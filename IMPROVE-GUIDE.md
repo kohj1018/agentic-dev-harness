@@ -11,9 +11,11 @@
 - 검증 메커니즘은 같은 세션 내 self-check 6종(`## 4. 정합성`, AC interpretation diversity, AC 형식, sizing, FAC↔AC 매핑, architect 호출 신호)만 존재.
 - **다른 세션·다른 LLM**의 외부 관점 검증이 부재 — 같은 모델의 blind spot이 그대로 plan에 박힌 채로 implement로 넘어감.
 - 병렬 가능성 정보는 TASK `## 9. 의존성`에 *명시 의무*만 있고, plan 출력에 *wave 그룹*으로 가시화되지 않음. 사용자가 "어떤 task를 동시에 implement해도 되나"를 매번 직접 위상 정렬해야 함.
+- task `## 4-1. 변경 예정 파일/경로`는 TASK_TEMPLATE 주석상 *"구현 시점에 채운다"* 라 plan 시점에 보통 비어 있음 — 동일 wave 내 file overlap 점검의 기초 자료가 부재해 wave 그룹화 정밀도가 휴리스틱 수준(`## 3. 구현 항목` 본문 path-like 토큰 추출)에 머무름.
+- 같은 working tree에서 다중 `/implement-workitem` 동시 실행 시 sneaky한 충돌이 다수 (공유 모듈 import-그래프 race / lockfile race / 빌드 캐시 충돌 / git index race) — `## 4-1` 만으로는 회수 불가, 그렇다고 wave 그룹화 자체를 포기하면 사용자가 매번 수동 위상정렬 필요.
 
 ### 0-2. 도달 상태 (개선 후)
-다음 2가지를 동시에 갖춘다.
+다음 5가지를 동시에 갖춘다.
 
 **A. Plan cross-review sub-loop (opt-in)** — plan 단계 직후의 선택 가능한 가지:
 ```
@@ -28,16 +30,27 @@
 /implement-workitem T-001 ...
 ```
 
-**B. Parallel waves 출력** — `/plan-workitem`이 마지막 출력에 `## 9. 의존성` 기반 위상 정렬 wave 그룹을 echo. 사용자는 같은 wave 안의 task를 여러 터미널 세션에서 동시에 `/implement-workitem`으로 돌릴 수 있다.
+**B. Parallel waves 출력** — `/plan-workitem`이 마지막 출력에 `## 9. 의존성` + `## 4-1` 기반 위상 정렬 wave 그룹을 echo. 사용자는 같은 wave 안의 task를 여러 터미널 세션에서 동시에 `/implement-workitem`으로 돌릴 수 있다.
+
+**C. `## 4-1. 변경 예정 파일/경로` 책임 시점 이동 (구현 시점 → plan 시점)** — TASK_TEMPLATE 주석 갱신 + plan-workitem이 분해 직후 채움. wave 그룹 file overlap 점검의 *정확한 기초 자료*가 됨. validate-plan이 plan 시점 unfilled 상태를 P0 finding으로 잡음. 구현 중 변동 시 implement-workitem이 갱신 (기존 finalize 차이 처리 정책 정합 유지).
+
+**D. LSP/MCP import dependency graph 보조 회수** — plan-workitem이 file overlap 점검 시 가용 LSP/MCP 서버(예: `mcp__ide__getDiagnostics` 등)를 통해 *공유 모듈 후보*를 회수. `## 4-1` enumeration이 안 겹치더라도 import 그래프상 같이 만질 후보가 있으면 경고. **가용 시에만** 활성화 — fork가 LSP/MCP server 미보유 시 휴리스틱 fallback (출력에 명시).
+
+**E. Worktree 권장 정책** — wave 그룹 안의 task를 병렬 implement할 때는 `claude --worktree` (Claude Code 2026-02-21 native worktree support) 또는 동등한 별 worktree 분리 *권장*. 단일 working tree 동시 implement는 운영상 비권장 (file 충돌 + git index race + 빌드 캐시 충돌 위험). `.gitignore`에 `.claude/worktrees/` mirror 패턴 추가.
 
 ### 0-3. 비목표 (이번 개선에서 하지 않는 일)
 - ❌ `/plan-workitem` 자체를 2-pass로 만들기 (ADR-026 비결정 No "2-pass planning" — 자동 2회 호출은 거절됨. 본 개선은 **opt-in 별 skill**이라 다른 트레이드오프).
-- ❌ wave 그룹을 milestone/feature 문서 *본문*에 영속 저장 (`## 9. 의존성`이 SSOT — 위상 정렬은 derived view라 drift 위험).
+- ❌ wave 그룹을 milestone/feature 문서 *본문*에 영속 저장 (`## 9. 의존성` + `## 4-1`이 SSOT — 위상 정렬은 derived view라 drift 위험).
 - ❌ 파일 충돌 자동 차단 (file overlap 경고만 출력, 사용자 결정 — ADR-007 책임 경계 정합).
 - ❌ AGENTS.md 본문 변경 (ADR-011 100줄 cap 보호. 본 개선은 enabling 정책 — AGENTS.md 1줄도 추가 X).
+- ❌ 빌드 캐시 / 테스트 격리 / DB·포트 등 외부 리소스 자동 격리 (보일러플레이트 책임 밖 — 프로젝트 환경 설계 책임. ADR-038 본문에 면책 단락).
+- ❌ `--worktree` 강제 (운영 권장만 — 단일 worktree 실행도 사용자 선택으로 허용. 자동 spawn X).
+- ❌ LSP/MCP server를 본 개선이 *제공*하지 않음 (가용 시 활용만 — 부재 시 휴리스틱 fallback).
 
 ### 0-4. 정책 강도 (ADR-022 정합)
-본 개선의 모든 새 정책은 **enabling (약)** 강도. 자동 차단 / Pass 차단 트리거 없음. 사용자가 cross-review를 건너뛰어도 워크플로우는 그대로 작동. evidence label: `[가설+외부실증]` (multi-LLM ensembling은 외부 연구 다수, 본 보일러플레이트 자체 [관측됨]은 아직 0건).
+본 개선의 모든 새 정책은 **enabling (약)** 강도. 자동 차단 / Pass 차단 트리거 없음. 사용자가 cross-review를 건너뛰어도 워크플로우는 그대로 작동. evidence label: `[가설+외부실증]` (multi-LLM ensembling + Claude Code native worktree 지원 + LSP의 import graph 정확성은 외부 실증, 본 보일러플레이트 자체 [관측됨]은 아직 0건).
+
+**예외 — soft enforcement 1건**: `## 4-1` plan 시점 필수는 validate-plan이 P0 finding으로 잡는 *간접 강제*다. plan-workitem 자체는 `## 4-1` 미채움 상태로 분해를 통과시키되 (자동 차단 X) 경고만 출력 — cross-review 라운드를 건너뛰면 그대로 implement로 넘어감. 즉 강제 강도는 "validate-plan을 돌렸을 때" 활성화. 본 개선의 enabling 약 정합 유지.
 
 ---
 
@@ -76,6 +89,7 @@ git rev-parse --abbrev-ref HEAD
 - `docs/00-meta/STRUCTURE.md`
 - `docs/00-meta/WORKFLOW.md`
 - `docs/00-meta/DELEGATION_STRATEGY.md`
+- `docs/30-workitems/_templates/TASK_TEMPLATE.md`
 - `docs/40-validation/reports/.gitkeep`
 - `docs/90-decisions/boilerplate/README.md`
 - `.agents/skills/plan-workitem/SKILL.md`
@@ -96,7 +110,7 @@ git rev-parse --abbrev-ref HEAD
 다음을 정확히 그대로 작성:
 
 ```markdown
-# ADR-038 — Cross-LLM Plan Validation (opt-in peer review)
+# ADR-038 — Cross-LLM Plan Validation (opt-in peer review + parallel waves)
 
 > scope: boilerplate
 
@@ -108,6 +122,9 @@ accepted
 - [관측됨] 본 보일러플레이트의 `/plan-workitem`은 6종 self-check(ADR-026 / ADR-037 정합)를 *같은 세션 내*에서 돌린다 (구조 사실 — 본 repo 인스턴스에서 직접 회수 가능).
 - [가설+외부실증] 동일 세션 내 self-check만으로는 *같은 모델의 blind spot*이 그대로 통과한다 (multi-model LLM-as-judge / debate / jury 패턴의 외부 연구가 회수 가능성 시사 — 본 repo [관측됨]은 0건, evidence 회수는 §15).
 - [관측됨] `## 9. 의존성`에 병렬 가능성이 명시되어도 plan 출력에 *wave 그룹*으로 가시화되는 자리는 현재 plan-workitem SKILL 본문에 부재 — 사용자가 매번 수동 위상 정렬 (구조 사실).
+- [관측됨] TASK_TEMPLATE `## 4-1. 변경 예정 파일/경로`는 주석상 *"구현 시점에 채운다"* 라 plan 시점에 비어 있는 경우가 다수 — wave 그룹 file overlap 점검의 기초 자료 부재 (구조 사실).
+- [외부실증] LSP(Language Server Protocol) 기반 import dependency graph 회수는 grep 휴리스틱보다 정확하고 토큰 비용이 적다. Claude Code는 MCP를 통해 LSP 서버를 호출 가능 (예: `mcp__ide__getDiagnostics`).
+- [외부실증] Claude Code 2026-02-21 native worktree support (`claude --worktree`). 사용자 다수가 worktree-per-task 패턴으로 4~8 concurrent agent를 안정적으로 운영 (외부 사례).
 
 ## ADR-026 비결정 단락과의 reconcile
 ADR-026 "비결정 (No) — 2-pass planning: 토큰 2배 + stabilize reviewer 책임 중복"은 **같은 세션 내 자동 2회 호출**을 거절한 결정이다.
@@ -134,44 +151,90 @@ ADR-026 "비결정 (No) — 2-pass planning: 토큰 2배 + stabilize reviewer �
 - **reviewer-tag**: 다중 리뷰어 동시 작성 시 충돌 회피. 미지정 시 `default`. 같은 tag로 재실행 시 덮어쓰기 허용.
 
 ### D3. /plan-workitem에 parallel waves 출력 추가
-plan-workitem 마지막 출력에 `## 9. 의존성`을 위상 정렬한 wave 그룹 echo. **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합).
+plan-workitem 마지막 출력에 `## 9. 의존성` + `## 4-1. 변경 예정 파일/경로`를 위상 정렬한 wave 그룹 echo. **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합).
 
 ### D4. agent 분담
-- `/validate-plan` → reviewer agent (4번째 review surface "plan" 추가).
+- `/validate-plan` → reviewer agent (4번째 review surface "plan" 추가, Plan Quality 9 차원).
 - `/repair-plan` → planner agent (workitem 문서 수정 권한 — 기존 plan-workitem과 동일).
 
 ### D5. Codex 호환
 ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents/skills/repair-plan` 2개 wrapper 신설.
 
+### D6. `## 4-1. 변경 예정 파일/경로` 책임 시점 이동 — 구현 시점 → plan 시점
+- TASK_TEMPLATE 주석 갱신: *"구현 시점에 채운다"* → *"plan 시점에 미리 채운다. 구현 중 변동 시 implement-workitem이 갱신한다."*
+- plan-workitem이 task 분해 직후 본 섹션을 채움 (sizing self-check의 5-파일 한도와 동일 라운드).
+- validate-plan이 본 섹션이 plan 시점에 비어 있는 task를 **[Plan-file-coverage]** P0 finding으로 잡음 (단, 초기 scaffolding·auth 같은 5+ 파일 예외 task가 본문에 *"scaffolding/auth 예외"* 명시 시 P1로 강등).
+- 본 시점 이동은 wave 그룹 file overlap 점검의 *정확한 기초 자료* 확보가 목적. 구현 시점 갱신 가능성은 그대로 유지 (finalize-workitem의 차이 처리 정책 정합 — ADR-007).
+
+### D7. LSP/MCP import dependency graph 보조 회수 (가용 시)
+- plan-workitem step 11의 file overlap 점검에 *LSP/MCP* 보조 경로 추가.
+- 가용 검출: `mcp__ide__getDiagnostics` 같은 LSP-backed MCP 서버가 호출 가능한지 본 skill이 빠르게 확인 → 가용 시 각 `## 4-1` enumeration 파일의 *forward 참조* (이 파일을 import하는 다른 파일 목록)를 회수, 두 task가 *동일한 import-grand-parent*를 만질 후보 1+건이면 "공유 모듈 후보" 경고 출력.
+- 가용 안 함: 휴리스틱 fallback (현행 path-like 토큰 비교) + 출력에 "LSP/MCP 미가용 — import 그래프 점검 skip" 한 줄 명시.
+- 본 차원은 **best-effort, 자동 차단 X**. 보일러플레이트는 LSP/MCP server를 *제공하지 않는다* — 가용 시 활용만.
+
+### D8. 새 dependency 추가 키워드 감지 → lockfile race 차단
+- task 본문(`## 3. 구현 항목` / `## 4-1`)에서 다음 키워드 중 1+ 감지 시 본 task를 *그 wave 단독 실행*으로 강등 (다른 task와 같은 wave 묶음 금지):
+  - 명시 표기: `package.json`, `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`, `Cargo.toml`, `Cargo.lock`, `Gemfile`, `Gemfile.lock`, `composer.json`, `composer.lock`, `pyproject.toml`, `Pipfile`, `Pipfile.lock`, `poetry.lock`, `uv.lock`, `go.mod`, `go.sum`, `requirements.txt`
+  - 의도 키워드: `의존성 추가` / `dependency 추가` / `package 추가` / `npm install` / `pnpm add` / `pip install` / `cargo add` 등
+- 사유: lockfile race + 새 패키지의 cross-task transitive 영향. 위상 정렬 단계에서 본 wave를 *비병렬*로 묶음.
+
+### D9. Wave 그룹 병렬 implement 시 worktree 권장
+- wave 그룹 echo 시점에 다음을 *권장*으로 명시 (강제 X):
+  - "**병렬 실행은 `claude --worktree` 사용 권장** — Claude Code 2026-02-21 native worktree support. 단일 working tree 동시 implement는 file 충돌 + git index race + 빌드 캐시 충돌 위험."
+- `.gitignore`에 `.claude/worktrees/` 패턴 추가 — main checkout에서 worktree 폴더 untracked 노출 방지.
+- 단, 단일 working tree에서 한 wave를 *순차 실행*하는 흐름도 그대로 지원 (사용자 선택).
+
 ## 정책 강도 (ADR-022 정합)
 **enabling (약)** — 자동 차단 / Pass 차단 트리거 0건. 사용자가 cross-review를 건너뛰면 워크플로우는 그대로 작동.
-- Evidence label: `[가설+외부실증]` (외부 multi-model 사례 + 본 보일러플레이트 [관측됨] 0건 — Ratchet 약 적용 가능).
+- Evidence label: `[가설+외부실증]` (외부 multi-model 사례 + LSP import graph 정확성 + Claude Code native worktree 사례 — 본 보일러플레이트 [관측됨] 0건, Ratchet 약 적용 가능).
+- **예외 — soft enforcement 1건**: `## 4-1` plan 시점 필수는 validate-plan이 P0 finding으로 잡는 *간접 강제*. plan-workitem 자체는 미채움 상태로 분해 통과 + 경고만 (자동 차단 X).
+
+## 동시 implement 면책 단락 (사용자/환경 책임)
+본 ADR은 다음 충돌 차원을 *자동 격리해주지 않는다* — 프로젝트 환경 설계 책임:
+- **빌드 캐시 race**: `tsbuildinfo` / `.next/cache` / `target/` 등. worktree-per-task로 격리 권장.
+- **테스트 러너 / 통합 테스트**: 포트 / 임시 DB / fixture 공유 시 동시 실행 충돌. testcontainers · 임시 디렉터리 · 자동 포트 할당으로 격리 권장.
+- **외부 리소스**: dev DB / Redis / 외부 API rate limit. Docker Compose의 task별 분리 인스턴스 또는 환경 변수 prefix 격리 권장.
+- **MCP가 외부 리소스를 자동 격리하진 않는다** — MCP는 도구 호출 통로일 뿐. 격리 책임은 *호출되는 서버 / 환경*에 있다.
+
+본 단락은 ADR-038 본문에 영속 — 사용자/fork가 같은 working tree에서 다중 implement를 시도하다 충돌 시 1차 책임 명시.
 
 ## 비결정 (영구 No)
 - ❌ `/plan-workitem` 자체에 자동 2-pass 박기 — ADR-026 비결정 그대로 유지.
 - ❌ 리뷰 결과 자동 적용 (수용·기각 판단 없이) — ADR-007 책임 경계 위반 (planner가 판단 책임).
-- ❌ wave 그룹을 milestone/feature 문서 본문에 영속 저장 — `## 9. 의존성` SSOT drift 위험 (ADR-005 위반).
+- ❌ wave 그룹을 milestone/feature 문서 본문에 영속 저장 — `## 9. 의존성` + `## 4-1` SSOT drift 위험 (ADR-005 위반).
 - ❌ 파일 overlap 자동 차단 — 사용자 결정 (`/plan-workitem`은 경고 출력만).
+- ❌ `## 4-1` 미채움 시 plan-workitem 강제 종료 — validate-plan P0 finding으로만 처리 (간접 강제, 자동 차단 X).
+- ❌ `--worktree` 자동 spawn — 사용자가 명시 실행 (강제 X).
+- ❌ 본 보일러플레이트가 LSP/MCP server를 제공 — 가용 시 활용만, 부재 시 휴리스틱 fallback.
+- ❌ 빌드 캐시 / 테스트 / 외부 리소스 자동 격리 — 프로젝트 환경 설계 책임 (면책 단락 참조).
 
 ## 결과
 - 사용자가 plan 품질을 외부 모델로 cross-validate할 수 있는 opt-in 경로.
-- `## 9. 의존성` 기반 wave 그룹 가시화 — 사용자가 여러 터미널에서 `/implement-workitem`을 병렬 실행 가능.
-- 적용 surface (8곳):
+- `## 9. 의존성` + `## 4-1` 기반 wave 그룹 가시화 — 사용자가 여러 터미널에서 `/implement-workitem`을 병렬 실행 가능.
+- `## 4-1`의 plan 시점 채움 강제 → wave 그룹 file overlap 점검 정밀도 향상.
+- LSP/MCP 가용 시 import 그래프 보조 회수로 sneaky한 공유 모듈 충돌 후보를 plan에서 회수.
+- worktree-per-task 권장 정책으로 병렬 implement 안전성 확보.
+- 적용 surface (11곳):
   1. `.claude/skills/validate-plan/SKILL.md` 신설.
   2. `.claude/skills/repair-plan/SKILL.md` 신설.
-  3. `.claude/skills/plan-workitem/SKILL.md` parallel waves 출력 + cross-review hook 안내.
-  4. `.claude/agents/reviewer.md` 4번째 surface "plan" + Write 범위 확장.
-  5. `.agents/skills/validate-plan/` Codex wrapper.
-  6. `.agents/skills/repair-plan/` Codex wrapper.
-  7. `docs/00-meta/STRUCTURE.md` skill count + plan-review row + canonical owner.
-  8. `docs/00-meta/WORKFLOW.md` + `docs/00-meta/DELEGATION_STRATEGY.md` sub-loop 명시.
+  3. `.claude/skills/plan-workitem/SKILL.md` parallel waves 출력 + `## 4-1` 채움 + LSP 보조 + cross-review hook 안내 + worktree 권장.
+  4. `.claude/agents/reviewer.md` 4번째 surface "plan" + Plan Quality 9 차원 + Write 범위 확장.
+  5. `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 4-1` 주석 시점 변경.
+  6. `.agents/skills/validate-plan/` Codex wrapper.
+  7. `.agents/skills/repair-plan/` Codex wrapper.
+  8. `docs/00-meta/STRUCTURE.md` skill count + plan-review row + canonical owner.
+  9. `docs/00-meta/WORKFLOW.md` + `docs/00-meta/DELEGATION_STRATEGY.md` sub-loop + worktree 권장.
+  10. `.gitignore` `plan-reviews/*.md` + `.claude/worktrees/` 패턴.
+  11. `README.md` + `README_ko.md` flow 다이어그램 + Step 3 + Codex wrapper 목록 + worktree tip.
 
 ## 후속 작업
 - 첫 fork 사용자의 `/validate-plan` 호출 빈도를 stabilize-milestone instruction improvement 후보로 추적 (ADR-022 [가설→실증] 승격 트리거).
+- LSP/MCP가 plan-workitem step 11에서 실제로 회수하는 공유 모듈 후보의 hit rate를 측정해 휴리스틱 fallback 비율 회수.
+- `claude --worktree` 사용 빈도 / wave 그룹 안의 충돌 사고 수를 evidence 회수.
 - 다른 LLM의 wrapper(`.agents/skills/validate-plan/agents/openai.yaml`) 외에도 사용 패턴이 늘어나면 ADR-010 매핑 표 갱신.
 
 ## 참고
-- ADR-005 (SSOT — `## 9. 의존성` SSOT 정합)
+- ADR-005 (SSOT — `## 9. 의존성` + `## 4-1` SSOT 정합)
 - ADR-007 (책임 경계 — 자동 차단 X)
 - ADR-010 (multi-tool 호환 — Codex wrapper)
 - ADR-022 (Ratchet — enabling 약 적용)
@@ -191,13 +254,14 @@ ADR-037 행 바로 다음에 ADR-038 행을 추가한다. 현재 본문에서 �
 
 ```
 | 037 | Spec coverage self-audit | accepted | (+amend1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`) | FAC→AC 매핑 추적, Spec Gap report, 자동 차단 X |
-| 038 | Cross-LLM Plan Validation | accepted | — | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설 + parallel waves 출력 |
+| 038 | Cross-LLM Plan Validation + Parallel Waves | accepted | — | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설 + wave 그룹 echo + `## 4-1` plan 시점 채움 + LSP 보조 + worktree 권장 |
 ```
 
 ### 2-3. 검증
 - `cat docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md` — Status `accepted` 포함되었는가
 - `grep -n "038" docs/90-decisions/boilerplate/README.md` — 1개 결과 (행 추가됨)
 - `grep -E "^\| 037 " docs/90-decisions/boilerplate/README.md` — 변경 없이 그대로
+- ADR-038 본문에 D1~D9 9개 결정 + 면책 단락 + 비결정 8개 모두 존재
 - 다른 ADR row의 *Amendments* 컬럼 / 한 줄 요약 컬럼이 흔들리지 않음 (수직 정렬 보존)
 
 ### 2-4. 커밋
@@ -211,12 +275,12 @@ git add docs/90-decisions/boilerplate/README.md
 커밋 본문 (HEREDOC — §12-4 acceptance의 `Refs: ADR-038` footer 강제 정합):
 ```bash
 git commit -m "$(cat <<'EOF'
-docs(boilerplate): add ADR-038 for cross-LLM plan validation
+docs(boilerplate): add ADR-038 for cross-LLM plan validation + parallel waves
 
-New ADR introducing opt-in /validate-plan + /repair-plan sub-loop and
-plan-workitem parallel wave output. Reconciles with ADR-026 비결정
-(2-pass planning) via 4-dimension difference table (session / model /
-trigger / cost).
+New ADR introducing opt-in /validate-plan + /repair-plan sub-loop, plan-
+workitem parallel wave output, ## 4-1 책임 시점 이동 (구현→plan), LSP/MCP
+import graph 보조 회수, worktree 권장 정책. Reconciles with ADR-026
+비결정 (2-pass planning) via 4-dimension difference table.
 
 Refs: ADR-038
 EOF
@@ -227,7 +291,7 @@ EOF
 
 ## 3. Phase 2 — `docs/40-validation/plan-reviews/` 디렉터리 + `.gitignore` 갱신
 
-목적: 임시 리뷰 파일이 살 자리 + gitignore mirror 패턴 박기. 이 phase 끝에 별도 commit 없이 Phase 3에 묶는다 (혼자서는 acceptance가 약함).
+목적: 임시 리뷰 파일이 살 자리 + gitignore mirror 패턴 박기 + worktree 폴더 ignore. 이 phase 끝에 별도 commit 없이 Phase 4에 묶는다.
 
 ### 3-1. 디렉터리 + `.gitkeep` 생성
 ```bash
@@ -243,23 +307,26 @@ docs/40-validation/reports/*.md
 !docs/40-validation/reports/.gitkeep
 ```
 
-그 아래에 2줄을 *추가*한다 (기존 줄은 변경하지 않음):
+그 아래에 3줄을 *추가*한다 (기존 줄은 변경하지 않음):
 
 ```
 docs/40-validation/plan-reviews/*.md
 !docs/40-validation/plan-reviews/.gitkeep
+.claude/worktrees/
 ```
+
+> 주: `.claude/worktrees/`는 Claude Code의 native `--worktree` 플래그가 worktree 폴더를 그 경로에 만들기 때문에 둔다. main checkout에서 untracked 노출 방지 (ADR-038 D9).
 
 ### 3-3. 검증 (Phase 2 작업 직후 시점 기준)
 - `ls -la docs/40-validation/plan-reviews/` — `.gitkeep` 만 존재
-- `tail -4 .gitignore` — plan-reviews 패턴 2줄이 reports 패턴 뒤에 위치
+- `tail -5 .gitignore` — plan-reviews 패턴 2줄 + `.claude/worktrees/` 1줄이 reports 패턴 뒤에 위치
 - `git status --porcelain` — `.gitignore` 변경 + 새 `.gitkeep` 두 항목이 *포함*되어야 함. Phase 3 이후엔 reviewer.md modification도 추가될 예정 (정상).
 
 이 phase는 단독 commit하지 않는다. Phase 4의 `/validate-plan` skill 작성과 함께 묶어 commit (그래야 디렉터리가 *왜 생겼는지*가 한 commit 안에 설명된다).
 
 ---
 
-## 4. Phase 3 — `reviewer` agent에 "plan" surface 추가 + Write 범위 확장
+## 4. Phase 3 — `reviewer` agent에 "plan" surface 추가 + Plan Quality 9 차원 + Write 범위 확장
 
 목적: `/validate-plan`이 reviewer agent를 호출할 때 plan surface 차원을 따로 잡고, `docs/40-validation/plan-reviews/` 쓰기 권한을 명시. 이 phase 끝에 별도 commit 없이 Phase 4에 묶는다.
 
@@ -283,15 +350,15 @@ docs/40-validation/plan-reviews/*.md
 - `code`: Clean Code 6 + Scope Discipline 4.
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
-- `plan`: Plan Quality 8 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
+- `plan`: Plan Quality 9 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
 ```
 
-#### 4-1-B. Plan Quality 8 차원 섹션 신설
+#### 4-1-B. Plan Quality 9 차원 섹션 신설
 
 위 4-1-A 단락 바로 다음, 그리고 "Write/Edit 사용 범위:" 단락 이전에 다음 단락을 *삽입*:
 
 ```
-## Plan Quality 8 차원 (plan surface 전용 — ADR-038)
+## Plan Quality 9 차원 (plan surface 전용 — ADR-038)
 
 `/validate-plan` 호출 시 본 agent가 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
 
@@ -303,8 +370,13 @@ docs/40-validation/plan-reviews/*.md
 6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요). (P1 권장)
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
+9. **[Plan-file-coverage]** (ADR-038 D6) — task `## 4-1. 변경 예정 파일/경로`가 plan 시점에 비어 있음. wave 그룹 file overlap 점검의 기초 자료 부재 — 본 항목이 unfilled면 *다음 라운드 wave 그룹화 정밀도가 떨어진다*. (P0 권장)
+   - 예외: task 본문에 *"scaffolding/auth 예외"* 명시 + 사유(외부 의존 탐색 / 초기 디렉터리 구조 미정 등)가 1줄 이상 있으면 P1로 강등.
+   - 본 차원이 발화하면 [Plan-dep]의 병렬 주장도 신뢰도 저하 — 리뷰 파일 "핵심 관찰"에 그 사실 1줄 명시.
 
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
+
+라벨링 예 2 (Plan-file-coverage): `P0 [Plan-file-coverage] T-003 — ## 4-1 비어 있음, 예외 사유 미명시 — plan 시점 채움 권장 (구현 시점 변동은 implement-workitem이 갱신)`.
 ```
 
 #### 4-1-C. Write/Edit 사용 범위 단락 확장
@@ -337,7 +409,8 @@ Write/Edit 사용 범위:
 ### 4-2. 검증
 - `grep -n "plan" .claude/agents/reviewer.md | grep -E "surface|Plan"` — 새 plan surface 언급 라인 모두 존재
 - `grep -c "ADR-038" .claude/agents/reviewer.md` — ≥1
-- 본문 line count 변화는 합리 (대략 +20 라인 정도)
+- `grep -c "Plan-file-coverage" .claude/agents/reviewer.md` — ≥1
+- 본문 line count 변화는 합리 (대략 +25 라인 정도 — Plan Quality 9 차원 + Plan-file-coverage 예외 단락)
 
 이 phase는 단독 commit하지 않는다. Phase 4에 묶는다.
 
@@ -388,19 +461,20 @@ context-pack: minimal
   - `M1` 입력 → `docs/30-workitems/milestones/M1-*.md` + 본 마일스톤 산하 feature/task 전체
   - `F-001` 입력 → 해당 feature 문서 + 본 feature 산하 task 전체
   - `T-001` 입력 → 해당 task 문서 + (있으면) 상위 feature + 상위 milestone
-- `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md` (양식 정합 점검용)
+- `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md` (양식 정합 점검용 — 본 가이드 Phase 6에서 TASK_TEMPLATE `## 4-1` 주석이 *"plan 시점에 채운다"* 로 갱신되어 있음)
 
-**큰 milestone budget 가이드 (ADR-019 minimal/JIT 정합)**: 산하 task 합산 ≥10개면 다음 순서로 budget — (a) feature 문서 전체 + 각 task `## 6 AC` 섹션만 1차 회수, (b) 그 결과로 P0 의심 task 후보를 좁힌 뒤 (c) 후보 task 본문 전체를 깊게 읽는다. 모든 task 본문을 사전 fork-load 금지.
+**큰 milestone budget 가이드 (ADR-019 minimal/JIT 정합)**: 산하 task 합산 ≥10개면 다음 순서로 budget — (a) feature 문서 전체 + 각 task `## 6 AC` + `## 4-1` 섹션만 1차 회수, (b) 그 결과로 P0 의심 task 후보를 좁힌 뒤 (c) 후보 task 본문 전체를 깊게 읽는다. 모든 task 본문을 사전 fork-load 금지.
 
-검토 차원 (8 dimensions — reviewer.md의 *Plan Quality 8 차원* 정합):
+검토 차원 (9 dimensions — reviewer.md의 *Plan Quality 9 차원* 정합):
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반. P0 권장.
 2. **[Plan-sizing]** — 1 task = 1 RGR 위반 / AC ≥4 / 변경 예정 파일 ≥6 (초기 scaffolding·auth 예외). P1 권장.
 3. **[Plan-AC-form]** — Given-When-Then 형식 부재 / 강력 금지 verb ("works"/"looks good"/"is correct"/"is fine"). P0 권장.
 4. **[Plan-ambiguity]** — 1 AC에 2+ 합리적 해석 가능. P1 권장.
 5. **[Plan-FAC-coverage]** — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC. P0 권장.
-6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장. P1 권장.
+6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장. P1 권장. (본 차원은 [Plan-file-coverage]가 unfilled면 신뢰도 저하 — 핵심 관찰에 명시.)
 7. **[Plan-arch]** — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. *`## 3-1` 섹션 자체가 부재한 fork*(ADR-031 비웹 override 경로 등)에서는 본 차원 *skip* + "핵심 관찰"에 "[Plan-arch] skipped: `## 3-1` 부재" 한 줄 명시. P1 권장.
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` / feature `## 11. 관련 문서` link 누락·깨짐. P2 권장.
+9. **[Plan-file-coverage]** (ADR-038 D6) — task `## 4-1. 변경 예정 파일/경로`가 plan 시점에 채워졌는가. 미채움 시 P0 (단, 본문에 *"scaffolding/auth 예외"* 명시 + 사유 1줄 있으면 P1로 강등). 본 차원이 unfilled면 wave 그룹 file overlap 점검 정밀도가 떨어지므로, plan 단계에서 채우는 게 워크플로우상 정합 — 구현 시점 변동은 implement-workitem이 그대로 갱신 (finalize 차이 처리 정책 ADR-007 정합).
 
 판정 규칙 (review verdict — 워크플로우 차단 아님):
 - **NEEDS_CHANGES** — P0 finding 1개 이상.
@@ -431,6 +505,7 @@ context-pack: minimal
 ### P0 (수용 강력 권장 — plan 품질 critical, repair-plan에서 우선 처리)
 - [P0] [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정. [Given]..[When]..[Then] 형식 + measurable verb로 재작성 권장.
 - [P0] [Plan-FAC-coverage] F-001:FAC-3 — unmapped. 본 FAC를 커버할 task 추가 (예: T-007) 권장.
+- [P0] [Plan-file-coverage] T-003 — ## 4-1 비어 있음, 예외 사유 미명시. plan 시점 채움 권장.
 
 ### P1 (수용 권장 — plan 품질 저하)
 - [P1] [Plan-sizing] T-001 — AC 4개. 1 task = 1 RGR 사이클 정합 위해 T-001a/T-001b로 분리 권장.
@@ -449,6 +524,7 @@ context-pack: minimal
 | Plan-dep | 0 | 0 | 0 |
 | Plan-arch | 0 | 0 | 0 |
 | Plan-doc-link | 0 | 0 | 1 |
+| Plan-file-coverage | 1 | 0 | 0 |
 
 ## 핵심 관찰 (3개 이내)
 - ...
@@ -480,6 +556,7 @@ context-pack: minimal
 - 파일 존재: `ls .claude/skills/validate-plan/SKILL.md`
 - frontmatter `agent: reviewer` 포함
 - `grep -c "ADR-038" .claude/skills/validate-plan/SKILL.md` — ≥1
+- `grep -c "Plan-file-coverage" .claude/skills/validate-plan/SKILL.md` — ≥3 (검토 차원 + 카운트 표 + 발견 예시)
 - frontmatter `allowed-tools`에 Write 포함 (리뷰 파일 작성용), Edit 미포함 (workitem 문서 수정 금지)
 
 ### 5-4. 커밋 (Phase 2~4 일괄)
@@ -505,8 +582,10 @@ feat(skills): add validate-plan for cross-LLM peer review (ADR-038)
 
 - New /validate-plan skill: reviewer-agent based, writes single ephemeral
   review file at docs/40-validation/plan-reviews/<id>.<tag>.md.
-- Adds "plan" review surface to reviewer agent (Plan Quality 8 dims).
-- Mirrors existing reports/ gitignore pattern for plan-reviews/.
+- Adds "plan" review surface to reviewer agent (Plan Quality 9 dims,
+  incl. new [Plan-file-coverage] for ## 4-1 plan-time fill).
+- Mirrors existing reports/ gitignore pattern for plan-reviews/, adds
+  .claude/worktrees/ ignore for native --worktree flag.
 
 Refs: ADR-038
 EOF
@@ -569,7 +648,7 @@ context-pack: minimal
    - **Reject-conflict** — 다른 리뷰어가 반대 의견 + 본 plan이 더 정합 (한 줄 사유).
 3. 결정 우선순위: P0 > P1 > P2. 한 라운드에 P0 + P1는 *반드시 Adopt/Adopt-modified/Reject* 판정. P2는 다음 중 하나 — (a) 같은 라운드에 같이 처리, 또는 (b) `docs/40-validation/IMPROVEMENT_GUIDE.md`에 *P2 라벨로 이주* 후 deferred 처리. **그냥 리뷰 파일과 함께 *삭제* 금지** — step 6의 파일 삭제로 P2가 추적 불가능해지면 정책 위반 (ADR-007 책임 경계 + ADR-005 SSOT). IMPROVEMENT_GUIDE에 옮긴 P2는 다음 stabilize-milestone 라운드의 instruction improvement 후보로 자연스럽게 회수됨.
 4. **다중 리뷰어 충돌 처리**: 같은 항목에 대해 리뷰어 A는 Adopt 권장, 리뷰어 B는 다른 수정 권장한 경우, 본 skill이 charter / architecture 정합 기준으로 어느 쪽을 더 받아들였는지 결정 + 결정 근거 1줄. 자동 합의 / 다수결 X — *planner agent 판단 책임* (ADR-007 책임 경계 정합).
-5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정. 수정 후에도 양식 정합을 점검 (TEMPLATE의 섹션 번호 유지, FAC↔AC `## 7-1` 매핑 갱신, AC Given-When-Then 형식 유지). `## 9. 의존성`이 수정된 경우 그 사실을 *기록*해 step 7의 출력에 포함 (wave 재emit 안내용).
+5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정. 수정 후에도 양식 정합을 점검 (TEMPLATE의 섹션 번호 유지, FAC↔AC `## 7-1` 매핑 갱신, AC Given-When-Then 형식 유지, **`## 4-1. 변경 예정 파일/경로`도 plan 시점 채움 유지** — ADR-038 D6). `## 9. 의존성` 또는 `## 4-1`이 수정된 경우 그 사실을 *기록*해 step 7의 출력에 포함 (wave 재emit 안내용).
 6. **삭제 전 사전 조건 점검** — (i) 모든 P0/P1 항목이 Adopt/Adopt-modified/Reject로 판정됐는가, (ii) P2 항목 중 deferred 결정된 항목이 모두 `docs/40-validation/IMPROVEMENT_GUIDE.md`로 *이미 이주*됐는가 (step 3-(b)). 둘 다 정합이면 삭제 진행.
    삭제는 step 1에서 회수한 파일 경로 목록을 *한 개씩 정확히* 수행 — `rm <path>` 반복 (glob 재실행 금지). 다른 workitem ID의 파일은 *건드리지 않는다*. 마지막 점검 — 회수한 모든 경로가 `docs/40-validation/plan-reviews/<workitem-id>.` 접두 + `.md` 접미 정합.
 
@@ -588,10 +667,10 @@ context-pack: minimal
   - Rejected (conflict): J개
   - P2 deferred → IMPROVEMENT_GUIDE 이주: L개 (이주된 항목의 IMPROVEMENT_GUIDE 라인 범위 함께 출력)
 - 수정된 workitem 문서 목록 (상대 경로)
-- **`## 9. 의존성` 수정 여부 플래그**: 수정됐으면 한 줄 안내 — `의존성 수정됨 → 기존 wave 그룹 stale. /plan-workitem <id> 재실행해 wave 재산출 권장.` (재실행 시 본 SKILL의 step 11 derived view가 갱신됨.)
+- **`## 9. 의존성` / `## 4-1` 수정 여부 플래그**: 둘 중 하나라도 수정됐으면 한 줄 안내 — `의존성·파일경로 수정됨 → 기존 wave 그룹 stale. /plan-workitem <id> 재실행해 wave 재산출 권장.` (재실행 시 본 SKILL의 step 11 derived view가 갱신됨.)
 - 다중 리뷰어 충돌이 있었던 항목 별 결정 근거 (있으면)
 - 삭제된 리뷰 파일 목록 (step 1에서 회수한 경로와 1:1 정합)
-- 다음 권장 액션: 보통 `/implement-workitem <task-id>`. 의존성 수정이 있었으면 `/plan-workitem <id>` 재실행이 먼저, 대규모 변경이면 `/validate-plan` 재실행 권장.
+- 다음 권장 액션: 보통 `/implement-workitem <task-id>`. 의존성 또는 `## 4-1` 수정이 있었으면 `/plan-workitem <id>` 재실행이 먼저, 대규모 변경이면 `/validate-plan` 재실행 권장.
 
 ## 다중 리뷰어 충돌 처리 예시
 - 리뷰어 A (`claude-b`): "[P1] [Plan-sizing] T-001 — AC 4개. T-001a/T-001b 분리 권장"
@@ -606,8 +685,9 @@ context-pack: minimal
 - 파일 존재: `ls .claude/skills/repair-plan/SKILL.md`
 - `agent: planner` 포함 (validate-plan은 reviewer였음 — 분담 정확)
 - allowed-tools에 `Bash(rm docs/40-validation/plan-reviews/*)` + `Bash(ls docs/40-validation/plan-reviews/*)`로 *좁혀진* 패턴 포함 (광역 `Bash(rm *)` 금지)
-- 본문에 workitem-id sanitization 가드 + P2 deferred IMPROVEMENT_GUIDE 이주 단락 + 의존성 수정 시 wave 재emit 안내 포함
+- 본문에 workitem-id sanitization 가드 + P2 deferred IMPROVEMENT_GUIDE 이주 단락 + 의존성·`## 4-1` 수정 시 wave 재emit 안내 포함
 - `grep -c "ADR-038" .claude/skills/repair-plan/SKILL.md` — ≥1
+- `grep -c "## 4-1" .claude/skills/repair-plan/SKILL.md` — ≥2 (수정 결과 점검 + wave 재emit 안내)
 
 ### 6-4. 커밋
 ```bash
@@ -618,9 +698,11 @@ feat(skills): add repair-plan to absorb cross-LLM review feedback (ADR-038)
 - New /repair-plan skill: planner-agent based, reads all
   docs/40-validation/plan-reviews/<id>.*.md files for the workitem,
   decides accept/reject/modify per finding, applies adopted edits
-  to workitem docs, then deletes the temp review files.
+  to workitem docs (incl. ## 4-1 plan-time fill), then deletes the
+  temp review files.
 - One-round budget P0+P1 only, P2 deferred (mirrors repair-workitem
   policy from ADR-007).
+- Emits wave-stale flag when ## 9. 의존성 or ## 4-1 가 수정됨.
 
 Refs: ADR-038
 EOF
@@ -629,29 +711,77 @@ EOF
 
 ---
 
-## 7. Phase 6 — `/plan-workitem` skill에 parallel waves 출력 + cross-review hook 추가
+## 7. Phase 6 — `/plan-workitem` skill 확장 + TASK_TEMPLATE 주석 갱신
 
-목적: 본 개선의 두 번째 가지 (parallel waves) + cross-review opt-in 안내를 plan-workitem 본문에 박는다.
+목적: 본 개선의 두 번째·세 번째·네 번째·다섯 번째 가지 (parallel waves + `## 4-1` plan 시점 채움 + LSP 보조 + worktree 권장)를 plan-workitem 본문에 박는다. 같은 commit으로 TASK_TEMPLATE 주석도 갱신 (plan-workitem이 `## 4-1`을 plan 시점에 채우는 정책이라 의미상 한 변경).
 
-### 7-1. `.claude/skills/plan-workitem/SKILL.md` 수정
+### 7-1. `docs/30-workitems/_templates/TASK_TEMPLATE.md` 주석 갱신
 
-#### 7-1-A. "반드시 수행할 일" 단락에 step 11 추가
+현재 본문 (line 14~17):
+```
+## 4-1. 변경 예정 파일/경로
+<!-- 구현 시점에 채운다. /finalize-workitem이 명시적 파일 add 시 우선 참조한다.
+     엄격한 화이트리스트가 아니라 참조 목록이다. 비어 있거나 git 실제 변경과 어긋나면 finalize는 차이를 출력에 명시하고 Needs Review로 즉시 종료한다 — 본 섹션을 갱신해 재실행하거나 `--apply` force 모드로 진행한다.
+     task 문서 자체는 finalize가 자동 포함하므로 본 섹션에 적지 않는다. -->
+```
+
+다음으로 *교체*:
+```
+## 4-1. 변경 예정 파일/경로
+<!-- plan 시점에 채운다 (ADR-038 D6). /plan-workitem이 task 분해 직후 본 섹션을 채운다 — wave 그룹 file overlap 점검의 기초 자료.
+     구현 중 변동 시 /implement-workitem이 갱신한다. /finalize-workitem이 명시적 파일 add 시 우선 참조한다.
+     엄격한 화이트리스트가 아니라 참조 목록이다. plan 시점 미채움 + 본문에 "scaffolding/auth 예외" 명시 없으면 /validate-plan이 [Plan-file-coverage] P0 finding으로 잡는다. finalize 시점에 git 실제 변경과 어긋나면 차이를 출력에 명시하고 Needs Review로 즉시 종료한다 — 본 섹션을 갱신해 재실행하거나 `--apply` force 모드로 진행한다.
+     task 문서 자체는 finalize가 자동 포함하므로 본 섹션에 적지 않는다. -->
+```
+
+### 7-2. `.claude/skills/plan-workitem/SKILL.md` 수정
+
+다음 4곳을 *순서대로* 수정.
+
+#### 7-2-A. "반드시 수행할 일" 단락 — step 10 갱신 + step 11 신설
 
 현재 본문 (line 50 근처):
 ```
 10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 병렬 가능 task는 비워둔다.
 ```
 
-그 *바로 다음*에 step 11을 추가:
+다음으로 *교체*:
 ```
-11. **wave 그룹 계산 + 파일 overlap 경고** (ADR-038 D3) — task `## 9. 의존성`을 위상 정렬해 wave 그룹을 derived view로 산출. ADR-026 `## 9` 형식이 자연어 허용(`- T-002: T-001의 X 정의 후 시작 가능`)이라 *기계 파싱 가능한 표기*(`- T-NNN: ...` prefix의 task ID enumeration)를 우선 회수 — 그 외 자유 텍스트는 best-effort heuristic, 호출마다 wave 결과가 달라질 수 있음을 출력에 명시. 동일 wave 내 task의 *file overlap 점검*은 다음 우선순위:
-   (1) **`## 4-1. 변경 예정 파일/경로`가 채워져 있으면 그 경로 enumeration 만 사용** — 두 task의 경로 집합 교집합이 비지 않으면 overlap.
-   (2) (1)이 비어 있으면 (plan 시점에 자주 발생) `## 3. 구현 항목` 본문에서 *path-like 토큰* (`src/...`, `docs/...`, `*.ts` 등 슬래시·확장자 포함) 만 추출해 비교. 일반 자연어 키워드는 사용하지 않음 (false-positive 회피).
-   (3) 자동 분리 X — 사용자가 wave 내에서 sequential / 별 worktree 분리 결정.
-   위상 정렬 결과는 본 skill *출력에만 echo* — workitem 문서 본문에 영속 저장 X (`## 9. 의존성` SSOT — ADR-005 정합).
+10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 병렬 가능 task는 비워둔다.
+10-1. **`## 4-1. 변경 예정 파일/경로` plan 시점 채움** (ADR-038 D6) — 본 섹션을 task 분해 직후 채운다.
+   - 채울 내용: 해당 task가 *추가/수정/삭제할 예정인 모든 파일 경로* enumeration (구현 시점 변동 가능성은 받아들이되, plan 시점 best estimate를 명시).
+   - sizing self-check의 *변경 예정 파일 5개 한도*가 본 섹션을 기준으로 발화 (Step 8).
+   - 본문에 *"scaffolding/auth 예외"* 명시 + 사유 1줄이 있으면 미채움 허용 (validate-plan P1로 강등).
+   - 일반 task는 미채움 시 plan 출력에 `[Plan-file-coverage] T-NNN — plan 시점 미채움 (validate-plan P0 후보)` 경고 1줄 추가. **자동 차단 X** — 사용자가 결정.
+
+11. **wave 그룹 계산 + 파일 overlap 경고 + worktree 권장** (ADR-038 D3 / D7 / D8 / D9) — 다음 sub-step을 순서대로 수행. 결과는 본 skill *출력에만 echo* — workitem 문서 본문에 영속 저장 X (`## 9. 의존성` + `## 4-1`이 SSOT — ADR-005 정합).
+
+11-(a) **위상 정렬**: task `## 9. 의존성`을 위상 정렬해 wave 그룹을 derived view로 산출. ADR-026 `## 9` 형식이 자연어 허용(`- T-002: T-001의 X 정의 후 시작 가능`)이라 *기계 파싱 가능한 표기*(`- T-NNN: ...` prefix의 task ID enumeration)를 우선 회수 — 그 외 자유 텍스트는 best-effort heuristic, 호출마다 wave 결과가 달라질 수 있음을 출력에 명시.
+
+11-(b) **`## 4-1` 기반 file overlap 점검** (1차):
+   - 동일 wave 내 두 task의 `## 4-1` enumeration 교집합이 비지 않으면 overlap.
+   - `## 4-1`이 비어 있는 task는 본 점검 skip + 출력에 `[Plan-file-coverage]` 경고 echo.
+
+11-(c) **LSP/MCP import dependency graph 보조 회수** (2차, ADR-038 D7 — *가용 시*):
+   - 본 skill이 호출 가능한 MCP 도구에 LSP-backed tool(예: `mcp__ide__getDiagnostics` 등)이 있는지 빠르게 검출.
+   - 가용 시: 각 task의 `## 4-1` enumeration 파일에 대해 *해당 파일을 import하는 다른 파일 목록*을 LSP에 회수. 두 task의 import-grand-parent 집합 교집합이 비지 않으면 "공유 모듈 후보" 경고 출력.
+   - 가용 안 함: 출력에 `LSP/MCP 미가용 — import 그래프 점검 skip` 한 줄 echo + 휴리스틱 fallback (현행 path-like 토큰 비교).
+   - **자동 차단 X** — best-effort. 정확도는 LSP 서버의 indexing 상태에 의존.
+
+11-(d) **새 dependency 추가 키워드 감지** (3차, ADR-038 D8 — lockfile race 차단):
+   - task 본문(`## 3. 구현 항목` / `## 4-1`)에서 다음 키워드 중 1+ 감지 시 본 task를 *그 wave 단독 실행*으로 강등 (다른 task와 같은 wave 묶음 금지):
+     - 명시 경로: `package.json`, `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`, `Cargo.toml`, `Cargo.lock`, `Gemfile`, `Gemfile.lock`, `composer.json`, `composer.lock`, `pyproject.toml`, `Pipfile`, `Pipfile.lock`, `poetry.lock`, `uv.lock`, `go.mod`, `go.sum`, `requirements.txt`
+     - 의도 키워드: `의존성 추가` / `dependency 추가` / `package 추가` / `npm install` / `pnpm add` / `pip install` / `cargo add` 등
+   - 본 task를 단독 wave로 분리하고 출력에 `⚠ lockfile-race risk: T-NNN을 단독 wave로 분리 (의존성 추가 키워드 감지)` 줄 추가.
+
+11-(e) **fallback heuristic** (1차/3차 모두 미적용 시):
+   - `## 3. 구현 항목` 본문에서 *path-like 토큰* (`src/...`, `docs/...`, `*.ts` 등 슬래시·확장자 포함) 만 추출해 비교. 일반 자연어 키워드는 사용하지 않음 (false-positive 회피).
+
+11-(f) **자동 분리 X**:
+   - 본 점검들은 *경고 출력만*. 사용자가 wave 내에서 sequential 진행 / 별 worktree 분리 / 그대로 동시 진행 중 결정.
 ```
 
-#### 7-1-B. "마지막 출력" 단락 확장
+#### 7-2-B. "마지막 출력" 단락 확장
 
 현재 본문 (line 81~100 사이) "마지막 출력" 단락의 끝부분(다음 추천 단계 단락의 앞)에 다음 항목을 추가한다.
 
@@ -662,22 +792,33 @@ EOF
 
 다음으로 *교체*:
 ```
-- **병렬 실행 그룹 (parallel waves)** — task `## 9. 의존성` 기반 위상 정렬 (자유 텍스트 dep는 best-effort). 다음 형식으로 echo:
+- **병렬 실행 그룹 (parallel waves)** — task `## 9. 의존성` + `## 4-1` 기반 위상 정렬 (자유 텍스트 dep는 best-effort). 다음 형식으로 echo:
   ```
   Wave 1 (병렬 가능): T-001, T-002, T-003
   Wave 2 (Wave 1 종료 후): T-004 (deps: T-001), T-005 (deps: T-002)
   Wave 3 (Wave 2 종료 후): T-006 (deps: T-004, T-005)
+  Wave 4 (단독 — lockfile race risk): T-007 (의존성 추가 감지)
   ```
-  - 동일 wave 내 두 task의 *file overlap 점검* — step 11의 우선순위 (`## 4-1` enumeration 우선, 비면 `## 3` path-like 토큰) 정합. 매칭 시 `⚠ file overlap 의심: T-NNN ↔ T-MMM (path: <경로>) — sequential 또는 worktree 분리 권장` 줄을 wave 그룹 아래 추가.
-  - 사용자 병렬 실행 시 권장 패턴: **별 git worktree에서 별 세션** 진행. 같은 작업 트리에서 다중 `/implement-workitem` 동시 실행은 file 충돌 위험. *주의*: DELEGATION_STRATEGY.md `## 병렬 패턴 3종` 표의 1·2·3은 *메인 세션이 sub-agent를 어떻게 호출하느냐*의 orchestration 패턴 — 본 wave 그룹은 *사용자가 여러 터미널·세션을 직접 띄우는* multi-session 시나리오라 독립 차원. ADR-038 본문이 그 관계를 명시.
+  - 동일 wave 내 두 task의 *file overlap 점검* — step 11-(b)의 `## 4-1` enumeration 우선, step 11-(c)의 LSP 보조 (가용 시), step 11-(e) 휴리스틱 fallback 정합. 매칭 시 다음 형식으로 wave 그룹 아래 추가:
+    ```
+    ⚠ file overlap 의심: T-NNN ↔ T-MMM (## 4-1 직접 겹침: <경로>) — sequential 또는 worktree 분리 권장
+    ⚠ 공유 모듈 후보 (LSP): T-NNN ↔ T-MMM (공통 import: <경로>) — sequential 또는 worktree 분리 권장
+    ⚠ lockfile-race risk: T-NNN을 단독 wave로 분리 (의존성 추가 키워드 감지)
+    ```
+  - `[Plan-file-coverage]` 경고가 있는 task는 wave 그룹 위에 별도로 echo: `[Plan-file-coverage] T-NNN — ## 4-1 미채움 (validate-plan P0 후보, scaffolding 예외 미명시)`.
+  - **병렬 실행 권장 패턴** (ADR-038 D9): `claude --worktree` 사용 — Claude Code 2026-02-21 native worktree support. 동일 wave의 각 task를 별 worktree·별 터미널·별 세션에서 진행. 단일 working tree 동시 implement는 file 충돌 + git index race + 빌드 캐시 충돌 위험이라 비권장. **빌드 캐시 / 통합 테스트 / DB·포트 등 외부 리소스는 worktree만으로는 격리되지 않음 — 프로젝트 환경 설계로 격리 (ADR-038 면책 단락 참조)**.
+  - *주의*: DELEGATION_STRATEGY.md `## 병렬 패턴 3종` 표의 1·2·3은 *메인 세션이 sub-agent를 어떻게 호출하느냐*의 orchestration 패턴 — 본 wave 그룹은 *사용자가 여러 터미널·세션을 직접 띄우는* multi-session 시나리오라 독립 차원. ADR-038 본문이 그 관계를 명시.
+- **LSP/MCP 가용 여부 안내** — step 11-(c) 결과 한 줄:
+  - 가용: `LSP/MCP import 그래프 점검: <서버 이름> 사용, N개 공유 모듈 후보 회수`
+  - 미가용: `LSP/MCP 미가용 — import 그래프 점검 skip (휴리스틱 fallback)`
 - **Cross-review opt-in 안내** (ADR-038) — 다음 한 줄 안내 출력:
   ```
   품질 확신이 부족하면: 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>` 회수.
   ```
-- 다음 추천 단계 (보통 `/implement-workitem [task-id]`, 또는 cross-review를 끼우려면 `/validate-plan [workitem-id]` 먼저)
+- 다음 추천 단계 (보통 `/implement-workitem [task-id]` — wave 그룹 병렬 시 `claude --worktree -p "/implement-workitem T-NNN"` 패턴, 또는 cross-review를 끼우려면 `/validate-plan [workitem-id]` 먼저)
 ```
 
-#### 7-1-C. 정책 근거 단락에 ADR-038 추가
+#### 7-2-C. "Cross-review hook" 단락 신설
 
 본 skill의 `## Context 정책 (ADR-019)` 단락 *바로 앞*에 다음 단락을 *삽입*:
 
@@ -688,26 +829,44 @@ EOF
 2. 원본 세션 (본 skill을 돌린 세션)에 돌아와 `/repair-plan <workitem-id>` 실행. 모든 리뷰 파일을 회수해 workitem 문서를 수정 + 리뷰 파일 삭제.
 
 본 흐름은 *opt-in*. 건너뛰어도 워크플로우 정상 작동.
+
+## Worktree 권장 패턴 (ADR-038 D9)
+본 skill의 wave 그룹 출력은 사용자가 같은 wave의 task를 *별 세션*에서 동시 `/implement-workitem`으로 진행할 수 있음을 가시화한다. 운영 권장:
+- Claude Code 2026-02-21 native worktree support 사용 — `claude --worktree -p "/implement-workitem T-NNN"` 패턴으로 각 task가 `.claude/worktrees/<task-id>/`에 별 working directory를 갖는다.
+- 단일 working tree에서 다중 implement 동시 실행은 비권장 (file 충돌 + git index race + 빌드 캐시 충돌).
+- 외부 리소스(DB / 포트 / lockfile) 격리는 *프로젝트 환경 책임* — ADR-038 면책 단락 참조.
+- 4~8 concurrent worktree까지는 외부 사례상 안정적, 그 이상은 사람 review가 병목.
+
+본 skill은 worktree를 *자동 spawn하지 않는다* — 사용자가 명시 실행.
 ```
 
-### 7-2. 검증
-- `grep -n "wave" .claude/skills/plan-workitem/SKILL.md` — ≥3 결과
-- `grep -c "ADR-038" .claude/skills/plan-workitem/SKILL.md` — ≥2
-- `grep -c "validate-plan" .claude/skills/plan-workitem/SKILL.md` — ≥2
-- 본문 line count 합리 (대략 +30 라인)
+### 7-3. 검증
+- `grep -n "wave" .claude/skills/plan-workitem/SKILL.md` — ≥5 결과 (step 11 + 마지막 출력)
+- `grep -c "ADR-038" .claude/skills/plan-workitem/SKILL.md` — ≥3
+- `grep -c "validate-plan" .claude/skills/plan-workitem/SKILL.md` — ≥3
+- `grep -c "## 4-1" .claude/skills/plan-workitem/SKILL.md` — ≥4 (step 10-1 + step 11-(b) + 출력 단락 + Plan-file-coverage 안내)
+- `grep -c "worktree" .claude/skills/plan-workitem/SKILL.md` — ≥3
+- `grep -c "LSP" .claude/skills/plan-workitem/SKILL.md` — ≥2
+- `grep -n "plan 시점" docs/30-workitems/_templates/TASK_TEMPLATE.md` — 새 주석 단락 매칭
+- 본문 line count 변화는 합리 (대략 +80~100 라인 정도 — step 10-1 + step 11 sub-step 6개 + 출력 단락 확장 + Cross-review hook 단락 + Worktree 권장 패턴 단락)
 
-### 7-3. 커밋
+### 7-4. 커밋
 ```bash
 git add .claude/skills/plan-workitem/SKILL.md
+git add docs/30-workitems/_templates/TASK_TEMPLATE.md
 git commit -m "$(cat <<'EOF'
-feat(plan-workitem): emit parallel wave groups + cross-review hook (ADR-038)
+feat(plan-workitem): emit parallel waves + ## 4-1 plan-time fill + LSP/worktree guidance (ADR-038)
 
-- Adds step 11: topological wave grouping from task ## 9. 의존성.
-- Output now echoes wave groups + file-overlap warnings.
-- Cross-review hook section guides users to /validate-plan + /repair-plan
-  in separate sessions.
+- Adds step 10-1: ## 4-1. 변경 예정 파일/경로 채움 강제 (plan 시점).
+- Adds step 11: topological wave grouping with sub-steps (a)~(f):
+  ## 4-1 overlap, LSP/MCP import graph (when available), dependency-
+  keyword lockfile-race guard, fallback heuristic.
+- Output now echoes wave groups + file-overlap warnings + shared-module
+  candidates (LSP) + lockfile-race single-wave + worktree recommendation.
+- Cross-review hook + Worktree section guides users to opt-in flows.
+- TASK_TEMPLATE ## 4-1 comment now says "plan 시점에 채운다".
 - Wave grouping is derived view only — no new persistent storage to keep
-  ## 9. 의존성 as SSOT (ADR-005).
+  ## 9. 의존성 + ## 4-1 as SSOT (ADR-005).
 
 Refs: ADR-038
 EOF
@@ -718,7 +877,7 @@ EOF
 
 ## 8. Phase 7 — SSOT 문서 갱신 (STRUCTURE / WORKFLOW / DELEGATION_STRATEGY)
 
-목적: 신규 산출물 / 신규 워크플로우 가지 / 위임 트리거 표를 SSOT 문서에 박는다. 1 commit.
+목적: 신규 산출물 / 신규 워크플로우 가지 / 위임 트리거 표 / worktree 정책을 SSOT 문서에 박는다. 1 commit.
 
 ### 8-1. `docs/00-meta/STRUCTURE.md` 갱신
 
@@ -753,10 +912,12 @@ EOF
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). 적용 surface: `docs/40-validation/QA_FINDINGS.md` / `IMPROVEMENT_GUIDE.md` 항목 스키마 — 두 파일의 evidence label 룰은 본 ADR 본문 인용. |
 ```
 
-그 *직후* 1행 *삽입*:
+그 *직후* 3행 *삽입*:
 ```
-| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 8 차원 — 세 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
-| Parallel waves 위상 정렬 derived view | `.claude/skills/plan-workitem/SKILL.md` Step 11 + "마지막 출력" 단락 (SSOT는 `task ## 9. 의존성` — derived view는 영속 저장 X). |
+| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 9 차원 — 세 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
+| Parallel waves 위상 정렬 derived view (`## 9. 의존성` + `## 4-1` 기반) | `.claude/skills/plan-workitem/SKILL.md` Step 11 + "마지막 출력" 단락 (SSOT는 `task ## 9. 의존성` + `task ## 4-1. 변경 예정 파일/경로` — derived view는 영속 저장 X). |
+| `## 4-1. 변경 예정 파일/경로` 책임 시점 (plan 시점 채움 강제) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) D6 (정책 SSOT). 적용 surface: `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 4-1` 주석 + `.claude/skills/plan-workitem/SKILL.md` Step 10-1 + `.claude/skills/validate-plan/SKILL.md` [Plan-file-coverage] 차원. |
+| Worktree 권장 정책 (병렬 implement) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) D9 (정책 SSOT). 적용 surface: `.gitignore` `.claude/worktrees/` 패턴 + `.claude/skills/plan-workitem/SKILL.md` "Worktree 권장 패턴" 단락 + `docs/00-meta/DELEGATION_STRATEGY.md` 병렬 패턴 단락 + README. |
 ```
 
 ### 8-2. `docs/00-meta/WORKFLOW.md` 갱신
@@ -777,8 +938,9 @@ EOF
 - 마일스톤 단위 목표를 `docs/30-workitems/milestones`에 만든다.
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
+- task의 `## 4-1. 변경 예정 파일/경로`는 **plan 시점에 채운다** (ADR-038 D6). 구현 중 변동 시 implement-workitem이 갱신.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
-- **선택**: `/plan-workitem` 출력의 wave 그룹을 참조해 동일 wave task를 별 worktree에서 동시 `/implement-workitem` 가능 (DELEGATION_STRATEGY 병렬 패턴 2).
+- **선택**: `/plan-workitem` 출력의 wave 그룹을 참조해 동일 wave task를 별 worktree에서 동시 `/implement-workitem` 가능. 권장 패턴은 `claude --worktree` (Claude Code 2026-02-21 native — ADR-038 D9). 단일 working tree 동시 implement는 비권장.
 ```
 
 #### 8-2-B. "워크아이템 라이프사이클" 다이어그램 갱신
@@ -795,7 +957,8 @@ discover → bootstrap → plan → implement → validate ─┬─Pass─→ f
 ```
 ```
 discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pass─→ finalize → stabilize
-                              │                          └─Needs Fix─→ repair → (validate 재실행)
+                              │   (wave 병렬 시          └─Needs Fix─→ repair → (validate 재실행)
+                              │    claude --worktree)
                               │
                               └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
 ```
@@ -812,7 +975,7 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
 
 그 *직전*에 (또는 다른 적절한 위치에) 2 행을 *삽입*:
 ```
-| `/plan-workitem` 산출물의 cross-LLM peer review (opt-in) | reviewer (plan surface) | 다른 세션 (Claude 새 창 / Codex 등)에서 `$validate-plan` or `/validate-plan` 호출. 임시 리뷰 파일 1개만 작성, workitem 문서 수정 X (ADR-038). |
+| `/plan-workitem` 산출물의 cross-LLM peer review (opt-in) | reviewer (plan surface, Plan Quality 9 차원) | 다른 세션 (Claude 새 창 / Codex 등)에서 `$validate-plan` or `/validate-plan` 호출. 임시 리뷰 파일 1개만 작성, workitem 문서 수정 X (ADR-038). |
 | Cross-review 결과 회수 + workitem 문서 수정 | planner | 원본 plan 세션에서 `/repair-plan`. 임시 리뷰 파일 회수 → 결정 → 적용 → 파일 삭제 (ADR-038). |
 ```
 
@@ -848,27 +1011,39 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
 ```
 선택 기준 — 가벼운 병렬: 1, 같은 파일 충돌 가능성 있는 단일 작업: 2, 작업 단위가 분명한 codebase-wide 분산 작업: 3.
 
-`/plan-workitem` 출력의 wave 그룹은 **본 표의 1·2·3과는 독립 차원**이다. 본 표의 1·2·3은 메인 세션이 sub-agent를 한 turn 안에서 어떻게 호출하느냐(orchestration). wave 그룹은 *사용자가 여러 터미널·세션을 띄워 동일 wave의 task를 `/implement-workitem`으로 동시 진행*하는 multi-session 시나리오 (ADR-038). 두 차원이 직교하므로 — wave 안의 한 task를 *내부적으로* sub-agent 분기할 때 본 표의 1·2·3을 별도로 선택한다. file overlap 경고가 있는 wave 자체는 **별 git worktree 권장** (단일 worktree에서 다중 implement 동시 실행은 file 충돌 위험).
+`/plan-workitem` 출력의 wave 그룹은 **본 표의 1·2·3과는 독립 차원**이다. 본 표의 1·2·3은 메인 세션이 sub-agent를 한 turn 안에서 어떻게 호출하느냐(orchestration). wave 그룹은 *사용자가 여러 터미널·세션을 띄워 동일 wave의 task를 `/implement-workitem`으로 동시 진행*하는 multi-session 시나리오 (ADR-038). 두 차원이 직교하므로 — wave 안의 한 task를 *내부적으로* sub-agent 분기할 때 본 표의 1·2·3을 별도로 선택한다.
+
+**Wave 그룹 병렬 실행 권장 패턴** (ADR-038 D9):
+- Claude Code 2026-02-21 native worktree support 사용 — `claude --worktree -p "/implement-workitem T-NNN"` 패턴으로 각 task가 `.claude/worktrees/<task-id>/`에 별 working directory를 갖는다. main checkout과 git index가 격리됨.
+- 단일 working tree에서 다중 implement 동시 실행은 file 충돌 + git index race + 빌드 캐시 충돌 위험이라 **비권장**.
+- 외부 리소스(DB / 포트 / lockfile / 빌드 캐시)는 worktree만으로는 격리되지 않음 — *프로젝트 환경 설계 책임* (Docker Compose · testcontainers · 임시 포트 / DB instance / 빌드 캐시 디렉터리 분리 등). ADR-038 면책 단락 참조.
+- 외부 사례상 4~8 concurrent worktree까지는 안정적, 그 이상은 사람 review가 병목.
+- file overlap 경고가 있는 wave 자체는 sequential 실행 또는 worktree 분리 결정 (자동 차단 X — 사용자 결정).
 ```
 
 ### 8-4. 검증
 - `grep -c "validate-plan" docs/00-meta/STRUCTURE.md` — ≥1
-- `grep -c "ADR-038" docs/00-meta/STRUCTURE.md` — ≥2 (산출물 행 + canonical owner 행)
+- `grep -c "ADR-038" docs/00-meta/STRUCTURE.md` — ≥4 (산출물 행 + canonical owner 4행)
 - `grep -c "validate-plan" docs/00-meta/WORKFLOW.md` — ≥1
+- `grep -c "## 4-1" docs/00-meta/WORKFLOW.md` — ≥1
+- `grep -c "worktree" docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md` — ≥3 합산
 - `grep -c "validate-plan" docs/00-meta/DELEGATION_STRATEGY.md` — ≥1
-- `grep -c "wave" docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md` — ≥2 합산
+- `grep -c "wave" docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md` — ≥3 합산
 
 ### 8-5. 커밋
 ```bash
 git add docs/00-meta/STRUCTURE.md docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md
 git commit -m "$(cat <<'EOF'
-docs(boilerplate): wire validate-plan/repair-plan into SSOT docs (ADR-038)
+docs(boilerplate): wire validate-plan/repair-plan + ## 4-1 + worktree into SSOT docs (ADR-038)
 
 - STRUCTURE.md: skill count 13 -> 15, new plan-review artifact row,
-  canonical owner rows for ADR-038 + parallel waves derived view.
-- WORKFLOW.md: section 3 sub-loop + lifecycle diagram updated.
+  canonical owner rows for ADR-038 / parallel waves derived view /
+  ## 4-1 책임 시점 / worktree 권장.
+- WORKFLOW.md: section 3 sub-loop + ## 4-1 plan-time fill + worktree
+  hint, lifecycle diagram updated.
 - DELEGATION_STRATEGY.md: delegation triggers for plan cross-review,
-  skill order 3a/3b, parallel-pattern wave mapping note.
+  skill order 3a/3b, parallel-pattern wave mapping + worktree
+  recommendation + 외부 리소스 면책 안내.
 
 Refs: ADR-038
 EOF
@@ -977,7 +1152,7 @@ EOF
 
 ## 10. Phase 9 — README.md / README_ko.md 갱신
 
-목적: 사용자가 가장 먼저 보는 진입 문서에 신규 워크플로우 가지를 안내.
+목적: 사용자가 가장 먼저 보는 진입 문서에 신규 워크플로우 가지 + worktree 권장을 안내.
 
 ### 10-1. `README.md` 갱신
 
@@ -1004,6 +1179,7 @@ EOF
   → /plan-workitem
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /implement-workitem (parallel by wave groups — see plan-workitem output)
+       └─ recommended: `claude --worktree -p "/implement-workitem T-NNN"` per task
   → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
   → /stabilize-milestone
 ```
@@ -1038,7 +1214,7 @@ EOF
 ### Step 3: Plan → Implement → Ship
 
 ```text
-# Plan
+# Plan (fills task ## 4-1 paths + emits parallel wave groups)
 /plan-workitem [milestone or feature id]
 
 # (Optional) Cross-LLM peer review — see ADR-038
@@ -1048,6 +1224,7 @@ EOF
 /repair-plan [workitem id]
 
 # Implement (parallel by wave groups from /plan-workitem output)
+#   Recommended: claude --worktree per task for isolated working tree
 /implement-workitem [task id]
 /validate-workitem [task id]
 
@@ -1062,7 +1239,9 @@ EOF
 /stabilize-milestone [milestone id]
 ```
 
-> **Tip — parallel implement**: `/plan-workitem` emits "parallel waves" derived from each task's `## 9. 의존성`. Tasks in the same wave can be implemented in separate terminal sessions / worktrees in parallel. See [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) and [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md) (parallel pattern 2 — git worktree).
+> **Tip — parallel implement**: `/plan-workitem` emits "parallel waves" derived from each task's `## 9. 의존성` + `## 4-1. 변경 예정 파일/경로`. Tasks in the same wave can be implemented in **separate terminal sessions / worktrees** in parallel. Recommended pattern: `claude --worktree -p "/implement-workitem T-NNN"` (Claude Code 2026-02-21 native worktree support). Same-working-tree parallel implement is discouraged (file conflict + git index race + build cache race risks). See [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) and [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md) (parallel pattern + worktree section).
+>
+> External resources (DB / port / lockfile / build cache) are **NOT auto-isolated by worktree** — that's a project-environment responsibility (Docker Compose, testcontainers, per-worker temp dirs, etc.). See the "동시 implement 면책 단락" in ADR-038.
 ```
 
 #### 10-1-C. "Using with Codex CLI" 단락의 wrapper 목록 갱신
@@ -1111,6 +1290,7 @@ EOF
   → /plan-workitem
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
   → /implement-workitem (wave 그룹 별 병렬 가능 — /plan-workitem 출력 참조)
+       └─ 권장: `claude --worktree -p "/implement-workitem T-NNN"` (task당 별 worktree)
   → /validate-workitem → /repair-workitem (Needs Fix일 때) → /finalize-workitem
   → /stabilize-milestone
 ```
@@ -1145,7 +1325,7 @@ EOF
 ### 3단계: 분해 → 구현 → 마감
 
 ```text
-# 분해
+# 분해 (task ## 4-1 경로 채움 + 병렬 wave 그룹 출력)
 /plan-workitem [milestone 또는 feature id]
 
 # (선택) 다른 LLM 교차 리뷰 — ADR-038 참조
@@ -1155,6 +1335,7 @@ EOF
 /repair-plan [workitem id]
 
 # 구현 (/plan-workitem 출력의 wave 그룹 기준 병렬 가능)
+#   권장: task당 claude --worktree 별 worktree 격리 실행
 /implement-workitem [task id]
 /validate-workitem [task id]
 
@@ -1169,7 +1350,9 @@ EOF
 /stabilize-milestone [milestone id]
 ```
 
-> **Tip — 병렬 구현**: `/plan-workitem`은 각 task의 `## 9. 의존성`에서 파생된 "병렬 wave"를 출력한다. 같은 wave 안의 task는 별 터미널 세션·별 worktree에서 동시에 `/implement-workitem`으로 진행할 수 있다. [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) 및 [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md) 참조 (단일 worktree 다중 implement 동시 실행은 file 충돌 위험 — 별 git worktree 권장).
+> **Tip — 병렬 구현**: `/plan-workitem`은 각 task의 `## 9. 의존성` + `## 4-1. 변경 예정 파일/경로`에서 파생된 "병렬 wave"를 출력한다. 같은 wave 안의 task는 **별 터미널 세션·별 worktree**에서 동시에 `/implement-workitem`으로 진행할 수 있다. 권장 패턴: `claude --worktree -p "/implement-workitem T-NNN"` (Claude Code 2026-02-21 native worktree support). 단일 working tree 동시 implement는 file 충돌 + git index race + 빌드 캐시 충돌 위험이라 비권장. [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) 및 [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md) 병렬 패턴·worktree 단락 참조.
+>
+> 외부 리소스(DB / 포트 / lockfile / 빌드 캐시)는 **worktree만으로는 격리되지 않음** — 프로젝트 환경 설계 책임 (Docker Compose · testcontainers · 임시 디렉터리 분리 등). ADR-038 "동시 implement 면책 단락" 참조.
 ```
 
 #### 10-2-C. "Codex CLI 진입" 단락의 wrapper 목록 갱신
@@ -1195,19 +1378,22 @@ EOF
 - `grep -c "validate-plan" README.md` — ≥3 (flow 다이어그램 + Step 3 + Codex 목록)
 - `grep -c "validate-plan" README_ko.md` — ≥3
 - `grep -c "repair-plan" README.md` — ≥3
-- `grep -c "ADR-038" README.md README_ko.md` — ≥2 합산
+- `grep -c "worktree" README.md README_ko.md` — ≥4 합산
+- `grep -c "## 4-1" README.md README_ko.md` — ≥2 합산
+- `grep -c "ADR-038" README.md README_ko.md` — ≥4 합산
 
 ### 10-4. 커밋
 ```bash
 git add README.md README_ko.md
 git commit -m "$(cat <<'EOF'
-docs(readme): announce plan cross-review + parallel wave guidance (ADR-038)
+docs(readme): announce plan cross-review + parallel wave + worktree guidance (ADR-038)
 
 - Overall flow diagram now branches at /plan-workitem.
-- Step 3 includes optional /validate-plan + /repair-plan loop.
+- Step 3 includes optional /validate-plan + /repair-plan loop and
+  recommended claude --worktree pattern for parallel wave implement.
 - Codex wrappers list adds \$validate-plan and \$repair-plan.
-- Tip box points to ADR-038 + DELEGATION_STRATEGY for parallel
-  worktree pattern.
+- Tip box references ADR-038 + DELEGATION_STRATEGY parallel/worktree
+  sections + 외부 리소스 면책 안내.
 
 Refs: ADR-038
 EOF
@@ -1226,9 +1412,9 @@ EOF
 
 11-1-A. **ADR cross-reference**: `ADR-038`이 다음 위치에서 모두 발견되어야 함:
 ```bash
-grep -l "ADR-038" docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md docs/90-decisions/boilerplate/README.md docs/00-meta/STRUCTURE.md docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md .claude/agents/reviewer.md .claude/skills/plan-workitem/SKILL.md .claude/skills/validate-plan/SKILL.md .claude/skills/repair-plan/SKILL.md
+grep -l "ADR-038" docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md docs/90-decisions/boilerplate/README.md docs/00-meta/STRUCTURE.md docs/00-meta/WORKFLOW.md docs/00-meta/DELEGATION_STRATEGY.md .claude/agents/reviewer.md .claude/skills/plan-workitem/SKILL.md .claude/skills/validate-plan/SKILL.md .claude/skills/repair-plan/SKILL.md docs/30-workitems/_templates/TASK_TEMPLATE.md README.md README_ko.md
 ```
-모두 1개 이상의 결과를 내야 함.
+모두 1개 이상의 결과를 내야 함. (Codex wrapper `.agents/skills/validate-plan/SKILL.md` / `.agents/skills/repair-plan/SKILL.md`는 ADR-010 wrapper 패턴 정합상 source of truth 경로만 인용하므로 ADR-038 직접 인용이 없을 수 있음 — 본 grep 목록에서 제외, 정합.)
 
 11-1-B. **Skill count 정합**: STRUCTURE.md의 *15종* 표기 + `.claude/skills/` 실제 디렉터리 개수 일치:
 ```bash
@@ -1248,13 +1434,14 @@ ls -d .agents/skills/*/ | wc -l
 git log --oneline -- AGENTS.md | head -10  # 본 가이드 phase 별 commit 메시지가 없어야 함
 wc -l AGENTS.md  # 100 이하 유지
 ```
-두 결과 모두 정합이어야 함. 본 가이드의 phase 별 commit 메시지에 `AGENTS.md`가 staged 파일로 등장한 적이 0이어야 함 (§5-4, §6-4, §7-3, §8-5, §9-4, §10-4의 `git add` 명령 어디에도 AGENTS.md 없음 — 자기 점검).
+두 결과 모두 정합이어야 함. 본 가이드의 phase 별 commit 메시지에 `AGENTS.md`가 staged 파일로 등장한 적이 0이어야 함 (§5-4, §6-4, §7-4, §8-5, §9-4, §10-4의 `git add` 명령 어디에도 AGENTS.md 없음 — 자기 점검).
 
-11-1-E. **`.gitignore` 정합**: plan-reviews 패턴이 reports 패턴 직후에 위치하고 mirror 형식 유지:
+11-1-E. **`.gitignore` 정합**: plan-reviews 패턴이 reports 패턴 직후에 위치하고 mirror 형식 유지 + `.claude/worktrees/` 패턴 추가:
 ```bash
 grep -A1 "plan-reviews" .gitignore
+grep "worktrees" .gitignore
 ```
-2줄 출력 (패턴 + `!.gitkeep` 예외).
+앞은 2줄 출력 (패턴 + `!.gitkeep` 예외), 뒤는 `.claude/worktrees/` 1줄 매칭.
 
 11-1-F. **`docs/40-validation/plan-reviews/` 디렉터리가 .gitkeep만 가짐**:
 ```bash
@@ -1262,23 +1449,23 @@ ls -A docs/40-validation/plan-reviews/
 ```
 결과 = `.gitkeep` (다른 파일 X — 본 개선 작업 중에 우연히 검토 파일이 생기지 않았는지 확인).
 
-11-1-G. **plan-workitem 본문 정합**: parallel waves + cross-review hook 단락 모두 존재:
+11-1-G. **plan-workitem 본문 정합**: parallel waves + `## 4-1` plan 시점 채움 + LSP 보조 + worktree 권장 단락 모두 존재:
 ```bash
-grep -n "wave 그룹\|Cross-review hook\|validate-plan" .claude/skills/plan-workitem/SKILL.md
+grep -n "wave 그룹\|Cross-review hook\|validate-plan\|Worktree 권장\|LSP/MCP" .claude/skills/plan-workitem/SKILL.md
 ```
-3+ 결과.
+5+ 결과.
 
-11-1-H. **reviewer.md 본문 정합**: plan surface + Plan Quality 8 + Write 범위 확장 모두 존재:
+11-1-H. **reviewer.md 본문 정합**: plan surface + Plan Quality 9 + [Plan-file-coverage] + Write 범위 확장 모두 존재:
 ```bash
-grep -n "plan surface\|Plan Quality\|plan-reviews" .claude/agents/reviewer.md
+grep -n "plan surface\|Plan Quality 9\|Plan-file-coverage\|plan-reviews" .claude/agents/reviewer.md
 ```
-3+ 결과.
+4+ 결과.
 
 11-1-I. **신규 가드 단락 정합**:
 ```bash
-grep -n "sanitization\|reviewer-tag 형식\|P2 deferred\|IMPROVEMENT_GUIDE" .claude/skills/validate-plan/SKILL.md .claude/skills/repair-plan/SKILL.md
+grep -n "sanitization\|reviewer-tag 형식\|P2 deferred\|IMPROVEMENT_GUIDE\|## 4-1" .claude/skills/validate-plan/SKILL.md .claude/skills/repair-plan/SKILL.md
 ```
-validate-plan 측에 `reviewer-tag 형식`, repair-plan 측에 `sanitization` + `P2 deferred` + `IMPROVEMENT_GUIDE` 매칭 1+ 라인씩 존재.
+validate-plan 측에 `reviewer-tag 형식` + `## 4-1` 매칭, repair-plan 측에 `sanitization` + `P2 deferred` + `IMPROVEMENT_GUIDE` + `## 4-1` 매칭 1+ 라인씩 존재.
 
 11-1-J. **ADR-038 evidence label 정합** (`+`는 정규식 메타라 `-F` 또는 `[+]`로 안전화):
 ```bash
@@ -1286,17 +1473,34 @@ grep -nF "[관측됨]" docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-vali
 grep -nF "[가설+외부실증]" docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md
 grep -nF "[외부실증]" docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md
 ```
-"같은 모델의 blind spot은 그대로 통과" 줄이 `[가설+외부실증]`로 라벨링되어 있고, "self-check를 같은 세션 내에서 돌린다" 줄이 `[관측됨]`이어야 함 (ADR-022 정합 — 구조 사실만 [관측됨]). multi-model ensembling 외부 사례 인용 줄은 `[외부실증]`.
+"같은 모델의 blind spot은 그대로 통과" 줄이 `[가설+외부실증]`로 라벨링되어 있고, "self-check를 같은 세션 내에서 돌린다" 줄 + "`## 4-1`은 plan 시점에 비어 있는 경우가 다수" 줄이 `[관측됨]`이어야 함 (ADR-022 정합 — 구조 사실만 [관측됨]). multi-model ensembling / LSP / worktree 외부 사례 인용 줄은 `[외부실증]`.
+
+11-1-K. **TASK_TEMPLATE `## 4-1` 주석 정합**:
+```bash
+grep -A3 "## 4-1" docs/30-workitems/_templates/TASK_TEMPLATE.md | grep "plan 시점"
+```
+1+ 라인 매칭. 기존 "구현 시점에 채운다" 문구가 *남아 있지 않아야* 함:
+```bash
+grep -c "구현 시점에 채운다" docs/30-workitems/_templates/TASK_TEMPLATE.md
+```
+결과 = `0`.
+
+11-1-L. **D8 dependency keyword 단락 정합** (plan-workitem step 11-(d)):
+```bash
+grep -n "lockfile-race\|pnpm-lock\|package.json" .claude/skills/plan-workitem/SKILL.md
+```
+3+ 결과.
 
 ### 11-2. 워크플로우 dry-run (선택 — 빠른 sanity check)
 
 본 개선이 완료된 후 실제 호출 흐름 1회 dry-run 권장 (정책 외 — 사용자가 fork 직후 1회 돌려 본 가이드 검증):
 
-1. 새 터미널 1에서 Claude Code 진입 후 `/plan-workitem M1` 자연어로 호출 (M1이 존재하는 fork만). 출력에 "Wave 1:" "Cross-review hook" 발견되어야 함.
-2. 새 터미널 2에서 Claude Code 진입 후 `/validate-plan M1 --reviewer-tag claude-b` 호출. `docs/40-validation/plan-reviews/M1.claude-b.md` 생성되어야 함.
+1. 새 터미널 1에서 Claude Code 진입 후 `/plan-workitem M1` 자연어로 호출 (M1이 존재하는 fork만). 출력에 "Wave 1:" "Cross-review hook" "## 4-1" "Worktree 권장" 발견되어야 함.
+2. 새 터미널 2에서 Claude Code 진입 후 `/validate-plan M1 --reviewer-tag claude-b` 호출. `docs/40-validation/plan-reviews/M1.claude-b.md` 생성되어야 함. 본 파일 안에 `[Plan-file-coverage]` 차원 1+ 라인이 발견되어야 함 (또는 0건이면 모든 task가 채워졌음을 의미).
 3. (선택) 새 터미널 3에서 Codex 진입 후 `$validate-plan M1 --reviewer-tag codex` 호출. `M1.codex.md` 생성되어야 함.
 4. 터미널 1로 복귀해 `/repair-plan M1` 호출. 임시 파일 모두 사라지고 workitem 문서가 갱신되어야 함.
-5. 결과를 .boilerplate/validation/SIMULATION_RUN.md에 *기록*. (선택 — 본 가이드 비범위지만 ADR-022 evidence 회수에 도움.)
+5. (선택) wave 그룹 안의 task 1개를 `claude --worktree -p "/implement-workitem T-001"`로 호출. `.claude/worktrees/T-001/` 경로에 별 working directory가 생성되어야 함. main checkout의 `git status`는 영향받지 않아야 함 (worktree 격리 확인).
+6. 결과를 .boilerplate/validation/SIMULATION_RUN.md에 *기록*. (선택 — 본 가이드 비범위지만 ADR-022 evidence 회수에 도움.)
 
 ### 11-3. 최종 commit (해당 시)
 
@@ -1324,9 +1528,9 @@ EOF
 본 가이드 완료 시 다음 항목을 모두 ✅ 해야 한다.
 
 ### 12-1. 신규 산출물 존재
-- [ ] `docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md` (Status: accepted)
-- [ ] `.claude/skills/validate-plan/SKILL.md` (frontmatter agent: reviewer)
-- [ ] `.claude/skills/repair-plan/SKILL.md` (frontmatter agent: planner)
+- [ ] `docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md` (Status: accepted, D1~D9 9개 결정 + 면책 단락 + 비결정 8개)
+- [ ] `.claude/skills/validate-plan/SKILL.md` (frontmatter agent: reviewer, Plan Quality 9 차원, `[Plan-file-coverage]` 포함)
+- [ ] `.claude/skills/repair-plan/SKILL.md` (frontmatter agent: planner, `## 4-1` 수정 점검 포함)
 - [ ] `.agents/skills/validate-plan/SKILL.md` + `agents/openai.yaml`
 - [ ] `.agents/skills/repair-plan/SKILL.md` + `agents/openai.yaml`
 - [ ] `docs/40-validation/plan-reviews/.gitkeep`
@@ -1335,21 +1539,22 @@ EOF
 - [ ] `docs/90-decisions/boilerplate/README.md`에 ADR-038 행 추가됨
 - [ ] `docs/00-meta/STRUCTURE.md` skill count 13 → 15
 - [ ] `docs/00-meta/STRUCTURE.md`에 plan-review 산출물 행 추가됨
-- [ ] `docs/00-meta/STRUCTURE.md` Canonical Owner 표에 ADR-038 + parallel waves derived view 행 2개 추가됨
-- [ ] `docs/00-meta/WORKFLOW.md` "3. 작업 단위 분해" sub-loop 안내 추가됨
-- [ ] `docs/00-meta/WORKFLOW.md` 라이프사이클 다이어그램에 (opt-in) 가지 추가됨
+- [ ] `docs/00-meta/STRUCTURE.md` Canonical Owner 표에 ADR-038 + parallel waves derived view + `## 4-1` 책임 시점 + worktree 정책 행 4개 추가됨
+- [ ] `docs/00-meta/WORKFLOW.md` "3. 작업 단위 분해" sub-loop + `## 4-1` plan 시점 안내 + worktree 안내 추가됨
+- [ ] `docs/00-meta/WORKFLOW.md` 라이프사이클 다이어그램에 (opt-in) 가지 + worktree 힌트 추가됨
 - [ ] `docs/00-meta/DELEGATION_STRATEGY.md` 위임 트리거 표 2 행 추가됨
 - [ ] `docs/00-meta/DELEGATION_STRATEGY.md` 스킬 실행 순서에 3a/3b 추가됨
-- [ ] `docs/00-meta/DELEGATION_STRATEGY.md` 병렬 패턴 매핑 단락 갱신됨
-- [ ] `.claude/agents/reviewer.md` plan surface + Plan Quality 8 + Write 범위 확장됨
-- [ ] `.claude/skills/plan-workitem/SKILL.md` step 11 + 마지막 출력 wave 단락 + cross-review hook 단락 추가됨
-- [ ] `.gitignore`에 `plan-reviews/*.md` + `!plan-reviews/.gitkeep` 추가됨
-- [ ] `README.md` flow + Step 3 + Codex 목록 갱신됨
+- [ ] `docs/00-meta/DELEGATION_STRATEGY.md` 병렬 패턴 매핑 단락 + worktree 단락 + 외부 리소스 면책 안내 갱신됨
+- [ ] `.claude/agents/reviewer.md` plan surface + Plan Quality 9 + `[Plan-file-coverage]` + Write 범위 확장됨
+- [ ] `.claude/skills/plan-workitem/SKILL.md` step 10-1 (`## 4-1` 채움) + step 11 sub-step (a)~(f) + 마지막 출력 wave 단락 + Cross-review hook + Worktree 권장 단락 추가됨
+- [ ] `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 4-1` 주석이 "plan 시점에 채운다"로 갱신됨 (기존 "구현 시점에 채운다" 0건)
+- [ ] `.gitignore`에 `plan-reviews/*.md` + `!plan-reviews/.gitkeep` + `.claude/worktrees/` 패턴 추가됨
+- [ ] `README.md` flow + Step 3 + Codex 목록 + worktree tip 갱신됨
 - [ ] `README_ko.md` 동일 변경 한국어로 적용됨
 
 ### 12-3. 정책 정합 (위반 0건)
 - [ ] AGENTS.md 본문 변경 없음 (ADR-011 100줄 cap 보호)
-- [ ] `## 9. 의존성` 외에 wave 그룹의 영속 저장 자리 *없음* (ADR-005 SSOT 정합)
+- [ ] `## 9. 의존성` + `## 4-1` 외에 wave 그룹의 영속 저장 자리 *없음* (ADR-005 SSOT 정합)
 - [ ] `/validate-plan`은 workitem 문서를 *수정하지 않음* (frontmatter `allowed-tools`에 Edit 없음)
 - [ ] `/repair-plan`은 workitem 문서 + IMPROVEMENT_GUIDE.md (P2 deferred 이주만) *외* 다른 산출물(QA_FINDINGS / report 등)을 *수정하지 않음*
 - [ ] `/repair-plan` allowed-tools의 `Bash(rm ...)` / `Bash(ls ...)`가 `docs/40-validation/plan-reviews/` 경로 prefix로 *좁혀짐*
@@ -1357,7 +1562,11 @@ EOF
 - [ ] `/validate-plan` SKILL 본문에 reviewer-tag 형식 제약(`[A-Za-z0-9._-]{1,32}`) 존재
 - [ ] 자동 차단 트리거 0건 — 모든 신규 정책은 enabling (ADR-022 정합). `NEEDS_CHANGES`는 리뷰 verdict이지 워크플로우 차단 아님 — 본문에 그 사실 명시
 - [ ] ADR-038 본문에 ADR-026 비결정 단락과의 reconcile 4 차원 표 존재
+- [ ] ADR-038 본문에 "동시 implement 면책 단락" (빌드 캐시 / 테스트 / 외부 리소스 격리 책임 명시) 존재
 - [ ] ADR-038 evidence 라벨이 `[가설+외부실증]` (multi-LLM blind spot은 본 repo [관측됨] 아님 — ADR-022 정합)
+- [ ] plan-workitem step 11-(c) LSP/MCP 보조가 *가용 시에만* 활성화 + 미가용 fallback 명시
+- [ ] plan-workitem step 11-(d) dependency 키워드 감지 시 *단독 wave 분리*만 수행 (자동 차단 X)
+- [ ] worktree 사용은 *권장만* — 자동 spawn 없음, 단일 working tree 실행도 허용
 
 ### 12-4. Git 정합
 - [ ] 본 가이드의 phase 별 commit 메시지가 Conventional Commits 형식 (ADR-008)
@@ -1367,10 +1576,11 @@ EOF
 
 ### 12-5. 회귀 점검
 - [ ] 기존 lifecycle 8단계 (discover→...→stabilize)는 *그대로* 작동 — cross-review를 건너뛰면 변경 전과 동일 동작
-- [ ] 기존 `/plan-workitem` 출력의 분해 매트릭스 / FAC↔AC echo / architect 호출 신호 모두 *그대로* 출력됨 (wave 단락은 *추가*만)
+- [ ] 기존 `/plan-workitem` 출력의 분해 매트릭스 / FAC↔AC echo / architect 호출 신호 모두 *그대로* 출력됨 (wave 단락 + `## 4-1` 채움 + LSP 보조는 *추가*만)
 - [ ] `.claude/skills/` 다른 12개 skill 본문은 *변경 없음*
 - [ ] `.claude/agents/` 다른 5개 agent 본문은 *변경 없음* (reviewer.md만 변경)
 - [ ] ADR-001 ~ ADR-037 본문은 *변경 없음*
+- [ ] TASK_TEMPLATE의 `## 4-1` 주석 외 다른 섹션 주석은 *변경 없음*
 
 ---
 
@@ -1409,10 +1619,10 @@ EOF
 
 ### 14-3. reviewer.md 변경이 길어져 토큰 비용 우려
 구분 — reviewer agent의 *반환 토큰 cap*(1,000~2,000)은 agent가 메인 세션에 *돌려주는 응답 cap*이지, 본문(reviewer.md) 자체의 *입력 prompt 토큰*과는 별개다. 본 개선은 두 측면을 각각 다룬다:
-- *입력 prompt 토큰*(reviewer.md 본문 자체 길이): Plan Quality 8 단락이 추가되어 reviewer가 로드될 때마다 항상 본문에 포함된다. 본문 +20 라인 정도라 메인 세션 컨텍스트 부담은 적지만, 본 가이드의 호출 surface 분기(4-1-A)로 *실제 추론 시 활성 차원*을 제한해 추론 비용을 회피.
-- *반환 토큰 cap*(메인 세션에 돌려주는 응답 길이): reviewer가 Plan Quality 8 + Clean Code 6 + Doc Consistency 4를 동시에 다 응답하면 cap 초과 위험. 본 가이드의 surface 분기로 *plan surface 호출*에선 Plan Quality 8만, *code/doc/mixed*에선 기존 차원만 응답하도록 명시.
+- *입력 prompt 토큰*(reviewer.md 본문 자체 길이): Plan Quality 9 단락이 추가되어 reviewer가 로드될 때마다 항상 본문에 포함된다. 본문 +25 라인 정도라 메인 세션 컨텍스트 부담은 적지만, 본 가이드의 호출 surface 분기(4-1-A)로 *실제 추론 시 활성 차원*을 제한해 추론 비용을 회피.
+- *반환 토큰 cap*(메인 세션에 돌려주는 응답 길이): reviewer가 Plan Quality 9 + Clean Code 6 + Doc Consistency 4를 동시에 다 응답하면 cap 초과 위험. 본 가이드의 surface 분기로 *plan surface 호출*에선 Plan Quality 9만, *code/doc/mixed*에선 기존 차원만 응답하도록 명시.
 
-후속 모니터링 — 본문 +20 라인이 의도 외 영향(다른 surface 호출 시에도 LLM이 Plan Quality 차원에 끌려가는 등)을 내면 다음 stabilize 라운드 instruction improvement 후보로 보고.
+후속 모니터링 — 본문 +25 라인이 의도 외 영향(다른 surface 호출 시에도 LLM이 Plan Quality 차원에 끌려가는 등)을 내면 다음 stabilize 라운드 instruction improvement 후보로 보고.
 
 ### 14-4. `/validate-plan` 호출 시 reviewer agent가 workitem 문서를 *수정해 버림*
 원인: agent가 본 skill의 가드(workitem 수정 금지)를 무시. 대응: 임시 — 본 commit으로 진행 후 stabilize 라운드 instruction improvement 후보로 보고. 영구 — reviewer.md `Write/Edit 사용 범위` 단락의 surface 분기를 더 강하게 명시 (예: `validate-plan` surface는 plan-reviews/ *외* 모든 경로 Edit 호출 시 self-terminate).
@@ -1423,13 +1633,33 @@ EOF
 ### 14-6. `/validate-plan`이 아직 파일 작성 중인데 `/repair-plan` 호출됨 (race condition)
 원인: 여러 세션이 비동기로 진행 — `/validate-plan`이 write 도중에 사용자가 원본 세션에서 `/repair-plan` 호출. 부분 작성된 파일을 읽고 적용 후 삭제하면 일부 발견 항목이 silent loss. 대응: **운영 규칙으로 회피** — 가이드의 dry-run 안내(§11-2)에 "모든 `/validate-plan` 호출이 마지막 출력의 *판정·리뷰 파일 경로 echo*까지 완료된 뒤에만 `/repair-plan` 호출" 사용자 규칙 명시. 영구 — 차후 validate-plan을 atomic write (`tmp.md` → `mv` to final)로 강화 (다음 stabilize 라운드 instruction improvement 후보).
 
+### 14-7. plan-workitem이 `## 4-1`을 plan 시점에 채우지 않고 비어 있는 채로 출력
+원인: skill 본문의 step 10-1을 LLM이 skip했거나, 사용자가 "scaffolding/auth 예외" 명시 없이 비워둠. 대응: validate-plan을 후속으로 돌리면 `[Plan-file-coverage] P0` finding으로 회수됨. repair-plan에서 Adopt 결정 후 `## 4-1` 채움. 자동 차단 X — 사용자 결정.
+
+### 14-8. LSP/MCP 서버가 가용한데 plan-workitem step 11-(c)가 결과를 회수하지 못함
+원인: LSP 서버 indexing이 아직 안 끝났거나, MCP 도구 호출이 타임아웃. 대응: 본 단락은 best-effort라 fallback heuristic (step 11-(e))가 자동 적용됨. 출력에 "LSP/MCP 호출 실패 — 휴리스틱 fallback 적용" 한 줄 echo. 사용자가 LSP indexing 완료 후 `/plan-workitem` 재실행 결정 가능.
+
+### 14-9. `claude --worktree`로 호출했는데 main checkout에 worktree 폴더가 untracked로 등장
+원인: `.gitignore`에 `.claude/worktrees/` 패턴이 빠짐. 대응: 11-1-E 점검 단계로 확인 + `.gitignore`에 추가. 본 가이드 Phase 2의 3-2 단계 정합.
+
+### 14-10. 같은 wave의 task 2개를 worktree 없이 같은 working tree에서 동시 implement 시도 후 충돌
+원인: 사용자가 권장(worktree)을 무시하고 단일 worktree 다중 implement 진행. 본 ADR-038은 *권장만* 하고 강제 차단 X (D9). 대응: ADR-038 면책 단락 참조 — 빌드 캐시 / 테스트 / 외부 리소스 격리는 *프로젝트 환경 책임*. 충돌 사고를 다음 stabilize 라운드 IMPROVEMENT_GUIDE에 [관측됨] 라벨로 기록 → ADR-038의 [가설+외부실증] → [관측됨] 승격 evidence로 활용.
+
+### 14-11. `## 4-1` plan 시점 채움이 sizing self-check (5 파일 한도)와 충돌
+원인: 한 task의 `## 4-1` enumeration이 6+ 파일인데 본문에 *"scaffolding/auth 예외"* 명시 없음. 대응: 기존 sizing self-check (plan-workitem step 8) 가 *추가 분해 권장 텍스트* 출력 (자동 차단 X). 사용자가 분해 결정. 본 개선은 sizing 룰 자체를 변경하지 않음 — `## 4-1`이 plan 시점에 채워졌다는 사실만으로 sizing self-check가 더 정확히 발화 (기존엔 본문 path-like 토큰 추출이라 정확도 낮았음).
+
 ---
 
 ## 15. 본 개선의 evidence 회수 계획 (선택)
 
 ADR-022 (Ratchet — enabling [가설→실증] 승격) 정합 — 본 개선의 `[가설+외부실증]` 라벨을 `[관측됨]`으로 승격하는 계획:
 
-- 첫 fork 사용자의 첫 마일스톤 stabilize 시 `instruction improvement 후보` 단계에서 `/validate-plan` 호출 빈도 / Adopt vs Reject 비율 측정 후 IMPROVEMENT_GUIDE에 보고.
+- 첫 fork 사용자의 첫 마일스톤 stabilize 시 `instruction improvement 후보` 단계에서 다음 메트릭을 측정 후 IMPROVEMENT_GUIDE에 보고:
+  - `/validate-plan` 호출 빈도 / 라운드당 평균 호출 수.
+  - 발견 별 Adopt vs Reject 비율 (특히 `[Plan-file-coverage]` 비율).
+  - plan-workitem step 11-(c) LSP/MCP 가용 비율 + 가용 시 공유 모듈 후보 hit rate.
+  - dependency 키워드 감지로 단독 wave 분리된 task 수.
+  - `claude --worktree` 사용 비율 / wave 그룹 안의 충돌 사고 수.
 - 3+ 라운드 누적 후 본 ADR-038에 Amendment 1 박아 evidence 라벨 갱신 + (필요 시) 정책 강도 조정.
 
 **가이드 사후 처리와의 정합** — 본 §15는 §13 옵션 A(가이드 삭제)와 충돌하지 않는다: evidence 회수 절차의 *책임 자리*는 **ADR-038 `## 후속 작업` 단락**이다 (가이드가 아니라). 본 §15는 fork 사용자가 ADR-038 후속 작업 단락만 보고도 회수 절차를 재구성할 수 있도록 *상세 안내*만 제공. 가이드 삭제 후에도 ADR-038만 살아 있으면 책임 추적 가능.
