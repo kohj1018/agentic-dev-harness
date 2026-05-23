@@ -32,6 +32,8 @@
 | 문서/코드의 모순·누락·숨은 복잡도 검토 | reviewer | **단위**: 코드·문서 단위 / **종류**: 구조적 모순 + 숨은 복잡도 + 정책 drift / **제약**: 수정 권장만, 직접 수정 X. Clean Code 6항목 (ADR-006). |
 | 구현 후 회귀 위험·엣지 케이스 점검 | qa | **단위**: milestone / user-flow 단위 / **종류**: 회귀 + 엣지 케이스 + 사용자 위험 / **제약**: 보고만, Write 권한 없음 (stabilize-milestone이 받아 적음). |
 | 독립적인 여러 task 동시 처리 | 병렬 패턴 3종 (아래 단락 참조) | 가벼운 → 무거운 순으로 선택 |
+| `/plan-workitem` 산출물의 cross-LLM peer review (opt-in) | reviewer (plan surface, Plan Quality 8 차원) | 다른 세션 (Claude 새 창 / Codex 등)에서 `$validate-plan` or `/validate-plan` 호출. 임시 리뷰 파일 1개만 작성, workitem 문서 수정 X (ADR-038). |
+| Cross-review 결과 회수 + workitem 문서 수정 | planner | 원본 plan 세션에서 `/repair-plan`. 임시 리뷰 파일 회수 → 결정 → 적용 → 파일 삭제 (ADR-038). |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
 
 ## 메인 세션에서 유지할 정보
@@ -70,6 +72,13 @@
 
 선택 기준 — 가벼운 병렬: 1, 같은 파일 충돌 가능성 있는 단일 작업: 2, 작업 단위가 분명한 codebase-wide 분산 작업: 3.
 
+`/plan-workitem` 출력의 wave 그룹은 **본 표의 1·2·3과는 독립 차원**이다. 본 표는 메인 세션이 sub-agent를 한 turn 안에서 어떻게 호출하느냐(orchestration). wave 그룹은 *사용자가 여러 터미널·세션을 띄워 동일 wave의 task를 `/implement-workitem`으로 동시 진행*하는 multi-session 시나리오 (ADR-038).
+
+**Wave 그룹 병렬 실행 권장 패턴** (ADR-038 D6 본문이 SSOT):
+- `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 필수. 미명시 시 자동 이름이 붙어 task-id와 매칭 안 됨. 공식 문서: [worktrees](https://code.claude.com/docs/en/worktrees).
+- 단일 working tree 다중 implement 동시 실행 비권장. 외부 리소스 격리는 ADR-038 면책 단락 참조.
+- `-p` + `--worktree` non-interactive 조합은 자동 cleanup 안 됨 — 작업 후 `git worktree remove .claude/worktrees/T-NNN` 수동 정리.
+
 도구별 bundled batch 지원은 Claude Code의 `/batch`가 유일한 1차 출처다 (Codex 동등 기능 도입 시 본 단락 갱신). 도구별 매핑 SSOT는 [boilerplate/ADR-010](../90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md).
 
 ## 중요 원칙
@@ -84,6 +93,8 @@
 1. `/bootstrap-project` → charter + architecture + 초기 workitem 생성
 2. `/bootstrap-stack` → 스택 확정 후 자동화 설계
 3. `/plan-workitem` → milestone/feature/task 분해
+3a. (선택) `/validate-plan <workitem-id>` — 다른 세션·다른 LLM에서 cross-review. 임시 파일 작성 (ADR-038).
+3b. (선택) `/repair-plan <workitem-id>` — 원본 plan 세션에서 임시 파일 회수 + 적용 + 삭제 (ADR-038).
 4. `/implement-workitem` → task 구현
 5. `/validate-workitem` → 판정 + report 기록
 6. `/repair-workitem` (Needs Fix일 때만) → report의 실패 항목 수정

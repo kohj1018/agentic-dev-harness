@@ -19,7 +19,10 @@ A Claude Code–first, Codex CLI–compatible boilerplate that sets up the docum
 /discover-product (optional)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
   → /bootstrap-design (frontend only — fills DESIGN.md)
-  → /plan-workitem → /implement-workitem
+  → /plan-workitem
+       └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
+  → /implement-workitem (parallel by wave groups — see plan-workitem output)
+       └─ recommended: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` per task (name in `--worktree` arg)
   → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
   → /stabilize-milestone
 ```
@@ -73,8 +76,17 @@ Once your stack is decided:
 ### Step 3: Plan → Implement → Ship
 
 ```text
-# Plan + implement
+# Plan (emits parallel wave groups from task ## 9. 의존성)
 /plan-workitem [milestone or feature id]
+
+# (Optional) Cross-LLM peer review — see ADR-038
+#   In a separate terminal / fresh Claude session OR Codex:
+/validate-plan [workitem id] [--reviewer-tag <tag>]
+#   Then back in the origin plan session:
+/repair-plan [workitem id]
+
+# Implement (parallel by wave groups from /plan-workitem output)
+#   Recommended: claude --worktree per task for isolated working tree
 /implement-workitem [task id]
 /validate-workitem [task id]
 
@@ -89,15 +101,18 @@ Once your stack is decided:
 /stabilize-milestone [milestone id]
 ```
 
+> **Tip — parallel implement**: `/plan-workitem` emits "parallel waves" derived from each task's `## 9. 의존성`. Tasks in the same wave can be implemented in **separate terminal sessions / worktrees** in parallel. Recommended pattern: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — the name is passed as the `--worktree` argument (required, no default mapping to task-id). ⚠ **Plan-artifact visibility**: `claude --worktree` defaults to a fresh checkout from `origin/HEAD`, so uncommitted plan documents may be invisible inside the worktree session — commit plan artifacts first, or set `worktree.baseRef = "head"`. See [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) for full worktree + external-resource caveats.
+
 ## Using with Codex CLI (alternate entry)
 
 When you hit Claude Code's usage limit or prefer Codex:
 
 1. Run `codex` in the same repo — `AGENTS.md` is auto-loaded.
-2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
+2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`
+   - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
 4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
 
 > Note: docs in `docs/` use Claude's `/<skill-name>` slash syntax. Read these as `$<skill-name>` when working in Codex.
