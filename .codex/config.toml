@@ -3,41 +3,12 @@
 #   https://developers.openai.com/codex/config-reference
 #   https://developers.openai.com/codex/config-advanced
 
-# 모델: gpt-5.5는 config-reference의 공식 예시 값. 현행 권장 모델로 단정하지 말고
-# 사용 계정에서 실제 접근 가능한지 사전 점검(Step 0-1)에서 1회 확인 후 박는다.
 model = "gpt-5.5"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-# Boilerplate-secure permissions 프로파일 — 빌트인 :workspace와 유사하게 project root
-# write를 허용하되, .env/secrets/** 차단을 포함한 custom profile (상속 아님, 독립 정의).
-# 현 .claude/settings.json의 secrets 차단(Read deny on .env, .env.*, secrets/**)과
-# 동등한 결과를 Codex 측에 보장. 그 이상은 보안 baseline이 아니므로 제한하지 않는다.
-default_permissions = "boilerplate-secure"
+[sandbox_workspace_write]
+network_access = true
 
-[permissions.boilerplate-secure.filesystem]
-# glob 구현에 따라 "**/.env"가 루트 .env를 잡는지 애매할 수 있으므로 보수적으로 명시.
-# 보안 baseline은 중복 패턴을 감수해서라도 확실히 잡는다.
-":root" = "read"
-":tmpdir" = "write"
-
-[permissions.boilerplate-secure.filesystem.":workspace_roots"]
-"." = "write"
-".env" = "none"
-".env.*" = "none"
-"**/.env" = "none"
-"**/.env.*" = "none"
-"secrets" = "none"
-"secrets/**" = "none"
-
-[permissions.boilerplate-secure.network]
-enabled = true
-
-# glob_scan_max_depth는 의도적으로 박지 않음 — config-advanced에 default 미명시 + 작은 값을
-# 박으면 모노레포(packages/*/.env 등) 깊이에서 보안 baseline 회귀 위험. 사용자가 깊이 제어
-# 필요해진 시점에 ~/.codex/config.toml에서 override한다.
-
-# [permissions.boilerplate-secure.network] 블록은 의도적으로 두지 않음.
-# Claude side baseline(.claude/settings.json)이 네트워크를 막지 않으므로 ADR-010
-# 도구 표면 매핑 표의 "양쪽 동시 — 동일 결과" 약속을 지키려면 Codex도 막지 않아야 함.
-# 네트워크 정책은 Codex sandbox_mode와 사용자 ~/.codex/config.toml 책임.
+[windows]
+sandbox = "unelevated"
