@@ -13,3 +13,5 @@ CLAUDE.local.md
 docs/30-workitems/plans/*.tmp
 docs/40-validation/reports/*.md
 !docs/40-validation/reports/.gitkeep
+docs/40-validation/plan-reviews/*.md
+!docs/40-validation/plan-reviews/.gitkeep
