@@ -59,9 +59,9 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - `code`: Clean Code 6 + Scope Discipline 4.
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
-- `plan`: Plan Quality 8 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
+- `plan`: Plan Quality 10 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
 
-## Plan Quality 8 차원 (plan surface 전용 — ADR-038)
+## Plan Quality 10 차원 (plan surface 전용 — ADR-038 + ADR-027 amend 1)
 
 `/validate-plan` 호출 시 본 agent가 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
 
@@ -73,8 +73,12 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요). (P1 권장)
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
+9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027 amend 1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). (P1 권장)
+10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027 amend 1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
 
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
+라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
+라벨링 예: `P0 [Plan-arch-iface] T-008:AC-1 — response 형식 { status: "ok", payload } 이 ARCH ## 7-1 envelope { data, error, meta } 와 불일치`.
 
 Write/Edit 사용 범위:
 - `/review-doc` 호출 시 → `docs/40-validation/IMPROVEMENT_GUIDE.md` 단일 파일만 허용 (review-doc body 의 *Write 범위 제한* 단락 정합).

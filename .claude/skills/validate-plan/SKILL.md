@@ -29,6 +29,8 @@ context-pack: minimal
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md` (`## 5. 비목표`, `## 7. 제약 조건` 참조)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` (`## 3-1. 레이어 경계` 참조 — *부재* 시 [Plan-arch] 차원 skip + 리뷰 파일 "핵심 관찰"에 그 사실 명시)
+- `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` (해당 스택 한정 — [Plan-arch-iface] 참조). *해당 sub-section 부재 시 본 차원 skip*.
+- `docs/20-system/DESIGN.md` (UI 프로젝트 한정 — [Plan-design] 참조). *파일 부재 시 본 차원 skip + "핵심 관찰" 에 명시*.
 - 입력 ID에 해당하는 workitem 문서 + **모든 하위 문서**:
   - `M1` 입력 → `docs/30-workitems/milestones/M1-*.md` + 본 마일스톤 산하 feature/task 전체
   - `F-001` 입력 → 해당 feature 문서 + 본 feature 산하 task 전체
@@ -42,7 +44,7 @@ context-pack: minimal
 
 **큰 milestone budget 가이드 (ADR-019 minimal/JIT 정합)**: 산하 task 합산 ≥10개면 다음 순서로 budget — (a) feature 문서 전체 + 각 task `## 6 AC` 섹션만 1차 회수, (b) 그 결과로 P0 의심 task 후보를 좁힌 뒤 (c) 후보 task 본문 전체를 깊게 읽는다. 모든 task 본문을 사전 fork-load 금지.
 
-검토 차원 (8 dimensions — reviewer.md의 *Plan Quality 8 차원* 정합):
+검토 차원 (10 dimensions — reviewer.md의 *Plan Quality 10 차원* 정합 — ADR-027 amend 1):
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반. P0 권장.
 2. **[Plan-sizing]** — 1 task = 1 RGR 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). P1 권장.
 3. **[Plan-AC-form]** — Given-When-Then 형식 부재 / 강력 금지 verb ("works"/"looks good"/"is correct"/"is fine"). P0 권장.
@@ -51,6 +53,8 @@ context-pack: minimal
 6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장. P1 권장.
 7. **[Plan-arch]** — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. *`## 3-1` 섹션 자체가 부재한 fork*에서는 본 차원 *skip* + "핵심 관찰"에 "[Plan-arch] skipped: `## 3-1` 부재" 한 줄 명시. P1 권장.
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` / feature `## 11. 관련 문서` link 누락·깨짐. P2 권장.
+9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / 8 상태 매트릭스 누락. P1 권장.
+10. **[Plan-arch-iface]** (해당 스택 한정 — 7-x sub-section 부재 시 skip) — ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 기존 결정 위반 / Don'ts 위반. P0 권장.
 
 판정 규칙 (review verdict — 워크플로우 차단 아님):
 - **NEEDS_CHANGES** — P0 finding 1개 이상.
@@ -98,6 +102,8 @@ context-pack: minimal
 | Plan-dep | 0 | 0 | 0 |
 | Plan-arch | 0 | 0 | 0 |
 | Plan-doc-link | 0 | 0 | 1 |
+| Plan-design | 0 | 0 | 0 |
+| Plan-arch-iface | 0 | 0 | 0 |
 
 ## 핵심 관찰 (3개 이내)
 - ...
