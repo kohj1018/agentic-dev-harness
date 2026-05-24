@@ -16,7 +16,15 @@ context-pack: minimal
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
-- `docs/20-system/ARCHITECTURE_OVERVIEW.md`
+- `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
+- `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. **UI 판정은 다중 신호 우선순위 (baseline placeholder 존재 회피)**:
+  1. DESIGN.md 부재 → 비-UI 확정 (fork 직후 삭제 권장 따른 경우, ADR-027 결정 #1·#15 정합) → DESIGN read skip + skip 사유 echo.
+  2. DESIGN.md 존재 + `## 0. Status` ≠ `draft` (예: `accepted` / `living`) → UI 확정 → 본문 회수 + cross-check 활성.
+  3. DESIGN.md 존재 + `## 0. Status` == `draft` → *추가 신호* 점검:
+     - ARCH `## 7-4. 프론트 결정` sub-section 활성 (본문 비어 있지 않음)
+     - 입력 workitem 산하 task 중 `## 7. 관련 문서` 에 `Design:` link 또는 본문에 UI 키워드 (`component`, `컴포넌트`, `page`, `페이지`, `screen`, `view`, `UI`, `frontend`, `프론트`) 등장
+     - 위 신호 *1개 이상* 발견 → *UI 의심* → warning 1줄 echo (`DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 미실행 의심. plan 진행은 허용하지만 시각 결정이 즉흥적이 됨`) + 본문 회수 + cross-check 활성.
+     - 신호 0개 → silent skip (false UI 판정 회피).
 - 입력 ID에 해당하는 상위 workitem 문서(있으면)
 - `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md`
 
@@ -70,6 +78,8 @@ feature 분해 시 12 main sections + `## 7-1` mapping subsection 모두 채운�
 2. 부재 → `## 7 FAC` 본문에서 *inline 매핑 표기*(예: `- FAC-1 → T-001:AC-1`) 휴리스틱 검출.
 3. 둘 다 부재 → `Spec Gap: <feature> 매핑표 부재 — legacy 문서 보강 권장` 라벨로 IMPROVEMENT_GUIDE에 P1 기록 + 다음 plan 라운드에서 `## 7-1` 보강.
 
+feature 분해 시 `## 11. 관련 문서` 에 *해당 스택* 의 `Architecture-Iface:` link 와 (UI 프로젝트 한정) `Design:` link 를 채운다. TEMPLATE 의 비해당 스택 줄은 *삭제* (placeholder 잔존 X — drift 차단).
+
 ## --fast 모드
 prototype은 `## 3 핵심 시나리오` / `## 7 FAC` / `## 8 NFR` 신설 3섹션을 1줄씩만 채워도 OK ("해당 없음" / "M2 이후 검토").
 YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등 정신.
@@ -104,6 +114,12 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   ```
 - 핵심 가정
 - 남은 미결정 사항
+- **인터페이스·디자인 cross-check 결과** (정합성 self-check 결과 요약):
+  ```
+  DESIGN cross-check: 컴포넌트 중복 N건, raw hex K건, 상태 매트릭스 누락 M건
+  ARCH 7-x cross-check: 7-1 위반 N건, 7-3 위반 K건, ...
+  ```
+  (UI/스택 비해당 시 "skip" 명시)
 - **병렬 실행 그룹 (parallel waves)** — task `## 9. 의존성` 기반 위상 정렬 (자유 텍스트 dep는 best-effort). 다음 형식으로 echo:
   ```
   Wave 1 (병렬 가능): T-001, T-002, T-003
@@ -125,16 +141,58 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 - Phase 4.1의 sizing 휴리스틱(1 RGR / AC 3 / 변경 5)이 monorepo·백엔드에서 깨지는 문제는 *외부실증*(Nx/Turbo 패턴) 기반. [관측됨] 데이터는 Phase 12 Round 2에서 회수.
 - **SSOT 노트**: 본 sizing 가이드는 본 skill 본문이 SSOT다. 운영 가이드라 ADR로 박지 않음 — 추적성은 ADR-026 Amendment 1에서 명시.
 
-## 정합성 self-check (분해 직후 1회 실행, ADR-026 amend 1)
+## 정합성 self-check (분해 직후 1회 실행, ADR-026 amend 1 + ADR-027 amend 1)
 - charter `## 5. 비목표` 단락 키워드와 분해된 feature/task를 매칭. 위반 의심 시 출력의 "남은 미결정 사항"에 명시.
 - feature 범위가 상위 milestone `## 3. 포함되는 기능`에 매핑되는지 확인. 매핑 실패 시 동일 위치에 명시.
 
+### Task type prefilter (context bloat 회피 — 본 prefilter 결과로 아래 cross-check sub-항목 적용 여부 결정)
+
+각 분해된 task 본문 (`## 2. 작업 범위` + `## 3. 구현 항목`) 에서 다음 키워드 매칭으로 task type 자동 분류 — 일치 시만 해당 cross-check 활성. 매칭 안 되면 본 task 의 UI/ARCH cross-check 모두 skip.
+
+- **UI task 신호**: `component`, `컴포넌트`, `page`, `페이지`, `screen`, `view`, `route` (라우팅 결정 시 7-4 도 함께), `UI`, `frontend`, `프론트`, `style`, `theme`, JSX/TSX 파일 path
+- **API task 신호**: `endpoint`, `API`, `route`, `handler`, `controller`, `OpenAPI`, `REST`, `GraphQL`, `7-1`
+- **CLI task 신호**: `command`, `CLI`, `argv`, `subcommand`, `flag`, `7-2`
+- **백엔드 task 신호**: `migration`, `schema`, `auth`, `인증`, `transaction`, `트랜잭션`, `cache`, `queue`, `worker`, `7-3`
+
+> Prefilter 한계 명시: 본 키워드 매칭은 *best-effort*. false positive/negative 가능 — prefilter 가 놓친 task 는 **validate-workitem (validator) 의 CHECK 단계가 catch** (2-layer defense — plan prefilter 가 1차, validator 가 2차). *implement/builder 가 catch 하지 않는다* — implement 는 EXECUTE 전용 (ADR-027 amend 1 책임 분배).
+
+### UI 프로젝트 + UI task 한정 — DESIGN.md cross-check
+(DESIGN.md 부재 또는 본 task 가 UI 신호 미매칭 시 본 단락 skip + skip 사유 echo):
+- 분해된 task 가 *새 컴포넌트* 를 신설하는가? 중복/재사용 검사는 **두 출처 모두** 대조 (인벤토리 stale 대비 — planner 는 Grep 권한 보유):
+  - (a) DESIGN.md `## 7. Components` 인벤토리 (설계 레지스트리)
+  - (b) 실제 `src/components/` · `app/components/` · `components/` 디렉터리의 기존 컴포넌트 파일명 (코드 실측 — DESIGN.md 미등록 컴포넌트도 포착)
+  - 둘 중 *어느 쪽이라도* 기능 유사 컴포넌트 발견 시 "남은 미결정 사항" 에 `- 컴포넌트 중복 의심: T-NNN 의 X ↔ <DESIGN.md ## 7 의 Y / src/components/Z.tsx>. 재사용 검토 권장` 명시. (b) 에만 있고 (a) 에 없으면 *인벤토리 stale* → `+ DESIGN.md ## 7 등록 보강` 도 권장.
+- AC 본문 또는 task `## 3. 구현 항목` 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}` 패턴) 가 직접 박혀 있는가? 발견 시 "남은 미결정 사항" 에 `- raw hex 검출: T-NNN AC-N — DESIGN.md ## 2 의 token 으로 교체 권장` 명시.
+- **8 상태 매트릭스 점검은 *task 의 use-case 해당 상태* 한정** (DESIGN.md `## 7` 의 *전체* 8 상태 설계는 별도 — reviewer Design Consistency `[Design-state]` 책임). 본 self-check 는 *task 본문이 명시한 상호작용* (예: hover/disabled 가 use-case 에 등장하는데 AC 에서 언급 누락) 만 점검. 누락 상태가 있으면 "남은 미결정 사항" 에 `- use-case 상태 누락: T-NNN — <상태> 가 task 본문에 등장하지만 AC 미언급` 명시. 자동 차단 X.
+
+### API/CLI/백엔드/프론트 스택 + 해당 type task 한정 — ARCH 7-x cross-check
+(해당 sub-section 부재 또는 본 task 가 해당 type 신호 미매칭 시 본 단락 skip):
+- API task: `## 7-1` envelope/error 컨벤션 외 응답 형식을 박는가? 분해된 task `## 3. 구현 항목` 본문에 envelope 형식 (예: `{ data, error, meta }`) 외 형식 키워드 (`status: ok`, `result:` 등) 등장 시 명시.
+- CLI task: `## 7-2` 출력 포맷 컨벤션 외 형식을 박는가? `## 3` 본문에 명시된 출력 형식이 7-2 의 text/JSON/table 모드 외 형식인지 점검.
+- 백엔드 task: `## 7-3` 결정 (DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) 과 어긋나는 새 결정을 즉흥 도입하는가? 도입 시 명시.
+- 프론트 task: `## 7-4` 결정 (라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 과 어긋나는 새 결정을 즉흥 도입하는가? 도입 시 명시.
+
+### 신규 인터페이스 요소 → task `## 3. 구현 항목` 에 *등록 line item* authoring (builder 가 독립 판단 없이 실행하도록)
+
+위 cross-check 에서 *정당한 신규 요소* (중복 아닌 새 컴포넌트 / 신규 endpoint / 신규 error code / 신규 출력 모드) 가 필요하다고 판단되면, 해당 task `## 3. 구현 항목` 에 **등록 step 을 명시적 line item 으로 박는다**:
+- 예: `- 신규 IconButton 컴포넌트 생성 + DESIGN.md ## 7. Components 에 한 줄 등록 (8 상태 매트릭스 설계 포함)`
+- 예: `- 신규 error code USER_LOCKED 도입 + ARCH ## 7-1 error 레지스트리 등록`
+- 예: `- 신규 CLI 출력 모드 --json 추가 + ARCH ## 7-2 출력 포맷 등록`
+
+이로써 등록 *결정* 은 plan 이 authoring 하고, builder 는 task 스펙을 *기계적으로 실행* — 등록 책임이 executor 의 독립 판단에 박히지 않는다 (ADR-027 amend 1 책임 분배 / ADR-005 정합). validator 는 본 line item 이 실행됐는지 점검 (`/validate-workitem` + `validator.md` CHECK 단계).
+
+**진짜 새 *primitive*** (Button/Input/Card 외 기반 컴포넌트) 는 task line item 이 아니라 architect 또는 `/bootstrap-design` 라운드 권장 (아래 `## architect 호출 권장 신호` #6 정합) — plan 은 그 권장만 출력.
+
+**모두 자동 차단 X — *권장 텍스트만* 출력** (ADR-007 책임 경계 정합).
+
 ## architect 호출 권장 신호 (감지 시 텍스트 제안만, 자동 호출 금지 — ADR-007)
-다음 4 신호 중 하나라도 감지되면 출력 마지막에 `architect 호출 권장: <이유>` 1줄 추가:
+다음 6 신호 중 하나라도 감지되면 출력 마지막에 `architect 호출 권장: <이유>` 1줄 추가:
 1. 새 모듈 디렉터리 생성 (`src/<new>/` 또는 동등 경로).
 2. charter `## 7. 제약 조건`에 없는 새 외부 의존 (npm/pip/cargo) 추가.
 3. ARCHITECTURE_OVERVIEW.md `## 3-1. 레이어 경계` 변경.
 4. "패턴 변경" / "새 boundary" / "도메인 경계" 키워드 등장.
+5. **ARCHITECTURE_OVERVIEW.md `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 *기존 결정* 변경 또는 신규 항목 추가 의심** (예: API versioning 정책 변경 / 인증 방식 변경 / 라우팅 전략 변경). 인터페이스 결정 책임 분배 (ADR-027) 정합.
+6. **DESIGN.md `## 7. Components` 인벤토리에 *새 primitive* 추가 의심** (예: 기존 Button/Input/Card 외 패턴 신설). 추가는 architect 또는 별도 `/bootstrap-design` 라운드 권장.
 
 ## Cross-review hook (ADR-038)
 본 skill 호출 후 plan 품질에 확신이 부족하거나 다중 모델 관점을 원하면:
