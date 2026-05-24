@@ -18,8 +18,10 @@ context-pack: minimal
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다.
 2. 필요하면 상위 feature/milestone/architecture 문서를 읽는다.
-3. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)를 회수한다.
-4. `## 6-2. TDD opt-out`을 점검한다 — 사유와 follow-up이 모두 있으면 opt-out 모드로 진행, 둘 중 하나만 비어 있으면 형식 위반으로 표시하고 종료(사용자에게 보강 요청).
+3. **task `## 7. 관련 문서` 의 `Design:` / `Architecture-Iface:` link 가 있으면 그 sub-section (예: `DESIGN.md ## 7 Components`, `ARCH ## 7-1`) 만 회수** — *plan 이 박은 결정을 충실히 실행하기 위함* (독립 디자인 판단 X — EXECUTE 전용). 전체 fork-load 금지 (ADR-019 minimal). link 없으면 본 step skip.
+4. **task `## 3. 구현 항목` 에 *등록 line item* (예: `+ DESIGN.md ## 7 등록`, `+ ARCH ## 7-1 error 레지스트리 등록`) 이 있으면 구현과 *동일 commit* 에 그 등록을 수행** — plan 이 authoring 한 스펙의 기계적 실행 (plan-workitem 정합). line item 없으면 등록 안 함 (builder 가 등록 여부를 *독립 판단하지 않는다*).
+5. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)를 회수한다.
+6. `## 6-2. TDD opt-out`을 점검한다 — 사유와 follow-up이 모두 있으면 opt-out 모드로 진행, 둘 중 하나만 비어 있으면 형식 위반으로 표시하고 종료(사용자에게 보강 요청).
 
 opt-out 흐름 (사유와 follow-up 모두 채워졌을 때만):
 - 테스트 작성을 건너뛴다.
