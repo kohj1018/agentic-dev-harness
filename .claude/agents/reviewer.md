@@ -55,11 +55,12 @@ reviewer를 호출하면 다음 4 카테고리의 *문서 일관성 위반*을 �
 
 reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link to ADR-XX`.
 
-**호출 surface 명시**: 본 agent가 호출될 때 입력에 *"review surface: code | doc | mixed | plan"*를 명시받는다. surface에 따라 적용 차원:
+**호출 surface 명시**: 본 agent가 호출될 때 입력에 *"review surface: code | doc | mixed | plan | design"*를 명시받는다. surface에 따라 적용 차원:
 - `code`: Clean Code 6 + Scope Discipline 4.
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
 - `plan`: Plan Quality 10 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
+- `design`: Design Consistency 4 (아래 별도 섹션 — ADR-027 amend 1). UI 프로젝트에서 stabilize-milestone 이 호출.
 
 ## Plan Quality 10 차원 (plan surface 전용 — ADR-038 + ADR-027 amend 1)
 
@@ -79,6 +80,27 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
 라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
 라벨링 예: `P0 [Plan-arch-iface] T-008:AC-1 — response 형식 { status: "ok", payload } 이 ARCH ## 7-1 envelope { data, error, meta } 와 불일치`.
+
+## Design Consistency 4 차원 (design surface 전용 — ADR-027 amend 1)
+
+stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
+
+1. **[Design-token]** — raw hex / 토큰 외 색 사용 / typography family/scale 외 사용. (P1)
+2. **[Design-inventory]** — DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트 신설 / 등록 누락. (P1)
+3. **[Design-state]** — **DESIGN.md `## 7` 본문에 등록된 컴포넌트 정의** 가 default/hover/active/focus/disabled/loading/error/empty 8 상태 매트릭스를 *모두 설계* 했는가 (문서 설계 기준 — task 구현이 8 상태 모두 구현했는지는 별도 차원). 누락 발견 시 `P1 [Design-state] DESIGN.md ## 7 의 <component> 정의에 <상태> 누락`. *task 구현 단계의 use-case 한정 상태 검증* 은 validator (validate-workitem) 책임 — 본 차원과 책임 분리. (P1)
+4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반 (예: primary CTA 2+ / color 5색 초과 / motion `prefers-reduced-motion` 미분기). (P0)
+
+**8 상태 매트릭스 책임 분배**:
+| 단계 | 책임 surface | 점검 기준 |
+|------|------------|----------|
+| plan-workitem self-check | planner | task 본문 use-case 에 등장하는 상태가 AC 에 누락? |
+| validate-plan [Plan-design] | reviewer (plan surface) | 동일 — use-case 한정 |
+| validate-workitem | validator | task 구현이 use-case 해당 상태 코드 구현? |
+| stabilize-milestone design surface [Design-state] | reviewer (design surface) | DESIGN.md `## 7` 본문에 *컴포넌트 정의가 8 상태 전체* 설계됐는가? |
+
+**근거**: DESIGN.md 는 *설계 문서* (8 상태 전 설계가 컴포넌트 인벤토리의 책임). task 는 *구현 단위* (1 task 1 RGR 사이클 — 8 상태 전부 1 task 강제는 ADR-026 sizing 위반). 두 surface 가 다른 기준으로 점검해야 정합.
+
+라벨링 예: `P0 [Design-donts] components/Hero.tsx:42 — primary CTA 2개 (DESIGN.md ## 9 위반)`.
 
 Write/Edit 사용 범위:
 - `/review-doc` 호출 시 → `docs/40-validation/IMPROVEMENT_GUIDE.md` 단일 파일만 허용 (review-doc body 의 *Write 범위 제한* 단락 정합).
