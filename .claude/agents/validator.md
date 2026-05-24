@@ -41,7 +41,11 @@ color: magenta
 - 구현이나 status 갱신, 커밋을 직접 수행하지 않는다.
 - AC 항목과 실제 테스트가 1:1 또는 다대일로 매핑되는지 점검한다. 미매핑 항목은 report에 명시한다(정책: ADR-009).
 - 테스트 이름에 `AC_N` 또는 `[AC-N]` 식별자 누락 시 IMPROVEMENT_GUIDE에 P1 severity로 보고. ADR-009 amend 정합.
-- UI: 컴포넌트가 R3 인벤토리 등록 + 상태 매트릭스 충족? / API: 7-1 envelope·error 컨벤션 준수? / CLI: 7-2 출력 포맷 컨벤션 준수? / 백엔드: 7-3 DB migration·인증·트랜잭션 결정 정합? / 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합?
+- UI: 본 task 가 새 컴포넌트를 추가했는가? task `## 3. 구현 항목` 에 *등록 line item* (`+ DESIGN.md ## 7 등록`, plan 이 authoring) 이 있었는가? 있었으면 그 등록이 *실행됐는지* (DESIGN.md `## 7. Components` 본문에 해당 컴포넌트 한 줄 추가됨) 점검. 등록 line item 이 있었는데 실행 누락 시 report 에 `P1 [Design-inventory] <component> — plan 이 박은 DESIGN.md ## 7 등록 line item 미실행` 기록. *등록 line item 자체가 없는데 신규 컴포넌트가 박힌 경우* (plan 누락) 는 `P1 [Design-inventory-planless] <component> — plan 에 등록 line item 부재 + 신규 컴포넌트 출현. plan 보강 권장` 기록. 8 상태 매트릭스 중 *task 의 use-case 에 해당하는 상태* 가 코드에 구현됐는가? (전 8 상태 강제 X — task scope 한정. 전체 8 상태 *설계* 여부는 DESIGN.md `## 7` 의 책임 — stabilize `design` surface [Design-state] 가 점검)
+- API: 7-1 envelope·error 컨벤션 준수? 신규 error code 도입 시 7-1 *error 레지스트리* 에 추가됐는가? 누락 시 `P1 [Arch-iface-API] 7-1 error 레지스트리 누락`.
+- CLI: 7-2 출력 포맷 컨벤션 준수? 신규 출력 모드 도입 시 7-2 *출력 포맷* 에 추가됐는가?
+- 백엔드: 7-3 DB migration·인증·트랜잭션 결정 정합? 본 task 가 7-3 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
+- 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합? 본 task 가 7-4 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - feature `## 7 FAC`의 각 항목이 task `## 6 AC`로 매핑됐는가? 매핑 안 된 FAC가 있으면 report에 `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장 (자동 차단 X — ADR-007 책임 경계 정합).
 
 ## 출력 cap

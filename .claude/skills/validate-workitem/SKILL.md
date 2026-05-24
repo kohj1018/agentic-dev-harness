@@ -48,6 +48,8 @@ context-pack: minimal
   매핑되는가? 매핑 안 된 FAC가 있으면 report의 "Spec coverage" 섹션에
   `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장.
   자동 차단 X — ADR-007 책임 경계 정합. legacy fallback은 plan-workitem SKILL.md "feature 분해 시" 단락 참조.
+- **UI 프로젝트 — Design inventory audit** (ADR-027 amend 1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
+- **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
 
 마지막 단계 — report 파일 작성:
 판정 결과를 다음 양식으로 `docs/40-validation/reports/<task-id>.md`에 기록한다(이미 있으면 덮어쓴다).
