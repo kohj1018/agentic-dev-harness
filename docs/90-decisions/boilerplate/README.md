@@ -26,12 +26,12 @@
 | 024 | Claude Code plan 모드 lifecycle 비범위 | accepted | — | plan 모드 비의무화, plansDirectory 제거, think-before-edit 규율 확보 |
 | 025 | 외부 의존 권장 + CI workflow 권장 | accepted | — | bootstrap-stack 외부 의존 출력 + stack-guard CI 권장, 강제 X |
 | 026 | plan-workitem 강화 (TASK_TEMPLATE schema) | accepted | (+amend1: planner self-check + architect 호출 신호) | AC GWT 형식 + sizing 3한계 + 의존성 섹션 + planner self-check |
-| 027 | 인터페이스 결정 책임 분배 | accepted | — | DESIGN.md(UI) + ARCHITECTURE 7-1~7-4(API/CLI/백엔드/프론트) + /bootstrap-design 신설 |
+| 027 | 인터페이스 결정 책임 분배 | accepted | (+amend1: cross-surface enforcement 보강 — plan/validate-plan/stabilize/templates) | DESIGN.md(UI) + ARCHITECTURE 7-1~7-4(API/CLI/백엔드/프론트) + /bootstrap-design 신설 |
 | 031 | Non-web stacks out of direct support scope | accepted | — | 비웹 스택은 기본 자동화 직접 지원 범위 밖, override 경로 제공 |
 | 035 | DISCOVERY.md Living Doc + Assumption Tracker | accepted | (+amend1: Charter staleness 보고) | 13섹션 + --update 모드 + DISCOVERY=SSOT/Charter=snapshot |
 | 036 | FEATURE_TEMPLATE 12섹션 PRD 강화 | accepted | — | User Story + Feature 시나리오 + FAC + NFR 신설, boundaries 3-tier 라벨 |
 | 037 | Spec coverage self-audit | accepted | (+amend1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`) | FAC→AC 매핑 추적, Spec Gap report, 자동 차단 X |
-| 038 | Cross-LLM Plan Validation + Parallel Waves | accepted | — | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설 + wave 그룹 echo + worktree 권장 |
+| 038 | Cross-LLM Plan Validation + Parallel Waves | accepted | (+amend1: Plan Quality 8 → 10 차원 — ADR-027 amend 1 양립) | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설 + wave 그룹 echo + worktree 권장 |
 
 ## Reserved / Parked / Dropped 번호
 

@@ -71,6 +71,34 @@ accepted
 - ADR-017 시뮬레이션 Round 2에서 DESIGN.md 채움 효과 측정 (LLM 시각 결정 일관성 delta).
 - ADR-017 Round 2 결과에 따라 shadcn 채움 자동화 가치 입증 시 후속 ADR 검토.
 
+## Amendment 1 — Cross-surface enforcement 보강
+
+### 배경
+- 본 ADR 마이그레이션 항목 9 ("builder / validator self-check 각 1줄 추가") 만 박았으나, 실측 결과 *예방 surface (plan-workitem) / 회수 surface (stabilize-milestone) / peer review surface (validate-plan)* 에 DESIGN.md / ARCH 7-1~7-4 cross-reference 가 부재.
+- 결과: 채워진 SSOT 가 *fork 사용자 보호 역할*을 수행하지 못함 (단순 self-check 1줄만으로는 LLM 미스 확률 큼 + deterministic 보장 X).
+
+### 결정 (5 추가)
+16. `/plan-workitem` 의 *반드시 먼저 읽을 파일* 에 `docs/20-system/DESIGN.md` (UI 프로젝트 한정) + ARCH 의 `## 7-1` / `## 7-2` / `## 7-3` / `## 7-4` (해당 스택 한정) 명시.
+17. `/plan-workitem` 의 *정합성 self-check* 에 "프론트 task 가 DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트를 신설하는가? raw hex code 가 AC 본문에 박혔는가? API task 가 7-1 envelope/error 컨벤션 외 응답 형식을 박는가?" 추가.
+18. `/validate-plan` Plan Quality 차원 8개 → **10개로 확장**: `[Plan-design]` (UI 프로젝트 한정) + `[Plan-arch-iface]` (API/CLI/백엔드/프론트 컨벤션, 해당 스택 한정).
+19. `/stabilize-milestone` deterministic preflight 5번째 항목 추가 — UI 프로젝트: raw hex grep + 컴포넌트 인벤토리 drift + DESIGN.md draft 잔존 검사. API/CLI/백엔드/프론트 스택: 7-x Don'ts 위반 grep.
+20. `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 7. 관련 문서` + `FEATURE_TEMPLATE.md` `## 11. 관련 문서` 에 `Design:` (UI 한정) + `Architecture-Iface:` (해당 스택 한정) 자리 신설.
+
+### 마이그레이션 (결정별 적용 위치)
+- 결정 16 → `.claude/skills/plan-workitem/SKILL.md` (필수 read-list + self-check 항목)
+- 결정 17 → 위와 동일 파일
+- 결정 18 → `.claude/skills/validate-plan/SKILL.md` + `.claude/agents/reviewer.md` Plan Quality 8 → 10 차원
+- 결정 19 → `.claude/skills/stabilize-milestone/SKILL.md` `### 1.0` deterministic preflight
+- 결정 20 → 2개 템플릿 파일
+
+### Ratchet 강도 (ADR-022 정합)
+- 결정 16, 17, 20 → enabling (약, [가설] 라벨 허용)
+- 결정 18, 19 → constraint (강, [외부실증] 라벨 — ADR-027 본 ADR 의 외부 근거 5종이 충족)
+
+### 후속 작업
+- ADR-017 시뮬레이션 Round 3 — Amendment 1 적용 후 LLM 시각·인터페이스 일관성 delta 측정.
+- Amendment 1 적용 후 `.boilerplate/validation/SIMULATION_RUN.md` 에 실측 라운드 추가.
+
 ## 참고
 - ADR-006 (단순성 1순위)
 - ADR-022 (Ratchet Principle — [외부실증] 라벨)
