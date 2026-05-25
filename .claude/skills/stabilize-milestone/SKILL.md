@@ -80,7 +80,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
 MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평가로 체크 (LLM 즉흥 판정 금지 — ADR-014 *P0 검증 도구* 정합):
 
 - `모든 task status: done` → 본 milestone에 속한 모든 task 파일(`docs/30-workitems/tasks/T-*.md`)의 `## 0. Status` 값이 모두 `done`.
-- `통합 validate Pass` → 단계 3의 `validate` 명령 exit code 0. `--dry-run` 모드에서는 본 단계 안에서 1회 실행.
+- `통합 validate Pass` → `validate` 명령 exit code 0. **normal 모드**: 단계 3에서 실행되므로 본 항목 판정은 단계 3 실행 후 확정된다 (1.5 가 단계 3 보다 먼저 와도 졸업 판정은 단계 3 결과를 반영). **`--dry-run` 모드**: 단계 3을 돌지 않으므로 본 1.5 단계 안에서 `validate` 를 1회 실행한다.
 - `E2E Pass (스택 정의 시)` → 단계 3의 E2E 명령 exit code 0. E2E 미정의 스택은 *해당 없음*으로 처리(통과).
 - `AC 매핑 100%` → 본 milestone의 모든 task의 최신 `docs/40-validation/reports/<task-id>.md` `## AC ↔ 테스트 매핑` 섹션 항목이 모두 `✅`. report 부재 task는 미충족 처리.
 - `P0 severity finding 0건` → `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션 항목 수 0.
@@ -135,6 +135,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 E2E 명령이 없는 스택은 3단계에서 통합 `validate`만 돌리고 E2E는 skip한다(출력에 명시).
 
 ## Dependency hygiene
+> 실행 시점: 단계 4~5(qa·reviewer 위임)와 함께 수행하고 결과를 단계 8 최종 출력 *전에* IMPROVEMENT_GUIDE 에 기록한다 — 본 섹션이 문서 끝에 있다고 *마지막에* 실행하는 것이 아니다.
 - `npm audit` / `pip-audit` (스택별 대응) 1회 실행.
 - 결과를 IMPROVEMENT_GUIDE.md에 P1 severity로 보고.
 - 6개월 unused deps는 P2로 자동 등록.

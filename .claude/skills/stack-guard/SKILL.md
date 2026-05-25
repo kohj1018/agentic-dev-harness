@@ -136,7 +136,7 @@ R0 — 운영 환경 가정 확인:
 | Go | `gofmt -l` | `golangci-lint` | `go vet` (built-in) | `go test` | (선택) |
 | Rust | `cargo fmt --check` | `clippy` | `cargo check` | `cargo test` | (선택) |
 
-생성된 `validate` 명령은 위 5단계를 *순서대로* 묶는다. 어느 한 단계라도 빠지면 출력에 *"missing: <단계>"* 명시. e2e는 `validate:e2e` 별도 명령으로 분리 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행).
+생성된 `validate` 명령은 위 표의 **format / lint / typecheck / unit test 4단계**를 *순서대로* 묶고, **e2e는 `validate:e2e` 별도 명령으로 분리**한다 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행). 4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시.
 
 도구 선택은 **첫 fork에서 결정 + ARCHITECTURE_OVERVIEW.md `## 7-X`에 박힌다** — 이후 변경 시 [/bootstrap-stack](../bootstrap-stack/SKILL.md) 재실행 또는 수동 갱신.
 

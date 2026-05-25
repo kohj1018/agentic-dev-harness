@@ -43,4 +43,4 @@ draft
      - hierarchy는 size+weight+color 중 2축 이상
      - 한 화면 primary CTA 2개 이상 금지
      - 모든 motion에 `prefers-reduced-motion` 분기
-     - 모든 컴포넌트에 empty/loading/error 상태 정의 -->
+     - 모든 컴포넌트에 ## 7 의 8 상태 매트릭스 정의 (특히 empty/loading/error 누락 빈번) -->

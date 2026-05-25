@@ -1,7 +1,7 @@
 ---
 name: implement-workitem
 description: Implement one scoped workitem using builder, following Red→Green→Refactor TDD cycle.
-argument-hint: "[task or feature identifier] [--fast]"
+argument-hint: "[task identifier] [--fast]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
 context: fork
@@ -12,7 +12,7 @@ context-pack: minimal
 너의 역할은 지정된 workitem을 Red → Green → Refactor 3 phase 사이클로 구현하는 것이다.
 
 입력:
-- `$ARGUMENTS`에는 task ID 또는 feature ID가 들어온다.
+- `$ARGUMENTS`에는 task ID가 들어온다 (feature/milestone 분해는 `/plan-workitem` 책임 — 본 skill은 task 단위 구현 전용).
 - `--fast` 플래그가 있으면 RGR 사이클을 1회만 돌려 첫 AC만 완료하고 종료한다(prototype용).
 
 반드시 먼저 할 일:

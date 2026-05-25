@@ -1,7 +1,7 @@
 ---
 name: validate-workitem
 description: Validate whether a completed workitem implementation matches its documented scope and is ready for the next step.
-argument-hint: "[task or feature identifier]"
+argument-hint: "[task identifier]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *) Bash(git diff *) Bash(git log *) Bash(git status *)
 context: fork
@@ -14,7 +14,7 @@ context-pack: minimal
 너의 역할은 지정된 workitem 구현 결과를 검증하고 표준 양식의 report를 기록하는 것이다.
 
 입력:
-- `$ARGUMENTS`에는 task ID 또는 feature ID가 들어온다.
+- `$ARGUMENTS`에는 task ID가 들어온다 (feature 단위 검토는 `/validate-plan` 책임). FAC↔AC spec coverage 점검 시 본 task 의 상위 feature 문서를 *참조로* 읽는다.
 
 반드시 먼저 할 일:
 1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 실행하고 stdout/stderr를 수집한다. 없으면 이 단계는 건너뛴다.

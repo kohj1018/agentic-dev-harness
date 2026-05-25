@@ -18,7 +18,7 @@ context-pack: minimal
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
 ## 모드
-- `--fast`: R0(레퍼런스 1개) + R1(원칙 1줄 minimal) + R2(토큰). R3·R4 생략. R1은 *완전 생략 금지* — R2 토큰 결정의 근거가 되므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다.
+- `--fast`: R0(레퍼런스 1개) + R1(원칙 1줄 minimal) + R2(토큰) + R4(저장 — 축약 섹션). **R3(컴포넌트 인벤토리)만 생략** — R4 저장은 *생략하지 않는다* (생략하면 DESIGN.md 가 안 채워져 skill 목적 무산). R1은 *완전 생략 금지* — R2 토큰 결정의 근거가 되므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다.
 - 기본: R0~R4 모두.
 
 ## 반드시 먼저 읽을 파일

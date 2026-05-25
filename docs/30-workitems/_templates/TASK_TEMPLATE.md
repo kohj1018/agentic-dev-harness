@@ -17,6 +17,8 @@ draft
      task 문서 자체는 finalize가 자동 포함하므로 본 섹션에 적지 않는다. -->
 
 ## 5. 완료 조건
+<!-- 이 task가 끝났다고 사람이 판단하는 상위 요약 (예: "로그인 폼이 동작하고 에러를 표시한다").
+     측정 가능한 검증 단위는 ## 6 Acceptance Criteria 가 담당 — 본 섹션은 그 사람용 요약이다. -->
 
 ## 6. Acceptance Criteria
 <!-- AC는 Given-When-Then *형식 강력 권장*. measurable verb 사용:
@@ -36,11 +38,10 @@ draft
      - AC-2 → tests/auth/me.spec.ts > test_AC_2_authenticated_returns_user -->
 
 ## 6-2. TDD opt-out
-<!-- 비어 있으면 TDD 적용. 채울 때만 사유와 follow-up task 링크가 모두 있어야 한다.
-     예: spike 종료 후 T-014에서 TDD로 재구현 (사유: 외부 의존 탐색).
-     사유와 follow-up 링크 둘 중 하나라도 비면 형식 위반으로 표시된다. -->
-- 사유:
-- Follow-up task:
+<!-- 본문이 비어 있으면 TDD 적용 (기본). opt-out 하려면 아래 두 줄을 *모두* 채워 본문에 추가한다 — 하나라도 비면 형식 위반:
+     - 사유: <왜 TDD를 건너뛰는가>
+     - Follow-up task: <TDD로 재구현할 task ID>
+     예: spike 종료 후 T-014에서 TDD로 재구현 (사유: 외부 의존 탐색). -->
 
 ## 7. 관련 문서
 - Milestone: <!-- 예: [M1-foundation](../milestones/M1-foundation.md) -->

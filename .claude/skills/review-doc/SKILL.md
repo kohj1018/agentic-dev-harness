@@ -26,6 +26,8 @@ context-pack: minimal
 - 빠진 엣지 케이스
 - 본문 내용이 첫 줄의 모드 라벨(`> 모드: ...`)과 정합한지 점검.
 - mismatch 발견 시 `docs/40-validation/IMPROVEMENT_GUIDE.md`에 **P1 severity**로 보고.
+
+*아래 항목은 검토 대상 문서가 그 항목의 대상일 때만 적용한다* (review-doc 은 단일 문서 도구 — 예: AGENTS.md 검토 시 길이 점검 / boilerplate README 검토 시 표 점검 / `docs/00-meta/` 문서 검토 시 파일 수 점검. repo 전체 상시 감사는 `/stabilize-milestone` deterministic preflight 책임 — stabilize-milestone SKILL "review-doc 책임 분담" 단락 정합):
 - AGENTS.md 길이 점검: 100줄 초과 시 IMPROVEMENT_GUIDE에 P0 severity로 보고. 80~100줄 사이는 P1.
 - `docs/90-decisions/boilerplate/README.md`의 *Reserved / Parked / Dropped 번호* 표가 git log의 실제 누락 번호와 일치하는지 점검. 새 dropped 번호 발견 시 P2 보고.
 - `docs/90-decisions/boilerplate/README.md` ADR 표의 *Amendments* 컬럼이 각 ADR 본문의 실제 `## Amendment N` 단락과 일치하는지 점검. 누락 발견 시 P1 보고.
