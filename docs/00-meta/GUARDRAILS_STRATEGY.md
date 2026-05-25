@@ -76,9 +76,9 @@
   실제 자동화는 프로젝트 상황에 맞게 생성하는 편이 유지보수에 유리하다.
 
 ## PostToolUse hook 매뉴얼 등록 절차
-> 본 단락은 STACK_SETUP_PLAN_TEMPLATE.md에서 이관됨 (I-18, IMPROVE-LIST). hook 자동 등록 정책의 SSOT는 본 파일.
+> 본 단락은 STACK_SETUP_PLAN_TEMPLATE.md에서 이관됨. hook 자동 등록 정책의 SSOT는 본 파일.
 
-현재 단계에서는 매뉴얼 등록. 추후 자동화 예정(GUARDRAILS_STRATEGY.md 참조).
+현재 단계에서는 매뉴얼 등록. 추후 자동화 예정.
 
 1. `.claude/settings.local.json` 생성 또는 수정.
 
@@ -123,4 +123,4 @@
 >
 > **Schema 주의 — `if` 필드 미사용**: Anthropic [hooks docs](https://code.claude.com/docs/en/hooks) 에 따르면 hook 의 `if` 필드는 *정확히 하나의 permission rule* 만 받으며 `|`/`&&`/list 같은 결합 syntax 를 지원하지 않는다. 따라서 본 예시는 *`if` 없이 matcher 만 사용 + verify 스크립트 내부 확장자 필터링* 패턴으로 박는다. fork 사용자가 *Edit / Write 별로 다른 동작이 필요* 하면 **두 hook handler 로 분리** 한다 (`matcher: "Edit"` 1개 + `matcher: "Write"` 1개 — 각자 자기 `if` 단일 rule).
 
-2. 주의: `defaultMode: "acceptEdits"` 환경에서 PostToolUse hook 은 매 Write/Edit 마다 실행 → 비용 폭증 위험. 로컬에서만 활성화 권장. (Step 19 의 `async`/`asyncRewake` 옵션 패턴으로 비용 폭증 완화 가능 — `asyncRewake` 는 exit code 2 에서 Claude 를 깨운다.)
+2. 주의: `defaultMode: "acceptEdits"` 환경에서 PostToolUse hook 은 매 Write/Edit 마다 실행 → 비용 폭증 위험. 로컬에서만 활성화 권장. (본 파일 `## /stack-guard 1단계 산출물 범위` 의 `async`/`asyncRewake` 옵션 패턴으로 비용 폭증 완화 가능 — `asyncRewake` 는 exit code 2 에서 Claude 를 깨운다.)

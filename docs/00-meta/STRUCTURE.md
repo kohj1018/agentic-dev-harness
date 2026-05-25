@@ -26,6 +26,7 @@
 |--------|------|-----------|--------------|----------|
 | project charter | `docs/10-charter/PROJECT_CHARTER.md` | `/bootstrap-project` | Living | baseline |
 | discovery | `docs/10-charter/DISCOVERY.md` | `/discover-product` | Living | generated |
+| discovery template | `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | architecture overview | `docs/20-system/ARCHITECTURE_OVERVIEW.md` | `/bootstrap-project`, `/bootstrap-stack` | Living | baseline |
 | design (UI only) | `docs/20-system/DESIGN.md` | `/bootstrap-design` (UI 스택 포함 시) | Living | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (15종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/stack-guard/review-doc/boilerplate-context) | 수동 (boilerplate 제공) | Reference | baseline |
@@ -33,6 +34,7 @@
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-workitem` | Living | generated |
 | feature | `docs/30-workitems/features/F-*-*.md` | `/plan-workitem` | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
+| workitem 템플릿 | `docs/30-workitems/_templates/{MILESTONE,FEATURE,TASK}_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` | ephemeral | generated |
 | plan review | `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` | `/validate-plan` (다른 세션·다른 LLM) | ephemeral | generated |
 | qa findings | `docs/40-validation/QA_FINDINGS.md` | `/stabilize-milestone` (mile별 누적) | Record | baseline |
@@ -71,6 +73,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | ADR 전용 상태값 (`proposed`/`accepted`/`superseded`/`deprecated`) | `docs/90-decisions/boilerplate/_ADR_GUIDE.md` |
 | 워크플로우 단계 흐름 (한 줄 그림) | `docs/00-meta/WORKFLOW.md` |
 | Guardrail 원칙 | `docs/00-meta/GUARDRAILS_STRATEGY.md` |
+| 도메인 용어 정의 | `docs/00-meta/GLOSSARY.md` |
 | 새 프로젝트 시작 절차 (체크리스트) | `docs/00-meta/PROJECT_START_CHECKLIST.md` |
 | Bootstrap 입력 예시 | `docs/00-meta/PROJECT_START_CHECKLIST.md` (1단계 예시 흡수) |
 | 모델 별칭 정책 | `docs/90-decisions/boilerplate/ADR-004-model-alias-policy.md` |
@@ -93,8 +96,8 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | DISCOVERY=SSOT / Charter=snapshot | [ADR-035](../90-decisions/boilerplate/ADR-035-continuous-discovery.md) (정책 SSOT). 적용 surface: `AGENTS.md` 1줄 + `PROJECT_CHARTER.md` 본문 끝 안내 + `/stabilize-milestone` step 6.5 staleness 감지. |
 | FAC↔AC 매핑표 영속 위치 | [ADR-037](../90-decisions/boilerplate/ADR-037-spec-coverage-audit.md) amend 1 (정책 SSOT). 영속 위치: 각 feature 문서의 `## 7-1` subsection — plan/validate/stabilize 가 본 위치를 cross-round 추적. |
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). 적용 surface: `docs/40-validation/QA_FINDINGS.md` / `IMPROVEMENT_GUIDE.md` 항목 스키마 — 두 파일의 evidence label 룰은 본 ADR 본문 인용. |
-| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 10 차원 (ADR-027 amend 1 로 8 → 10 확장) — 세 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
-| DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) amend 1 (정책 SSOT). 적용 surface: `.claude/skills/plan-workitem/SKILL.md` (read-list + self-check + task type prefilter + 신규 요소 등록 line-item authoring) + `.claude/skills/validate-plan/SKILL.md` (`[Plan-design]` + `[Plan-arch-iface]` 차원) + `.claude/skills/stabilize-milestone/SKILL.md` `### 1.0` 5번째 항목 (5-0 변경 파일 회수 + 5-1 UI 다중 신호 판정 포함) + `.claude/agents/reviewer.md` (Plan Quality 10 차원 + Design Consistency 4 차원 + `design` surface) + `.claude/skills/implement-workitem/SKILL.md` (task-linked 섹션 회수 + 등록 line item 실행 — *EXECUTE 전용, builder.md 변경 X*) + `.claude/skills/validate-workitem/SKILL.md` + `.claude/agents/validator.md` L44 + 2개 TEMPLATE — 본 묶음이 한 단위, ADR-027 amend 1 본문 변경 시 동기 갱신. |
+| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 10 차원 (ADR-027 amend 1 로 8 → 10 확장) + `docs/00-meta/DELEGATION_STRATEGY.md` 위임 트리거 표(차원 수 echo) — 네 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
+| DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) amend 1 (정책 SSOT). 적용 surface: `.claude/skills/plan-workitem/SKILL.md` (read-list + self-check + task type prefilter + 신규 요소 등록 line-item authoring) + `.claude/skills/validate-plan/SKILL.md` (`[Plan-design]` + `[Plan-arch-iface]` 차원) + `.claude/skills/stabilize-milestone/SKILL.md` `### 1.0` 5번째 항목 (5-0 변경 파일 회수 + 5-1 UI 다중 신호 판정 포함) + `.claude/agents/reviewer.md` (Plan Quality 10 차원 + Design Consistency 4 차원 + `design` surface) + `.claude/skills/implement-workitem/SKILL.md` (task-linked 섹션 회수 + 등록 line item 실행 — *EXECUTE 전용, builder.md 변경 X*) + `.claude/skills/validate-workitem/SKILL.md` + `.claude/agents/validator.md` L44~48 + 2개 TEMPLATE — 본 묶음이 한 단위, ADR-027 amend 1 본문 변경 시 동기 갱신. |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 context-pack / ADR-026 sizing)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

@@ -30,7 +30,7 @@
 - 후속 작업
 
 ## 새 ADR 추가 절차
-1. ADR 본문을 작성한다(번호는 가장 큰 기존 번호 + 1).
+1. ADR 본문을 작성한다(번호 정책: [상위 README 허브](../README.md) "새 ADR을 어디 박는가" 참조 — boilerplate는 100 미만, project는 ADR-100+).
 2. [README.md](README.md) 인덱스 표에 한 줄 추가(번호, 제목, 상태, 한 줄 요약).
 3. 관련 agent/skill 본문에 ADR 링크를 박는다(정책 설명을 길게 박지 않는다).
 

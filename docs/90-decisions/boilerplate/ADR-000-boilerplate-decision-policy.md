@@ -25,7 +25,7 @@ accepted
 
 ### C. fork 후 ADR 번호 정책
 - fork 사용자는 보일러플레이트 ADR 번호 범위(001~099)를 그대로 사용하지 않는다.
-- 새 프로젝트 ADR은 **ADR-100부터** 시작한다(예: `ADR-100-stack-selection.md`).
+- 새 프로젝트 ADR은 **ADR-100부터** 시작한다(예: `ADR-100-<slug>.md`. 결정 A대로 `/bootstrap-project`=ADR-100 / `/bootstrap-stack`=ADR-101).
 - 보일러플레이트 ADR을 supersede할 경우 본인 번호(ADR-100+)에서 박은 뒤 본문 첫 줄에 `Supersedes ADR-NNN (boilerplate)` 표기.
 - **ADR-002, ADR-003은 legacy reserved**: 새 project ADR은 무조건 ADR-100부터 시작한다 (Amendment 1로 정정. boilerplate/README.md *Reserved / Parked / Dropped 번호* 표 참조).
 

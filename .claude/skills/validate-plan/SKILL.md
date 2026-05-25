@@ -64,7 +64,7 @@ context-pack: minimal
 마지막 단계 — 리뷰 파일 작성:
 
 1. 출력 파일 경로: `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`
-   - 동일 tag로 재호출 시 덮어쓰기 허용.
+   - 동일 tag로 재호출 시 기존 파일은 보존하고 `<tag>-2.md`/`<tag>-3.md`로 자동 suffix 부여 (위 입력 단락 — silent overwrite 방지).
    - 다른 tag로 동시 검토 시 파일 충돌 없음.
 2. 다음 양식 그대로 작성:
 

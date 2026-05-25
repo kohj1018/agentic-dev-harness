@@ -60,7 +60,7 @@ context-pack: minimal
 - Redis: `docker-compose.yml` 권장.
 - S3: localstack 또는 MinIO 권장.
 
-사용자가 채택 시 README에 1단락 + `make dev` / `pnpm dev` 등의 통합 진입점에 wiring. 상세 절차는 [STACK_SETUP_PLAN.md](../../../docs/00-meta/STACK_SETUP_PLAN.md) 참조.
+사용자가 채택 시 README에 1단락 + `make dev` / `pnpm dev` 등의 통합 진입점에 wiring. 상세 절차는 생성될 `docs/00-meta/STACK_SETUP_PLAN.md` 참조.
 
 ## monorepo 라운드 (감지 시 자동, ADR-008 amend 1)
 1. **orchestrator 결정**: turbo / nx / pnpm workspaces only / lerna 등 1종.
