@@ -16,7 +16,7 @@ accepted
 2. ARCHITECTURE 7-1(API 컨벤션), 7-2(CLI 컨벤션), 7-3(백엔드 결정), 7-4(프론트 결정) sub-section 신설.
 3. `/bootstrap-design` skill 신설 (UI 한정, R0~R4 라운드).
 4. `/bootstrap-stack`이 7-1/7-2/7-3/7-4 채움 책임 (스택 감지 → architect 단발 sub-call).
-5. UI DESIGN.md는 Stitch DESIGN.md canonical 섹션 순서 채택 (Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Motion / Do's and Don'ts).
+5. UI DESIGN.md는 Stitch DESIGN.md canonical **8섹션** 순서 채택 (Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Do's and Don'ts) **+ Motion 확장 섹션**. 공식 spec 8섹션에 Motion 은 없으나, 본 보일러플레이트는 a11y·UX 가치(Material 3 motion)를 위해 Motion 을 Components 와 Do's and Don'ts 사이에 *의도적으로 확장*한다 (amend 2 결정 24). lint 의 section-ordering 은 canonical 8섹션의 상대 순서만 보므로 중간 확장은 위반이 아니다 — 재번호하지 않는다.
 6. 3-tier DTCG 토큰 모델 (primitive → semantic → component).
 7. 영역별 Don'ts 섹션 필수 — LLM 정확도 향상의 단일 최대 기여.
 8. **repo root `DESIGN.md` 두지 않음** — 외부 도구 자동 발견 마찰은 사용자가 root stub으로 ad-hoc 해결.

@@ -33,7 +33,8 @@ draft
      각 컴포넌트마다 상태 매트릭스 강제: default / hover / active / focus / disabled / loading / error / empty. -->
 
 ## 8. Motion
-<!-- duration/easing + `prefers-reduced-motion` 분기. Material 3 기준: 라우팅 UI 160~240ms, entrance/exit 240~360ms -->
+<!-- (보일러플레이트 확장 섹션 — Stitch 공식 canonical 8섹션 외. 근거: Material 3 motion / a11y. ADR-027 amend 2 결정 24)
+     duration/easing + `prefers-reduced-motion` 분기. Material 3 기준: 라우팅 UI 160~240ms, entrance/exit 240~360ms -->
 
 ## 9. Do's and Don'ts
 <!-- explicit prohibition (LLM 정확도 단일 최대 기여 — ADR-027 #7):
