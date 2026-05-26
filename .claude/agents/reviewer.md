@@ -74,7 +74,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요). (P1 권장)
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
-9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027 amend 1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). (P1 권장)
+9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027 amend 1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). (P1 권장)
 10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027 amend 1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
 
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
@@ -88,7 +88,7 @@ stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
 1. **[Design-token]** — raw hex / 토큰 외 색 사용 / typography family/scale 외 사용. (P1)
 2. **[Design-inventory]** — DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트 신설 / 등록 누락. (P1)
 3. **[Design-state]** — **DESIGN.md `## 7` 본문에 등록된 컴포넌트 정의** 가 default/hover/active/focus/disabled/loading/error/empty 8 상태 매트릭스를 *모두 설계* 했는가 (문서 설계 기준 — task 구현이 8 상태 모두 구현했는지는 별도 차원). 누락 발견 시 `P1 [Design-state] DESIGN.md ## 7 의 <component> 정의에 <상태> 누락`. *task 구현 단계의 use-case 한정 상태 검증* 은 validator (validate-workitem) 책임 — 본 차원과 책임 분리. (P1)
-4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반 (예: primary CTA 2+ / color 5색 초과 / motion `prefers-reduced-motion` 미분기). (P0)
+4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반. *deterministic 예*(grep 가능): primary CTA 2+ / color 5색 초과 / raw hex / motion `prefers-reduced-motion` 미분기. *LLM-판정 anti-slop 예*(ADR-027 amend 2 결정 23 — grep 어려움): 보라/violet gradient·cyan-on-dark 디폴트, nested cards, gradient heading text, glassmorphism·neon glow, 전면 center-align, 획일적 card grid 반복, icon-tile-above-heading, monospace 장식 남용, bounce/elastic easing, 장식용 sparkline. (P0) *DESIGN.md `## 9` 가 SSOT — 본 목록은 그 일부를 echo한 것이며, 프로젝트의 `## 9` 추가 룰도 함께 점검한다.*
 
 **8 상태 매트릭스 책임 분배**:
 | 단계 | 책임 surface | 점검 기준 |
