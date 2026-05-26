@@ -18,7 +18,7 @@ A Claude Code–first, Codex CLI–compatible boilerplate that sets up the docum
 ```
 /discover-product (optional)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (frontend only — fills DESIGN.md)
+  → /bootstrap-design (frontend only — fills DESIGN.md + a temporary design-preview.html for review, removed after approval)
   → /plan-workitem
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /implement-workitem (parallel by wave groups — see plan-workitem output)

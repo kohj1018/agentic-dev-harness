@@ -1,16 +1,16 @@
 ---
 name: bootstrap-design
-description: UI 시각 결정 발굴 라운드 (R0~R4). DESIGN.md 채움. UI 스택 포함 프로젝트 전용.
+description: UI 시각 결정 발굴 라운드 (R0~R5). DESIGN.md 채움. UI 스택 포함 프로젝트 전용.
 argument-hint: "[product description | --fast]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit Agent
+allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html)
 context-pack: minimal
 ---
 
 # /bootstrap-design
 
 > 모드: How-to (UI 시각 결정 라운드)
-> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R4를 직접 운전한다. R0(레퍼런스 분해)과 R1(원칙 추출)의 무거운 추론은 `Agent` 도구로 architect를 단발 sub-call로 위임. 종료 후 사용자가 `/clear` 권장 (R0~R4 인터랙션이 다음 task 컨텍스트에 잡음).
+> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R5를 직접 운전한다. R0(레퍼런스 분해)과 R1(원칙 추출)의 무거운 추론은 `Agent` 도구로 architect를 단발 sub-call로 위임. 종료 후 사용자가 `/clear` 권장 (R0~R5 인터랙션이 다음 task 컨텍스트에 잡음).
 
 ## 트리거
 - `/bootstrap-stack` 종료 출력에 "frontend 감지됨. `/bootstrap-design` 권장" 텍스트 한 줄. 사용자 발화로 시작.
@@ -18,8 +18,8 @@ context-pack: minimal
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
 ## 모드
-- `--fast`: R0(레퍼런스 1개) + R1(원칙 1줄 minimal) + R2(토큰) + R4(저장 — 축약 섹션). **R3(컴포넌트 인벤토리)만 생략** — R4 저장은 *생략하지 않는다* (생략하면 DESIGN.md 가 안 채워져 skill 목적 무산). R1은 *완전 생략 금지* — R2 토큰 결정의 근거가 되므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다.
-- 기본: R0~R4 모두.
+- `--fast`: R0(레퍼런스 1개) + R1(원칙 1줄 minimal) + R2(토큰) + R4(저장 — 축약 섹션). **R3(컴포넌트 인벤토리)·R5(시안)는 생략** — R4 저장은 *생략하지 않는다* (생략하면 DESIGN.md 가 안 채워져 skill 목적 무산). R1은 *완전 생략 금지* — R2 토큰 결정의 근거가 되므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다. `--fast`에서 시안이 필요하면 종료 후 사용자가 "design-preview 생성"을 명시 발화 → R5만 단독 수행.
+- 기본: R0~R5 모두.
 
 ## 반드시 먼저 읽을 파일
 - `docs/10-charter/PROJECT_CHARTER.md` (페르소나·시나리오)
@@ -73,14 +73,47 @@ context-pack: minimal
 - 섹션 순서를 Stitch DESIGN.md canonical에 정렬: Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Motion / Do's and Don'ts.
 - 토큰은 fenced `yaml` 블록 또는 frontmatter YAML로.
 
+## R5 — 라이브 시안(design-preview.html) 생성 + 검토 루프 + 정리 (ADR-027 amend 2 결정 21·22)
+
+> 목적: plan 으로 넘어가기 *전에* 사용자가 시각 방향을 눈으로 확인·확정한다. DESIGN.md 가 *SSOT*, preview 는 *검토용 임시 파일* (ADR-005 — preview 직접 편집 금지 / 검토 완료 후 삭제).
+
+### R5-1. 생성
+- `docs/20-system/DESIGN.md` 의 토큰·컴포넌트만으로 **단일 자기완결 HTML** `docs/20-system/design-preview.html` 를 생성한다 (빌드·외부 의존 0 — CSS 는 `<style>` 인라인).
+- DESIGN.md `## 2~6` 토큰은 `:root { --token: value; }` CSS custom property 로 옮기고, 모든 요소가 *그 변수만* 참조하게 한다 (DESIGN.md 가 SSOT 임이 구조로 드러나도록 — raw hex 직접 사용 금지).
+- 파일 상단에 GENERATED 헤더 주석(아래) 필수:
+  ```html
+  <!--
+    GENERATED FROM docs/20-system/DESIGN.md — 검토용 임시 파일(검토 완료 시 삭제). 직접 편집 금지.
+    SSOT는 DESIGN.md. 수정은 DESIGN.md → /bootstrap-design R5 재생성.
+    생성 기준: <DESIGN.md 갱신 시각 / 생성 일시>
+  -->
+  ```
+- preview 가 포함할 섹션(순서):
+  1. **Tokens** — color(primitive/semantic/component) swatch + hex + 텍스트 대비비 표시 / typography scale(각 size·weight 샘플) / spacing scale(시각 막대) / radius·shadow 샘플.
+  2. **Components** — DESIGN.md `## 7` 인벤토리의 각 컴포넌트를 8 상태(default/hover/active/focus/disabled/loading/error/empty)로 나란히 렌더. hover/active/focus 는 CSS pseudo + *상태 클래스 변형*(예: `.is-hover`)을 둘 다 둬서 정적 캡처에서도 보이게 한다.
+  3. **대표 화면 2~3개** — charter `## 2.1 페르소나` / `## 3.1 핵심 시나리오` 에 기반한 실사용 맥락(예: 랜딩 hero / 입력 폼 / 카드 리스트·대시보드 패널). 토큰이 실제 화면에서 어떻게 보이는지 확인용.
+- 생성 직후 DESIGN.md `## 9 Do's and Don'ts` 위반을 self-check 해 위반 의심 항목을 출력에 보고(자동 차단 X).
+
+### R5-2. 검토 루프
+- 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html` 를 열어 확인하고 피드백 주세요."*
+- 피드백 수령 시 **반드시 DESIGN.md(SSOT) 를 먼저 수정** → 그 다음 preview 재생성. (preview 를 먼저 고치지 않는다.)
+- 사용자가 *승인*할 때까지 반복. 승인 전에는 R5-3(삭제) 와 `/plan-workitem` 권장을 수행하지 않는다.
+- `--fast` 에서는 R5 를 생략(위 `## 모드`). 사용자가 명시 요청 시 R5 만 단독 수행.
+
+### R5-3. 정리 (시안 삭제)
+- 검토가 끝나고 사용자가 시안을 *승인*하면 `docs/20-system/design-preview.html` 를 **삭제**한다. 시안은 검토용 임시 산출물이고, 확정된 시각 결정은 이미 DESIGN.md(SSOT)에 반영돼 있으며, 필요하면 언제든 R5 단독 실행으로 재생성 가능하다.
+- 삭제 후 사용자에게 "시안 검토 완료 — design-preview.html 삭제됨 (재생성: `/bootstrap-design` R5)" 1줄 안내.
+- **예외**: 사용자가 *명시적으로 보존을 요청한 경우에만* 파일을 유지하고, 이때는 `.gitignore` 에 `docs/20-system/design-preview.html` 추가를 권장(영속 commit 방지 — DESIGN.md 와의 drift 회피).
+
 ## 종료 후
-- 사용자가 `/clear` 권장. R0~R4가 인터랙션 길어지면 다음 task의 컨텍스트에 잡음.
+- 사용자가 `/clear` 권장. R0~R5가 인터랙션 길어지면 다음 task의 컨텍스트에 잡음.
 
 마지막 출력:
 - `docs/20-system/DESIGN.md` 경로
+- design-preview 시안 상태: 삭제됨(승인 후 — 기본) / 유지(보존 요청 시) / 미생성(`--fast`). 재생성: `/bootstrap-design` R5
 - 채워진 섹션 요약
 - 남은 열린 질문
-- 다음 권장 단계 (`/plan-workitem` 또는 `/implement-workitem`)
+- 다음 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-workitem` (또는 `/implement-workitem`). 미승인 상태면 "시안 검토·피드백 먼저" 안내.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

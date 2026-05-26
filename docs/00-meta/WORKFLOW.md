@@ -8,6 +8,7 @@
 ## 2. 시스템 설계
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`에서 시스템 구조를 정리한다.
 - `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다.
+- UI 프로젝트는 `/bootstrap-design` R5가 `docs/20-system/design-preview.html`(DESIGN.md 파생 뷰, 검토용 임시 파일)을 생성한다. **사용자가 시안을 브라우저로 확인·승인한 뒤** R5가 시안을 삭제하고 `/plan-workitem`으로 진행 권장 (ADR-027 amend 2 결정 21).
 - ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (amend 1 포함) SSOT.
 
 ## 3. 작업 단위 분해
