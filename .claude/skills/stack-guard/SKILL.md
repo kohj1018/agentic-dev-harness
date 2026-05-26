@@ -163,6 +163,16 @@ R0 — 운영 환경 가정 확인:
 
 `validate` 명령에 lint 단계로 통합 권장 — CI fail 처리는 프로젝트 결정.
 
+## DESIGN.md lint 권장 (UI + Node 계열 한정, ADR-027 amend 2 결정 25)
+- **조건**: `docs/20-system/DESIGN.md` 존재(UI 프로젝트) **그리고** 스택이 Node 계열(npx 사용 가능)일 때만.
+- **권장 명령** (강제 X, shared 기본값 미등록 — 사용자가 채택 시 `validate` 의 lint 단계 또는 CI에 wiring):
+  ```bash
+  npx @google/design.md lint docs/20-system/DESIGN.md
+  ```
+- 검사 항목: broken token reference / missing primary color / WCAG contrast / orphaned token / **section ordering** 등. exit 1 on error.
+- **Motion 확장 주의**: 본 보일러플레이트는 Motion 을 canonical 8섹션 외 확장으로 둔다(ADR-027 amend 2 결정 24). lint 의 section-ordering 은 canonical 8섹션 상대 순서만 보므로 통과하지만, 만약 특정 버전이 비-canonical 섹션을 경고하면 그 경고는 *무시 가능*(의도된 확장).
+- 비-Node 스택·비-UI 프로젝트는 본 항목 skip. *GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합 — npm 의존이라 shared 기본값에는 넣지 않는다.*
+
 ## CI 권장 출력 (ADR-025)
 `.github/workflows/validate.yml` 형식 권장 텍스트를 출력한다 (파일 자동 생성 X — 사용자 결정):
 ```yaml
