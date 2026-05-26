@@ -103,3 +103,41 @@ accepted
 - ADR-006 (단순성 1순위)
 - ADR-022 (Ratchet Principle — [외부실증] 라벨)
 - ADR-031 (비웹 스택 override 경로)
+
+## Amendment 2 — 디자인 워크플로우 실효 강화 (시안 / anti-slop / lint / Motion 정합)
+
+### 배경
+- amend 1이 cross-surface enforcement(예방/회수/peer review)를 박았으나, *시각 결정의 사전 확인*은 여전히 텍스트(DESIGN.md)뿐 — 사용자가 plan 전에 "실제로 어떻게 보이는지"를 확인할 자리가 없었다.
+- [외부실증] Stitch 공식 spec(google-labs-code/design.md `docs/spec.md`)의 canonical 섹션은 **8개이며 Motion을 포함하지 않는다**. 본 ADR 결정 #5가 "canonical 순서 채택"이라며 Motion을 Components/Do's 사이에 끼운 것은 *근거 있는 확장*을 canonical로 잘못 라벨링한 내부 불일치.
+- [외부실증] `@google/design.md lint` CLI(broken token ref / WCAG contrast / orphaned token / section ordering 등 7룰)가 DESIGN.md를 기계 검증한다 — 현재 deterministic 검사는 stabilize 5-2 raw hex grep 1종뿐.
+- [외부실증] Impeccable(impeccable.style)은 AI 슬롭을 37패턴(8 카테고리)으로 정의 — 현 DESIGN.md `## 9` Don'ts(~7항목)보다 훨씬 풍부.
+
+### 결정 (6 추가)
+21. **`/bootstrap-design`에 R5(라이브 시안) 신설** — DESIGN.md 토큰/컴포넌트만으로 자기완결 HTML(`docs/20-system/design-preview.html`)을 생성해 사용자가 브라우저로 확인 → 피드백 → DESIGN.md(SSOT) 수정 → preview 재생성 루프. 사용자 승인 후 **시안을 삭제(R5-3)** 하고 `/plan-workitem` 권장. **preview는 derived view** — SSOT는 DESIGN.md, preview를 직접 편집하지 않으며 검토용 임시 산출물로 취급한다 (ADR-005 정합).
+22. **산출물 `docs/20-system/design-preview.html`** 신설 (presence: conditional / lifecycle: **ephemeral** — R5-3에서 검토 완료 후 삭제, commit 안 됨). 빌드·외부 의존 0(인라인 `<style>`). 사용자가 *명시적으로 보존을 요청한 경우에만* 유지하며, 그때는 `.gitignore`에 추가 권장(DESIGN.md와의 drift 회피).
+23. **anti-slop Don'ts 강화** — Impeccable 37패턴 중 *대표 룰*을 DESIGN.md `## 9` + reviewer `[Design-donts]`(design surface)에 흡수한다. **외부 skill(impeccable/taste)을 lifecycle에 편입하지 않는다** — 룰 텍스트만 보일러플레이트 자체 규율로 흡수 (ADR-006 단순성).
+24. **Motion = 의도된 확장 명문화** — 본 ADR 결정 #5의 "canonical" 표현을 *"Stitch canonical 8섹션 + Motion 확장"*으로 정정. DESIGN.md 섹션 번호는 **재배치/재번호하지 않는다**(lint의 section-ordering은 canonical 8섹션의 상대 순서만 보므로 중간 확장 섹션은 위반이 아님 — churn 회피).
+25. **`@google/design.md lint` optional stack guardrail** — UI 프로젝트 + Node 계열일 때만 `/stack-guard`가 *권장 텍스트*로 출력. shared 기본값·강제 X (ADR-025 "권장만" 선례 / GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합).
+26. **R0 reference-evidence grounding (옵션)** — R0에서 사용자 제공 URL / MCP(lazyweb 무료·mobbin 유료) / 라이브러리(refero·getdesign.md) 중 *가용한 것*으로 레퍼런스를 근거화하고 what-to-borrow / what-to-avoid를 DESIGN.md `## 1 Overview`에 1줄씩 남긴다. **MCP 기본 연결·기본 의존 추가 X** (도구중립 ADR-010 / 계정·요금 의존).
+
+### 비결정 (영구 No)
+- Codex `bootstrap-design` wrapper 추가 — ADR-010 amend 2가 자연어 호출 4종으로 의도 분류. (R5로 사용 빈도가 크게 늘면 Phase 3에서 ADR-010 측 재평가 — 본 ADR 범위 아님.)
+- Mobbin·Lazyweb MCP 기본 연결 — 계정/요금/환경 의존, shared 기본값 부적합.
+- taste-skill·image-to-code 기본 lifecycle 편입 — 이미지생성 의존 + 산출물·승인 단계 폭증. 결정 21(R5)이 더 가볍게 동일 목적 달성.
+- DESIGN.md repo root 이동 — 본 ADR 결정 #8(의도적 `docs/20-system/` 배치) 유지. root stub은 ad-hoc.
+
+### 마이그레이션 (결정별 적용 위치)
+- 결정 21 → `.claude/skills/bootstrap-design/SKILL.md`(R5 라운드 + `--fast` + 마지막 출력), `docs/00-meta/WORKFLOW.md` §2(승인 게이트), `README.md`/`README_ko.md`(흐름)
+- 결정 22 → `docs/00-meta/STRUCTURE.md`(산출물 표 + canonical owner). *staleness 검사 불필요* — 시안은 검토 후 삭제되므로 stale 되지 않음.
+- 결정 23 → `docs/20-system/DESIGN.md` `## 9`, `.claude/agents/reviewer.md`(`[Design-donts]` + `[Plan-design]`)
+- 결정 24 → 본 ADR 결정 #5 본문 + `docs/20-system/DESIGN.md` `## 8 Motion` 헤더 노트
+- 결정 25 → `.claude/skills/stack-guard/SKILL.md`
+- 결정 26 → `.claude/skills/bootstrap-design/SKILL.md` R0
+
+### Ratchet 강도 (ADR-022 정합)
+- 결정 21, 22, 24, 25, 26 → enabling (약 — 새 라운드/산출물/문서 정정/옵션 권장이라 강제력 없음, 되돌리기 쉬움. fork 데이터 회수 후 재평가)
+- 결정 23 → constraint (강, [외부실증] Impeccable 37패턴 — reviewer `[Design-donts]` 검수 차원을 tightening)
+
+### 후속 작업
+- ADR-017 시뮬레이션 라운드에서 R5 시안 루프의 시각 결정 confidence delta 측정.
+- R5 사용 빈도 회수 후 Codex wrapper 승격 여부를 ADR-010 Phase 3에서 재평가.
