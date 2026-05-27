@@ -58,10 +58,11 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 - 핵심 가정과 열린 질문 요약
 - 다음 권장 단계 (`/bootstrap-project` — DISCOVERY.md를 입력으로 사용)
 
-## --update 모드 (mid-project pivot, ADR-035)
+## --update 모드 (mid-project pivot, ADR-035 + amend2)
 기존 DISCOVERY.md 있으면:
-- R0 (페르소나 재확인) → R1·R2 (opportunity backlog 갱신·새 pain 추가) → R3 (assumption tracker 갱신) → R4 저장.
-- **`--fast --update`**: assumption tracker만 갱신 (가장 빈번한 mid-project use case).
+- **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 리서치 노트(/research-pack 산출)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
+- R0 (페르소나 재확인) → R1·R2 (opportunity backlog 갱신·새 pain 추가) → R3 (assumption tracker 갱신 — §14 evidence로 §12 검증 결과 갱신) → R4 저장.
+- **`--fast --update`**: §12 Assumption Tracker + §14 Evidence Log만 빠르게 갱신 (가장 빈번한 mid-project use case).
 
 ## Idempotency (ADR-035)
 ID 매칭 — 기존 ID(A-1·A-2)면 *검증일·다음 행동만 갱신*, 새 가정이면 새 ID 부여. DISCOVERY.md = persona/scenario/assumption SSOT, Charter는 snapshot view.

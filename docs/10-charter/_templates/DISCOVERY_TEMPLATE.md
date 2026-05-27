@@ -56,3 +56,18 @@ draft
 | Pain | 빈도×고통 | 현재 상태 | 비고 |
 |------|---------|---------|-----|
 | (예: 협업자 권한 관리) | (가끔×하) | parked | M3 이후 재평가 |
+
+## 14. Evidence Log
+<!-- raw 증거 적재(인터뷰 요약·정량 지표 스냅샷·딥리서치). Evidence → Insight(§15) → Assumption(§12)/Opportunity(§13) 흐름의 입구.
+     /discover-product --update 가 새 증거를 회수해 §15·§12·§13을 갱신. /research-pack 노트(docs/10-charter/insights/)도 external-research 항목으로 옮긴다.
+     type: qual(인터뷰·관찰) | quant(지표·실험) | research(내부 정리) | external-research(외부 1차 자료). 정책: ADR-035 amend2. -->
+| ID  | source | date | type | finding | linked (A-N 가정 / I-N 인사이트) | confidence |
+|-----|--------|------|------|---------|------------------------------|-----------|
+| E-1 | (예: 사용자 인터뷰 5명) | 2026-05-27 | qual | (예: 3/5가 주간 갱신 안 함) | A-1 | 중 |
+
+## 15. Insight Backlog
+<!-- Evidence(§14)를 해석한 인사이트. status: open(미반영) | planned(feature 연결됨) | rejected.
+     plan-workitem이 feature/task 생성 시 본 ID를 연결한다. 미반영 open 인사이트는 stabilize §6.5가 보고. -->
+| ID  | insight (so-what) | 근거 evidence | status | linked feature | 비고 |
+|-----|-------------------|--------------|--------|----------------|-----|
+| I-1 | (예: 갱신 리마인더가 핵심 가치) | E-1 | open | - | M1 후보 |

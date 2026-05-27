@@ -52,3 +52,27 @@ ADR-035 *잔여 모니터링*의 *"assumption tracker 빈 결과율 보고"*를 
 
 ### 근거
 mid-project pivot 시 DISCOVERY만 갱신하고 Charter는 그대로일 경우 SSOT silent divergence 차단.
+
+## Amendment 2 (2026-05-27) — Evidence Log + Insight Backlog (데이터→인사이트→기획 루프)
+
+### 배경
+- [관측됨] DISCOVERY는 정성 발굴(persona/pain/JTBD)에서 곧장 가정으로 점프 — *raw 증거(인터뷰 원문 요약·정량 지표·딥리서치 결과)를 적재할 1급 자리*가 없었다. 검증 "결과"는 §12의 한 칸 텍스트로만 남았다.
+- [외부실증] Teresa Torres Opportunity Solution Tree / Cagan dual-track — discovery는 evidence → insight → opportunity → solution 흐름이 끊기지 않아야 한다.
+
+### 결정
+1. DISCOVERY_TEMPLATE에 **§14 Evidence Log**(source/date/type/finding/linked/confidence) + **§15 Insight Backlog**(insight/근거 evidence/status/linked feature) 신설. type: `qual | quant | research | external-research`. **append(재번호 X)** — 기존 13섹션 보존, 총 **13 → 15섹션**(ADR-035 결정 1의 "13섹션" 표현을 본 amend가 갱신).
+2. 흐름: Evidence(§14) → Insight(§15) → Assumption(§12)/Opportunity(§13) → feature(plan-workitem이 §15 ID 연결).
+3. `/discover-product --update`가 새 증거(§14 신규 행 + `docs/10-charter/insights/` 리서치 노트)를 회수해 §15·§12·§13 갱신. `--fast --update`는 §12 + §14만 빠르게 갱신.
+4. `/stabilize-milestone` §6.5 staleness에 4번째 시그널 추가: §15 Insight Backlog의 `status=open`(미반영) 인사이트 수 → 있으면 P1 보고.
+
+### 결과
+- 데이터/인터뷰/딥리서치가 같은 입구(§14)로 수렴 → 반복 루프(계측→데이터→증거→인사이트→기획)가 닫힌다.
+
+### Ratchet 강도 (ADR-022)
+- enabling(약, [관측됨]+[외부실증]) — 표는 선택적 채움, 자동 차단 X.
+
+### 적용 surface
+- `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md` §14·§15
+- `.claude/skills/discover-product/SKILL.md` --update 단락
+- `.claude/skills/stabilize-milestone/SKILL.md` §6.5
+- `.claude/skills/plan-workitem/SKILL.md` feature/task evidence 연결
