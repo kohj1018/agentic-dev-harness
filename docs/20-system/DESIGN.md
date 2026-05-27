@@ -13,6 +13,7 @@ draft
 ## 1. Overview
 <!-- 디자인 원칙 3~5개 (actionable verb. "modern/clean/sleek" 같은 모호어 금지) -->
 
+<a id="design-2-colors"></a>
 ## 2. Colors
 <!-- 3-tier 토큰 (DTCG): primitive(blue-100..900) → semantic(color/text/primary) → component(button/bg/primary) -->
 
@@ -28,14 +29,17 @@ draft
 ## 6. Shapes
 <!-- 컴포넌트 모서리 / 컨테이너 형태 -->
 
+<a id="design-7-components"></a>
 ## 7. Components
 <!-- primitives (Button/Input/Text/Icon), composites (Card/Modal/Toast), patterns (Form/EmptyState/ErrorState/LoadingState).
      각 컴포넌트마다 상태 매트릭스 강제: default / hover / active / focus / disabled / loading / error / empty. -->
 
+<a id="design-8-motion"></a>
 ## 8. Motion
 <!-- (보일러플레이트 확장 섹션 — Stitch 공식 canonical 8섹션 외. 근거: Material 3 motion / a11y. ADR-027#d24)
      duration/easing + `prefers-reduced-motion` 분기. Material 3 기준: 라우팅 UI 160~240ms, entrance/exit 240~360ms -->
 
+<a id="design-9-donts"></a>
 ## 9. Do's and Don'ts
 <!-- explicit prohibition (LLM 정확도 단일 최대 기여 — ADR-027 #7):
      [기존 규율]

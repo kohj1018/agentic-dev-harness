@@ -38,6 +38,7 @@ draft
 ## 7. 기술 선택
 <!-- 언어, 프레임워크, DB, 인프라 등 주요 기술 선택과 이유. 스택이 미정이면 미정으로 적는다. -->
 
+<a id="arch-7-1"></a>
 ## 7-1. API 컨벤션
 <!-- API 스택일 때만 채운다. /bootstrap-stack이 architect 단발 호출로 채운다.
      **비-API 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->
@@ -64,6 +65,7 @@ draft
      - endpoint 단/복수형 혼용 금지
      - 비차단 fail이 200 OK로 가는 패턴 금지 -->
 
+<a id="arch-7-2"></a>
 ## 7-2. CLI 컨벤션
 <!-- CLI 라이브러리 사용 시만 채운다. /bootstrap-stack이 architect 단발 호출로 채운다.
      **비-CLI 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->
@@ -83,6 +85,7 @@ draft
      - TTY 감지 없는 ANSI 색 금지
      - interactive prompt가 `--yes`로 우회되지 않는 패턴 금지 -->
 
+<a id="arch-7-3"></a>
 ## 7-3. 백엔드 결정
 <!-- 백엔드 스택일 때만 채운다. /bootstrap-stack이 채운다.
      **비-백엔드 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->
@@ -111,6 +114,7 @@ draft
 ### API versioning
 <!-- header / URL / breaking 정책. URL prefix(`/v1`) vs header(`Accept-Version`). -->
 
+<a id="arch-7-4"></a>
 ## 7-4. 프론트 결정
 <!-- 프론트 스택일 때만 채운다. /bootstrap-design 또는 /bootstrap-stack이 채운다.
      **비-프론트 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->

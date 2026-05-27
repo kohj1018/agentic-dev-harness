@@ -112,6 +112,7 @@
 
 **스킬 자동 호출 아님** — `/validate-workitem`이 출력하는 "다음 액션 추천"은 텍스트 제안일 뿐이다. 사용자 또는 메인 세션이 그 제안을 받아 실제 다음 skill을 발화한다.
 
+<a id="delegation-midproject"></a>
 ## Mid-project 문서 갱신 동선
 
 charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요하다. 별도 skill 없이 다음 경로를 따른다.

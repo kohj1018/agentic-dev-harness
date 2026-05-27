@@ -67,8 +67,8 @@ feature
 - Milestone: <!-- 예: [M1-foundation](../milestones/M1-foundation.md) -->
 - Feature: <!-- 예: [F-001-core-value](../features/F-001-core-value.md) -->
 - Architecture: <!-- 예: [ARCHITECTURE_OVERVIEW](../../20-system/ARCHITECTURE_OVERVIEW.md) -->
-- Architecture-Iface: <!-- 해당 스택 한정. 예: [ARCH ## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#7-1-api-컨벤션) / [## 7-4 프론트](../../20-system/ARCHITECTURE_OVERVIEW.md#7-4-프론트-결정). 비해당 스택은 줄 자체 삭제 (placeholder 잔존 X). 정책: ADR-027. -->
-- Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#7-components) / [## 2 Colors](../../20-system/DESIGN.md#2-colors). 비-UI 프로젝트는 줄 자체 삭제. -->
+- Architecture-Iface: <!-- 해당 스택 한정. 예: [ARCH ## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1) / [## 7-4 프론트](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-4). 비해당 스택은 줄 자체 삭제 (placeholder 잔존 X). 정책: ADR-027. -->
+- Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components) / [## 2 Colors](../../20-system/DESIGN.md#design-2-colors). 비-UI 프로젝트는 줄 자체 삭제. -->
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 
 ## 8. 메모

@@ -47,6 +47,7 @@
 - 테스트 도구
 - lint/typecheck 도구
 
+<a id="guardrails-stack-guard-scope"></a>
 ## /stack-guard 1단계 산출물 범위
 스택이 확정된 후 사용자가 `/stack-guard`를 발화하면 다음을 생성한다.
 
