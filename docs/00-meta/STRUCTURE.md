@@ -111,10 +111,13 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 - 작업: `T-001-xxx.md`, `T-002-xxx.md`
 - ADR: `ADR-001-xxx.md` (boilerplate, 001~099 — ADR-002/003은 legacy reserved), `ADR-100-xxx.md` (project, 100+)
 
+<a id="structure-doc-linking"></a>
 ## 문서 연결 원칙
 - 상위 문서는 하위 문서를 링크한다.
 - 기능 문서는 관련 마일스톤, 설계 문서, ADR을 링크한다.
 - QA 문서는 기능/작업 ID를 기준으로 역참조한다.
+- ADR 간 참조·anchor·fan-out(`## Surfaces`) 규약은 [ADR-045](../90-decisions/boilerplate/ADR-045-doc-reference-contract.md) SSOT.
+- cross-surface 정책의 적용 파일 목록은 해당 ADR의 `## Surfaces` 블록이 SSOT다. 아래 Canonical Owner 표는 산문으로 재나열하지 않고 그 블록을 가리킨다(ADR-045 D3).
 
 ## 절차
 
@@ -124,6 +127,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 
 ### 새 정책 도입 시
 1. ADR을 만든다 — 정책 본문은 ADR이 SSOT.
-2. `docs/90-decisions/README.md`에 한 줄 추가.
-3. 관련 agent/skill 본문에는 정책 설명 대신 ADR 링크 + 자기 영역 행동 규율(self-check 등)만 둔다.
-4. canonical owner 매핑이 변하면 본 문서의 Canonical Owner 표 갱신.
+2. `docs/90-decisions/README.md`(또는 boilerplate/project 인덱스)에 한 줄 추가.
+3. 관련 agent/skill 본문에는 정책 설명 대신 ADR 링크 + 자기 영역 행동 규율(self-check 등)만 둔다 + 자신을 고정하는 `ADR-NNN` 역참조(ADR-045 D4).
+4. 여러 파일에 동기 반영되는 정책이면 ADR 본문에 `## Surfaces` 블록을 둔다(fan-out SSOT — ADR-045 D3). Canonical Owner 표에는 산문 나열 대신 `→ ADR-NNN ## Surfaces` 포인터만 둔다.
+5. canonical owner 매핑이 변하면 본 문서의 Canonical Owner 표 갱신.
