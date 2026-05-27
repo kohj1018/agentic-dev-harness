@@ -48,5 +48,9 @@ color: magenta
 - 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합? 본 task 가 7-4 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - feature `## 7 FAC`의 각 항목이 task `## 6 AC`로 매핑됐는가? 매핑 안 된 FAC가 있으면 report에 `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장 (자동 차단 X — ADR-007 책임 경계 정합 · ADR-037 spec-coverage 정합).
 
-## 출력 cap
-반환 요약은 1,000~2,000 토큰. 긴 reasoning은 본 sub-agent 안에 둔다(메인 컨텍스트 토큰 경합 방지 — Anthropic 가이드).
+## 출력 계약 (ADR-046)
+메인 반환 요약은 signal-first: 판정/결론 1~3줄 → 핵심 항목 ≤5 → 리스크·미결정 ≤3 → 다음 액션 1개(분기 시 ≤3).
+기본 ≤ 600 토큰, 보존 항목이 많을 때만 ≤ 1,200 토큰(수치는 휴리스틱, hard cap 아님).
+*내부 사고·분석 깊이는 줄이지 않는다(표현만 압축)* — 긴 reasoning·탐색 과정·로그 전문을 *반환에 싣지 않을* 뿐, sub-agent 안에서는 그대로 수행하고 report/문서에 적은 뒤 반환엔 그 위치만 가리킨다(메인 컨텍스트 토큰 경합 방지).
+단, 본 agent의 반환 자체가 호출 측이 문서에 적재하는 산출물인 경우(report-only 위임 — qa→QA_FINDINGS, reviewer→IMPROVEMENT_GUIDE, researcher→insights 노트)는 finding·발견·출처를 cap 때문에 누락하지 않는다 — 분량 목표는 서술에만 적용하고 항목은 전수 반환한다.
+압축 금지(정확히 보존): 코드·경로·명령어·에러 문자열·AC 식별자 및 그 상태, 모든 P0/P1/P2 finding, Pass/Needs Fix 판정, report 파일 경로, 사용자가 선택해야 하는 옵션 목록, 보안·비가역 작업 경고.
