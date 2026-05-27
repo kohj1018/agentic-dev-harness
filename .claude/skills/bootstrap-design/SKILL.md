@@ -1,7 +1,7 @@
 ---
 name: bootstrap-design
 description: UI 시각 결정 발굴 라운드 (R0~R5). DESIGN.md 채움. UI 스택 포함 프로젝트 전용.
-argument-hint: "[product description | --fast]"
+argument-hint: "[product description | --fast | --update]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html)
 context-pack: minimal
