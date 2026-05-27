@@ -1,7 +1,7 @@
 ---
 name: finalize-workitem
 description: Finalize a passed workitem — set status done, stage explicit files, and commit.
-argument-hint: "[task identifier(s)] [--apply]"
+argument-hint: "[task identifier(s)] [--apply --rationale \"<why>\"]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(git add *) Bash(git status *) Bash(git diff *) Bash(git commit *) Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *)
 context: fork
@@ -14,6 +14,7 @@ context-pack: minimal
 입력:
 - `$ARGUMENTS`에는 task ID(또는 다중 ID, 예: `T-001 T-002`)가 들어온다.
 - 선택 플래그 `--apply` — task 문서 `## 4-1. 변경 예정 파일/경로`와 git 실제 변경이 어긋나도 git 실제 변경을 신뢰하고 진행(아래 5-(4) 차이 처리에서 종료하지 않는다). 단 민감 경로 가드는 그대로 적용된다.
+  - **사유 입력 (ADR-007 amend3)**: `--apply`는 사용자가 **`--rationale "<왜 4-1과 다른지>"`** 를 함께 넘겨야 한다(`$ARGUMENTS` 파싱). finalize는 이 사유를 커밋 body의 `--apply rationale: <...>` 줄에 기록한다. `--apply`인데 `--rationale`이 없으면 **사유를 스스로 만들지 않고** `Needs Rationale`로 종료 + `--rationale` 동봉 재실행 안내(executor가 사유를 발명하면 다시 "자아"가 생긴다).
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다.
@@ -45,6 +46,7 @@ context-pack: minimal
 7. 커밋 메시지 초안을 Conventional Commits 스타일로 생성한다(정책: ADR-008).
    - 형식: `<type>(<scope>): <summary>` — `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf` 등.
    - 본문에 변경 요약 한 단락 + task ID 참조.
+   - **`--apply` 모드면** body에 사용자가 넘긴 `--rationale` 값을 `--apply rationale: <...>` 한 줄로 포함 (ADR-007 amend3). `--rationale` 부재 시 `Needs Rationale` 종료(커밋 X).
    - footer에 `Refs: T-NNN (AC-X, AC-Y)` 형식 포함 (ADR-008 amend 2). 누락 시 *footer 추가 권장 텍스트* 출력 — 자동 차단은 하지 않음 (사용자 결정).
 8. `git commit -m "..."` 실행.
    - **금지**: `--no-verify`, `--amend`, `git push`.
