@@ -88,7 +88,7 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 - 사용자가 plan 품질을 외부 모델로 cross-validate할 수 있는 opt-in 경로.
 - `## 9. 의존성` 기반 wave 그룹 가시화 — 사용자가 여러 터미널에서 `/implement-workitem`을 병렬 실행 가능.
 - worktree-per-task 권장 정책으로 병렬 implement 안전성 확보.
-- 적용 surface(구 "8곳" 목록)는 본 ADR `## Surfaces`로 이전 (fan-out SSOT — ADR-045 D3).
+- 적용 surface(구 "8곳" 목록)는 본 ADR `## Surfaces`로 이전 (fan-out SSOT — ADR-045#d3).
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - .claude/skills/validate-plan/SKILL.md         — D1 신설
@@ -110,7 +110,7 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 <a id="adr-038-amend-1"></a>
 ## Amendment 1 — Plan Quality 차원 8 → 10 (ADR-027#amend-1 양립)
 
-ADR-027 amend 1 결정 18 에 의해 Plan Quality 차원이 8 → 10 으로 확장됨. 추가 2 차원:
+ADR-027#d18 에 의해 Plan Quality 차원이 8 → 10 으로 확장됨. 추가 2 차원:
 - `[Plan-design]` (UI 프로젝트 한정 — DESIGN.md 부재 시 skip)
 - `[Plan-arch-iface]` (해당 스택 한정 — ARCH 7-x sub-section 부재 시 skip)
 

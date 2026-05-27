@@ -8,7 +8,7 @@
 ## 2. 시스템 설계
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`에서 시스템 구조를 정리한다.
 - `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다.
-- UI 프로젝트는 `/bootstrap-design` R5가 `docs/20-system/design-preview.html`(DESIGN.md 파생 뷰, 검토용 임시 파일)을 생성한다. **사용자가 시안을 브라우저로 확인·승인한 뒤** R5가 시안을 삭제하고 `/plan-workitem`으로 진행 권장 (ADR-027 amend 2 결정 21).
+- UI 프로젝트는 `/bootstrap-design` R5가 `docs/20-system/design-preview.html`(DESIGN.md 파생 뷰, 검토용 임시 파일)을 생성한다. **사용자가 시안을 브라우저로 확인·승인한 뒤** R5가 시안을 삭제하고 `/plan-workitem`으로 진행 권장 (ADR-027#d21).
 - ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
 
 ## 3. 작업 단위 분해
@@ -16,7 +16,7 @@
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
-- **선택**: `/plan-workitem` 출력의 wave 그룹을 참조해 동일 wave task를 별 worktree에서 동시 `/implement-workitem` 가능. 권장 패턴은 `claude --worktree T-NNN -p "..."` (이름은 `--worktree` 인자로 필수, ADR-038 D6). 단일 working tree 동시 implement는 비권장.
+- **선택**: `/plan-workitem` 출력의 wave 그룹을 참조해 동일 wave task를 별 worktree에서 동시 `/implement-workitem` 가능. 권장 패턴은 `claude --worktree T-NNN -p "..."` (이름은 `--worktree` 인자로 필수, ADR-038#d6). 단일 working tree 동시 implement는 비권장.
 
 ## 4. 구현 및 검증
 - 구현은 `/implement-workitem`으로 시작한다.
@@ -83,7 +83,7 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
                               └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
 ```
 
-> Note: wave 그룹 병렬 implement 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 권장 (ADR-038 D6 — 이름은 `--worktree` 인자로 필수).
+> Note: wave 그룹 병렬 implement 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 권장 (ADR-038#d6 — 이름은 `--worktree` 인자로 필수).
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.
 스킬 간 흐름은 **자동 호출이 아니라 텍스트 제안 → 사용자/메인이 발화**한다.

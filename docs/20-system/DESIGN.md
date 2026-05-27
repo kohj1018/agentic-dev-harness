@@ -33,7 +33,7 @@ draft
      각 컴포넌트마다 상태 매트릭스 강제: default / hover / active / focus / disabled / loading / error / empty. -->
 
 ## 8. Motion
-<!-- (보일러플레이트 확장 섹션 — Stitch 공식 canonical 8섹션 외. 근거: Material 3 motion / a11y. ADR-027 amend 2 결정 24)
+<!-- (보일러플레이트 확장 섹션 — Stitch 공식 canonical 8섹션 외. 근거: Material 3 motion / a11y. ADR-027#d24)
      duration/easing + `prefers-reduced-motion` 분기. Material 3 기준: 라우팅 UI 160~240ms, entrance/exit 240~360ms -->
 
 ## 9. Do's and Don'ts
@@ -46,7 +46,7 @@ draft
      - 한 화면 primary CTA 2개 이상 금지
      - 모든 motion에 `prefers-reduced-motion` 분기
      - 모든 컴포넌트에 ## 7 의 8 상태 매트릭스 정의 (특히 empty/loading/error 누락 빈번)
-     [anti-slop 추가 — Impeccable 37패턴에서 흡수, ADR-027 amend 2 결정 23]
+     [anti-slop 추가 — Impeccable 37패턴에서 흡수, ADR-027#d23]
      - 보라/violet gradient·cyan-on-dark 디폴트 금지 (가장 흔한 AI 슬롭 시그니처)
      - 카드 안의 카드(nested cards) 금지 — 중첩 대신 spacing·divider로 구분
      - heading에 gradient text 금지

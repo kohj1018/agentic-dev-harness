@@ -62,7 +62,7 @@ mid-project pivot 시 DISCOVERY만 갱신하고 Charter는 그대로일 경우 S
 - [외부실증] Teresa Torres Opportunity Solution Tree / Cagan dual-track — discovery는 evidence → insight → opportunity → solution 흐름이 끊기지 않아야 한다.
 
 ### 결정
-1. DISCOVERY_TEMPLATE에 **§14 Evidence Log**(source/date/type/finding/linked/confidence) + **§15 Insight Backlog**(insight/근거 evidence/status/linked feature) 신설. type: `qual | quant | research | external-research`. **append(재번호 X)** — 기존 13섹션 보존, 총 **13 → 15섹션**(ADR-035 결정 1의 "13섹션" 표현을 본 amend가 갱신).
+1. DISCOVERY_TEMPLATE에 **§14 Evidence Log**(source/date/type/finding/linked/confidence) + **§15 Insight Backlog**(insight/근거 evidence/status/linked feature) 신설. type: `qual | quant | research | external-research`. **append(재번호 X)** — 기존 13섹션 보존, 총 **13 → 15섹션**(ADR-035#d1의 "13섹션" 표현을 본 amend가 갱신).
 2. 흐름: Evidence(§14) → Insight(§15) → Assumption(§12)/Opportunity(§13) → feature(plan-workitem이 §15 ID 연결).
 3. `/discover-product --update`가 새 증거(§14 신규 행 + `docs/10-charter/insights/` 리서치 노트)를 회수해 §15·§12·§13 갱신. `--fast --update`는 §12 + §14만 빠르게 갱신.
 4. `/stabilize-milestone` §6.5 staleness에 4번째 시그널 추가: §15 Insight Backlog의 `status=open`(미반영) 인사이트 수 → 있으면 P1 보고.

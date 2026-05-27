@@ -48,7 +48,7 @@ context-pack: minimal
   - motion 톤
 - **안티-레퍼런스 1~2개 필수**: "purple gradient generic SaaS 같지 말 것", "indigo-on-slate Tailwind 디폴트 회피".
 - architect 단발 sub-call로 분해 가능.
-- **(옵션) reference-evidence grounding** (ADR-027 amend 2 결정 26 — 기본 의존 추가 X, *가용한 것*만): 사용자 제공 URL/스크린샷, 또는 연결돼 있다면 MCP 화면 리서치(lazyweb 무료 / mobbin 유료), 또는 사전추출 라이브러리(refero.design / getdesign.md)에서 1~3개 레퍼런스를 근거로 본다. 본 것에서 *what to borrow* / *what to avoid* 를 각 1줄씩 추려 DESIGN.md `## 1 Overview` 에 남긴다. **MCP·계정 도구를 보일러플레이트 기본 의존으로 추가하지 않는다** — agent 가 기본 브라우징 불가하면 사용자가 URL·스크린샷을 직접 제공.
+- **(옵션) reference-evidence grounding** (ADR-027#d26 — 기본 의존 추가 X, *가용한 것*만): 사용자 제공 URL/스크린샷, 또는 연결돼 있다면 MCP 화면 리서치(lazyweb 무료 / mobbin 유료), 또는 사전추출 라이브러리(refero.design / getdesign.md)에서 1~3개 레퍼런스를 근거로 본다. 본 것에서 *what to borrow* / *what to avoid* 를 각 1줄씩 추려 DESIGN.md `## 1 Overview` 에 남긴다. **MCP·계정 도구를 보일러플레이트 기본 의존으로 추가하지 않는다** — agent 가 기본 브라우징 불가하면 사용자가 URL·스크린샷을 직접 제공.
 
 ## R1 — 디자인 원칙 3~5개
 - actionable verb. 모호어("modern/clean/sleek") 금지.
@@ -84,7 +84,7 @@ context-pack: minimal
 - 섹션 순서를 Stitch DESIGN.md canonical에 정렬: Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Motion / Do's and Don'ts.
 - 토큰은 fenced `yaml` 블록 또는 frontmatter YAML로.
 
-## R5 — 라이브 시안(design-preview.html) 생성 + 검토 루프 + 정리 (ADR-027 amend 2 결정 21·22)
+## R5 — 라이브 시안(design-preview.html) 생성 + 검토 루프 + 정리 (ADR-027#d21·#d22)
 
 > 목적: plan 으로 넘어가기 *전에* 사용자가 시각 방향을 눈으로 확인·확정한다. DESIGN.md 가 *SSOT*, preview 는 *검토용 임시 파일* (ADR-005 — preview 직접 편집 금지 / 검토 완료 후 삭제).
 

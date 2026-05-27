@@ -51,7 +51,7 @@ context-pack: minimal
 *재확인 surface*가 됨 — 2-layer defense (plan에서 잡으면 RGR 1회 절감).
 
 10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 병렬 가능 task는 비워둔다.
-11. **wave 그룹 계산** (ADR-038 D3 / D6) — 다음 sub-step을 순서대로 수행. 결과는 본 skill *출력에만 echo* — workitem 문서 본문에 영속 저장 X (`## 9. 의존성`이 SSOT — ADR-005 정합). **Context 부담 회피**: 본 step의 검사 2종((a) 위상 정렬 / (b) lockfile race) + 선언 1종((c) 자동 분리 X) 모두 *각 task 본문 전체 fork-load 금지* — `## 9. 의존성` 본문 + `## 3. 구현 항목` 본문의 path-like 토큰만 회수 (ADR-019 minimal 정합). **file overlap 휴리스틱은 본 step에서 제외** — 정밀도가 낮고(`## 4-1`은 현행 정책상 plan 시점 대부분 비어 있음 — WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE 주석 SSOT) 외부 LLM peer review(`/validate-plan`)에 전적으로 위임.
+11. **wave 그룹 계산** (ADR-038#d3 / #d6) — 다음 sub-step을 순서대로 수행. 결과는 본 skill *출력에만 echo* — workitem 문서 본문에 영속 저장 X (`## 9. 의존성`이 SSOT — ADR-005 정합). **Context 부담 회피**: 본 step의 검사 2종((a) 위상 정렬 / (b) lockfile race) + 선언 1종((c) 자동 분리 X) 모두 *각 task 본문 전체 fork-load 금지* — `## 9. 의존성` 본문 + `## 3. 구현 항목` 본문의 path-like 토큰만 회수 (ADR-019 minimal 정합). **file overlap 휴리스틱은 본 step에서 제외** — 정밀도가 낮고(`## 4-1`은 현행 정책상 plan 시점 대부분 비어 있음 — WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE 주석 SSOT) 외부 LLM peer review(`/validate-plan`)에 전적으로 위임.
 
 11-(a) **위상 정렬 (결정적 알고리즘)**: 각 task의 `## 9. 의존성` 본문에서 *self-ID 콜론 뒤*의 자연어 텍스트(예: `- T-002: T-001의 X 정의 후 시작 가능` → 콜론 뒤 "`T-001의 X 정의 후 시작 가능`") 안에서 **`T-[0-9]+` 패턴의 task ID 토큰을 모두 추출**. 추출한 토큰을 dep로 간주 → **단순 DAG 위상 정렬** (Kahn's algorithm 등 결정적 알고리즘). *주의*: ADR-026 `## 9` 본문은 self-ID prefix(`- T-NNN:`) + 자연어 dep 설명 형식이라 prefix 자체는 *해당 task 본인*이고 dep는 콜론 뒤 텍스트에 묻혀 있음 — prefix만 보면 안 됨. **결정성 보장**: 같은 입력(`## 9. 의존성` 텍스트)에 같은 wave 그룹. 단, *추출 자체*가 자연어 본문 기반이라 false-positive/negative 가능 — 사용자가 wave 결과를 *참고용*으로 활용 + 최종 의존성 판단은 사용자 책임.
 
@@ -132,8 +132,8 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   Wave 3 (Wave 2 종료 후): T-006 (deps: T-004, T-005)
   Wave 4 (단독 — lockfile race risk): T-007 (의존성 추가 감지)
   ```
-  - (file overlap 점검은 plan-workitem에서 제외 — `/validate-plan` 외부 peer review가 *외부 관점*으로 회수. 정합 근거는 step 11 머리 단락 + ADR-038 D3.)
-  - **병렬 실행 권장 패턴** (ADR-038 D6 참조): `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 필수. 단일 working tree 동시 implement는 비권장. 외부 리소스(DB / 포트 / lockfile / 빌드 캐시) 격리는 프로젝트 환경 책임 (ADR-038 면책 단락 참조). **⚠ plan 산출물 가시성 주의**: `claude --worktree`는 기본 *원격 기준 fresh checkout*이라 uncommitted plan 문서가 worktree 세션에서 안 보일 수 있음 → 병렬 implement 전 plan 산출물 commit 또는 `worktree.baseRef = "head"` 설정 (ADR-038 D6).
+  - (file overlap 점검은 plan-workitem에서 제외 — `/validate-plan` 외부 peer review가 *외부 관점*으로 회수. 정합 근거는 step 11 머리 단락 + ADR-038#d3.)
+  - **병렬 실행 권장 패턴** (ADR-038#d6 참조): `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 필수. 단일 working tree 동시 implement는 비권장. 외부 리소스(DB / 포트 / lockfile / 빌드 캐시) 격리는 프로젝트 환경 책임 (ADR-038 면책 단락 참조). **⚠ plan 산출물 가시성 주의**: `claude --worktree`는 기본 *원격 기준 fresh checkout*이라 uncommitted plan 문서가 worktree 세션에서 안 보일 수 있음 → 병렬 implement 전 plan 산출물 commit 또는 `worktree.baseRef = "head"` 설정 (ADR-038#d6).
 - **Cross-review opt-in 안내** (ADR-038) — 한 줄 안내 출력:
   ```
   품질 확신이 부족하면: 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>` 회수.
@@ -208,7 +208,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 본 흐름은 *opt-in*. 건너뛰어도 워크플로우 정상 작동. *opt-in 시작 후 `/repair-plan`을 건너뛰면 `docs/40-validation/plan-reviews/<id>.*.md`가 잔존*: 다음 라운드 호출이 자동 suffix(-N)로 보존(또는 rm으로 수동 정리).
 
-운영 권장 (worktree·외부 리소스 면책 단락): ADR-038 D6 + 면책 단락 참조.
+운영 권장 (worktree·외부 리소스 면책 단락): ADR-038#d6 + 면책 단락 참조.
 
 ## 기술 부채 회수 hook (ADR-022 / ADR-039)
 부채 회수 의도가 있는 분해(사용자 요청 또는 milestone 부채 예산)일 때만 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 *open* 항목(특히 P0/P1 리팩토링·아키텍처 부채)을 회수해, 이번 범위와 관련되면 **후보 task로 surface**한다(보통 `Type: refactor` 또는 `bugfix` — ADR-039). 자동 생성 X — 출력 "다음 추천 단계"/"남은 미결정 사항"에 `- 부채 회수 후보: <IMPROVEMENT_GUIDE 항목 ID> → T-XXX(refactor) 권장` 형태로 제시. 부채 회수 의도가 없으면 IMPROVEMENT_GUIDE를 사전 read 하지 않는다 (ADR-019 minimal 정합).

@@ -100,7 +100,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | FAC↔AC 매핑표 영속 위치 | [ADR-037](../90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-1 (정책 SSOT). 영속 위치: 각 feature 문서의 `## 7-1` subsection — plan/validate/stabilize 가 본 위치를 cross-round 추적. |
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). 적용 surface: `docs/40-validation/QA_FINDINGS.md` / `IMPROVEMENT_GUIDE.md` 항목 스키마 — 두 파일의 evidence label 룰은 본 ADR 본문 인용. |
 | Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 10 차원 (ADR-027#amend-1 로 8 → 10 확장) + `docs/00-meta/DELEGATION_STRATEGY.md` 위임 트리거 표(차원 수 echo) — 네 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
-| DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045 D3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
+| DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
 | Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). 적용 surface: `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 0-1` + `docs/30-workitems/_templates/FEATURE_TEMPLATE.md` `## 0-1` + `.claude/skills/plan-workitem/SKILL.md` Type 라우팅 단락 — 세 surface 동기 갱신. |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 context-pack / ADR-026 sizing)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
@@ -117,7 +117,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 - 기능 문서는 관련 마일스톤, 설계 문서, ADR을 링크한다.
 - QA 문서는 기능/작업 ID를 기준으로 역참조한다.
 - ADR 간 참조·anchor·fan-out(`## Surfaces`) 규약은 [ADR-045](../90-decisions/boilerplate/ADR-045-doc-reference-contract.md) SSOT.
-- cross-surface 정책의 적용 파일 목록은 해당 ADR의 `## Surfaces` 블록이 SSOT다. 아래 Canonical Owner 표는 산문으로 재나열하지 않고 그 블록을 가리킨다(ADR-045 D3).
+- cross-surface 정책의 적용 파일 목록은 해당 ADR의 `## Surfaces` 블록이 SSOT다. 아래 Canonical Owner 표는 산문으로 재나열하지 않고 그 블록을 가리킨다(ADR-045#d3).
 
 ## 절차
 
@@ -128,6 +128,6 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 ### 새 정책 도입 시
 1. ADR을 만든다 — 정책 본문은 ADR이 SSOT.
 2. `docs/90-decisions/README.md`(또는 boilerplate/project 인덱스)에 한 줄 추가.
-3. 관련 agent/skill 본문에는 정책 설명 대신 ADR 링크 + 자기 영역 행동 규율(self-check 등)만 둔다 + 자신을 고정하는 `ADR-NNN` 역참조(ADR-045 D4).
-4. 여러 파일에 동기 반영되는 정책이면 ADR 본문에 `## Surfaces` 블록을 둔다(fan-out SSOT — ADR-045 D3). Canonical Owner 표에는 산문 나열 대신 `→ ADR-NNN ## Surfaces` 포인터만 둔다.
+3. 관련 agent/skill 본문에는 정책 설명 대신 ADR 링크 + 자기 영역 행동 규율(self-check 등)만 둔다 + 자신을 고정하는 `ADR-NNN` 역참조(ADR-045#d4).
+4. 여러 파일에 동기 반영되는 정책이면 ADR 본문에 `## Surfaces` 블록을 둔다(fan-out SSOT — ADR-045#d3). Canonical Owner 표에는 산문 나열 대신 `→ ADR-NNN ## Surfaces` 포인터만 둔다.
 5. canonical owner 매핑이 변하면 본 문서의 Canonical Owner 표 갱신.

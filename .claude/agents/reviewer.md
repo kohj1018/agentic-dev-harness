@@ -104,7 +104,7 @@ stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
 1. **[Design-token]** — raw hex / 토큰 외 색 사용 / typography family/scale 외 사용. (P1)
 2. **[Design-inventory]** — DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트 신설 / 등록 누락. (P1)
 3. **[Design-state]** — **DESIGN.md `## 7` 본문에 등록된 컴포넌트 정의** 가 default/hover/active/focus/disabled/loading/error/empty 8 상태 매트릭스를 *모두 설계* 했는가 (문서 설계 기준 — task 구현이 8 상태 모두 구현했는지는 별도 차원). 누락 발견 시 `P1 [Design-state] DESIGN.md ## 7 의 <component> 정의에 <상태> 누락`. *task 구현 단계의 use-case 한정 상태 검증* 은 validator (validate-workitem) 책임 — 본 차원과 책임 분리. (P1)
-4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반. *deterministic 예*(grep 가능): primary CTA 2+ / color 5색 초과 / raw hex / motion `prefers-reduced-motion` 미분기. *LLM-판정 anti-slop 예*(ADR-027 amend 2 결정 23 — grep 어려움): 보라/violet gradient·cyan-on-dark 디폴트, nested cards, gradient heading text, glassmorphism·neon glow, 전면 center-align, 획일적 card grid 반복, icon-tile-above-heading, monospace 장식 남용, bounce/elastic easing, 장식용 sparkline. (P0) *DESIGN.md `## 9` 가 SSOT — 본 목록은 그 일부를 echo한 것이며, 프로젝트의 `## 9` 추가 룰도 함께 점검한다.*
+4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반. *deterministic 예*(grep 가능): primary CTA 2+ / color 5색 초과 / raw hex / motion `prefers-reduced-motion` 미분기. *LLM-판정 anti-slop 예*(ADR-027#d23 — grep 어려움): 보라/violet gradient·cyan-on-dark 디폴트, nested cards, gradient heading text, glassmorphism·neon glow, 전면 center-align, 획일적 card grid 반복, icon-tile-above-heading, monospace 장식 남용, bounce/elastic easing, 장식용 sparkline. (P0) *DESIGN.md `## 9` 가 SSOT — 본 목록은 그 일부를 echo한 것이며, 프로젝트의 `## 9` 추가 룰도 함께 점검한다.*
 
 **8 상태 매트릭스 책임 분배**:
 | 단계 | 책임 surface | 점검 기준 |
@@ -120,7 +120,7 @@ stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
 
 Write/Edit 사용 범위:
 - `/review-doc` 호출 시 → `docs/40-validation/IMPROVEMENT_GUIDE.md` 단일 파일만 허용 (review-doc body 의 *Write 범위 제한* 단락 정합).
-- `/validate-plan` 호출 시 → `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` 단일 파일만 허용 (ADR-038 D2). workitem 문서 (milestone/feature/task) 일체 수정 금지.
+- `/validate-plan` 호출 시 → `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` 단일 파일만 허용 (ADR-038#d2). workitem 문서 (milestone/feature/task) 일체 수정 금지.
 - `/validate-discovery` 호출 시 → `docs/40-validation/discovery-reviews/DISCOVERY.<reviewer-tag>.md` 단일 파일만 허용. DISCOVERY/charter 수정 금지 (ADR-044).
 - 그 외 surface (`/stabilize-milestone` / manual fork) 호출 시 reviewer 는 *report-only* — 본 agent 가 직접 쓰지 않고 호출 측이 받아 적는다.
 
