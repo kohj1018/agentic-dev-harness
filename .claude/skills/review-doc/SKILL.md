@@ -32,6 +32,7 @@ context-pack: minimal
 - `docs/90-decisions/boilerplate/README.md`의 *Reserved / Parked / Dropped 번호* 표가 git log의 실제 누락 번호와 일치하는지 점검. 새 dropped 번호 발견 시 P2 보고.
 - `docs/90-decisions/boilerplate/README.md` ADR 표의 *Amendments* 컬럼이 각 ADR 본문의 실제 `## Amendment N` 단락과 일치하는지 점검. 누락 발견 시 P1 보고.
 - `docs/00-meta/` 파일 수가 ADR-012의 *6개* 원칙과 일치하는지 (`_templates/`는 카운트 제외). 위반 시 P0 보고.
+- 검토 대상이 `## Surfaces` 블록을 가진 ADR이면, 등재된 각 surface 파일에 해당 `ADR-NNN` 역참조가 있는지 spot-check. 누락 시 P1 `[Surface-backref]` 보고 (ADR-045 D4).
 - reviewer 위임 시 입력에 `review surface: doc` 를 명시한다 (reviewer.md 의 Document Consistency 차원 정합 — Clean Code / Scope Discipline / Document Consistency 3 차원 중 doc surface 선택).
 
 Write 범위 제한 (수정 대상 파일 제한 — frontmatter `allowed-tools` 와 직교):
