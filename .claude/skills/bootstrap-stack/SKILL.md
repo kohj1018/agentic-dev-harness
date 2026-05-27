@@ -1,7 +1,7 @@
 ---
 name: bootstrap-stack
 description: Add stack-specific setup guidance and project automation after the stack and runtime are explicitly chosen.
-argument-hint: "[stack and runtime summary]"
+argument-hint: "[stack and runtime summary | --recommend | --migrate]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit
 context: fork
@@ -16,6 +16,8 @@ context-pack: minimal
 입력:
 - `$ARGUMENTS`에는 언어, 프레임워크, 패키지 매니저, 테스트 도구, 배포 환경 등이 자연어로 들어온다.
 - 입력이 짧더라도 `stack-brief-template.md` 구조를 참고해 내부적으로 정리한다.
+- **`--recommend`**: 스택 확정 *전* 모드. 아래 `## --recommend 모드` 절차를 따른다 (추천 텍스트만 출력, 파일 생성 X).
+- **`--migrate`**: 스택 변경 모드. 아래 `## --migrate 모드` 절차를 따른다 (마이그레이션 contract ADR 작성).
 
 반드시 먼저 읽을 파일:
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
@@ -25,7 +27,7 @@ context-pack: minimal
 - `stack-brief-template.md`
 - `output-checklist.md`
 
-반드시 수행할 일:
+반드시 수행할 일 (플래그 없는 기본 모드 한정 — `--recommend`/`--migrate`는 위 입력 라우팅대로 각 모드 섹션 절차가 우선):
 1. 스택 정보를 구조화한다.
 2. 아래 문서를 갱신한다.
    - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
@@ -80,6 +82,25 @@ context-pack: minimal
 | Python CLI | `src/<pkg>/{cli,core,...}/`, `tests/` |
 
 ARCHITECTURE_OVERVIEW.md `## 3-1` 채움 시 함께 박음. 사용자 즉흥 결정 → 스파게티 차단.
+
+## --recommend 모드 (ADR-041)
+스택 확정 *전* 호출. architect로서 다음을 수행:
+1. `docs/10-charter/PROJECT_CHARTER.md` `## 6 목표`/`## 7 비목표`/`## 8 성공 기준`/`## 9 제약`, `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 8 품질 속성`을 읽어 요구·규모·확장 기대를 파악.
+2. (옵션) 최신 프레임워크/라이브러리 지형이 필요하면 *먼저* `/research-pack <스택 후보 주제>`를 돌려 insights 노트를 만들어 두고 본 모드가 이를 참조한다 — 지식 컷오프 보완. (bootstrap-stack은 fork+Agent 미보유라 본 skill에서 직접 researcher 위임은 불가.)
+3. **2~3개 스택 조합**을 제시. 각 조합: (a) 현재 복잡도, (b) 확장·마이그레이션 비용, (c) ADR-031 직접지원 5유형(web frontend/API/CLI/monorepo/Supabase) 정합, (d) 마이그레이션 경로("X로 시작 → Y로 성장 가능").
+4. **ADR-006 단순성 가중** — 요구에 비해 과한 스택이면 명시 경고. prototype은 가장 단순한 조합 우선.
+5. 출력은 *추천 텍스트만*. 파일 생성 X. 사용자가 선택하면 `/bootstrap-stack <선택한 스택>`(플래그 없이)로 본 흐름 진행 안내.
+
+## --migrate 모드 (ADR-041)
+스택 변경 시 호출. 다음 contract를 새 project ADR(`docs/90-decisions/project/ADR-1NN-<migration>.md`, 기존 ADR-101 stack-selection을 `superseded` 처리 + 상단 "대체: ADR-1NN")로 작성:
+- **old stack / new stack**
+- **호환성**: 데이터·API·런타임 호환 이슈
+- **cutover 순서**: expand-contract(신규 추가 → 양쪽 dual-run → 구식 제거) 단계
+- **rollback**: 되돌리기 절차
+- **validation**: 마이그레이션 완료 판정 기준
+- **hook·verify 갱신 목록**: `/stack-guard` 재실행으로 갱신할 verify 스크립트·도구(도구 감지 우선순위로 기존 도구 보존 — stack-guard SKILL "도구 감지 우선 순서" 참조)
+작성한 project ADR은 **`docs/90-decisions/project/README.md` 인덱스에 한 줄 추가**(인덱스 표의 현재 컬럼 형식에 맞춰 — Step 12 적용 시 area·last-reviewed 포함). 기존 ADR-101을 supersede하면 그 행 상태도 `superseded`로 갱신.
+작성 후 안내: `/bootstrap-stack <new stack>` → `/stack-guard` 순으로 재실행. 마이그레이션 cutover 작업은 `Type: migration` task(ADR-039)로 분해(`/plan-workitem`).
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
