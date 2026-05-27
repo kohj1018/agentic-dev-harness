@@ -56,9 +56,24 @@ FAC ↔ AC 매핑은 *plan-workitem 출력 echo* 가 아니라 **feature 문서�
 
 - 기존 feature 문서 (template 변경 전 생성) 의 `## 7-1` 보강 — Legacy fallback 3-단계로 운영 차단 없이 회수되므로 fork 별로 일괄 migration / lazy migration / 신규 feature 부터만 적용 중 선택. plan-workitem 호출 자연 발생 시점에 보강 가능.
 
+<a id="adr-037-amend-2"></a>
+## Amendment 2 (2026-05-27) — plan 출력 echo 축소 (ADR-046 정합)
+
+### 결정
+plan-workitem의 FAC↔AC *전체 매핑표 echo*를 폐지한다. plan 출력에는 `unmapped N건` 요약 + feature `## 7-1` 위치 포인터만 둔다. 전체 매핑표 SSOT는 feature 문서 `## 7-1`(본 ADR #amend-1) — 변경 없음.
+
+### 근거
+- 전체표 echo는 이미 `## 7-1`에 영속된 내용의 *대화 중복 출력* — ADR-005 SSOT 정신 및 ADR-046#d5(중복 echo 금지)와 어긋난다.
+- 본 ADR 결정 1(validator self-audit)·#amend-1(영속 SSOT)의 *추적 메커니즘*은 불변 — 바뀌는 것은 plan의 *대화 출력 형식*뿐.
+- #d2 및 #amend-1의 "plan 출력은 echo" 문구 중 *전체표 echo* 부분만 본 amendment가 대체한다(narrowing).
+
+### 적용 surface
+- [plan-workitem/SKILL.md](../../../.claude/skills/plan-workitem/SKILL.md) "feature 분해 시"·"마지막 출력" — 전체표 echo 제거, unmapped 요약 + 위치 포인터.
+- 정합 정책: [ADR-046](ADR-046-signal-first-output.md)#d5.
+
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - docs/30-workitems/_templates/FEATURE_TEMPLATE.md     — #amend-1 §7-1 FAC↔AC 매핑표
-- .claude/skills/plan-workitem/SKILL.md                — #amend-1 영속 저장 + 출력 echo
+- .claude/skills/plan-workitem/SKILL.md                — #amend-1 영속 저장 + #amend-2 출력 echo 축소(요약만)
 - .claude/skills/validate-workitem/SKILL.md            — #d1 Spec coverage audit
 - .claude/agents/validator.md                           — #d1 FAC→AC 매핑 점검
 - .claude/skills/stabilize-milestone/SKILL.md          — #amend-1 §1.0 FAC unmapped 점검

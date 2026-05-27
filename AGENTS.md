@@ -46,5 +46,8 @@ Claude Code의 빌트인 plan 모드(Shift+Tab)는 사용자 자율 도구다. �
 ## Discovery → Charter SSOT 정책
 **DISCOVERY=SSOT, Charter=snapshot** — DISCOVERY.md 갱신 시 Charter는 자동 sync 안 됨. `/bootstrap-project`로 갱신 제안을 받은 뒤 `--apply`로 적용하거나 직접 편집. (ADR-035)
 
+## 출력 스타일 (signal-first)
+대화·반환 출력은 signal-first: 결론/판정 → 핵심 변경 → 리스크 → 다음 액션. 긴 reasoning·로그·중복 echo는 report/문서에 두고 대화엔 요지만 남긴다. 문서 본문(charter/ADR/AC 등)·코드·경고는 압축하지 않는다 (ADR-046).
+
 ## AGENTS.md 길이 정책
 본 문서는 **100줄 hard cap**(soft cap 80줄)을 적용한다. 새 정책은 ADR로 박고, 본 문서에는 한 줄 + 링크만 둔다 (ADR-011).
