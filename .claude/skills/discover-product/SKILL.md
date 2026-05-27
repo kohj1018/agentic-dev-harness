@@ -57,6 +57,7 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 - DISCOVERY.md 경로
 - 핵심 가정과 열린 질문 요약
 - 다음 권장 단계 (`/bootstrap-project` — DISCOVERY.md를 입력으로 사용)
+- **(opt-in, ADR-044) 기획 품질 확신이 부족하면**: 다른 세션·다른 LLM에서 `/validate-discovery --reviewer-tag <tag>` 1+회 → 원본 세션에서 `/repair-discovery` 회수. 건너뛰어도 정상.
 
 ## --update 모드 (mid-project pivot, ADR-035 + amend2)
 기존 DISCOVERY.md 있으면:

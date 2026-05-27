@@ -15,3 +15,5 @@ docs/40-validation/reports/*.md
 !docs/40-validation/reports/.gitkeep
 docs/40-validation/plan-reviews/*.md
 !docs/40-validation/plan-reviews/.gitkeep
+docs/40-validation/discovery-reviews/*.md
+!docs/40-validation/discovery-reviews/.gitkeep

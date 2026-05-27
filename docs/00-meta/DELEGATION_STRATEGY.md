@@ -34,6 +34,8 @@
 | 독립적인 여러 task 동시 처리 | 병렬 패턴 3종 (아래 단락 참조) | 가벼운 → 무거운 순으로 선택 |
 | `/plan-workitem` 산출물의 cross-LLM peer review (opt-in) | reviewer (plan surface, Plan Quality 10 차원) | 다른 세션 (Claude 새 창 / Codex 등)에서 `$validate-plan` or `/validate-plan` 호출. 임시 리뷰 파일 1개만 작성, workitem 문서 수정 X (ADR-038). |
 | Cross-review 결과 회수 + workitem 문서 수정 | planner | 원본 plan 세션에서 `/repair-plan`. 임시 리뷰 파일 회수 → 결정 → 적용 → 파일 삭제 (ADR-038). |
+| DISCOVERY(기획)의 cross-LLM peer review (opt-in) | reviewer (discovery surface, Discovery Quality 8 차원) | 다른 세션에서 `/validate-discovery`. 임시 리뷰 파일 1개, DISCOVERY/charter 수정 X (ADR-044). |
+| 기획 cross-review 결과 회수 + DISCOVERY 수정 | architect | 원본 세션에서 `/repair-discovery`. 리뷰 회수 → 결정 → DISCOVERY 수정 → 파일 삭제 (ADR-044). |
 | 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임 (ADR-040). |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
 

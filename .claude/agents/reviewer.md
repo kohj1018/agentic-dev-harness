@@ -61,6 +61,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
 - `plan`: Plan Quality 10 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
 - `design`: Design Consistency 4 (아래 별도 섹션 — ADR-027 amend 1). UI 프로젝트에서 stabilize-milestone 이 호출.
+- `discovery`: Discovery Quality 8 (아래 별도 섹션 — ADR-044). `/validate-discovery` 가 호출. Clean Code / Scope / Doc / Plan / Design 미적용.
 
 ## Plan Quality 10 차원 (plan surface 전용 — ADR-038 + ADR-027 amend 1)
 
@@ -80,6 +81,21 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
 라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
 라벨링 예: `P0 [Plan-arch-iface] T-008:AC-1 — response 형식 { status: "ok", payload } 이 ARCH ## 7-1 envelope { data, error, meta } 와 불일치`.
+
+## Discovery Quality 8 차원 (discovery surface 전용 — ADR-044)
+
+`/validate-discovery` 호출 시 본 agent가 DISCOVERY.md(제품 기획 SSOT)를 비판 검토할 때 사용. 각 발견에 P0/P1/P2 + 카테고리 라벨.
+
+1. **[Disc-persona]** 페르소나가 증거 기반인가, 추측이면 가정으로 표시됐나. (P1)
+2. **[Disc-pain]** pain이 빈도×고통으로 실재·우선순위화됐나 vs 가정. (P1)
+3. **[Disc-jtbd]** JTBD가 진짜 job인가(solution-in-disguise 아님). (P1)
+4. **[Disc-scope]** MVP 범위/비범위가 ruthless한가(scope creep). (P0)
+5. **[Disc-assumption]** 가장 위험한 가정이 식별·검증계획 있나(§10/§12 Assumption Tracker). (P0)
+6. **[Disc-metric]** 성공 기준이 측정 가능한가(§9). (P1)
+7. **[Disc-evidence]** §14 Evidence Log 신뢰도 라벨 적절·가설↔사실 분리(ADR-035 amend2). §14 부재 시 skip + "핵심 관찰"에 명시. (P1)
+8. **[Disc-bias]** confirmation bias / leading 질문 / 단일 출처 과신. (P1)
+
+라벨링 예: `P0 [Disc-scope] MVP 범위에 "협업 권한 관리" — JTBD 핵심(주간 갱신)과 무관, M3 이후로 비범위 권장`.
 
 ## Design Consistency 4 차원 (design surface 전용 — ADR-027 amend 1)
 
@@ -105,6 +121,7 @@ stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
 Write/Edit 사용 범위:
 - `/review-doc` 호출 시 → `docs/40-validation/IMPROVEMENT_GUIDE.md` 단일 파일만 허용 (review-doc body 의 *Write 범위 제한* 단락 정합).
 - `/validate-plan` 호출 시 → `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` 단일 파일만 허용 (ADR-038 D2). workitem 문서 (milestone/feature/task) 일체 수정 금지.
+- `/validate-discovery` 호출 시 → `docs/40-validation/discovery-reviews/DISCOVERY.<reviewer-tag>.md` 단일 파일만 허용. DISCOVERY/charter 수정 금지 (ADR-044).
 - 그 외 surface (`/stabilize-milestone` / manual fork) 호출 시 reviewer 는 *report-only* — 본 agent 가 직접 쓰지 않고 호출 측이 받아 적는다.
 
 정책 근거: [ADR-006](../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md), [ADR-038](../../docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (plan surface).
