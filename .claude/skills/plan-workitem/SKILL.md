@@ -52,6 +52,8 @@ context-pack: minimal
 
 자동 차단 X — 사용자가 plan 검토 시 *해석 결정 협상*.
 
+**해석 확정 기록 (ADR-006 amend2)**: 권장 선택이 채택될 만큼 명확하면 해당 task `## 8. 메모`에 `해석 확정: AC-N = <선택>` 한 줄을 *기록*한다. 이 기록이 있으면 implement(builder)는 그 해석을 기계적으로 따르고, *기록이 없는데 2+ 해석이면 implement는 진행을 중단(Needs Plan Decision)* 한다 — plan에서 해석을 확정해 두면 implement 하드스탑을 예방한다 (2-layer defense — plan이 사고, implement는 집행).
+
 본 self-check가 plan 단계에서 발화하면 [implement-workitem ambiguity surfacing](../implement-workitem/SKILL.md)은
 *재확인 surface*가 됨 — 2-layer defense (plan에서 잡으면 RGR 1회 절감).
 
@@ -63,6 +65,14 @@ context-pack: minimal
 11-(b) **lockfile race 경고**: task 본문(`## 3. 구현 항목`)에서 manifest/lock 파일명 *어느 하나라도* 명시되면 (OR 매치 — 예: `package.json` / `pnpm-lock.yaml` / `Cargo.toml` / `Cargo.lock` / `pyproject.toml` / `poetry.lock` / `uv.lock` / `go.mod` / `go.sum` 중 하나라도 본문에 등장) 해당 task를 "단독 wave (lockfile race risk)"로 표시. **출력 echo만, 자동 차단 X, 영속 저장 X** — 사용자가 wave 구성을 결정. **휴리스틱 한계 명시**: 본 검출은 *파일명 토큰이 본문에 직접 적힌 경우*만 잡음 — "add Redis client" 같은 자연어 dep 추가 task는 false negative. 출력에 *"본 검출은 manifest/lock 토큰 명시 task만 매치 — 자연어 dep 추가는 누락 가능"* 한 줄 echo 권장.
 
 11-(c) **자동 분리 X**: 본 점검들은 *경고 출력만*. 사용자가 wave 내에서 sequential 진행 / 별 worktree 분리 / 그대로 동시 진행 중 결정.
+
+## Workitem Type 라우팅 (ADR-039)
+분해된 각 feature/task의 `## 0-1. Type`을 읽어 처리를 라우팅한다 (미기재 시 feature):
+- **technical-enabler**: User Story 대신 기술적 근거 + 서비스하는 가정/기회(DISCOVERY ID)·상위 결정(ADR) 링크를 채운다. 시나리오 cross-check skip.
+- **bugfix**: TASK `## 3-T. 트러블슈팅`(증상/재현/관측/가설/root cause/회귀 테스트 AC)을 채운다. AC는 *버그 재현 실패 테스트* 형태로.
+- **refactor**: 외부 행동 불변을 AC에 명시("행동 동일 + 구조 개선 측정"). Surgical Changes(ADR-006) 정합 — 범위 밖 변경 금지를 task `## 4`에 박는다.
+- **migration**: bootstrap-stack `--migrate` contract(ADR-041)를 상위 참조로 link. expand-contract 단계를 `## 3`에 분해.
+- **research-spike**: 산출은 `/research-pack` 리서치 노트(ADR-040). TDD opt-out 기본(`## 6-2`에 사유=탐색 + follow-up 구현 task).
 
 ## feature 분해 시 (ADR-036)
 feature 분해 시 12 main sections + `## 7-1` mapping subsection 모두 채운다.
@@ -79,6 +89,8 @@ feature 분해 시 12 main sections + `## 7-1` mapping subsection 모두 채운�
 3. 둘 다 부재 → `Spec Gap: <feature> 매핑표 부재 — legacy 문서 보강 권장` 라벨로 IMPROVEMENT_GUIDE에 P1 기록 + 다음 plan 라운드에서 `## 7-1` 보강.
 
 feature 분해 시 `## 11. 관련 문서` 에 *해당 스택* 의 `Architecture-Iface:` link 와 (UI 프로젝트 한정) `Design:` link 를 채운다. TEMPLATE 의 비해당 스택 줄은 *삭제* (placeholder 잔존 X — drift 차단).
+
+**Evidence/Insight 연결 (ADR-035 amend2)**: feature가 DISCOVERY `## 15. Insight Backlog`의 인사이트를 구현하는 것이면, feature `## 1. 요약`에 `근거 insight: I-N` 한 줄을 박고, 해당 Insight Backlog 행의 `status`를 `planned` + `linked feature`를 채울 것을 plan 출력에 권장(plan은 DISCOVERY를 직접 수정하지 않음 — `/discover-product --update`가 회수). **`Type: feature` 한정** — 근거 인사이트가 없는 즉흥 feature면 "남은 미결정 사항"에 `- 근거 insight 부재: F-NNN — DISCOVERY 회수 권장` 명시. technical-enabler 등 비-feature 타입은 가정/기회·ADR 링크로 정당화되므로 insight 부재 경고를 내지 않는다.
 
 ## --fast 모드
 prototype은 `## 3 핵심 시나리오` / `## 7 FAC` / `## 8 NFR` 신설 3섹션을 1줄씩만 채워도 OK ("해당 없음" / "M2 이후 검토").
@@ -182,6 +194,8 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 이로써 등록 *결정* 은 plan 이 authoring 하고, builder 는 task 스펙을 *기계적으로 실행* — 등록 책임이 executor 의 독립 판단에 박히지 않는다 (ADR-027 amend 1 책임 분배 / ADR-005 정합). validator 는 본 line item 이 실행됐는지 점검 (`/validate-workitem` + `validator.md` CHECK 단계).
 
 **진짜 새 *primitive*** (Button/Input/Card 외 기반 컴포넌트) 는 task line item 이 아니라 architect 또는 `/bootstrap-design` 라운드 권장 (아래 `## architect 호출 권장 신호` #6 정합) — plan 은 그 권장만 출력.
+
+**외부 라이브러리 docs-check line item (ADR-040)**: task `## 2/## 3` 본문에 *외부 SDK·API·결제·인증·외부 서비스 연동* 키워드(예: `결제`, `payment`, `Stripe`, `OAuth`, `auth provider`, `SDK`, `webhook`, `외부 API`)가 등장하면, 해당 task `## 3. 구현 항목`에 line item을 자동 추가: `- 구현 전 최신 공식문서 확인 (/research-pack 또는 researcher 위임 — 모델 지식 컷오프 보완)`. builder는 이 line item을 보고 불확실하면 researcher 위임을 메인에 요청(직접 웹서핑 X).
 
 **모두 자동 차단 X — *권장 텍스트만* 출력** (ADR-007 책임 경계 정합).
 
