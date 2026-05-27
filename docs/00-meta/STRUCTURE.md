@@ -95,13 +95,14 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
-| Milestone graduation checklist 5+1 | [ADR-014](../90-decisions/boilerplate/ADR-014-milestone-graduation.md) (정책 SSOT). 적용 surface: `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md` placeholder + `.claude/skills/stabilize-milestone/SKILL.md` `### 1.5` 평가 로직 — ADR-014 본문 변경 시 두 surface 동기 갱신. |
-| DISCOVERY=SSOT / Charter=snapshot | [ADR-035](../90-decisions/boilerplate/ADR-035-continuous-discovery.md) (정책 SSOT). 적용 surface: `AGENTS.md` 1줄 + `PROJECT_CHARTER.md` 본문 끝 안내 + `/stabilize-milestone` step 6.5 staleness 감지. |
-| FAC↔AC 매핑표 영속 위치 | [ADR-037](../90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-1 (정책 SSOT). 영속 위치: 각 feature 문서의 `## 7-1` subsection — plan/validate/stabilize 가 본 위치를 cross-round 추적. |
-| Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). 적용 surface: `docs/40-validation/QA_FINDINGS.md` / `IMPROVEMENT_GUIDE.md` 항목 스키마 — 두 파일의 evidence label 룰은 본 ADR 본문 인용. |
-| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). 적용 surface: `.claude/skills/validate-plan/SKILL.md` + `.claude/skills/repair-plan/SKILL.md` 본문 + `.claude/agents/reviewer.md` Plan Quality 10 차원 (ADR-027#amend-1 로 8 → 10 확장) + `docs/00-meta/DELEGATION_STRATEGY.md` 위임 트리거 표(차원 수 echo) — 네 surface가 한 묶음, ADR-038 본문 변경 시 동기 갱신. |
+| Milestone graduation checklist 5+1 | [ADR-014](../90-decisions/boilerplate/ADR-014-milestone-graduation.md) (정책 SSOT). → ADR-014 `## Surfaces` 참조 (fan-out SSOT). |
+| DISCOVERY=SSOT / Charter=snapshot | [ADR-035](../90-decisions/boilerplate/ADR-035-continuous-discovery.md) (정책 SSOT). → ADR-035 `## Surfaces` 참조 (fan-out SSOT). |
+| FAC↔AC 매핑표 영속 위치 | [ADR-037](../90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-1 (정책 SSOT). 영속 위치: 각 feature 문서 `## 7-1` (plan/validate/stabilize cross-round 추적). → ADR-037 `## Surfaces` 참조 (fan-out SSOT). |
+| Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). → ADR-022 `## Surfaces` 참조 (fan-out SSOT). |
+| Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). → ADR-038 `## Surfaces` 참조 (fan-out SSOT). |
+| Cross-LLM discovery validation (opt-in peer review) | [ADR-044](../90-decisions/boilerplate/ADR-044-cross-llm-discovery-validation.md) (정책 SSOT). → ADR-044 `## Surfaces` 참조 (fan-out SSOT). |
 | DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
-| Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). 적용 surface: `docs/30-workitems/_templates/TASK_TEMPLATE.md` `## 0-1` + `docs/30-workitems/_templates/FEATURE_TEMPLATE.md` `## 0-1` + `.claude/skills/plan-workitem/SKILL.md` Type 라우팅 단락 — 세 surface 동기 갱신. |
+| Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). → ADR-039 `## Surfaces` 참조 (fan-out SSOT). |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 context-pack / ADR-026 sizing)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 
