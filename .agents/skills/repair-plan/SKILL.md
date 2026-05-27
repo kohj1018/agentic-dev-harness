@@ -3,7 +3,7 @@ name: repair-plan
 description: Use ONLY when the user explicitly types `$repair-plan <workitem-id>`. Do not trigger implicitly from generic phrasing.
 ---
 
-Source of truth: `.claude/skills/repair-plan/SKILL.md`. Read it and follow the workflow.
+Source of truth: `.claude/skills/repair-plan/SKILL.md` (skill 신설 근거: ADR-038). Read it and follow the workflow.
 
 Treat all frontmatter keys other than `name` and `description` (e.g., `agent:`, `disable-model-invocation:`, `allowed-tools:`, `context:`, `argument-hint:`, `model:`, `effort:`) as Claude-only and ignore them — execute locally in Codex.
 

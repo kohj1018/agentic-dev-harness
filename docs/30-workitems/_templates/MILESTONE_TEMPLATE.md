@@ -12,7 +12,7 @@ draft
 ## 4. 제외되는 기능
 
 ## 5. 완료 기준 (graduation checklist)
-> sprint contract: 본 마일스톤이 "done"이라고 합의되는 외부 검증 가능한 기준.
+> sprint contract: 본 마일스톤이 "done"이라고 합의되는 외부 검증 가능한 기준 (ADR-014).
 - [ ] 모든 task status: done
 - [ ] 통합 validate Pass
 - [ ] E2E Pass (스택에 정의된 경우)

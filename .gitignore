@@ -13,6 +13,7 @@ CLAUDE.local.md
 docs/30-workitems/plans/*.tmp
 docs/40-validation/reports/*.md
 !docs/40-validation/reports/.gitkeep
+# plan-reviews (ephemeral) + .claude/worktrees/ 병렬 implement — ADR-038
 docs/40-validation/plan-reviews/*.md
 !docs/40-validation/plan-reviews/.gitkeep
 docs/40-validation/discovery-reviews/*.md
