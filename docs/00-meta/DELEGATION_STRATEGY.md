@@ -106,6 +106,8 @@
 각 단계에서 중요한 설계 판단이 필요하면 architect를 먼저 사용한다.
 문서 품질이 걱정되면 `/review-doc` 또는 reviewer를 사이에 끼운다.
 
+**review-doc vs stabilize 분담 (사용 타이밍)**: `/review-doc`은 *단일 문서 on-demand 심층 비평* — 핵심 문서(charter/ARCHITECTURE/큰 ADR)를 새로 쓰거나 크게 고친 직후, *전파되기 전에* 쓴다. *repo-wide cross-doc 정합*(링크·ADR-ref·FAC↔AC·모드라벨)은 `/stabilize-milestone` deterministic preflight가 매 마일스톤 자동 수행 — review-doc을 `--all`로 확장하지 않는다(stabilize 책임).
+
 **스킬 자동 호출 아님** — `/validate-workitem`이 출력하는 "다음 액션 추천"은 텍스트 제안일 뿐이다. 사용자 또는 메인 세션이 그 제안을 받아 실제 다음 skill을 발화한다.
 
 ## Mid-project 문서 갱신 동선

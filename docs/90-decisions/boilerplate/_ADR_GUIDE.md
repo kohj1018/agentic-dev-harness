@@ -21,6 +21,9 @@
 2. 기존 ADR 상단에 "대체: ADR-xxx"를 기록한다.
 3. 새 ADR에서 기존 ADR을 참조한다.
 
+## area 태그 (장기 분류 — project ADR 권장)
+ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: `product | design | dev | infra | process | tooling`. project ADR이 쌓일 때 종류별 필터·sprawl 추적에 쓴다(폴더 분리 대신 메타데이터 — 단순성).
+
 ## 권장 섹션
 - 상태
 - 배경 (왜 이 결정이 필요했는가)
