@@ -5,6 +5,12 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- `/validate-plan`(타 세션·타 LLM 비판 리뷰, 문서 수정 X) + `/repair-plan`(회수·수용·기각 후 문서 수정) opt-in 추가.
+- 리뷰 파일은 `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`(ephemeral). 같은 tag 재실행은 #amend-2로 *덮어쓰기 대신 `<tag>-N` 자동 suffix*.
+- `/plan-workitem`이 `## 9. 의존성` 위상정렬 wave 그룹을 echo(영속 저장 X). 병렬 implement는 `claude --worktree T-NNN` 권장.
+- Plan Quality 차원은 #amend-1로 8→10(ADR-027#amend-1 양립).
+
 ## 배경
 - [가설] multi-model ensembling / peer review가 단일 모델 blind spot을 회수한다는 외부 연구 패턴이 존재 (LLM-as-judge, debate, jury 등). 본 ADR은 구체 출처 미인용 — [가설] 단일 라벨. 향후 구체 URL 인용 시 [외부실증]으로 승격 (`## 후속 작업` 단락 evidence 회수 트리거).
 - [관측됨] 본 보일러플레이트의 `/plan-workitem`은 6종 self-check(ADR-026 / ADR-037 정합)를 *같은 세션 내*에서 돌린다 (구조 사실).
@@ -37,7 +43,7 @@ ADR-026 "비결정 (No) — 2-pass planning: 토큰 2배 + stabilize reviewer �
 - **reviewer-tag**: 다중 리뷰어 동시 작성 시 충돌 회피. 미지정 시 `default`. 같은 tag로 재실행 시 덮어쓰기 허용. *(→ Amendment 2 로 "기존 파일 보존 + `<tag>-N` 자동 suffix" 로 정정됨)*
 
 ### D3. /plan-workitem에 parallel waves 출력 추가
-plan-workitem 마지막 출력에 task `## 9. 의존성`을 위상 정렬한 wave 그룹 echo (Kahn's algorithm 등 결정적 알고리즘 — 같은 입력에 같은 wave). **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합). **file overlap 점검은 plan-workitem에서 제외** — `## 4-1. 변경 예정 파일/경로`가 implement 시점에 채워진다는 현행 정책(WORKFLOW.md §4 line 25 + TASK_TEMPLATE `## 4-1` 주석 SSOT)상 plan 시점 정확도 부족 → 외부 LLM peer review(`/validate-plan`)에 *전적 위임*. 새 dependency 추가 의도(manifest/lock 파일명 *어느 하나라도* 명시 — 예: `package.json` 또는 `pnpm-lock.yaml`)가 보이는 task는 *단독 wave* 라벨로 echo (자동 차단 X / 영속 저장 X).
+plan-workitem 마지막 출력에 task `## 9. 의존성`을 위상 정렬한 wave 그룹 echo (Kahn's algorithm 등 결정적 알고리즘 — 같은 입력에 같은 wave). **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합). **file overlap 점검은 plan-workitem에서 제외** — `## 4-1. 변경 예정 파일/경로`가 implement 시점에 채워진다는 현행 정책(WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE `## 4-1` 주석 SSOT)상 plan 시점 정확도 부족 → 외부 LLM peer review(`/validate-plan`)에 *전적 위임*. 새 dependency 추가 의도(manifest/lock 파일명 *어느 하나라도* 명시 — 예: `package.json` 또는 `pnpm-lock.yaml`)가 보이는 task는 *단독 wave* 라벨로 echo (자동 차단 X / 영속 저장 X).
 
 ### D4. agent 분담
 - `/validate-plan` → reviewer agent (4번째 review surface "plan" 추가, Plan Quality 10 차원 (ADR-027 amend 1)).
@@ -82,20 +88,26 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 - 사용자가 plan 품질을 외부 모델로 cross-validate할 수 있는 opt-in 경로.
 - `## 9. 의존성` 기반 wave 그룹 가시화 — 사용자가 여러 터미널에서 `/implement-workitem`을 병렬 실행 가능.
 - worktree-per-task 권장 정책으로 병렬 implement 안전성 확보.
-- 적용 surface (8곳):
-  1. `.claude/skills/validate-plan/SKILL.md` 신설.
-  2. `.claude/skills/repair-plan/SKILL.md` 신설.
-  3. `.claude/skills/plan-workitem/SKILL.md` parallel waves 출력 + cross-review hook 안내 + worktree 권장.
-  4. `.claude/agents/reviewer.md` 4번째 surface "plan" + Plan Quality 10 차원 (ADR-027 amend 1) + Write 범위 확장.
-  5. `.agents/skills/validate-plan/` Codex wrapper.
-  6. `.agents/skills/repair-plan/` Codex wrapper.
-  7. `docs/00-meta/STRUCTURE.md` + `docs/00-meta/WORKFLOW.md` + `docs/00-meta/DELEGATION_STRATEGY.md` sub-loop + worktree 권장.
-  8. `.gitignore` `plan-reviews/*.md` + `.claude/worktrees/` 패턴 + `README.md` + `README_ko.md` flow 다이어그램.
+- 적용 surface(구 "8곳" 목록)는 본 ADR `## Surfaces`로 이전 (fan-out SSOT — ADR-045 D3).
+
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- .claude/skills/validate-plan/SKILL.md         — D1 신설
+- .claude/skills/repair-plan/SKILL.md            — D1 신설
+- .claude/skills/plan-workitem/SKILL.md          — D3 wave echo + cross-review hook + worktree
+- .claude/agents/reviewer.md                      — D4 plan surface + Plan Quality 10(#amend-1)
+- .agents/skills/validate-plan/                   — D5 Codex wrapper
+- .agents/skills/repair-plan/                     — D5 Codex wrapper
+- docs/00-meta/STRUCTURE.md                        — 산출물 표(plan review) + Canonical Owner
+- docs/00-meta/WORKFLOW.md                         — §3 opt-in sub-loop
+- docs/00-meta/DELEGATION_STRATEGY.md              — 위임 트리거 echo
+- .gitignore                                       — plan-reviews/*.md + .claude/worktrees/
+- README.md / README_ko.md                         — flow 다이어그램
 
 ## 후속 작업
 - 첫 fork 사용자의 `/validate-plan` 호출 빈도 / finding Adopt vs Reject 비율 / `claude --worktree` 사용 빈도를 stabilize-milestone instruction improvement 후보로 추적 (ADR-022 `[가설→실증]` → `[관측됨]` 승격 트리거).
 - evidence가 누적된 뒤 — wave 그룹 file overlap 정밀도 부족이 [관측됨]으로 잡히면 — `## 4-1` plan 시점 채움 / LSP-MCP 보조 같은 부수 정책을 별도 ADR amend로 추가 검토.
 
+<a id="adr-038-amend-1"></a>
 ## Amendment 1 — Plan Quality 차원 8 → 10 (ADR-027 amend 1 양립)
 
 ADR-027 amend 1 결정 18 에 의해 Plan Quality 차원이 8 → 10 으로 확장됨. 추가 2 차원:
@@ -104,6 +116,7 @@ ADR-027 amend 1 결정 18 에 의해 Plan Quality 차원이 8 → 10 으로 확�
 
 본 Amendment 는 *번호 확장 + 인용 sync* 만 책임. 차원 본문 정의는 ADR-027 amend 1 + reviewer.md `Plan Quality 10 차원` 단락 SSOT.
 
+<a id="adr-038-amend-2"></a>
 ## Amendment 2 — 리뷰 파일 충돌 정책 정정 (덮어쓰기 → 자동 suffix)
 
 D2 의 "같은 tag 재실행 시 덮어쓰기 허용" 을 **기존 파일 보존 + `<tag>-N` 자동 suffix** 로 정정한다. silent overwrite 로 인한 기존 리뷰 유실을 막기 위함이며, validate-plan SKILL `입력`/`리뷰 파일 작성` 단락의 구현 의도(silent overwrite 방지)와 정합. `/repair-plan` 은 `<workitem-id>.*.md` glob 으로 suffix 파일까지 일괄 회수하므로 회수 흐름은 그대로 작동한다.

@@ -5,6 +5,12 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
+- `/bootstrap-design`(R0~R5 + `--fast` + `--update`)이 DESIGN.md를, `/bootstrap-stack`이 7-1~7-4를 채운다.
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·R5 시안·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4.
+- 적용 파일 전체는 아래 `## Surfaces` 참조.
+
 ## 배경
 - [외부실증] [prg.sh — Why Your AI Keeps Building the Same Purple Gradient](https://prg.sh/ramblings/Why-Your-AI-Keeps-Building-the-Same-Purple-Gradient-Website) — LLM이 시각 결정 입력 없이 생성하면 median 미감(purple gradient generic SaaS)으로 수렴한다. 명시적 결정 자리가 없으면 매 task마다 LLM이 즉흥 결정한다.
 - [관측됨] `DESIGN_SYSTEM.md`가 UI / API·백엔드 / CLI 3 그룹 placeholder를 한 파일에 담아 "광의 SSOT" 시도 → 백엔드 개발자에게 misnomer + ARCHITECTURE 운영성 섹션과 책임 중복.
@@ -71,6 +77,7 @@ accepted
 - ADR-017 시뮬레이션 Round 2에서 DESIGN.md 채움 효과 측정 (LLM 시각 결정 일관성 delta).
 - ADR-017 Round 2 결과에 따라 shadcn 채움 자동화 가치 입증 시 후속 ADR 검토.
 
+<a id="adr-027-amend-1"></a>
 ## Amendment 1 — Cross-surface enforcement 보강
 
 ### 배경
@@ -99,11 +106,27 @@ accepted
 - ADR-017 시뮬레이션 Round 3 — Amendment 1 적용 후 LLM 시각·인터페이스 일관성 delta 측정.
 - Amendment 1 적용 후 `.boilerplate/validation/SIMULATION_RUN.md` 에 실측 라운드 추가.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- .claude/skills/plan-workitem/SKILL.md            — #amend-1 read-list+self-check, #amend-3 UI 판정
+- .claude/skills/validate-plan/SKILL.md             — #amend-1 [Plan-design]+[Plan-arch-iface]
+- .claude/skills/stabilize-milestone/SKILL.md       — #amend-1 §1.0 #5, #amend-3 §5-1
+- .claude/agents/reviewer.md                         — #amend-1 Plan Quality 10 + Design Consistency + design surface, #amend-2 [Design-donts]
+- .claude/skills/implement-workitem/SKILL.md         — task-linked 등록 line item 실행
+- .claude/skills/validate-workitem/SKILL.md          — 인터페이스 CHECK
+- .claude/agents/validator.md                        — 인터페이스 CHECK 규칙(UI/API/CLI/7-x)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md#7    — #amend-1 Design:/Architecture-Iface: 자리
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md#11 — #amend-1 Design:/Architecture-Iface: 자리
+- .claude/skills/bootstrap-design/SKILL.md           — #amend-2 R5/R0, #amend-4 --update
+- docs/20-system/DESIGN.md                            — #amend-2 §9 Don'ts, §8 Motion
+- .claude/skills/stack-guard/SKILL.md                — #amend-2 design.md lint 권장
+- docs/00-meta/WORKFLOW.md                            — #amend-2 §2 승인 게이트
+
 ## 참고
 - ADR-006 (단순성 1순위)
 - ADR-022 (Ratchet Principle — [외부실증] 라벨)
 - ADR-031 (비웹 스택 override 경로)
 
+<a id="adr-027-amend-2"></a>
 ## Amendment 2 — 디자인 워크플로우 실효 강화 (시안 / anti-slop / lint / Motion 정합)
 
 ### 배경
@@ -142,6 +165,7 @@ accepted
 - ADR-017 시뮬레이션 라운드에서 R5 시안 루프의 시각 결정 confidence delta 측정.
 - R5 사용 빈도 회수 후 Codex wrapper 승격 여부를 ADR-010 Phase 3에서 재평가.
 
+<a id="adr-027-amend-3"></a>
 ## Amendment 3 (2026-05-27) — UI 판정 다중신호 절차 단일 SSOT
 
 ### 배경
@@ -162,6 +186,7 @@ accepted
 ### Ratchet 강도 (ADR-022)
 - enabling(약) — 순수 리팩토링(동작 동일, 산문 단일화).
 
+<a id="adr-027-amend-4"></a>
 ## Amendment 4 — bootstrap-design --update 모드
 
 ### 배경
