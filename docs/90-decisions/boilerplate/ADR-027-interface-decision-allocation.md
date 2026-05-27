@@ -161,3 +161,14 @@ accepted
 
 ### Ratchet 강도 (ADR-022)
 - enabling(약) — 순수 리팩토링(동작 동일, 산문 단일화).
+
+## Amendment 4 — bootstrap-design --update 모드
+
+### 배경
+- [관측됨] discover-product는 `--update`(mid-project pivot)가 있으나 bootstrap-design은 없다 → 대규모 디자인 변경/재디자인 시 처음부터 R0~R5를 다시 돌아야 해 비용·잡음이 크다.
+
+### 결정
+27. `/bootstrap-design --update` 신설 — 기존 DESIGN.md가 있을 때 delta 갱신: R0(레퍼런스 재확인, 선택) → 변경 토큰/컴포넌트만 R2/R3 부분 갱신(미변경 토큰·§1~§9 구조 보존, 전면 재작성 X) → R4 저장 → (시각 방향이 크게 바뀌면) R5 시안 재생성·검토 루프. 대규모 재디자인(브랜드/방향 전환)은 결정 근거를 ADR로 남길 것을 권장.
+
+### Ratchet 강도 (ADR-022)
+- enabling(약) — 새 모드, opt-in.
