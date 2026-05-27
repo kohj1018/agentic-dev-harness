@@ -56,10 +56,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - **(c) 3차 — validation report fallback**: 위 둘 다 비어 있는 task 는 `docs/40-validation/reports/<task-id>.md` 의 diff trace audit 단락 회수.
    - **(d) 모두 실패 시**: 본 task 는 *조사 불가* 로 표시 + IMPROVEMENT_GUIDE 에 `P2 [Stabilize-recovery] T-NNN — 변경 파일 회수 불가` 기록 후 다음 task 로 계속.
 
-   5-1. **UI 프로젝트 판정** (plan-workitem 과 동일 다중 신호 우선순위 적용 — false UI 판정 회피):
-   - (i) DESIGN.md 부재 → 비-UI 확정 → 본 5-1 ~ 5-3 모두 skip + skip 사유 echo.
-   - (ii) DESIGN.md 존재 + `## 0. Status` ≠ `draft` → UI 확정 → 5-1 ~ 5-3 활성.
-   - (iii) DESIGN.md 존재 + `## 0. Status` == `draft` → 추가 신호 (ARCH `## 7-4` 활성 / 본 마일스톤 산하 task 중 `## 7. 관련 문서` 의 `Design:` link 또는 본문 UI 키워드 등장) 1개 이상 → UI 의심 → IMPROVEMENT_GUIDE 에 `P1 [Design-draft] DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 권장` 기록 + 5-1 ~ 5-3 활성. 신호 0개 → silent skip.
+   5-1. **UI 프로젝트 판정** — **ADR-027 amend3 "UI 판정 다중신호 절차"** 적용(부재→비-UI: 5-1~5-3 skip+사유 echo / status≠draft→UI: 5-1~5-3 활성 / status=draft+추가신호≥1→UI 의심: IMPROVEMENT_GUIDE에 `P1 [Design-draft] DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 권장` 기록 + 5-1~5-3 활성 / 신호 0→silent skip).
 
    5-2. **UI 프로젝트 — raw hex grep** (정규식 deterministic): 5-0 에서 회수한 변경 파일 목록 중 확장자가 `.tsx`/`.jsx`/`.ts`/`.js`/`.vue`/`.svelte`/`.astro`/`.css`/`.scss`/`.html` 인 파일에서 `#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?` 패턴 grep. 일치 발견 시 IMPROVEMENT_GUIDE 에 `P1 [Design-rawhex] <file:line> — DESIGN.md ## 2 token 으로 교체 권장` 기록. **DESIGN.md 자체 파일은 grep 대상 *제외*** (token 정의 영역이라 false positive 회피).
 

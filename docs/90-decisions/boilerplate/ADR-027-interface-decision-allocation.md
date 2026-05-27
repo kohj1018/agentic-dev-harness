@@ -141,3 +141,23 @@ accepted
 ### 후속 작업
 - ADR-017 시뮬레이션 라운드에서 R5 시안 루프의 시각 결정 confidence delta 측정.
 - R5 사용 빈도 회수 후 Codex wrapper 승격 여부를 ADR-010 Phase 3에서 재평가.
+
+## Amendment 3 (2026-05-27) — UI 판정 다중신호 절차 단일 SSOT
+
+### 배경
+- [관측됨] "UI 프로젝트 판정 다중신호 절차"(DESIGN.md 부재→비-UI / status≠draft→UI / status=draft→추가신호)가 `plan-workitem` 본문과 `stabilize-milestone` §5-1에 *거의 동일한 산문으로 복제*돼 있다 → 지시문 비대 + 한쪽 수정 시 drift.
+
+### 결정 (canonical 절차 — 인용 대상)
+**UI 판정 다중신호 절차** (false UI 판정 회피):
+1. `docs/20-system/DESIGN.md` 부재 → **비-UI 확정** → UI 관련 회수/cross-check skip + 사유 echo.
+2. DESIGN.md 존재 + `## 0. Status` ≠ `draft`(예: accepted/living) → **UI 확정** → 본문 회수 + cross-check 활성.
+3. DESIGN.md 존재 + `## 0. Status` == `draft` → *추가 신호* 점검: (a) ARCH `## 7-4. 프론트 결정` 활성, (b) 대상 workitem 산하 task의 `## 7. 관련 문서`에 `Design:` link 또는 본문 UI 키워드(`component/컴포넌트/page/페이지/screen/view/UI/frontend/프론트`). 신호 ≥1 → *UI 의심* → warning 1줄 echo + 본문 회수 + cross-check 활성. 신호 0 → silent skip.
+
+본 절차가 단일 SSOT(상세·근거)다. **단 ADR-019 JIT 정합상 skill은 절차를 매 호출마다 따라야 하므로, 바 참조만 두면 안 된다** — 각 skill은 *압축 인라인 3-case*(부재→비-UI / status≠draft→UI / status=draft+신호≥1→UI 의심)를 유지하고 `상세: ADR-027 amend3`로 인용한다. 제거 대상은 *장황한 신호 열거 산문*뿐이며, 절차 자체를 skill 밖으로 빼는 게 아니다.
+
+### 적용 surface (압축 인라인 3-case + ADR 인용으로 교체 — 바 참조 X)
+- `.claude/skills/plan-workitem/SKILL.md` DESIGN.md read 항목
+- `.claude/skills/stabilize-milestone/SKILL.md` §5-1
+
+### Ratchet 강도 (ADR-022)
+- enabling(약) — 순수 리팩토링(동작 동일, 산문 단일화).

@@ -17,14 +17,7 @@ context-pack: minimal
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
-- `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. **UI 판정은 다중 신호 우선순위 (baseline placeholder 존재 회피)**:
-  1. DESIGN.md 부재 → 비-UI 확정 (fork 직후 삭제 권장 따른 경우, ADR-027 결정 #1·#15 정합) → DESIGN read skip + skip 사유 echo.
-  2. DESIGN.md 존재 + `## 0. Status` ≠ `draft` (예: `accepted` / `living`) → UI 확정 → 본문 회수 + cross-check 활성.
-  3. DESIGN.md 존재 + `## 0. Status` == `draft` → *추가 신호* 점검:
-     - ARCH `## 7-4. 프론트 결정` sub-section 활성 (본문 비어 있지 않음)
-     - 입력 workitem 산하 task 중 `## 7. 관련 문서` 에 `Design:` link 또는 본문에 UI 키워드 (`component`, `컴포넌트`, `page`, `페이지`, `screen`, `view`, `UI`, `frontend`, `프론트`) 등장
-     - 위 신호 *1개 이상* 발견 → *UI 의심* → warning 1줄 echo (`DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 미실행 의심. plan 진행은 허용하지만 시각 결정이 즉흥적이 됨`) + 본문 회수 + cross-check 활성.
-     - 신호 0개 → silent skip (false UI 판정 회피).
+- `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. UI 판정은 **ADR-027 amend3 "UI 판정 다중신호 절차"** 적용(부재→비-UI / status≠draft→UI / status=draft→추가신호). UI 확정 시 본문 회수 + cross-check 활성, 비-UI/skip 시 사유 echo.
 - 입력 ID에 해당하는 상위 workitem 문서(있으면)
 - `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md`
 
