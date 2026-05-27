@@ -20,7 +20,7 @@
 - WHY가 비자명할 때만 주석을 단다(숨은 제약, 미묘한 invariant, 특정 버그 우회). WHAT 주석은 좋은 식별자 이름으로 대체한다.
 - backwards-compat shim, feature flag, 사용 안 되는 변수의 `_` rename 같은 호환 hack을 만들지 않는다. 정말 안 쓰면 삭제한다.
 - 변경한 모든 줄은 task의 AC 또는 명시 요청으로 거꾸로 추적 가능해야 한다.
-  인접 코드 개선·무관 포맷팅·기존 스타일 무시·pre-existing dead code 삭제는 금지 (ADR-006 amend1).
+  인접 코드 개선·무관 포맷팅·기존 스타일 무시·pre-existing dead code 삭제는 금지 (ADR-006#amend-1).
 
 정책 근거: [ADR-006-simplicity-and-architecture.md](docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md).
 
@@ -36,7 +36,7 @@ Claude Code의 빌트인 plan 모드(Shift+Tab)는 사용자 자율 도구다. �
 ## 깊은 운영 원칙은 다음 문서를 따른다
 - [문서 계층과 산출물 인벤토리](docs/00-meta/STRUCTURE.md)
 - [시각 디자인](docs/20-system/DESIGN.md) (UI 프로젝트 한정)
-- [인터페이스 결정 책임 분배](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (DESIGN.md UI + ARCH 7-1~7-4 cross-surface enforcement, amend 1)
+- [인터페이스 결정 책임 분배](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (DESIGN.md UI + ARCH 7-1~7-4 cross-surface enforcement, ADR-027#amend-1)
 - [워크플로우 + 문서 상태 전이](docs/00-meta/WORKFLOW.md)
 - [에이전트 실행 전략 + 위임 트리거](docs/00-meta/DELEGATION_STRATEGY.md)
 - [Guardrail 운영 원칙](docs/00-meta/GUARDRAILS_STRATEGY.md)

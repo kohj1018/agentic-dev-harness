@@ -18,7 +18,7 @@ context-pack: minimal
 
 반드시 먼저 할 일:
 1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 실행하고 stdout/stderr를 수집한다.
-   - **명령이 없을 때 (ADR-007 amend3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
+   - **명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
    - 다른 빌더(`bun validate`, `mise run validate`, `just validate` 등)를 쓰는 스택은 본 skill의 `allowed-tools`에 해당 패턴(`Bash(bun validate)` 등)을 추가해야 자동 실행된다.
 2. 관련 workitem 문서를 읽는다.
 3. 필요한 상위 문서를 읽는다.
@@ -26,7 +26,7 @@ context-pack: minimal
 
 검증 기준:
 - 문서 범위와 구현이 일치하는가
-- 범위 밖 변경 + diff trace audit (ADR-006 amend1):
+- 범위 밖 변경 + diff trace audit (ADR-006#amend-1):
   `git diff` 결과의 각 변경 줄(또는 hunk)이 task의 AC-N 또는 명시 요청으로
   거꾸로 추적 가능한가? 추적 불가 줄은 다음 카테고리 중 하나로 분류 보고.
 
@@ -49,7 +49,7 @@ context-pack: minimal
   매핑되는가? 매핑 안 된 FAC가 있으면 report의 "Spec coverage" 섹션에
   `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장.
   자동 차단 X — ADR-007 책임 경계 정합. legacy fallback은 plan-workitem SKILL.md "feature 분해 시" 단락 참조.
-- **UI 프로젝트 — Design inventory audit** (ADR-027 amend 1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
+- **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
 - **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
 
 마지막 단계 — report 파일 작성:
@@ -70,7 +70,7 @@ context-pack: minimal
 - [P1] <...>
 - [P2] <...>
 
-## Diff trace audit (ADR-006 amend1)
+## Diff trace audit (ADR-006#amend-1)
 - 추적 가능 변경 줄: N개 (AC-1: M개, AC-2: ...)
 - 추적 불가 변경 줄: K개
   - (a) 인접 포맷팅/주석: <file:line> ... [P1]

@@ -31,7 +31,7 @@ Clean Code 6항목 체크리스트 (호출될 때마다 적용):
 
 P0/P1/P2 분류와 함께 위 6항목 중 어디에 해당하는지 라벨링한다(예: `P1 [Duplication] auth.ts:42 — 같은 정규화 로직이 3곳에 반복`).
 
-## Scope Discipline 체크 (별도 차원 — Clean Code와 독립, ADR-006 amend1)
+## Scope Discipline 체크 (별도 차원 — Clean Code와 독립, ADR-006#amend-1)
 
 변경 줄이 task의 AC 또는 명시 요청으로 거꾸로 추적 가능한가.
 다음 4 카테고리의 *범위 정합 위반*을 발견 시 라벨링.
@@ -60,23 +60,23 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
 - `plan`: Plan Quality 10 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
-- `design`: Design Consistency 4 (아래 별도 섹션 — ADR-027 amend 1). UI 프로젝트에서 stabilize-milestone 이 호출.
+- `design`: Design Consistency 4 (아래 별도 섹션 — ADR-027#amend-1). UI 프로젝트에서 stabilize-milestone 이 호출.
 - `discovery`: Discovery Quality 8 (아래 별도 섹션 — ADR-044). `/validate-discovery` 가 호출. Clean Code / Scope / Doc / Plan / Design 미적용.
 
-## Plan Quality 10 차원 (plan surface 전용 — ADR-038 + ADR-027 amend 1)
+## Plan Quality 10 차원 (plan surface 전용 — ADR-038 + ADR-027#amend-1)
 
 `/validate-plan` 호출 시 본 agent가 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
 
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반 의심. (P0 권장)
 2. **[Plan-sizing]** (ADR-026) — 1 task = 1 RGR 사이클 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). (P1 권장)
 3. **[Plan-AC-form]** (ADR-026) — Given-When-Then 형식 부재 / 강력 금지 verb 사용 ("works"/"looks good"/"is correct"/"is fine"). (P0 권장)
-4. **[Plan-ambiguity]** (ADR-006 amend1) — AC 1개에 2+ 합리적 해석 존재. (P1 권장)
+4. **[Plan-ambiguity]** (ADR-006#amend-1) — AC 1개에 2+ 합리적 해석 존재. (P1 권장)
 5. **[Plan-FAC-coverage]** (ADR-037) — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC / 누락 매핑. (P0 권장)
 6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요). (P1 권장)
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
-9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027 amend 1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). (P1 권장)
-10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027 amend 1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
+9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027#amend-1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). (P1 권장)
+10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027#amend-1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
 
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
 라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
@@ -92,12 +92,12 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 4. **[Disc-scope]** MVP 범위/비범위가 ruthless한가(scope creep). (P0)
 5. **[Disc-assumption]** 가장 위험한 가정이 식별·검증계획 있나(§10/§12 Assumption Tracker). (P0)
 6. **[Disc-metric]** 성공 기준이 측정 가능한가(§9). (P1)
-7. **[Disc-evidence]** §14 Evidence Log 신뢰도 라벨 적절·가설↔사실 분리(ADR-035 amend2). §14 부재 시 skip + "핵심 관찰"에 명시. (P1)
+7. **[Disc-evidence]** §14 Evidence Log 신뢰도 라벨 적절·가설↔사실 분리(ADR-035#amend-2). §14 부재 시 skip + "핵심 관찰"에 명시. (P1)
 8. **[Disc-bias]** confirmation bias / leading 질문 / 단일 출처 과신. (P1)
 
 라벨링 예: `P0 [Disc-scope] MVP 범위에 "협업 권한 관리" — JTBD 핵심(주간 갱신)과 무관, M3 이후로 비범위 권장`.
 
-## Design Consistency 4 차원 (design surface 전용 — ADR-027 amend 1)
+## Design Consistency 4 차원 (design surface 전용 — ADR-027#amend-1)
 
 stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
 

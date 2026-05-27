@@ -26,4 +26,4 @@ accepted
 - enabling(약) — opt-in peer review. 자동 차단 X.
 
 ## 참고
-- ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027 amend1(reviewer surface 패턴).
+- ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027#amend-1(reviewer surface 패턴).

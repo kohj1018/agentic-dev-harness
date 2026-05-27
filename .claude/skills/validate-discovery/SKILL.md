@@ -30,7 +30,7 @@ context-pack: minimal
 4. `[Disc-scope]` MVP 범위/비범위가 ruthless한가(scope creep). (P0)
 5. `[Disc-assumption]` 가장 위험한 가정이 식별·검증계획 있나(§10/§12). (P0)
 6. `[Disc-metric]` 성공 기준이 측정 가능한가(§9). (P1)
-7. `[Disc-evidence]` §14 Evidence 신뢰도 라벨 적절·가설↔사실 분리(ADR-035 amend2). §14 부재 시 본 차원 skip + "핵심 관찰"에 명시. (P1)
+7. `[Disc-evidence]` §14 Evidence 신뢰도 라벨 적절·가설↔사실 분리(ADR-035#amend-2). §14 부재 시 본 차원 skip + "핵심 관찰"에 명시. (P1)
 8. `[Disc-bias]` confirmation bias / leading 질문 / 단일 출처 과신. (P1)
 
 판정 규칙: **NEEDS_CHANGES**(P0 ≥1) / **ALL_GOOD**(P0=0; P1/P2는 막지 않음). *리뷰 라벨이지 워크플로 차단 아님*(ADR-038 정합).

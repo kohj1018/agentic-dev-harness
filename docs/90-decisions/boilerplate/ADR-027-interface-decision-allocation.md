@@ -103,8 +103,8 @@ accepted
 - 결정 18, 19 → constraint (강, [외부실증] 라벨 — ADR-027 본 ADR 의 외부 근거 5종이 충족)
 
 ### 후속 작업
-- ADR-017 시뮬레이션 Round 3 — Amendment 1 적용 후 LLM 시각·인터페이스 일관성 delta 측정.
-- Amendment 1 적용 후 `.boilerplate/validation/SIMULATION_RUN.md` 에 실측 라운드 추가.
+- ADR-017 시뮬레이션 Round 3 — #amend-1 적용 후 LLM 시각·인터페이스 일관성 delta 측정.
+- #amend-1 적용 후 `.boilerplate/validation/SIMULATION_RUN.md` 에 실측 라운드 추가.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - .claude/skills/plan-workitem/SKILL.md            — #amend-1 read-list+self-check, #amend-3 UI 판정
@@ -130,7 +130,7 @@ accepted
 ## Amendment 2 — 디자인 워크플로우 실효 강화 (시안 / anti-slop / lint / Motion 정합)
 
 ### 배경
-- amend 1이 cross-surface enforcement(예방/회수/peer review)를 박았으나, *시각 결정의 사전 확인*은 여전히 텍스트(DESIGN.md)뿐 — 사용자가 plan 전에 "실제로 어떻게 보이는지"를 확인할 자리가 없었다.
+- #amend-1이 cross-surface enforcement(예방/회수/peer review)를 박았으나, *시각 결정의 사전 확인*은 여전히 텍스트(DESIGN.md)뿐 — 사용자가 plan 전에 "실제로 어떻게 보이는지"를 확인할 자리가 없었다.
 - [외부실증] Stitch 공식 spec(google-labs-code/design.md `docs/spec.md`)의 canonical 섹션은 **8개이며 Motion을 포함하지 않는다**. 본 ADR 결정 #5가 "canonical 순서 채택"이라며 Motion을 Components/Do's 사이에 끼운 것은 *근거 있는 확장*을 canonical로 잘못 라벨링한 내부 불일치.
 - [외부실증] `@google/design.md lint` CLI(broken token ref / WCAG contrast / orphaned token / section ordering 등 7룰)가 DESIGN.md를 기계 검증한다 — 현재 deterministic 검사는 stabilize 5-2 raw hex grep 1종뿐.
 - [외부실증] Impeccable(impeccable.style)은 AI 슬롭을 37패턴(8 카테고리)으로 정의 — 현 DESIGN.md `## 9` Don'ts(~7항목)보다 훨씬 풍부.
@@ -144,7 +144,7 @@ accepted
 26. **R0 reference-evidence grounding (옵션)** — R0에서 사용자 제공 URL / MCP(lazyweb 무료·mobbin 유료) / 라이브러리(refero·getdesign.md) 중 *가용한 것*으로 레퍼런스를 근거화하고 what-to-borrow / what-to-avoid를 DESIGN.md `## 1 Overview`에 1줄씩 남긴다. **MCP 기본 연결·기본 의존 추가 X** (도구중립 ADR-010 / 계정·요금 의존).
 
 ### 비결정 (영구 No)
-- Codex `bootstrap-design` wrapper 추가 — ADR-010 amend 2가 자연어 호출 4종으로 의도 분류. (R5로 사용 빈도가 크게 늘면 Phase 3에서 ADR-010 측 재평가 — 본 ADR 범위 아님.)
+- Codex `bootstrap-design` wrapper 추가 — ADR-010#amend-2가 자연어 호출 4종으로 의도 분류. (R5로 사용 빈도가 크게 늘면 Phase 3에서 ADR-010 측 재평가 — 본 ADR 범위 아님.)
 - Mobbin·Lazyweb MCP 기본 연결 — 계정/요금/환경 의존, shared 기본값 부적합.
 - taste-skill·image-to-code 기본 lifecycle 편입 — 이미지생성 의존 + 산출물·승인 단계 폭증. 결정 21(R5)이 더 가볍게 동일 목적 달성.
 - DESIGN.md repo root 이동 — 본 ADR 결정 #8(의도적 `docs/20-system/` 배치) 유지. root stub은 ad-hoc.
@@ -177,7 +177,7 @@ accepted
 2. DESIGN.md 존재 + `## 0. Status` ≠ `draft`(예: accepted/living) → **UI 확정** → 본문 회수 + cross-check 활성.
 3. DESIGN.md 존재 + `## 0. Status` == `draft` → *추가 신호* 점검: (a) ARCH `## 7-4. 프론트 결정` 활성, (b) 대상 workitem 산하 task의 `## 7. 관련 문서`에 `Design:` link 또는 본문 UI 키워드(`component/컴포넌트/page/페이지/screen/view/UI/frontend/프론트`). 신호 ≥1 → *UI 의심* → warning 1줄 echo + 본문 회수 + cross-check 활성. 신호 0 → silent skip.
 
-본 절차가 단일 SSOT(상세·근거)다. **단 ADR-019 JIT 정합상 skill은 절차를 매 호출마다 따라야 하므로, 바 참조만 두면 안 된다** — 각 skill은 *압축 인라인 3-case*(부재→비-UI / status≠draft→UI / status=draft+신호≥1→UI 의심)를 유지하고 `상세: ADR-027 amend3`로 인용한다. 제거 대상은 *장황한 신호 열거 산문*뿐이며, 절차 자체를 skill 밖으로 빼는 게 아니다.
+본 절차가 단일 SSOT(상세·근거)다. **단 ADR-019 JIT 정합상 skill은 절차를 매 호출마다 따라야 하므로, 바 참조만 두면 안 된다** — 각 skill은 *압축 인라인 3-case*(부재→비-UI / status≠draft→UI / status=draft+신호≥1→UI 의심)를 유지하고 `상세: ADR-027#amend-3`로 인용한다. 제거 대상은 *장황한 신호 열거 산문*뿐이며, 절차 자체를 skill 밖으로 빼는 게 아니다.
 
 ### 적용 surface (압축 인라인 3-case + ADR 인용으로 교체 — 바 참조 X)
 - `.claude/skills/plan-workitem/SKILL.md` DESIGN.md read 항목

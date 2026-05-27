@@ -86,11 +86,12 @@ accepted
 
 - 향후 Phase 3에서 나머지 3개(discover-product, review-doc, boilerplate-context) 승격 여부 재평가는 *fork 데이터 회수 후* 결정 (현재 0건).
 
+<a id="adr-010-amend-2"></a>
 ## Amendment 2 (2026-05-16) — bootstrap-design 자연어 호출 skill 명시
 
 ### 결정
 
-[ADR-027](ADR-027-interface-decision-allocation.md)로 신설된 `/bootstrap-design`을 *Phase 2 보류 자연어 호출 skill*의 4번째 항목으로 명시한다. 본 ADR amend 1의 "나머지 3개(discover-product, review-doc, boilerplate-context)" 표기는 *역사적 기록*으로 보존하되, 현재 상태의 정확한 카운트는 **4개**다 (discover-product, review-doc, boilerplate-context, bootstrap-design).
+[ADR-027](ADR-027-interface-decision-allocation.md)로 신설된 `/bootstrap-design`을 *Phase 2 보류 자연어 호출 skill*의 4번째 항목으로 명시한다. 본 ADR #amend-1의 "나머지 3개(discover-product, review-doc, boilerplate-context)" 표기는 *역사적 기록*으로 보존하되, 현재 상태의 정확한 카운트는 **4개**다 (discover-product, review-doc, boilerplate-context, bootstrap-design).
 
 ### 근거
 
@@ -99,7 +100,7 @@ accepted
 
 ### 적용 surface
 
-- 본 ADR amend 1 본문 "나머지 3개" 문구는 보존(Record 라이프사이클). 본 amend 2가 정정 SSOT.
+- 본 ADR #amend-1 본문 "나머지 3개" 문구는 보존(Record 라이프사이클). 본 #amend-2가 정정 SSOT.
 - README.md / README_ko.md 본문 변경 없음 — 이미 4개 정합.
 - Phase 3 wrapper 승격 재평가 풀은 **4개** (3개 → 4개로 갱신).
 

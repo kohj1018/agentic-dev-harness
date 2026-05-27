@@ -59,7 +59,7 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 - 다음 권장 단계 (`/bootstrap-project` — DISCOVERY.md를 입력으로 사용)
 - **(opt-in, ADR-044) 기획 품질 확신이 부족하면**: 다른 세션·다른 LLM에서 `/validate-discovery --reviewer-tag <tag>` 1+회 → 원본 세션에서 `/repair-discovery` 회수. 건너뛰어도 정상.
 
-## --update 모드 (mid-project pivot, ADR-035 + amend2)
+## --update 모드 (mid-project pivot, ADR-035#amend-2)
 기존 DISCOVERY.md 있으면:
 - **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 리서치 노트(/research-pack 산출)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
 - R0 (페르소나 재확인) → R1·R2 (opportunity backlog 갱신·새 pain 추가) → R3 (assumption tracker 갱신 — §14 evidence로 §12 검증 결과 갱신) → R4 저장.

@@ -53,6 +53,7 @@ graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycl
 - ADR-009 (TDD default)
 - ADR-022 (Ratchet Principle — [관측됨] 라벨)
 
+<a id="adr-014-amend-1"></a>
 ## Amendment 1 (2026-05-16) — Evaluator-Optimizer 패턴 명명
 
 ### 결정
@@ -72,7 +73,7 @@ graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycl
 
 ### 적용 surface
 
-- [.claude/skills/stabilize-milestone/SKILL.md](../../../.claude/skills/stabilize-milestone/SKILL.md) 본문 첫 단락에 *"본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014 amend 1)"* 1줄 추가.
+- [.claude/skills/stabilize-milestone/SKILL.md](../../../.claude/skills/stabilize-milestone/SKILL.md) 본문 첫 단락에 *"본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1)"* 1줄 추가.
 - [DELEGATION_STRATEGY.md](../../00-meta/DELEGATION_STRATEGY.md) 스킬 실행 순서 가이드 단락에 동일 1줄.
 
 ### 후속 작업

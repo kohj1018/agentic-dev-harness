@@ -42,6 +42,7 @@ skill 간 흐름은 **자동 호출이 아니라 텍스트 제안 → 사용자/
 - `/finalize-workitem`이 통합 검증 명령(`validate`)을 한 번 더 돌리는 정책 — 직전 `/validate-workitem` 통과 후에도 안전성을 위해 한 번 더(상태가 변했을 수 있음).
 - `/stabilize-milestone`은 코드 수정·커밋을 하지 않고 점검 결과를 누적 기록한다 — 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 연결.
 
+<a id="adr-007-amend-1"></a>
 ## Amendment 1 (2026-05-15) — finalize lock file 화이트리스트
 
 ### 결정
@@ -78,6 +79,7 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 - fork 사용자가 *milestone stabilize 시 qa vs reviewer 어느 쪽 호출*을 매번 판단하지 않도록 경계 규칙 명문화.
 - skill 단위 책임(본 ADR)과 agent 단위 경계(DELEGATION_STRATEGY)가 분리 SSOT라 변경 비용 분리.
 
+<a id="adr-007-amend-3"></a>
 ## Amendment 3 (2026-05-27) — validate 게이트 강화 + finalize --apply 사유
 
 ### 결정

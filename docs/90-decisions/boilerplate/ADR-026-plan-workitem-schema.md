@@ -55,6 +55,7 @@ plan-workitem 마지막 출력에 `Milestone | Feature | Task | AC 수 | 의존�
 - ADR-007 (workitem lifecycle)
 - ADR-022 (Ratchet Principle)
 
+<a id="adr-026-amend-1"></a>
 ## Amendment 1 (2026-05-15) — planner self-check + architect 신호 + sizing SSOT
 - planner skill에 charter 정합 self-check 단락 (비목표 키워드 매칭 + milestone 매핑 확인).
 - architect 호출 권장 신호 4종 (텍스트 제안만, 자동 호출 X — ADR-007 정합).

@@ -38,6 +38,7 @@ accepted
 - 사용자가 다른 컨벤션을 원하면 charter에서 명시적으로 override + 새 ADR로 결정 보존.
 - changelog 자동화는 스택 확정 후 별도 task로 도입.
 
+<a id="adr-008-amend-1"></a>
 ## Amendment 1 (2026-05-15) — 모노레포 scope 컨벤션
 
 ### 결정
@@ -54,6 +55,7 @@ accepted
 ### 단일 repo
 단일 repo 케이스는 scope를 생략하거나 feature/module명을 자유 사용 — 본 amendment는 모노레포 전용.
 
+<a id="adr-008-amend-2"></a>
 ## Amendment 2 (2026-05-15) — `Refs:` footer 컨벤션
 
 ### 결정 (컨벤션 — 단정형)
@@ -67,7 +69,7 @@ Refs: T-003 (AC-2, AC-3)
 
 - `Refs:` 값은 `T-NNN (AC-X, AC-Y)` 형식.
 - 다중 task 묶음 commit은 `Refs: T-001, T-002` 형식.
-- lock file 화이트리스트 commit(ADR-007 amend 1)은 `Refs: chore` 또는 생략 가능.
+- lock file 화이트리스트 commit(ADR-007#amend-1)은 `Refs: chore` 또는 생략 가능.
 - PR 본문 footer는 `Refs: ADR-NNN` 형식 — commit footer의 `T-NNN` 형식과 키는 동일하나 값의 형식이 다름 (grep·자동 도구에서 정규식으로 분리 가능한 의도적 분리).
 
 ### 실행 (skill — 권장형)

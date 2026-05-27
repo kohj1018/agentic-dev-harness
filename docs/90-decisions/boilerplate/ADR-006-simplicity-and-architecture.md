@@ -26,7 +26,7 @@ accepted
 
 | 층 | Surface | 형태 |
 |----|---------|------|
-| 단순성·YAGNI | `AGENTS.md` | 6개 항목(Amendment 1 Surgical Changes 포함), fork된 새 세션이 자동 로드. |
+| 단순성·YAGNI | `AGENTS.md` | 6개 항목(#amend-1 Surgical Changes 포함), fork된 새 세션이 자동 로드. |
 | 단순성·YAGNI | `.claude/agents/builder.md` | 구현 출력 직전 self-check 4항목. 미통과 항목은 "남은 정리 항목"에 명시. |
 | Clean Code 6항목 | `.claude/agents/reviewer.md` | 6항목 체크리스트, P0/P1/P2 + 항목 라벨링. |
 | Clean Architecture | `.claude/agents/architect.md` | "프로젝트 규모가 정당화하는가" self-check. |
@@ -39,7 +39,7 @@ accepted
 - Clean Architecture는 적용 비용이 크므로 규모가 정당화할 때만 강제한다.
 
 ## 결과
-- `AGENTS.md`에 단순성 6개 항목 단락 (`CLAUDE.md`는 `@AGENTS.md` import. 초기 5개 + Amendment 1 Surgical Changes 1개).
+- `AGENTS.md`에 단순성 6개 항목 단락 (`CLAUDE.md`는 `@AGENTS.md` import. 초기 5개 + #amend-1 Surgical Changes 1개).
 - builder, validator, reviewer, architect의 규칙에 self-check / 체크리스트 / 규모 점검 추가.
 - `/implement-workitem` skill이 구현 시 단순성 self-check + Clean Code 6항목을 참조.
 - ARCHITECTURE_OVERVIEW의 `## 3-1. 레이어 경계 + 의존성 규칙` 섹션이 "프로젝트 규모가 정당화될 때만 채운다" YAGNI 보호 단서와 함께 도입된다(이 ADR과 같은 적용 사이클의 후속 변경).
@@ -49,6 +49,7 @@ accepted
 - 단순성 self-check 4항목이 builder 출력 비용을 늘리는지 측정. 비용이 크면 축약 검토.
 - `legacy 코드`의 premature abstraction은 즉시 제거하지 않고 `/stabilize-milestone`이 후보로만 보고하는 정책을 유지한다(사용자 결정 우선).
 
+<a id="adr-006-amend-1"></a>
 ## Amendment 1 (2026-05-16) — Surgical Changes 명시 + ambiguity surfacing protocol
 
 ### 결정
@@ -88,19 +89,20 @@ accepted
 - 본 Amendment 적용 후 builder self-check 비용 측정. 항목 추가가 builder 출력 토큰을 크게 늘리면 축약 검토.
 - fork 프로젝트에서 [관측됨] 데이터 회수 후 enabling 부분을 [가설→실증]로 승격 검토.
 
+<a id="adr-006-amend-2"></a>
 ## Amendment 2 (2026-05-27) — implement 단계 ambiguity 하드스탑
 
 ### 결정
-Amendment 1의 *Ambiguity surfacing*을 다음과 같이 정정한다.
+#amend-1의 *Ambiguity surfacing*을 다음과 같이 정정한다.
 - **plan 단계(planner)**: AC가 2+ 해석 가능하면 plan-workitem 9-1 self-check가 *해석안 + 권장 선택*을 "남은 미결정 사항"에 박는다(기존 유지). **추가**: 권장 선택을 채택했으면 해당 task `## 8. 메모`에 `해석 확정: AC-N = <선택>` 한 줄로 *기록*한다(implement가 따를 근거).
 - **implement 단계(builder)**: builder는 먼저 task `## 8. 메모`의 `해석 확정:` 기록을 찾는다.
   - 기록 있음 → 그 해석을 *기계적으로 따른다*(자체 재해석 X).
   - 기록 없음 + 2+ 해석이 *구현을 실질적으로 다르게* 만듦(사소한 표현 차이는 제외) → **구현을 시작하지 않고 `Needs Plan Decision`으로 종료**한다. 출력에 해석안을 나열하고 `/repair-plan <id>`(cross-review 했을 때) 또는 `/plan-workitem <id>` 재실행으로 해석을 확정하도록 안내한다.
 
-### 강도 분류 (ADR-022 정합) — Amendment 1에서 변경
-- Amendment 1은 implement의 ambiguity를 *enabling(약)* 으로 뒀다.
-- 본 Amendment 2는 *plan 결정 부재 + 2+ 해석이 **구현 결과를 실질적으로 다르게** 만드는 경우*에 한해 **constraint(강)** 으로 승격한다. 사소한 표현 차이(동일 구현으로 수렴)는 해당 없음 — false-stop 회피.
-- 근거 라벨 `[외부실증]`: *실행자가 모호성을 침묵 속에 자체 해석하면 결함이 새어든다*는 실패 모드는 amend1이 인용한 Karpathy silent-assumption testimony로 뒷받침된다(ADR-022 constraint 요건 충족).
+### 강도 분류 (ADR-022 정합) — #amend-1에서 변경
+- #amend-1은 implement의 ambiguity를 *enabling(약)* 으로 뒀다.
+- 본 #amend-2는 *plan 결정 부재 + 2+ 해석이 **구현 결과를 실질적으로 다르게** 만드는 경우*에 한해 **constraint(강)** 으로 승격한다. 사소한 표현 차이(동일 구현으로 수렴)는 해당 없음 — false-stop 회피.
+- 근거 라벨 `[외부실증]`: *실행자가 모호성을 침묵 속에 자체 해석하면 결함이 새어든다*는 실패 모드는 #amend-1이 인용한 Karpathy silent-assumption testimony로 뒷받침된다(ADR-022 constraint 요건 충족).
 - `context: fork`라 실시간 질의 불가 → *차단 = 종료 + 안내*이지 무한 대기 아님. plan 9-1/Step 7-D가 해석을 선기록하면 hard-stop은 거의 발화 안 함(2-layer 예방).
 
 ### 적용 surface

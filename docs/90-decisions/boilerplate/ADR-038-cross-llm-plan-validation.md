@@ -40,13 +40,13 @@ ADR-026 "비결정 (No) — 2-pass planning: 토큰 2배 + stabilize reviewer �
 - **위치**: `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`
 - **lifecycle**: ephemeral (`docs/40-validation/reports/`와 동일 mirror — `.gitignore`로 `*.md` 제외 + `.gitkeep`로 디렉터리 보존).
 - **삭제 주체**: `/repair-plan` (수용·기각 결정 후 일괄 삭제).
-- **reviewer-tag**: 다중 리뷰어 동시 작성 시 충돌 회피. 미지정 시 `default`. 같은 tag로 재실행 시 덮어쓰기 허용. *(→ Amendment 2 로 "기존 파일 보존 + `<tag>-N` 자동 suffix" 로 정정됨)*
+- **reviewer-tag**: 다중 리뷰어 동시 작성 시 충돌 회피. 미지정 시 `default`. 같은 tag로 재실행 시 덮어쓰기 허용. *(→ #amend-2 로 "기존 파일 보존 + `<tag>-N` 자동 suffix" 로 정정됨)*
 
 ### D3. /plan-workitem에 parallel waves 출력 추가
 plan-workitem 마지막 출력에 task `## 9. 의존성`을 위상 정렬한 wave 그룹 echo (Kahn's algorithm 등 결정적 알고리즘 — 같은 입력에 같은 wave). **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합). **file overlap 점검은 plan-workitem에서 제외** — `## 4-1. 변경 예정 파일/경로`가 implement 시점에 채워진다는 현행 정책(WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE `## 4-1` 주석 SSOT)상 plan 시점 정확도 부족 → 외부 LLM peer review(`/validate-plan`)에 *전적 위임*. 새 dependency 추가 의도(manifest/lock 파일명 *어느 하나라도* 명시 — 예: `package.json` 또는 `pnpm-lock.yaml`)가 보이는 task는 *단독 wave* 라벨로 echo (자동 차단 X / 영속 저장 X).
 
 ### D4. agent 분담
-- `/validate-plan` → reviewer agent (4번째 review surface "plan" 추가, Plan Quality 10 차원 (ADR-027 amend 1)).
+- `/validate-plan` → reviewer agent (4번째 review surface "plan" 추가, Plan Quality 10 차원 (ADR-027#amend-1)).
 - `/repair-plan` → planner agent (workitem 문서 수정 권한 — 기존 plan-workitem과 동일).
 
 ### D5. Codex 호환
@@ -108,13 +108,13 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 - evidence가 누적된 뒤 — wave 그룹 file overlap 정밀도 부족이 [관측됨]으로 잡히면 — `## 4-1` plan 시점 채움 / LSP-MCP 보조 같은 부수 정책을 별도 ADR amend로 추가 검토.
 
 <a id="adr-038-amend-1"></a>
-## Amendment 1 — Plan Quality 차원 8 → 10 (ADR-027 amend 1 양립)
+## Amendment 1 — Plan Quality 차원 8 → 10 (ADR-027#amend-1 양립)
 
 ADR-027 amend 1 결정 18 에 의해 Plan Quality 차원이 8 → 10 으로 확장됨. 추가 2 차원:
 - `[Plan-design]` (UI 프로젝트 한정 — DESIGN.md 부재 시 skip)
 - `[Plan-arch-iface]` (해당 스택 한정 — ARCH 7-x sub-section 부재 시 skip)
 
-본 Amendment 는 *번호 확장 + 인용 sync* 만 책임. 차원 본문 정의는 ADR-027 amend 1 + reviewer.md `Plan Quality 10 차원` 단락 SSOT.
+본 Amendment 는 *번호 확장 + 인용 sync* 만 책임. 차원 본문 정의는 ADR-027#amend-1 + reviewer.md `Plan Quality 10 차원` 단락 SSOT.
 
 <a id="adr-038-amend-2"></a>
 ## Amendment 2 — 리뷰 파일 충돌 정책 정정 (덮어쓰기 → 자동 suffix)

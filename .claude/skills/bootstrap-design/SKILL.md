@@ -22,7 +22,7 @@ context-pack: minimal
 - 기본: R0~R5 모두.
 - `--update`: 기존 DESIGN.md가 있을 때의 부분 갱신/재디자인 모드(아래 `## --update 모드`). 처음부터 R0~R5를 다시 돌지 않는다.
 
-## --update 모드 (재디자인/부분 갱신, ADR-027 amend4)
+## --update 모드 (재디자인/부분 갱신, ADR-027#amend-4)
 기존 `docs/20-system/DESIGN.md`가 채워져 있을 때:
 - 처음부터 R0~R5를 다시 돌지 않는다. 변경 필요한 부분만 갱신:
   - R0(레퍼런스 재확인) — *선택*. 시각 방향 자체가 바뀔 때만.
