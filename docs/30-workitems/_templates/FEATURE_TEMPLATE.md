@@ -3,11 +3,19 @@
 ## 0. Status
 draft
 
+## 0-1. Type
+<!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
+     technical-enabler/bugfix/refactor/migration/research-spike 면 아래 ## 2는 "User Story" 대신
+     "기술적 근거(Technical rationale)" 한 줄 + 서비스하는 가정/기회(DISCOVERY ID)·상위 결정(ADR) 링크로 채운다.
+     정책: ADR-039. -->
+feature
+
 ## 1. 요약
 
-## 2. 사용자 가치 (User Story)
+## 2. 사용자 가치 (User Story) — Type=feature 일 때
 <!-- "As a <persona>, I want to <goal>, so that <benefit>." 1개 이상.
-     persona는 PROJECT_CHARTER.md `## 2.1` ID 인용 — 자체 발명 X. -->
+     persona는 PROJECT_CHARTER.md `## 2.1` ID 인용 — 자체 발명 X.
+     Type≠feature 면 본 섹션 제목을 "기술적 근거"로 바꾸고: 무엇을/왜 + 서비스하는 DISCOVERY assumption/insight ID 또는 ADR 링크. -->
 
 ## 3. 핵심 시나리오 (Feature-level)
 <!-- happy / alternate / fail 각 3~5단계.

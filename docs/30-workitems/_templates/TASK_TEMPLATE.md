@@ -3,11 +3,31 @@
 ## 0. Status
 draft
 
+## 0-1. Type
+<!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
+     - technical-enabler: 사용자 시나리오가 없는 기술 작업(SDK/로깅/의존성/CI). ## 1에 기술적 근거 + 어떤 가정/기회(DISCOVERY assumption ID)·상위 결정(ADR)을 서비스하는지 링크.
+     - bugfix: 아래 ## 3-T 트러블슈팅 sub-template을 채운다(## 3 대신).
+     - refactor: 외부 행동 불변. AC는 "행동 동일 + 구조 개선 측정".
+     - migration: bootstrap-stack --migrate contract(ADR-041)와 연결. expand-contract 단계를 ## 3에 명시.
+     - research-spike: 산출은 리서치 노트(/research-pack, ADR-040). TDD opt-out 기본.
+     정책: ADR-039. -->
+feature
+
 ## 1. 작업 목적
 
 ## 2. 작업 범위
 
 ## 3. 구현 항목
+
+## 3-T. 트러블슈팅 (Type=bugfix 일 때만 — 아니면 본 섹션 삭제)
+<!-- 증상만 있고 AC가 없는 작업의 root-cause 절차. 채운 뒤 회귀 테스트 AC를 ## 6에 박는다. -->
+- **증상(Symptom):** <사용자가 본 잘못된 동작>
+- **재현 절차(Repro):** <1. … 2. … 결정적 재현 순서>
+- **기대 / 실제(Expected / Actual):**
+- **관측(Observed):** <로그·에러·스택트레이스·네트워크 등 1차 증거>
+- **가설(Hypotheses):** <1~3개, 각 검증 방법 1줄>
+- **근본 원인(Root cause):** <확정된 원인 — 가설 검증 후 채움>
+- **회귀 테스트 AC:** <이 버그를 재현하는 실패 테스트를 ## 6 AC-N으로 박는다(Red→Green)>
 
 ## 4. 제외 항목
 
