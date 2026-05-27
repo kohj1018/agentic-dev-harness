@@ -109,14 +109,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   | M1        | F-001   | T-001 | 2     | -      |
   | M1        | F-001   | T-002 | 3     | T-001  |
   ```
-- feature 분해 시: 매핑표를 *feature 문서의 `## 7-1`에 직접 기록* + plan 출력 요약에 동일 표 echo
-  (`## 7-1` 본문이 SSOT, plan 출력은 사람 확인용):
-  ```
-  ## 7-1. FAC ↔ AC 매핑표
-  FAC-1 → T-001:AC-1, T-002:AC-2
-  FAC-2 → T-003:AC-1
-  FAC-3 → unmapped  ← 미커버 task 필요
-  ```
+- feature 분해 시: 매핑표는 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
 - 핵심 가정
 - 남은 미결정 사항
 - **인터페이스·디자인 cross-check 결과** (정합성 self-check 결과 요약):
@@ -212,6 +205,9 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 ## 기술 부채 회수 hook (ADR-022 / ADR-039)
 부채 회수 의도가 있는 분해(사용자 요청 또는 milestone 부채 예산)일 때만 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 *open* 항목(특히 P0/P1 리팩토링·아키텍처 부채)을 회수해, 이번 범위와 관련되면 **후보 task로 surface**한다(보통 `Type: refactor` 또는 `bugfix` — ADR-039). 자동 생성 X — 출력 "다음 추천 단계"/"남은 미결정 사항"에 `- 부채 회수 후보: <IMPROVEMENT_GUIDE 항목 ID> → T-XXX(refactor) 권장` 형태로 제시. 부채 회수 의도가 없으면 IMPROVEMENT_GUIDE를 사전 read 하지 않는다 (ADR-019 minimal 정합).
+
+## 출력 스타일 (ADR-046)
+마지막 출력은 signal-first(문서 목록 → 매트릭스 → 미결정 → 다음 액션). 파일에 영속된 상세(FAC↔AC 전체표·cross-check 세부)는 위치만 가리키고 echo하지 않는다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

@@ -24,6 +24,15 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 - 라운드별 응답은 자연어로만 받는다(`AskUserQuestion`은 [공식 문서](https://code.claude.com/docs/en/agent-sdk/user-input)의 Limitations 섹션 기준 sub-agent에서 사용 불가).
 - 매 라운드 끝에 `skip` / `good` / `refine: ...`로 응답할 수 있다.
 
+라운드 출력 포맷 (ADR-046 출력 스타일 — 사용자-facing 표면만 압축, 내부 분석·DISCOVERY.md 적재 내용은 불변):
+각 라운드는 다음 고정 포맷으로 압축해 출력한다.
+```
+이번 결정: <1~2줄>
+확인 필요: <있으면 ≤3개, 없으면 생략>
+답변: skip / good / refine: …
+```
+단, 사용자가 *선택해야 하는* 옵션(R0 페르소나 후보·R1 pain 목록 등)은 선택 가능하도록 보존한다 — 압축은 framing·서술에만 적용하고 선택지 자체는 빠뜨리지 않는다(ADR-046#d3). architect 단발 sub-call의 *과정*만 대화에 풀어쓰지 않는다.
+
 라운드 구성:
 
 **R0 — 문제 한 줄 + 페르소나 확인**
@@ -67,6 +76,9 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 
 ## Idempotency (ADR-035)
 ID 매칭 — 기존 ID(A-1·A-2)면 *검증일·다음 행동만 갱신*, 새 가정이면 새 ID 부여. DISCOVERY.md = persona/scenario/assumption SSOT, Charter는 snapshot view.
+
+## 출력 스타일 (ADR-046)
+라운드 표면 출력은 위 "라운드 출력 포맷"을 따른다 — 라운드 수·분석 깊이는 줄이지 않고 표면 분량만 압축한다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
