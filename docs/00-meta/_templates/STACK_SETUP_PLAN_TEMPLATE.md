@@ -34,3 +34,10 @@ jobs:
 ```
 
 GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 권장만.
+
+## Optional MCP Connectors
+<!-- 기본 자동 연결 X (ADR-043). RCE급 도구(예: Playwright browser_run_code_unsafe)는 신뢰 클라이언트 한정. secret은 .env(커밋 X).
+     연결 절차(ADR-043, 전용 skill 없음 — 1회성 셋업): (a) researcher(ADR-040)로 해당 능력의 최신 공식 MCP 설정 조회; (b) Claude(`claude mcp add <name> --scope project` 또는 `.mcp.json`) + Codex(`.codex/config.toml [mcp_servers.<name>]`) 설정을 *사용자가 직접 실행*; (c) project ADR(ADR-1NN)에 purpose/official docs/scope/read-only/secret/왜 기록 + project README 인덱스 갱신; (d) 아래 표에 행 추가. -->
+| name | purpose | official docs | scope | read-only | secret | smoke check | last-verified |
+|------|---------|---------------|-------|-----------|--------|-------------|---------------|
+| (예: jetbrains) | IDE 연동 | (URL) | project | - | - | - | - |
