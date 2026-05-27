@@ -35,6 +35,7 @@
 | 039 | Workitem Type 분류 | accepted | — | task/feature에 Type 필드(feature/technical-enabler/bugfix/refactor/migration/research-spike) |
 | 040 | 외부 리서치 capability | accepted | — | researcher agent + /research-pack skill, report-only 웹 접근 |
 | 041 | 스택 추천 + 마이그레이션 contract | accepted | — | bootstrap-stack --recommend(확정 전 2~3조합) / --migrate(expand-contract contract ADR) |
+| 042 | UX 흐름 품질 (HEART) | accepted | — | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 |
 
 ## Reserved / Parked / Dropped 번호
 

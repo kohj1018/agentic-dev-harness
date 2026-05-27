@@ -44,6 +44,14 @@ feature
 ## 8. Non-functional Requirements
 <!-- 성능·접근성·보안·i18n. 해당 없으면 "(해당 없음)" 명시. -->
 
+## 8-1. UX 흐름 품질
+<!-- UI feature 한정(비-UI는 "(해당 없음)"). 정책: ADR-042 (Google HEART).
+     - primary task: 이 feature에서 사용자의 핵심 1행동.
+     - empty / loading / error 흐름: 각 상태에서 사용자가 무엇을 보고 어떻게 복구하는가.
+     - accessibility: 키보드·스크린리더·대비 등 흐름 레벨 요구.
+     - copy 톤: 핵심 메시지·에러 문구 방향.
+     - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수. -->
+
 ## 9. 엣지 케이스
 
 ## 10. 의존성
