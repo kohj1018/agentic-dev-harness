@@ -7,18 +7,18 @@
 accepted
 
 ## 현재 유효 결정
-- ADR 간 모든 참조는 정규 ID로 쓴다: `ADR-NNN` / `ADR-NNN#amend-M` / `ADR-NNN#dK`. **줄번호 참조(`file.md L44`) 금지.**
+- ADR 간 모든 참조는 정규 ID로 쓴다: `ADR-NNN` / `ADR-NNN#amend-M` / `ADR-NNN#dK`. **줄번호/line-number 참조(파일명 뒤 `L+숫자` 형태) 금지.**
 - 다른 파일에서 인용되는 amendment 헤딩 위에는 stable anchor를 둔다(결정은 anchor 없이 `#dK` 토큰).
 - cross-surface 정책 ADR은 `## Surfaces` 블록을 *fan-out SSOT*로 둔다. STRUCTURE.md Canonical Owner 셀은 그 포인터만 둔다(산문 나열 중복 제거).
 - 다개정(amend **4개 이상** 또는 정정성 amend 포함) ADR은 상단에 `## 현재 유효 결정` 요약(≤6줄)을 둔다.
-- amend는 작게 유지. 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가·amend 4+ 누적은 신규 supersede ADR로 간다(ADR-045 이후 *신규 변경* 기준 — 기존 ADR은 grandfather, D6).
+- amend는 작게 유지. 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가·개정(amend) 4개 이상 누적은 신규 supersede ADR로 간다(ADR-045 이후 *신규 변경* 기준 — 기존 ADR은 grandfather, D6).
 - **비-ADR 문서끼리의 링크·섹션 참조도 동일 규약**(상대경로 markdown 링크 + cross-ref 섹션엔 stable anchor) — D9.
 - 신규 ADR은 본 계약을 의무 적용. 기존 ADR/문서는 *많이 인용되는 것부터* 점진 이관.
 
 ## 배경
-- [관측됨] `boilerplate/README.md` ADR-038 행 Amendments 컬럼이 `+amend1`만 적혀 본문 Amendment 2와 어긋났다(인용 drift 실재).
-- [관측됨] `STRUCTURE.md` Canonical Owner 표와 `stabilize-milestone/SKILL.md` §1.0 노트가 `validator.md L44~48` / `L44` 줄번호로 참조 — line shift에 취약.
-- [관측됨] `amend` 토큰이 39개 파일 131회, `amend 1 / amend1 / Amendment 1` 표기 혼재 → grep 일관 검색 불가.
+- [관측됨] `boilerplate/README.md` ADR-038 행 Amendments 컬럼이 첫 개정만 표기돼 본문 `## Amendment 2`와 어긋났다(인용 drift 실재).
+- [관측됨] `STRUCTURE.md` Canonical Owner 표와 `stabilize-milestone/SKILL.md` §1.0 노트가 `validator.md` 줄번호 형태로 참조 — line shift에 취약.
+- [관측됨] `amend` 토큰이 39개 파일 131회, `amend N / amendN / Amendment N` 표기 혼재 → grep 일관 검색 불가.
 - [관측됨] cross-surface 묶음(ADR-027/038)이 ADR 본문 "적용 위치" + Canonical Owner 셀 두 곳에 산문으로 중복 — fan-out 레지스트리 자신이 SSOT를 위반.
 - 본 repo 관측만으로 [관측됨] 충족. 외부 다중 repo 실증은 미인용.
 
@@ -34,7 +34,7 @@ ADR·하위 단위의 *canonical 참조 ID*는 다음으로 통일한다. 인용
 | ADR 내 결정 | `ADR-027#d5` |
 | 문서 섹션 | `ARCHITECTURE_OVERVIEW.md#arch-7-1` (stable anchor — D9·부록 B) |
 
-- **유일한 hard ban: 줄번호/line 참조**(`validator.md L44`, `WORKFLOW.md §4 line 25` 등) — line shift에 조용히 깨진다. 내용 서술자(예: `validator.md 의 인터페이스 CHECK 규칙(7-x)`)나 섹션 anchor로 대체한다.
+- **유일한 hard ban: 줄번호/line 참조**(validator.md 줄번호 참조, WORKFLOW.md §4 줄번호 참조 등) — line shift에 조용히 깨진다. 내용 서술자(예: `validator.md 의 인터페이스 CHECK 규칙(7-x)`)나 섹션 anchor로 대체한다.
 - `ARCH 7-1`, `DESIGN.md ## 9` 같은 **사람이 읽는 shorthand는 허용**한다(현 문서 스타일 존중). 단 그 shorthand가 *그 자리의 주된/유일한 참조*일 때는 canonical 형태를 1회 병기한다 — 예: `ARCH 7-1 (ARCHITECTURE_OVERVIEW.md#arch-7-1)`. 문맥상 보조 언급은 shorthand 단독 허용.
 - amend 인용 토큰은 `ADR-027#amend-1`로 통일한다(본문 헤딩 `## Amendment 1`은 그대로 둔다). `amend 1 / amend1 / amendment-1`을 *인용 식별자*로 쓰지 않는다.
 - navigational markdown 링크(`[ADR-027](...path...)`)는 그대로 쓴다.
@@ -71,9 +71,9 @@ anchor id 규칙: `adr-<번호>-amend-<M>`. *외부 인용이 없는* amendment�
 |-----------|------|
 | 문구 정정·surface 1~2개 추가·충돌 없는 확장 | `## Amendment N` 추가 |
 | 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가 | 신규 ADR로 supersede(amend 흡수 금지) |
-| amend 4개 이상 누적 | 통합 재발행(supersede)로 클린 ADR 재작성. 구 ADR은 `superseded`로 history 잔존 |
+| 개정(amend) 4개 이상 누적 | 통합 재발행(supersede)로 클린 ADR 재작성. 구 ADR은 `superseded`로 history 잔존 |
 
-**적용 시점(중요)**: 본 기준은 ADR-045 이후의 *새 변경*에만 적용한다. 이미 amend가 누적된 기존 ADR(예: amend 4개 + surface 다수인 ADR-027)은 **grandfather** — 즉시 재발행 의무 없음. 기존 ADR은 `## 현재 유효 결정` + `## Surfaces` 정리만 하고, *다음 변경이 발생할 때* amend 대신 통합 재발행을 우선 검토한다.
+**적용 시점(중요)**: 본 기준은 ADR-045 이후의 *새 변경*에만 적용한다. 이미 amend가 누적된 기존 ADR(예: 개정(amend) 4개 + surface 다수인 ADR-027)은 **grandfather** — 즉시 재발행 의무 없음. 기존 ADR은 `## 현재 유효 결정` + `## Surfaces` 정리만 하고, *다음 변경이 발생할 때* amend 대신 통합 재발행을 우선 검토한다.
 
 supersede 절차는 기존 `_ADR_GUIDE.md` "대체 절차"를 그대로 따른다(상태 변경 + 상단 "대체: ADR-NNN" + 신규 ADR이 구 ADR 참조).
 
