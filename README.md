@@ -17,6 +17,7 @@ A Claude Code–first, Codex CLI–compatible boilerplate that sets up the docum
 
 ```
 /discover-product (optional)
+  └─ (optional) /validate-discovery (separate session) → /repair-discovery (origin session)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
   → /bootstrap-design (frontend only — fills DESIGN.md + a temporary design-preview.html for review, removed after approval)
   → /plan-workitem
@@ -108,12 +109,12 @@ Once your stack is decided:
 When you hit Claude Code's usage limit or prefer Codex:
 
 1. Run `codex` in the same repo — `AGENTS.md` is auto-loaded.
-2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
+2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
-4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
+4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
 
 > Note: docs in `docs/` use Claude's `/<skill-name>` slash syntax. Read these as `$<skill-name>` when working in Codex.
 

@@ -17,6 +17,7 @@
 
 ```
 /discover-product (선택)
+  └─ (선택) /validate-discovery (별 세션) → /repair-discovery (원본 세션)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
   → /bootstrap-design (UI 전용 — DESIGN.md 채움 + 검토용 임시 design-preview.html 생성, 승인 후 삭제)
   → /plan-workitem
@@ -107,12 +108,12 @@
 Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 1. 같은 저장소에서 `codex` 실행 — `AGENTS.md`가 자동 로드된다.
-2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
+2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
 3. 자주 쓰는 core workflow skill은 Codex skill로 호출 가능:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
-4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
+4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
 
 > 참고: `docs/` 하위 문서는 Claude의 `/<skill-name>` 슬래시 표기를 사용한다. Codex에서는 `$<skill-name>`으로 읽는다.
 
