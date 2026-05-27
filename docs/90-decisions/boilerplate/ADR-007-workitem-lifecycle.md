@@ -77,3 +77,20 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 ### 근거
 - fork 사용자가 *milestone stabilize 시 qa vs reviewer 어느 쪽 호출*을 매번 판단하지 않도록 경계 규칙 명문화.
 - skill 단위 책임(본 ADR)과 agent 단위 경계(DELEGATION_STRATEGY)가 분리 SSOT라 변경 비용 분리.
+
+## Amendment 3 (2026-05-27) — validate 게이트 강화 + finalize --apply 사유
+
+### 결정
+1. **validate 부재 게이트** — `/validate-workitem`·`/finalize-workitem`의 통합 검증 명령 단계에서, *스택 확정 신호*(`docs/00-meta/STACK_SETUP_PLAN.md` 존재)가 있는데 `validate` 명령(`pnpm/npm/make/task validate`)이 없으면 **skip이 아니라 `Needs Stack Guard`로 종료**하고 `/stack-guard` 실행을 안내한다. STACK_SETUP_PLAN.md가 없으면(스택 미정) 기존대로 skip.
+2. **finalize --apply 사유** — `/finalize-workitem --apply`는 사용자가 **`--rationale "<왜 4-1과 다른지>"`** 를 함께 넘겨야 한다(`$ARGUMENTS`에서 파싱). finalize는 이 사유를 커밋 body의 `--apply rationale: <...>` 줄에 기록한다. `--apply`인데 `--rationale`이 없으면 finalize는 **사유를 스스로 만들지 않고**(executor가 사유를 발명하면 다시 "자아") `Needs Rationale`로 종료하고 `--rationale` 동봉 재실행을 안내한다.
+
+### 근거
+- [관측됨] validate 부재 silent skip은 스택 확정 프로젝트에서 *기계 게이트가 항상 켜져 있다*는 보장을 깬다(A13 장기 운영 리스크).
+- [관측됨] `--apply`는 실제 변경을 신뢰하므로 남용 시 finalize에 "자아"가 생긴다 — commit body 사유 강제로 추적성 확보(ADR-008 Refs footer 정신).
+
+### 강도 (ADR-022)
+- constraint(강, [관측됨]) — 둘 다 종료/강제. 단 스택 확정 신호가 있을 때만(green-field 미정 프로젝트 면제).
+
+### 적용 surface
+- [.claude/skills/validate-workitem/SKILL.md](../../../.claude/skills/validate-workitem/SKILL.md) step 1
+- [.claude/skills/finalize-workitem/SKILL.md](../../../.claude/skills/finalize-workitem/SKILL.md) — validate 단계 + `--apply` 플래그 정의 + 커밋 메시지 단계
