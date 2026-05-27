@@ -87,3 +87,27 @@ accepted
 ### 후속 작업
 - 본 Amendment 적용 후 builder self-check 비용 측정. 항목 추가가 builder 출력 토큰을 크게 늘리면 축약 검토.
 - fork 프로젝트에서 [관측됨] 데이터 회수 후 enabling 부분을 [가설→실증]로 승격 검토.
+
+## Amendment 2 (2026-05-27) — implement 단계 ambiguity 하드스탑
+
+### 결정
+Amendment 1의 *Ambiguity surfacing*을 다음과 같이 정정한다.
+- **plan 단계(planner)**: AC가 2+ 해석 가능하면 plan-workitem 9-1 self-check가 *해석안 + 권장 선택*을 "남은 미결정 사항"에 박는다(기존 유지). **추가**: 권장 선택을 채택했으면 해당 task `## 8. 메모`에 `해석 확정: AC-N = <선택>` 한 줄로 *기록*한다(implement가 따를 근거).
+- **implement 단계(builder)**: builder는 먼저 task `## 8. 메모`의 `해석 확정:` 기록을 찾는다.
+  - 기록 있음 → 그 해석을 *기계적으로 따른다*(자체 재해석 X).
+  - 기록 없음 + 2+ 해석이 *구현을 실질적으로 다르게* 만듦(사소한 표현 차이는 제외) → **구현을 시작하지 않고 `Needs Plan Decision`으로 종료**한다. 출력에 해석안을 나열하고 `/repair-plan <id>`(cross-review 했을 때) 또는 `/plan-workitem <id>` 재실행으로 해석을 확정하도록 안내한다.
+
+### 강도 분류 (ADR-022 정합) — Amendment 1에서 변경
+- Amendment 1은 implement의 ambiguity를 *enabling(약)* 으로 뒀다.
+- 본 Amendment 2는 *plan 결정 부재 + 2+ 해석이 **구현 결과를 실질적으로 다르게** 만드는 경우*에 한해 **constraint(강)** 으로 승격한다. 사소한 표현 차이(동일 구현으로 수렴)는 해당 없음 — false-stop 회피.
+- 근거 라벨 `[외부실증]`: *실행자가 모호성을 침묵 속에 자체 해석하면 결함이 새어든다*는 실패 모드는 amend1이 인용한 Karpathy silent-assumption testimony로 뒷받침된다(ADR-022 constraint 요건 충족).
+- `context: fork`라 실시간 질의 불가 → *차단 = 종료 + 안내*이지 무한 대기 아님. plan 9-1/Step 7-D가 해석을 선기록하면 hard-stop은 거의 발화 안 함(2-layer 예방).
+
+### 적용 surface
+- [.claude/skills/implement-workitem/SKILL.md](../../../.claude/skills/implement-workitem/SKILL.md) — ambiguity 단계 재작성.
+- [.claude/agents/builder.md](../../../.claude/agents/builder.md) — ambiguity 규칙 1줄 교정.
+- [.claude/skills/plan-workitem/SKILL.md](../../../.claude/skills/plan-workitem/SKILL.md) — 9-1에 "해석 확정 기록" 1줄.
+
+### 근거
+- 사용자 의도: implement/finalize는 *기계적*, plan/validate가 *사고* 담당. implement가 해석을 자체 결정하면 그 경계가 무너진다.
+- 2-layer 방어 유지: plan 9-1이 1차로 해석을 확정 → implement는 그 결정을 *집행만*. plan이 놓쳤을 때만 implement가 중단해 plan으로 되돌린다.

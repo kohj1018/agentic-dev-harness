@@ -10,7 +10,7 @@
 | 001 | Doc hierarchy | accepted | — | docs/ 디렉터리 6분할 결정 |
 | 004 | Model alias policy | accepted | (+amend1: agent 이름 역할 중심) | shared 기본값에서 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용 |
 | 005 | Single Source of Truth (SSOT) | accepted | — | 같은 사실은 1곳에서 정의, 다른 곳은 한 줄 + 링크. 정책=ADR 패턴. |
-| 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+amend1: Surgical Changes + ambiguity surfacing) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
+| 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+amend1: Surgical Changes + ambiguity surfacing, +amend2: implement ambiguity 하드스탑) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
 | 007 | Workitem lifecycle | accepted | (+amend1: lock file whitelist 11종, +amend2: agent 단위 판정 경계 SSOT) | discover→bootstrap→plan→implement→validate→repair→finalize→stabilize 8단계 |
 | 008 | Commit convention | accepted | (+amend1: monorepo scope, +amend2: Refs footer) | Conventional Commits 기본 채택 |
 | 009 | TDD default + opt-out | accepted | (+amend1: AC ID 컨벤션) | /implement-workitem 디폴트는 Red→Green→Refactor 사이클, opt-out은 사유+follow-up 모두 필요 |
