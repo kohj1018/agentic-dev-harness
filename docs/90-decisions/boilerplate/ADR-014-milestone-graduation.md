@@ -48,6 +48,11 @@ accepted
 ## 잔여 모니터링
 graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycle 단계 결함 신호 → ADR 후보.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- .claude/skills/stabilize-milestone/SKILL.md         — #d3 graduation pre-check §1.5, #amend-1 evaluator-optimizer 1줄
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — #d1 §5 완료기준 5+1, #d2 §8 회고
+- docs/00-meta/DELEGATION_STRATEGY.md                 — #amend-1 evaluator-optimizer 1줄
+
 ## 참고
 - ADR-007 (workitem lifecycle)
 - ADR-009 (TDD default)

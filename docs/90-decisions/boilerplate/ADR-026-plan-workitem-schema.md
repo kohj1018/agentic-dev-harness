@@ -50,6 +50,10 @@ plan-workitem 마지막 출력에 `Milestone | Feature | Task | AC 수 | 의존�
 ## 잔여 모니터링
 첫 마일스톤 *재분해 권장 텍스트 발화율* > 50% 시 verb 정의 재검토.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md   — AC 구조화 (base)
+- .claude/skills/plan-workitem/SKILL.md            — #amend-1 planner self-check + architect 신호 + sizing
+
 ## 참고
 - ADR-009 (TDD default)
 - ADR-007 (workitem lifecycle)

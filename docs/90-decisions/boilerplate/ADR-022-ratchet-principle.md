@@ -34,5 +34,11 @@ accepted
 ## 후속 작업
 없음 — 본 ADR이 다른 ADR의 근거.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- docs/40-validation/QA_FINDINGS.md                   — evidence label 스키마
+- docs/40-validation/IMPROVEMENT_GUIDE.md             — evidence label 스키마
+- .claude/agents/builder.md                            — self-check 1줄(제약 vs 권장)
+- docs/90-decisions/boilerplate/_ADR_GUIDE.md          — Ratchet Principle 단락
+
 ## 참고
 - Addy Osmani — agent harness engineering (https://addyosmani.com/blog/agent-harness-engineering/)

@@ -25,5 +25,10 @@ accepted
 ## Ratchet 강도 (ADR-022)
 - enabling(약) — opt-in peer review. 자동 차단 X.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- .claude/skills/validate-discovery/SKILL.md           — #d1 신설
+- .claude/skills/repair-discovery/SKILL.md             — #d2 신설 (agent: architect)
+- .claude/agents/reviewer.md                            — #d3 discovery surface 8 차원
+
 ## 참고
 - ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027#amend-1(reviewer surface 패턴).

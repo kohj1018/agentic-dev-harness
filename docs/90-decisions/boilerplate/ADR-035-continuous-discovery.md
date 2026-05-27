@@ -35,6 +35,13 @@ ID 매칭 — 기존 ID(A-1·A-2)면 *검증일·다음 행동만 갱신*, 새 �
 ## 잔여 모니터링
 assumption tracker 빈 결과율 — stabilize가 "미검증 가정 N건" 형태로 보고.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- AGENTS.md                                            — DISCOVERY=SSOT 1줄
+- docs/10-charter/PROJECT_CHARTER.md                   — 본문 끝 staleness 안내
+- docs/10-charter/_templates/DISCOVERY_TEMPLATE.md     — #amend-2 §14 Evidence / §15 Insight
+- .claude/skills/stabilize-milestone/SKILL.md          — #amend-1 §6.5 staleness (#amend-2 4번째 시그널)
+- .claude/skills/discover-product/SKILL.md             — #amend-2 R-E Evidence 회수 / --update
+
 ## 참고
 - ADR-022 (Ratchet Principle — [관측됨+외부실증] 라벨)
 - ADR-007 (workitem lifecycle)

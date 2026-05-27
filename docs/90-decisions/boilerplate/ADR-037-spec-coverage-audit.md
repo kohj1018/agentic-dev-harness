@@ -56,6 +56,13 @@ FAC ↔ AC 매핑은 *plan-workitem 출력 echo* 가 아니라 **feature 문서�
 
 - 기존 feature 문서 (template 변경 전 생성) 의 `## 7-1` 보강 — Legacy fallback 3-단계로 운영 차단 없이 회수되므로 fork 별로 일괄 migration / lazy migration / 신규 feature 부터만 적용 중 선택. plan-workitem 호출 자연 발생 시점에 보강 가능.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md     — #amend-1 §7-1 FAC↔AC 매핑표
+- .claude/skills/plan-workitem/SKILL.md                — #amend-1 영속 저장 + 출력 echo
+- .claude/skills/validate-workitem/SKILL.md            — #d1 Spec coverage audit
+- .claude/agents/validator.md                           — #d1 FAC→AC 매핑 점검
+- .claude/skills/stabilize-milestone/SKILL.md          — #amend-1 §1.0 FAC unmapped 점검
+
 ## 참고
 - ADR-036 (FEATURE_TEMPLATE 12섹션)
 - ADR-026 (TASK_TEMPLATE schema)

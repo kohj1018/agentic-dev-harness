@@ -32,5 +32,10 @@ accepted
 ## Ratchet 강도 (ADR-022)
 - enabling (약, [관측됨]+[외부실증]) — 필드는 *선택적*, 미기재 시 기본 feature. 자동 차단 X.
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md        — #d1 §0-1 Type 필드 + 분기 주석
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md     — #d1 §0-1 Type 필드
+- .claude/skills/plan-workitem/SKILL.md                — #d3 Type 라우팅 단락
+
 ## 참고
 - ADR-026 (plan-workitem TASK_TEMPLATE schema), ADR-041 (migration contract), ADR-040 (research capability), ADR-006 (단순성·Surgical Changes).
