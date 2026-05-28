@@ -7,7 +7,7 @@
 
 일상적인 구현 결정(변수명, 함수 분리 등)은 ADR 대상이 아니다.
 
-## 상태값
+## Status 값
 - `proposed`: 제안됨, 아직 확정 아님
 - `accepted`: 팀/개인이 수용함
 - `superseded`: 새 ADR로 대체됨
@@ -30,7 +30,7 @@
 ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: `product | design | dev | infra | process | tooling`. project ADR이 쌓일 때 종류별 필터·sprawl 추적에 쓴다(폴더 분리 대신 메타데이터 — 단순성).
 
 ## 권장 섹션
-- 상태
+- Status
 - 현재 유효 결정 (amend ≥4 또는 정정성 amend 포함 시 필수 — ADR-045#d5)
 - 배경 (왜 이 결정이 필요했는가)
 - 결정 (무엇을 선택했는가)

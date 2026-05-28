@@ -2,7 +2,7 @@
 
 > scope: boilerplate
 
-## 상태
+## Status
 accepted
 
 ## 배경

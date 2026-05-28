@@ -4,7 +4,7 @@
 
 ## Boilerplate ADR (fork 후 supersede 가능)
 
-| # | 제목 | 상태 | Amendments | 한 줄 요약 |
+| # | 제목 | Status | Amendments | 한 줄 요약 |
 |---|------|------|------------|-----------|
 | 000 | Boilerplate decision policy | accepted | (+#amend-1: 폴더 분리) | scope 라벨링 + supersede + 번호 정책 |
 | 001 | Doc hierarchy | accepted | — | docs/ 디렉터리 6분할 결정 |
@@ -46,7 +46,7 @@
 본 보일러플레이트 진화 과정에서 *번호는 잡혔지만 ADR이 만들어지지 않은* 경우를 추적한다.
 fork 사용자는 이 번호들을 *자기 ADR 번호로 재사용하지 않는다* — Project ADR은 ADR-100부터.
 
-| # | 상태 | 사유 |
+| # | Status | 사유 |
 |---|------|------|
 | ADR-002 | legacy reserved | deprecated placeholder for initial project decisions. **새 project ADR은 ADR-100+에 박음** (ADR-000#amend-1 참조). 본 번호는 재사용 X. |
 | ADR-003 | legacy reserved | deprecated placeholder for stack selection. **새 project ADR은 ADR-100+에 박음**. 본 번호는 재사용 X. |

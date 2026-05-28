@@ -2,7 +2,7 @@
 
 > scope: boilerplate
 
-## 상태
+## Status
 accepted
 
 ## 현재 유효 결정 (요약 — 상세는 본문·amend SSOT)
