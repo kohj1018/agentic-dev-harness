@@ -117,6 +117,38 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 (시그널 4는 drift가 아니라 *미반영 인사이트* 신호 — 위 4번 줄에서 별도 P1 보고하므로 본 집계에 포함하지 않는다.)
 
 7. ARCHITECTURE_OVERVIEW의 `## 3-1. 레이어 경계 + 의존성 규칙` 섹션이 비어 있고 모듈 수가 3개 이상이면 채울 것을 권장 출력한다(정책: ADR-006).
+
+7-T. **Telemetry aggregate** ([ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7 deep telemetry + D1 inspectability 정합). 본 마일스톤 산하 task의 *이미 수집된 데이터*를 수치 dashboard로 echo. 새 데이터 수집 X — surface만.
+
+수집 소스:
+- 본 마일스톤 산하 모든 task의 `docs/40-validation/reports/<task-id>.md` (존재 시).
+- 본 마일스톤 산하 feature의 `## 7-1. FAC ↔ AC 매핑표`.
+- `docs/40-validation/QA_FINDINGS.md` 본 milestone 헤더(`## M-N`) 아래.
+- `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 2. 즉시 수정할 항목` 및 `## 3. 권장 리팩토링` 안의 본 milestone sub-section (`### M-N` 그룹) — Cross-stabilize 회귀 신호 grep 대상. **`## 5. Repair decision log`는 제외** (Step 3 신설 영역, *closed records*라 *open finding 재등장* 측정 대상 아님).
+
+집계 항목:
+- Tasks: M done / N total (M/N %)
+- AC↔테스트 매핑: A ✅ / B total (A/B %)
+- FAC coverage: C ✅ / D total (C/D %)
+- Evidence Bundle 신뢰도 분포: High K / Medium L / Low J (Step 2 도입 후 채워짐 — 미도입 마일스톤은 "해당없음" 한 줄)
+- Validate exit code (가장 최근 실행): 0 / non-zero / 미설정
+- Findings 분포: P0 X / P1 Y / P2 Z (본 milestone 헤더 산하)
+- Cross-stabilize 회귀 신호: *이전 모든 milestone들*(`## M-1` ~ `## M-(N-1)`)의 P1 라벨 finding이 본 milestone의 **QA_FINDINGS(`## M-N`)** 또는 **IMPROVEMENT_GUIDE 의 `## 2. 즉시 수정할 항목`/`## 3. 권장 리팩토링` 안 `### M-N`** 두 sub-section에 *재등장*한 항목 수 (라벨 grep, 휴리스틱 한계 echo — 동의어/오타 false-negative 가능. 본 grep은 *정확한 라벨 매칭*만 잡음. `## 5. Repair decision log`는 *closed records*라 회귀 신호 대상 아님).
+
+본 단계는 *수치 echo만* — IMPROVEMENT_GUIDE / QA_FINDINGS에 새 항목 박지 않음. Cross-stabilize 회귀 신호가 1+ 건이면 단계 8 출력의 "P1 / P2 후속 작업"에 *patterned drift 의심* 한 줄 추가.
+
+출력 형식 (단계 8의 최종 출력에 *Telemetry* 단락으로 포함):
+```
+Telemetry — M1
+- Tasks: 12 / 12 (100%)
+- AC↔테스트 매핑: 34 / 36 (94.4%)
+- FAC coverage: 8 / 8 (100%)
+- Evidence Bundle 신뢰도: High 9 / Medium 2 / Low 1
+- Validate exit code: 0
+- Findings: P0 0 / P1 3 / P2 7
+- Cross-stabilize 회귀 신호: 0건
+```
+
 8. 최종 출력:
    - 통합 `validate` 결과 + E2E 결과 (있으면)
    - P0 / P1 / P2 후속 작업
@@ -131,6 +163,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
      각 항목에 [ADR-022](../../../docs/90-decisions/boilerplate/ADR-022-ratchet-principle.md) evidence label 부착.
      *AGENTS.md / agent / skill body는 자동 수정 X — 보고만*.
      - DESIGN.md / ARCH 7-x cross-surface drift 가 본 마일스톤 중에 N회 이상 발견됐다면 *ADR-027#amend-1 적용 본문* 이 누락된 fork 인지 점검 권장.
+   - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
 
 책임 경계:
 - 코드 수정·커밋·workitem status 변경 금지.
