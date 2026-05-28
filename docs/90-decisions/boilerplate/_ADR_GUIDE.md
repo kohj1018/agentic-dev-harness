@@ -38,6 +38,7 @@ ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: 
 - 결과 (이 결정으로 무엇이 달라지는가)
 - Surfaces (여러 파일에 동기 반영되는 정책이면 필수 — fan-out SSOT, ADR-045#d3)
 - 후속 작업
+- Mutation Contract (harness surface 수정 ADR 한정 — 대상 surface 정의: [ADR-047](ADR-047-code-as-agent-harness.md) D3)
 
 ## 새 ADR 추가 절차
 1. ADR 본문을 작성한다(번호 정책: [상위 README 허브](../README.md) "새 ADR을 어디 박는가" 참조 — boilerplate는 100 미만, project는 ADR-100+).
@@ -55,3 +56,7 @@ ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: 
 
 ## Ratchet Principle (ADR-022)
 새 ADR을 박을 때는 [ADR-022](ADR-022-ratchet-principle.md)의 적용 범위 표를 따른다. 본 ADR의 `## 배경`은 [관측됨]·[외부실증]·[가설] 중 어디에 근거하는지 명시한다.
+
+## Harness Mutation Contract (ADR-047)
+
+본 ADR이 `.claude/skills` / `.claude/agents` / `AGENTS.md` / `.agents/skills` / `.codex/config.toml` / lifecycle ADR 중 *어느 하나라도* 수정한다면 ([ADR-047](ADR-047-code-as-agent-harness.md) D3 대상 surface), 본문에 `## Mutation Contract` 섹션 6 필드(Target / Failure mode / Predicted improvement / Preserved invariants / Falsifying evaluation / Rollback path)를 명시한다. ADR-022와 양립 — evidence label은 그대로, Mutation Contract는 변경 governance 양식.

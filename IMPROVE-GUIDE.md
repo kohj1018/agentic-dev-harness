@@ -173,7 +173,7 @@ AGENTS.md는 *100줄 hard cap* (ADR-011) — 다른 줄이 100 line 근처면 �
 
 ### 검증 방법
 1. `Glob docs/90-decisions/boilerplate/ADR-047*.md` → 파일 1개 존재.
-2. `Grep "ADR-047"` on `docs/90-decisions/boilerplate/README.md` → 1행 매치.
+2. `Grep "Code-as-Agent-Harness paradigm"` on `docs/90-decisions/boilerplate/README.md` → 1행 매치 (인덱스 표 행은 `| 047 |` 포맷이라 `ADR-047` literal은 매치되지 않음 — 1-2 구현 지시 + 기존 표 컨벤션 정합).
 3. `Grep "ADR-047"` on `AGENTS.md` → 1행 매치.
 4. `Grep "ADR-047"` on `docs/00-meta/STRUCTURE.md` → 1행 매치.
 5. `Grep "Mutation Contract"` on `docs/90-decisions/boilerplate/_ADR_GUIDE.md` → 2행 이상 매치(권장 섹션 + 새 단락).
