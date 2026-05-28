@@ -55,7 +55,14 @@ feature
      테스트 이름에 `AC_N` 또는 `[AC-N]` 식별자 포함 강력 권장 (ADR-009 amend).
      예:
      - AC-1 → tests/auth/me.spec.ts > test_AC_1_unauthenticated_returns_401
-     - AC-2 → tests/auth/me.spec.ts > test_AC_2_authenticated_returns_user -->
+     - AC-2 → tests/auth/me.spec.ts > test_AC_2_authenticated_returns_user
+     - 선택 — machine-checkable path 형식 (ADR-047 D6 contract formation 정합):
+       기존 `- AC-N → <file> > <test-name>` 자연어 양식 *대신* `- AC-N → <runner>::<file>::<test-id>` 형식을 박을 수 있다.
+       runner는 jest|pytest|go|cargo 등 — 실제 실행 가능한 명령으로 채울 것.
+       예: `- AC-1 → jest::tests/auth/me.spec.ts::test_AC_1_unauthenticated_returns_401`
+       채워져 있고 *placeholder가 아니면* /validate-workitem이 path 우선 resolve.
+       채워지지 않으면 기존 자연어 양식(`→ <file> > <test-name>`) 그대로 — 강제 X.
+       **angle-bracket placeholder(`<runner>` 등)만 남기는 것 금지** — 안 채울 거면 자연어 양식으로 작성. 잔존 placeholder는 validator가 *미설정*으로 간주하고 자연어 매칭 fallback하지만, report에 P2 라벨로 기록. -->
 
 ## 6-2. TDD opt-out
 <!-- 본문이 비어 있으면 TDD 적용 (기본). opt-out 하려면 아래 두 줄을 *모두* 채워 본문에 추가한다 — 하나라도 비면 형식 위반:

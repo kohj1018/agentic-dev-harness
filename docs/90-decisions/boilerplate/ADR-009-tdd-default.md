@@ -51,6 +51,10 @@ fast 모드:
 - `/finalize-workitem` 통과 조건에 AC 미충족 0개 추가.
 - AGENTS.md에 "TDD 기본" 1단락(fork된 새 세션 자동 로드 surface; CLAUDE.md는 @AGENTS.md import).
 
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md   — ## 6-1 테스트 시나리오 path 형식 권장 (opt-in, ADR-047 D6 contract formation 정합)
+- .claude/skills/validate-workitem/SKILL.md       — AC↔테스트 매핑 path 우선 resolve + [verify-placeholder] P2 라벨
+
 ## 후속 작업
 - AC 자연어 매핑이 헐거우면 테스트 이름에 `AC_N` 식별자 컨벤션 권장 강화.
 - legacy 코드 수정은 characterization test 선행 후 RGR(task 단위 사용자 결정).
