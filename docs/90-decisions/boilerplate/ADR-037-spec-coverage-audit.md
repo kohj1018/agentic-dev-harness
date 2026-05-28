@@ -30,6 +30,7 @@ feature 분해 후 출력에 `FAC-N → T-xxx:AC-N` 형식 매핑표. 미커버 
 ## 후속 작업
 없음
 
+<a id="adr-037-amend-1"></a>
 ## Amendment 1 (2026-05-16) — FAC ↔ AC 매핑표 영속 SSOT 위치
 
 ### 결정

@@ -10,7 +10,7 @@
 이 변경이 해결하는 문제를 적어주세요.
 
 ## 문서 반영 여부
-- [ ] `CLAUDE.md`
+- [ ] `AGENTS.md` (canonical entry — `CLAUDE.md`는 `@AGENTS.md` import)
 - [ ] `docs/00-meta`
 - [ ] `docs/10-charter`
 - [ ] `docs/20-system`
