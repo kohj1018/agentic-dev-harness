@@ -63,6 +63,7 @@ accepted
 - (Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.
 - ADR-005 SSOT 패턴 5("CLAUDE.md = 진입 페이지")의 표현을 "entry page (AGENTS.md)"로 갱신하는 후속 ADR 또는 in-place 수정 검토. 본 ADR 채택 후 캐노니컬 진입점이 AGENTS.md로 옮겨가므로 패턴 5의 단어가 어긋난다.
 - (Step 0-2에서 스키마 변경 또는 `.` 비상속 발견 시) 적용된 fallback 패턴을 본 ADR "결과" 또는 "후속 작업"에 명시해 추적성 유지.
+- `boilerplate-secure` permissions 프로파일 적용 (2026-05-28): `extends = ":workspace"`로 빌트인 워크스페이스 프로파일 상속 + `:workspace_roots` 하위 `**/.env`·`**/.env.*`·`**/secrets`·`**/secrets/**` deny + `network.domains "*" = "allow"`(domains 비우면 모든 도메인 차단됨). legacy `sandbox_mode`/`sandbox_workspace_write` 제거(프로파일과 공존 시 프로파일이 통째로 무시 — ADR-010 item 1 이행). `:workspace`는 filesystem path key가 아니라 built-in 프로파일 이름이므로 `extends`로만 사용한다는 점도 함께 정합화. **실측 검증**(`codex doctor` startup warning 0개 + `.env` read deny + 외부 네트워크 접근)은 커밋 직전 사용자 수행 책임.
 
 ## Amendment 1 (2026-05-16) — Phase 2.5: stack-guard wrapper 승격
 
