@@ -1,9 +1,9 @@
 <!-- 구조 변경 시 README.md와 README_ko.md를 동시에 갱신한다. drift를 막기 위해 두 README 본문은 짧게 유지하고 깊은 정의는 docs/ 링크로 둔다. -->
-# Claude Code Agentic Boilerplate
+# agentic-dev-harness
 
 **Language: English | [한국어](README_ko.md)**
 
-A Claude Code–first, Codex CLI–compatible boilerplate that sets up the document structure and sub-agent workflow all at once when starting a new project.
+A document-first agentic dev harness for Claude Code and Codex CLI — sets up document structure and sub-agent workflow all at once when starting a new project. Both CLIs are supported as first-class entry points.
 
 > **In short**: Fork this repo → optionally run `/discover-product` to ground your charter in real user data → run `/bootstrap-project` → get charter, architecture, and initial workitems in one shot. The main session orchestrates; sub-agents do the work.
 
@@ -40,7 +40,7 @@ The Quick Start below walks through these commands as Steps 0–3.
 
 ### Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) must be installed
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [Codex CLI](https://developers.openai.com/codex) installed — the harness supports both as first-class entry points
 - Apply this repository as a GitHub template to a new repo, or clone it to get started
 
 ### Step 0 (Optional): Discover
@@ -144,7 +144,7 @@ For a full inventory of all artifacts (location, owner, lifecycle), see [STRUCTU
 
 ## Guardrail Principles
 
-This template prioritizes cross-platform reusability — shared base settings do not include OS/shell/runtime-dependent hooks. See [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md) for details.
+This harness prioritizes cross-platform reusability — shared base settings do not include OS/shell/runtime-dependent hooks. See [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md) for details.
 
 Default automation directly covers web frontend, API server, CLI, monorepo, and Supabase integration. Non-web stacks (mobile, ML, embedded, game, native desktop) follow fork-user override paths — see [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md).
 

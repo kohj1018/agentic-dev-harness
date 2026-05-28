@@ -1,9 +1,9 @@
 <!-- 구조 변경 시 README.md와 README_ko.md를 동시에 갱신한다. drift를 막기 위해 두 README 본문은 짧게 유지하고 깊은 정의는 docs/ 링크로 둔다. -->
-# Claude Code Agentic Boilerplate
+# agentic-dev-harness
 
 **Language: [English](README.md) | 한국어**
 
-새 프로젝트를 시작할 때 문서 구조와 서브에이전트 워크플로우를 한 번에 세팅하는 Claude Code 우선·Codex CLI 호환 보일러플레이트다.
+새 프로젝트를 시작할 때 문서 구조와 서브에이전트 워크플로우를 한 번에 세팅하는 document-first agentic 개발 harness다. Claude Code와 Codex CLI 둘 다 1급 진입점으로 지원한다.
 
 > **한 줄 요약**: 이 저장소를 fork → 필요하면 `/discover-product`로 사용자 데이터 기반 발굴 → `/bootstrap-project` 실행 → charter·architecture·초기 workitem을 한 번에 생성. 메인 세션은 오케스트레이션, 실작업은 서브에이전트가 수행한다.
 
@@ -39,7 +39,7 @@
 
 ### 전제 조건
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)가 설치되어 있어야 한다
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 또는 [Codex CLI](https://developers.openai.com/codex)가 설치되어 있어야 한다 — 둘 다 1급 진입점으로 지원한다
 - 이 저장소를 GitHub 템플릿으로 새 저장소에 적용하거나, 복제해서 시작한다
 
 ### 0단계 (선택): 발굴
@@ -143,7 +143,7 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 ## Guardrail 원칙
 
-이 템플릿은 cross-platform 재사용성을 우선한다 — shared 기본값에 OS/셸/런타임 종속적인 hook를 포함하지 않는다. 자세한 내용은 [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md)를 참고한다.
+이 harness는 cross-platform 재사용성을 우선한다 — shared 기본값에 OS/셸/런타임 종속적인 hook를 포함하지 않는다. 자세한 내용은 [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md)를 참고한다.
 
 기본 자동화가 직접 다루는 스택은 web frontend / API server / CLI / monorepo / Supabase 통합 5종이다. 비웹 스택(mobile / ML / embedded / game / desktop)은 fork 사용자 override 경로를 따른다 — 자세한 내용은 [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md) 참조.
 
