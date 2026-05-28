@@ -12,7 +12,8 @@ accepted
 - Plan Quality 차원은 #amend-1로 8→10(ADR-027#amend-1 양립).
 
 ## 배경
-- [가설] multi-model ensembling / peer review가 단일 모델 blind spot을 회수한다는 외부 연구 패턴이 존재 (LLM-as-judge, debate, jury 등). 본 ADR은 구체 출처 미인용 — [가설] 단일 라벨. 향후 구체 URL 인용 시 [외부실증]으로 승격 (`## 후속 작업` 단락 evidence 회수 트리거).
+- [외부실증] Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 (Diverse Interaction Modes Grounded in Shared Program State) — critique-and-repair, adversarial validation, reasoning debate 패턴을 survey로 정리. 본 ADR의 cross-LLM peer review 패턴이 *survey-level 외부실증* 자격.
+- [가설] 다중 모델 *동등 효과*의 정량 측정은 본 ADR 단계에서 미실시 — opt-in 정책 유지의 근거는 *비용/효용 비율을 사용자가 선택*하는 ADR-022 enabling 정합.
 - [관측됨] 본 보일러플레이트의 `/plan-workitem`은 6종 self-check(ADR-026 / ADR-037 정합)를 *같은 세션 내*에서 돌린다 (구조 사실).
 - [가설] 동일 세션 내 self-check만으로는 *같은 모델의 blind spot*이 그대로 통과한다 (multi-model LLM-as-judge / debate / jury 패턴의 외부 연구가 회수 가능성 시사 — 본 repo [관측됨]은 0건 + 구체 출처 미인용으로 [가설] 단일 라벨, evidence 회수는 `## 후속 작업` 단락).
 - [관측됨] `## 9. 의존성`에 병렬 가능성이 명시되어도 plan 출력에 *wave 그룹*으로 가시화되는 자리는 현재 plan-workitem SKILL 본문에 부재 — 사용자가 매번 수동 위상 정렬 (구조 사실).
@@ -62,7 +63,7 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 
 ## 정책 강도 (ADR-022 정합)
 **enabling (약)** — 자동 차단 / Pass 차단 트리거 0건. 사용자가 cross-review를 건너뛰면 워크플로우는 그대로 작동.
-- Evidence label: `[가설→실증]` (ADR-022 합성 표기 — Claude Code worktree 공식 docs는 [외부실증], multi-model peer review는 [가설] — 본 보일러플레이트 [관측됨] 0건이라 Phase 시뮬레이션 통과 후 [관측됨]으로 승격 예정. Ratchet 약 적용 가능).
+- Evidence label: `[가설→실증]` (ADR-022 합성 표기 유지). **외부실증 구성**: (a) Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 — cross-LLM peer review 패턴이 외부 survey-level 실증으로 자격. (b) Claude Code worktree 공식 docs. **가설 구성**: 본 보일러플레이트에서의 *정량적 효과 측정*은 미실시 — [관측됨] 0건. Phase 시뮬레이션 통과 후 [관측됨]으로 승격 예정. Ratchet 약 적용 유지.
 
 ## 동시 implement 면책 단락 (사용자/환경 책임)
 본 ADR은 다음 충돌 차원을 *자동 격리해주지 않는다* — 프로젝트 환경 설계 책임:
@@ -128,3 +129,4 @@ D2 의 "같은 tag 재실행 시 덮어쓰기 허용" 을 **기존 파일 보존
 - ADR-022 (Ratchet — enabling 약 적용)
 - ADR-026 (plan-workitem schema — 2-pass 비결정 reconcile)
 - ADR-037 (Spec coverage — validate-plan 체크리스트가 흡수)
+- Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 — cross-review 패턴 survey-level evidence.
