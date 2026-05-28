@@ -10,6 +10,7 @@ accepted
 - 리뷰 파일은 `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`(ephemeral). 같은 tag 재실행은 #amend-2로 *덮어쓰기 대신 `<tag>-N` 자동 suffix*.
 - `/plan-workitem`이 `## 9. 의존성` 위상정렬 wave 그룹을 echo(영속 저장 X). 병렬 implement는 `claude --worktree T-NNN` 권장.
 - Plan Quality 차원은 #amend-1로 8→10(ADR-027#amend-1 양립).
+- file overlap 점검은 plan-workitem 제외(#d3) — 단 #amend-3로 정정: 명시적 `write_set:` 교집합은 plan-workitem이 결정적 wave 분리, `## 4-1` 기반 free-form overlap은 외부 peer review 책임.
 
 ## 배경
 - [외부실증] Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 (Diverse Interaction Modes Grounded in Shared Program State) — critique-and-repair, adversarial validation, reasoning debate 패턴을 survey로 정리. 본 ADR의 cross-LLM peer review 패턴이 *survey-level 외부실증* 자격.
@@ -130,3 +131,8 @@ D2 의 "같은 tag 재실행 시 덮어쓰기 허용" 을 **기존 파일 보존
 - ADR-026 (plan-workitem schema — 2-pass 비결정 reconcile)
 - ADR-037 (Spec coverage — validate-plan 체크리스트가 흡수)
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 — cross-review 패턴 survey-level evidence.
+
+<a id="adr-038-amend-3"></a>
+## Amendment 3 — file overlap 정책 정정 (free-form 제외, 명시적 write_set 허용)
+
+D3 의 *"file overlap 점검은 plan-workitem에서 제외 — 외부 LLM peer review에 전적 위임"* 정책은 **TASK_TEMPLATE `## 4-1. 변경 예정 파일/경로`(implement 시점 채움 — plan 시점에는 빈 상태)에 기반한 free-form file overlap** 한정으로 정정한다. **명시적 `write_set:` 구조화 필드**(TASK_TEMPLATE `## 9. 의존성` 안 — ADR-026 schema 확장으로 plan 시점 deterministic input)는 본 면제 범위 밖이며, plan-workitem은 `write_set` 교집합을 *결정적으로 검출해 wave 분리*한다 (ADR-047 D1 inspectability 정합). 본 amend는 *deterministic 부분만 회수* — 자연어 dep / `## 4-1` 기반 추측은 여전히 외부 peer review 책임.
