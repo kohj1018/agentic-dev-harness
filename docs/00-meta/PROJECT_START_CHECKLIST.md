@@ -55,6 +55,7 @@
 - [ ] 예전 프로젝트 예시 문구가 남아 있지 않다
 - [ ] 불필요한 템플릿 placeholder가 과하게 남아 있지 않다
 - [ ] 새 프로젝트의 핵심 범위와 비범위가 명확하다
+- [ ] (비-UI 프로젝트) `docs/20-system/DESIGN.md`를 삭제하고 `AGENTS.md`의 DESIGN 링크 줄도 제거했다
 
 ## 권장 원칙
 - charter 신뢰도가 중요한 프로젝트는 `/discover-product`로 발굴 단계를 먼저 거친다. 그 외에는 `/bootstrap-project`로 바로 시작해도 된다.

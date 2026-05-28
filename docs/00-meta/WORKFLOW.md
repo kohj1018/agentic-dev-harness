@@ -7,7 +7,7 @@
 
 ## 2. 시스템 설계
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`에서 시스템 구조를 정리한다.
-- `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다.
+- `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다. **삭제 시 `AGENTS.md`의 `[시각 디자인](docs/20-system/DESIGN.md)` 링크 줄(약 38행)도 함께 제거한다**(dangling 방지).
 - UI 프로젝트는 `/bootstrap-design` R5가 `docs/20-system/design-preview.html`(DESIGN.md 파생 뷰, 검토용 임시 파일)을 생성한다. **사용자가 시안을 브라우저로 확인·승인한 뒤** R5가 시안을 삭제하고 `/plan-workitem`으로 진행 권장 (ADR-027#d21).
 - ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
 
@@ -21,6 +21,7 @@
 ## 4. 구현 및 검증
 - 구현은 `/implement-workitem`으로 시작한다.
 - 검증은 `/validate-workitem`으로 수행한다 — 판정 + `docs/40-validation/reports/<task-id>.md` 기록.
+> Note: validation report(`docs/40-validation/reports/<task-id>.md`)는 `.gitignore`된 **checkout-local 임시 파일**이다(커밋되지 않음). 따라서 `/validate-workitem`과 `/finalize-workitem`은 **같은 worktree/checkout**에서 연속 실행해야 한다 — 다른 worktree에서 나눠 실행하면 finalize가 report를 못 찾아 `Needs Validation`으로 종료한다.
 - 검증 실패 시 `/repair-workitem`으로 report의 실패 항목을 수정한다.
 - 검증 통과 시 `/finalize-workitem`으로 status `done` 갱신 + 커밋.
 - 마일스톤 단위 종합 점검은 `/stabilize-milestone`에서 수행한다.
@@ -36,7 +37,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 2. 단순 typo / 오타 수정
 3. 명시적으로 비목표(charter `## 5`)에 박힌 영역의 긴급 패치
 
-면제 적용 시 `/finalize-workitem` 단계에서 IMPROVEMENT_GUIDE.md에 *"상위 문서 후행 갱신 필요"* P2 보고 — 다음 stabilize 라운드에서 상위 문서 sync 추적.
+면제 적용 시 해당 task 문서 `## 8. 메모`에 *"상위 문서 후행 갱신 필요 (WORKFLOW 4-A 면제) — <어떤 상위 문서>"* 를 기록한다. `/finalize-workitem`이 이 task 문서를 커밋에 포함하므로 기록이 영속되고, 다음 `/plan-workitem` 또는 `/stabilize-milestone` 라운드에서 이 메모를 회수해 상위 문서 sync용 후속 task로 연결한다.
 
 ## 4-1. 마감 (finalize)
 - `/finalize-workitem`이 task 문서 status를 `done`으로 갱신한다.
