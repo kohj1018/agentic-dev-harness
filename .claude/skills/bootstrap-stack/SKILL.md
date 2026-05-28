@@ -24,6 +24,8 @@ context-pack: minimal
 - `docs/00-meta/WORKFLOW.md`
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
+- `docs/90-decisions/boilerplate/_ADR_GUIDE.md` (ADR-101 작성 시 권장 섹션·area 태그·Mutation Contract 규약)
+- `docs/90-decisions/project/README.md` (project ADR 인덱스 — ADR-101 추가 후 한 줄 갱신 대상)
 - `stack-brief-template.md`
 - `output-checklist.md`
 
@@ -31,7 +33,8 @@ context-pack: minimal
 1. 스택 정보를 구조화한다.
 2. 아래 문서를 갱신한다.
    - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
-   - `docs/90-decisions/project/ADR-101-stack-selection.md` (project ADR은 100+ 번호 — boilerplate/ADR-003은 legacy reserved)
+   - `docs/90-decisions/project/ADR-101-stack-selection.md` (project ADR은 100+ 번호 — boilerplate/ADR-003은 legacy reserved). _ADR_GUIDE.md 권장 섹션 + Ratchet evidence label 정합.
+   - **`docs/90-decisions/project/README.md` 인덱스 표에 ADR-101 한 줄 추가** (인덱스 표 컬럼 양식은 `docs/90-decisions/project/README.md` 본문 표 헤더가 SSOT — _ADR_GUIDE.md "새 ADR 추가 절차" §2 정합). `--migrate` 모드와 동일한 형식.
 3. 필요하면 아래 문서를 만든다.
    - `docs/00-meta/STACK_SETUP_PLAN.md`
    - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 생성 (이미 있으면 갱신 제안만).
