@@ -89,6 +89,24 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.
 스킬 간 흐름은 **자동 호출이 아니라 텍스트 제안 → 사용자/메인이 발화**한다.
 
+## 스킬 종료 시 "다음 단계" 출력 contract
+
+각 lifecycle skill 의 마지막 출력은 사용자가 *복사·붙여넣기* 로 후속 skill 을 즉시 발화할 수 있도록 다음 양식을 따른다. ADR-046#d1 "다음 액션 1개 (분기 시 ≤3)" 의 구체화 — 대부분 lifecycle skill 이 `context: fork` 라 sub-agent context 정합.
+
+```
+다음 단계:
+- 기본 권장: `/<next-skill> <args>` — <이 명령을 실행할 1줄 이유>
+- 분기 옵션 (해당 시 — ≤3 개):
+  - <조건 A> 시: `/<alt-skill> <args>`
+  - <조건 B> 시: `/<alt-skill> <args>`
+- 프롬프트 동봉 권장 (다음 skill 호출 시 자연어로 함께 전달할 컨텍스트 — 해당 시):
+  - <미결정 / 해석안 / 선택 옵션 / 이번 회차 의 미해결 finding 등>
+```
+
+본 contract 의 **목적**: 사용자가 매번 *어느 skill 을 어떤 인자로 호출하고, 무엇을 함께 전달해야 하는지* 를 다시 계산하지 않도록 — skill 출력 자체가 후속 발화 template 을 제공.
+
+**자동 호출 금지**: skill 간 chain 은 위 출력이 *텍스트 제안* 일 뿐이고, 사용자/메인이 명시 발화로만 진행한다 (ADR-007 책임 경계 / ADR-046 signal-first).
+
 ## 문서 상태 전이
 
 ```

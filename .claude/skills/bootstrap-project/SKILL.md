@@ -65,7 +65,16 @@ context-pack: minimal
 - 갱신한 파일 목록
 - 핵심 가정
 - 남은 미결정 사항
-- 다음 추천 단계 최대 3개
+- 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-workitem` 순서가 SSOT):
+  - 기본 권장: `/bootstrap-stack <스택 요약>` (또는 `--recommend` 로 추천 받기) — 스택 확정이 후속 lifecycle 의 전제 (스택 미정 상태에서 plan 은 가짜 작업).
+  - 분기 옵션 (해당 시 ≤3):
+    - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-workitem M1` — 첫 milestone 의 feature/task 분해
+    - UI 프로젝트 + 스택 확정 후: `/bootstrap-design` 다음 `/plan-workitem M1`
+    - 기획 신뢰도 재확인 원하면: 다른 세션에서 `/validate-discovery --reviewer-tag <tag>` 후 원본에서 `/repair-discovery`
+  - 프롬프트 동봉 권장:
+    - charter `## 5. 비목표` 의 핵심 키워드 (다음 plan 라운드의 scope 가드 입력)
+    - DISCOVERY.md `## 12. Assumption Tracker` 의 *미검증* 가정 중 우선 검증 대상 (있으면)
+    - 남은 미결정 사항 본문 (사용자가 다음 skill 발화 전 결정해야 할 항목)
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

@@ -47,6 +47,15 @@ Write 범위 제한 (수정 대상 파일 제한 — frontmatter `allowed-tools`
 - 상위 설계 문제와 하위 구현 문제를 구분한다.
 - 막연한 칭찬은 하지 않는다.
 - 시간/턴이 부족하면 확인된 범위까지의 핵심 판단만 요약하고 종료한다.
+- 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
+  - 기본 권장: P0 finding 이 0건이면 후속 skill 없이 종료. P0/P1 이 있으면 검토 대상 문서 종류별 분기.
+  - 분기 옵션 (해당 시 ≤3):
+    - workitem 문서 (milestone/feature/task) 면: 메인 세션이 `planner` 위임 또는 `/plan-workitem <id>` 로 회수 + 후속 task 박기
+    - charter / architecture / ADR 이면: 메인이 `architect` 단발 위임으로 갱신
+    - AGENTS.md / 운영 문서이면: 사용자 직접 수정 (Living Doc 갱신)
+  - 프롬프트 동봉 권장:
+    - 본 review 출력의 P0/P1 finding 라벨 + 라인 위치 (수정자의 컨텍스트 회수용)
+    - 본 review 가 *건너뛴 영역* (시간/턴 부족 시) — 다음 라운드 review-doc 호출의 우선순위 입력
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

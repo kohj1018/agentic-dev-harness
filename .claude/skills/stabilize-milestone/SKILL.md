@@ -164,6 +164,18 @@ Telemetry — M1
      *AGENTS.md / agent / skill body는 자동 수정 X — 보고만*.
      - DESIGN.md / ARCH 7-x cross-surface drift 가 본 마일스톤 중에 N회 이상 발견됐다면 *ADR-027#amend-1 적용 본문* 이 누락된 fork 인지 점검 권장.
    - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
+   - **다음 단계** ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
+     - **졸업 가능 = YES + P0 후속 0건**:
+       - 기본 권장: `/plan-workitem M-(N+1)` — 다음 milestone 의 feature/task 분해
+       - 프롬프트 동봉 권장: 본 라운드 Telemetry 의 신뢰도 분포 + Cross-stabilize 회귀 신호 (다음 milestone 의 우선순위 조정 입력)
+     - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
+       - `[Spec-gap]` finding 있음: `/plan-workitem F-NNN` 으로 미커버 task 추가
+       - 회귀·엣지케이스 (QA_FINDINGS P0) 있음: `/repair-workitem T-NNN` 으로 해당 task 수정 → 재 validate
+       - `[Doc-link]` / `[ADR-ref]` 등 문서 정합 P0: 사용자 직접 수정 (architect 또는 메인)
+     - **공통 프롬프트 동봉 권장**:
+       - 미해결 P0/P1 라벨 목록 (다음 호출의 우선 처리 대상)
+       - Cross-stabilize 회귀 신호 항목 (있으면 — patterned drift 경고)
+       - 본 마일스톤의 instruction improvement 후보 (있으면 — 다음 stabilize 라운드에서 회수)
 
 책임 경계:
 - 코드 수정·커밋·workitem status 변경 금지.
