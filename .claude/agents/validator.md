@@ -29,6 +29,7 @@ color: magenta
 - 빠진 테스트/검증 포인트
 - 수정이 필요한 항목 최대 5개
 - report 파일 경로 (`docs/40-validation/reports/<task-id>.md`)
+- Evidence Bundle: 검증된 것 / oracle gap (검증하지 못한 것) / 신뢰도 (High|Medium|Low)
 - 다음 권장 액션 (Pass면 `/finalize-workitem`, Needs Fix면 `/repair-workitem` — 텍스트 제안임을 명시)
 
 규칙:

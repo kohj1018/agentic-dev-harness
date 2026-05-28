@@ -51,6 +51,7 @@ context-pack: minimal
   자동 차단 X — ADR-007 책임 경계 정합. legacy fallback은 plan-workitem SKILL.md "feature 분해 시" 단락 참조.
 - **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
 - **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
+- **Evidence Bundle 양식 강제** (ADR-047 D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 
 마지막 단계 — report 파일 작성:
 판정 결과를 다음 양식으로 `docs/40-validation/reports/<task-id>.md`에 기록한다(이미 있으면 덮어쓴다).
@@ -88,6 +89,33 @@ context-pack: minimal
 - FAC-1: ✅ T-001:AC-1
 - FAC-2: ✅ T-001:AC-2
 - FAC-3: ❌ unmapped — 미커버 task 추가 권장 (예: T-XXX [Given]...[When]...[Then]...)
+
+## Evidence Bundle (*Code as Agent Harness* arXiv:2605.18747 §5.2.1·§5.2.2 oracle adequacy)
+<!-- 본 검증 라운드가 *무엇을 봤고 무엇을 못 봤는지* 명시. green test가 곧 충분한 검증이라는 착각을 줄인다. -->
+
+### 검증된 것 (verified)
+- 통합 명령 exit code: <0 / non-zero / 미설정>
+- AC↔테스트 매핑: M개 ✅ / K개 ❌ (커버리지 %)
+- diff trace audit: 추적 가능 N줄, 추적 불가 K줄(카테고리별)
+- FAC↔AC spec coverage: <% / 부재>
+- 기타 deterministic 점검: <markdown-link-check / static analysis 등 / 해당없음>
+
+### 검증하지 못한 것 (oracle gap)
+<!-- 다음 카테고리 중 *본 task의 surface area에 해당하는 것만* 명시. 해당없으면 "해당없음" 한 줄.
+     UI 외에도 backend API에 i18n / 접근성 응답이 있으면 본 카테고리도 surface로 본다. -->
+- 동시성·race condition 시나리오: <검증 가능 여부 / 가능 시 도구>
+- 운영 환경 부하·성능: <검증 가능 여부>
+- 외부 서비스 실패·timeout: <mocked / not covered>
+- 보안 (인증 우회·권한 escalation·인젝션): <not covered / partial / not applicable>
+- 접근성·국제화 (task surface가 해당하면): <not covered / partial / not applicable>
+- 회귀: 이전 milestone의 어떤 시나리오를 본 변경이 깰 위험이 있나 — <명시 또는 "관련 없음">
+
+### 신뢰도 (confidence)
+<!-- 기준 (정의 — 같은 입력에 같은 판정 보장. 평가 순서: Low → Medium → High 의 *첫 매치* 등급으로 확정):
+     - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 AC↔테스트 매핑 <70%, 또는 AC↔테스트 ❌ 있음
+     - Medium: Low 조건 모두 불일치 + High 조건 중 1~2개 미달 (예: 매핑 70~89% / oracle gap 카테고리 1개 누락)
+     - High: 통합 명령 통과 + AC↔테스트 매핑 ≥90% + diff trace audit 통과 + oracle gap 카테고리 모두 명시(해당없음 포함) -->
+- 본 판정의 신뢰도: <High / Medium / Low> — <한 줄 근거 (예: "통합 명령 + AC 매핑 100% + diff trace 통과 + 외부 서비스 의존 없음" / "통합 명령만 통과, 동시성·외부 의존 미검증")>
 
 ## 다음 권장 액션
 - Pass: `/finalize-workitem <task-id>` (자동 호출 아님 — 사용자 또는 메인 세션이 발화한다)
