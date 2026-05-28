@@ -40,7 +40,7 @@
 | 044 | Cross-LLM Discovery Validation | accepted | — | /validate-discovery + /repair-discovery (기획 층 peer review, ADR-038 패턴 mirror) + reviewer discovery surface |
 | 045 | Document reference contract | accepted | — | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
 | 046 | Signal-first output contract | accepted | — | sub-agent 반환 cap 축소(1~2k→≤600) + signal-first 대화/반환 계약 + auto-clarity 보존 리스트 |
-| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 명시 + harness surface 수정 시 6 필드 mutation contract (*Code as Agent Harness* arXiv:2605.18747 §3.5.3) |
+| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 
 ## Reserved / Parked / Dropped 번호
 

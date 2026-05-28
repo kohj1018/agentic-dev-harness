@@ -64,11 +64,12 @@ accepted
 
 ## 결정
 
-### D1. 정체성 명시
+### D1. 정체성 명시 (*Code as Agent Harness* §1 Harness 정의 / §3.4.4 Verification through Deterministic Sensors 정합)
 본 보일러플레이트는 **"document-driven code-as-agent-harness specialization"**이다.
-- *Executability* — `validate` 명령 + AC↔테스트 매핑 + stabilize deterministic preflight가 model 의도를 검증.
+- *Executability* — `validate` 명령 + AC↔테스트 매핑 + stabilize deterministic preflight가 model 의도를 검증 (논문 §3.4.4 deterministic sensors 적용).
 - *Inspectability* — validation report / QA_FINDINGS / IMPROVEMENT_GUIDE / ADR이 실패 진단·역추적 가능.
 - *Statefulness* — git + 문서 6 layer가 상호작용 history 보존.
+- 본 D1은 *원칙 owning* — `[외부실증]` 논문 §1 Harness 정의 + §3.4.4 deterministic sensors 인용 single source.
 
 ### D2. Shared Harness Substrate 6 Layer
 | Layer | 위치 | Lifecycle | 책임 |
@@ -103,44 +104,94 @@ accepted
 
 ADR 본문 어느 위치에 박는지: `## 결정` 블록(D1~Dn) 다음, `## 결과` 이전 어디든 — 보통 `## 정책 강도` 보조 섹션 *전후* (본 ADR 자체는 *전*에 둠). `## Mutation Contract` 섹션을 두고 위 6 필드를 각 1줄로 박는다.
 
+본 D3는 *원칙 owning* — `[외부실증]` 논문 §3.5.3 인용 single source.
+
 ### D4. Falsifying evaluation의 default
 별도 명시가 없으면 falsifying evaluation은 [ADR-017 dogfood simulation](ADR-017-dogfood-simulation.md)의 todo CLI baseline 재실행이다. fork 사용자는 자기 baseline으로 대체 가능.
 
+### D5. Sandboxed Execution and Permissioned State Transition (*Code as Agent Harness* §3.4.3 정합)
+multi-tier permission이 *harness state*. agent의 위험 transition을 *pre-execution gating* (permission boundary) 또는 *후속 deterministic sensor catch* (D1 Executability와 정합)로 통제한다.
+- 본 보일러는 `.claude/settings.json` 의 `defaultMode` 로 *permission 기본 모드*를 결정 — 4 모드(`default` / `acceptEdits` / `bypassPermissions` / `plan`) 별 위험 tier·정당화·대체 경로는 [docs/00-meta/GUARDRAILS_STRATEGY.md](../../00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier) 의 `## defaultMode 위험 tier` 단락이 적용 surface SSOT.
+- 민감 파일 접근 차단은 `.claude/settings.json` 의 `permissions.deny` (현재 `.env` / `secrets/**`) 가 owning.
+- 본 D5는 *원칙 owning* — `[외부실증]` 논문 §3.4.3 sandboxed execution + permissioned state transition 인용 single source. 영구 GUARDRAILS_STRATEGY 본문은 본 D5만 인용.
+
+### D6. Contract Formation (*Code as Agent Harness* §3.4.2 정합)
+계획이 *executable preconditions/postconditions*를 형성해야 verification이 deterministic해진다.
+- 본 보일러의 적용: TASK_TEMPLATE `## 6. Acceptance Criteria` Given-When-Then 형식 (정성적 contract) + `## 6-1. 테스트 시나리오` machine-checkable path 형식 `<runner>::<file>::<test-id>` (executable contract). validator는 path 형식이면 *path 직접 resolve*, 자연어 양식이면 fallback.
+- 본 D6은 *원칙 owning* — `[외부실증]` 논문 §3.4.2 Planning as Contract Formation 인용 single source. 양식 SSOT: TASK_TEMPLATE / ADR-009 (AC ↔ 테스트 식별자). 영구 TASK_TEMPLATE / validate-workitem SKILL 본문은 본 D6만 인용.
+
+### D7. Deep Telemetry as the Optimization Substrate (*Code as Agent Harness* §3.5.1 정합)
+단순 fail/pass가 아니라 *수치·분포·추이*와 *durable correction history* 가 harness 진화의 substrate.
+- 본 보일러의 적용: (a) validation report `## Evidence Bundle` 누적 (D8 양식 정합) — task 단위, (b) /stabilize-milestone `7-T. Telemetry aggregate` 수치 dashboard — milestone 단위, (c) /repair-plan·/repair-discovery P0/P1 결정 이력 영속화 (task `## 8. 메모` / IMPROVEMENT_GUIDE `## 5. Repair decision log` / DISCOVERY `### Repair history`) — correction history.
+- 본 D7은 *원칙 owning* — `[외부실증]` 논문 §3.5.1 Deep Telemetry as the Optimization Substrate 인용 single source. 영구 stabilize-milestone / repair-plan / repair-discovery SKILL 본문은 본 D7만 인용.
+
+### D8. Oracle Adequacy + Semantic Verification (*Code as Agent Harness* §5.2.1·§5.2.2 정합)
+pass/fail 단일 신호는 *과신*을 만든다 — "evaluation beyond final task success"는 open problem.
+- 각 verifier는 *무엇을 못 검증했는지(oracle gap)* 와 *신뢰도(High/Medium/Low)* 를 declare해야 한다. executable feedback이 *불완전*하다는 사실을 verifier가 *선언* — semantic 보존은 executable signal로 잡히지 않을 수 있음.
+- 본 보일러의 적용: validate-workitem report `## Evidence Bundle` 의 *검증된 것 / 검증하지 못한 것 (oracle gap) / 신뢰도* 3 sub-section. Pass 판정이라도 oracle gap 미명시 시 *신뢰도: Low 자동 강등*.
+- 본 D8은 *원칙 owning* — `[외부실증]` 논문 §5.2.1 Harness-Level Evaluation and Oracle Adequacy + §5.2.2 Semantic Verification Beyond Executable Feedback 인용 single source. 영구 validate-workitem SKILL / validator agent 본문은 본 D8만 인용.
+
+### D9. Optimized Workflow Topology + Shared State (*Code as Agent Harness* §4.1.3·§5.2.4 정합)
+agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wave 계산 + conflict review 안정성 ↑. shared state의 semantic conflict는 syntactic merge로 잡히지 않으므로 *deterministic input*(예: 명시적 `write_set:`)이 plan 시점에 회수 가능해야.
+- 본 보일러의 적용: TASK_TEMPLATE `## 9. 의존성` 5필드 구조화 (opt-in, 병렬 wave 한정 — `depends_on` / `read_set` / `write_set` / `assumptions` / `verifier`) + plan-workitem wave 계산 (write_set 교집합 시 자동 wave 분리, 자연어 grep fallback 유지). 적용 surface SSOT: ADR-026 (TASK_TEMPLATE schema) + ADR-038#amend-3 (deterministic write_set 회수).
+- 본 D9는 *원칙 owning* — `[외부실증]` 논문 §4.1.3 Optimized Workflow Topology + §5.2.4 Transactional Shared Program State 인용 single source. 영구 TASK_TEMPLATE / plan-workitem SKILL 본문은 본 D9만 인용.
+
 ## Mutation Contract (본 ADR 자체에 적용)
-1. **Target** — _ADR_GUIDE.md / AGENTS.md / STRUCTURE.md의 정체성·mutation contract 단락.
-2. **Failure mode** — 진화 라운드마다 skill/agent 본문이 수정될 때 회귀 evidence·rollback이 양식화 안 돼 *어느 변경이 어떤 실패를 막았는지* 6개월 뒤 재구성 불가 (관측됨, Phase 진화 라운드 다수).
-3. **Predicted improvement** — 새 ADR 본문에 6 필드가 정착되면 fork retrospective에서 *변경 사유 추적 시간* 단축.
+1. **Target** — _ADR_GUIDE.md / AGENTS.md / STRUCTURE.md의 정체성·mutation contract 단락 + 영구 SKILL / TEMPLATE / GUARDRAILS 의 D5~D9 인용 surface.
+2. **Failure mode** — 진화 라운드마다 skill/agent 본문이 수정될 때 회귀 evidence·rollback이 양식화 안 돼 *어느 변경이 어떤 실패를 막았는지* 6개월 뒤 재구성 불가 (관측됨, Phase 진화 라운드 다수). 추가: *영구 파일이 외부 논문 §X.Y.Z를 직접 인용*하면 논문 supersede 시 분산 갱신 부담 발생 → 본 ADR D5~D9가 single source 역할.
+3. **Predicted improvement** — 새 ADR 본문에 6 필드가 정착되면 fork retrospective에서 *변경 사유 추적 시간* 단축. + 영구 파일 논문 의존이 본 ADR 한 곳으로 집중됨.
 4. **Preserved invariants** — 기존 lifecycle 8단계 / validate report 양식 / IMPROVEMENT_GUIDE 스키마 / signal-first cap.
 5. **Falsifying evaluation** — `.boilerplate/validation/SIMULATION_RUN.md` 다음 라운드에서 *fork 사용자가 mutation contract 양식이 부담스럽다*는 신호 1+ 회 누적되면 enabling → 약권장 강도 재검토.
-6. **Rollback path** — 본 ADR superseded + ADR-005·ADR-022 단편 정의로 복귀.
+6. **Rollback path** — 본 ADR superseded + ADR-005·ADR-022 단편 정의로 복귀. D5~D9 분리 시 별도 ADR (예: ADR-048 Sandboxed Execution, ADR-049 Contract Formation 등) 로 분할 supersede 가능.
 
 ## 정책 강도 (ADR-022 정합)
-**enabling (약) — [외부실증]** (*Code as Agent Harness* survey 인용). 자동 차단 0건. 6 필드 누락 시 reviewer P2 라벨로 보고만.
+**enabling (약) — [외부실증]** (*Code as Agent Harness* survey 인용 — D1·D3·D5·D6·D7·D8·D9 모두 본 ADR이 single source). 자동 차단 0건. 6 필드 누락 시 reviewer P2 라벨로 보고만.
 
 ## 결과
 - 본 보일러플레이트의 정체성이 ADR 1개로 명시됨 — fork 사용자가 1 페이지로 "이 보일러는 무엇을 모델링 하는가"를 이해.
 - harness 자체를 바꾸는 모든 ADR이 6 필드 mutation contract를 갖춤 → retrospective 추적성 + regression evidence 누적.
+- **영구 SKILL / TEMPLATE / GUARDRAILS 파일은 외부 논문을 직접 인용하지 않고 본 ADR D# 정합만 인용** — 논문 supersede / retraction 시 본 ADR 한 곳만 갱신하면 됨 (ADR-005 SSOT 정신 정합).
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- AGENTS.md                                                  — 정체성 1줄 link
-- docs/00-meta/STRUCTURE.md                                  — Canonical Owner 표
-- docs/90-decisions/boilerplate/_ADR_GUIDE.md                — mutation contract 트리거 + 권장 섹션
+- AGENTS.md                                                                          — 정체성 1줄 link
+- docs/00-meta/STRUCTURE.md                                                          — Canonical Owner 표
+- docs/00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier              — D5 적용 surface (`## defaultMode 위험 tier`)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md                                      — D6 적용 (`## 6-1` path 형식) + D7 적용 (`## 8. 메모` 영속 위치) + D9 적용 (`## 9. 의존성` 5필드)
+- docs/40-validation/IMPROVEMENT_GUIDE.md                                            — D7 적용 (`## 5. Repair decision log`)
+- docs/90-decisions/boilerplate/_ADR_GUIDE.md                                        — mutation contract 트리거 + 권장 섹션
+- .claude/skills/validate-workitem/SKILL.md                                          — D6 적용 (path resolve) + D8 적용 (`## Evidence Bundle`)
+- .claude/skills/stabilize-milestone/SKILL.md                                        — D7 적용 (`7-T. Telemetry aggregate`)
+- .claude/skills/repair-plan/SKILL.md                                                — D7 적용 (`5-D` 결정 이력 영속화)
+- .claude/skills/repair-discovery/SKILL.md                                           — D7 적용 (`4-D` 결정 이력 영속화)
+- .claude/skills/plan-workitem/SKILL.md                                              — D9 적용 (wave 계산 `write_set` 우선)
+- .claude/agents/validator.md                                                        — D8 적용 (Evidence Bundle 출력)
 
 > README 인덱스(`docs/90-decisions/boilerplate/README.md`)는 *모든 ADR이 1줄 등재*되는 인덱스라 surface 정의(ADR-045 — *cross-surface enforcement*가 필요한 fan-out)에 해당하지 않는다. 인덱스 한 줄 추가는 별도 정상 절차(_ADR_GUIDE "새 ADR 추가 절차" §2).
 
 ## 후속 작업
 - 다음 보일러플레이트 진화 라운드(Phase 12+)부터 *harness mutation surface*를 건드리는 ADR은 본 contract를 적용. 기존 ADR은 사후 retrofit X (Surgical Changes — ADR-006).
 - 첫 fork 사용자 라운드에서 mutation contract 양식 부담 신호 추적 (ADR-022 evidence 회수).
+- D5~D9 중 본문이 *비대*해지는 항목 (특히 D7 — 적용 surface 다수) 은 별도 ADR로 분할 supersede 검토 (ADR-045 D6 기준 amend 4+ 또는 정책 의미 변경 시).
 
 ## 참고
-- arXiv:2605.18747v1, Ning et al. 2026, *Code as Agent Harness* — §3.5.3 Governed Harness Mutation, §1 Harness 정의.
-- ADR-005 (SSOT), ADR-017 (dogfood simulation), ADR-019 (context-pack), ADR-022 (Ratchet), ADR-045 (reference contract), ADR-046 (signal-first).
+- arXiv:2605.18747v1, Ning et al. 2026-05-18, *Code as Agent Harness: Toward Executable, Verifiable, and Stateful Agent Systems*:
+  - §1 Harness 정의 (D1 인용 owning)
+  - §3.4.2 Planning as Contract Formation (D6 인용 owning)
+  - §3.4.3 Sandboxed Execution and Permissioned State Transition (D5 인용 owning)
+  - §3.4.4 Verification through Deterministic Sensors (D1 인용 owning)
+  - §3.5.1 Deep Telemetry as the Optimization Substrate (D7 인용 owning)
+  - §3.5.3 Governed Harness Mutation (D3 인용 owning)
+  - §4.1.3 Optimized Workflow Topology for Agentic Coordination (D9 인용 owning)
+  - §5.2.1 Harness-Level Evaluation and Oracle Adequacy (D8 인용 owning)
+  - §5.2.2 Semantic Verification Beyond Executable Feedback (D8 인용 owning)
+  - §5.2.4 Transactional Shared Program State and Semantic Conflict Resolution (D9 인용 owning)
+- ADR-005 (SSOT — 본 ADR 영구 파일 인용 SSOT 역할 정합), ADR-017 (dogfood simulation — D4 default), ADR-019 (context-pack), ADR-022 (Ratchet — 정책 강도), ADR-045 (reference contract — Surfaces fan-out), ADR-046 (signal-first).
 ```
 
 **1-2) README 인덱스에 한 줄 추가** — `docs/90-decisions/boilerplate/README.md` 의 ADR 표 마지막 행(현재 ADR-046) 바로 아래에 추가:
 
 ```markdown
-| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 명시 + harness surface 수정 시 6 필드 mutation contract (*Code as Agent Harness* arXiv:2605.18747 §3.5.3) |
+| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 ```
 
 **1-3) AGENTS.md 한 줄 link 추가** — *"## 깊은 운영 원칙은 다음 문서를 따른다"* 섹션의 마지막 `[ADR 인덱스](docs/90-decisions/README.md)` 줄 *바로 위*에 한 줄 추가:
@@ -209,7 +260,7 @@ docs(adr): add ADR-047 code-as-agent-harness paradigm and mutation contract
 **2-1) validate-workitem SKILL.md report 양식 보강** — 본 SKILL의 *"마지막 단계 — report 파일 작성"* 단락 내 report markdown block에서 `## 다음 권장 액션` 줄 *바로 위*에 다음 섹션을 삽입한다:
 
 ```markdown
-## Evidence Bundle (*Code as Agent Harness* arXiv:2605.18747 §5.2.1·§5.2.2 oracle adequacy)
+## Evidence Bundle (ADR-047 D8 oracle adequacy 정합)
 <!-- 본 검증 라운드가 *무엇을 봤고 무엇을 못 봤는지* 명시. green test가 곧 충분한 검증이라는 착각을 줄인다. -->
 
 ### 검증된 것 (verified)
@@ -240,7 +291,7 @@ docs(adr): add ADR-047 code-as-agent-harness paradigm and mutation contract
 **2-2) validate-workitem SKILL.md 검증 기준 단락 보강** — 본 SKILL의 *"검증 기준:"* 목록 끝(현재 마지막 항목은 *Arch-iface audit*)에 한 항목 추가:
 
 ```markdown
-- **Evidence Bundle 양식 강제** (ADR-047 D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
+- **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 ```
 
 **2-3) validator.md 출력 형식 보강** — 본 agent의 *"출력 형식:"* 목록에 한 항목 추가 (*"다음 권장 액션"* 줄 *바로 위*):
@@ -292,7 +343,7 @@ docs(skills): add Evidence Bundle section to validate-workitem report schema
 **3-1) repair-plan SKILL.md 수행 단계 보강** — 본 SKILL의 *"수행:"* 목록 안 *"5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정..."* 단계 *다음*, *"6. 삭제 전 사전 조건 점검..."* 단계 *이전*에 새 단계 5-D 삽입 (외부 fence가 4-backtick인 점 주의):
 
 ````markdown
-5-D. **P0/P1 결정 이력 영속화** (*Code as Agent Harness* arXiv:2605.18747 §3.5.1 durable correction history + ADR-047 D1 inspectability). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
+5-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 durable correction history + D1 inspectability 정합). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
 
 **영속 위치 — workitem 타입별로 다름** (open items와 closed decision의 의미 분리):
 - **task (T-NNN)**: 해당 task 문서 `## 8. 메모`에 1줄 append (`## 8`이 자유 메모란).
@@ -328,7 +379,7 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 **3-3) repair-discovery SKILL.md 수행 단계 보강** — 본 SKILL의 *"수행:"* 목록 안 *"4. Adopt/Adopt-modified 항목을 DISCOVERY.md에 반영..."* 단계 *바로 다음*에 새 sub-step 추가:
 
 ```markdown
-4-D. **P0/P1 결정 이력 영속화** (*Code as Agent Harness* arXiv:2605.18747 §3.5.1 + ADR-047 D1): 본 라운드의 P0+P1 결정을 DISCOVERY.md `## 12. Assumption Tracker` *표 끝 아래의 보조 단락* `### Repair history`(없으면 신설)에 한 줄씩 append. 형식: `- repair-discovery <YYYY-MM-DD> [<reviewer-tag>] <severity> <category>: <결정> — <근거 ≤80자>`. P2는 영속 X.
+4-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 + D1 정합): 본 라운드의 P0+P1 결정을 DISCOVERY.md `## 12. Assumption Tracker` *표 끝 아래의 보조 단락* `### Repair history`(없으면 신설)에 한 줄씩 append. 형식: `- repair-discovery <YYYY-MM-DD> [<reviewer-tag>] <severity> <category>: <결정> — <근거 ≤80자>`. P2는 영속 X.
 ```
 
 **3-4) repair-discovery SKILL.md 마지막 출력 보강** — 본 SKILL의 *"마지막 출력:"* 한 줄 인라인 항목 목록 안 *"수정된 DISCOVERY 섹션"* 토큰 *바로 다음*에 다음 토큰을 추가(`/` 구분자 유지):
@@ -340,7 +391,7 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 **3-5) TASK_TEMPLATE.md `## 8. 메모` 안내 주석 추가** — `## 8. 메모` 헤더 줄 *바로 다음*에 다음 HTML 주석 한 줄 추가:
 
 ```markdown
-<!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유. -->
+<!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유. -->
 ```
 
 **3-6) IMPROVEMENT_GUIDE.md `## 5. Repair decision log` sub-section 신설** — `docs/40-validation/IMPROVEMENT_GUIDE.md` 파일 끝(`## 4. 보류 항목` 아래)에 새 sub-section 추가:
@@ -349,7 +400,7 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 
 ## 5. Repair decision log
 
-`/repair-plan`이 feature(F-NNN) 또는 milestone(M-N) 단위로 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리 (ADR-047 D1 inspectability). `## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링`과 의미 분리 — 이 두 섹션은 *open items*이고 본 섹션은 *closed records*(지나간 판단).
+`/repair-plan`이 feature(F-NNN) 또는 milestone(M-N) 단위로 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리 (ADR-047 D7 durable correction history + D1 inspectability). `## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링`과 의미 분리 — 이 두 섹션은 *open items*이고 본 섹션은 *closed records*(지나간 판단).
 
 - task scope (T-NNN) 결정은 해당 task `## 8. 메모`에 직접 append — 본 섹션 아님.
 - ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`).
@@ -362,7 +413,7 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 **3-7) (선택) DISCOVERY_TEMPLATE.md** — `Glob docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`로 존재 확인. 존재하면 `## 12. Assumption Tracker` 표 아래에 다음 안내 주석:
 
 ```markdown
-<!-- /repair-discovery가 본 라운드의 P0/P1 결정을 1줄씩 append하는 `### Repair history` 보조 단락이 본 §12 표 아래에 들어선다 (ADR-047 D1 + ADR-044 정합). -->
+<!-- /repair-discovery가 본 라운드의 P0/P1 결정을 1줄씩 append하는 `### Repair history` 보조 단락이 본 §12 표 아래에 들어선다 (ADR-047 D7 durable correction history + D1 inspectability + ADR-044 정합). -->
 ```
 
 존재하지 않으면 본 sub-step skip (template 신설은 본 step 범위 밖).
@@ -393,11 +444,11 @@ docs(skills): persist P0/P1 decision log in repair-plan and repair-discovery
 
 ### 왜
 - **현재**: `.claude/settings.json` 의 `defaultMode: "acceptEdits"` 는 shared(공통)으로 박혀 있어 fork 후 모든 환경에서 *기본 자동 수락*.
-- **GAP**: multi-tier permission이 harness state임에도(*Code as Agent Harness* §3.4.3 Sandboxed Execution and Permissioned State Transition), acceptEdits를 shared로 두는 결정의 *위험 tier*가 ADR / 문서에 명시되어 있지 않다 — fork 사용자가 안전 trade-off를 모른 채 그대로 채택.
+- **GAP**: multi-tier permission이 harness state임에도(*Code as Agent Harness* §3.4.3 — ADR-047 D5 적용 surface), acceptEdits를 shared로 두는 결정의 *위험 tier*가 ADR / 문서에 명시되어 있지 않다 — fork 사용자가 안전 trade-off를 모른 채 그대로 채택.
 - *기본 모드 변경은 보일러플레이트 회귀 위험 큼* — *문서화*만 박고 사용자 결정에 맡긴다.
 
 ### ADR-022 정책 강도
-**enabling (약) — [외부실증]** (논문 §3.4.3). doc-only. 자동 차단 0건. `.claude/settings.json` 본문 변경 없음.
+**enabling (약) — [외부실증]** (ADR-047 D5 SSOT 인용). doc-only. 자동 차단 0건. `.claude/settings.json` 본문 변경 없음.
 
 ### 영향 받는 파일
 - 수정: `docs/00-meta/GUARDRAILS_STRATEGY.md`
@@ -405,10 +456,11 @@ docs(skills): persist P0/P1 decision log in repair-plan and repair-discovery
 
 ### 단계별 수행
 
-**4-1) GUARDRAILS_STRATEGY.md 위험 tier 단락 추가** — `## shared 기본값에 포함하지 않는 것` 헤더 줄 *바로 위*에 다음 단락을 삽입한다:
+**4-1) GUARDRAILS_STRATEGY.md 위험 tier 단락 추가** — `## shared 기본값에 포함하지 않는 것` 헤더 줄 *바로 위*에 다음 단락을 삽입한다 (헤더 위에 `<a id>` anchor 줄 포함 — ADR-045 D9.2 정합, 다른 파일이 링크로 가리키는 비-ADR 섹션은 stable anchor 필수):
 
 ```markdown
-## defaultMode 위험 tier (ADR-047 D2 sandboxed execution 정합)
+<a id="guardrails-default-mode-risk-tier"></a>
+## defaultMode 위험 tier (ADR-047 D5 sandboxed execution + permissioned state transition 정합)
 
 `.claude/settings.json` 의 `defaultMode` 는 *agent의 edit/write 기본 수락 모드*를 결정한다. 본 보일러플레이트는 shared 기본값으로 `"acceptEdits"` 를 박고 있다 — 다음 정당화·위험 tier·대체 경로를 명시한다.
 
@@ -420,7 +472,7 @@ docs(skills): persist P0/P1 decision log in repair-plan and repair-discovery
 | `plan` | 읽기 전용 | 매우 낮음 | 사용자 명시 선택 |
 
 **`acceptEdits` shared 정당화**:
-- 본 보일러플레이트의 lifecycle(plan→implement→validate→repair→finalize→stabilize)이 모든 변경을 *후속 validate에서 검증*한다 (deterministic sensor, *Code as Agent Harness* arXiv:2605.18747 §3.4.4). 즉 mid-stream confirm을 빼도 끝단 validator가 catch.
+- 본 보일러플레이트의 lifecycle(plan→implement→validate→repair→finalize→stabilize)이 모든 변경을 *후속 validate에서 검증*한다 (deterministic sensor — ADR-047 D1 Executability 정합). 즉 mid-stream confirm을 빼도 끝단 validator가 catch.
 - 비-acceptEdits 모드에서는 builder가 매 Edit마다 confirm으로 중단 — RGR 사이클이 사실상 불가능해 보일러 디폴트와 충돌.
 
 **`acceptEdits`의 잔여 위험**:
@@ -431,7 +483,7 @@ docs(skills): persist P0/P1 decision log in repair-plan and repair-discovery
 - shared `defaultMode` 제거 + `.claude/settings.local.json` 에 개발자 본인의 모드 설정. 팀 차원의 강제는 *프로젝트 자체 정책 ADR-100+* 으로 박을 것.
 - bypassPermissions 사용은 *로컬 only*. shared로 절대 박지 않는다.
 
-**참고**: Claude Code 공식 [문서](https://code.claude.com/docs) 의 permission modes 절 + ADR-047 D2 (multi-tier permission as harness state).
+**참고**: Claude Code 공식 [문서](https://code.claude.com/docs) 의 permission modes 절 + ADR-047 D5 (sandboxed execution + permissioned state transition — 본 단락이 D5 적용 surface, 논문 §3.4.3 인용 SSOT는 ADR-047 D5 본문).
 ```
 
 **4-2) (선택, 미적용)** `.claude/settings.json` 자체 수정은 본 step에서 *하지 않는다*. fork 사용자가 옵션 B를 채택할 때 4-1 단락의 *fork 사용자 대체 경로* 가 절차 안내 역할.
@@ -531,7 +583,7 @@ docs(adr): cite Code as Agent Harness paper in ADR-038 background and evidence l
 ## 9. 의존성
 <!-- 기본(자연어): `- T-002: T-001의 X 정의 후 시작 가능`. 비어 있으면 병렬 가능으로 간주.
 
-     선택(구조화, 병렬 wave 대상 task 한정 — ADR-026 schema + ADR-038#d3 정정 + *Code as Agent Harness* arXiv:2605.18747 §4.1.3/§5.2.4):
+     선택(구조화, 병렬 wave 대상 task 한정 — ADR-026 schema + ADR-038#d3 정정 + ADR-047 D9 workflow topology + shared state 정합):
      자연어 1줄 *대신* 또는 *아래에* 다음 5필드를 박을 수 있다. 5필드는 plan-workitem wave 계산이 *우선 사용*, 부재 시 자연어 grep fallback.
 
      - depends_on: [T-001, T-003]          # 명시적 task ID 목록 — 자연어 grep 대신 결정적 dep
@@ -549,7 +601,7 @@ docs(adr): cite Code as Agent Harness paper in ADR-038 background and evidence l
 **6-2) plan-workitem SKILL.md 단계 11-(a) 우선순위 명시** — 본 SKILL의 *"11-(a) **위상 정렬 (결정적 알고리즘)**:"* 단락 끝(같은 단락의 마지막 문장 뒤)에 다음 줄 추가:
 
 ```markdown
-   *우선순위* (ADR-047 D1 + *Code as Agent Harness* §4.1.3): 본 task `## 9. 의존성`에 *구조화 필드*(`depends_on:` / `write_set:` 등)가 있으면 자연어 grep 대신 구조화 필드를 결정적으로 사용. `depends_on:` 부재 + 자연어 1줄만 있으면 기존 grep fallback. `write_set:` 교집합이 있는 task 쌍은 *같은 wave에 두지 않는다* — 자동 wave 분리 + 출력에 *file race* 한 줄 명시.
+   *우선순위* (ADR-047 D9 workflow topology + D1 inspectability 정합): 본 task `## 9. 의존성`에 *구조화 필드*(`depends_on:` / `write_set:` 등)가 있으면 자연어 grep 대신 구조화 필드를 결정적으로 사용. `depends_on:` 부재 + 자연어 1줄만 있으면 기존 grep fallback. `write_set:` 교집합이 있는 task 쌍은 *같은 wave에 두지 않는다* — 자동 wave 분리 + 출력에 *file race* 한 줄 명시.
 ```
 
 **6-3) plan-workitem SKILL.md 단계 11-(b) lockfile race 보강** — 본 SKILL의 *"11-(b) **lockfile race 경고**:"* 단락 끝(같은 단락의 마지막 문장 뒤)에 한 줄 추가:
@@ -609,7 +661,7 @@ docs(templates): allow optional structured deps in TASK_TEMPLATE for parallel wa
 **7-1) TASK_TEMPLATE.md `## 6-1. 테스트 시나리오` 주석 보강** — `## 6-1. 테스트 시나리오` 헤더 바로 아래 HTML 주석 블록 안의 마지막 예시 줄(`- AC-2 → tests/auth/me.spec.ts > test_AC_2_authenticated_returns_user -->`)에서 닫는 `-->` 토큰 *직전*(같은 줄의 `-->` 앞에서 줄바꿈)에 다음 본문을 삽입한다. 즉 기존 `- AC-2 → ... ` 다음에 새 본문이 들어가고 그 뒤에 `-->`가 위치한다 (HTML 주석 블록 안에 새 본문이 포함되도록):
 
 ```
-     - 선택 — machine-checkable path 형식 (*Code as Agent Harness* arXiv:2605.18747 §3.4.2 contract formation 정합 + ADR-047):
+     - 선택 — machine-checkable path 형식 (ADR-047 D6 contract formation 정합):
        기존 `- AC-N → <file> > <test-name>` 자연어 양식 *대신* `- AC-N → <runner>::<file>::<test-id>` 형식을 박을 수 있다.
        runner는 jest|pytest|go|cargo 등 — 실제 실행 가능한 명령으로 채울 것.
        예: `- AC-1 → jest::tests/auth/me.spec.ts::test_AC_1_unauthenticated_returns_401`
@@ -628,7 +680,7 @@ docs(templates): allow optional structured deps in TASK_TEMPLATE for parallel wa
 **7-3) validate-workitem SKILL.md AC↔테스트 매핑 우선순위 명시** — *"검증 기준:"* 목록 안의 *"AC ↔ 테스트 매핑"* 항목 *바로 다음*에 두 줄(들여쓰기 sub-bullet)을 추가:
 
 ```markdown
-  - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D1 inspectability + *Code as Agent Harness* §3.4.2 contract formation).
+  - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D6 contract formation + D1 inspectability 정합).
   - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
 ```
 
@@ -658,7 +710,7 @@ docs(templates): strengthen TASK_TEMPLATE 6-1 test-path format for deterministic
 - `.claude/skills/stabilize-milestone/SKILL.md` 의 최종 출력(단계 8) *직전*에 telemetry aggregate block을 추가.
 
 ### 왜
-- 단순 fail/pass가 아니라 *수치·분포·추이*가 harness 진화의 substrate (*Code as Agent Harness* §3.5.1 Deep Telemetry as Optimization Substrate).
+- 단순 fail/pass가 아니라 *수치·분포·추이*가 harness 진화의 substrate (*Code as Agent Harness* §3.5.1 Deep Telemetry as the Optimization Substrate).
 - 현재 stabilize-milestone은 P0/P1/P2 라벨링은 잘 하지만 *수치 dashboard*가 없다. 데이터는 이미 다 존재 — validation reports + QA_FINDINGS + feature `## 7-1` — *surfacing*만 빠짐.
 - ADR-014 graduation checklist 5+1이 이미 deterministic 평가 — 그 위에 *수치 echo block* 한 개 추가하면 milestone graduation이 *진짜* 데이터 기반이 된다.
 
@@ -673,7 +725,7 @@ docs(templates): strengthen TASK_TEMPLATE 6-1 test-path format for deterministic
 **8-1) stabilize-milestone SKILL.md 단계 7과 8 사이에 새 단계 추가** — 본 SKILL의 *"7. ARCHITECTURE_OVERVIEW의 `## 3-1`..."* 줄과 *"8. 최종 출력:"* 줄 사이에 다음 새 단계를 삽입한다 (외부 fence가 4-backtick인 점 주의 — 내부 ` ``` ` 블록 보존):
 
 ````markdown
-7-T. **Telemetry aggregate** (*Code as Agent Harness* arXiv:2605.18747 §3.5.1 deep telemetry as optimization substrate + [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D1 inspectability). 본 마일스톤 산하 task의 *이미 수집된 데이터*를 수치 dashboard로 echo. 새 데이터 수집 X — surface만.
+7-T. **Telemetry aggregate** ([ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7 deep telemetry + D1 inspectability 정합). 본 마일스톤 산하 task의 *이미 수집된 데이터*를 수치 dashboard로 echo. 새 데이터 수집 X — surface만.
 
 수집 소스:
 - 본 마일스톤 산하 모든 task의 `docs/40-validation/reports/<task-id>.md` (존재 시).

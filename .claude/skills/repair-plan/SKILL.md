@@ -37,7 +37,7 @@ context-pack: minimal
 3. 결정 우선순위: P0 > P1 > P2. **한 라운드에 P0 + P1 + P2 모두 판정 + 처리한다** — P2 deferred 자리 신설 X (ADR-038 비결정 정합 — "다음 stabilize 라운드 instruction improvement 후보" 같은 *defer-식 reject 사유는 표면 정합/실질 모순*이므로 금지). P2도 동일하게 4결정 중 하나로 판정: trivially 수용 가능 시 Adopt / Adopt-modified, 리뷰어가 잘못 본 경우(예: 이미 있는 link를 누락이라고 보고) Reject-false-positive, 본 plan이 더 정합한 경우 Reject-conflict. 4결정 카테고리 *외의 deferred drop은 허용 X* — 정직하게 *수용* 또는 *기각*만.
 4. **다중 리뷰어 충돌 처리**: 같은 항목에 대해 리뷰어 A는 Adopt 권장, 리뷰어 B는 다른 수정 권장한 경우, 본 skill이 charter / architecture 정합 기준으로 어느 쪽을 더 받아들였는지 결정 + 결정 근거 1줄. 자동 합의 / 다수결 X — *planner agent 판단 책임* (ADR-007 책임 경계 정합).
 5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정. 수정 후에도 양식 정합을 점검 (TEMPLATE의 섹션 번호 유지, FAC↔AC `## 7-1` 매핑 갱신, AC Given-When-Then 형식 유지). `## 9. 의존성`이 수정된 경우 그 사실을 *기록*해 아래 "마지막 출력" 단락의 wave 재emit 안내에 포함.
-5-D. **P0/P1 결정 이력 영속화** (*Code as Agent Harness* arXiv:2605.18747 §3.5.1 durable correction history + ADR-047 D1 inspectability). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
+5-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 durable correction history + D1 inspectability 정합). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
 
 **영속 위치 — workitem 타입별로 다름** (open items와 closed decision의 의미 분리):
 - **task (T-NNN)**: 해당 task 문서 `## 8. 메모`에 1줄 append (`## 8`이 자유 메모란).

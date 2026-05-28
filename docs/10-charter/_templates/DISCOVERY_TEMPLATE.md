@@ -50,7 +50,7 @@ draft
 |-----|----------------------|------------|----------|------|---------|
 | A-1 | (예: 타겟이 매주 이력서 갱신) | (예: 5명 인터뷰) | (미검증) | - | - |
 
-<!-- /repair-discovery가 본 라운드의 P0/P1 결정을 1줄씩 append하는 `### Repair history` 보조 단락이 본 §12 표 아래에 들어선다 (ADR-047 D1 + ADR-044 정합). -->
+<!-- /repair-discovery가 본 라운드의 P0/P1 결정을 1줄씩 append하는 `### Repair history` 보조 단락이 본 §12 표 아래에 들어선다 (ADR-047 D7 durable correction history + D1 inspectability + ADR-044 정합). -->
 
 ## 13. Opportunity Backlog
 <!-- 기각·검증실패 후보까지 보존 (Torres OST opportunity space 정신).

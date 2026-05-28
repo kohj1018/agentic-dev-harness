@@ -21,6 +21,32 @@
 - `.claude/settings.json`의 최소 공통 설정
 - 민감 파일 접근 제한
 
+<a id="guardrails-default-mode-risk-tier"></a>
+## defaultMode 위험 tier (ADR-047 D5 sandboxed execution + permissioned state transition 정합)
+
+`.claude/settings.json` 의 `defaultMode` 는 *agent의 edit/write 기본 수락 모드*를 결정한다. 본 보일러플레이트는 shared 기본값으로 `"acceptEdits"` 를 박고 있다 — 다음 정당화·위험 tier·대체 경로를 명시한다.
+
+| 모드 | 행동 | 위험 tier | 본 보일러 적용 |
+|------|------|----------|--------------|
+| `default` | 모든 Write/Edit 마다 confirm | 낮음 | — |
+| `acceptEdits` | Write/Edit 자동 수락, Bash·MCP는 confirm | **중간** | **shared 기본값** |
+| `bypassPermissions` | 모든 도구 자동 수락 | 높음 | local-only 권장 (절대 shared X) |
+| `plan` | 읽기 전용 | 매우 낮음 | 사용자 명시 선택 |
+
+**`acceptEdits` shared 정당화**:
+- 본 보일러플레이트의 lifecycle(plan→implement→validate→repair→finalize→stabilize)이 모든 변경을 *후속 validate에서 검증*한다 (deterministic sensor — ADR-047 D1 Executability 정합). 즉 mid-stream confirm을 빼도 끝단 validator가 catch.
+- 비-acceptEdits 모드에서는 builder가 매 Edit마다 confirm으로 중단 — RGR 사이클이 사실상 불가능해 보일러 디폴트와 충돌.
+
+**`acceptEdits`의 잔여 위험**:
+- builder가 *task 범위 밖* Write/Edit를 자동 수락 — validator의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 하지만 *비가역 파괴*는 후행 catch가 무의미.
+- 민감 파일 접근은 `permissions.deny`(현재 `.env`/`secrets/**`)에 박혀 있어 차단되지만, *프로젝트 외부 경로* 작업은 별도 sandbox 책임.
+
+**fork 사용자 대체 경로** (옵션 B):
+- shared `defaultMode` 제거 + `.claude/settings.local.json` 에 개발자 본인의 모드 설정. 팀 차원의 강제는 *프로젝트 자체 정책 ADR-100+* 으로 박을 것.
+- bypassPermissions 사용은 *로컬 only*. shared로 절대 박지 않는다.
+
+**참고**: Claude Code 공식 [문서](https://code.claude.com/docs) 의 permission modes 절 + ADR-047 D5 (sandboxed execution + permissioned state transition — 본 단락이 D5 적용 surface, 논문 §3.4.3 인용 SSOT는 ADR-047 D5 본문).
+
 ## shared 기본값에 포함하지 않는 것
 - PowerShell 전용 hook
 - Bash 전용 hook
