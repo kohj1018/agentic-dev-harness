@@ -8,7 +8,7 @@ accepted
 ## 배경
 - [관측됨] 기존 6개 agent(architect/planner/builder/validator/reviewer/qa)의 tools에 WebSearch/WebFetch가 없다 → 구현 중 외부 라이브러리(결제/인증/SDK)의 *최신 공식문서*를 확인할 수 없고, 모델 지식 컷오프로 stale API를 쓸 위험이 있다.
 - [관측됨] 딥리서치·스택 추천·MCP 최신 설정 조회 모두 "사용자가 직접 붙여넣기"에만 의존.
-- [외부실증] Anthropic "Effective context engineering" / subagent 가이드 — 리서치/딥다이브는 서브에이전트의 정전(canonical) 용도(탐색 노이즈 격리, 1,000~2,000 토큰 요약만 반환).
+- [외부실증] Anthropic "Effective context engineering" / subagent 가이드 — 리서치/딥다이브는 서브에이전트의 정전(canonical) 용도(탐색 노이즈 격리, 1,000~2,000 토큰 요약만 반환 — 현재 cap은 ADR-046 ≤600 참조).
 
 ## 결정
 1. **`researcher` agent 신설** — tools: `Read, Glob, Grep, WebSearch, WebFetch`. **코드·문서 직접 수정 권한 없음(Write/Edit 없음)** = report-only. model: sonnet. context-pack: minimal.
