@@ -21,6 +21,7 @@ accepted
 
 ## 결과
 - `.claude/skills/validate-discovery/SKILL.md`, `.claude/skills/repair-discovery/SKILL.md`, reviewer `discovery` surface(8 차원), `docs/40-validation/discovery-reviews/`.
+- **Codex 호환 (의도적 비대칭)**: `validate-discovery`·`repair-discovery`는 *자연어 호출*만 제공한다(`.agents/skills/` wrapper 미생성). ADR-038은 inner-loop 빈도가 높아 wrapper를 만들었으나, discovery cross-review는 호출 빈도가 낮아 ADR-010 Phase 2 자연어 정책을 따른다(자연어 호출 Codex skill의 목록 SSOT = README.md / README_ko.md — ADR-010 #amend-3). — ADR-038 D5와 의도적으로 다른 점을 명시.
 
 ## Ratchet 강도 (ADR-022)
 - enabling(약) — opt-in peer review. 자동 차단 X.

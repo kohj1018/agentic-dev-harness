@@ -5,6 +5,12 @@
 ## 상태
 accepted
 
+## 현재 유효 결정 (요약 — 상세는 본문·amend SSOT)
+- AGENTS.md = 캐노니컬 진입 페이지, CLAUDE.md = `@AGENTS.md` import (D1·D2).
+- 워크플로우 본문 SSOT = `.claude/skills/<name>/SKILL.md`, `.agents/skills/`는 얇은 wrapper (D3·D4).
+- Codex wrapper는 inner-loop 빈도 높은 skill에만 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).
+- `.codex/config.toml` = 안전 baseline(secrets 차단 포함) + Codex 모델 ID 추적 (D5·D8).
+
 ## 배경
 이 보일러플레이트는 Claude Code 표면(`CLAUDE.md`, `.claude/`)에만 묶여 있어, 사용자가 Claude Code의 사용량 한도에 걸리거나 다른 사정으로 OpenAI Codex CLI로 전환할 때 동일 워크플로우를 이어가지 못한다.
 
@@ -57,7 +63,7 @@ accepted
 
 ## 후속 작업
 - Phase 1.5 (적용됨): plan-workitem, bootstrap-project, bootstrap-stack, stabilize-milestone 4개 wrapper 추가. 근거 — fork 직후 첫 진입 시나리오(charter → architecture → 첫 분해)에서 자연어 호출 대비 wrapper 가성비가 inner-loop와 동등.
-- Phase 2 (보류): discover-product, stack-guard, review-doc, boilerplate-context 4개. 호출 빈도 낮아 자연어 호출로 충분.
+- Phase 2 자연어 호출 skill: 목록·개수는 README.md / README_ko.md가 SSOT (#amend-3) — 본 ADR은 핀하지 않는다. wrapper 승격 여부는 fork 데이터 회수 후 재평가 (amend-1 후속 작업과 동일 정책).
 - Phase 3 `.codex/agents/` TOML (명시 subagent workflow 자주 쓰게 되면).
 - Codex 모델 ID 갱신은 본 ADR을 새 ADR로 superseding.
 - (Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.
@@ -108,3 +114,24 @@ accepted
 ### 후속 작업
 
 없음 — count 정정만.
+
+<a id="adr-010-amend-3"></a>
+## Amendment 3 (2026-05-28) — 자연어 호출 Codex skill 목록 SSOT를 README로 단일화
+
+### 결정
+
+Phase 2 *자연어 호출* Codex skill의 **목록·개수는 README.md / README_ko.md가 단일 SSOT**다(ADR-005). 본 ADR은 더 이상 개수를 핀하지 않는다. #amend-1의 "3개"·#amend-2의 "4개" 및 "README는 4개를 정확히 나열" 표기는 이후 [ADR-040](ADR-040-external-research-capability.md)(research-pack)·[ADR-044](ADR-044-cross-llm-discovery-validation.md)(validate-discovery·repair-discovery) 신설로 stale해졌으므로 *폐기*한다 — README가 현행 목록을 이미 정확히 반영한다.
+
+### 근거
+
+- 개수를 ADR에 박으면 skill이 추가/이관될 때마다 정정 amendment가 쌓인다(amend churn — [ADR-045](ADR-045-doc-reference-contract.md) D5·D6이 경계). 목록 SSOT를 README 1곳으로 단일화해 재발을 차단한다.
+- ADR-010의 역할은 *Phase 분류 정책*과 *Codex 모델 ID 추적*이지 변동성 큰 목록의 미러가 아니다(ADR-005 — 정의 1곳).
+
+### 적용 surface
+
+- #amend-1 "3개" / #amend-2 "4개" 문구는 Record로 보존(덮어쓰기 X). 본 #amend-3이 정정 SSOT — 이후 카운트·목록은 README만 참조.
+- Phase 3 wrapper 승격 재평가 풀 = "현재 README의 자연어 호출 목록"(숫자 대신 목록 참조).
+
+### 후속 작업
+
+없음.
