@@ -41,6 +41,7 @@
 | 045 | Document reference contract | accepted | — | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
 | 046 | Signal-first output contract | accepted | — | sub-agent 반환 cap 축소(1~2k→≤600) + signal-first 대화/반환 계약 + auto-clarity 보존 리스트 |
 | 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
+| 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
 
 ## Reserved / Parked / Dropped 번호
 

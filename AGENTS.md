@@ -40,6 +40,7 @@ Claude Code의 빌트인 plan 모드(Shift+Tab)는 사용자 자율 도구다. �
 - [워크플로우 + 문서 상태 전이](docs/00-meta/WORKFLOW.md)
 - [에이전트 실행 전략 + 위임 트리거](docs/00-meta/DELEGATION_STRATEGY.md)
 - [Guardrail 운영 원칙](docs/00-meta/GUARDRAILS_STRATEGY.md)
+- [Optional MCP Connectors 기록·사용 강제](docs/90-decisions/boilerplate/ADR-048-mcp-usage-enforcement.md)
 - [새 프로젝트 시작 체크리스트](docs/00-meta/PROJECT_START_CHECKLIST.md)
 - [Code-as-Agent-Harness 패러다임 + Harness Mutation Contract](docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md)
 - [ADR 인덱스](docs/90-decisions/README.md)
