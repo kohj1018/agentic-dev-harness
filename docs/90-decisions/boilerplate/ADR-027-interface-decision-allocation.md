@@ -7,8 +7,9 @@ accepted
 
 ## 현재 유효 결정
 - 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
-- `/bootstrap-design`(R0~R5 + `--fast` + `--update`)이 DESIGN.md를, `/bootstrap-stack`이 7-1~7-4를 채운다.
-- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·R5 시안·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4.
+- **`/bootstrap-design`의 *워크플로우 라운드 구조*(레퍼런스→원칙→시안→토큰→DESIGN.md→preview 순서·시점)는 ADR-049가 supersede(R0~R6 concept-mockup-first + 레퍼런스 노트). 본 ADR은 *DESIGN.md 내용*(아래 #5 Stitch 8섹션+Motion / #6 3-tier 토큰 / #7·#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT만 유지.** 본 ADR #3/#13/#21/#d22/#d26/#27의 라운드 구조·시안 시점·preview lifecycle(삭제 시점·gitignore 정책) 기술은 historical(net 규칙은 ADR-049). design-preview.html *산출물*은 ADR-049 R6이 계속 사용.
+- `/bootstrap-stack`이 7-1~7-4를 채운다.
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-049).
 - 적용 파일 전체는 아래 `## Surfaces` 참조.
 
 ## 배경
@@ -116,7 +117,7 @@ accepted
 - .claude/agents/validator.md                        — 인터페이스 CHECK 규칙(UI/API/CLI/7-x)
 - docs/30-workitems/_templates/TASK_TEMPLATE.md#7    — #amend-1 Design:/Architecture-Iface: 자리
 - docs/30-workitems/_templates/FEATURE_TEMPLATE.md#11 — #amend-1 Design:/Architecture-Iface: 자리
-- .claude/skills/bootstrap-design/SKILL.md           — #amend-2 R5/R0, #amend-4 --update
+- .claude/skills/bootstrap-design/SKILL.md           — #amend-2 §9 Don'ts self-check(R2 생성·R6 점검) + canonical 8섹션 순서(R5 저장), #amend-4 --update; 라운드 구조·시안 시점은 ADR-049
 - docs/20-system/DESIGN.md                            — #amend-2 §9 Don'ts, §8 Motion
 - .claude/skills/stack-guard/SKILL.md                — #amend-2 design.md lint 권장
 - docs/00-meta/WORKFLOW.md                            — #amend-2 §2 승인 게이트
