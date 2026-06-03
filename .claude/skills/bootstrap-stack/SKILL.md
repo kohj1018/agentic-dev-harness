@@ -38,6 +38,7 @@ context-pack: minimal
 3. 필요하면 아래 문서를 만든다.
    - `docs/00-meta/STACK_SETUP_PLAN.md`
    - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 생성 (이미 있으면 갱신 제안만).
+   - **Optional MCP Connectors 백필 (ADR-048#d1 / ADR-043#d5)**: `.codex/config.toml`에 `[mcp_servers.*]`가 이미 있으면(예: jetbrains) STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 `lifecycle usage`·`agent access` 포함해 backfill 권장. 표는 생성하되 *자동 연결은 하지 않는다*(사용자 직접 — ADR-043 보안).
 4. **인터페이스 컨벤션 채움** — API/CLI/백엔드/프론트 컨벤션은 ARCHITECTURE_OVERVIEW.md의 7-1/7-2/7-3/7-4에 박는다.
    - API 스택 감지 시: architect 단발 sub-call로 7-1(API 컨벤션) + 7-3(백엔드 결정) 채움.
    - CLI 스택 감지 시: 같은 방식으로 7-2(CLI 컨벤션) 채움.
@@ -57,6 +58,7 @@ context-pack: minimal
 - 추천 guardrail 목록
 - 생성/추가가 필요한 문서 목록
 - 남은 불확실성
+- **연결된/연결 권장 MCP가 있으면**: `STACK_SETUP_PLAN.md ## Optional MCP Connectors`에 lifecycle usage + agent access 기록 안내 1줄 (ADR-048).
 - 다음 권장 단계로 `/stack-guard`를 안내한다(자동 호출 아님 — 사용자가 발화한다).
 
 ## 외부 의존 부트업 권장 (감지 시 출력, ADR-025)
