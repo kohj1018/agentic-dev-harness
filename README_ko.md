@@ -19,7 +19,7 @@
 /discover-product (선택)
   └─ (선택) /validate-discovery (별 세션) → /repair-discovery (원본 세션)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (UI 전용 — DESIGN.md 채움 + 검토용 임시 design-preview.html 생성, 승인 후 삭제)
+  → /bootstrap-design (UI 전용 — 레퍼런스를 DESIGN_RESEARCH.md로 조사 + DESIGN.md 작성 *전* 다중 concept 시안으로 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-049]
   → /plan-workitem
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
   → /implement-workitem (wave 그룹 별 병렬 가능 — /plan-workitem 출력 참조)

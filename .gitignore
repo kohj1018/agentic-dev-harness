@@ -18,3 +18,6 @@ docs/40-validation/plan-reviews/*.md
 !docs/40-validation/plan-reviews/.gitkeep
 docs/40-validation/discovery-reviews/*.md
 !docs/40-validation/discovery-reviews/.gitkeep
+# design exploration/preview (ephemeral, never committed — ADR-049#d31 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
+docs/20-system/design-concepts/
+docs/20-system/design-preview.html

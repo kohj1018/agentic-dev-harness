@@ -30,7 +30,9 @@
 | research note | `docs/10-charter/insights/<date>-<slug>.md` | `/research-pack` | Record | generated |
 | architecture overview | `docs/20-system/ARCHITECTURE_OVERVIEW.md` | `/bootstrap-project`, `/bootstrap-stack` | Living | baseline |
 | design (UI only) | `docs/20-system/DESIGN.md` | `/bootstrap-design` (UI 스택 포함 시) | Living | conditional |
-| design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R5, 검토 후 삭제) | ephemeral | conditional |
+| design research note (UI only) | `docs/20-system/DESIGN_RESEARCH.md` | `/bootstrap-design` (R0 레퍼런스 + R2 선택 근거) | Reference | conditional |
+| design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
+| design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (18종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (7종: architect/builder/validator/planner/reviewer/qa/researcher) | 수동 (boilerplate 제공) | Reference | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/bootstrap-project`, `/plan-workitem` | Living | generated |
@@ -91,7 +93,8 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | AGENTS.md 진입 페이지 정책 (왜 이 파일을 진입점으로 삼는가) | `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` |
 | 공통 진입 지침 본문 (도구 중립 entry instructions) | `AGENTS.md` |
 | 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` |
-| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT). 검토용 파생 뷰 `docs/20-system/design-preview.html` 는 `/bootstrap-design` R5 가 *DESIGN.md 로부터* 생성하고 검토 완료 후 삭제 — 직접 편집·영속 금지 (ADR-027#amend-2 / ADR-005). |
+| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT). 검토용 파생 뷰 `design-preview.html`(R6) 와 방향 선택용 `design-concepts/concept-*.html`(R2) 는 `/bootstrap-design` 이 생성하고 검토·선택 완료 후 삭제 — 직접 편집·영속 금지 (ADR-005). |
+| UI 디자인 워크플로우 라운드 구조 (R0~R6 concept-first) + 레퍼런스 노트 | [ADR-049](../90-decisions/boilerplate/ADR-049-concept-mockup-first-design.md) (정책 SSOT — 라운드 구조·시안 시점). → ADR-049 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
