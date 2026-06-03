@@ -7,11 +7,13 @@ draft
 
 <!-- 본 문서는 UI 프로젝트의 시각 결정 SSOT.
      baseline에는 placeholder로 존재한다 (presence: conditional, STRUCTURE.md 참조).
-     - UI 프로젝트: /bootstrap-design이 R0~R5 라운드로 본 파일을 채운다.
+     - UI 프로젝트: /bootstrap-design이 R0~R6 라운드로 본 파일을 채운다 (ADR-049).
      - 비-UI 프로젝트(API 서버 / CLI 도구 등): fork 직후 본 파일을 삭제한다. -->
 
 ## 1. Overview
-<!-- 디자인 원칙 3~5개 (actionable verb. "modern/clean/sleek" 같은 모호어 금지) -->
+<!-- 디자인 원칙 3~5개 (actionable verb. "modern/clean/sleek" 같은 모호어 금지).
+     + [디자인 리서치](DESIGN_RESEARCH.md) 링크 + what-to-borrow/avoid 1~2줄 (ADR-049#d28).
+     + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-049#d30 — /bootstrap-design R2 선택 결과). -->
 
 <a id="design-2-colors"></a>
 ## 2. Colors
