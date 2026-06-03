@@ -4,31 +4,20 @@
 
 model = "gpt-5.5"
 approval_policy = "on-request"
-default_permissions = "boilerplate-secure"
 
-# boilerplate-secure: 빌트인 `:workspace` 프로파일(워크스페이스 read/write baseline)을 상속하고,
-# `.env`/`secrets`는 deny로 차단, 네트워크는 `domains "*" = "allow"`로 public 접근을 명시한다.
-# (`:workspace`는 filesystem path key가 아니라 built-in 프로파일 이름이므로 `extends`로만 쓴다.
-#  `network.domains`가 비면 모든 도메인이 deny되므로 기존 `network_access = true`와 동등하려면
-#  `"*" = "allow"`가 필수.)
-# legacy `sandbox_mode`/`sandbox_workspace_write`는 함께 두면 프로파일이 통째로 무시되므로 제거함.
-[permissions.boilerplate-secure]
-extends = ":workspace"
+# Native Windows `unelevated` sandbox cannot enforce split read/write carveouts
+# such as "workspace is writable, but .env is denied". Use the legacy
+# workspace-write sandbox here so shell tools work on Windows without elevated
+# setup. Secret files remain protected by AGENTS.md policy; use WSL or
+# `windows.sandbox = "elevated"` plus permission profiles when OS-level
+# secret-deny enforcement is required.
+sandbox_mode = "workspace-write"
 
-[permissions.boilerplate-secure.filesystem]
-glob_scan_max_depth = 4
-
-[permissions.boilerplate-secure.filesystem.":workspace_roots"]
-"**/.env" = "deny"
-"**/.env.*" = "deny"
-"**/secrets" = "deny"
-"**/secrets/**" = "deny"
-
-[permissions.boilerplate-secure.network]
-enabled = true
-
-[permissions.boilerplate-secure.network.domains]
-"*" = "allow"
+[sandbox_workspace_write]
+network_access = true
 
 [windows]
 sandbox = "unelevated"
+
+[features]
+unified_exec = false
