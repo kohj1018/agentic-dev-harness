@@ -194,6 +194,12 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 **외부 라이브러리 docs-check line item (ADR-040)**: task `## 2/## 3` 본문에 *외부 SDK·API·결제·인증·외부 서비스 연동* 키워드(예: `결제`, `payment`, `Stripe`, `OAuth`, `auth provider`, `SDK`, `webhook`, `외부 API`)가 등장하면, 해당 task `## 3. 구현 항목`에 line item을 자동 추가: `- 구현 전 최신 공식문서 확인 (/research-pack 또는 researcher 위임 — 모델 지식 컷오프 보완)`. builder는 이 line item을 보고 불확실하면 researcher 위임을 메인에 요청(직접 웹서핑 X).
 
+**의존성 설치 line item (ADR-040#amend-1)**: 분해된 task가 *새 외부 패키지*(charter `## 7. 제약 조건`에 없는 npm/pip/cargo/go 등)를 요구하면, 해당 task `## 3. 구현 항목`에 설치 단계를 명시적 line item으로 박는다:
+- 형식 — 한 줄 line item으로, *설치 명령만* inline code로 감싼다(백틱 중첩 금지). 예: `- 의존성 설치 — pnpm add zod@^3 실행 (용도: 입력 스키마 검증) (AC-2)`. 패키지 매니저는 스택(ARCHITECTURE/STACK_SETUP_PLAN)에서 자연스러운 것 사용(pnpm/npm/pip/cargo/go get 등).
+- **버전·사용법 불확실 시**: 모델 지식 컷오프 보완을 위해 `최신 버전·사용법 확인: /research-pack <pkg> 선행 권장 (또는 메인 세션이 researcher 위임)` 한 줄을 같은 task에 부기한다. 확인 후 정확한 버전으로 line item을 갱신한다. (plan-workitem은 fork라 직접 웹 접근 불가 — research-pack/researcher 경로를 *권장*만; ADR-040#5 패턴.)
+- **wave/lockfile 정합**: 새 의존을 추가하는 task는 기존 step 11-(b) "lockfile race 경고"·`write_set`에 lock 파일(`pnpm-lock.yaml` 등)을 포함시켜 *단독 wave*로 표시한다(병렬 implement 시 lockfile 충돌 차단).
+- 이 의존이 charter 제약 밖이면 기존 `architect 호출 권장 신호 #2`도 함께 발화(새 외부 의존 = 검토 대상).
+
 **connected-MCP 사용 line item (ADR-048#d3)**: `docs/00-meta/STACK_SETUP_PLAN.md` `## Optional MCP Connectors` 표가 *존재*하면 그 표만 회수(부재 시 본 점검 skip — ADR-019 minimal). 분해 task의 capability(예: 브라우저 E2E / DB 스키마 introspection / 최신 공식문서 / PR·issue / 디자인 자산)가 표의 어떤 행 `lifecycle usage`와 매칭되면, 해당 task `## 3. 구현 항목`에 line item 자동 추가: `- <capability> 작업 시 <mcp-name> MCP 사용 (STACK_SETUP_PLAN Optional MCP Connectors 참조)`. 권장 텍스트만 — builder가 독립 판단 없이 실행하도록 *plan이 authoring*(ADR-040 docs-check / ADR-027#amend-1 책임 분배와 동일 패턴). 표의 행 `agent access`가 비어 있으면(아직 부여 X) line item에 `(agent access 미부여 — 연결 절차 (e) 필요)` 한 줄 부기.
 
 **모두 자동 차단 X — *권장 텍스트만* 출력** (ADR-007 책임 경계 정합).

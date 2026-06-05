@@ -76,6 +76,12 @@ AC 해석 처리 (ADR-006#amend-2 — 하드스탑):
 외부 docs-check line item 처리 (ADR-040):
 - task `## 3. 구현 항목`에 `구현 전 최신 공식문서 확인` line item(plan이 박음)이 있고, 그 외부 라이브러리·API의 *최신 사용법 확신*이 없으면 **구현을 시작하지 않고** 출력에 `Needs Research: <대상> — /research-pack <대상> 실행 후 재개 권장`을 명시한다. builder는 웹 접근이 없어 *직접 웹서핑하지 않는다*. 이미 확신이 있으면 line item을 체크하고 진행한다.
 
+의존성 설치 line item 처리 (ADR-040#amend-1):
+- task `## 3. 구현 항목`에 plan이 박은 의존성 설치 line item(예: `pnpm add <pkg>@<ver>`)이 있으면, 그 패키지가 필요해지는 시점(보통 Green phase)에 **설치 명령을 먼저 실행**한다(`allowed-tools`의 `Bash` 활용 — 추가 권한 불필요). 설치는 기계적 작업이므로 *기본은 진행*이다.
+- 설치 후 lock 파일 변경은 그대로 둔다 — `/finalize-workitem`이 lock 파일을 자동 화이트리스트로 add한다(ADR-007#amend-1).
+- **보류는 *실제 실행 실패*일 때만**: 설치가 sandbox/네트워크/승인 차단으로 실제 실패하면 *날조·우회하지 않고* `Needs Install: <명령> — 메인 세션/사용자 실행 필요`를 출력하고, 그 의존이 필요 없는 다른 AC 구현은 계속한다.
+- **research gate는 *설치*가 아니라 *API 사용*에만 적용**: 패키지를 깐 뒤에도 그 라이브러리의 *최신 사용법 확신*이 없으면(plan이 `/research-pack 선행 권장`을 부기한 경우 등) ADR-040 hardstop대로 **통합 코드 작성을 멈추고** `Needs Research: <pkg> — /research-pack <pkg> 실행 후 재개`를 출력한다. 즉 *설치 자체는 막지 않고*, 잘못된(stale) API로 코드를 쓰는 것만 막는다(builder는 웹 접근 없음 — 직접 조사 금지).
+
 connected-MCP 사용 line item 처리 (ADR-048#d4):
 - task `## 3. 구현 항목`에 `<capability> 작업 시 <mcp-name> MCP 사용` line item(plan이 박음)이 있으면, 그 MCP 도구로 해당 작업을 수행한다(예: DB 스키마 introspection MCP로 실제 스키마 확인 후 구현).
 - 단, **MCP 도구(`mcp__<server>__*`)가 본 skill `allowed-tools`에 없거나 호출 불가**하면 *날조·우회·추측하지 않고* 출력에 `Needs MCP Access: <mcp-name> — implement-workitem allowed-tools에 mcp__<server>__* 부여 또는 메인 세션 경유 필요 (STACK_SETUP_PLAN 연결 절차 (e))`를 명시하고 해당 line item은 미실행으로 둔다(다른 AC 구현은 계속). ADR-040 "Needs Research" hardstop과 동일 — builder는 권한 밖 도구를 임의 대체하지 않는다.
