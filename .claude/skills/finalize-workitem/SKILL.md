@@ -2,7 +2,6 @@
 name: finalize-workitem
 description: Finalize a passed workitem — set status done, stage explicit files, and commit.
 argument-hint: "[task identifier(s)] [--apply --rationale \"<why>\"]"
-disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(git add *) Bash(git status *) Bash(git diff *) Bash(git commit *) Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *)
 context: fork
 agent: builder

@@ -2,7 +2,6 @@
 name: implement-workitem
 description: Implement one scoped workitem using builder, following Red→Green→Refactor TDD cycle.
 argument-hint: "[task identifier] [--fast]"
-disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
 context: fork
 agent: builder
