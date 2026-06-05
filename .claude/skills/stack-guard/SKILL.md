@@ -4,8 +4,6 @@ description: After /bootstrap-stack, generate verify scripts and a unified `vali
 argument-hint: "[stack summary | empty to read existing docs]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
-context: fork
-agent: builder
 context-pack: minimal
 ---
 
