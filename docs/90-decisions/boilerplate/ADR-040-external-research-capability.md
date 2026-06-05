@@ -29,3 +29,17 @@ accepted
 
 ## 참고
 - ADR-035 (Evidence Log 연결), ADR-041 (스택 추천 그라운딩), ADR-043 (MCP 설정 조회), ADR-019 (context-pack minimal).
+
+<a id="adr-040-amend-1"></a>
+## Amendment 1 (2026-06-05) — 의존성 설치 authoring(plan) + 실행(implement)
+### 결정
+1. plan-workitem은 task가 *새 외부 패키지*를 요구하면 `## 3`에 설치 line item(`<pkg-manager> add <pkg>@<ver>` + 용도)을 박는다. 버전·사용법 불확실 시 `/research-pack <pkg>`(또는 researcher 위임) 선행을 권장 부기하고, 의존 추가 task의 `write_set`·lockfile race 경고에 lock 파일을 포함해 단독 wave로 표시한다.
+2. implement-workitem은 그 line item의 설치 명령을 *먼저 실행*한다(기계적 — 기본은 진행). 설치가 sandbox/네트워크/승인 차단으로 *실제 실패*하면 `Needs Install`로 보류. 설치와 *별개로*, 라이브러리 *API 사용법* 확신이 없으면 `Needs Research`로 통합 코드 작성만 멈춘다(설치 자체는 막지 않음). 날조·우회 금지. lock 파일은 finalize 자동 화이트리스트(ADR-007#amend-1)가 add.
+### 근거
+- [관측됨] 의존성 설치가 어느 단계 책임인지 불명확해 사용자 수동 설치에 의존 → plan이 *결정*하고 implement가 *집행*하는 책임 분배로 정렬(ADR-027#amend-1 패턴).
+### 강도 (ADR-022)
+- enabling(약). 단 "API 사용법 불확실 → 통합 코드 작성 전 연구" hardstop은 constraint(약, ADR-040 정신 유지) — *설치 자체*는 막지 않는다.
+### 적용 surface
+- .claude/skills/plan-workitem/SKILL.md       — 의존성 설치 line item authoring
+- .claude/skills/implement-workitem/SKILL.md  — 의존성 설치 line item 처리
+- docs/30-workitems/_templates/TASK_TEMPLATE.md — `## 3` 주석(설치 단계 형식)
