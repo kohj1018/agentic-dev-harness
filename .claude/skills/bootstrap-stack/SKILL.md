@@ -3,11 +3,7 @@ name: bootstrap-stack
 description: Add stack-specific setup guidance and project automation after the stack and runtime are explicitly chosen.
 argument-hint: "[stack and runtime summary | --recommend | --migrate]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit
-context: fork
-agent: architect
-model: opus
-effort: max
+allowed-tools: Read Glob Grep Write Edit Agent
 context-pack: minimal
 ---
 
@@ -91,7 +87,7 @@ ARCHITECTURE_OVERVIEW.md `## 3-1` 채움 시 함께 박음. 사용자 즉흥 결
 ## --recommend 모드 (ADR-041)
 스택 확정 *전* 호출. architect로서 다음을 수행:
 1. `docs/10-charter/PROJECT_CHARTER.md` `## 6 목표`/`## 7 비목표`/`## 8 성공 기준`/`## 9 제약`, `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 8 품질 속성`을 읽어 요구·규모·확장 기대를 파악.
-2. (옵션) 최신 프레임워크/라이브러리 지형이 필요하면 *먼저* `/research-pack <스택 후보 주제>`를 돌려 insights 노트를 만들어 두고 본 모드가 이를 참조한다 — 지식 컷오프 보완. (bootstrap-stack은 fork+Agent 미보유라 본 skill에서 직접 researcher 위임은 불가.)
+2. (옵션) 최신 프레임워크/라이브러리 지형이 필요하면 `Agent` 도구로 **researcher에 직접 위임**(메인 세션 실행이라 가능)하거나, 먼저 `/research-pack <스택 후보 주제>`로 insights 노트를 만들어 참조한다 — 지식 컷오프 보완.
 3. **2~3개 스택 조합**을 제시. 각 조합: (a) 현재 복잡도, (b) 확장·마이그레이션 비용, (c) ADR-031 직접지원 5유형(web frontend/API/CLI/monorepo/Supabase) 정합, (d) 마이그레이션 경로("X로 시작 → Y로 성장 가능").
 4. **ADR-006 단순성 가중** — 요구에 비해 과한 스택이면 명시 경고. prototype은 가장 단순한 조합 우선.
 5. 출력은 *추천 텍스트만*. 파일 생성 X. 사용자가 선택하면 `/bootstrap-stack <선택한 스택>`(플래그 없이)로 본 흐름 진행 안내.

@@ -3,11 +3,7 @@ name: bootstrap-project
 description: Convert discovery output (DISCOVERY.md) or a natural-language brief into charter/architecture/M1/F-001. Re-run safe with update mode.
 argument-hint: "[project brief or empty (uses DISCOVERY.md)] [--apply]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit
-context: fork
-agent: architect
-model: opus
-effort: max
+allowed-tools: Read Glob Grep Write Edit Agent
 context-pack: minimal
 ---
 
@@ -38,10 +34,10 @@ context-pack: minimal
 1. 입력 회수 — DISCOVERY.md 또는 자연어 입력.
 2. 기존 산출물(charter/architecture/M1/F-001) 존재 여부 점검.
    - 없으면 새로 생성.
-   - 있으면 **갱신 모드** — 본 skill은 `context: fork`에서 실행되므로 사용자에게 실시간 확인을 받을 수 없다.
+   - 있으면 **갱신 모드** — 본 skill은 메인 세션에서 실행된다. 기존 산출물 덮어쓰기는 사고 방지를 위해 명시적 승인(`--apply` 또는 사용자 확인)을 요구한다.
      - `--apply` 인자가 있으면: 기존 산출물을 읽고 architect로 갱신본을 생성해 즉시 반영한다.
      - `--apply` 인자가 없으면: 기존 산출물을 읽고 갱신 제안 diff를 출력에만 표시하고 **종료**한다(파일 수정 없음). 사용자가 검토 후 `/bootstrap-project --apply ...`로 재실행하거나, 메인 세션에서 architect를 직접 호출해 부분 반영한다.
-3. 현재 architect agent가 산출물을 직접 생성/갱신한다 — 입력은 DISCOVERY.md 또는 자연어 입력 + 기존 산출물(있으면). 본 skill은 frontmatter `agent: architect` + `context: fork`로 이미 architect 컨텍스트에서 fork되어 실행되므로 별도 sub-call이 필요 없고 `Agent` 권한도 보유하지 않는다.
+3. 메인 세션이 본 절차를 직접 운전한다(discover-product·bootstrap-design 패턴). 무거운 아키텍처 추론(charter 구조화·ARCHITECTURE 결정·ADR-100 초안)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론을 본 skill이 파일에 반영한다(architect agent의 `model: opus`가 추론 품질을 보장). 종료 후 사용자에게 `/clear` 또는 새 세션 권장.
 4. 다음 산출물을 갱신한다.
    - `README.md`
    - `docs/10-charter/PROJECT_CHARTER.md`
