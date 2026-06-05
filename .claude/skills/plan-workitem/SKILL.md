@@ -25,6 +25,14 @@ context-pack: minimal
 1. 입력 ID에 해당하는 상위 문서를 읽어 범위와 비범위를 파악한다.
 2. 작업을 milestone, feature, task 중 적절한 레벨로 나눈다.
 3. 각 문서의 범위와 비범위를 명확히 적는다.
+3-G. **`## 3. 구현 항목`을 *단계별 구현 가이드*로 작성 (ADR-026#amend-2)**:
+   각 task의 `## 3`은 terse 목록이 아니라 *그 문서만 보고 따라 하면 구현이 끝나는* 번호 매긴 절차로 쓴다.
+   - 작성 전, 그 task가 *건드릴 실제 파일*을 JIT로 읽는다(대상 파일에 한정 — ADR-019 minimal 정합). 추측이 아니라 *현재 코드/문서의 실제 상태*를 근거로 한다.
+   - 각 단계 형식:
+     `N. <파일경로[:라인/식별자]> — 현재: <지금 상태 한 줄> → 변경: <정확한 수정 내용(필요 시 before/after 코드·문자열)> → 확인: <어떤 테스트/명령/관찰로 검증>`
+   - "X를 적절히 처리한다" 같은 모호 지시 금지 — *어디를, 무엇으로, 어떻게* 바꾸는지 명시.
+   - AC(`## 6`)는 여전히 RGR 사이클의 측정 단위다. `## 3` 가이드는 그 AC를 충족시키는 *집행 절차*이고, 각 단계는 가능하면 `(AC-N)` 태그로 대응 AC를 가리킨다.
+   - 단계가 5개 파일을 넘으면 기존 sizing self-check(아래)대로 분해 권장 텍스트를 함께 출력.
 4. 관련 문서 링크를 함께 기록한다.
 5. 검증 포인트와 완료 기준을 포함한다.
 6. **task 단위 분해 시**: TASK_TEMPLATE의 `## 6. Acceptance Criteria`에 측정 가능한 AC를 최소 1개 이상 채운다. Given-When-Then 형식을 *강력 권장*하며 자세한 점검은 아래 9번 항목과 TASK_TEMPLATE 주석을 참조한다. AC가 비면 `/implement-workitem`이 RGR 사이클을 시작할 수 없다(정책: [ADR-009](../../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md), [ADR-026](../../../docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md)).
@@ -133,6 +141,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   ```
   품질 확신이 부족하면: 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>` 회수.
   ```
+- 각 task의 `## 3. 구현 항목`이 *단계별 before/after 가이드*로 채워졌는지 self-check 결과 (모호 단계 N건 — 있으면 명시).
 - 다음 추천 단계 (보통 `/implement-workitem [task-id]` — wave 그룹 병렬 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 패턴, 또는 cross-review를 끼우려면 `/validate-plan [workitem-id]` 먼저)
 
 ## monorepo·백엔드 sizing 가이드
