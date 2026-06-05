@@ -87,11 +87,11 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
 > Note: wave 그룹 병렬 implement 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 권장 (ADR-038#d6 — 이름은 `--worktree` 인자로 필수).
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.
-스킬 간 흐름은 **자동 호출이 아니라 텍스트 제안 → 사용자/메인이 발화**한다.
+스킬 간 흐름은 기본적으로 **텍스트 제안 → 사용자/메인이 발화**한다. 단 task 실행 inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable이라 메인 세션이 직접 호출할 수 있다 (ADR-050).
 
 ## 스킬 종료 시 "다음 단계" 출력 contract
 
-각 lifecycle skill 의 마지막 출력은 사용자가 *복사·붙여넣기* 로 후속 skill 을 즉시 발화할 수 있도록 다음 양식을 따른다. ADR-046#d1 "다음 액션 1개 (분기 시 ≤3)" 의 구체화 — 대부분 lifecycle skill 이 `context: fork` 라 sub-agent context 정합.
+각 lifecycle skill 의 마지막 출력은 사용자가 *복사·붙여넣기* 로 후속 skill 을 즉시 발화할 수 있도록 다음 양식을 따른다. ADR-046#d1 "다음 액션 1개 (분기 시 ≤3)" 의 구체화. (lifecycle skill 의 실행 컨텍스트 — fork vs 메인 세션 — 분포는 ADR-050 참조.)
 
 ```
 다음 단계:
@@ -105,7 +105,7 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
 
 본 contract 의 **목적**: 사용자가 매번 *어느 skill 을 어떤 인자로 호출하고, 무엇을 함께 전달해야 하는지* 를 다시 계산하지 않도록 — skill 출력 자체가 후속 발화 template 을 제공.
 
-**자동 호출 금지**: skill 간 chain 은 위 출력이 *텍스트 제안* 일 뿐이고, 사용자/메인이 명시 발화로만 진행한다 (ADR-007 책임 경계 / ADR-046 signal-first).
+**자동 호출 정책 (ADR-050)**: bootstrap/plan/stabilize 및 cross-session 리뷰 skill은 텍스트 제안만 — 사용자/메인이 명시 발화. task 실행 inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable이라 메인 세션이 제안을 직접 실행할 수 있다 (ADR-007 책임 경계 / ADR-046 signal-first / ADR-050).
 
 ## 문서 상태 전이
 

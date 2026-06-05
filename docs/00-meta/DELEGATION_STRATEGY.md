@@ -39,6 +39,8 @@
 | 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임 (ADR-040). |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
 
+> **실행 컨텍스트 노트 (ADR-050)**: 본 표의 agent 매핑은 *책임 경계 정의*다(ADR-007#amend-2). 일부 lifecycle skill(validate-workitem/repair-workitem 등)은 이제 메인 세션에서 실행되지만(ADR-050) **같은 책임 경계**를 따른다 — 메인 세션이 그 경계대로 직접 수행하거나, 같은 역할의 agent를 `Agent`로 직접 fork 위임할 수 있다. `.claude/agents/*.md` persona 파일은 그대로 존재한다.
+
 ## 메인 세션에서 유지할 정보
 - 현재 milestone / feature / task
 - 최근 결정 사항
@@ -110,7 +112,7 @@
 
 **review-doc vs stabilize 분담 (사용 타이밍)**: `/review-doc`은 *단일 문서 on-demand 심층 비평* — 핵심 문서(charter/ARCHITECTURE/큰 ADR)를 새로 쓰거나 크게 고친 직후, *전파되기 전에* 쓴다. *repo-wide cross-doc 정합*(링크·ADR-ref·FAC↔AC·모드라벨)은 `/stabilize-milestone` deterministic preflight가 매 마일스톤 자동 수행 — review-doc을 `--all`로 확장하지 않는다(stabilize 책임).
 
-**스킬 자동 호출 아님** — `/validate-workitem`이 출력하는 "다음 액션 추천"은 텍스트 제안일 뿐이다. 사용자 또는 메인 세션이 그 제안을 받아 실제 다음 skill을 발화한다.
+**스킬 자동 호출 (ADR-050)** — task 실행 inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable이라 메인 세션이 "다음 액션 추천"을 직접 실행할 수 있다. 그 외 skill(bootstrap/plan/stabilize·cross-session 리뷰)은 텍스트 제안일 뿐이며 사용자/메인의 명시 발화로 진행한다.
 
 <a id="delegation-midproject"></a>
 ## Mid-project 문서 갱신 동선
