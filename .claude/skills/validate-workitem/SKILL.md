@@ -2,10 +2,7 @@
 name: validate-workitem
 description: Validate whether a completed workitem implementation matches its documented scope and is ready for the next step.
 argument-hint: "[task identifier]"
-disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *) Bash(git diff *) Bash(git log *) Bash(git status *)
-context: fork
-agent: validator
 context-pack: minimal
 ---
 
@@ -121,8 +118,8 @@ context-pack: minimal
 - 본 판정의 신뢰도: <High / Medium / Low> — <한 줄 근거 (예: "통합 명령 + AC 매핑 100% + diff trace 통과 + 외부 서비스 의존 없음" / "통합 명령만 통과, 동시성·외부 의존 미검증")>
 
 ## 다음 권장 액션
-- Pass: `/finalize-workitem <task-id>` (자동 호출 아님 — 사용자 또는 메인 세션이 발화한다)
-- Needs Fix: `/repair-workitem <task-id>` (자동 호출 아님)
+- Pass: `/finalize-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
+- Needs Fix: `/repair-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
 ```
 
 마지막 출력 (메인 세션에 텍스트로):

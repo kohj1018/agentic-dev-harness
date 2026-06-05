@@ -2,10 +2,7 @@
 name: repair-workitem
 description: Apply fixes for failed validation report items, scoped to the documented workitem.
 argument-hint: "[task id] [optional notes]"
-disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
-context: fork
-agent: builder
 context-pack: minimal
 ---
 
