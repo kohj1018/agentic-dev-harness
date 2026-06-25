@@ -2,18 +2,37 @@
 name: validate-workitem
 description: Validate whether a completed workitem implementation matches its documented scope and is ready for the next step.
 argument-hint: "[task identifier]"
-allowed-tools: Read Glob Grep Write Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *) Bash(git diff *) Bash(git log *) Bash(git status *)
+allowed-tools: Read Glob Grep Write Agent Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *) Bash(git diff *) Bash(git log *) Bash(git status *)
 context-pack: minimal
 ---
 
 이 skill은 **판정 + report 기록 전용**이다. status 변경, 코드 수정, 커밋은 하지 않는다.
 
 너의 역할은 지정된 workitem 구현 결과를 검증하고 표준 양식의 report를 기록하는 것이다.
+큰 diff에서는 **메인 세션이 감사 축(audit AXIS)별 validator를 병렬 팬아웃**하고(아래 0단계),
+각 validator가 반환한 **partial verdict**(findings + 그 축의 evidence)를 *메인이 집계해
+단일 report 1개를 작성*한다. **report 작성과 confidence 산정은 집계자(메인 세션) 책임이다 —
+validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로는 `<task-id>.md` 단일 파일).
 
 입력:
 - `$ARGUMENTS`에는 task ID가 들어온다 (feature 단위 검토는 `/validate-plan` 책임). FAC↔AC spec coverage 점검 시 본 task 의 상위 feature 문서를 *참조로* 읽는다.
 
 반드시 먼저 할 일:
+0. **감사 축 분할 + 병렬 validator 팬아웃 (orchestration)** — diff 규모로 분기한다.
+   - **diff가 작으면 (cost guard)**: 팬아웃하지 않고 메인 세션이 직접 단일 inline validator로 1~5단계를 그대로 수행한다(아래 fallback 기준).
+   - **diff가 크면**: 메인 세션이 아래 **감사 축**을 독립 sub-task로 분할하고, [DELEGATION 병렬 패턴 #1](../../../docs/00-meta/DELEGATION_STRATEGY.md#병렬-패턴-3종)(한 turn에 `validator` sub-agent 다중 호출)로 *한 turn에* 팬아웃한다. 각 validator는 **자기 축 하나만** scoped로 받고 **partial verdict만 반환**한다(report 작성 금지).
+     - 축 목록 (1축 = 1 validator sub-task):
+       1. AC ↔ 테스트 매핑 (+ 테스트 선행 휴리스틱 + `[verify-placeholder]` / `[test-id-missing]`)
+       2. 범위 밖 변경 + diff trace audit (ADR-006#amend-1)
+       3. FAC → AC spec coverage audit (ADR-037)
+       4. Arch-iface 7-1/7-2/7-3/7-4 audit (API/CLI/백엔드/프론트)
+       5. UI Design inventory audit (ADR-027#amend-1) — UI 프로젝트에 한해 spawn
+       6. MCP 사용 audit (ADR-048#d5)
+       7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검)
+     - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
+     - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
+     - **small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 파일 ≤ 2 *또는* 변경 줄 합계 ≤ 50, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단).
+     - **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent 병렬 파리티가 없으므로(ADR-010 매핑) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
 1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 실행하고 stdout/stderr를 수집한다.
    - **명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
    - 다른 빌더(`bun validate`, `mise run validate`, `just validate` 등)를 쓰는 스택은 본 skill의 `allowed-tools`에 해당 패턴(`Bash(bun validate)` 등)을 추가해야 자동 실행된다.
@@ -53,8 +72,15 @@ context-pack: minimal
 - **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
 - **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 
-마지막 단계 — report 파일 작성:
-판정 결과를 다음 양식으로 `docs/40-validation/reports/<task-id>.md`에 기록한다(이미 있으면 덮어쓴다).
+마지막 단계 — partial 집계 + report 파일 작성 (집계자=메인 세션 단독):
+0단계에서 팬아웃했으면 각 validator가 반환한 partial verdict(축별 findings + 그 축의 evidence)를
+*메인 세션이* 모아 아래 양식의 report 1개를 `docs/40-validation/reports/<task-id>.md`에 기록한다(이미 있으면 덮어쓴다).
+validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이면 메인 세션이 자기 판정을 그대로 기록한다.
+
+집계 규칙 (combined verdict):
+- **Needs Fix 트리거**: 어느 한 축이라도 P0 finding이 있거나, AC↔테스트 매핑에 ❌ AC가 하나라도 있으면 → **Needs Fix**. 그 외 P1/P2만 있으면 Pass(라벨은 report에 전수 기록).
+- 각 축의 partial findings(P0/P1/P2)·`[verify-placeholder]`·`[test-id-missing]`·`Spec Gap`·`[Design-inventory*]`·`[MCP-*]`·`[Arch-iface-7-N]`를 누락 없이 해당 report 섹션에 전수 합친다(ADR-046#d3 — cap 때문에 finding 누락 금지).
+- **confidence는 메인 세션이 *집계 후* 재계산**한다(개별 validator의 신뢰도 추정을 그대로 신뢰하지 않는다). 아래 confidence ladder의 입력(통합 명령 통과 여부 / AC↔테스트 매핑 % / diff trace 통과 / oracle gap 카테고리 명시 여부)을 *집계된 전체*에서 평가해 Low→Medium→High 첫 매치로 확정한다.
 
 ```markdown
 # Validation Report: <task-id>
