@@ -95,7 +95,8 @@ AC 해석 처리 (각 builder 가 자기 AC subset 에 대해 수행 — ADR-006
 - 다음 추천 단계 (보통 `/validate-workitem <task-id>`)
 
 외부 docs-check line item 처리 (각 builder 가 자기 slice 의 `## 3` step 에 대해 — ADR-040):
-- 그 slice 의 step 에 `구현 전 최신 공식문서 확인` line item(plan이 박음)이 있고, 그 외부 라이브러리·API의 *최신 사용법 확신*이 없으면 **그 slice 구현을 시작하지 않고** 출력에 `Needs Research: <대상> — /research-pack <대상> 실행 후 재개 권장`을 명시한다(메인 foreman 에 보고 — 메인은 그 slice 만 보류). builder는 웹 접근이 없어 *직접 웹서핑하지 않는다*. 이미 확신이 있으면 line item을 체크하고 진행한다.
+- 그 slice 의 step 에 `구현 전 최신 공식문서 확인` line item(plan이 박음)이 있고, 그 외부 라이브러리·API의 *최신 사용법 확신*이 없으면 **그 slice 구현을 시작하지 않고** 출력에 `Needs Research: <대상> — <무엇이 불확실한지 1줄>`을 명시한다(메인 foreman 에 보고 — 메인은 그 slice 만 보류). builder는 웹 접근이 없어 *직접 웹서핑하지 않는다*. 이미 확신이 있으면 line item을 체크하고 진행한다.
+- **foreman 자동 재개 (ADR-040#amend-2)**: implement foreman(Stage 2A)은 builder가 `Needs Research`로 멈추면 *수동 `/research-pack` 안내에 그치지 않고* researcher agent에 **Agent로 직접 위임**(`/research-pack` 호출 아님 — research-pack은 disable-model-invocation)하여 findings를 회수하고, 그 결론을 builder 재호출 프롬프트에 주입해 구현을 재개한다. Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade(foreman이 직접 researcher 본문을 순차 호출하거나, 사전 `/research-pack` 노트를 참조).
 
 의존성 설치 line item 처리 (각 builder 가 자기 slice 에서 — ADR-040#amend-1):
 - 그 slice 의 step 에 plan이 박은 의존성 설치 line item(예: `pnpm add <pkg>@<ver>`)이 있으면, 그 패키지가 필요해지는 시점(보통 Green phase)에 **설치 명령을 먼저 실행**한다(builder `allowed-tools`의 `Bash` 활용 — 추가 권한 불필요). 설치는 기계적 작업이므로 *기본은 진행*이다.
