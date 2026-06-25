@@ -47,23 +47,41 @@ R0 — 운영 환경 가정 확인:
      - hook 등록 절차는 [GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md) link만 박는다 (SSOT — 본 skill이 절차 본문 embed 금지).
    - 파일이 아예 없으면(`/bootstrap-stack` 산출물이 빠진 경우) `/stack-guard`가 새로 생성하되, 출력에 "`/bootstrap-stack`이 STACK_SETUP_PLAN.md를 만들지 않았음 — 사후 검토 권장"을 명시.
 4. `.gitattributes`가 없으면 생성, 있으면 line ending 규칙 추가.
-5. **Smoke test (필수)**: 생성된 `validate` 명령을 1회 실행한다 (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요).
+5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 1회 실행한다 (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요). UI/web 프로젝트(수행-6 의 UI 판정 ≥1 신호)면 `validate:e2e` 도 1회 실행한다.
    본 smoke test 는 *wiring 검증* 이 목적 (명령이 올바르게 연결됐는지) — *프로젝트 자체의 lint/test 통과 여부* 와 분리해 보고한다.
+   설치가 `Needs Install` 로 보류된 경우(수행-6) smoke test 를 실행하지 못하므로 `validate smoke test: SKIPPED (deps not installed — Needs Install)` 로 보고하고 종료하지 않는다(사용자 설치 후 재실행 안내).
 
-   판정 표:
+   `validate` 판정 표:
    - **wiring 성공 + 프로젝트 PASS** → `validate smoke test: PASS (wiring OK, project clean)`.
    - **wiring 성공 + 프로젝트 빈 케이스** (비어있는 lint 룰 / 테스트 0건) → `validate smoke test: PASS (wiring OK, empty rules/tests warning)`.
    - **wiring 성공 + 프로젝트 lint/test 실 위반** → `validate smoke test: WIRING OK, PROJECT FAIL` + stderr 요약. stack-guard 자체는 성공이라 종료 X, 사용자에게 *프로젝트 수정* 안내.
    - **wiring 실패** (명령 없음 / 패키지 매니저 비호환 / 스크립트 자체 오류) → `validate smoke test: WIRING FAIL` + 생성된 명령 + 실패 stderr + 제안 대체 (예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 종료.
 
-   > 핵심 구분: stack-guard 의 책무는 *wiring* 까지. 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
+   `validate:e2e` 판정 행 (UI/web 한정):
+   - **e2e wiring 성공 + 스펙 0건 / placeholder** (scaffold 직후 정상 케이스) → `validate:e2e smoke test: PASS (wiring OK, no specs yet)`.
+   - **e2e wiring 성공 + 스펙 실행됨** → `validate:e2e smoke test: PASS (wiring OK)` (프로젝트 e2e 실패는 *프로젝트 책무* 로 분리 보고, 차단 X).
+   - **e2e wiring 실패** (browser 미설치 / playwright config 누락 / `validate:e2e` 진입점 없음) → `validate:e2e smoke test: WIRING FAIL` + stderr + 제안 (browser 미설치 → `npx playwright install`; 진입점 누락 → 수행-6 재작업). **stack-guard 산출물 수정 필요** — 종료.
+   - **browser 설치가 `Needs Install` 로 보류** → `validate:e2e smoke test: SKIPPED (browsers not installed — Needs Install: npx playwright install)`. 종료 X.
+
+   > 핵심 구분: stack-guard 의 책무는 *wiring* (validate + validate:e2e 진입점·browser 까지). 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
+
+6. **Toolchain 선설치 + E2E readiness** (실행 순서상 step 5 smoke test *앞*에 수행 — `allowed-tools` 의 Bash 활용, 신규 권한 불필요):
+   - **6-1. UI 판정** (ADR-027#amend-3 압축 3-case): `docs/20-system/DESIGN.md` 부재 → 비-UI. DESIGN.md 존재 + `## 0. Status` ≠ `draft` → UI 확정. DESIGN.md 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4. 프론트 결정` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 web frontend 유형) ≥1 → UI 의심(UI 로 취급). 신호 0 → 비-UI. 상세: ADR-027#amend-3.
+   - **6-2. Toolchain 설치 (전 스택 공통, 기계적 — 기본은 진행)**: 감지된 패키지 매니저로 authored devDeps 를 설치한다 — `pnpm install` / `npm install` / `pip install -e .` (또는 `uv sync`) / `go mod download` / `cargo fetch` 중 스택에 자연스러운 1종. lockfile 존재 시 frozen 설치(`pnpm install --frozen-lockfile` / `npm ci`) 우선. 설치 후 lock 파일 변경은 그대로 둔다(finalize 자동 화이트리스트, ADR-007#amend-1).
+   - **6-3. Playwright browser 설치 (UI/web 한정)**: 6-1 이 UI 면 `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요).
+   - **6-4. `validate:e2e` scaffold (UI/web 한정, e2e 필요 시)**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고, `package.json` 의 `scripts` 에 `validate:e2e` 진입점(예: `playwright test`)을 박는다. *이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). 비-UI 프로젝트는 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
+   - **6-5. Graceful fallback (날조·우회 금지)**: 6-2/6-3 의 설치 명령이 sandbox/네트워크/승인 차단으로 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고, 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다. 이후 step 5 smoke 는 해당 항목을 SKIPPED 로 처리한다. (implement-workitem 의 ADR-040#amend-1 `Needs Install` 패턴과 동일.)
+   - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존*(biome/tsc/vitest/@playwright/test + browser)뿐이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 Stage 6(ADR-052)에 기록 — 본 step 은 toolchain+e2e 소유만 집행한다.
 
 마지막 출력:
 - 생성/갱신한 파일 목록
 - 운영 환경 가정 (R0 결과)
-- 통합 명령 호출 방법 (예: `pnpm validate`)
+- 통합 명령 호출 방법 (예: `pnpm validate`; UI/web 이면 `pnpm validate:e2e` 도)
+- UI 판정 결과 (UI 확정 / UI 의심 / 비-UI — ADR-027#amend-3 근거 신호)
+- Toolchain 설치 결과 (`deps install: DONE (<pkg-manager>)` / `Needs Install: <명령>`); UI/web 이면 browser 설치 결과 (`playwright install: DONE` / `Needs Install: npx playwright install`)
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
-- validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약)
+- validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
+- validate:e2e smoke test 결과 (UI/web 한정 — PASS (no specs yet) / PASS / WIRING FAIL / SKIPPED)
 - 다음 권장 단계 (`/plan-workitem` 또는 `/implement-workitem`)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
 - **옵션: Claude PostToolUse async adapter 예시** (사용자가 채택 시 `.claude/settings.local.json` 에 복사). GUARDRAILS_STRATEGY.md 의 PostToolUse 동기 hook 예시와 동일하게 *Unix / Windows 2 OS 예시* 모두 제공 — 동일 schema 에 `async: true` + `asyncRewake: true` 만 추가:
@@ -134,7 +152,7 @@ R0 — 운영 환경 가정 확인:
 | Go | `gofmt -l` | `golangci-lint` | `go vet` (built-in) | `go test` | (선택) |
 | Rust | `cargo fmt --check` | `clippy` | `cargo check` | `cargo test` | (선택) |
 
-생성된 `validate` 명령은 위 표의 **format / lint / typecheck / unit test 4단계**를 *순서대로* 묶고, **e2e는 `validate:e2e` 별도 명령으로 분리**한다 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행). 4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시.
+생성된 `validate` 명령은 위 표의 **format / lint / typecheck / unit test 4단계**를 *순서대로* 묶고, **e2e는 `validate:e2e` 별도 명령으로 분리**한다 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행). 4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시. **UI/web 프로젝트(ADR-027#amend-3 UI 판정)면 stack-guard 가 `validate:e2e` 진입점 + 최소 playwright config 를 scaffold 하고 browser 를 설치한 뒤(`npx playwright install`) `validate:e2e` 까지 smoke 한다**(수행-6 + Step 5). 비-UI 는 e2e scaffold 를 skip 하되 toolchain 설치는 수행한다.
 
 도구 선택은 **첫 fork에서 결정 + ARCHITECTURE_OVERVIEW.md `## 7-X`에 박힌다** — 이후 변경 시 [/bootstrap-stack](../bootstrap-stack/SKILL.md) 재실행 또는 수동 갱신.
 
@@ -147,12 +165,13 @@ R0 — 운영 환경 가정 확인:
 3. **부재 → Biome+tsc+Vitest+Playwright default 박음**: green-field 또는 도구 미정 프로젝트에만 적용.
 4. **충돌(Biome ↔ ESLint+Prettier 둘 다 박힘 등)**: 사용자에게 출력으로 보고 + 결정 요청. 자동 선택 X.
 
-**Dependency 설치 정책** (네트워크 / 환경 의존도 큼 — 기본은 *설치하지 않음*):
+**Dependency 설치 정책** (toolchain 선설치 — 기본은 *설치한다*, 차단 시 graceful fallback):
 
-- `/stack-guard` 는 *직접 패키지를 install 하지 않는다*. 산출은 `package.json` 의 `scripts.validate` 진입점 + verify 스크립트 본문 + *권장 devDeps 목록* (예: `biome / typescript / vitest / @playwright/test`).
-- 출력에 `필요한 devDependencies (사용자가 npm install / pnpm add -D 로 직접 설치)` 섹션을 박는다 — 설치 명령 텍스트는 권장이지 자동 실행 X.
-- 이유: 네트워크 환경 / 사용자 승인 / 기존 lockfile 충돌 / monorepo 의 workspace 라우팅 등 도구가 자동 판단하기 어려운 변수 존재. 자동 설치는 sandbox 정책 위반 위험도.
-- 이미 설치돼 있으면 별도 출력 없이 verify 스크립트만 박는다.
+- `/stack-guard` 는 *authored toolchain 을 기본 설치* 한다(수행-6). 산출은 `package.json` 의 `scripts.validate`(+ UI/web 이면 `scripts.validate:e2e`) 진입점 + verify 스크립트 본문 + 실제 설치된 devDeps(예: `biome / typescript / vitest / @playwright/test`) + (UI/web) playwright browser.
+- 패키지 매니저 설치는 lockfile 존재 시 frozen(`pnpm install --frozen-lockfile` / `npm ci`) 우선, 부재 시 일반 install. 설치된 devDeps 목록을 출력에 박는다.
+- **설치 범위 경계(SSOT)**: stack-guard 가 까는 것은 *toolchain + e2e 의존* 뿐이다. *task 단위 기능 패키지*는 plan-workitem authoring → implement-workitem 설치(ADR-040#amend-1). 경계 결정 기록은 Stage 6/ADR-052.
+- **Graceful fallback (날조·우회 금지)**: 네트워크 / 사용자 승인 / lockfile 충돌 / monorepo workspace 라우팅 / sandbox 정책으로 설치가 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다(implement-workitem ADR-040#amend-1 패턴 동일). 이후 smoke 는 SKIPPED.
+- 이미 설치돼 있으면(노드 모듈/lock 정합) 재설치하지 않고 verify 스크립트만 박되, 설치 상태를 `deps already present` 로 출력한다.
 
 ## Secret scanner 권장 (전 스택, ADR-021)
 - `gitleaks` 또는 `trufflehog`. 둘 중 1종 선택.
