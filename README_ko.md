@@ -22,8 +22,7 @@
   → /bootstrap-design (UI 전용 — 레퍼런스를 DESIGN_RESEARCH.md로 조사 + DESIGN.md 작성 *전* 다중 concept 시안으로 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-049]
   → /plan-workitem
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
-  → /implement-workitem (wave 그룹 별 병렬 가능 — /plan-workitem 출력 참조)
-       └─ 권장: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` (이름은 `--worktree` 인자로 필수)
+  → /implement-workitem
   → /validate-workitem → /repair-workitem (Needs Fix일 때) → /finalize-workitem
   → /stabilize-milestone
 ```
@@ -76,7 +75,7 @@
 ### 3단계: 분해 → 구현 → 마감
 
 ```text
-# 분해 (task ## 9. 의존성 기반 wave 그룹 출력)
+# 분해 (milestone/feature/task로 분해 + ## 9. 의존성 순서 선언)
 /plan-workitem [milestone 또는 feature id]
 
 # (선택) 다른 LLM 교차 리뷰 — ADR-038 참조
@@ -85,8 +84,7 @@
 #   원본 plan 세션으로 돌아와서:
 /repair-plan [workitem id]
 
-# 구현 (/plan-workitem 출력의 wave 그룹 기준 병렬 가능)
-#   권장: task당 claude --worktree 별 worktree 격리 실행
+# 구현
 /implement-workitem [task id]
 /validate-workitem [task id]
 
@@ -100,8 +98,6 @@
 # milestone의 모든 task가 done이 되면:
 /stabilize-milestone [milestone id]
 ```
-
-> **Tip — 병렬 구현**: `/plan-workitem`은 각 task의 `## 9. 의존성`에서 파생된 "병렬 wave"를 출력한다. 같은 wave 안의 task는 **별 터미널 세션·별 worktree**에서 동시에 `/implement-workitem`으로 진행할 수 있다. 권장 패턴: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 *필수* (미지정 시 task-id와 무관한 자동 이름 부여). ⚠ **plan 산출물 가시성**: `claude --worktree`는 기본 `origin/HEAD` 기준 fresh checkout이라 uncommitted plan 문서가 worktree 세션에서 안 보일 수 있음 → 병렬 implement 전 plan 산출물 commit 또는 `worktree.baseRef = "head"` 설정. worktree + 외부 리소스 면책 전체는 [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) 참조.
 
 ## Codex CLI에서 사용하기 (대체 진입점)
 

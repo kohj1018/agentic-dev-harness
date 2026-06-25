@@ -22,8 +22,7 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
   → /bootstrap-design (frontend only — researches references into DESIGN_RESEARCH.md, shows multiple concept mockups to pick a direction *before* writing DESIGN.md, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-049]
   → /plan-workitem
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
-  → /implement-workitem (parallel by wave groups — see plan-workitem output)
-       └─ recommended: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` per task (name in `--worktree` arg)
+  → /implement-workitem
   → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
   → /stabilize-milestone
 ```
@@ -77,7 +76,7 @@ Once your stack is decided:
 ### Step 3: Plan → Implement → Ship
 
 ```text
-# Plan (emits parallel wave groups from task ## 9. 의존성)
+# Plan (decomposes into milestone/feature/task with ## 9. 의존성 ordering)
 /plan-workitem [milestone or feature id]
 
 # (Optional) Cross-LLM peer review — see ADR-038
@@ -86,8 +85,7 @@ Once your stack is decided:
 #   Then back in the origin plan session:
 /repair-plan [workitem id]
 
-# Implement (parallel by wave groups from /plan-workitem output)
-#   Recommended: claude --worktree per task for isolated working tree
+# Implement
 /implement-workitem [task id]
 /validate-workitem [task id]
 
@@ -101,8 +99,6 @@ Once your stack is decided:
 # Once all tasks in the milestone are done:
 /stabilize-milestone [milestone id]
 ```
-
-> **Tip — parallel implement**: `/plan-workitem` emits "parallel waves" derived from each task's `## 9. 의존성`. Tasks in the same wave can be implemented in **separate terminal sessions / worktrees** in parallel. Recommended pattern: `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — the name is passed as the `--worktree` argument (required, no default mapping to task-id). ⚠ **Plan-artifact visibility**: `claude --worktree` defaults to a fresh checkout from `origin/HEAD`, so uncommitted plan documents may be invisible inside the worktree session — commit plan artifacts first, or set `worktree.baseRef = "head"`. See [ADR-038](docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) for full worktree + external-resource caveats.
 
 ## Using with Codex CLI (alternate entry)
 

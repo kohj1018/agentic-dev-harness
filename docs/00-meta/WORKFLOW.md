@@ -16,7 +16,6 @@
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
-- **선택**: `/plan-workitem` 출력의 wave 그룹을 참조해 동일 wave task를 별 worktree에서 동시 `/implement-workitem` 가능. 권장 패턴은 `claude --worktree T-NNN -p "..."` (이름은 `--worktree` 인자로 필수, ADR-038#d6). 단일 working tree 동시 implement는 비권장.
 
 ## 4. 구현 및 검증
 - 구현은 `/implement-workitem`으로 시작한다.
@@ -83,8 +82,6 @@ discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pas
                               │                          └─Needs Fix─→ repair → (validate 재실행)
                               └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
 ```
-
-> Note: wave 그룹 병렬 implement 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 권장 (ADR-038#d6 — 이름은 `--worktree` 인자로 필수).
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.
 스킬 간 흐름은 기본적으로 **텍스트 제안 → 사용자/메인이 발화**한다. 단 task 실행 inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable이라 메인 세션이 직접 호출할 수 있다 (ADR-050).

@@ -58,16 +58,7 @@ context-pack: minimal
 본 self-check가 plan 단계에서 발화하면 [implement-workitem ambiguity surfacing](../implement-workitem/SKILL.md)은
 *재확인 surface*가 됨 — 2-layer defense (plan에서 잡으면 RGR 1회 절감).
 
-10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 병렬 가능 task는 비워둔다.
-11. **wave 그룹 계산** (ADR-038#d3 / #d6) — 다음 sub-step을 순서대로 수행. 결과는 본 skill *출력에만 echo* — workitem 문서 본문에 영속 저장 X (`## 9. 의존성`이 SSOT — ADR-005 정합). **Context 부담 회피**: 본 step의 검사 2종((a) 위상 정렬 / (b) lockfile race) + 선언 1종((c) 자동 분리 X) 모두 *각 task 본문 전체 fork-load 금지* — `## 9. 의존성` 본문 + `## 3. 구현 항목` 본문의 path-like 토큰만 회수 (ADR-019 minimal 정합). **file overlap 휴리스틱은 본 step에서 제외** — 정밀도가 낮고(`## 4-1`은 현행 정책상 plan 시점 대부분 비어 있음 — WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE 주석 SSOT) 외부 LLM peer review(`/validate-plan`)에 전적으로 위임.
-
-11-(a) **위상 정렬 (결정적 알고리즘)**: 각 task의 `## 9. 의존성` 본문에서 *self-ID 콜론 뒤*의 자연어 텍스트(예: `- T-002: T-001의 X 정의 후 시작 가능` → 콜론 뒤 "`T-001의 X 정의 후 시작 가능`") 안에서 **`T-[0-9]+` 패턴의 task ID 토큰을 모두 추출**. 추출한 토큰을 dep로 간주 → **단순 DAG 위상 정렬** (Kahn's algorithm 등 결정적 알고리즘). *주의*: ADR-026 `## 9` 본문은 self-ID prefix(`- T-NNN:`) + 자연어 dep 설명 형식이라 prefix 자체는 *해당 task 본인*이고 dep는 콜론 뒤 텍스트에 묻혀 있음 — prefix만 보면 안 됨. **결정성 보장**: 같은 입력(`## 9. 의존성` 텍스트)에 같은 wave 그룹. 단, *추출 자체*가 자연어 본문 기반이라 false-positive/negative 가능 — 사용자가 wave 결과를 *참고용*으로 활용 + 최종 의존성 판단은 사용자 책임.
-   *우선순위* (ADR-047 D9 workflow topology + D1 inspectability 정합): 본 task `## 9. 의존성`에 *구조화 필드*(`depends_on:` / `write_set:` 등)가 있으면 자연어 grep 대신 구조화 필드를 결정적으로 사용. `depends_on:` 부재 + 자연어 1줄만 있으면 기존 grep fallback. `write_set:` 교집합이 있는 task 쌍은 *같은 wave에 두지 않는다* — 자동 wave 분리 + 출력에 *file race* 한 줄 명시.
-
-11-(b) **lockfile race 경고**: task 본문(`## 3. 구현 항목`)에서 manifest/lock 파일명 *어느 하나라도* 명시되면 (OR 매치 — 예: `package.json` / `pnpm-lock.yaml` / `Cargo.toml` / `Cargo.lock` / `pyproject.toml` / `poetry.lock` / `uv.lock` / `go.mod` / `go.sum` 중 하나라도 본문에 등장) 해당 task를 "단독 wave (lockfile race risk)"로 표시. **출력 echo만, 자동 차단 X, 영속 저장 X** — 사용자가 wave 구성을 결정. **휴리스틱 한계 명시**: 본 검출은 *파일명 토큰이 본문에 직접 적힌 경우*만 잡음 — "add Redis client" 같은 자연어 dep 추가 task는 false negative. 출력에 *"본 검출은 manifest/lock 토큰 명시 task만 매치 — 자연어 dep 추가는 누락 가능"* 한 줄 echo 권장.
-   *write_set 우선* (ADR-047 D1): task의 `write_set:`이 박혀 있으면 manifest/lock 파일 grep 대신 *write_set의 매치*로 판정 (예: `write_set`에 `pnpm-lock.yaml`이 있으면 단독 wave). write_set 부재 시 기존 manifest/lock 토큰 grep fallback.
-
-11-(c) **자동 분리 X**: 본 점검들은 *경고 출력만*. 사용자가 wave 내에서 sequential 진행 / 별 worktree 분리 / 그대로 동시 진행 중 결정.
+10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 의존성이 없는 task는 비워둔다.
 
 ## Workitem Type 라우팅 (ADR-039)
 분해된 각 feature/task의 `## 0-1. Type`을 읽어 처리를 라우팅한다 (미기재 시 feature):
@@ -128,21 +119,12 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   ARCH 7-x cross-check: 7-1 위반 N건, 7-3 위반 K건, ...
   ```
   (UI/스택 비해당 시 "skip" 명시)
-- **병렬 실행 그룹 (parallel waves)** — task `## 9. 의존성` 기반 위상 정렬 (자유 텍스트 dep는 best-effort). 다음 형식으로 echo:
-  ```
-  Wave 1 (병렬 가능): T-001, T-002, T-003
-  Wave 2 (Wave 1 종료 후): T-004 (deps: T-001), T-005 (deps: T-002)
-  Wave 3 (Wave 2 종료 후): T-006 (deps: T-004, T-005)
-  Wave 4 (단독 — lockfile race risk): T-007 (의존성 추가 감지)
-  ```
-  - (file overlap 점검은 plan-workitem에서 제외 — `/validate-plan` 외부 peer review가 *외부 관점*으로 회수. 정합 근거는 step 11 머리 단락 + ADR-038#d3.)
-  - **병렬 실행 권장 패턴** (ADR-038#d6 참조): `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 필수. 단일 working tree 동시 implement는 비권장. 외부 리소스(DB / 포트 / lockfile / 빌드 캐시) 격리는 프로젝트 환경 책임 (ADR-038 면책 단락 참조). **⚠ plan 산출물 가시성 주의**: `claude --worktree`는 기본 *원격 기준 fresh checkout*이라 uncommitted plan 문서가 worktree 세션에서 안 보일 수 있음 → 병렬 implement 전 plan 산출물 commit 또는 `worktree.baseRef = "head"` 설정 (ADR-038#d6).
 - **Cross-review opt-in 안내** (ADR-038) — 한 줄 안내 출력:
   ```
   품질 확신이 부족하면: 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>` 회수.
   ```
 - 각 task의 `## 3. 구현 항목`이 *단계별 before/after 가이드*로 채워졌는지 self-check 결과 (모호 단계 N건 — 있으면 명시).
-- 다음 추천 단계 (보통 `/implement-workitem [task-id]` — wave 그룹 병렬 시 `claude --worktree T-NNN -p "/implement-workitem T-NNN"` 패턴, 또는 cross-review를 끼우려면 `/validate-plan [workitem-id]` 먼저)
+- 다음 추천 단계 (보통 `/implement-workitem [task-id]`, 또는 cross-review를 끼우려면 `/validate-plan [workitem-id]` 먼저)
 
 ## monorepo·백엔드 sizing 가이드
 - **monorepo**: 1 task = 단일 패키지 5 파일 이하 (cross-package 변경은 task 분리).
@@ -197,7 +179,6 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 **의존성 설치 line item (ADR-040#amend-1)**: 분해된 task가 *새 외부 패키지*(charter `## 7. 제약 조건`에 없는 npm/pip/cargo/go 등)를 요구하면, 해당 task `## 3. 구현 항목`에 설치 단계를 명시적 line item으로 박는다:
 - 형식 — 한 줄 line item으로, *설치 명령만* inline code로 감싼다(백틱 중첩 금지). 예: `- 의존성 설치 — pnpm add zod@^3 실행 (용도: 입력 스키마 검증) (AC-2)`. 패키지 매니저는 스택(ARCHITECTURE/STACK_SETUP_PLAN)에서 자연스러운 것 사용(pnpm/npm/pip/cargo/go get 등).
 - **버전·사용법 불확실 시**: 모델 지식 컷오프 보완을 위해 `최신 버전·사용법 확인: /research-pack <pkg> 선행 권장 (또는 메인 세션이 researcher 위임)` 한 줄을 같은 task에 부기한다. 확인 후 정확한 버전으로 line item을 갱신한다. (plan-workitem은 fork라 직접 웹 접근 불가 — research-pack/researcher 경로를 *권장*만; ADR-040#5 패턴.)
-- **wave/lockfile 정합**: 새 의존을 추가하는 task는 기존 step 11-(b) "lockfile race 경고"·`write_set`에 lock 파일(`pnpm-lock.yaml` 등)을 포함시켜 *단독 wave*로 표시한다(병렬 implement 시 lockfile 충돌 차단).
 - 이 의존이 charter 제약 밖이면 기존 `architect 호출 권장 신호 #2`도 함께 발화(새 외부 의존 = 검토 대상).
 
 **connected-MCP 사용 line item (ADR-048#d3)**: `docs/00-meta/STACK_SETUP_PLAN.md` `## Optional MCP Connectors` 표가 *존재*하면 그 표만 회수(부재 시 본 점검 skip — ADR-019 minimal). 분해 task의 capability(예: 브라우저 E2E / DB 스키마 introspection / 최신 공식문서 / PR·issue / 디자인 자산)가 표의 어떤 행 `lifecycle usage`와 매칭되면, 해당 task `## 3. 구현 항목`에 line item 자동 추가: `- <capability> 작업 시 <mcp-name> MCP 사용 (STACK_SETUP_PLAN Optional MCP Connectors 참조)`. 권장 텍스트만 — builder가 독립 판단 없이 실행하도록 *plan이 authoring*(ADR-040 docs-check / ADR-027#amend-1 책임 분배와 동일 패턴). 표의 행 `agent access`가 비어 있으면(아직 부여 X) line item에 `(agent access 미부여 — 연결 절차 (e) 필요)` 한 줄 부기.
@@ -219,8 +200,6 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 2. 원본 세션 (본 skill을 돌린 세션)에 돌아와 `/repair-plan <workitem-id>` 실행. 모든 리뷰 파일을 회수해 workitem 문서를 수정 + 리뷰 파일 삭제.
 
 본 흐름은 *opt-in*. 건너뛰어도 워크플로우 정상 작동. *opt-in 시작 후 `/repair-plan`을 건너뛰면 `docs/40-validation/plan-reviews/<id>.*.md`가 잔존*: 다음 라운드 호출이 자동 suffix(-N)로 보존(또는 rm으로 수동 정리).
-
-운영 권장 (worktree·외부 리소스 면책 단락): ADR-038#d6 + 면책 단락 참조.
 
 ## 기술 부채 회수 hook (ADR-022 / ADR-039)
 부채 회수 의도가 있는 분해(사용자 요청 또는 milestone 부채 예산)일 때만 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 *open* 항목(특히 P0/P1 리팩토링·아키텍처 부채)을 회수해, 이번 범위와 관련되면 **후보 task로 surface**한다(보통 `Type: refactor` 또는 `bugfix` — ADR-039). 자동 생성 X — 출력 "다음 추천 단계"/"남은 미결정 사항"에 `- 부채 회수 후보: <IMPROVEMENT_GUIDE 항목 ID> → T-XXX(refactor) 권장` 형태로 제시. 부채 회수 의도가 없으면 IMPROVEMENT_GUIDE를 사전 read 하지 않는다 (ADR-019 minimal 정합).

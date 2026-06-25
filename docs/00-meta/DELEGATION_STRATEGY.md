@@ -77,13 +77,6 @@
 
 선택 기준 — 가벼운 병렬: 1, 같은 파일 충돌 가능성 있는 단일 작업: 2, 작업 단위가 분명한 codebase-wide 분산 작업: 3.
 
-`/plan-workitem` 출력의 wave 그룹은 **본 표의 1·2·3과는 독립 차원**이다. 본 표는 메인 세션이 sub-agent를 한 turn 안에서 어떻게 호출하느냐(orchestration). wave 그룹은 *사용자가 여러 터미널·세션을 띄워 동일 wave의 task를 `/implement-workitem`으로 동시 진행*하는 multi-session 시나리오 (ADR-038).
-
-**Wave 그룹 병렬 실행 권장 패턴** (ADR-038#d6 본문이 SSOT):
-- `claude --worktree T-NNN -p "/implement-workitem T-NNN"` — 이름은 `--worktree` 인자로 필수. 미명시 시 자동 이름이 붙어 task-id와 매칭 안 됨. 공식 문서: [worktrees](https://code.claude.com/docs/en/worktrees).
-- 단일 working tree 다중 implement 동시 실행 비권장. 외부 리소스 격리는 ADR-038 면책 단락 참조.
-- `-p` + `--worktree` non-interactive 조합은 자동 cleanup 안 됨 — 작업 후 `git worktree remove .claude/worktrees/T-NNN` 수동 정리.
-
 도구별 bundled batch 지원은 Claude Code의 `/batch`가 유일한 1차 출처다 (Codex 동등 기능 도입 시 본 단락 갱신). 도구별 매핑 SSOT는 [boilerplate/ADR-010](../90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md).
 
 ## 중요 원칙

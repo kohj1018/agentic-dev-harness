@@ -85,18 +85,5 @@ feature
 <!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유. -->
 
 ## 9. 의존성
-<!-- 기본(자연어): `- T-002: T-001의 X 정의 후 시작 가능`. 비어 있으면 병렬 가능으로 간주.
-
-     선택(구조화, 병렬 wave 대상 task 한정 — ADR-026 schema + ADR-038#d3 정정 + ADR-047 D9 workflow topology + shared state 정합):
-     자연어 1줄 *대신* 또는 *아래에* 다음 5필드를 박을 수 있다. 5필드는 plan-workitem wave 계산이 *우선 사용*, 부재 시 자연어 grep fallback.
-
-     - depends_on: [T-001, T-003]          # 명시적 task ID 목록 — 자연어 grep 대신 결정적 dep
-     - read_set: ["src/auth/**", "docs/20-system/ARCHITECTURE_OVERVIEW.md"]   # 본 task가 *읽기*만 하는 경로 glob
-     - write_set: ["src/auth/me.ts", "tests/auth/me.spec.ts"]                  # 본 task가 *쓰는* 경로 glob — 다른 task의 write_set과 교집합 있으면 wave 분리
-     - assumptions: ["JWT secret env 변수가 이미 설정됨"]                       # 본 task가 시작 시 *가정하는* 외부 상태 1~3개
-     - verifier: "jest tests/auth/me.spec.ts"                                  # 본 task 완료 판정의 deterministic 명령 (선택, 비우면 통합 validate에 위임)
-
-     구조화 사용 권장 케이스:
-     - 같은 wave에 들어갈 task가 3개 이상.
-     - read_set/write_set이 모호해 file race 우려.
-     - 단순 순차 작업이면 자연어 1줄 그대로 — 본 5필드를 강제하지 않는다 (ADR-022 enabling 약). -->
+<!-- 자연어 1줄로 선행 task를 선언한다: `- T-002: T-001의 X 정의 후 시작 가능`. 비어 있으면 선행 의존 없음.
+     plan-workitem이 본 선언을 읽어 분해 결과 매트릭스의 의존성 컬럼을 채운다. 단순 순차 진행 기준이며 별도 형식을 강제하지 않는다. -->
