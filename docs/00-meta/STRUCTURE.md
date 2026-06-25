@@ -33,10 +33,10 @@
 | design research note (UI only) | `docs/20-system/DESIGN_RESEARCH.md` | `/bootstrap-design` (R0 레퍼런스 + R2 선택 근거) | Reference | conditional |
 | design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
 | design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
-| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (18종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
+| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (20종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (7종: architect/builder/validator/planner/reviewer/qa/researcher) | 수동 (boilerplate 제공) | Reference | baseline |
-| milestone | `docs/30-workitems/milestones/M*-*.md` | `/bootstrap-project`, `/plan-workitem` | Living | generated |
-| feature | `docs/30-workitems/features/F-*-*.md` | `/bootstrap-project`, `/plan-workitem` | Living | generated |
+| milestone | `docs/30-workitems/milestones/M*-*.md` | `/bootstrap-project`, `/plan-milestone` | Living | generated |
+| feature | `docs/30-workitems/features/F-*-*.md` | `/bootstrap-project`, `/plan-milestone`, `/plan-workitem` | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
 | workitem 템플릿 | `docs/30-workitems/_templates/{MILESTONE,FEATURE,TASK}_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` | ephemeral | generated |
@@ -51,7 +51,7 @@
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
 | AGENTS.md | `./AGENTS.md` | (수동 또는 ADR-010 fork 시) | Living | baseline |
 | Codex 프로젝트 설정 | `.codex/config.toml` | 수동 | Living | baseline |
-| Codex skill wrapper | `.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` | 수동 | Reference | baseline |
+| Codex skill wrapper | `.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` (자연어 호출 skill 목록 SSOT는 boilerplate/README — ADR-010#amend-3; lifecycle/메인 호출 skill은 wrapper 미보유 가능) | 수동 | Reference | baseline |
 | .github 템플릿 | `.github/ISSUE_TEMPLATE/*.md`, `.github/PULL_REQUEST_TEMPLATE/*.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | scripts 안내 | `scripts/README.md` (스택 확정 전 placeholder) | 수동 (boilerplate 제공) | Reference | baseline |
 
@@ -108,6 +108,8 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). → ADR-039 `## Surfaces` 참조 (fan-out SSOT). |
 | 출력 스타일 (signal-first 대화/반환 계약) | [ADR-046](../90-decisions/boilerplate/ADR-046-signal-first-output.md) (정책 SSOT). → ADR-046 `## Surfaces` 참조 (fan-out SSOT). |
 | Code-as-Agent-Harness 패러다임 + Harness Mutation Contract | [ADR-047](../90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) (정책 SSOT). → ADR-047 `## Surfaces` 참조 (fan-out SSOT). |
+| 메인 세션 오케스트레이션(foreman·fan-out)·wave 제거 | [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) (정책 SSOT). → ADR-051 `## Surfaces` 참조 (fan-out SSOT). |
+| Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 context-pack)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

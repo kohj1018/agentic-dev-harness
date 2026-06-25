@@ -144,3 +144,5 @@ charter/architecture/스택 관련 mid-project 갱신 경로는 [DELEGATION_STRA
 ## 단계별 에이전트 위임
 
 각 단계에서의 에이전트 선택과 위임 조건은 [DELEGATION_STRATEGY.md](DELEGATION_STRATEGY.md)를 참조한다.
+
+메인 세션 오케스트레이션(foreman·fan-out·wave 제거) 정책은 [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) 참조.

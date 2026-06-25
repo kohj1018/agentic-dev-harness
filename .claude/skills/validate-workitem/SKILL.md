@@ -156,4 +156,4 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
-메인 세션 연쇄 실행(implement→validate→repair, ADR-050) 시 직전 단계가 메인 컨텍스트에 올린 task 문서는 *갱신되지 않았으면 재독 생략*. 단 통합 검증 명령 재실행·diff 재확인·report 신규 작성은 항상 수행(코드 상태/산출물이 매 phase 변한다).
+메인 세션 연쇄 실행(implement→validate→repair, ADR-050) 시 직전 단계가 메인 컨텍스트에 올린 task 문서는 *갱신되지 않았으면 재독 생략*(ADR-051 D8 + ADR-019#amend-1 정합). 단 통합 검증 명령 재실행·diff 재확인·report 신규 작성은 항상 수행(코드 상태/산출물이 매 phase 변한다).

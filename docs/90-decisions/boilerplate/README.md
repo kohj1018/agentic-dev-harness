@@ -17,7 +17,7 @@
 | 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
 | 011 | AGENTS.md 100줄 hard cap | accepted | — | AGENTS.md 최대 100줄, 신규 정책은 ADR + 1줄 링크 |
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
-| 014 | Milestone graduation contract | accepted | (+#amend-1: evaluator-optimizer pattern 명명) | graduation checklist 5+1 + 회고 + pre-check + --dry-run |
+| 014 | Milestone graduation contract | accepted | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3) | graduation checklist 5+1 + 회고 + pre-check + --dry-run |
 | 017 | Dogfood 시뮬레이션 의무 + 재실행 트리거 | accepted | (+#amend-1: 위치 경로 .boilerplate/) | todo CLI baseline 시뮬레이션 + 성공 기준 3개 + 재실행 트리거 3종 |
 | 019 | Context Packs + JIT 로딩 | accepted | — | minimal/full 2종 context-pack + 사전 fork-load 금지 정책 |
 | 020 | `validate --changed` incremental | accepted | — | finalize는 --changed만, stabilize는 full validate |
@@ -31,9 +31,9 @@
 | 035 | DISCOVERY.md Living Doc + Assumption Tracker | accepted | (+#amend-1: Charter staleness 보고, +#amend-2: Evidence Log + Insight Backlog) | 15섹션 + --update 모드 + DISCOVERY=SSOT/Charter=snapshot |
 | 036 | FEATURE_TEMPLATE 12섹션 PRD 강화 | accepted | — | User Story + Feature 시나리오 + FAC + NFR 신설, boundaries 3-tier 라벨 |
 | 037 | Spec coverage self-audit | accepted | (+#amend-1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`, +#amend-2: plan 출력 echo 축소 — ADR-046 정합) | FAC→AC 매핑 추적, Spec Gap report, 자동 차단 X |
-| 038 | Cross-LLM Plan Validation + Parallel Waves | accepted | (+#amend-1: Plan Quality 8 → 10 차원 — ADR-027#amend-1 양립, +#amend-2: 리뷰 파일 충돌 정정 — 덮어쓰기→자동 suffix, +#amend-3: file overlap 정책 정정 — 명시적 write_set 결정적 wave 분리) | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설 + wave 그룹 echo + worktree 권장 |
+| 038 | Cross-LLM Plan Validation + Parallel Waves | accepted (#d3·#d6·#amend-3 superseded by 051) | (+#amend-1: Plan Quality 8 → 10 차원 — ADR-027#amend-1 양립, +#amend-2: 리뷰 파일 충돌 정정 — 덮어쓰기→자동 suffix, +#amend-3: file overlap 정책 정정 — 명시적 write_set 결정적 wave 분리 — *ADR-051이 write_set 5필드와 함께 폐지*) | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설. ~~wave 그룹 echo + worktree 권장~~(ADR-051 제거) |
 | 039 | Workitem Type 분류 | accepted | — | task/feature에 Type 필드(feature/technical-enabler/bugfix/refactor/migration/research-spike) |
-| 040 | 외부 리서치 capability | accepted | (+#amend-1: 의존성 설치 authoring/실행) | researcher agent + /research-pack skill, report-only 웹 접근 |
+| 040 | 외부 리서치 capability | accepted | (+#amend-1: 의존성 설치 authoring/실행, +#amend-2: builder Needs-Research soft 게이트 + 오케스트레이터 자동 위임 + install-ownership 3분할 boundary) | researcher agent + /research-pack skill, report-only 웹 접근 |
 | 041 | 스택 추천 + 마이그레이션 contract | accepted | — | bootstrap-stack --recommend(확정 전 2~3조합) / --migrate(expand-contract contract ADR) |
 | 042 | UX 흐름 품질 (HEART) | accepted | — | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 |
 | 043 | Optional MCP Connectors | accepted | — | 기본 자동연결 X + STACK_SETUP_PLAN 연결 절차(researcher 기반, 전용 skill 없음) + 보안 가드 |
@@ -43,7 +43,9 @@
 | 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 | 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
 | 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | accepted | — | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
-| 050 | Main-session, model-invocable lifecycle skills | accepted | — | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |
+| 050 | Main-session, model-invocable lifecycle skills | accepted (부분 superseded by 051) | — | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |
+| 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | — | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
+| 052 | Stack provisioning (install) + E2E readiness | accepted | — | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) |
 
 ## Reserved / Parked / Dropped 번호
 

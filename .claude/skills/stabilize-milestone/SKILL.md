@@ -215,3 +215,4 @@ E2E는 단계 3-a의 *필요성 판정*으로 결정한다 — e2e 불필요(비
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
+fan-out 병렬 오케스트레이션 정책은 [ADR-051](../../../docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) D2 정합.
