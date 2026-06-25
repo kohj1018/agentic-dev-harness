@@ -116,3 +116,4 @@ connected-MCP 사용 line item 처리 (각 builder 가 자기 slice 에서 — A
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
+foreman 이 inner-loop 를 여러 라운드 운전할 때(ADR-051 D8 + ADR-019#amend-1) 직전 라운드에서 이미 로드한 task 문서는 변경 신호(`## 8. 메모` repair 갱신·validate report 신규)가 없으면 재독 생략 — 변경 신호가 있을 때만 재읽기.
