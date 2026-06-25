@@ -1,30 +1,28 @@
 ---
 name: plan-workitem
-description: 상위 설계 문서를 기반으로 milestone, feature, task 단위 문서를 생성하거나 정리할 때 사용한다 (Claude Code plan 모드와 다름 — workitem 분해기).
-argument-hint: "[milestone or feature id]"
+description: 기존 feature 문서를 task 단위로 분해하고, 그 task의 AC를 feature `## 7-1` FAC↔AC 매핑표에 채운다 (milestone·feature 문서 *생성*은 plan-milestone 담당 — ADR-050/ADR-051). Claude Code plan 모드와 다름 — task 분해기.
+argument-hint: "[feature id]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit
-context: fork
-agent: planner
+allowed-tools: Read Glob Grep Write Edit Agent
 context-pack: minimal
 ---
 
-너의 역할은 입력으로 받은 milestone/feature/task ID에 대한 workitem 문서를 분해·생성·갱신하는 것이다.
+너의 역할은 입력으로 받은 feature ID를 task 단위로 분해하고, 그 task들의 AC를 feature `## 7-1` 매핑표에 채우는 것이다. milestone·feature 문서 *생성*은 `/plan-milestone` 담당이며, 본 skill은 *이미 존재하는* feature 문서를 입력으로 받는다.
 
 입력:
-- `$ARGUMENTS`에는 milestone ID(예: `M1`), feature ID(예: `F-001`), 또는 자연어 분해 요청이 들어온다.
+- `$ARGUMENTS`에는 분해 대상 feature ID(예: `F-001`)가 들어온다. feature 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다).
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
 - `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. UI 판정은 **ADR-027#amend-3 "UI 판정 다중신호 절차"** 적용(부재→비-UI / status≠draft→UI / status=draft→추가신호). UI 확정 시 본문 회수 + cross-check 활성, 비-UI/skip 시 사유 echo.
-- 입력 ID에 해당하는 상위 workitem 문서(있으면)
-- `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md`
+- 입력 feature ID에 해당하는 feature 문서(필수 — 부재 시 `/plan-milestone` 안내 후 종료) 및 그 상위 milestone 문서
+- `docs/30-workitems/_templates/TASK_TEMPLATE.md` (task 생성 양식 SSOT)
 
 반드시 수행할 일:
-1. 입력 ID에 해당하는 상위 문서를 읽어 범위와 비범위를 파악한다.
-2. 작업을 milestone, feature, task 중 적절한 레벨로 나눈다.
-3. 각 문서의 범위와 비범위를 명확히 적는다.
+1. 입력 feature 문서와 그 상위 milestone 문서를 읽어 범위와 비범위를 파악한다.
+2. feature 범위를 *task 단위*로 분해한다. milestone·feature 레벨 신설은 하지 않는다 — feature scope가 한 milestone에 담기 어려울 만큼 크면 `/plan-milestone` 재분해를 출력에 권장한다.
+3. 각 task의 범위와 비범위를 명확히 적는다.
 3-G. **`## 3. 구현 항목`을 *단계별 구현 가이드*로 작성 (ADR-026#amend-2)**:
    각 task의 `## 3`은 terse 목록이 아니라 *그 문서만 보고 따라 하면 구현이 끝나는* 번호 매긴 절차로 쓴다.
    - 작성 전, 그 task가 *건드릴 실제 파일*을 JIT로 읽는다(대상 파일에 한정 — ADR-019 minimal 정합). 추측이 아니라 *현재 코드/문서의 실제 상태*를 근거로 한다.
@@ -36,7 +34,7 @@ context-pack: minimal
 4. 관련 문서 링크를 함께 기록한다.
 5. 검증 포인트와 완료 기준을 포함한다.
 6. **task 단위 분해 시**: TASK_TEMPLATE의 `## 6. Acceptance Criteria`에 측정 가능한 AC를 최소 1개 이상 채운다. Given-When-Then 형식을 *강력 권장*하며 자세한 점검은 아래 9번 항목과 TASK_TEMPLATE 주석을 참조한다. AC가 비면 `/implement-workitem`이 RGR 사이클을 시작할 수 없다(정책: [ADR-009](../../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md), [ADR-026](../../../docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md)).
-7. 새 문서를 만들 때는 해당 레벨의 템플릿을 복사해 채운다.
+7. 새 task 문서를 만들 때는 `TASK_TEMPLATE.md`를 복사해 채운다. milestone·feature 문서 템플릿 복사는 `/plan-milestone`가 담당하므로 본 skill에서 하지 않는다.
 8. **분해 후 sizing self-check** — 다음 3 한계 중 하나라도 초과 시 *추가 분해 권장 텍스트*를 출력에 명시 (자동 차단 X, 사용자 결정):
    - 1 task = 1 RGR 사이클.
    - AC 3개 이하.
@@ -68,8 +66,11 @@ context-pack: minimal
 - **migration**: bootstrap-stack `--migrate` contract(ADR-041)를 상위 참조로 link. expand-contract 단계를 `## 3`에 분해.
 - **research-spike**: 산출은 `/research-pack` 리서치 노트(ADR-040). TDD opt-out 기본(`## 6-2`에 사유=탐색 + follow-up 구현 task).
 
-## feature 분해 시 (ADR-036)
-feature 분해 시 12 main sections + `## 7-1` mapping subsection 모두 채운다.
+## task 분해 + `## 7-1` AC 측 채움 (ADR-036 / ADR-050)
+**책임 경계**: feature 문서 *본문 12 main sections* + `## 7 FAC` 작성 + *빈* `## 7-1. FAC ↔ AC 매핑표` shell 생성은 `/plan-milestone`가 이미 끝낸 상태로 본 skill에 들어온다. 본 skill은 **그 feature 문서를 task로 분해**하고, 분해된 task `## 6 AC`로 **기존 `## 7-1` shell의 AC 측(매핑 행)을 채운다** — `## 7-1` 자체를 신설하지 않는다.
+
+입력 feature 문서에 `## 7-1` shell이 *부재*하면(plan-milestone 미실행 또는 legacy 문서) 아래 Legacy fallback을 따른다.
+
 `## 7 FAC`는 task `## 6 AC`로 분해되며 매핑 결과는 **feature 문서의 `## 7-1. FAC ↔ AC 매핑표` subsection에 영속 저장** (출력만 X — drift 차단).
 매핑 누락(unmapped FAC)은 plan 출력의 "남은 미결정 사항"에 *추가*로 명시.
 다음 라운드의 [validate-workitem](../validate-workitem/SKILL.md) Spec coverage audit (ADR-037)
@@ -82,17 +83,11 @@ feature 분해 시 12 main sections + `## 7-1` mapping subsection 모두 채운�
 2. 부재 → `## 7 FAC` 본문에서 *inline 매핑 표기*(예: `- FAC-1 → T-001:AC-1`) 휴리스틱 검출.
 3. 둘 다 부재 → `Spec Gap: <feature> 매핑표 부재 — legacy 문서 보강 권장` 라벨로 IMPROVEMENT_GUIDE에 P1 기록 + 다음 plan 라운드에서 `## 7-1` 보강.
 
-feature 분해 시 `## 11. 관련 문서` 에 *해당 스택* 의 `Architecture-Iface:` link 와 (UI 프로젝트 한정) `Design:` link 를 채운다. TEMPLATE 의 비해당 스택 줄은 *삭제* (placeholder 잔존 X — drift 차단).
-
-**Evidence/Insight 연결 (ADR-035#amend-2)**: feature가 DISCOVERY `## 15. Insight Backlog`의 인사이트를 구현하는 것이면, feature `## 1. 요약`에 `근거 insight: I-N` 한 줄을 박고, 해당 Insight Backlog 행의 `status`를 `planned` + `linked feature`를 채울 것을 plan 출력에 권장(plan은 DISCOVERY를 직접 수정하지 않음 — `/discover-product --update`가 회수). **`Type: feature` 한정** — 근거 인사이트가 없는 즉흥 feature면 "남은 미결정 사항"에 `- 근거 insight 부재: F-NNN — DISCOVERY 회수 권장` 명시. technical-enabler 등 비-feature 타입은 가정/기회·ADR 링크로 정당화되므로 insight 부재 경고를 내지 않는다.
+feature `## 11. 관련 문서`의 `Architecture-Iface:` / (UI 한정) `Design:` link 채움과 비해당 스택 줄 삭제, 그리고 Evidence/Insight 연결(`근거 insight: I-N` 기입 + Insight Backlog status 권장)은 feature 문서 *생성* 책임이므로 `/plan-milestone`가 담당한다 — 본 skill에서는 하지 않는다. 단, task 분해 중 입력 feature 문서에서 이 항목들이 *비어 있음*을 발견하면 plan 출력의 "남은 미결정 사항"에 `- feature <id> 링크/insight 미채움 — /plan-milestone 보강 권장` 한 줄로 surface한다(자동 수정 X).
 
 ## --fast 모드
 prototype은 `## 3 핵심 시나리오` / `## 7 FAC` / `## 8 NFR` 신설 3섹션을 1줄씩만 채워도 OK ("해당 없음" / "M2 이후 검토").
 YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등 정신.
-
-## milestone 생성 시 default (ADR-014)
-- `## 5. 완료 기준`은 ADR-014 graduation checklist 5+1 항목 default 사용 (MILESTONE_TEMPLATE 그대로 복사). 사용자가 추가 기준을 협상해 "(선택)" 행을 채운다.
-- `## 8. 회고`는 `/stabilize-milestone`이 자동 채움 — plan 단계에서는 비워둔다.
 
 반드시 지킬 원칙:
 - 코드를 구현하지 않는다.
@@ -110,7 +105,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   | M1        | F-001   | T-001 | 2     | -      |
   | M1        | F-001   | T-002 | 3     | T-001  |
   ```
-- feature 분해 시: 매핑표는 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
+- task 분해 시: AC 매핑은 입력 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
 - 핵심 가정
 - 남은 미결정 사항
 - **인터페이스·디자인 cross-check 결과** (정합성 self-check 결과 요약):
@@ -209,3 +204,10 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
+
+## 메인 세션 실행 + 무거운 추론 위임 (ADR-050)
+본 skill은 fork sub-agent가 아니라 **메인 세션**에서 직접 실행된다(bootstrap-project·discover-product 패턴 정합). 메인 컨텍스트 비대화를 막기 위해:
+- 무거운 추론(대규모 task 분해 설계·AC interpretation diversity 판단·sizing 협상·아키텍처 영향 분석)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론만 본 skill이 문서에 반영한다(architect의 `model: opus`가 추론 품질 보장). 본 skill이 직접 모든 task 본문을 펼쳐 inline으로 추론하지 않는다.
+- 대상 파일 JIT 읽기는 step 3-G대로 *그 task가 건드릴 실제 파일*에 한정한다(ADR-019 minimal).
+- 분해 완료 후 사용자에게 `/clear` 또는 새 세션을 권장한다 — 다음 단계(`/implement-workitem`)가 깨끗한 컨텍스트에서 시작하도록.
+- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent 병렬 fan-out parity가 없으므로, architect 단발 sub-call도 순차 단일 실행으로 동작한다(결과 동일, 처리량만 차이).

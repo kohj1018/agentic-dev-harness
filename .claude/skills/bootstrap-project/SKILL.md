@@ -64,8 +64,8 @@ context-pack: minimal
 - 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-workitem` 순서가 SSOT):
   - 기본 권장: `/bootstrap-stack <스택 요약>` (또는 `--recommend` 로 추천 받기) — 스택 확정이 후속 lifecycle 의 전제 (스택 미정 상태에서 plan 은 가짜 작업).
   - 분기 옵션 (해당 시 ≤3):
-    - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-workitem M1` — 첫 milestone 의 feature/task 분해
-    - UI 프로젝트 + 스택 확정 후: `/bootstrap-design` 다음 `/plan-workitem M1`
+    - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-workitem F-001` — seed된 첫 feature(F-001)의 task 분해
+    - UI 프로젝트 + 스택 확정 후: `/bootstrap-design` 다음 `/plan-workitem F-001`
     - 기획 신뢰도 재확인 원하면: 다른 세션에서 `/validate-discovery --reviewer-tag <tag>` 후 원본에서 `/repair-discovery`
   - 프롬프트 동봉 권장:
     - charter `## 5. 비목표` 의 핵심 키워드 (다음 plan 라운드의 scope 가드 입력)
