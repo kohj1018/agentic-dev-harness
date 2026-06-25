@@ -16,7 +16,7 @@ accepted
 `## 5. 완료 기준`을 다음 5개 필수 + 1개 선택으로 교체:
 1. 모든 task status: done
 2. 통합 validate Pass
-3. E2E Pass (스택에 정의된 경우)
+3. E2E Pass (E2E-applicable 스택은 MUST — exit code 0; #amend-2가 "정의된 경우" soft-pass를 강화)
 4. AC 매핑 100% (validation report 기준)
 5. P0 severity finding 0건 (QA_FINDINGS의 본 마일스톤 헤더 기준)
 6. (선택) 본 마일스톤 한정 추가 기준
@@ -49,8 +49,9 @@ accepted
 graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycle 단계 결함 신호 → ADR 후보.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- .claude/skills/stabilize-milestone/SKILL.md         — #d3 graduation pre-check §1.5, #amend-1 evaluator-optimizer 1줄
-- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — #d1 §5 완료기준 5+1, #d2 §8 회고
+- .claude/skills/stabilize-milestone/SKILL.md         — #d3 graduation pre-check §1.5, #amend-1 evaluator-optimizer 1줄, #amend-2 E2E MUST-run hard-block
+- .claude/skills/stack-guard/SKILL.md                 — #amend-2 E2E-applicable 판정(provision/smoke) — ADR-052 D2 정합
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — #d1 §5 완료기준 5+1, #d2 §8 회고, #amend-2 item 3 MUST 문구
 - docs/00-meta/DELEGATION_STRATEGY.md                 — #amend-1 evaluator-optimizer 1줄
 
 ## 참고
@@ -84,3 +85,23 @@ graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycl
 ### 후속 작업
 
 없음 — citation 추가만.
+
+<a id="adr-014-amend-2"></a>
+## Amendment 2 (2026-06-25) — E2E MUST-run hard-block (ADR-052 D3)
+
+### 결정
+graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`의 *soft-pass*("정의된 경우"만 평가)를 **E2E-applicable 스택 한정 hard-block**으로 강화한다.
+- *E2E-applicable* = STACK_SETUP_PLAN에 `validate:e2e` 명령 또는 E2E provision 항목 존재. 이 경우 미통과(exit code ≠ 0 또는 미설정) 시 graduation pre-check `졸업 가능: NO` **hard-block**.
+- *E2E-not-applicable*(`validate:e2e` 미설정 + provision 항목 없음) = 기존대로 *해당 없음=통과*. stack-guard가 "applicable 스택이면 설정 권장" 1줄 echo(ADR-052 D2).
+
+### 근거
+- [관측됨] "정의된 경우" soft-pass가 E2E-applicable 스택을 무점검 통과시켜 readiness 없이 졸업 가능. E2E readiness 판정 SSOT는 stack-guard provision/smoke(ADR-052 D2)로 이전.
+
+### 강도 (ADR-022)
+- constraint(강) — E2E-applicable 스택에 graduation hard-block. ADR-014 본래 5+1 contract 정신 계승(졸업 모호성 제거).
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md         — 1.5 Graduation pre-check item 3 E2E MUST-run hard-block
+- .claude/skills/stack-guard/SKILL.md                 — E2E-applicable 판정 + provision/smoke (ADR-052 D2 정합)
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — `## 5. 완료 기준` item 3 MUST 문구
+- docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md — D3 owning ADR

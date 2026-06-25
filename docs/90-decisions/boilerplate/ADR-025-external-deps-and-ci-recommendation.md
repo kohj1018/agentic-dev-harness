@@ -36,3 +36,4 @@ accepted
 ## 참고
 - GUARDRAILS_STRATEGY.md
 - ADR-022 (Ratchet Principle — [외부실증] 라벨)
+- ADR-052 (stack install provision + E2E readiness — ADR-025 "강제 X 권장만" stance를 toolchain install로 확장)

@@ -42,3 +42,18 @@ accepted
 ## 참고
 - ADR-022 (Ratchet Principle — [외부실증] 라벨)
 - ADR-010 (multi-tool 호환)
+
+<a id="adr-019-amend-1"></a>
+## Amendment 1 (2026-06-25) — 조건부 re-read (foreman/fan-out inner-loop, ADR-051 D8)
+
+### 결정
+foreman/fan-out 도입(ADR-051 D1·D2)으로 메인 세션이 inner-loop를 여러 라운드 운전할 때, minimal/JIT 정책을 *조건부 re-read*로 좁힌다 — **직전 라운드에서 이미 로드한 문서는 변경 신호(mtime 갱신, validate report 신규 생성, task `## 8. 메모` repair 갱신)가 있을 때만 재읽기**. 변경 신호가 없으면 in-context 버전을 재사용하고 재로딩하지 않는다.
+- 본 amend는 ADR-019 본래 "사전 fork-load 금지 + minimal" 정신 계승 — *불필요한 재로딩*도 fork-load와 동형의 컨텍스트 낭비로 본다.
+
+### 강도 (ADR-022)
+- enabling(약) — 토큰 절감. 변경 신호 판정이 모호하면 *안전하게 재읽기*(false re-read는 비용만, 정확성 무해).
+
+### 적용 surface
+- .claude/skills/implement-workitem/SKILL.md   — foreman inner-loop 조건부 re-read (ADR-051 D8)
+- .claude/skills/validate-workitem/SKILL.md    — fan-out 라운드 조건부 re-read
+- 각 skill 본문 `## Context 정책 (ADR-019)` 단락에 1줄 인용 (ADR-019 #amend-1).

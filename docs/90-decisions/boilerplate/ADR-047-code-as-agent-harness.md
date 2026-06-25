@@ -82,7 +82,7 @@ pass/fail 단일 신호는 *과신*을 만든다 — "evaluation beyond final ta
 
 ### D9. Optimized Workflow Topology + Shared State (*Code as Agent Harness* §4.1.3·§5.2.4 정합)
 agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wave 계산 + conflict review 안정성 ↑. shared state의 semantic conflict는 syntactic merge로 잡히지 않으므로 *deterministic input*(예: 명시적 `write_set:`)이 plan 시점에 회수 가능해야.
-- 본 보일러의 적용: TASK_TEMPLATE `## 9. 의존성` 5필드 구조화 (opt-in, 병렬 wave 한정 — `depends_on` / `read_set` / `write_set` / `assumptions` / `verifier`) + plan-workitem wave 계산 (write_set 교집합 시 자동 wave 분리, 자연어 grep fallback 유지). 적용 surface SSOT: ADR-026 (TASK_TEMPLATE schema) + ADR-038#amend-3 (deterministic write_set 회수).
+- 본 보일러의 적용: **implement-workitem foreman의 file-disjoint slice partition** — foreman이 한 task를 `## 3. 구현 항목`의 step 파일 경로로 나눠 *충돌 없는 slice는 병렬 builder, 겹치거나 작으면 단일/순차*로 운전한다(ADR-051 #d6 re-anchor). **plan-time wave 계산·echo + TASK_TEMPLATE `## 9` 5필드 구조화(`write_set` 등) + ADR-038#amend-3 write_set 메커니즘은 ADR-051 #d5가 *폐지*** (wave 전용 스키마 — 사용자 결정 완전 제거). 적용 surface SSOT: ADR-051 #d6(foreman `## 3`-path partition). (ADR-026 `## 9` 5필드 Surfaces 줄도 동시 제거 — §6.4.2b.)
 - 본 D9는 *원칙 owning* — `[외부실증]` 논문 §4.1.3 Optimized Workflow Topology + §5.2.4 Transactional Shared Program State 인용 single source. 영구 TASK_TEMPLATE / plan-workitem SKILL 본문은 본 D9만 인용.
 
 ## Mutation Contract (본 ADR 자체에 적용)
@@ -112,7 +112,7 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 - .claude/skills/stabilize-milestone/SKILL.md                                        — D7 적용 (`7-T. Telemetry aggregate`)
 - .claude/skills/repair-plan/SKILL.md                                                — D7 적용 (`5-D` 결정 이력 영속화)
 - .claude/skills/repair-discovery/SKILL.md                                           — D7 적용 (`4-D` 결정 이력 영속화)
-- .claude/skills/plan-workitem/SKILL.md                                              — D9 적용 (wave 계산 `write_set` 우선)
+- .claude/skills/implement-workitem/SKILL.md                                         — D9 적용 (foreman `## 3` step-path partition — ADR-051 #d6 re-anchor)
 - .claude/agents/validator.md                                                        — D8 적용 (Evidence Bundle 출력)
 
 > README 인덱스(`docs/90-decisions/boilerplate/README.md`)는 *모든 ADR이 1줄 등재*되는 인덱스라 surface 정의(ADR-045 — *cross-surface enforcement*가 필요한 fan-out)에 해당하지 않는다. 인덱스 한 줄 추가는 별도 정상 절차(_ADR_GUIDE "새 ADR 추가 절차" §2).

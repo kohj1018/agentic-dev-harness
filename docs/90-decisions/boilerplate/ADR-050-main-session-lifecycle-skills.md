@@ -3,7 +3,7 @@
 > scope: boilerplate
 
 ## Status
-accepted
+accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman 오케스트레이션으로 supersede. de-fork 나머지·D2 model-invocable·D3는 유효 유지.)
 
 ## 배경
 - [관측됨] bootstrap/validate/repair류 skill이 `context: fork` 서브에이전트로 돌면, (1) 사용자 실시간 권한 응답이 불가해 리뷰·report 파일 `rm`이 막히고, (2) repair가 풀 프로젝트 컨텍스트로 "검증이 맞는지"를 판단하기 어렵다.
@@ -12,7 +12,7 @@ accepted
 
 ## 결정
 
-### D1. 일부 lifecycle skill을 메인 세션 실행으로 전환
+### D1. 일부 lifecycle skill을 메인 세션 실행으로 전환 — implement-workitem 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1 (fork builder → foreman 병렬/단일 builder 위임: file-disjoint면 병렬, 작거나 겹치면 단일)
 다음 7종에서 `context: fork`(및 죽은 `agent:`)를 제거해 메인 세션 인라인 실행한다: bootstrap-project, bootstrap-stack, stack-guard, validate-plan, repair-plan, validate-workitem, repair-workitem.
 - bootstrap-project/bootstrap-stack은 무거운 아키텍처 추론을 `Agent`로 architect sub-call 위임(discover-product·bootstrap-design 패턴). 나머지는 메인 세션이 직접 수행.
 - `context-pack: minimal`은 유지(메인 세션 skill도 사용 — discover-product 선례).
