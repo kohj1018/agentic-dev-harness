@@ -1,0 +1,90 @@
+# ADR-051 — 메인 세션 오케스트레이션(foreman) + 병렬 fan-out + wave 제거
+
+> scope: boilerplate
+
+## Status
+accepted
+
+## 대체
+- [ADR-050](ADR-050-main-session-lifecycle-skills.md) D1 중 implement-workitem 부분을 **supersede** — implement-workitem은 fork builder 격리가 아니라 *foreman(메인 세션 오케스트레이터)*이 builder 위임을 운전한다. **파일 경계가 분리되면(file-disjoint) 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회) 파일이 겹치면 단일 builder로** 운전한다.
+- [ADR-038](ADR-038-cross-llm-plan-validation.md) `## 결정` #d3(parallel waves echo) + #d6(wave별 worktree 병렬 권장)을 **supersede** — plan-workitem은 wave 그룹을 계산·echo하지 않는다. 병렬성은 validate/stabilize *fan-out*으로 이전.
+
+## 배경
+- [관측됨] implement-workitem이 `context: fork` + `agent: builder`로 돌면 메인 세션이 구현 흐름을 *직접 운전*하지 못한다 — RGR 사이클 중 사용자 권한 응답·재해석 결정이 fork 경계에 막힌다(ADR-050 D2가 model-invocable로 풀었어도 fork 격리는 잔존).
+- [관측됨] plan-workitem이 출력하는 wave 그룹(ADR-038#d3)은 *derived view*인데 사용자가 이를 따라 `claude --worktree`(ADR-038#d6)로 병렬 implement를 시도하면 (a) uncommitted plan 문서 미가시, (b) lockfile/빌드캐시 race, (c) worktree 수동 cleanup 부담이 반복 관측됐다. wave 가시화의 실효 < 병렬 implement의 환경 충돌 비용.
+- [관측됨] validate-workitem·stabilize-milestone은 *report-only fan-out*(여러 task·여러 verifier를 동시 점검)이 충돌 위험 없이 안전하다 — 쓰기 격리가 필요 없는 read/판정 작업이라 병렬화 이득이 깨끗하다.
+- 기존 규약: ADR-007 lifecycle 8단계, ADR-019 "사전 fork-load 금지 + minimal", ADR-038 parallel waves, ADR-047 D9(workflow topology + shared state), ADR-050(de-fork + model-invocable). 본 ADR은 *병렬성의 위치*를 plan-time wave에서 validate/stabilize fan-out으로 재배치하고 implement 운전권을 foreman으로 옮긴다.
+
+## 결정
+
+### D1. implement-workitem을 foreman 오케스트레이션으로 전환 (ADR-050 D1 implement 부분 supersede)
+implement-workitem에서 `context: fork`(및 `agent: builder`)를 제거하고 **메인 세션 foreman**이 실행한다. foreman은 task를 1회 읽어 `## 3. 구현 항목`의 step 파일 경로로 *충돌 없는(file-disjoint) slice*를 싸게 나눈 뒤(`## 9. 의존성`은 자연어 *선행 순서*만 — 5필드 삭제됨), 각 slice를 `Agent`로 **builder에 위임**한다 — **파일 경계가 분리되면 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회)·파일이 겹치면 단일 builder로** 운전한다(과도한 분할 금지 — Stage 2A partition 규칙). 각 builder는 자기 slice의 AC에 대해 RGR을 돌리고, foreman이 결과·`## 4-1`을 *단일 writer*로 병합한다. 무거운 추론의 노이즈 격리는 bootstrap-project의 architect 위임과 동형이되, *동시성*은 file-disjoint slice에서만 적용한다(같은 파일을 쓰는 slice는 순차 또는 worktree).
+- foreman은 task 재해석(`Needs Plan Decision`)·권한 응답·`Needs Install`/`Needs Research` 분기를 메인 세션에서 직접 처리한다.
+- `context-pack: minimal` 유지. ADR-050 D2(model-invocable)는 그대로 — foreman이 inner-loop를 운전한다.
+- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent parallel parity가 없으므로 builder `Agent` 위임을 *메인 세션 인라인 단일 실행*으로 대체한다(ADR-010 정합, 행동 동일·격리만 없음).
+
+### D2. validate/stabilize 병렬 fan-out (ADR-038 병렬성 위치 재배치)
+병렬성은 plan-time wave가 아니라 *report-only 단계의 fan-out*으로 제공한다:
+- validate-workitem: 단일 workitem 검증을 **audit axis별**(AC↔테스트 / diff-trace / FAC↔AC spec / Arch-iface 7-x / UI Design-inventory / Evidence Bundle)로 **병렬 fan-out** — 각 validator는 *partial verdict만 반환*하고 **메인이 단일 report(`reports/<task-id>.md`)를 작성**(clobber 방지). 여러 task 동시 검증 시 task별 fan-out도 동형. 읽기·판정뿐이라 write 충돌 없음(작은 diff는 단일 inline validator로 fallback).
+- stabilize-milestone: qa·reviewer(code/design surface) 위임을 **병렬 fan-out**.
+- 두 단계 모두 report/판정 산출물이라 동시 실행이 git index race·빌드캐시 충돌을 일으키지 않는다(implement 병렬과 결정적 차이).
+- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — fan-out 대상 task/verifier를 순차로 1개씩 처리(판정 결과 동일, wall-clock만 길어짐).
+
+### D3. plan-workitem de-fork (ADR-050 D1 패턴 확장)
+plan-workitem에서 `context: fork`(및 `agent:`)를 제거해 메인 세션 인라인 실행한다 — planning은 사용자와의 상호작용(sizing·해석 확정·의존성 결정)이 잦아 fork 격리 이득보다 운전권 손실이 크다(ADR-050 D1 de-fork 논거 동형). 무거운 아키텍처 추론은 architect `Agent` 위임 유지.
+- `disable-model-invocation`은 **유지**(ADR-050 D2 범위 한정 — plan-workitem은 텍스트 제안 + 사용자 명시 발화 규약 유지).
+
+### D4. plan-milestone 신규 skill
+milestone 단위 분해를 plan-workitem에서 분리한 **`/plan-milestone [milestone-id]`** 신규 skill을 신설한다 — milestone → feature 분해 + graduation 기준(ADR-014 5+1) authoring을 책임진다. plan-workitem은 feature → task 분해에 집중(역할 경계 명확화).
+- `disable-model-invocation: true` + 메인 세션 실행(fork X) + architect `Agent` 위임. `.claude` + `.agents` 양 mirror 신설.
+
+### D5. wave echo + worktree 병렬 권장 제거 (ADR-038 #d3·#d6 supersede)
+plan-workitem은 더 이상 `## 9. 의존성`을 위상정렬한 wave 그룹을 echo하지 않으며, `claude --worktree` 병렬 implement 권장도 출력하지 않는다.
+- `## 9. 의존성` 5필드(`depends_on`/`read_set`/`write_set`/`assumptions`/`verifier`)는 wave 전용 스키마(ADR-047 D9 "opt-in 병렬 wave 한정")라 **전부 삭제**한다(사용자 결정 — 완전 제거 + YAGNI). foreman의 file-disjoint 분할은 `## 3` step 파일 경로로 결정(write_set 불필요 — 아래 D6). 남는 것은 plain 자연어 의존성 선언뿐.
+- `.gitignore`의 `.claude/worktrees/` 패턴은 잔존 무해라 *삭제하지 않는다*(Surgical — ADR-006). 단 ADR-038 면책 단락(동시 implement 환경 책임)은 ADR-038에 영속한 채 "병렬 implement 비권장"으로 status note만 단다.
+
+### D6. ADR-047 D9 re-anchor (foreman `## 3` step-path partition)
+ADR-047 D9(Optimized Workflow Topology + Shared State)의 적용 SSOT를 *plan-workitem wave 계산*에서 **foreman의 intra-task partition**으로 재anchor한다 — foreman이 한 task를 `## 3. 구현 항목`의 step 파일 경로로 나눠 *file-disjoint slice는 병렬 builder, 겹치거나 작으면 단일/순차*로 운전한다. TASK_TEMPLATE `## 9` 5필드(`write_set` 등) 구조화 스키마와 ADR-038#amend-3 write_set wave 분리 메커니즘은 wave 전용이라 **ADR-051 #d5가 함께 폐지**한다(사용자 결정 — 완전 제거). 즉 D9의 *개념*(워크플로 토폴로지 최적화)은 foreman 분할로 계승하되 *명시적 write_set 스키마는 쓰지 않는다*.
+
+### D7. NO-merge 결정 (기록)
+**병렬 작업 결과의 자동 코드 merge를 본 보일러플레이트가 제공·전제하지 않는다** — validate/stabilize fan-out은 *독립 report-only 산출물*(task별 report, QA_FINDINGS/IMPROVEMENT_GUIDE 누적)이라 merge할 shared write 산물이 없다. implement foreman의 병렬 builder는 **file-disjoint slice에만** 띄우므로 *같은 파일을 동시에 쓰지 않는다* → 코드 merge 자체가 발생하지 않고, foreman은 `## 4-1` 파일목록(메타데이터)만 단일 writer로 병합한다. 제거된 것은 *cross-task* plan-time wave + `claude --worktree` 멀티세션 implement(D5)이며, *intra-task* foreman 분할은 disjoint 보장으로 merge-free다. fork 사용자가 disjoint를 깨는 자체 병렬 전략을 둔다면 환경 책임(ADR-038 면책 단락 정신 계승).
+
+### D8. 조건부 re-read (ADR-019 amend)
+foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운전하면, 매 라운드 전체 task/feature 문서를 재로딩하면 컨텍스트 낭비다. ADR-019 minimal/JIT 정책을 *조건부 re-read*로 좁힌다 — **직전 라운드에서 이미 로드한 문서는 mtime/판정 변경 신호가 있을 때만 재읽기**(예: repair 후 task `## 8. 메모` 갱신, validate report 신규 생성). 변경 신호 없으면 in-context 버전 재사용. 본 정책은 ADR-019 `## Amendment 1`로 박는다(아래 Surfaces).
+
+## Mutation Contract (ADR-047 D3)
+1. **Target** — `.claude/skills/{implement-workitem,plan-workitem,validate-workitem,stabilize-milestone}/SKILL.md` frontmatter·본문(foreman/fan-out/de-fork/wave 제거); `.claude/skills/plan-milestone/SKILL.md` 신규; ADR-038 #d3·#d6·`## 현재 유효 결정`·`## Surfaces`; ADR-047 D9 anchor 단락; ADR-050 status/supersede note; ADR-019 `## Amendment 1`; WORKFLOW.md·DELEGATION_STRATEGY.md 병렬·운전권 단락; STRUCTURE.md roster.
+2. **Failure mode** — fork 격리로 메인이 implement inner-loop를 직접 운전 불가; plan-time wave + worktree 병렬 implement가 lockfile/빌드캐시 race·uncommitted plan 미가시·수동 cleanup 부담을 반복 유발(관측됨); 매 라운드 full re-read로 컨텍스트 낭비.
+3. **Predicted improvement** — foreman 운전권 확보(권한·재해석 즉시 처리), 병렬성 위치를 충돌 없는 report-only fan-out으로 이동해 race 사고 0건화, 조건부 re-read로 라운드당 토큰 절감.
+4. **Preserved invariants** — lifecycle 8단계 책임 경계·validate report 양식·signal-first cap·ADR-050 D2 model-invocable 범위·`## 9. 의존성`의 *자연어 의존성 선언*. **단, ADR-038 #d3·#d6(plan-time wave echo + worktree 병렬 implement) + #amend-3(write_set 결정적 wave 분리) + TASK_TEMPLATE `## 9` 5필드 구조는 본 ADR D5가 의도적으로 *제거*(소비처 이전이 아니라 폐지 — wave 전용 스키마)**; ADR-050 D1 implement 부분은 D1이 supersede.
+5. **Falsifying evaluation** — ADR-017 dogfood 재실행에서 (a) foreman 운전이 *원치 않는 자동 연쇄*(사용자 확인 전 다음 task 진행)를 일으키거나, (b) fan-out 순차 degrade(Codex)에서 판정 누락이 생기면 D1·D2 범위 재검토.
+6. **Rollback path** — 본 ADR superseded → ADR-050 D1(implement fork) + ADR-038 #d3·#d6·#amend-3(wave echo + worktree + write_set wave 분리) + TASK_TEMPLATE `## 9` 5필드 + ADR-026 Surfaces 5필드 줄 복원, plan-milestone skill 제거(양 mirror), ADR-019 `## Amendment 1` 철회.
+
+## 정책 강도 (ADR-022)
+- D1·D3·D4·D8: enabling(약) — 운전권/역할/토큰 개선. D2: enabling(약) — 병렬 fan-out opt-in 가속. D5·D7: constraint 완화 + 제거(약) — 병렬 implement 권장 철회(자동 차단 없던 권장이라 강도 약). D6: 정정성 re-anchor(행동 불변, 소비처 명문화).
+
+## 결과
+- implement는 foreman이 메인 세션에서 운전(file-disjoint slice는 병렬 builder, 작거나 겹치면 단일), plan-workitem/plan-milestone는 메인 세션 분해, 병렬성은 *intra-task foreman 분할* + validate/stabilize report-only fan-out으로 제공, *cross-task* plan-time wave + worktree 멀티세션 implement는 제거.
+- ADR-038은 cross-LLM plan validation(`/validate-plan`+`/repair-plan`) 정책만 유효로 잔존, 병렬 wave 부분은 superseded.
+- ADR-050 D1 implement 부분 + ADR-038 #d3·#d6 supersede 기록, ADR-047 D9·ADR-019는 amend로 정합.
+
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. ADR-045 정합 — 실제 파일 경로 1행 1개, 생략·comma-join 금지)
+- .claude/skills/implement-workitem/SKILL.md                      — D1 foreman 전환(de-fork + 병렬/단일 builder 위임: file-disjoint면 병렬)
+- .claude/skills/plan-workitem/SKILL.md                           — D3 de-fork + D5 wave/worktree echo 제거
+- .claude/skills/plan-milestone/SKILL.md                          — D4 신규 skill
+- .claude/skills/validate-workitem/SKILL.md                       — D2 병렬 fan-out
+- .claude/skills/stabilize-milestone/SKILL.md                     — D2 병렬 fan-out (qa·reviewer)
+- .agents/skills/plan-milestone/SKILL.md                          — D4 Codex wrapper (신규)
+- .agents/skills/plan-milestone/agents/openai.yaml                — D4 Codex wrapper policy (신규)
+- docs/00-meta/WORKFLOW.md                                        — foreman 운전권 + fan-out + wave 제거 단락
+- docs/00-meta/DELEGATION_STRATEGY.md                             — foreman/builder 위임 트리거 + 병렬 fan-out + Codex degrade 노트
+- docs/00-meta/STRUCTURE.md                                       — skill roster 18→20 + 생성 주체 컬럼 + Codex wrapper 인벤토리
+- docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md  — #d3·#d6 superseded note + status note
+- docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md      — D9 re-anchor(foreman `## 3` step-path partition; write_set 5필드 스키마 폐지)
+- docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md       — Surfaces line 55(`## 9` 5필드) 제거 (5필드 삭제 정합)
+- docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md — D1 implement 부분 supersede note
+- docs/90-decisions/boilerplate/ADR-019-context-packs-and-jit.md      — `## Amendment 1` 조건부 re-read
+
+## 참고
+- ADR-007(lifecycle), ADR-014(graduation — plan-milestone가 5+1 authoring), ADR-019(context-pack — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
+- Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.3 (Optimized Workflow Topology) — 병렬성 위치 재배치의 survey-level 근거.
