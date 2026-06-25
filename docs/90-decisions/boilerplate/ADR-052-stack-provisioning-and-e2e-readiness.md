@@ -23,8 +23,8 @@ stack-guard에 **E2E provision/smoke 단계**를 신설한다 — `validate:e2e`
 
 ### D3. E2E MUST-run hard-block (ADR-014 graduation item 3 amend)
 ADR-014 graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`를 **`E2E Pass (E2E-applicable 스택은 MUST, exit code 0)`**로 강화한다.
-- *E2E-applicable* 판정: STACK_SETUP_PLAN에 `validate:e2e` 명령 또는 E2E provision 항목이 *존재*하면 MUST-run — 미통과 시 graduation pre-check `졸업 가능: NO` **hard-block**(기존 "정의된 경우"의 soft-pass 제거).
-- *E2E-not-applicable*(`validate:e2e` 미설정 + provision 항목 없음 — 예: 순수 라이브러리/CLI 스택): 기존대로 *해당 없음=통과*. 단 stack-guard가 "E2E 미설정 — applicable 스택이면 설정 권장" 1줄 echo.
+- *E2E-applicable* 판정 (stabilize §1.5·MILESTONE_TEMPLATE item 3 정합): **UI 프로젝트(ADR-027#amend-3 다중신호 판정) ∨ graduation item 6이 e2e를 명시 선언**이면 필요 → MUST-run (applicable 스택의 `validate:e2e`+provision은 stack-guard D1/D2가 선설치) — 미통과 시 graduation pre-check `졸업 가능: NO` **hard-block**(기존 "정의된 경우"의 soft-pass 제거).
+- *E2E-not-applicable*(비-UI ∧ item 6 e2e 미선언 — 예: 순수 라이브러리/CLI 스택): *해당 없음=통과*. 단 stack-guard가 "E2E 미설정 — applicable 스택이면 설정 권장" 1줄 echo.
 - 본 D3은 ADR-014 `## Amendment 2`로 박는다(아래 Surfaces).
 
 ### D4. repair-milestone 신규 skill

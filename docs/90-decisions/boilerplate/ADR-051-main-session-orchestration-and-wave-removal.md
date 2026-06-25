@@ -35,7 +35,7 @@ plan-workitem에서 `context: fork`(및 `agent:`)를 제거해 메인 세션 인
 - `disable-model-invocation`은 **유지**(ADR-050 D2 범위 한정 — plan-workitem은 텍스트 제안 + 사용자 명시 발화 규약 유지).
 
 ### D4. plan-milestone 신규 skill
-milestone 단위 분해를 plan-workitem에서 분리한 **`/plan-milestone [milestone-id]`** 신규 skill을 신설한다 — milestone → feature 분해 + graduation 기준(ADR-014 5+1) authoring을 책임진다. plan-workitem은 feature → task 분해에 집중(역할 경계 명확화).
+milestone 단위 분해를 plan-workitem에서 분리한 **`/plan-milestone [milestone idea | feature idea]`** 신규 skill을 신설한다 — milestone → feature 분해 + graduation 기준(ADR-014 5+1) authoring을 책임진다. plan-workitem은 feature → task 분해에 집중(역할 경계 명확화).
 - `disable-model-invocation: true` + 메인 세션 실행(fork X) + architect `Agent` 위임. `.claude` + `.agents` 양 mirror 신설.
 
 ### D5. wave echo + worktree 병렬 권장 제거 (ADR-038 #d3·#d6 supersede)
