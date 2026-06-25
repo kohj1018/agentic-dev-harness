@@ -16,7 +16,8 @@ context-pack: minimal
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다 (`## 6 AC`, `## 8 메모`의 기존 `해석 확정`/repair 결정 이력 포함).
-2. `docs/40-validation/reports/<task-id>.md`를 읽는다.
+   - **메인 세션 연쇄 실행으로 직전 단계가 같은 task 문서를 메인 컨텍스트에 올렸고 그 뒤 갱신되지 않았으면 `## 6 AC` 재독은 생략**(ADR-019). 단 **이전 repair 라운드가 `## 8. 메모`를 append(mutate)했다면 그 메모는 반드시 재독**한다 — 직전 라운드의 4-판정 이력을 보고 같은 항목 재출현을 판단해야 하므로.
+2. `docs/40-validation/reports/<task-id>.md`를 읽는다 (report는 매 validate phase 새로 쓰이므로 **항상 새로 읽는다** — 캐시 대상 아님).
    - 파일이 없거나 stale(파일 mtime이 task 문서/구현 파일보다 오래됨)하면 `/validate-workitem` 선행을 안내하고 종료한다.
    - 파일이 `Pass`이면 `/finalize-workitem`을 안내하고 종료한다(repair 대상 없음).
 3. 사용자가 인자로 부분 지정을 줬으면 그 부분만 대상으로 한다.
@@ -60,3 +61,4 @@ context-pack: minimal
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
+메인 세션 연쇄 실행(validate→repair, ADR-050) 시 직전 단계가 메인 컨텍스트에 올린 task `## 6 AC`는 *갱신되지 않았으면 재독 생략*. 단 직전 repair 라운드가 mutate한 `## 8. 메모`와 매 phase 새로 쓰이는 report는 항상 재독.

@@ -33,12 +33,12 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
      - **small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 파일 ≤ 2 *또는* 변경 줄 합계 ≤ 50, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단).
      - **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent 병렬 파리티가 없으므로(ADR-010 매핑) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
-1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 실행하고 stdout/stderr를 수집한다.
+1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 **항상 실행**하고 stdout/stderr를 수집한다 (메인 세션 연쇄 실행이라도 implement 이후 코드 상태가 바뀌었으므로 직전 결과를 재사용하지 않는다).
    - **명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
    - 다른 빌더(`bun validate`, `mise run validate`, `just validate` 등)를 쓰는 스택은 본 skill의 `allowed-tools`에 해당 패턴(`Bash(bun validate)` 등)을 추가해야 자동 실행된다.
-2. 관련 workitem 문서를 읽는다.
-3. 필요한 상위 문서를 읽는다.
-4. 최근 변경 파일 또는 diff를 기준으로 구현 결과를 본다.
+2. 관련 workitem 문서를 읽는다 — **메인 세션 연쇄 실행으로 직전 단계가 이미 같은 task 문서를 메인 컨텍스트에 올렸고 그 뒤 문서가 갱신되지 않았으면 재독을 생략**하고, 없거나 갱신됐으면 읽는다 (ADR-019 minimal sufficiency).
+3. 필요한 상위 문서를 읽는다 (사전 fork-load 금지 — task 본문에서 발화 시 인용).
+4. 최근 변경 파일 또는 diff를 기준으로 구현 결과를 본다 — **직전 단계 이후 코드/diff가 바뀌었으므로 diff는 항상 새로 확인**한다.
 
 검증 기준:
 - 문서 범위와 구현이 일치하는가
@@ -156,3 +156,4 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
+메인 세션 연쇄 실행(implement→validate→repair, ADR-050) 시 직전 단계가 메인 컨텍스트에 올린 task 문서는 *갱신되지 않았으면 재독 생략*. 단 통합 검증 명령 재실행·diff 재확인·report 신규 작성은 항상 수행(코드 상태/산출물이 매 phase 변한다).
