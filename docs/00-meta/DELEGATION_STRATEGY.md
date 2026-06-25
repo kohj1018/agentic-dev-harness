@@ -90,7 +90,7 @@
 
 1. `/bootstrap-project` → charter + architecture + 초기 workitem 생성
 2. `/bootstrap-stack` → 스택 확정 후 자동화 설계
-3. `/plan-workitem` → milestone/feature/task 분해
+3. `/plan-milestone` → (M2+) milestone + feature 문서 생성 / `/plan-workitem F-NNN` → 기존 feature를 task로 분해
 3a. (선택) `/validate-plan <workitem-id>` — 다른 세션·다른 LLM에서 cross-review. 임시 파일 작성 (ADR-038).
 3b. (선택) `/repair-plan <workitem-id>` — 원본 plan 세션에서 임시 파일 회수 + 적용 + 삭제 (ADR-038).
 4. `/implement-workitem` → task 구현

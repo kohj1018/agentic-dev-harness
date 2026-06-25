@@ -39,9 +39,9 @@
 - [ ] shared 설정에 환경 종속적인 hook를 바로 넣지 않았다
 
 ## 4. 작업 구조 준비
-- [ ] `/plan-workitem [milestone-id]`를 실행해 milestone/feature/task 문서를 분해했다
+- [ ] `/plan-workitem F-NNN`로 seed된 feature(F-001)를 task로 분해했다 (M2+ 신규 milestone·feature 생성은 `/plan-milestone`)
   ```
-  /plan-workitem M1
+  /plan-workitem F-001
   ```
 - [ ] bootstrap 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md / M1 / F-001의 `## 0. Status`를 `draft → ready`로 전환했다
 - [ ] `docs/30-workitems/milestones`에 첫 milestone 문서가 있다

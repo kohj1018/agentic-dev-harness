@@ -76,8 +76,8 @@ Once your stack is decided:
 ### Step 3: Plan → Implement → Ship
 
 ```text
-# Plan (decomposes into milestone/feature/task with ## 9. 의존성 ordering)
-/plan-workitem [milestone or feature id]
+# Plan (decompose a feature into tasks with ## 9. 의존성 ordering; M2+ milestone/feature authoring = /plan-milestone)
+/plan-workitem [feature id]
 
 # (Optional) Cross-LLM peer review — see ADR-038
 #   In a separate terminal / fresh Claude session OR Codex:
@@ -108,7 +108,7 @@ When you hit Claude Code's usage limit or prefer Codex:
 2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / stabilize: `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`
+   - Planning / bootstrap / stabilize: `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
 4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
 

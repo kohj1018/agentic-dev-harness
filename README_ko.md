@@ -75,8 +75,8 @@
 ### 3단계: 분해 → 구현 → 마감
 
 ```text
-# 분해 (milestone/feature/task로 분해 + ## 9. 의존성 순서 선언)
-/plan-workitem [milestone 또는 feature id]
+# 분해 (feature를 task로 분해 + ## 9. 의존성 순서 선언; M2+ milestone/feature 생성은 /plan-milestone)
+/plan-workitem [feature id]
 
 # (선택) 다른 LLM 교차 리뷰 — ADR-038 참조
 #   별 터미널 / 새 Claude 세션 또는 Codex 에서:
@@ -107,7 +107,7 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
 2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $stack-guard. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
 3. 자주 쓰는 core workflow skill은 Codex skill로 호출 가능:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / stabilize: `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`
+   - Planning / bootstrap / stabilize: `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
 4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
 
