@@ -18,7 +18,7 @@ context-pack: minimal
 1. 관련 task 문서를 읽는다 (메인 세션이 *한 번*만 읽는다 — builder 에 task 전문을 넘기지 않는다).
 2. 필요하면 상위 feature/milestone/architecture 문서를 읽는다.
 3. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)와 `## 3. 구현 항목`을 회수한다.
-4. **분할 (partition) — 싸게 한다, 과추론 금지**:
+4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
    - 파일이 **겹치거나** step A 산출물을 step B 가 import/호출하는 *명백한* 선후 의존이 있으면 → 같은 slice(한 builder) 또는 *순차* dispatch. 의존은 `## 3` step 경로만 보고 rough 하게 판단 — 깊은 그래프 분석 금지.
@@ -29,7 +29,7 @@ context-pack: minimal
    - 그 slice 가 책임지는 AC subset (예: builder-A → AC-1·AC-2, builder-B → AC-3)
    - **task `## 7. 관련 문서` 의 `Design:` / `Architecture-Iface:` link 가 있고 그 slice 와 관련되면** 그 sub-section (예: `DESIGN.md ## 7 Components`, `ARCH ## 7-1`) 경로만 — *plan 이 박은 결정을 충실히 실행하기 위함* (builder 의 독립 디자인 판단 X — EXECUTE 전용). 전체 fork-load 금지. 관련 link 없으면 생략.
    - 그 slice 의 step 에 *등록 line item* (예: `+ DESIGN.md ## 7 등록`, `+ ARCH ## 7-1 error 레지스트리 등록`) 이 있으면 함께 전달 — builder 가 구현과 *동일 commit* 에 기계적으로 수행한다 (builder 가 등록 여부를 *독립 판단하지 않는다*). (ADR-027)
-   - 병렬 builder 는 *file-disjoint* slice 에만 띄운다. 같은 파일에 실제 write-conflict 가능성이 있으면 worktree isolation(`EnterWorktree`/`ExitWorktree`)을 *그 경우에 한해* 적용하거나 순차로 돌린다 — disjoint 인 일반 경우엔 worktree 불필요.
+   - 병렬 builder 는 *file-disjoint* slice 에만 띄운다. 같은 파일에 실제 write-conflict 가능성이 있으면 *그 slice 들은 순차로* 돌린다(또는 사용자가 별도 worktree 로 격리) — disjoint 인 일반 경우엔 불필요.
    - **same-checkout 제약(WORKFLOW.md 정합)**: worktree 를 쓴 builder 의 변경은 *최종 minimal validate 전에 메인 checkout 으로 병합*한다. validate/finalize 는 같은 checkout 에서 실행해야 하고, validation report(`docs/40-validation/reports/<task-id>.md`)는 gitignored·checkout-local 이라 worktree 에 흩어지면 후속 finalize 가 `Needs Validation` 으로 못 찾는다. 일반 disjoint 병렬(worktree 미사용)은 본 제약과 무관.
 6. **`## 6-2. TDD opt-out` 점검 (메인이 먼저)** — 사유와 follow-up이 모두 있으면 opt-out 모드를 해당 slice builder 에 지시, 둘 중 하나만 비어 있으면 형식 위반으로 표시하고 *분할/dispatch 전에 종료*(사용자에게 보강 요청).
 
@@ -96,7 +96,7 @@ AC 해석 처리 (각 builder 가 자기 AC subset 에 대해 수행 — ADR-006
 
 외부 docs-check line item 처리 (각 builder 가 자기 slice 의 `## 3` step 에 대해 — ADR-040):
 - 그 slice 의 step 에 `구현 전 최신 공식문서 확인` line item(plan이 박음)이 있고, 그 외부 라이브러리·API의 *최신 사용법 확신*이 없으면 **그 slice 구현을 시작하지 않고** 출력에 `Needs Research: <대상> — <무엇이 불확실한지 1줄>`을 명시한다(메인 foreman 에 보고 — 메인은 그 slice 만 보류). builder는 웹 접근이 없어 *직접 웹서핑하지 않는다*. 이미 확신이 있으면 line item을 체크하고 진행한다.
-- **foreman 자동 재개 (ADR-040#amend-2)**: implement foreman(Stage 2A)은 builder가 `Needs Research`로 멈추면 *수동 `/research-pack` 안내에 그치지 않고* researcher agent에 **Agent로 직접 위임**(`/research-pack` 호출 아님 — research-pack은 disable-model-invocation)하여 findings를 회수하고, 그 결론을 builder 재호출 프롬프트에 주입해 구현을 재개한다. Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade(foreman이 직접 researcher 본문을 순차 호출하거나, 사전 `/research-pack` 노트를 참조).
+- **foreman 자동 재개 (ADR-040#amend-2)**: implement foreman 은 builder가 `Needs Research`로 멈추면 *수동 `/research-pack` 안내에 그치지 않고* researcher agent에 **Agent로 직접 위임**(`/research-pack` 호출 아님 — research-pack은 disable-model-invocation)하여 findings를 회수하고, 그 결론을 builder 재호출 프롬프트에 주입해 구현을 재개한다. Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade(foreman이 직접 researcher 본문을 순차 호출하거나, 사전 `/research-pack` 노트를 참조).
 
 의존성 설치 line item 처리 (각 builder 가 자기 slice 에서 — ADR-040#amend-1):
 - 그 slice 의 step 에 plan이 박은 의존성 설치 line item(예: `pnpm add <pkg>@<ver>`)이 있으면, 그 패키지가 필요해지는 시점(보통 Green phase)에 **설치 명령을 먼저 실행**한다(builder `allowed-tools`의 `Bash` 활용 — 추가 권한 불필요). 설치는 기계적 작업이므로 *기본은 진행*이다.

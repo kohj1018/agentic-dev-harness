@@ -83,7 +83,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 
 - `모든 task status: done` → 본 milestone에 속한 모든 task 파일(`docs/30-workitems/tasks/T-*.md`)의 `## 0. Status` 값이 모두 `done`.
 - `통합 validate Pass` → `validate` 명령 exit code 0. **normal 모드**: 단계 3에서 실행되므로 본 항목 판정은 단계 3 실행 후 확정된다 (1.5 가 단계 3 보다 먼저 와도 졸업 판정은 단계 3 결과를 반영). **`--dry-run` 모드**: 단계 3을 돌지 않으므로 본 1.5 단계 안에서 `validate` 를 1회 실행한다.
-- `E2E Pass (needed → must pass)` → 단계 3의 e2e 판정 결과를 그대로 반영(ADR-052):
+- `E2E Pass (needed → must pass)` → 단계 3의 e2e 판정 결과를 그대로 반영(ADR-052). **`--dry-run` 모드**: 단계 3 미실행이라 e2e 판정 입력이 없으므로 `E2E: dry-run skipped (졸업 판정 보류)` 로 표기(heavy e2e 는 normal 모드 재실행에서 확정):
   - **e2e 불필요** (UI 아님 ∧ graduation item 6에 e2e 미선언) → *해당 없음*(통과).
   - **e2e 필요** (UI 프로젝트 — ADR-027#amend-3 다중신호 UI 판정 ∨ graduation item 6이 e2e를 명시 선언) ∧ `validate:e2e` exit code 0 → 통과.
   - **e2e 필요 ∧ `validate:e2e` exit code ≠ 0 (real failure)** → **`졸업 가능: NO` (hard)**. 조기 종료 옵션이 아니라 *졸업 차단*이다. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.

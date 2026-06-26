@@ -71,7 +71,7 @@ R0 — 운영 환경 가정 확인:
    - **6-3. Playwright browser 설치 (UI/web 한정)**: 6-1 이 UI 면 `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요).
    - **6-4. `validate:e2e` scaffold (UI/web 한정, e2e 필요 시)**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고, `package.json` 의 `scripts` 에 `validate:e2e` 진입점(예: `playwright test`)을 박는다. *이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). 비-UI 프로젝트는 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다. 이 e2e provision/smoke 는 milestone graduation 의 E2E MUST-run hard-block(ADR-014#amend-2 / ADR-052 D3)이 검사할 대상을 선readiness 한다.
    - **6-5. Graceful fallback (날조·우회 금지)**: 6-2/6-3 의 설치 명령이 sandbox/네트워크/승인 차단으로 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고, 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다. 이후 step 5 smoke 는 해당 항목을 SKIPPED 로 처리한다. (implement-workitem 의 ADR-040#amend-1 `Needs Install` 패턴과 동일.)
-   - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존*(biome/tsc/vitest/@playwright/test + browser)뿐이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 Stage 6(ADR-052)에 기록 — 본 step 은 toolchain+e2e 소유만 집행한다.
+   - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존*(biome/tsc/vitest/@playwright/test + browser)뿐이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 ADR-052(install-ownership 3분할)에 기록 — 본 step 은 toolchain+e2e 소유만 집행한다.
 
 마지막 출력:
 - 생성/갱신한 파일 목록
@@ -169,7 +169,7 @@ R0 — 운영 환경 가정 확인:
 
 - `/stack-guard` 는 *authored toolchain 을 기본 설치* 한다(수행-6). 산출은 `package.json` 의 `scripts.validate`(+ UI/web 이면 `scripts.validate:e2e`) 진입점 + verify 스크립트 본문 + 실제 설치된 devDeps(예: `biome / typescript / vitest / @playwright/test`) + (UI/web) playwright browser.
 - 패키지 매니저 설치는 lockfile 존재 시 frozen(`pnpm install --frozen-lockfile` / `npm ci`) 우선, 부재 시 일반 install. 설치된 devDeps 목록을 출력에 박는다.
-- **설치 범위 경계(SSOT)**: stack-guard 가 까는 것은 *toolchain + e2e 의존* 뿐이다. *task 단위 기능 패키지*는 plan-workitem authoring → implement-workitem 설치(ADR-040#amend-1). 경계 결정 기록은 Stage 6/ADR-052.
+- **설치 범위 경계(SSOT)**: stack-guard 가 까는 것은 *toolchain + e2e 의존* 뿐이다. *task 단위 기능 패키지*는 plan-workitem authoring → implement-workitem 설치(ADR-040#amend-1). 경계 결정 기록은 ADR-052(install-ownership 3분할).
 - **Graceful fallback (날조·우회 금지)**: 네트워크 / 사용자 승인 / lockfile 충돌 / monorepo workspace 라우팅 / sandbox 정책으로 설치가 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다(implement-workitem ADR-040#amend-1 패턴 동일). 이후 smoke 는 SKIPPED.
 - 이미 설치돼 있으면(노드 모듈/lock 정합) 재설치하지 않고 verify 스크립트만 박되, 설치 상태를 `deps already present` 로 출력한다.
 

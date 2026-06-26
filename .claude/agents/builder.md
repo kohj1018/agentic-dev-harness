@@ -62,7 +62,7 @@ finalize 위임을 받았을 때의 가드 (`/finalize-workitem`이 본 에이�
 - `git commit --no-verify`, `git commit --amend`, `git push` 금지.
 - 커밋 메시지는 Conventional Commits 스타일(정책: [ADR-008](../../docs/90-decisions/boilerplate/ADR-008-commit-convention.md)).
 
-구현 완료 후 task 문서의 `## 4-1. 변경 예정 파일/경로` 섹션을 갱신한다 — finalize의 add 참조 목록으로 사용된다.
+구현 완료 후 *변경한 파일 목록*을 foreman 에 반환한다 — `## 4-1. 변경 예정 파일/경로` 는 foreman 이 단독 writer 로 병합한다(병렬 builder 가 같은 섹션을 동시에 쓰지 않게 — ADR-051 D7). finalize 의 add 참조 목록은 그 `## 4-1` 에서 읽힌다.
 
 ## 출력 계약 (ADR-046)
 메인 반환 요약은 signal-first: 판정/결론 1~3줄 → 핵심 항목 ≤5 → 리스크·미결정 ≤3 → 다음 액션 1개(분기 시 ≤3).

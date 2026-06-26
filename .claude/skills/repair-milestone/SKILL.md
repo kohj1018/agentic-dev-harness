@@ -61,6 +61,7 @@ context-pack: minimal
 - 새 기능을 추가하지 않는다.
 - milestone 범위 밖 파일을 수정하지 않는다.
 - 자동 커밋하지 않는다 — 결과만 반환하고 커밋은 사용자/`/finalize-workitem`이 별도로 (ADR-047 D7 — finalize/user가 commit owner).
+- workitem `## 0. Status` 를 변경하지 않는다 — status 소유권은 finalize/사용자에 유지(ADR-052 D4 — repair-milestone 는 코드만 수정, commit·status 미수행).
 - per-task 코드 결함은 직접 고치지 말고 `/repair-workitem`으로 위임한다 (task scope SSOT 침범 금지). cross-cutting 결함만 직접 수정.
 - QA_FINDINGS / IMPROVEMENT_GUIDE에서 본 milestone(`## M-N` / `### M-N`) 외 다른 milestone 그룹은 건드리지 않는다.
 
