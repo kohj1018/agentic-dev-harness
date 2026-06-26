@@ -10,7 +10,7 @@ accepted (부분 superseded — #d3 parallel waves echo + #d6 worktree 병렬 im
 - 리뷰 파일은 `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`(ephemeral). 같은 tag 재실행은 #amend-2로 *덮어쓰기 대신 `<tag>-N` 자동 suffix*.
 - ~~`/plan-workitem`이 `## 9. 의존성` 위상정렬 wave 그룹을 echo. 병렬 implement는 `claude --worktree` 권장~~ → **[ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 supersede** — wave echo·worktree 병렬 implement 권장 제거. 병렬성은 validate/stabilize report-only fan-out(ADR-051 #d2)으로 이전. `## 9. 의존성` 5필드 구조는 ADR-051 #d5가 *삭제*(wave 전용 스키마) — foreman은 `## 3` step 경로로 분할.
 - Plan Quality 차원은 #amend-1로 8→10(ADR-027#amend-1 양립).
-- file overlap 점검은 plan-workitem 제외(#d3) — 단 #amend-3로 정정: 명시적 `write_set:` 교집합은 plan-workitem이 결정적 wave 분리, `## 4-1` 기반 free-form overlap은 외부 peer review 책임.
+- file overlap 점검은 plan-workitem 제외(#d3, 유효 유지) — #amend-3의 *명시적 `write_set:` 결정적 wave 분리*는 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 폐지(write_set 5필드 삭제). `## 4-1` 기반 free-form overlap을 외부 peer review에 위임하는 부분만 유효 잔존.
 
 ## 배경
 - [외부실증] Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 (Diverse Interaction Modes Grounded in Shared Program State) — critique-and-repair, adversarial validation, reasoning debate 패턴을 survey로 정리. 본 ADR의 cross-LLM peer review 패턴이 *survey-level 외부실증* 자격.
@@ -133,6 +133,6 @@ D2 의 "같은 tag 재실행 시 덮어쓰기 허용" 을 **기존 파일 보존
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 — cross-review 패턴 survey-level evidence.
 
 <a id="adr-038-amend-3"></a>
-## Amendment 3 — file overlap 정책 정정 (free-form 제외, 명시적 write_set 허용)
+## Amendment 3 — file overlap 정책 정정 (free-form 제외, 명시적 write_set 허용) — *write_set wave 분리 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (5필드 삭제); free-form 외부위임만 유효*
 
 D3 의 *"file overlap 점검은 plan-workitem에서 제외 — 외부 LLM peer review에 전적 위임"* 정책은 **TASK_TEMPLATE `## 4-1. 변경 예정 파일/경로`(implement 시점 채움 — plan 시점에는 빈 상태)에 기반한 free-form file overlap** 한정으로 정정한다. **명시적 `write_set:` 구조화 필드**(TASK_TEMPLATE `## 9. 의존성` 안 — ADR-026 schema 확장으로 plan 시점 deterministic input)는 본 면제 범위 밖이며, plan-workitem은 `write_set` 교집합을 *결정적으로 검출해 wave 분리*한다 (ADR-047 D1 inspectability 정합). 본 amend는 *deterministic 부분만 회수* — 자연어 dep / `## 4-1` 기반 추측은 여전히 외부 peer review 책임.

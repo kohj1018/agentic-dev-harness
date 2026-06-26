@@ -18,7 +18,7 @@ accepted
 ## 결정
 
 ### D1. implement-workitem을 foreman 오케스트레이션으로 전환 (ADR-050 D1 implement 부분 supersede)
-implement-workitem에서 `context: fork`(및 `agent: builder`)를 제거하고 **메인 세션 foreman**이 실행한다. foreman은 task를 1회 읽어 `## 3. 구현 항목`의 step 파일 경로로 *충돌 없는(file-disjoint) slice*를 싸게 나눈 뒤(`## 9. 의존성`은 자연어 *선행 순서*만 — 5필드 삭제됨), 각 slice를 `Agent`로 **builder에 위임**한다 — **파일 경계가 분리되면 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회)·파일이 겹치면 단일 builder로** 운전한다(과도한 분할 금지 — Stage 2A partition 규칙). 각 builder는 자기 slice의 AC에 대해 RGR을 돌리고, foreman이 결과·`## 4-1`을 *단일 writer*로 병합한다. 무거운 추론의 노이즈 격리는 bootstrap-project의 architect 위임과 동형이되, *동시성*은 file-disjoint slice에서만 적용한다(같은 파일을 쓰는 slice는 순차 또는 worktree).
+implement-workitem에서 `context: fork`(및 `agent: builder`)를 제거하고 **메인 세션 foreman**이 실행한다. foreman은 task를 1회 읽어 `## 3. 구현 항목`의 step 파일 경로로 *충돌 없는(file-disjoint) slice*를 싸게 나눈 뒤(`## 9. 의존성`은 자연어 *선행 순서*만 — 5필드 삭제됨), 각 slice를 `Agent`로 **builder에 위임**한다 — **파일 경계가 분리되면 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회)·파일이 겹치면 단일 builder로** 운전한다(과도한 분할 금지 — 본 ADR #d6 partition 규칙). 각 builder는 자기 slice의 AC에 대해 RGR을 돌리고, foreman이 결과·`## 4-1`을 *단일 writer*로 병합한다. 무거운 추론의 노이즈 격리는 bootstrap-project의 architect 위임과 동형이되, *동시성*은 file-disjoint slice에서만 적용한다(같은 파일을 쓰는 slice는 순차 또는 worktree).
 - foreman은 task 재해석(`Needs Plan Decision`)·권한 응답·`Needs Install`/`Needs Research` 분기를 메인 세션에서 직접 처리한다.
 - `context-pack: minimal` 유지. ADR-050 D2(model-invocable)는 그대로 — foreman이 inner-loop를 운전한다.
 - **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent parallel parity가 없으므로 builder `Agent` 위임을 *메인 세션 인라인 단일 실행*으로 대체한다(ADR-010 정합, 행동 동일·격리만 없음).
@@ -74,6 +74,8 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - .claude/skills/plan-milestone/SKILL.md                          — D4 신규 skill
 - .claude/skills/validate-workitem/SKILL.md                       — D2 병렬 fan-out
 - .claude/skills/stabilize-milestone/SKILL.md                     — D2 병렬 fan-out (qa·reviewer)
+- .claude/agents/builder.md                                       — D1 slice-scoped builder (foreman 위임 단위) + D7 단독 writer(`## 4-1`)
+- .claude/agents/validator.md                                     — D2 per-axis partial verdict 반환
 - .agents/skills/plan-milestone/SKILL.md                          — D4 Codex wrapper (신규)
 - .agents/skills/plan-milestone/agents/openai.yaml                — D4 Codex wrapper policy (신규)
 - docs/00-meta/WORKFLOW.md                                        — foreman 운전권 + fan-out + wave 제거 단락

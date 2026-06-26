@@ -16,7 +16,7 @@ accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR
 다음 7종에서 `context: fork`(및 죽은 `agent:`)를 제거해 메인 세션 인라인 실행한다: bootstrap-project, bootstrap-stack, stack-guard, validate-plan, repair-plan, validate-workitem, repair-workitem.
 - bootstrap-project/bootstrap-stack은 무거운 아키텍처 추론을 `Agent`로 architect sub-call 위임(discover-product·bootstrap-design 패턴). 나머지는 메인 세션이 직접 수행.
 - `context-pack: minimal`은 유지(메인 세션 skill도 사용 — discover-product 선례).
-- implement-workitem·finalize-workitem은 fork 유지(구현 컨텍스트 폭증·git 조작 격리 이득).
+- finalize-workitem은 fork 유지(git 조작 격리 이득). *implement-workitem은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman(메인 세션 오케스트레이터)으로 supersede — 위 D1 헤딩 참조.*
 
 ### D2. task 실행 inner-loop 4종 model-invocable
 implement-workitem, validate-workitem, repair-workitem, finalize-workitem에서 `disable-model-invocation: true`를 제거해 **모델이 Skill 도구로 직접 호출**할 수 있게 한다.

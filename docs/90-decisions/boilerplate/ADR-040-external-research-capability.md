@@ -49,7 +49,7 @@ accepted
 
 ### 결정
 1. **builder Needs-Research soft 게이트**: builder persona에 standing soft 게이트를 둔다 — 외부 lib/service의 *최신 사용법/시그니처/버전* 확신이 없고 *그 불확실성이 구현을 실질적으로 바꿀 때만* stale-API 추측 대신 `Needs Research: <대상>`을 메인에 emit하고 멈춘다(plan line item 유무 무관). 과발동 금지: 안정 API이거나 구현 결과를 바꾸지 않으면 진행한다. builder는 웹 접근 없음 — 직접 조사하지 않는다.
-2. **오케스트레이터 자동 위임 (researcher 자율성)**: 메인 세션 오케스트레이터(implement foreman — ADR-051 D1 / stack-guard / plan-milestone)는 `Needs Research`를 받으면 *수동 `/research-pack` 안내에 그치지 않고* researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — research-pack은 disable-model-invocation). builder 컨텍스트 오염 회피(ADR-040 #5 위임 경로 계승). researcher는 report-only 유지(Write 없음). Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade.
+2. **오케스트레이터 자동 위임 (researcher 자율성)**: 메인 세션 오케스트레이터 중 **`Agent` 도구를 보유한 skill**(implement foreman — ADR-051 D1 / plan-milestone)는 `Needs Research`를 받으면 *수동 `/research-pack` 안내에 그치지 않고* researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — research-pack은 disable-model-invocation). builder 컨텍스트 오염 회피(ADR-040 #5 위임 경로 계승). researcher는 report-only 유지(Write 없음). Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade.
 3. **install-ownership 3분할 boundary**: 의존성 *authoring*(어떤 패키지 — plan, #amend-1) / *실행*(task 구현 중 설치 — implement·foreman, #amend-1) / *검증*(스택 선언↔설치 정합 회수 — stack-guard, ADR-052 D1)의 3분할을 명문화한다. researcher는 이 셋 중 *어디에도* 설치 권한을 갖지 않는다 — 버전·사용법 *조사*만(report-only 불변).
 
 ### 강도 (ADR-022)

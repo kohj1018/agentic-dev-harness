@@ -18,7 +18,7 @@ accepted
 | 1 | discover | `/discover-product` | (메인 세션 운전) | persona/pain/JTBD/시나리오 발굴 → DISCOVERY.md |
 | 2 | bootstrap | `/bootstrap-project` | architect | DISCOVERY.md → charter/architecture/M1/F-001 |
 | 3 | plan | `/plan-milestone`(M2+ milestone+feature) · `/plan-workitem`(feature→task) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone) + feature를 task로 분해(plan-workitem) |
-| 4 | implement | `/implement-workitem` | builder | task 구현 (Red→Green→Refactor 사이클, ADR-009) |
+| 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) |
 | 5 | validate | `/validate-workitem` | validator | 판정 + report 기록. **status 변경·코드 수정·커밋 금지.** |
 | 6 | repair (Needs Fix일 때만) | `/repair-workitem` | builder | report의 실패 항목만 수정. **자동 커밋 금지, 새 기능 금지, 범위 밖 변경 금지.** |
 | 7 | finalize (Pass일 때) | `/finalize-workitem` | builder | status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 |

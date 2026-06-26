@@ -19,7 +19,7 @@
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
 | 014 | Milestone graduation contract | accepted | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3) | graduation checklist 5+1 + 회고 + pre-check + --dry-run |
 | 017 | Dogfood 시뮬레이션 의무 + 재실행 트리거 | accepted | (+#amend-1: 위치 경로 .boilerplate/) | todo CLI baseline 시뮬레이션 + 성공 기준 3개 + 재실행 트리거 3종 |
-| 019 | Context Packs + JIT 로딩 | accepted | — | minimal/full 2종 context-pack + 사전 fork-load 금지 정책 |
+| 019 | Context Packs + JIT 로딩 | accepted | (+#amend-1: 조건부 re-read — ADR-051 D8) | minimal/full 2종 context-pack + 사전 fork-load 금지 정책 |
 | 020 | `validate --changed` incremental | accepted | — | finalize는 --changed만, stabilize는 full validate |
 | 021 | 정적 분석 권장 + secret scanner | accepted | (+#amend-1: secret scanner) | 스택별 1종 정적 분석 + gitleaks/trufflehog, 강제 X 권장만 |
 | 022 | Ratchet Principle | accepted | — | 정책의 제약 강도를 *제약(강)/enabling(약)*으로 차등 적용 |

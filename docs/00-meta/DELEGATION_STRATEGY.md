@@ -36,7 +36,7 @@
 | Cross-review 결과 회수 + workitem 문서 수정 | planner | 원본 plan 세션에서 `/repair-plan`. 임시 리뷰 파일 회수 → 결정 → 적용 → 파일 삭제 (ADR-038). |
 | DISCOVERY(기획)의 cross-LLM peer review (opt-in) | reviewer (discovery surface, Discovery Quality 8 차원) | 다른 세션에서 `/validate-discovery`. 임시 리뷰 파일 1개, DISCOVERY/charter 수정 X (ADR-044). |
 | 기획 cross-review 결과 회수 + DISCOVERY 수정 | architect | 원본 세션에서 `/repair-discovery`. 리뷰 회수 → 결정 → DISCOVERY 수정 → 파일 삭제 (ADR-044). |
-| 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임. **Standing auto-trigger (ADR-040#amend-2)**: 메인 세션 오케스트레이터(implement foreman / stack-guard / plan-milestone)는 sub-agent가 `Needs Research`를 emit하면 researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — disable-model-invocation). Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade. |
+| 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임. **Standing auto-trigger (ADR-040#amend-2)**: 메인 세션 오케스트레이터 중 `Agent` 도구 보유 skill(implement foreman / plan-milestone)는 sub-agent가 `Needs Research`를 emit하면 researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — disable-model-invocation). Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade. |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
 
 > **실행 컨텍스트 노트 (ADR-050)**: 본 표의 agent 매핑은 *책임 경계 정의*다(ADR-007#amend-2). 일부 lifecycle skill(validate-workitem/repair-workitem 등)은 이제 메인 세션에서 실행되지만(ADR-050) **같은 책임 경계**를 따른다 — 메인 세션이 그 경계대로 직접 수행하거나, 같은 역할의 agent를 `Agent`로 직접 fork 위임할 수 있다. `.claude/agents/*.md` persona 파일은 그대로 존재한다.

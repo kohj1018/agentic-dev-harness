@@ -82,8 +82,8 @@ pass/fail 단일 신호는 *과신*을 만든다 — "evaluation beyond final ta
 
 ### D9. Optimized Workflow Topology + Shared State (*Code as Agent Harness* §4.1.3·§5.2.4 정합)
 agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wave 계산 + conflict review 안정성 ↑. shared state의 semantic conflict는 syntactic merge로 잡히지 않으므로 *deterministic input*(예: 명시적 `write_set:`)이 plan 시점에 회수 가능해야.
-- 본 보일러의 적용: **implement-workitem foreman의 file-disjoint slice partition** — foreman이 한 task를 `## 3. 구현 항목`의 step 파일 경로로 나눠 *충돌 없는 slice는 병렬 builder, 겹치거나 작으면 단일/순차*로 운전한다(ADR-051 #d6 re-anchor). **plan-time wave 계산·echo + TASK_TEMPLATE `## 9` 5필드 구조화(`write_set` 등) + ADR-038#amend-3 write_set 메커니즘은 ADR-051 #d5가 *폐지*** (wave 전용 스키마 — 사용자 결정 완전 제거). 적용 surface SSOT: ADR-051 #d6(foreman `## 3`-path partition). (ADR-026 `## 9` 5필드 Surfaces 줄도 동시 제거 — §6.4.2b.)
-- 본 D9는 *원칙 owning* — `[외부실증]` 논문 §4.1.3 Optimized Workflow Topology + §5.2.4 Transactional Shared Program State 인용 single source. 영구 TASK_TEMPLATE / plan-workitem SKILL 본문은 본 D9만 인용.
+- 본 보일러의 적용: **implement-workitem foreman의 file-disjoint slice partition** — foreman이 한 task를 `## 3. 구현 항목`의 step 파일 경로로 나눠 *충돌 없는 slice는 병렬 builder, 겹치거나 작으면 단일/순차*로 운전한다(ADR-051 #d6 re-anchor). **plan-time wave 계산·echo + TASK_TEMPLATE `## 9` 5필드 구조화(`write_set` 등) + ADR-038#amend-3 write_set 메커니즘은 ADR-051 #d5가 *폐지*** (wave 전용 스키마 — 사용자 결정 완전 제거). 적용 surface SSOT: ADR-051 #d6(foreman `## 3`-path partition). (ADR-026 `## 9` 5필드 Surfaces 줄도 함께 제거됨.)
+- 본 D9는 *원칙 owning* — `[외부실증]` 논문 §4.1.3 Optimized Workflow Topology + §5.2.4 Transactional Shared Program State 인용 single source. 영구 implement-workitem SKILL 본문(foreman `## 3` step-path partition)이 본 D9를 인용.
 
 ## Mutation Contract (본 ADR 자체에 적용)
 1. **Target** — _ADR_GUIDE.md / AGENTS.md / STRUCTURE.md의 정체성·mutation contract 단락 + 영구 SKILL / TEMPLATE / GUARDRAILS 의 D5~D9 인용 surface.
@@ -105,7 +105,7 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 - AGENTS.md                                                                          — 정체성 1줄 link
 - docs/00-meta/STRUCTURE.md                                                          — Canonical Owner 표
 - docs/00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier              — D5 적용 surface (`## defaultMode 위험 tier`)
-- docs/30-workitems/_templates/TASK_TEMPLATE.md                                      — D6 적용 (`## 6-1` path 형식) + D7 적용 (`## 8. 메모` 영속 위치) + D9 적용 (`## 9. 의존성` 5필드)
+- docs/30-workitems/_templates/TASK_TEMPLATE.md                                      — D6 적용 (`## 6-1` path 형식) + D7 적용 (`## 8. 메모` 영속 위치)
 - docs/40-validation/IMPROVEMENT_GUIDE.md                                            — D7 적용 (`## 5. Repair decision log`)
 - docs/90-decisions/boilerplate/_ADR_GUIDE.md                                        — mutation contract 트리거 + 권장 섹션
 - .claude/skills/validate-workitem/SKILL.md                                          — D6 적용 (path resolve) + D8 적용 (`## Evidence Bundle`)
