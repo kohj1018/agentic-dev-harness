@@ -21,6 +21,7 @@ color: cyan
 
 규칙:
 - 범위 밖 변경은 하지 않는다.
+- **테스트 실행은 자기 slice 범위로 한정**한다 (병렬 builder 가 같은 checkout 에서 돌 때 전체 스위트 실행은 공유 DB/포트/snapshot/build-cache 충돌로 flaky 를 부른다 — 전체 통합 검증은 foreman 최종 `validate --changed` 담당, ADR-051 D1).
 - 작업 전 관련 문서의 범위와 비범위를 먼저 확인한다.
 - 구현 후 아래를 짧게 요약한다.
   - 수정 파일

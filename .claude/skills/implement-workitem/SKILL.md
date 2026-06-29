@@ -22,6 +22,7 @@ context-pack: minimal
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
    - 파일이 **겹치거나** step A 산출물을 step B 가 import/호출하는 *명백한* 선후 의존이 있으면 → 같은 slice(한 builder) 또는 *순차* dispatch. 의존은 `## 3` step 경로만 보고 rough 하게 판단 — 깊은 그래프 분석 금지.
+   - **공유 변이 지점·테스트 의존 주의(조용한 clobber 방지)**: manifest/lockfile·barrel(`index.*`)·DI 컨테이너·route registry 처럼 *여러 slice 가 동시에 append 할 수 있는 공유 파일*은 `## 3` 에 명시 안 돼도 *겹치는 파일*로 간주 → 순차/단일. slice B 의 테스트가 slice A 코드를 import 하면 disjoint 아님 → 순차. *의심되면 단일 builder*.
    - **작은 task(파일 ≤~2-3개, RGR 1회 분량)** → 분할하지 말고 *단일 builder 1개*. 병렬 오버헤드를 만들지 않는다.
    - 각 slice 는 {담당 step 목록, 그 step 이 만족시킬 AC subset, slice 가 건드릴 파일 집합}으로 정의된다.
 5. **dispatch — 각 builder 에게 자기 slice 만 전달**한다 (ADR-019 minimal). builder 1개에 넘기는 것:

@@ -68,6 +68,7 @@ context-pack: minimal
 마지막 출력:
 - 4-판정 카운트: Adopted M / Adopt-modified K / Reject-FP I / Reject-context J
 - cross-cutting 직접 수정 파일 목록 + 어떤 finding을 어떻게 해소했는지
+- **커밋 안내**: cross-cutting 수정 파일은 repair-milestone 가 *커밋하지 않는다*(ADR-052 D4) — 사용자가 직접 커밋한 뒤 다음 단계로 진행한다. *미커밋 상태로 두면* 후속 task 의 `/finalize-workitem` 이 그 파일을 task `## 4-1` 밖 변경으로 보고 `Needs Review` 로 멈춘다.
 - `/repair-workitem`으로 위임한 task 목록 (Codex 순차 degrade 여부 명시)
 - Reject한 항목 + 근거 (있으면)
 - `## 5. Repair decision log` `### M-N` append 줄 수 (P0+P1 합)
