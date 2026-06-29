@@ -91,7 +91,7 @@ graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycl
 
 ### 결정
 graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`의 *soft-pass*("정의된 경우"만 평가)를 **E2E-applicable 스택 한정 hard-block**으로 강화한다.
-- *E2E-applicable* = UI 프로젝트(ADR-027#amend-3 다중신호 판정) ∨ graduation item 6이 e2e 명시 선언 (stabilize §1.5·MILESTONE_TEMPLATE item 3 정합). 이 경우 미통과(exit code ≠ 0 또는 미설정) 시 graduation pre-check `졸업 가능: NO` **hard-block**. (applicable 스택의 `validate:e2e`/provision은 stack-guard가 선설치 — ADR-052 D1/D2.)
+- *E2E-applicable* = UI 프로젝트(ADR-027#amend-3 다중신호 판정) ∨ graduation item 6이 e2e 명시 선언 (stabilize §1.5·MILESTONE_TEMPLATE item 3 정합). 이 경우 미통과(exit code ≠ 0 또는 미설정) 시 graduation pre-check `졸업 가능: NO` **hard-block**. (applicable 스택의 `validate:e2e`/provision은 stack-guard가 선설치 — ADR-052 D1/D2.) **단 0-spec 예외**: 미통과가 `No tests found`(spec 미작성)이면 real failure 아님 → PASS-with-warning(coverage 권장), 차단 X (spec 실행 후 실패만 hard-block — ADR-052 D3·stabilize §1.5/3-b 정합).
 - *E2E-not-applicable*(비-UI ∧ item 6 e2e 미선언) = 기존대로 *해당 없음=통과*. stack-guard가 "applicable 스택이면 설정 권장" 1줄 echo(ADR-052 D2).
 
 ### 근거

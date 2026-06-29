@@ -76,8 +76,7 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - .claude/skills/stabilize-milestone/SKILL.md                     — D2 병렬 fan-out (qa·reviewer)
 - .claude/agents/builder.md                                       — D1 slice-scoped builder (foreman 위임 단위) + D7 단독 writer(`## 4-1`)
 - .claude/agents/validator.md                                     — D2 per-axis partial verdict 반환
-- .agents/skills/plan-milestone/SKILL.md                          — D4 Codex wrapper (신규)
-- .agents/skills/plan-milestone/agents/openai.yaml                — D4 Codex wrapper policy (신규)
+- .agents/skills/plan-milestone/                                  — D4 Codex wrapper 디렉터리 (SKILL.md + agents/openai.yaml; 신규)
 - docs/00-meta/WORKFLOW.md                                        — foreman 운전권 + fan-out + wave 제거 단락
 - docs/00-meta/DELEGATION_STRATEGY.md                             — foreman/builder 위임 트리거 + 병렬 fan-out + Codex degrade 노트
 - docs/00-meta/STRUCTURE.md                                       — skill roster 18→20 + 생성 주체 컬럼 + Codex wrapper 인벤토리
