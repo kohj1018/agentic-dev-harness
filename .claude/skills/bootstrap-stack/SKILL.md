@@ -103,5 +103,8 @@ ARCHITECTURE_OVERVIEW.md `## 3-1` 채움 시 함께 박음. 사용자 즉흥 결
 작성한 project ADR은 **`docs/90-decisions/project/README.md` 인덱스에 한 줄 추가**(인덱스 표의 현재 컬럼 형식에 맞춰 — Step 12 적용 시 area·last-reviewed 포함). 기존 ADR-101을 supersede하면 그 행 상태도 `superseded`로 갱신.
 작성 후 안내: `/bootstrap-stack <new stack>` → `/stack-guard` 순으로 재실행. 마이그레이션 cutover 작업은 `Type: migration` task(ADR-039)로 분해(`/plan-workitem`).
 
+## 고-stakes 설계 게이트 (ADR-053)
+설계 결정이 ADR-053 게이트(S1~S4 중 1+ → full 패널 / S5만 → 리서치-only / 전부 NO → 단발)면, architect 단발 대신: ① researcher 웹 패스(must-or-flag, 오프라인 `Needs Research`) → ② architect 다각도 2~3안 → ③(최상위만) 두 번째 architect 적대 검토(review-doc 미사용·parallel-merge 금지) → ④ ARCHITECTURE §7 결정 블록 기록. 저-stakes는 현행 단발. (Codex: 순차 단일 degrade — researcher 인라인/사전 노트.)
+
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

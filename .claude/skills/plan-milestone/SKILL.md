@@ -60,6 +60,7 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
 **R2 — architect 단발 sub-call: 분할 vs 단일 협상**
 - R1의 목표 후보를 *여러 마일스톤으로 쪼갤지, 한 마일스톤으로 묶을지* `Agent`(architect) 단발 sub-call로 판단(스코프 크기·의존·졸업 가능성 기준). (Codex: 병렬 위임 미지원 시 메인 세션이 직접 판단.)
 - architect 결론(분할 권고·각 마일스톤 한 줄 목표·feature 후보 목록)을 받아 사용자와 협상한다. 사용자가 분할 구조를 확정할 때까지 반복.
+- **고-stakes 설계 게이트 (ADR-053)**: R2 분할에 외부 기술 불확실성이 있으면 ADR-053 리서치-only 게이트(researcher 위임). 분할 자체는 다각도 패널 불요.
 
 **R3 — 마일스톤 문서 authoring (MILESTONE_TEMPLATE에서)**
 - 확정된 각 마일스톤을 `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`를 복사해 `docs/30-workitems/milestones/M<N>-<이름>.md`로 작성한다. `<N>`은 기존 마일스톤 다음 번호(additive — M1 보존).
