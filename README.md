@@ -105,7 +105,7 @@ Once your stack is decided:
 When you hit Claude Code's usage limit or prefer Codex:
 
 1. Run `codex` in the same repo — `AGENTS.md` is auto-loaded.
-2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
+2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery, validate-milestone) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`

@@ -21,10 +21,10 @@ accepted
 - 검증된 ADR-038/044 패턴 mirror로 일관성. 새 agent 0(qa/reviewer 재사용). read-only/single-origin 분리로 e2e 충돌 차단.
 
 ## 결과
-- `.claude/skills/validate-milestone/SKILL.md`(신규), repair-milestone(확장), stabilize-milestone(single-origin), `docs/40-validation/stabilize-reviews/`, .gitignore. STRUCTURE 산출물 표·로스터 + README 자연어 Codex 목록은 migration 적용 대상(Surfaces 아님).
+- `.claude/skills/validate-milestone/SKILL.md`(신규), repair-milestone(확장), stabilize-milestone(single-origin), `docs/40-validation/stabilize-reviews/`, .gitignore. STRUCTURE 산출물 표·로스터 + README 자연어 Codex 목록(양 README의 정책 요약 문단·명시 목록 *둘 다*) + DELEGATION_STRATEGY 위임 표 + WORKFLOW §5·라이프사이클 흐름은 migration 적용 대상(Surfaces 아님).
 
 ## Mutation Contract (ADR-047 D3)
-1. Target — validate-milestone 신설 / repair-milestone 회수·dedup·종료가드·echo-rm / stabilize single-origin / .gitignore / STRUCTURE 산출물 표+로스터 / README 자연어 Codex 목록.
+1. Target — validate-milestone 신설 / repair-milestone 회수·dedup·종료가드·echo-rm / stabilize single-origin / .gitignore / STRUCTURE 산출물 표+로스터 / README 자연어 Codex 목록 / DELEGATION_STRATEGY 위임 표 / WORKFLOW §5·라이프사이클 흐름.
 2. Failure mode — stabilize가 read-only 리뷰와 stateful 실행을 묶어 멀티모델 병렬 시 e2e 충돌 + tracked-doc clobber; repair-milestone 종료가드가 peer P0 누락.
 3. Predicted improvement — read-only 리뷰만 모델별 병렬 → 다양성 + 충돌 0; repair-milestone이 origin·peer finding 단일 종합.
 4. Preserved invariants — stabilize read-only 본질(코드·커밋·status 미변경) / 실행 origin 단일 / repair-milestone cross-cutting·per-task routing(ADR-052 D4) 불변 / opt-in.

@@ -49,6 +49,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 - E2E + 회귀 + 리팩토링 후보 + ADR 후보 점검.
 - **코드 수정·커밋·status 변경 금지** — 결과는 `QA_FINDINGS.md`와 `IMPROVEMENT_GUIDE.md`에 누적 기록.
 - 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 연결.
+- **선택 (opt-in, ADR-054)**: stabilize 후 다른 세션·다른 LLM에서 `/validate-milestone <M> --reviewer-tag <tag>`(읽기 전용)로 2nd opinion → 원본 세션에서 `/repair-milestone <M>`이 peer 리뷰를 종합. 건너뛰어도 정상.
 
 다운스트림 마이그레이션: 이미 평면 양식의 QA 데이터를 가진 프로젝트는 (1) 기존 항목을 `## M1` 또는 `## 일반` 묶음으로 감싸고 (2) 다음 회차부터 새 마일스톤 헤더로 누적한다.
 
@@ -81,6 +82,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pass─→ finalize → stabilize
                               │                          └─Needs Fix─→ repair → (validate 재실행)
                               └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
+(opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 ```
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.

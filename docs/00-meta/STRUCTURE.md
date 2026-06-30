@@ -52,7 +52,7 @@
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
 | AGENTS.md | `./AGENTS.md` | (수동 또는 ADR-010 fork 시) | Living | baseline |
 | Codex 프로젝트 설정 | `.codex/config.toml` | 수동 | Living | baseline |
-| Codex skill wrapper | `.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` (자연어 호출 skill 목록 SSOT는 boilerplate/README — ADR-010#amend-3; lifecycle/메인 호출 skill은 wrapper 미보유 가능) | 수동 | Reference | baseline |
+| Codex skill wrapper | `.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` (자연어 호출 skill 목록 SSOT는 README.md / README_ko.md — ADR-010#amend-3; lifecycle/메인 호출 skill은 wrapper 미보유 가능) | 수동 | Reference | baseline |
 | .github 템플릿 | `.github/ISSUE_TEMPLATE/*.md`, `.github/PULL_REQUEST_TEMPLATE/*.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | scripts 안내 | `scripts/README.md` (스택 확정 전 placeholder) | 수동 (boilerplate 제공) | Reference | baseline |
 
