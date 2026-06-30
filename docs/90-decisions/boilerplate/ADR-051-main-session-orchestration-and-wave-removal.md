@@ -95,7 +95,7 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 ## Amendment 1 (2026-06-30) — 공유 런타임 리소스 partition 가드
 ### 결정
 1. foreman partition(D6 `## 3` 경로 분할)에 *공유 런타임 리소스* 트리거 추가: 두 slice의 테스트가 격리 없이 공유 DB·고정 포트·로컬 Supabase 스택·단일 dev server·공유 빌드/codegen 캐시를 동시에 건드리면 file-disjoint라도 순차/단일. 격리 보장 시 병렬 유지. soft(hard-block 아님).
-2. builder는 *테스트 범위 한정이 완화책이지 해결책 아님*을 명시 — 충돌 신호는 foreman 보고. stack-guard는 e2e/통합 격리를 *권장*(unit 격리 authoring 한계).
+2. builder는 *테스트 범위 한정이 완화책이지 해결책 아님*을 명시. foreman은 격리 여부를 dispatch *전*에 두 신호로 판단해 순차화한다 — (a) `STACK_SETUP_PLAN.md`의 "테스트 격리 미설정" 표식, (b) 두 slice의 `## 3`가 동일 공유 리소스 지목(builder는 peer slice 미가시·false-Green 사후 탐지 불가라 *사전 결정*). builder는 자기 slice의 공유-리소스 의존을 "남은 리스크"로 보고. stack-guard는 e2e/통합 격리를 *권장*(unit 격리 authoring 한계).
 ### 근거
 - [관측됨] D7은 disjoint를 *file* 속성으로만 봤으나, ADR-038 면책 단락(빌드캐시 race / 포트·임시DB·fixture)이 *런타임 리소스* 충돌을 이미 명시 → same-checkout 병렬 builder에 그대로 재현(최악 false-Green). race 지식을 partition 트리거로 승격.
 ### 강도 (ADR-022)
