@@ -47,6 +47,7 @@
 | 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | (+#amend-1: 공유 런타임 리소스 partition 가드) | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
 | 052 | Stack provisioning (install) + E2E readiness | accepted | — | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) |
 | 053 | 고-stakes 설계 패널 (stakes-gated design protocol) | accepted | — | stakes 게이트(S1~S5) + 3단 강도(리서치·다각도·적대) + ARCHITECTURE §7 결정 블록 + stabilize backstop |
+| 054 | Cross-LLM Stabilize Review | accepted | — | /validate-milestone 신설(read-only peer review) + repair-milestone 종합·dedup·echo-rm + stabilize single-origin + .gitignore |
 
 ## Reserved / Parked / Dropped 번호
 

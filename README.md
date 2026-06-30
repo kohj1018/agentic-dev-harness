@@ -110,7 +110,7 @@ When you hit Claude Code's usage limit or prefer Codex:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
-4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
+4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`, `validate-milestone`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
 
 > Note: docs in `docs/` use Claude's `/<skill-name>` slash syntax. Read these as `$<skill-name>` when working in Codex.
 

@@ -109,7 +109,7 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-milestone <milestone 아이디어>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
-4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
+4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`, `validate-milestone`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
 
 > 참고: `docs/` 하위 문서는 Claude의 `/<skill-name>` 슬래시 표기를 사용한다. Codex에서는 `$<skill-name>`으로 읽는다.
 

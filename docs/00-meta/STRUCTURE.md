@@ -33,7 +33,7 @@
 | design research note (UI only) | `docs/20-system/DESIGN_RESEARCH.md` | `/bootstrap-design` (R0 레퍼런스 + R2 선택 근거) | Reference | conditional |
 | design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
 | design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
-| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (20종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
+| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (21종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (7종: architect/builder/validator/planner/reviewer/qa/researcher) | 수동 (boilerplate 제공) | Reference | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/bootstrap-project`, `/plan-milestone` | Living | generated |
 | feature | `docs/30-workitems/features/F-*-*.md` | `/bootstrap-project`, `/plan-milestone`, `/plan-workitem` | Living | generated |
@@ -42,6 +42,7 @@
 | validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` | ephemeral | generated |
 | plan review | `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` | `/validate-plan` (다른 세션·다른 LLM) | ephemeral | generated |
 | discovery review | `docs/40-validation/discovery-reviews/DISCOVERY.<reviewer-tag>.md` | `/validate-discovery` (다른 세션·다른 LLM) | ephemeral | generated |
+| stabilize review | `docs/40-validation/stabilize-reviews/<M>.<reviewer-tag>.md` | `/validate-milestone` (다른 세션·다른 LLM) | ephemeral | generated |
 | qa findings | `docs/40-validation/QA_FINDINGS.md` | `/stabilize-milestone` (mile별 누적) | Record | baseline |
 | improvement guide | `docs/40-validation/IMPROVEMENT_GUIDE.md` | `/stabilize-milestone` | Living | baseline |
 | ADR (boilerplate) | `docs/90-decisions/boilerplate/ADR-*.md` (인덱스: `docs/90-decisions/boilerplate/README.md`) | 수동 (boilerplate 진화) | Record | baseline |

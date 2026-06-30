@@ -19,6 +19,8 @@ context-pack: minimal
 그 외 변경은 금지한다 — milestone 문서의 `## 0. Status` / `## 1~7` 섹션 / 다른 workitem 문서 / 코드 일체.
 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 텍스트 제안만 출력한다.
 
+**실행 single-origin (ADR-054)**: `validate`/`validate:e2e`/`npm audit` 실행 + QA_FINDINGS/IMPROVEMENT_GUIDE/회고 *쓰기*는 본 skill(origin)이 *한 번만*. **같은 checkout에서 stabilize 2개 동시 실행 금지**(포트·테스트DB·Playwright outputDir·빌드캐시 충돌 + tracked-doc clobber). 다른 모델 2nd opinion은 *읽기 전용* `/validate-milestone <M> --reviewer-tag <tag>` 병렬 → `/repair-milestone`이 종합(실행은 origin 1회).
+
 입력:
 - `$ARGUMENTS`에는 milestone ID(예: `M1`)가 들어온다.
 - `--dry-run` 플래그가 있으면 1.5 Graduation pre-check만 돌리고 종료(P0 검증 도구 — 전체 QA 없이 빠른 졸업 가능 여부 확인).
