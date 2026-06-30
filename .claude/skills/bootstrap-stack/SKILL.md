@@ -35,7 +35,7 @@ context-pack: minimal
    - `docs/00-meta/STACK_SETUP_PLAN.md`
    - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 생성 (이미 있으면 갱신 제안만).
    - **Optional MCP Connectors 백필 (ADR-048#d1 / ADR-043#d5)**: `.codex/config.toml`에 `[mcp_servers.*]`가 이미 있으면(예: jetbrains) STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 `lifecycle usage`·`agent access` 포함해 backfill 권장. 표는 생성하되 *자동 연결은 하지 않는다*(사용자 직접 — ADR-043 보안).
-4. **인터페이스 컨벤션 채움** — API/CLI/백엔드/프론트 컨벤션은 ARCHITECTURE_OVERVIEW.md의 7-1/7-2/7-3/7-4에 박는다.
+4. **인터페이스 컨벤션 채움** — API/CLI/백엔드/프론트 컨벤션은 ARCHITECTURE_OVERVIEW.md의 7-1/7-2/7-3/7-4에 박는다. **(7-3 백엔드 결정(인증·DB·트랜잭션) 등 되돌리기 비싼 선택이 ADR-053 게이트(S1~S4 중 1+)에 걸리면, architect 단발 대신 아래 `## 고-stakes 설계 게이트`의 ①~④ 절차를 따른다.)**
    - API 스택 감지 시: architect 단발 sub-call로 7-1(API 컨벤션) + 7-3(백엔드 결정) 채움.
    - CLI 스택 감지 시: 같은 방식으로 7-2(CLI 컨벤션) 채움.
    - 프론트 스택 감지 시: 7-4(프론트 결정) 채움. 시각 결정은 `/bootstrap-design`이 별도 처리.
