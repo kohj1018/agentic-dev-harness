@@ -71,6 +71,7 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
 **R4 — feature 문서 authoring (FEATURE_TEMPLATE에서)**
 - 각 마일스톤의 feature 후보를 `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`를 복사해 `docs/30-workitems/features/F-<NNN>-<이름>.md`로 작성한다(기존 F-001 다음 번호 — additive).
 - `## 0-1. Type`을 채운다(ADR-039). `feature`면 `## 2`를 User Story로, 비-feature(technical-enabler/bugfix/refactor/migration/research-spike)면 기술적 근거 + 서비스하는 DISCOVERY ID·ADR 링크로 채운다(정책은 FEATURE_TEMPLATE 주석·ADR-039가 SSOT).
+- `## 3. 핵심 시나리오`(feature가 만족시킬 사용자 시나리오)와 `## 10. 의존성`(feature 간 선후·병렬)을 채운다 — FAC가 추적할 시나리오 + feature 의존 검토의 전제. 이 두 섹션 *신설*은 `/plan-milestone` 책임이다(plan-workitem 아님).
 - `## 7. Feature-level Acceptance Criteria`(FAC)를 시나리오 수준 측정 기준으로 채운다.
 - `## 7-1. FAC ↔ AC 매핑표`는 **빈 shell만** 둔다(`- FAC-1 →` 등 우변 미채움) — task 분해 시 `/plan-workitem`이 채운다(영속 SSOT, ADR-036/ADR-037). 이 skill은 task를 만들지 않으므로 매핑을 채우지 않는다.
 - `## 11. 관련 문서`의 Milestone 링크를 R3 마일스톤으로 채운다. 비해당 스택의 Architecture-Iface/Design 줄은 삭제(placeholder 잔존 금지).
@@ -94,6 +95,7 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
   다음 단계:
   - 기본 권장: 본 skill이 만든 각 feature마다 `/plan-workitem F-NNN` — feature를 task로 분해 (milestone+feature는 본 skill이 작성 완료; plan-workitem은 feature→task 전용)
   - 분기 옵션 (해당 시 — ≤3 개):
+    - 마일스톤 plan 교차검토 원하면: 다른 세션·다른 LLM에서 `/validate-plan <M>`(milestone-plan mode) 후 원본에서 `/repair-plan <M>`
     - UI feature 포함 + DESIGN.md 미반영 시: `/bootstrap-design --update` 먼저
     - 기획 신뢰도 재확인 원하면: 다른 세션에서 `/validate-discovery --reviewer-tag <tag>` 후 원본에서 `/repair-discovery`
   - 프롬프트 동봉 권장 (다음 skill 호출 시 함께 전달):
