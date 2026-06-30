@@ -11,7 +11,7 @@ accepted
 - [외부실증] expand-contract(parallel change) 마이그레이션 패턴 — 점진 cutover + dual-run + cleanup.
 
 ## 결정
-1. **`--recommend` 모드** (스택 확정 전): PROJECT_CHARTER `## 6 목표`/`## 7 비목표`/`## 8 성공 기준`/`## 9 제약`/ARCH `## 8 품질 속성`(규모·성능·확장 기대)을 읽어 **2~3개 스택 조합 + tradeoff**를 제시. 각 조합에 (a) 현재 복잡도, (b) 확장·마이그레이션 비용, (c) ADR-031 직접지원 5유형 정합, (d) 마이그레이션 경로("X로 시작 → Y로 성장")를 명시. **ADR-006 단순성 가중**(과한 스택 경고). 최신 프레임워크 지형 그라운딩이 필요하면 *사전에 `/research-pack`* 으로 insights 노트를 만들어 참조한다(bootstrap-stack은 fork+Agent 미보유라 직접 위임 X). 출력 → 사용자 선택 → 기존 bootstrap-stack 본 흐름 진행. 파일 자동 생성 X(추천 텍스트만).
+1. **`--recommend` 모드** (스택 확정 전): PROJECT_CHARTER `## 6 목표`/`## 7 비목표`/`## 8 성공 기준`/`## 9 제약`/ARCH `## 8 품질 속성`(규모·성능·확장 기대)을 읽어 **2~3개 스택 조합 + tradeoff**를 제시. 각 조합에 (a) 현재 복잡도, (b) 확장·마이그레이션 비용, (c) ADR-031 직접지원 5유형 정합, (d) 마이그레이션 경로("X로 시작 → Y로 성장")를 명시. **ADR-006 단순성 가중**(과한 스택 경고). 최신 프레임워크 지형 그라운딩이 필요하면 *사전에 `/research-pack`* 으로 insights 노트를 만들어 참조한다(bootstrap-stack은 fork+Agent 미보유라 직접 위임 X (→ ADR-040#amend-3 정정 — 이 세 skill은 Agent 보유)). 출력 → 사용자 선택 → 기존 bootstrap-stack 본 흐름 진행. 파일 자동 생성 X(추천 텍스트만).
 2. **`--migrate` 모드**: 새 ADR(또는 ADR-101 supersede)에 마이그레이션 contract를 기록 — old stack / new stack / 호환성(데이터·API·런타임) / cutover 순서(expand-contract) / rollback / validation(검증 기준) / hook·verify 갱신 목록. 이후 `/bootstrap-stack`(스택 정보 갱신)·`/stack-guard`(verify 재생성, 도구 감지 우선순위로 기존 도구 보존) 재실행을 안내.
 
 ## 근거

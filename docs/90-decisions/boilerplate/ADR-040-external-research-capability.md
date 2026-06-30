@@ -15,7 +15,7 @@ accepted
 2. **`research-pack` skill 신설** — 메인 세션에서 실행(discover-product 패턴, `context: fork`/`agent:` 미지정). 무거운 웹 조사는 **researcher agent에 `Agent` 위임**(노이즈 격리, 결론만 반환), 반환된 결론으로 리서치 노트 1개를 `docs/10-charter/insights/<date>-<slug>.md`에 작성(Write는 본 skill의 allowed-tools, 대상은 insights/ 단일 위치). **researcher agent는 report-only(Write 없음) 유지** — 노트 작성은 research-pack skill의 책임이라 `agent: researcher`와 Write 권한이 충돌하지 않는다.
 3. **신뢰도·출처 규율**: 모든 발견에 출처 URL + 발행일 + *공식/1차/2차* 신뢰도 라벨 + "제품에 대한 추론"(사실과 분리). 외부 리서치 결과는 DISCOVERY Evidence Log(ADR-035#amend-2)의 `external-research` type 항목으로 연결.
 4. **`data-analyst`·별도 insight agent는 만들지 않는다** — insight 합성은 discover-product/--update의 한 단계(skill)로 충분(역할 중복·복잡도 회피).
-5. **위임 경로**: implement-workitem이 외부 라이브러리 불확실성에 부딪히면 builder가 직접 웹서핑하지 않고 *메인 세션이 researcher에 위임*(builder 컨텍스트 오염 회피). MCP 연결 절차(ADR-043)·bootstrap-stack --recommend(ADR-041)도 researcher로 최신 설정/지형을 조회한다 — fork+Agent 미보유 skill(bootstrap-stack 등)은 *사전 `/research-pack` 노트*를 참조하는 방식.
+5. **위임 경로**: implement-workitem이 외부 라이브러리 불확실성에 부딪히면 builder가 직접 웹서핑하지 않고 *메인 세션이 researcher에 위임*(builder 컨텍스트 오염 회피). MCP 연결 절차(ADR-043)·bootstrap-stack --recommend(ADR-041)도 researcher로 최신 설정/지형을 조회한다 — fork+Agent 미보유 skill(bootstrap-stack 등)은 *사전 `/research-pack` 노트*를 참조하는 방식. (→ ADR-040#amend-3 정정 — 이 세 skill은 Agent 보유)
 
 ## 근거
 - 웹 도구를 기존 agent(예: reviewer)에 붙이면 그 agent의 권한 표면이 부적절히 넓어진다(reviewer가 코드리뷰 중 웹서핑 = scope creep). 전용 최소권한 agent가 더 깨끗하다.
@@ -60,3 +60,13 @@ accepted
 - .claude/skills/implement-workitem/SKILL.md    — foreman 자동 재개(researcher 위임 — ADR-051 D1 정합)
 - docs/00-meta/DELEGATION_STRATEGY.md           — researcher row standing auto-trigger
 - docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md — install-ownership 검증(3분할) owning ADR (D1)
+
+<a id="adr-040-amend-3"></a>
+## Amendment 3 (2026-06-30) — 소스 품질 규율 + Agent-보유 stale note 정정
+### 결정
+1. **소스 품질 능동 선택**: researcher는 위계 ① 공식 문서/공식 레포(README·CHANGELOG·릴리스 노트·*현재 메이저 버전* 문서)·1차 스펙 → ② maintainer 1차 → ③ 평판 2차로 *찾아 읽는다*. 라이브러리는 현재 메이저 버전 먼저 확정 후 그 버전 문서. 양질 출처 미발견 시 "양질 출처 부족" 명시(약한 정보를 단단히 제시 금지).
+2. **stale note 정정**: 본 ADR D5 + ADR-041 D1의 "fork+Agent 미보유 skill(bootstrap-stack 등)" 표현은 현재와 어긋난다 — bootstrap-stack/bootstrap-project/plan-milestone 모두 `Agent` 보유 + 메인 세션 실행이라 researcher 직접 위임 가능. 본 amend가 그 "미보유" 표현을 supersede(사전 `/research-pack` 노트 참조는 *Agent 미보유 환경 fallback*). 원문은 인라인 포인터로 보존.
+### 강도 (ADR-022)
+- constraint(약, 소스 품질) + 정정성(행동 불변).
+### 적용 surface
+- .claude/agents/researcher.md — 소스 품질 규율(standing)
