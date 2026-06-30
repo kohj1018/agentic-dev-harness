@@ -83,5 +83,7 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 - 삭제된 리뷰 파일 목록 (*반드시 먼저 할 일 step 1*에서 회수한 경로와 1:1 정합)
 - 다음 권장 액션: 보통 `/implement-workitem <task-id>`. 대규모 변경이면 `/validate-plan` 재실행 권장.
 
+- milestone-plan mode 리뷰(ADR-038#amend-4)도 동일 회수·적용 — M/F id 이미 처리.
+
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

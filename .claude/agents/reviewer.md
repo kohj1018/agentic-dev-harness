@@ -82,6 +82,13 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
 라벨링 예: `P0 [Plan-arch-iface] T-008:AC-1 — response 형식 { status: "ok", payload } 이 ARCH ## 7-1 envelope { data, error, meta } 와 불일치`.
 
+### Milestone-Plan Quality 4 (milestone-mode — 하위 task 0건, ADR-038#amend-4)
+- [MP-FAC-quality] P0 — FAC 시나리오 수준 + 측정 가능, `## 3` 추적.
+- [MP-feature-scope] P0 — charter 비목표 / milestone 제외 침범.
+- [MP-graduation] P1 — graduation 5+1(ADR-014) + e2e 선언(ADR-052).
+- [MP-feature-dep] P1 — feature 간 순환·잘못된 병렬.
+(task 1건+면 Plan Quality 10 차원.)
+
 ## Discovery Quality 8 차원 (discovery surface 전용 — ADR-044)
 
 `/validate-discovery` 호출 시 본 agent가 DISCOVERY.md(제품 기획 SSOT)를 비판 검토할 때 사용. 각 발견에 P0/P1/P2 + 카테고리 라벨.

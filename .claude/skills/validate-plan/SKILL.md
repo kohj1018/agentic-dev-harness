@@ -42,6 +42,13 @@ context-pack: minimal
 
 **큰 milestone budget 가이드 (ADR-019 minimal/JIT 정합)**: 산하 task 합산 ≥10개면 다음 순서로 budget — (a) feature 문서 전체 + 각 task `## 6 AC` 섹션만 1차 회수, (b) 그 결과로 P0 의심 task 후보를 좁힌 뒤 (c) 후보 task 본문 전체를 깊게 읽는다. 모든 task 본문을 사전 fork-load 금지.
 
+## 입력 형태 판정 — milestone-plan mode (ADR-038#amend-4)
+하위 문서 회수 결과 **분해된 task가 0건**이면(plan-milestone 직후·plan-workitem 미실행) **milestone-plan mode**:
+- **비활성**: [Plan-sizing]·[Plan-AC-form]·[Plan-dep] (task 산물 부재).
+- **[Plan-FAC-coverage] 반전**: `## 7-1` 빈 shell은 *정상* — unmapped FAC를 P0로 올리지 **않는다**. shell이 *형식적으로 깨졌을 때만* P2.
+- **활성**: milestone-plan 4차원(아래).
+- 혼합 마일스톤은 **feature 단위로** mode 적용. task가 1건+면 기존 10차원.
+
 검토 차원 (10 dimensions — reviewer.md의 *Plan Quality 10 차원* 정합 — ADR-027#amend-1):
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반. P0 권장.
 2. **[Plan-sizing]** — 1 task = 1 RGR 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). P1 권장.
@@ -53,6 +60,12 @@ context-pack: minimal
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` / feature `## 11. 관련 문서` link 누락·깨짐. P2 권장.
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / 8 상태 매트릭스 누락. P1 권장.
 10. **[Plan-arch-iface]** (해당 스택 한정 — 7-x sub-section 부재 시 skip) — ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 기존 결정 위반 / Don'ts 위반. P0 권장.
+
+**milestone-plan 4차원 (milestone-mode 한정, ADR-038#amend-4):**
+11. **[MP-FAC-quality]** — FAC가 *시나리오 수준 + 측정 가능*('works' 류 금지), feature `## 3` 시나리오 추적. P0.
+12. **[MP-feature-scope]** — feature가 charter `## 5 비목표` / milestone `## 4 제외되는 기능` 침범 여부. P0.
+13. **[MP-graduation]** — milestone `## 5 완료 기준` graduation 5+1(ADR-014) 정합 + UI/e2e 시 e2e 선언(ADR-052). P1.
+14. **[MP-feature-dep]** — feature 간 의존(순환·잘못된 병렬). P1.
 
 판정 규칙 (review verdict — 워크플로우 차단 아님):
 - **NEEDS_CHANGES** — P0 finding 1개 이상.
@@ -102,6 +115,10 @@ context-pack: minimal
 | Plan-doc-link | 0 | 0 | 1 |
 | Plan-design | 0 | 0 | 0 |
 | Plan-arch-iface | 0 | 0 | 0 |
+| MP-FAC-quality | 0 | 0 | 0 |
+| MP-feature-scope | 0 | 0 | 0 |
+| MP-graduation | 0 | 0 | 0 |
+| MP-feature-dep | 0 | 0 | 0 |
 
 ## 핵심 관찰 (3개 이내)
 - ...
