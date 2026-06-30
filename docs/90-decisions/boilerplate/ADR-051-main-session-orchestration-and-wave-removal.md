@@ -69,12 +69,12 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - ADR-050 D1 implement 부분 + ADR-038 #d3·#d6 supersede 기록, ADR-047 D9·ADR-019는 amend로 정합.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. ADR-045 정합 — 실제 파일 경로 1행 1개, 생략·comma-join 금지)
-- .claude/skills/implement-workitem/SKILL.md                      — D1 foreman 전환(de-fork + 병렬/단일 builder 위임: file-disjoint면 병렬)
+- .claude/skills/implement-workitem/SKILL.md                      — D1 foreman 전환(de-fork + 병렬/단일 builder 위임: file-disjoint면 병렬) #amend-1
 - .claude/skills/plan-workitem/SKILL.md                           — D3 de-fork + D5 wave/worktree echo 제거
 - .claude/skills/plan-milestone/SKILL.md                          — D4 신규 skill
 - .claude/skills/validate-workitem/SKILL.md                       — D2 병렬 fan-out
 - .claude/skills/stabilize-milestone/SKILL.md                     — D2 병렬 fan-out (qa·reviewer)
-- .claude/agents/builder.md                                       — D1 slice-scoped builder (foreman 위임 단위) + D7 단독 writer(`## 4-1`)
+- .claude/agents/builder.md                                       — D1 slice-scoped builder (foreman 위임 단위) + D7 단독 writer(`## 4-1`) #amend-1
 - .claude/agents/validator.md                                     — D2 per-axis partial verdict 반환
 - .agents/skills/plan-milestone/                                  — D4 Codex wrapper 디렉터리 (SKILL.md + agents/openai.yaml; 신규)
 - docs/00-meta/WORKFLOW.md                                        — foreman 운전권 + fan-out + wave 제거 단락
@@ -85,7 +85,22 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md       — Surfaces line 55(`## 9` 5필드) 제거 (5필드 삭제 정합)
 - docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md — D1 implement 부분 supersede note
 - docs/90-decisions/boilerplate/ADR-019-context-packs-and-jit.md      — `## Amendment 1` 조건부 re-read
+- .claude/skills/stack-guard/SKILL.md                             — §6-2-1 테스트 격리 권장 #amend-1
 
 ## 참고
 - ADR-007(lifecycle), ADR-014(graduation — plan-milestone가 5+1 authoring), ADR-019(context-pack — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.3 (Optimized Workflow Topology) — 병렬성 위치 재배치의 survey-level 근거.
+
+<a id="adr-051-amend-1"></a>
+## Amendment 1 (2026-06-30) — 공유 런타임 리소스 partition 가드
+### 결정
+1. foreman partition(D6 `## 3` 경로 분할)에 *공유 런타임 리소스* 트리거 추가: 두 slice의 테스트가 격리 없이 공유 DB·고정 포트·로컬 Supabase 스택·단일 dev server·공유 빌드/codegen 캐시를 동시에 건드리면 file-disjoint라도 순차/단일. 격리 보장 시 병렬 유지. soft(hard-block 아님).
+2. builder는 *테스트 범위 한정이 완화책이지 해결책 아님*을 명시 — 충돌 신호는 foreman 보고. stack-guard는 e2e/통합 격리를 *권장*(unit 격리 authoring 한계).
+### 근거
+- [관측됨] D7은 disjoint를 *file* 속성으로만 봤으나, ADR-038 면책 단락(빌드캐시 race / 포트·임시DB·fixture)이 *런타임 리소스* 충돌을 이미 명시 → same-checkout 병렬 builder에 그대로 재현(최악 false-Green). race 지식을 partition 트리거로 승격.
+### 강도 (ADR-022)
+- enabling(약) — 격리 보장 시 병렬 유지, hard-block 아님.
+### 적용 surface
+- .claude/skills/implement-workitem/SKILL.md
+- .claude/agents/builder.md
+- .claude/skills/stack-guard/SKILL.md

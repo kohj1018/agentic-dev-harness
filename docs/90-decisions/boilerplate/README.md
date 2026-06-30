@@ -44,7 +44,7 @@
 | 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
 | 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | accepted | — | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
 | 050 | Main-session, model-invocable lifecycle skills | accepted (부분 superseded by 051) | — | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |
-| 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | — | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
+| 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | (+#amend-1: 공유 런타임 리소스 partition 가드) | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
 | 052 | Stack provisioning (install) + E2E readiness | accepted | — | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) |
 | 053 | 고-stakes 설계 패널 (stakes-gated design protocol) | accepted | — | stakes 게이트(S1~S5) + 3단 강도(리서치·다각도·적대) + ARCHITECTURE §7 결정 블록 + stabilize backstop |
 

@@ -21,7 +21,7 @@ color: cyan
 
 규칙:
 - 범위 밖 변경은 하지 않는다.
-- **테스트 실행은 자기 slice 범위로 한정**한다 (병렬 builder 가 같은 checkout 에서 돌 때 전체 스위트 실행은 공유 DB/포트/snapshot/build-cache 충돌로 flaky 를 부른다 — 전체 통합 검증은 foreman 최종 `validate --changed` 담당, ADR-051 D1).
+- **테스트 실행은 자기 slice 범위로 한정**한다 (전체 스위트는 공유 DB/포트/snapshot/build-cache 충돌로 flaky). *단, 범위 한정은 폭발 반경을 줄일 뿐 공유 런타임 리소스 충돌을 없애지 못한다* — 격리 없이 공유 DB/포트를 쓰는 slice는 *foreman이 순차화*해야 한다(implement-workitem partition, ADR-051#amend-1). builder는 peer slice를 못 보므로 직접 해결 불가 — 충돌 신호는 foreman에 보고. 전체 통합 검증은 foreman 최종 `validate --changed`(ADR-051 D1).
 - 작업 전 관련 문서의 범위와 비범위를 먼저 확인한다.
 - 구현 후 아래를 짧게 요약한다.
   - 수정 파일

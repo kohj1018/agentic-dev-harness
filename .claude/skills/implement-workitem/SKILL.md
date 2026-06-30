@@ -23,6 +23,7 @@ context-pack: minimal
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
    - 파일이 **겹치거나** step A 산출물을 step B 가 import/호출하는 *명백한* 선후 의존이 있으면 → 같은 slice(한 builder) 또는 *순차* dispatch. 의존은 `## 3` step 경로만 보고 rough 하게 판단 — 깊은 그래프 분석 금지.
    - **공유 변이 지점·테스트 의존 주의(조용한 clobber 방지)**: manifest/lockfile·barrel(`index.*`)·DI 컨테이너·route registry 처럼 *여러 slice 가 동시에 append 할 수 있는 공유 파일*은 `## 3` 에 명시 안 돼도 *겹치는 파일*로 간주 → 순차/단일. slice B 의 테스트가 slice A 코드를 import 하면 disjoint 아님 → 순차. *의심되면 단일 builder*.
+   - **공유 런타임 리소스 주의(병렬 안전, ADR-051#amend-1 / ADR-038 면책 단락)**: 두 slice의 테스트가 *격리 없이* 공유 런타임 리소스(테스트 DB·고정 포트·로컬 Supabase 54321/54322·단일 dev server·공유 빌드/codegen 캐시 `tsbuildinfo`·`.next/cache`)를 동시에 건드리면, file-disjoint라도 병렬 시 충돌(최악: 한 builder의 seed가 다른 builder 단언을 우연히 충족하는 *false-Green*) → 그 slice들은 *순차 dispatch(또는 단일 builder)*. 격리(testcontainers·트랜잭션 롤백·랜덤 포트)가 보장되면 병렬 유지. **soft(hard-block 아님)** — 격리된 unit-test 일반 케이스 병렬 속도는 죽이지 않는다.
    - **작은 task(파일 ≤~2-3개, RGR 1회 분량)** → 분할하지 말고 *단일 builder 1개*. 병렬 오버헤드를 만들지 않는다.
    - 각 slice 는 {담당 step 목록, 그 step 이 만족시킬 AC subset, slice 가 건드릴 파일 집합}으로 정의된다.
 5. **dispatch — 각 builder 에게 자기 slice 만 전달**한다 (ADR-019 minimal). builder 1개에 넘기는 것:
