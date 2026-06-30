@@ -20,7 +20,7 @@ context-pack: minimal
    - **glob 결과 → 실제 파일 경로 목록을 메모리에 회수.** 이후 *수행 step 6*의 삭제는 이 목록의 각 파일을 한 개씩 정확히 삭제한다 (glob 재실행 금지 — race 차단).
    - 결과 0건: 사용자에게 *"리뷰 파일이 없음 — 다른 세션에서 `/validate-plan <workitem-id>`를 먼저 실행하세요."* 안내 후 종료. workitem 문서 수정 금지.
    - 결과 1건 이상: 모두 읽는다.
-2. 입력 ID에 해당하는 workitem 문서 + 모든 하위 문서를 읽는다 (`/validate-plan`과 동일 범위).
+2. 입력 ID에 해당하는 workitem 문서 + 모든 하위 문서를 읽는다 (`/validate-plan`과 동일 범위). milestone-plan mode 리뷰(ADR-038#amend-4 — 하위 task 0건의 M/F id)도 동일하게 회수·적용한다(M/F id는 sanitization step에서 이미 처리).
 3. `docs/10-charter/PROJECT_CHARTER.md` `## 5. 비목표` / `## 7. 제약 조건`을 읽는다 (수용 판단 근거).
 4. `docs/20-system/ARCHITECTURE_OVERVIEW.md`를 읽는다.
 
@@ -82,8 +82,6 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 - 다중 리뷰어 충돌이 있었던 항목 별 결정 근거 (있으면)
 - 삭제된 리뷰 파일 목록 (*반드시 먼저 할 일 step 1*에서 회수한 경로와 1:1 정합)
 - 다음 권장 액션: 보통 `/implement-workitem <task-id>`. 대규모 변경이면 `/validate-plan` 재실행 권장.
-
-- milestone-plan mode 리뷰(ADR-038#amend-4)도 동일 회수·적용 — M/F id 이미 처리.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
