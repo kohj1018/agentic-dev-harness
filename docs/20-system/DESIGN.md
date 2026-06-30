@@ -62,4 +62,6 @@ draft
      - icon-tile-above-heading 패턴 반복 지양
      - monospace를 "기술적 느낌" 장식용으로 남용 금지 (실제 코드·수치에만)
      - bounce/elastic easing 디폴트 금지 (모션은 의미 전달 목적에 한정 — 장식 모션 회피)
-     - sparkline 등 데이터 시각요소를 장식으로 사용 금지 -->
+     - sparkline 등 데이터 시각요소를 장식으로 사용 금지
+     [클래스 레벨 규율 — 특정 유행 인스턴스 추격 대신, ADR-049#amend-1]
+     - 브랜드 근거 없이 *현재 인기 fontstack·시각 트렌드*를 디폴트로 쓰지 않는다(Inter 단독 금지의 일반화). 채택 시 ## 1 Overview에 브랜드 근거 명시. -->

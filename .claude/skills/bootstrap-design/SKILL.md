@@ -51,6 +51,7 @@ context-pack: minimal
 - **안티-레퍼런스 1~2개 필수**: "purple gradient generic SaaS 같지 말 것", "indigo-on-slate Tailwind 디폴트 회피".
 - architect 단발 sub-call로 분해 가능.
 - **(옵션) reference-evidence grounding** (ADR-049#d28 / ADR-048 — 기본 의존 추가 X, *가용한 것*만): 사용자 제공 URL/스크린샷, 또는 연결돼 있다면 디자인 MCP 화면 리서치(lazyweb 무료 / mobbin 유료 — `STACK_SETUP_PLAN ## Optional MCP Connectors`에 `agent access` 부여된 경우만 호출), 또는 사전추출 라이브러리(refero.design / getdesign.md)에서 1~3개 레퍼런스를 근거로 본다. **MCP·계정 도구를 보일러플레이트 기본 의존으로 추가하지 않는다** — agent가 기본 브라우징 불가하면 사용자가 URL·스크린샷을 직접 제공.
+- **레퍼런스 grounding 필수화 (ADR-049#amend-1)**: R0는 *최소 1개* 레퍼런스(사용자 URL/스크린샷, 또는 가용 디자인 MCP/라이브러리)를 근거로 한다. 없으면 *silent degrade 금지* — `레퍼런스 없음: 모델 지식 기반 + <사유>`를 `DESIGN_RESEARCH.md` `## grounding 출처`에 **명시 기록** 후 진행(검증된 슬롭 근본원인 = R0 옵션→median).
 - **레퍼런스 노트 영속화 (필수, `--fast`는 minimal)**: 위 분해 결과를 `docs/20-system/DESIGN_RESEARCH.md`에 *문서로* 남긴다. 양식:
 
   ```markdown
@@ -113,6 +114,7 @@ context-pack: minimal
 ### R2-2. 선택 루프
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-concepts/concept-*.html`를 열어 비교하고, 선호 방향(또는 하이브리드: 예 'A 색 + B 타이포')을 알려주세요."*
 - 피드백 수령 시 필요하면 concept을 *재생성*(직접 편집 X). 사용자가 한 방향(또는 하이브리드)을 *선택*할 때까지 반복.
+- **수렴 규칙 (ADR-049#amend-1)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
 - **선택 전에는 R3~R6로 진행하지 않는다.** 하이브리드 선택이면 그 조합을 메모로 확정.
 - 선택 확정 시 *각 concept의 방향·근거 + 최종 선택 이유*를 `docs/20-system/DESIGN_RESEARCH.md`의 `## 시안 옵션` / `## 최종 선택`에 기록(근거 추적 — DESIGN.md는 최종 *결정*만 담는다, ADR-049#d28).
 
@@ -171,6 +173,7 @@ context-pack: minimal
 ### R6-2. 검토 루프
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html`를 열어 확인하고 피드백 주세요."*
 - 피드백 수령 시 **반드시 DESIGN.md(SSOT)를 먼저 수정** → 그 다음 preview 재생성. (preview를 먼저 고치지 않는다.)
+- **수렴 규칙 (ADR-049#amend-1)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
 - 사용자가 *승인*할 때까지 반복. 승인 전에는 R6-3(정리)과 `/plan-workitem` 권장을 수행하지 않는다.
 - `--fast`에서는 R6를 생략(위 `## 모드`). 사용자가 명시 요청 시 R6만 단독 수행.
 
