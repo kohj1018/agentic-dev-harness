@@ -189,6 +189,12 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 5. **ARCHITECTURE_OVERVIEW.md `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 *기존 결정* 변경 또는 신규 항목 추가 의심** (예: API versioning 정책 변경 / 인증 방식 변경 / 라우팅 전략 변경). 인터페이스 결정 책임 분배 (ADR-027) 정합.
 6. **DESIGN.md `## 7. Components` 인벤토리에 *새 primitive* 추가 의심** (예: 기존 Button/Input/Card 외 패턴 신설). 추가는 architect 또는 별도 `/bootstrap-design` 라운드 권장.
 
+### Stack-decision tier 라우팅 (ADR-055)
+위 신호 #2(charter 제약 밖 새 외부 의존) 또는 #5(ARCH §7 결정 변경)가 감지되면, 그 dep/변경을 tier로 분류해 라우팅을 함께 출력한다(권장 텍스트만 — 자동 차단 X):
+- **T2** — dep/변경이 ADR-053 S1~S4에 해당(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존을 건드림, 또는 ARCH §7 결정·charter §7 제약을 뒤엎음): `T2: /bootstrap-stack --migrate 권장 (ADR-101 supersede)` 출력. task로 즉흥 도입하지 않는다.
+- **물질적이나 비-foundational** (S1~S4 미해당이지만 근거 기록이 필요한 새 의존): 해당 task `## 0-1. Type`을 `technical-enabler`로 두고 근거를 `## 2`에 기록(ADR-039).
+- **사소(T3)**: 평범한 `## 3` install line-item으로 처리(ADR-040#amend-1). ADR-101/charter §7 제약 미변경.
+
 ## Cross-review hook (ADR-038)
 본 skill 호출 후 plan 품질에 확신이 부족하거나 다중 모델 관점을 원하면:
 1. 별 터미널·별 세션 (Claude 또는 Codex)에서 `/validate-plan <workitem-id> --reviewer-tag <distinct-tag>` 1+ 회 실행. **다중 리뷰어 시 서로 다른 tag 필수** (default 충돌 silent overwrite 회피). 각 호출이 `docs/40-validation/plan-reviews/<id>.<tag>.md` 1개를 작성.

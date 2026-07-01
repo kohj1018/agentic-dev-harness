@@ -118,7 +118,8 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 |----------|------|
 | charter 부분 갱신 | 자연어로 메인 세션에 변경 요청 → `planner` agent에 fork 위임 |
 | charter 전면 재정의 | `/discover-product` 재실행(또는 산출물만 갱신) → `/bootstrap-project`로 charter 재생성 |
-| architecture 스택 변경 | `/bootstrap-stack` 재실행 후 `/stack-guard` 이어 실행 |
+| architecture 스택 변경 (T2 — 언어/런타임/프레임워크/DB/인증 등 토대 변경, ADR-055) | `/bootstrap-stack --migrate` (타깃 미정이면 DEEP 라운드로 수렴) 후 `/stack-guard` 이어 실행 |
+| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | `/plan-workitem`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1). 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
 | architecture 시스템 경계만 갱신 | 자연어 + `architect` 단발 호출 |
 
 > 주: `/discover-product`, `/stack-guard`는 현재 `.claude/skills/`에 모두 존재한다.

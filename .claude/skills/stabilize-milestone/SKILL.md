@@ -136,6 +136,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 6. 미흡한 ADR 후보 제안 — 마일스톤 중에 내려진 결정인데 ADR이 없는 것을 식별. ADR 후보 기준에 "layer 경계·의존성 규칙 변경"도 포함(ADR-006 정책).
    - ARCHITECTURE_OVERVIEW.md에 비해당 7-x sub-section이 *잔존*하면 IMPROVEMENT_GUIDE.md에 P2 보고 — *"조건부 sub-section 미삭제. /bootstrap-stack 재실행 또는 수동 삭제 권장."*
    - layer 경계·의존성 규칙 변경(ARCHITECTURE_OVERVIEW의 ## 3-1)이 마일스톤 중에 발생했으면 ADR 후보로 표시한다(정책: ADR-006).
+   - **[Stack-drift] ADR-101 staleness 감지 (ADR-055, report-only)**: 본 마일스톤에서 순증한 dep(산하 task `## 3` install line-item / lockfile diff)을 T2 임계 카테고리(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존, 또는 ARCH §7 결정·charter §7 제약을 뒤엎음 — 개별로 사소해도 cluster로 넘으면 포함)와 대조. 임계를 넘으면 `P2 [Stack-drift] ADR-101 stale — 누적 dep가 T2 임계 도달 → /bootstrap-stack --migrate 후보 또는 ADR-101 amend`를 IMPROVEMENT_GUIDE에 기록. 임계 미달 누적은 침묵(피로 방지 — ADR-101은 dep 원장이 아님). 휴리스틱 한계 echo(키워드/lockfile diff 기반 — false negative 가능).
 ### 6.5. DISCOVERY ↔ Charter staleness 감지 (ADR-035#amend-1)
 
 다음 4 시그널을 점검한다 (보고만, 자동 차단 X — validator 책임 경계 정합).
