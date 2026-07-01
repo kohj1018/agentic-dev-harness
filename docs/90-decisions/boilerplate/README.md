@@ -34,7 +34,7 @@
 | 038 | Cross-LLM Plan Validation + Parallel Waves | accepted (#d3·#d6·#amend-3 superseded by 051) | (+#amend-1: Plan Quality 8 → 10 차원 — ADR-027#amend-1 양립, +#amend-2: 리뷰 파일 충돌 정정 — 덮어쓰기→자동 suffix, +#amend-3: file overlap 정책 정정 — 명시적 write_set 결정적 wave 분리 — *ADR-051이 write_set 5필드와 함께 폐지*, +#amend-4: milestone-plan mode — FAC 가짜P0 수정 + milestone 4차원) | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설. ~~wave 그룹 echo + worktree 권장~~(ADR-051 제거) |
 | 039 | Workitem Type 분류 | accepted | — | task/feature에 Type 필드(feature/technical-enabler/bugfix/refactor/migration/research-spike) |
 | 040 | 외부 리서치 capability | accepted | (+#amend-1: 의존성 설치 authoring/실행, +#amend-2: builder Needs-Research soft 게이트 + 오케스트레이터 자동 위임 + install-ownership 3분할 boundary, +#amend-3: 소스 품질 규율 + Agent-보유 stale note 정정) | researcher agent + /research-pack skill, report-only 웹 접근 |
-| 041 | 스택 추천 + 마이그레이션 contract | accepted | — | bootstrap-stack --recommend(확정 전 2~3조합) / --migrate(expand-contract contract ADR) |
+| 041 | 스택 추천 + 마이그레이션 contract | accepted (D1 superseded by 055) | — | --migrate(expand-contract contract ADR) 유지 / --recommend(D1)은 ADR-055 입력 적응형 DEEP 흐름으로 흡수 |
 | 042 | UX 흐름 품질 (HEART) | accepted | — | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 |
 | 043 | Optional MCP Connectors | accepted | — | 기본 자동연결 X + STACK_SETUP_PLAN 연결 절차(researcher 기반, 전용 skill 없음) + 보안 가드 |
 | 044 | Cross-LLM Discovery Validation | accepted | — | /validate-discovery + /repair-discovery (기획 층 peer review, ADR-038 패턴 mirror) + reviewer discovery surface |
@@ -48,6 +48,7 @@
 | 052 | Stack provisioning (install) + E2E readiness | accepted | — | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) |
 | 053 | 고-stakes 설계 패널 (stakes-gated design protocol) | accepted | — | stakes 게이트(S1~S5) + 3단 강도(리서치·다각도·적대) + ARCHITECTURE §7 결정 블록 + stabilize backstop |
 | 054 | Cross-LLM Stabilize Review | accepted | — | /validate-milestone 신설(read-only peer review) + repair-milestone 종합·dedup·echo-rm + stabilize single-origin + .gitignore |
+| 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
 
 ## Reserved / Parked / Dropped 번호
 

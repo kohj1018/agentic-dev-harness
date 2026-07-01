@@ -111,6 +111,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Code-as-Agent-Harness 패러다임 + Harness Mutation Contract | [ADR-047](../90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) (정책 SSOT). → ADR-047 `## Surfaces` 참조 (fan-out SSOT). |
 | 메인 세션 오케스트레이션(foreman·fan-out)·wave 제거 | [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) (정책 SSOT). → ADR-051 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
+| Stack 결정 taxonomy (T1 기초 / T2 마이그레이션 / T3 라이브러리 추가) + 입력 적응형 bootstrap-stack 흐름 | [ADR-055](../90-decisions/boilerplate/ADR-055-input-adaptive-stack-flow.md) (정책 SSOT). → ADR-055 `## Surfaces` 참조 (fan-out SSOT). |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 context-pack)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

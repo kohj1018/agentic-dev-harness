@@ -3,7 +3,7 @@
 > scope: boilerplate
 
 ## Status
-accepted
+accepted (D1 `--recommend` 부분 superseded by ADR-055 — 입력 적응형 DEEP 흐름으로 흡수. D2 `--migrate` contract는 유지)
 
 ## 배경
 - [관측됨] `/bootstrap-stack`은 "프로젝트 스택이 명확해진 이후"를 전제한다 — 확정 *전* 추천 자리가 없어 사용자가 스택을 즉흥 선택한다.
