@@ -63,14 +63,16 @@
 
 ### 2단계: 스택 세팅
 
-스택이 정해지면:
+`/bootstrap-stack`은 입력 적응형이다. 스택이 정해졌으면 입력을 문서화하고, 미정이면 무입력(또는 모호한 입력)으로 실행해 리서치로 옵션을 조사한 뒤 2~3개 조합을 트레이드오프·추천과 함께 라운드로 제시하고, 선택되면 한 세션에서 산출물까지 작성한다:
 
 ```text
-/bootstrap-stack [스택/런타임 설명]
+/bootstrap-stack [스택/런타임 설명]        # 이미 정함 → 문서화
+/bootstrap-stack                          # 미정 → 심층 결정 라운드
+/bootstrap-stack --migrate [새 스택]       # 스택 변경 (타깃 미정이면 라운드)
 /stack-guard
 ```
 
-`/bootstrap-stack`은 스택 선택을 문서화하고 필요한 자동화 방향을 정리한다. `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행하면 통합 `validate` 진입점과 verify 스크립트가 생성된다. 프론트엔드 스택이 감지되면 `/bootstrap-design`도 함께 실행해 `docs/20-system/DESIGN.md`를 채운다 ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
+`/bootstrap-stack`은 결정(미정 시 리서치+라운드) 또는 문서화를 수행하고 필요한 자동화 방향을 정리한다. `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행하면 통합 `validate` 진입점과 verify 스크립트가 생성된다. 프론트엔드 스택이 감지되면 `/bootstrap-design`도 함께 실행해 `docs/20-system/DESIGN.md`를 채운다 ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
 
 ### 3단계: 분해 → 구현 → 마감
 

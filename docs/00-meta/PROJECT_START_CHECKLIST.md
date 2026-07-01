@@ -20,6 +20,7 @@
 - [ ] 첫 milestone/feature 문서가 생성되었다
 
 ## 2. 운영 결정 (스택 확정)
+> 스택이 아직 미정이면 이 절을 건너뛰고 `/bootstrap-stack`을 *무입력*으로 실행해 리서치+라운드로 결정할 수 있다(입력 적응형). 이미 정했으면 아래를 채운 뒤 `[스택 설명]`을 넘긴다.
 - [ ] 운영 OS/셸 전제를 정했다
 - [ ] 언어/프레임워크를 정했다
 - [ ] 패키지 매니저를 정했다
@@ -28,7 +29,7 @@
 
 ## 3. guardrail 추가
 - [ ] `docs/00-meta/GUARDRAILS_STRATEGY.md`를 읽었다
-- [ ] 스택이 정해진 뒤 `/bootstrap-stack [스택 설명]`을 실행했다
+- [ ] `/bootstrap-stack`을 실행했다 — 스택이 정해졌으면 `[스택 설명]`을 넘겨 문서화, 미정이면 무입력으로 심층 결정 라운드
 
   ```
   /bootstrap-stack Next.js 16 + TypeScript + pnpm + Supabase + Playwright + Vercel

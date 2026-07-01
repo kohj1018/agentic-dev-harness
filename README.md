@@ -64,14 +64,16 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 
 ### Step 2: Set Up Stack
 
-Once your stack is decided:
+`/bootstrap-stack` is input-adaptive. If you already know your stack, pass it and it is documented directly. If you are undecided, run it with no (or vague) input and it researches options, presents 2-3 combinations with tradeoffs and a recommendation over rounds, and — once you choose — authors everything in one session:
 
 ```text
-/bootstrap-stack [stack/runtime description]
+/bootstrap-stack [stack/runtime description]   # decided → document
+/bootstrap-stack                               # undecided → deep decision rounds
+/bootstrap-stack --migrate [new stack]         # stack change (rounds if target undecided)
 /stack-guard
 ```
 
-`/bootstrap-stack` documents stack choices and outlines needed automation. Then run `/stack-guard` after reviewing `STACK_SETUP_PLAN.md` — it generates the unified `validate` entrypoint and verify scripts. If a frontend stack is detected, also run `/bootstrap-design` to populate `docs/20-system/DESIGN.md` ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
+`/bootstrap-stack` decides (research + rounds when undecided) or documents stack choices and outlines needed automation. Then run `/stack-guard` after reviewing `STACK_SETUP_PLAN.md` — it generates the unified `validate` entrypoint and verify scripts. If a frontend stack is detected, also run `/bootstrap-design` to populate `docs/20-system/DESIGN.md` ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
 
 ### Step 3: Plan → Implement → Ship
 
