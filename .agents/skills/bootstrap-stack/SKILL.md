@@ -1,6 +1,6 @@
 ---
 name: bootstrap-stack
-description: Use ONLY when the user explicitly types `$bootstrap-stack <stack-and-runtime-summary>`. Do not trigger implicitly from generic phrasing.
+description: Use ONLY when the user explicitly types `$bootstrap-stack [stack summary | empty for a recommendation | --migrate]`. Do not trigger implicitly from generic phrasing.
 ---
 
 Source of truth: `.claude/skills/bootstrap-stack/SKILL.md`. Read it and follow the workflow.
