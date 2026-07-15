@@ -1,20 +1,20 @@
 # IMPROVE-GUIDE — 2026-07 개선 라운드 실행 가이드
 
 이 가이드는 2026-07 개선 라운드의 확정 결정 전체를 repo에 적용하는 단계별 행동 지침이다.
-위에서 아래로 Stage 순서대로 실행한다. 각 Stage 는 자기완결이며 Stage 끝의 커밋 단위로 원자 적용한다.
+위에서 아래로 Stage 순서대로 실행한다. 각 Stage는 자기완결이며 Stage 끝의 커밋 단위로 원자 적용한다.
 
 ## 실행 규칙 (모든 Stage 공통)
 
 1. **실행 순서**: Stage 0A → 0B → 1A → 1B → 1C → 2 → 3 → 4 → 5. (0A/0B는 상호 독립이라 순서 교환 가능. 1A→1B→1C→2→3은 앞 Stage 산출물을 뒤 Stage가 인용하므로 반드시 직렬.)
 2. **커밋**: 각 Stage 끝의 "커밋" 항목에 적힌 파일만 명시적으로 `git add` 한다 (`git add -A` / `git add .` 금지 — AGENTS.md 규율). 커밋 메시지는 각 Stage에 제공된 한 줄을 사용한다.
-3. **"현재:" 인용**: 이 가이드의 before 인용은 2026-07-14 HEAD(48b0af7) 기준이다. 인용문이 파일과 1글자라도 다르면 그 주변 문맥(섹션 제목·키워드)으로 위치를 찾아 의도대로 적용하고, 의도 자체가 성립 불가능하면 멈추고 사용자에게 보고한다.
+3. **"현재:" 인용**: 이 가이드의 before 인용은 가이드가 커밋된 2026-07-14 repo 상태(3f18f93) 기준이다. 인용문이 파일과 1글자라도 다르면 그 주변 문맥(섹션 제목·키워드)으로 위치를 찾아 의도대로 적용하고, 의도 자체가 성립 불가능하면 멈추고 사용자에게 보고한다.
 4. **ADR 거버넌스 (이번 라운드는 umbrella 방식 — ADR-051/052 선례)**: 신규 ADR은 **2개만**(ADR-056 경험 계약·voice / ADR-057 플래닝 v2·seam) 만들고, 나머지 정책은 전부 **기존 ADR의 Amendment**로 담는다. 신규 ADR 작성 Stage에서 `docs/90-decisions/boilerplate/README.md`의 "Boilerplate ADR" 표에 한 줄 추가하고, Amendment를 추가한 Stage에서는 해당 행 "Amendments" 컬럼에 `+#amend-N: <키워드>`를 덧붙인다.
 5. **`.agents/skills/` wrapper**: 기존 wrapper는 15줄 thin pointer라 `.claude/skills/*/SKILL.md` 본문 수정 시 자동 반영된다 — 본문만 고치면 되고 wrapper는 건드리지 않는다(신설만 Stage 0A에서 수행).
 6. **날짜**: Amendment 날짜는 실제 적용일을 쓴다(이 가이드는 `2026-07-14`로 표기 — 적용일이 다르면 교체).
 7. 이 가이드 파일 자체는 어떤 산출물에서도 링크·인용하지 않는다(완료 후 사용자가 삭제).
 8. **라운드는 통째로 적용한다**: Stage 간 예고 참조가 여럿 있다(1B의 ADR-056이 1C의 designer·R1 voice 훅과 Stage 2·3의 R5·`--refresh`를 예고 참조, Stage 3이 0B의 ADR-051#amend-2 앵커를 참조 등). 실행 순서를 지키면 전부 해소되지만, **라운드를 중간에 끊고 stabilize를 돌리면 [Ref-anchor]/[ADR-ref] preflight가 미존재 앵커를 P1로 보고**한다 — 전 Stage 적용 후 검증할 것.
 9. **한 파일이 한 Stage 안에서 여러 커밋에 걸치면**(Stage 3의 plan-workitem·TASK_TEMPLATE) 편집을 한꺼번에 하지 말고 **커밋 순서대로 "그 커밋 대상 편집 → 커밋"을 반복**한다(파일 단위 add만 가능 — 부분 스테이징 불가).
-10. **ADR-045 D6 거버넌스 노트**: ADR-007(amend 4개)·ADR-027(amend 4개)은 "다음 변경 시 통합 재발행 우선 검토" 대상이지만, 이번 라운드는 사용자 지시(신규 ADR 최소화)로 **amendment를 유지하고 재발행은 의도적으로 보류**한다(다음 변경 라운드의 재발행 후보로 기록). 대신 D5 트리거(amend 4+)에 따라 두 ADR에 `## 현재 유효 결정` 요약을 신설/갱신한다(ADR-027 갱신=Stage 1B, ADR-007 신설=Stage 2, ADR-007 요약의 lifecycle 줄 동기=Stage 3).
+10. **ADR-045 D6 거버넌스 노트**: ADR-007(amend 4개)·ADR-027(amend 4개)은 "다음 변경 시 통합 재발행 우선 검토" 대상이지만, 이번 라운드는 사용자 지시(신규 ADR 최소화)로 **amendment를 유지하고 재발행은 의도적으로 보류**한다(다음 변경 라운드의 재발행 후보로 기록). 대신 D5 트리거(amend 4+ 또는 base 결정을 뒤집는 amendment)에 따라 `## 현재 유효 결정` 요약을 신설/갱신한다(ADR-010=Stage 0A, ADR-044·054 신설=Stage 0A, ADR-027 갱신=Stage 1B, ADR-049 갱신=Stage 1C, ADR-007 신설=Stage 2, ADR-007 요약의 lifecycle 줄 동기=Stage 3). **일반 원칙: 기존 `## 현재 유효 결정` 요약을 가진 ADR에 amendment를 얹을 때는 그 요약도 같은 커밋에서 갱신한다** — 요약만(또는 본문만) 고치면 요약↔본문 모순을 새로 만든다. base 결정을 뒤집는 변경(ADR-049#amend-2, ADR-044/054#amend-1)도 같은 사용자 지시(신규 ADR 최소화)로 supersede 신규 ADR 대신 amendment로 담는다 — ADR-045 D6 표의 의도적 예외이며, 각 amendment의 반전 근거 명시 + D5 요약 신설이 보완 장치다(해당 ADR들도 다음 라운드 재발행 후보).
 
 ## 전체 그림 (무엇이 왜 바뀌나)
 
@@ -56,7 +56,7 @@
 - 본 개정은 ADR-054 Falsifying evaluation의 후퇴가 아니라 *접근성 수정* — read-only/single-origin·opt-in 성격은 전부 보존.
 
 ### Mutation Contract (ADR-047 D3, 압축)
-- Target: wrapper 6파일 신설 / README 2종 목록 / ADR-044·054 표기 / stabilize preflight 7 / validate-milestone SKILL Codex 단락 / 자연어 5종 본문 1줄.
+- Target: wrapper 6파일 신설 / README 2종 목록 + 트리 라벨 / ADR-044·054 표기 amendment + `## 현재 유효 결정` 신설 / ADR-010 본문 과잉보장 정정 4곳 + 요약 정정 2곳 / stabilize preflight 7 / validate-milestone SKILL Codex 단락 / 자연어 5종 본문 1줄.
 - Failure mode: cross-LLM 리뷰 skill이 Codex에서 발견 불가(관측됨).
 - Predicted improvement: Codex `$` 표면에 가족 6종 전부 노출, 번역 규칙 모순 소멸.
 - Preserved invariants: D3/D4(wrapper=thin pointer), #amend-3(자연어 목록 SSOT=README), 각 skill의 read-only/opt-in 계약.
@@ -67,11 +67,22 @@
 - constraint(강, [관측됨]) — wrapper·README 동일 커밋 + preflight 체크. 나머지 enabling.
 ```
 
-**추가 in-place 정정 (같은 파일 — 보안 과잉 보장 문구 보수)**: ADR-010 `## 현재 유효 결정`의 `.codex/config.toml = 안전 baseline(secrets 차단 포함) + Codex 모델 ID 추적 (D5·D8).` bullet을 → `.codex/config.toml = 안전 baseline + Codex 모델 ID 추적 (D5·D8). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**.`로 정정한다. 근거: [관측됨] `.codex/config.toml` 주석("Native Windows unelevated sandbox cannot enforce split read/write carveouts... Secret files remain protected by AGENTS.md policy")과 ADR 요약이 불일치 — 문서가 실제보다 강하게 보장하고 있었다. (config.toml 자체의 보안 재설계는 본 라운드 비범위 — `codex doctor` 실측이 필요한 별도 작업으로 이월.)
+**추가 in-place 정정 (같은 파일 — 아래 6곳을 같은 커밋에서 모두 수정한다. 일부만 고치면 요약↔본문 모순이 남는다 — 실행 규칙 10)**:
+
+근거: [관측됨] `.codex/config.toml` 실물에는 `boilerplate-secure` 프로파일이 없고(legacy `sandbox_mode = "workspace-write"` 유지) 상단 주석이 "Native Windows unelevated sandbox cannot enforce split read/write carveouts... Secret files remain protected by AGENTS.md policy"라고 명시 — ADR-010의 여러 곳이 실제보다 강하게 보장하고 있었다. (config.toml 자체의 보안 재설계는 본 라운드 비범위 — `codex doctor` 실측이 필요한 별도 작업으로 이월.)
+
+1. **`## 현재 유효 결정`의 config bullet** — 현재: `` - `.codex/config.toml` = 안전 baseline(secrets 차단 포함) + Codex 모델 ID 추적 (D5·D8). `` → 변경: `` - `.codex/config.toml` = 안전 baseline + Codex 모델 ID 추적 (D5·D8). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**. `` (`.codex/config.toml`을 감싼 백틱은 원문대로 유지.)
+2. **`## 현재 유효 결정`의 wrapper bullet** — 현재: `Codex wrapper는 inner-loop 빈도 높은 skill에만 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).` → 변경: `Codex wrapper는 inner-loop 빈도 높은 skill + **cross-LLM 리뷰 skill과 그 repair 짝(빈도 무관 필수 — #amend-4)**에 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).` (amend-4를 추가하면서 요약을 안 고치면 정면 모순.)
+3. **`## 결정` 표 D5 행** — 현재: `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, secrets 차단, 모델). → 변경: `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, 모델. **secrets 차단은 Windows unelevated에서 OS-강제 불가 — AGENTS 정책 의존, 파일 주석 참조**).
+4. **`## 도구 표면 매핑` 표의 "Read 차단" 행** — Codex 셀 현재: `.codex/config.toml` `permissions.boilerplate-secure.filesystem` → 변경: `AGENTS.md 정책 의존 (Windows unelevated sandbox — OS-강제 불가, config.toml 주석 참조)`. SSOT 셀의 "양쪽 동시 — 동일 결과를..." 표현도 `Claude=OS-강제 / Codex=정책 의존 (비대칭 — config.toml 주석 SSOT)`로 정정.
+5. **`## 후속 작업`의 "`boilerplate-secure` permissions 프로파일 적용 (2026-05-28)" bullet** — 문두에 정정 노트 추가(이력은 보존): `**[정정 2026-07-14: 본 프로파일은 현재 config.toml에 적용돼 있지 않다(legacy workspace-write 유지 — Windows unelevated 한계, 파일 주석 참조). 아래는 이력 보존용 서술.]** ` 그대로 기존 본문 앞에 붙인다.
+6. **`## 결과`의 config bullet** — 현재: `` - `.codex/config.toml` 안전 baseline (boilerplate-secure permissions 프로파일 포함, upstream default는 박지 않음). `` → 변경: `` - `.codex/config.toml` 안전 baseline (legacy `sandbox_mode` 유지 — `boilerplate-secure` 프로파일은 미적용, 한계는 파일 주석 참조. upstream default는 박지 않음). ``
 
 ## 0A-2. wrapper 6파일 신설
 
-`.agents/skills/validate-plan/SKILL.md`(15줄 stub)와 `agents/openai.yaml`(2줄)을 패턴으로 3종을 만든다.
+`.agents/skills/validate-plan/SKILL.md`(15줄 stub)와 `agents/openai.yaml`(2줄)을 패턴으로 3종을 만든다. 대상 디렉터리가 이미 존재하면(중단된 이전 적용의 잔재) 내용을 본 지시와 일치하게 덮어쓴다.
+
+**번역 완전성 원칙**: 각 wrapper의 Slash command translation 단락은 *canonical 본문에 등장하는 모든* `/skill` 명령을 커버해야 한다 — 작성 직전 본문을 `grep -oE "/[a-z][a-z-]+"`로 실측하고(파일 경로 안의 조각 match는 무시), wrapper 보유 skill은 `$<name>`으로, 자연어 skill은 "Follow `.claude/skills/<name>/SKILL.md`" 문구로 안내한다(일부만 번역하면 Codex 사용자가 무효 `/` 명령을 권장받는다). 아래 (1)(3)(5)의 명령 목록은 2026-07-14 본문 실측값.
 
 **(1) `.agents/skills/validate-milestone/SKILL.md`** (새 파일):
 
@@ -85,7 +96,7 @@ Source of truth: `.claude/skills/validate-milestone/SKILL.md` (skill 신설 근�
 
 Treat all frontmatter keys other than `name` and `description` (e.g., `agent:`, `disable-model-invocation:`, `allowed-tools:`, `context:`, `argument-hint:`, `model:`, `effort:`) as Claude-only and ignore them — execute locally in Codex.
 
-**Slash command translation**: 본문 안의 `/validate-milestone` 표기는 Claude 슬래시 커맨드다. Codex에서는 `$validate-milestone`으로 읽고 사용자에게 안내한다. 본문에 등장하는 `/repair-milestone`은 `$repair-milestone`, `/stabilize-milestone`은 `$stabilize-milestone`으로 안내. Codex CLI는 `/`를 빌트인 슬래시 커맨드에 쓰므로 명시적 치환이 필요.
+**Slash command translation**: 본문 안의 `/validate-milestone` 표기는 Claude 슬래시 커맨드다. Codex에서는 `$validate-milestone`으로 읽고 사용자에게 안내한다. 본문에 등장하는 `/repair-milestone`은 `$repair-milestone`으로 안내. Codex CLI는 `/`를 빌트인 슬래시 커맨드에 쓰므로 명시적 치환이 필요.
 
 Preserve all repo policies from `AGENTS.md` and `docs/`.
 
@@ -99,11 +110,11 @@ policy:
   allow_implicit_invocation: false
 ```
 
-**(3) `.agents/skills/validate-discovery/SKILL.md`** (새 파일): (1)과 동일 구조로 작성하되 — `name: validate-discovery`, description의 명령을 `$validate-discovery`로, Source of truth를 `.claude/skills/validate-discovery/SKILL.md` (skill 신설 근거: ADR-044; wrapper 승격: ADR-010#amend-4)로, 번역 단락을 `/validate-discovery`→`$validate-discovery`, `/repair-discovery`→`$repair-discovery`, `/discover-product`는 자연어 호출("Follow .claude/skills/discover-product/SKILL.md")로 안내.
+**(3) `.agents/skills/validate-discovery/SKILL.md`** (새 파일): (1)과 동일 구조로 작성하되 — `name: validate-discovery`, description의 명령을 `$validate-discovery`로, Source of truth를 `.claude/skills/validate-discovery/SKILL.md` (skill 신설 근거: ADR-044; wrapper 승격: ADR-010#amend-4)로, 번역 단락(본문 실측: 3개 명령 + 자연어 1종)을 `/repair-discovery`→`$repair-discovery`, `/validate-plan`→`$validate-plan`, `/validate-discovery`(자기 참조 시)→`$validate-discovery`, `/discover-product`는 자연어 호출("Follow .claude/skills/discover-product/SKILL.md")로 안내.
 
 **(4) `.agents/skills/validate-discovery/agents/openai.yaml`**: (2)와 동일 2줄.
 
-**(5) `.agents/skills/repair-discovery/SKILL.md`** (새 파일): 동일 구조 — `name: repair-discovery`, Source of truth `.claude/skills/repair-discovery/SKILL.md` (ADR-044; wrapper 승격: ADR-010#amend-4), 번역 단락 `/repair-discovery`→`$repair-discovery`, `/validate-discovery`→`$validate-discovery`.
+**(5) `.agents/skills/repair-discovery/SKILL.md`** (새 파일): 동일 구조 — `name: repair-discovery`, Source of truth `.claude/skills/repair-discovery/SKILL.md` (ADR-044; wrapper 승격: ADR-010#amend-4), 번역 단락(본문 실측: 마지막 출력·비교 문맥의 명령 포함 4개) — `/validate-discovery`→`$validate-discovery`, `/bootstrap-project`→`$bootstrap-project`, `/plan-workitem`→`$plan-workitem`, `/repair-plan`→`$repair-plan` (뒤 3개를 빠뜨리면 본문 마지막 출력이 Codex에서 무효 `/` 명령을 권장하게 됨).
 
 **(6) `.agents/skills/repair-discovery/agents/openai.yaml`**: (2)와 동일 2줄.
 
@@ -122,7 +133,11 @@ policy:
 현재: `` For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`, `validate-milestone`), invoke in natural language ``
 변경: 목록을 `` (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`) ``로 축소.
 
-**README_ko.md** — 같은 세 위치(항목 2·3·4)를 한국어 문면으로 동일하게 반영.
+**README.md 항목 5 (구조 트리 라벨 정정)** —
+현재(:130): `├── .codex/            # Codex CLI project config (boilerplate-secure baseline)`
+변경: 괄호 부분을 `(safety baseline — limits in config.toml comments)`로 교체. 0A-1 정정과 같은 과잉 보장 계열 — `boilerplate-secure` 프로파일은 실제 config.toml에 적용돼 있지 않다.
+
+**README_ko.md** — 같은 네 위치(항목 2·3·4·5)를 한국어 문면으로 동일하게 반영(항목 5는 :129 트리 라벨 → `(안전 baseline — 한계는 config.toml 주석 참조)`).
 
 ## 0A-4. ADR-054 / ADR-044 superseded 표기 amendment
 
@@ -134,12 +149,34 @@ policy:
 결정 5(Codex wrapper 미생성 — 자연어 호출)는 [ADR-010 Amendment 4](ADR-010-multi-agent-compatibility.md#adr-010-amend-4)가 supersede한다 — `.agents/skills/validate-milestone/` wrapper가 신설되어 Codex에서 `$validate-milestone`으로 호출한다. 근거: [관측됨] 자연어 호출의 Codex discoverability 0으로 실전 실패. read-only·single-origin·opt-in 등 나머지 결정은 불변.
 ```
 
+**추가 in-place (같은 파일, 같은 커밋)**: 본 amendment는 base 결정(결정 5)을 뒤집으므로 ADR-045 D5 요약 트리거에 해당 — `## Status` 바로 아래에 다음을 신설한다:
+
+```markdown
+## 현재 유효 결정
+- `/validate-milestone <M> [--reviewer-tag <tag>]` = stabilize 판단층(qa·reviewer 축)의 **읽기 전용 cross-LLM 2nd opinion** — 산출물은 임시 리뷰 파일 `docs/40-validation/stabilize-reviews/<M>.<tag>.md` 1개뿐. 코드·문서 수정과 validate/e2e/audit *실행*은 일체 금지.
+- 실행·tracked-doc 기록·졸업 판정은 **stabilize-milestone(origin)의 single-origin** — 같은 checkout에서 stabilize 동시 실행 금지.
+- 리뷰 회수는 `/repair-milestone`: adopt/adopt-modified/reject-FP/reject-conflict 판정·dedup·적용 후 리뷰 파일 삭제.
+- verdict는 리뷰 라벨일 뿐 워크플로 차단 아님. 전체 흐름은 opt-in.
+- Codex 호출: `$validate-milestone`(wrapper — #amend-1; 구 결정 5의 자연어 정책 superseded).
+```
+
 **`docs/90-decisions/boilerplate/ADR-044-cross-llm-discovery-validation.md`** 파일 끝에 추가:
 
 ```markdown
 <a id="adr-044-amend-1"></a>
 ## Amendment 1 (2026-07-14) — Codex 호환 단락 supersede (ADR-010#amend-4)
 `## 결과`의 "Codex 호환 (의도적 비대칭)" 단락은 [ADR-010 Amendment 4](ADR-010-multi-agent-compatibility.md#adr-010-amend-4)가 supersede한다 — `validate-discovery`·`repair-discovery` wrapper가 신설되어 `$validate-discovery`/`$repair-discovery`로 호출한다. opt-in 성격·나머지 결정은 불변.
+```
+
+**추가 in-place (같은 파일, 같은 커밋)**: 결과 단락의 명시 정책을 뒤집는 amendment이므로 동일하게(ADR-045 D5) `## Status` 바로 아래에 다음을 신설한다:
+
+```markdown
+## 현재 유효 결정
+- `/validate-discovery [--reviewer-tag <tag>]` = 다른 세션·다른 LLM에서 DISCOVERY.md를 Discovery Quality 8차원으로 **읽기 전용** 비판 검토 — 산출물은 임시 리뷰 파일 `docs/40-validation/discovery-reviews/DISCOVERY.<tag>.md` 1개뿐. DISCOVERY·charter 수정 금지.
+- `/repair-discovery`(architect) = 원본 세션에서 리뷰 N개 회수 → adopt/adopt-modified/reject-FP/reject-conflict 판정 → DISCOVERY.md 수정 → 리뷰 파일 삭제.
+- charter는 건드리지 않는다 — sync는 `/bootstrap-project`(--apply) 경로(ADR-035).
+- verdict는 리뷰 라벨일 뿐 차단 아님. 전체 흐름은 opt-in.
+- Codex 호출: `$validate-discovery`/`$repair-discovery`(wrapper — #amend-1; 구 "의도적 비대칭" 자연어 정책 superseded).
 ```
 
 ## 0A-5. validate-milestone SKILL Codex 단락 교체
@@ -150,7 +187,7 @@ policy:
 
 ## 0A-6. 잔여 자연어 5종 — 본문 Codex 안내 일관화
 
-wrapper 미승격 5종(`discover-product`, `review-doc`, `boilerplate-context`, `research-pack`, `bootstrap-design`)은 본문에 Codex 언급이 0회라 Codex-only 사용자가 첫 단계부터 발견 실패할 수 있다. 각 skill의 `.claude/skills/<name>/SKILL.md` 본문(도입부 또는 "## 트리거" 부근)에 아래 1줄을 동일하게 추가한다:
+wrapper 미승격 5종(`discover-product`, `review-doc`, `boilerplate-context`, `research-pack`, `bootstrap-design`)은 본문에 Codex 언급이 0회라 Codex-only 사용자가 첫 단계부터 발견 실패할 수 있다. 각 skill의 `.claude/skills/<name>/SKILL.md` 본문(도입부 또는 "## 트리거" 부근)에 아래 1줄을 추가한다(`<name>`은 각 skill 이름으로 치환):
 
 `**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow \`.claude/skills/<name>/SKILL.md\""로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4).`
 
@@ -254,7 +291,7 @@ feat(validate): record orchestration mode in report and fix small-diff fallback 
 3. **한계 정직 보고**: 일반 HTML 페이지는 fetch 시 markdown 변환으로 stylesheet URL·CSS가 소실된다([관측됨] 2026-07-14 실측). stylesheet URL을 발견할 수 없으면 "추출 불가 — <사유>"를 반환하고 날조하지 않는다. CSS-in-JS/Tailwind JIT 사이트는 수율 낮음을 명시.
 4. **값 복제 금지 규율**: 추출 토큰은 *구조 학습용*(스케일 짜임새·시맨틱 네이밍·대비 수치) — 특정 서비스 값의 통째 복제는 클론화라 금지. what-to-borrow/avoid 판단(bootstrap-design R0)이 계속 관문.
 ### 근거
-- [관측됨] bootstrap-design R0의 무거운 분해가 웹 도구 없는 architect에 위임돼 있어 실 웹 grounding 경로가 0 → "모델 지식 기반" fallback으로 median 회귀(ADR-049#amend-1 근거가 자인한 슬롭 근본원인 — 줄번호 참조 금지, ADR-045 D1). 텍스트 4축 요약은 코드 증거가 없어 R2 concept 생성 입력이 빈약.
+- [관측됨] bootstrap-design R0의 무거운 분해가 웹 도구 없는 architect에 위임돼 있어 실 웹 grounding 경로가 0 → "모델 지식 기반" fallback으로 median 회귀(ADR-049#amend-1 근거가 자인한 슬롭 근본원인). 텍스트 4축 요약은 코드 증거가 없어 R2 concept 생성 입력이 빈약.
 - [외부실증] 오픈소스 디자인 토큰 패키지는 대형 실서비스의 진짜 값 + 시맨틱 이름 + 주석을 오픈 라이선스로 제공(2026-07-14 Primer·Polaris fetch 실측).
 ### 강도 (ADR-022)
 - enabling(약) — report-only 불변, 모드 추가.
@@ -300,13 +337,13 @@ feat(researcher): add design-reference mode with code-level token extraction (AD
 
 # Stage 1B — ADR-056 작성 + Voice & Writing 규칙서 적용
 
-목적: **신규 umbrella ADR-056(마일스톤 경험 계약)을 이 Stage에서 작성**한다 — 경험 계약의 세 축이 "화면이 어떻게 보이고(레이아웃·상태), 눌렀을 때 뭐가 일어나고(인터랙션), **무슨 말이 쓰여 있는지(voice)**"이므로 voice 규칙서는 별도 ADR이 아니라 ADR-056의 결정 8~11로 담는다. 이 Stage는 그중 **Voice 파트(결정 8~11)만 적용**하고, 프로토타입·게이트 파트(결정 1~7)는 Stage 2가 적용한다. (죽은 필드였던 FEATURE §8-1 copy 톤(downstream 소비자 0)은 "§10 delta"로 재정의해 회생.)
+목적: **신규 umbrella ADR-056(마일스톤 경험 계약)을 이 Stage에서 작성**한다 — 경험 계약의 세 축이 "화면이 어떻게 보이고(레이아웃·상태), 눌렀을 때 뭐가 일어나고(인터랙션), **무슨 말이 쓰여 있는지(voice)**"이므로 voice 규칙서는 별도 ADR이 아니라 ADR-056의 결정 8~11로 담는다. 이 Stage는 그중 **Voice 파트(결정 8~11)만 적용**하고, 프로토타입·게이트 파트(결정 1~7)와 학습 채널(결정 12)은 Stage 2가 적용한다. (죽은 필드였던 FEATURE §8-1 copy 톤(downstream 소비자 0)은 "§10 delta"로 재정의해 회생.)
 
 > 참고: ADR-056 본문(결정 2·Surfaces)은 designer agent를 참조하는데, designer.md는 바로 다음 Stage 1C에서 신설된다 — 같은 라운드 내 예고 참조라 정상(1C 완료 전에는 R5를 실행하지 않으므로 기능적 dangling 없음).
 
 ## 1B-1. 신규 ADR 작성 — `docs/90-decisions/boilerplate/ADR-056-milestone-experience-contract.md`
 
-전체 내용 (새 파일 — 결정 1~7은 Stage 2에서, 결정 8~11은 본 Stage에서 적용):
+전체 내용 (새 파일 — 결정 1~7·12는 Stage 2에서, 결정 8~11은 본 Stage에서 적용):
 
 ```markdown
 # ADR-056 — 마일스톤 경험 계약 (프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서)
@@ -323,22 +360,22 @@ accepted
 - [관측됨] reviewer[design]은 grep 기반 토큰 대조만 가능했다 — 렌더 증거(스크린샷) 생산·주입 파이프라인 부재. 단 Playwright는 stack-guard가 UI 프로젝트에 선설치(ADR-052 D1)하고 Read 도구는 이미지를 읽을 수 있어 MCP 없이도 기술적으로 가능하다.
 - [관측됨] voice/UX writing 규칙서가 repo 어디에도 없다 — 카피 관련 항목은 FEATURE §8-1 "copy 톤" 필드뿐이고 그마저 downstream 소비자 0인 죽은 필드. 전역 규칙 없이 feature 필드만 있어 feature마다 톤이 즉흥 재결정된다(ADR-027이 시각에 진단한 "명시 결정 자리 부재 → 매번 즉흥 결정"과 동형). placeholder 카피 금지 규칙도 0건.
 
-## 결정 — A. 경험 계약 (1~7, Stage 적용: 프로토타입·게이트)
+## 결정 — A. 경험 계약 (1~7 — 프로토타입 라운드·게이트)
 1. **승인 프로토타입 산출물 (경험 계약 SSOT)** — UI 확정(ADR-027#amend-3) 마일스톤은 **화면 단위** 자기완결 HTML 프로토타입을 `docs/20-system/prototypes/M<N>/<screen>.html`에 둔다(**커밋 대상**, lifecycle: Record — 재승인 시 같은 파일 *대체*, presence: conditional). **화면-키(screen-keyed)인 이유**: [관측됨] 실사용에서 한 화면은 여러 feature 표면의 합성이고 그 합성층을 아무도 설계하지 않아 품질이 무너졌다 — feature별 파일은 한 화면을 3~4개 프로토타입으로 쪼개 합성층 고아 문제를 재생산한다(단일 화면 feature는 화면명=feature 슬러그로 자연 수렴). feature 문서 `## 7`의 `프로토타입:` 참조 줄이 그 feature가 등장하는 화면 파일(들)을 나열한다(feature↔화면 매핑은 이 참조 줄들로 유도). 경험 계약 범위 — *확정*: 레이아웃 / 인터랙션 결과(정적 HTML이므로 캡션·상태 클래스로 표기) / 실제 카피(§10) / 상태(happy + **못생긴 상태 의무 5종**: 긴 제목·빈 목록·로딩·에러·항목 과다). *열어둠*: 엔지니어링 내부(상태관리·fetch·컴포넌트 구조 — ARCH §7-4 영역). SSOT 삼각: DESIGN.md=전역 시각 토큰 / FEATURE §3·§7=시나리오·측정 / prototypes=화면 경험. 충돌 시 우선순위: DESIGN.md 토큰 > 프로토타입 > FAC 텍스트(화면·카피·상태의 구체 해석 한정 프로토타입 우선). 탐색 시안은 `docs/20-system/prototypes/M<N>/_drafts/`(gitignore — 버리는 것)와 경로로 구분.
-2. **plan-milestone R5 프로토타입 라운드** — R4 뒤 신설(UI 마일스톤 한정, 비-UI는 skip+사유 echo): R5-1 화면 목록 확정(feature당 대표 1화면 기본, 면제 feature는 이 시점 기록) → R5-2 브로드 시안 2~3안(designer 위임 — divergence 카드 차용, DESIGN.md 토큰만 참조) → R5-3 선택·수정 루프(취향 오라클=사용자, 2사이클 미수렴 시 brief 수정) → R5-4 경험 계약 완성(못생긴 상태 5종 + 실카피 + 인터랙션 캡션 + `:root` 토큰 참조 — 의무 체크리스트) → R5-5 승인 시 커밋 경로(`<screen>.html`) 저장 + 승인 직전 raw hex 1회 grep + feature 문서 `## 7`에 프로토타입 참조 줄(화면 파일 + 진입 메모) + `_drafts/` 내 시안 파일 삭제. **`/plan-milestone M<N> --prototype [F-NNN]`** 재진입 모드(R0~R4 skip — 마일스톤 중간 화면 변경·재승인).
+2. **plan-milestone R5 프로토타입 라운드** — R4 뒤 신설(UI 마일스톤 한정, 비-UI는 skip+사유 echo): R5-1 화면 목록 확정(feature당 대표 1화면 기본, 면제 feature는 이 시점 기록) → R5-2 브로드 시안 2~3안(designer 위임 — divergence 카드 차용, DESIGN.md 토큰만 참조) → R5-3 선택·수정 루프(취향 오라클=사용자, 2사이클 미수렴 시 brief 수정) → R5-4 경험 계약 완성(못생긴 상태 5종 + 실카피 + 인터랙션 캡션 + `:root` 토큰 참조 — 의무 체크리스트) → R5-5 승인 시 커밋 경로(`<screen>.html`) 저장 + 승인 직전 raw hex 1회 grep(`:root` 토큰 *정의* 블록 제외 — 자기완결 파일의 정의값 hex는 정상) + feature 문서 `## 7`에 프로토타입 참조 줄(화면 파일 + 진입 메모) + `_drafts/` 내 시안 파일 삭제. **`/plan-milestone M<N> --prototype [F-NNN]`** 재진입 모드(R0~R4 skip — 마일스톤 중간 화면 변경·재승인).
 3. **plan-workitem 입구 계약 (이중 잠금)** — UI **확정** feature 분해 시 해당 승인 프로토타입 참조도 면제 기록도 없으면 **`Needs Experience Contract`로 종료** + `--prototype` 안내(ADR-007#amend-3 `Needs Stack Guard` 동형 — ADR-007#amend-5로 예외 등재). UI **의심**(status=draft+신호)은 경고만(false positive 완충). opt-out: feature 문서에 `프로토타입 면제: <사유>` 기재 시 통과(TDD opt-out 동형 — 사유 영속). 배치 모드(ADR-057 결정 2)에서는 미충족 feature만 보류 목록으로 분리하고 나머지는 진행한다(전체 차단 X). 분해된 task `## 3`에 프로토타입 참조 line item을 plan이 authoring(builder는 기계 실행).
 4. **경험 좁힘 질문 규칙** — plan-workitem 9-1 self-check에 추가: "AC 해석이 프로토타입·상위 약속이 보여주는 사용자 체감(보이는 것·눌렀을 때·문안)을 *좁히면* 무조건 질문 — 내부 엔지니어링 선택은 자율". implement 단계 비대칭: builder의 AC-ambiguity 하드스탑에서 *경험 계약이 존재하는 slice의 보이는 것·문안 차이는 "사소한 표현 차이" 분류 금지*(silent narrowing 차단).
 5. **stabilize §3-V 경험 게이트 (스크린샷 vs 승인본)** — UI 확정 마일스톤이면 메인 세션이 앱 기동 → 핵심 화면(≤6~8, 기본 뷰포트 1종) Playwright CLI 스크린샷 → `docs/40-validation/visual/M-N/` 갤러리(gitignore ephemeral) → Read 멀티모달로 대조. **실행 자체는 UI 확정 마일스톤에서 의무 — silent skip 금지**(미실행 시 사유(blocked-on-env 등)를 최종 출력에 echo; *판정*은 report-only 유지 — ADR-052 e2e silent-skip 금지와 동형). **대조 앵커 위계: ① 커밋된 승인 프로토타입 `<screen>.html`(존재 시 — 같은 뷰포트로 file:// 렌더 캡처해 나란히 대조 가능) → ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면 fallback)**. 불일치는 `P1 [Experience-drift]` report-only(enabling — 졸업 필수 승격은 fork 실증 후 ratchet; MILESTONE item 6 선택 기준 예시 제공). 갤러리 경로를 최종 출력에 실어 사용자 육안 확인 유도(스펙 자체 오류는 인간 오라클). 환경 실패는 기존 blocked-on-env 라벨 재사용. `--dry-run`에는 미포함. Codex(멀티모달 편차): 갤러리 생성 + 사용자 수동 대조로 degrade. hot-loop 배치 금지(per-task validate에 넣지 않음 — ADR-049#amend-2 결정 7 carve-out 정합).
 6. **렌더 증거 주입** — stabilize design-surface reviewer 입력에 §3-V 갤러리 경로·visual-qa 결과를 주입(ADR-027#amend-6), reviewer는 Read로 이미지 열람.
 7. **grep 오탐 방지** — stabilize §5-2 raw hex grep 대상에서 `docs/20-system/prototypes/` 제외(자기완결 HTML — DESIGN.md 제외와 동형. 단 프로토타입 최종본은 `:root` 토큰 참조가 원칙이므로 위반 의심은 R5-4 체크리스트가 잡음).
 
-## 결정 — B. Voice & Writing 규칙서 (8~11, Stage 적용: §10 + 집행)
+## 결정 — B. Voice & Writing 규칙서 (8~11 — §10 규칙서 + 집행)
 8. **DESIGN.md §10 Voice & Writing 신설** (§9 뒤 — Stitch canonical 8섹션의 상대 순서 밖 추가라 lint 비위반, ADR-027 #d24 Motion 확장과 동일 논리. 섹션 목록 정정은 ADR-027#amend-5). 내용 스키마: (a) 존댓말·어조 규정(언어별 1줄), (b) 내부용어→사용자 언어 번역표, (c) 금지 표현 — *grep 가능 패턴*(정규식)과 *LLM-판정 규칙* 2분류(§9 Don'ts와 동형), (d) 표면별 예시 카피 4종(버튼/에러/빈 상태/확인 다이얼로그). **기본값 채움 + 확인 1회**: baseline placeholder에 opinionated 기본값(한국어 해요체·명령형 CTA 등)을 채워 두고 `/bootstrap-design` R1에서 "채택 or 변경"을 1회 확인(무확인 굳음 방지). **다운스트림 마이그레이션**: §10 신설 전 기존 fork(DESIGN.md에 §10 부재)는 plan-milestone R5 진입 시(또는 `/bootstrap-design --update`) §10을 기본값으로 신설 + 채택/변경 확인 1회로 흡수한다.
 9. **실카피 의무**: R2 concept·R5 마일스톤 프로토타입·R6 preview의 대표 화면은 charter 페르소나·시나리오 기반 실제 문구로 렌더. placeholder 카피 금지. §10 확정 전(R2) 카피는 "방향 선택용 후보"로 명시(SSOT 오인 방지).
 10. **voice 집행**: (a) stabilize deterministic preflight에 placeholder-카피 grep + §10 grep 가능 금지 패턴 grep(`P1 [Design-voice-grep]`), (b) reviewer Design Consistency 4→5차원(`[Design-voice]` — LLM 판정분) + [Plan-design] 차원에 §10 구절(reviewer·validate-plan 미러 양쪽 동기), (c) plan-workitem DESIGN cross-check에 "UI task 카피 §10 정합" 1줄, (d) validator UI 체크에 §10 정합 1줄.
 11. **FEATURE §8-1 재정의**: copy 톤 필드는 "§10 전역 규칙 대비 feature-특이 delta만 기록"으로 좁힌다(ADR-042#amend-1 동반). 비-UI 프로젝트는 기존 DESIGN.md 삭제 경로에 §10도 동반 삭제(별도 VOICE.md 신설 X — 파일 분리 기각).
 
-## 결정 — C. 경험 축 학습 채널 (12, Stage 적용: stabilize)
+## 결정 — C. 경험 축 학습 채널 (12 — stabilize)
 12. **stabilize instruction improvement에 경험 축 확인 추가**: 단계 8의 instruction improvement 후보 문단에 "경험·사용 관점 교훈(제품을 실제로 써 본 결과에서 나온 것) 유무를 별도로 확인" 1줄을 둔다 — [관측됨] 실사용에서 교훈이 검증-정교화 방향으로만 쌓이고 경험 축 교훈이 0건이었던 편향의 방지 장치.
 
 ## 비결정 (No)
@@ -456,7 +493,7 @@ FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milesto
 5. **[Design-voice]** — DESIGN.md `## 10. Voice & Writing` 위반(LLM-판정분): 어조 규정 위반(존댓말 혼용 등 grep이 못 잡는 문맥), 내부용어의 사용자 표면 노출, 금지 표현의 [LLM-판정] 항목. *grep 가능분(placeholder 카피 등)은 stabilize preflight 5-2b·validator가 담당* — 본 차원은 문맥 판정 + grep 누락분 백스톱만. DESIGN.md §10 부재 시 skip + 명시. (P1)
 ```
 
-- **surface 매핑 줄 동기**: 같은 파일 "호출 surface 명시" 목록의 `` `design`: Design Consistency 4 차원 `` 표기를 **5**로 갱신(제목만 바꾸면 본문 카운트와 자기모순).
+- **surface 매핑 줄 동기**: 같은 파일 "호출 surface 명시" 목록의 `` `design`: Design Consistency 4 `` 표기(:63 — 여기는 "차원" 없이 숫자만)를 **5**로 갱신(제목만 바꾸면 본문 카운트와 자기모순).
 - 같은 파일 Plan Quality 9번 [Plan-design] 본문 끝에 한 구절 추가: `/ **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056)`.
 - **validate-plan 미러 동기**: `.claude/skills/validate-plan/SKILL.md`의 검토 차원 9번 [Plan-design] 항목 끝에도 동일 구절(`/ UI task 카피가 DESIGN.md §10 위반·미참조 (ADR-056)`)을 추가한다 — reviewer와 validate-plan은 같은 차원 목록의 미러(한쪽만 고치면 drift).
 
@@ -525,7 +562,7 @@ context-pack: minimal
 - 레퍼런스 분해(R0): 코드 증거(추출 토큰 — researcher 디자인 레퍼런스 모드 산출)를 입력으로 color signature / typography pairing / density / motion 톤 + what-to-borrow / what-to-avoid를 분해한다.
 - 디자인 원칙(R1): actionable verb 원칙 3~5개. 모호어("modern/clean/sleek") 금지.
 - concept 시안(R2): divergence 카드에 따라 *서로 확실히 다른* 방향의 자기완결 HTML/CSS 시안을 authoring한다.
-- 마일스톤 화면 프로토타입(plan-milestone R5): 확정된 DESIGN.md 토큰(`:root` CSS 변수만 참조 — raw hex 금지) 위에서 화면 구성·인터랙션 주석·실카피·못생긴 상태(긴 제목/빈 목록/로딩/에러/항목 과다)를 채운 프로토타입을 authoring한다.
+- 마일스톤 화면 프로토타입(plan-milestone R5): 확정된 DESIGN.md 토큰(`:root` CSS 변수만 참조 — 정의 블록 밖 raw hex 금지) 위에서 화면 구성·인터랙션 주석·실카피·못생긴 상태(긴 제목/빈 목록/로딩/에러/항목 과다)를 채운 프로토타입을 authoring한다.
 - DESIGN.md/DESIGN_RESEARCH.md authoring 보조(R3~R5).
 
 규칙:
@@ -577,6 +614,10 @@ Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 �
 - docs/00-meta/STRUCTURE.md (agent 로스터 7→8종)
 - docs/00-meta/DELEGATION_STRATEGY.md (designer 위임 행)
 ```
+
+**추가 in-place (같은 파일, 같은 커밋 — 실행 규칙 10)**: ADR-049는 이미 `## 현재 유효 결정`을 보유하고 본 amendment가 #amend-1의 base 결정을 뒤집으므로, 요약 끝에 bullet 1개를 추가한다:
+
+`- R0/R1 분해·R2 concept 시안·R5(ADR-056) 프로토타입의 authoring 주체 = **designer agent**(생성 전담 — 감사·비평은 reviewer[design], 취향 오라클=사용자·추천 금지). R0는 grounding 소스 위계 5단(사용자 URL → researcher 디자인 모드 → 디자인 MCP → 정성 소스 → 모델 지식+확인 게이트), R2는 divergence 카드 강제 (#amend-2 — #amend-1 "designer 미신설" 반전).`
 
 ## 1C-3. `.claude/skills/bootstrap-design/SKILL.md` 수정
 
@@ -712,9 +753,9 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
   2. **못생긴 상태 5종** — 같은 파일 내 섹션으로 나란히: 긴 제목 / 빈 목록 / 로딩 / 에러 / 항목 과다
   3. 실카피 — DESIGN.md `## 10` Voice & Writing 준수, placeholder 금지 (ADR-056 결정 9)
   4. 인터랙션 캡션 — "이 버튼을 누르면 <무엇이 일어난다>"를 각 인터랙션 요소에 명시(정적 HTML의 '눌렀을 때' 계약)
-  5. `:root` 토큰만 참조 (DESIGN.md 파생임이 구조로 드러나게)
+  5. `:root` 토큰만 참조 — 자기완결을 위해 DESIGN.md 토큰의 `:root` 정의 블록은 파일 내 포함하고, 정의 밖 스타일 규칙은 `var(--…)`만 사용 (DESIGN.md 파생임이 구조로 드러나게)
   *확정하지 않는 것*(명시): 상태관리·fetch·컴포넌트 분리 등 엔지니어링 내부 — ARCH §7-4 영역.
-- **R5-5 승인·저장**: 사용자 승인 시 최종본을 **화면 단위**로 `docs/20-system/prototypes/M<N>/<screen>.html`에 저장한다(**커밋 대상** — Record; 재승인 시 같은 파일 대체. 화면-키인 이유: 한 화면은 여러 feature 표면의 합성 — ADR-056 결정 1). 저장 직전 **raw hex 정규식 1회 grep**(발견 시 토큰으로 수정 후 저장 — 상시 grep 제외(결정 7)의 승인-시점 보완). 각 feature 문서 `## 7`에 `프로토타입: [화면 파일](상대경로) (진입: <라우트/상태 진입 메모>)` 참조 줄을 기입한다(그 feature가 등장하는 화면 파일마다 1줄 — §3-V가 이 진입 메모로 화면을 찾는다). `_drafts/` 내 시안 파일을 삭제한다(빈 디렉터리 잔존 무해). 승인 전에는 종료 출력으로 진행하지 않는다.
+- **R5-5 승인·저장**: 사용자 승인 시 최종본을 **화면 단위**로 `docs/20-system/prototypes/M<N>/<screen>.html`에 저장한다(**커밋 대상** — Record; 재승인 시 같은 파일 대체. 화면-키인 이유: 한 화면은 여러 feature 표면의 합성 — ADR-056 결정 1). 저장 직전 **raw hex 정규식 1회 grep — `:root` 정의 블록은 검사 제외**(자기완결 파일이라 정의값 hex는 정상, 검사 대상은 정의 밖 사용처. 발견 시 토큰으로 수정 후 저장 — 상시 grep 제외(결정 7)의 승인-시점 보완). 각 feature 문서 `## 7`에 `프로토타입: [화면 파일](상대경로) (진입: <라우트/상태 진입 메모>)` 참조 줄을 기입한다(그 feature가 등장하는 화면 파일마다 1줄 — §3-V가 이 진입 메모로 화면을 찾는다). `_drafts/` 내 시안 파일을 삭제한다(빈 디렉터리 잔존 무해). 승인 전에는 종료 출력으로 진행하지 않는다.
 
 **`--prototype [F-NNN]` 재진입 모드 (ADR-056)**: R0~R4를 건너뛰고 R5만 수행한다(인자 F-NNN이 있으면 그 feature 화면만). 마일스톤 중간 화면 변경·재승인 경로. 갱신 승인 후에는 "영향받는 task를 `/plan-workitem F-NNN --refresh`로 동기화"를 종료 출력에 안내한다(stale 계약 대조 방지).
 ```
@@ -862,13 +903,13 @@ accepted
 2. **`/plan-workitem M<N>` 배치 분해 모드 (2-tier)**: 마일스톤 전체 feature를 한 세션에서 task로 분해한다.
    - *안정 tier(전 feature 완성)*: task 범위/비범위, `## 6` AC, `## 9` 의존성, feature `## 7-1` FAC↔AC 매핑, seam self-check(결정 9 — 마일스톤 전체 대상 1회). 코드가 변해도 낡지 않는 정보.
    - *가이드 tier*: `## 3. 구현 항목`의 현재상태-기반 단계 가이드는 **첫 구현 대상 feature만 full JIT** 작성. 나머지 feature의 task는 의도 수준 초안 + `## 3` 본문 첫 줄에 **HTML 주석 마커** `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->` (heading이 아닌 주석 — 문서 스키마 보존, grep 문자열 `## 3 상태: draft`는 동일).
-   - **멱등(재개 안전)**: 이미 task 문서가 존재하는 feature는 skip하고 이어간다 — 배치 세션이 중간에 끊겨도 재실행이 안전하다.
+   - **멱등(재개 안전)**: 분해가 *완결된* feature는 skip하고 이어간다 — 배치 세션이 중간에 끊겨도 재실행이 안전하다. skip 판정은 task 문서 존재만이 아니라 완결 기준(전 task `## 6` AC 존재 + feature `## 7-1` 매핑 완성)으로 한다 — 부분 생성 feature를 통째로 skip하면 task가 유실된다.
    - **사이즈 가드**: feature 5+ 마일스톤은 배치를 2회로 분할 실행 권장(컨텍스트 소진으로 인한 부분 완료가 최빈 실패 모드).
    - 기존 `/plan-workitem F-NNN`(단일 feature full 분해)은 그대로 유지(마일스톤 중간 feature 추가 등).
 3. **`--refresh F-NNN`**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 재접지(JIT read)하고 draft 마커를 제거한다. 협상·AC 재작성 없음(경량). repair 이력(`## 8. 메모`)과 승인 프로토타입 갱신을 반영.
 4. **`Needs Plan Refresh` 하드스탑**: `/implement-workitem`은 task `## 3`에 draft 마커가 있으면 dispatch 전에 종료하고 `--refresh`를 안내한다(`Needs Plan Decision` 동형). refresh를 잊어도 stale 가이드로 구현하는 사고가 원천 차단된다.
 5. **feature-완료 체크포인트**: `/finalize-workitem`이 status 갱신 후 sibling task를 회수해 해당 feature의 전 task가 done이면 출력에 Feature-완료 블록을 추가 — (a) FAC closure 요약(feature `## 7-1`의 각 매핑 AC가 최신 validation report에서 ✅인지; report 부재는 "확인 불가" degrade), (b) 다음 단계 제안(남은 미-refresh feature의 `--refresh`, 또는 `/stabilize-milestone M-N --feature F-NNN`). 텍스트 제안만 — disable-model-invocation 정책 불변.
-6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만, graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056)를 해당 feature 화면·시나리오 한정. QA_FINDINGS는 `## M-N` 아래 `### F-NNN` sub-label. read-only·실행 single-origin(ADR-054) 불변.
+6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만, graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056)를 해당 feature 화면·시나리오 한정. QA_FINDINGS는 기존 `### P0/P1/P2` severity 스키마를 유지하고 각 항목 문두에 `(F-NNN)` scope 태그만 붙인다(별도 `### F-NNN` 헤더 금지 — graduation P0 카운트·repair-milestone 회수가 severity 섹션 스키마를 소비). read-only·실행 single-origin(ADR-054) 불변.
 7. **plan-workitem 조망 echo**: 단일 feature 모드 출력에 "같은 milestone의 미분해 feature 목록"을 1줄 echo.
 
 ## 결정 — B. Cross-task seam 계약 (8~14)
@@ -967,6 +1008,8 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 5. **마지막 출력 "다음 단계"** — 분기 옵션 갱신:
 현재: `- 스택이 이미 brief/charter 에 명시됐고 /bootstrap-stack + /stack-guard 도 끝났다면: /plan-workitem F-001 — seed된 첫 feature(F-001)의 task 분해` / `- UI 프로젝트 + 스택 확정 후: /bootstrap-design 다음 /plan-workitem F-001`
 변경: `- 스택이 이미 brief/charter 에 명시됐고 /bootstrap-stack + /stack-guard 도 끝났다면: /plan-milestone — 첫 마일스톤(M1)과 feature 문서를 라운드 협상으로 생성 (ADR-057)` / `- UI 프로젝트 + 스택 확정 후: /bootstrap-design 다음 /plan-milestone`
+6. **`output-checklist.md` (같은 skill 디렉터리)**: 기대 산출물 목록의 `docs/30-workitems/milestones/M1-foundation.md`·`docs/30-workitems/features/F-001-core-value.md` 두 줄을 삭제하고 그 자리에 `- (milestone/feature 문서는 /plan-milestone이 생성 — ADR-057)` 참고 1줄을 둔다(안 고치면 체크리스트가 skill이 더 이상 만들지 않는 산출물을 요구).
+7. **`examples/career-saas-example.md` (같은 skill 디렉터리)**: 예시 산출물의 `M1-foundation.md 생성`·`F-001-core-value.md 생성` 두 줄을 `- (이후 /plan-milestone이 M1-foundation.md·F-001-core-value.md 생성 — ADR-057)` 한 줄로 교체.
 
 ## 3-4. `.claude/skills/plan-milestone/SKILL.md` — "모든 마일스톤" 전환 + R2 seam 1줄
 
@@ -989,7 +1032,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 - **`M<N>` 입력 — 마일스톤 배치 분해 모드 (ADR-057 결정 2)**: 본 마일스톤 `## 3. 포함되는 기능`의 모든 feature를 한 세션에서 분해한다.
   - *안정 tier (전 feature 완성)*: 각 task의 범위/비범위·`## 6` AC·`## 9` 의존성·feature `## 7-1` FAC↔AC 매핑·cross-task seam self-check(ADR-057 결정 9 — **마일스톤 전체 task 집합 대상 1회**, cross-feature seam 포함).
   - *가이드 tier*: `## 3` 단계별 가이드는 **첫 구현 대상 feature(의존성상 최선두)만** 3-G full JIT로 작성. 나머지 feature의 task는 의도 수준 초안만 적고 `## 3` 본문 첫 줄에 HTML 주석 마커 `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->`를 박는다(heading 아님 — 스키마 보존, ADR-026#amend-3). AC 해석 확정(9-1)·경험 계약 입구 점검(ADR-056)은 배치 시점에 전 feature 수행.
-  - **멱등**: 이미 task 문서가 존재하는 feature는 skip — 배치 재실행 안전. **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
+  - **멱등**: 분해 완결 feature(전 task에 `## 6` AC 존재 + `## 7-1` 매핑 완성)는 skip, 부분 생성 feature는 이어서 완성 — 배치 재실행 안전. **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
   - 경험 계약 입구 점검은 마일스톤 내 *모든 UI 확정 feature*에 대해 1회 일괄 수행 — 하나라도 미충족이면 그 feature만 보류 목록으로 출력하고 나머지는 진행(전체 차단 X — ADR-056 결정 3의 배치 단서).
 - **`F-NNN --refresh` — 가이드 재접지 모드 (ADR-057 결정 3)**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 3-G 재작성하고 draft 마커를 제거한다. AC·범위·매핑은 손대지 않는다(변경이 필요해 보이면 "남은 미결정 사항"에 surface — 자동 수정 X). `## 8. 메모`의 repair 이력과 승인 프로토타입 갱신(`--prototype` 재승인)을 반영 입력으로 읽는다.
 ```
@@ -1022,7 +1065,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 "마지막 출력" 목록 앞에 수행 항목 추가:
 
 ```markdown
-9. **feature-완료 감지 (ADR-057 결정 5)**: step 4에서 done으로 갱신한 각 task의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status: done`이면 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
+9. **feature-완료 감지 (ADR-057 결정 5)**: step 4에서 done으로 갱신한 각 task의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아님) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
    - FAC closure 요약: feature `## 7-1` 매핑표의 각 `T-NNN:AC-N`이 `docs/40-validation/reports/<task-id>.md`에서 ✅인지 (report 부재 task는 "확인 불가 — report checkout-local" degrade).
    - 다음 단계 제안(텍스트만): 미-refresh feature 있으면 `/plan-workitem F-next --refresh`, FAC 시나리오 통합 확인 원하면 `/stabilize-milestone M-N --feature F-NNN`, 마일스톤 마지막 feature면 `/stabilize-milestone M-N`.
    - Feature 링크 부재 시 "feature 소속 불명 — task `## 7` 링크 보강 권장" 1줄만.
@@ -1035,7 +1078,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 **(2) 입력 단락**에 추가:
 
 ```markdown
-- `--feature F-NNN` 플래그(ADR-057 결정 6): **feature 스코프 점검** — §1.0 preflight는 항목 3(FAC unmapped)만, §1.5 graduation pre-check는 skip(**졸업 판정은 milestone 전용** — 출력에 "본 실행은 졸업 판정이 아님"을 명시), 단계 3 validate 1회 + 3-P/3-V(ADR-056)/단계 4 qa fan-out을 해당 feature의 화면·시나리오 한정, 단계 5(reviewer)·6·6.5·7-T는 skip. **milestone 문서 `## 8. 회고` 자동 채움도 skip**(회고는 milestone 전체 stabilize 전용 — 중간 상태 덮어쓰기 방지). QA_FINDINGS 기록은 `## M-N` 헤더 아래 `### F-NNN` sub-label. read-only·실행 single-origin(ADR-054) 불변.
+- `--feature F-NNN` 플래그(ADR-057 결정 6): **feature 스코프 점검** — §1.0 preflight는 항목 3(FAC unmapped)만, §1.5 graduation pre-check는 skip(**졸업 판정은 milestone 전용** — 출력에 "본 실행은 졸업 판정이 아님"을 명시), 단계 3 validate 1회 + 3-P/3-V(ADR-056)/단계 4 qa fan-out을 해당 feature의 화면·시나리오 한정, 단계 5(reviewer)·6·6.5·7-T는 skip. **milestone 문서 `## 8. 회고` 자동 채움도 skip**(회고는 milestone 전체 stabilize 전용 — 중간 상태 덮어쓰기 방지). QA_FINDINGS 기록은 기존 스키마 유지 — `## M-N` 아래 `### P0/P1/P2` 섹션에 적되 각 항목 문두에 `(F-NNN)` scope 태그를 붙인다(**별도 `### F-NNN` 헤더 금지** — graduation의 "`### P0` 섹션 항목 수" 카운트와 repair-milestone 회수가 severity 섹션 스키마를 소비한다). read-only·실행 single-origin(ADR-054) 불변.
 ```
 
 ## 3-9. 템플릿 3곳 + ARCH §4-1
@@ -1079,6 +1122,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 
 **`.claude/skills/validate-plan/SKILL.md`** — 카운트 언급 **전수** 갱신:
 - "검토 차원 (10 dimensions — reviewer.md의 *Plan Quality 10 차원* 정합 ...)" → 괄호 안 **두 카운트 모두** `11`로 + 10번 뒤에 reviewer와 동일한 11번 [Plan-seam] 항목 추가(신호 미해당 skip 명시).
+- **milestone-plan 4차원 블록 재번호**: 이 파일의 MP 블록은 번호 목록이다(현행 `11. [MP-FAC-quality]` ~ `14. [MP-feature-dep]`) — [Plan-seam]을 11번으로 넣으면서 `12.`~`15.`로 재번호한다(안 하면 `11.` 중복. reviewer.md의 MP 블록은 bullet 형식이라 재번호 불요).
 - milestone-plan mode 단락의 `"task가 1건+면 기존 10차원."` → `11차원`.
 - 카운트 표에 `| Plan-seam | 0 | 0 | 0 |` 행 추가(Plan-arch-iface 행 뒤).
 - milestone-plan mode 게이팅 단락에 `[Plan-seam]은 task 0건이면 비활성` 1줄 추가.
@@ -1118,7 +1162,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 - **Overall Flow 다이어그램**: `→ /bootstrap-design (...) → /plan-workitem` 구간을 `→ /bootstrap-design (...) → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)`로 교체.
 - discover-product 설명 문장의 `which /bootstrap-project then converts into charter/architecture/initial workitems` → `... into charter/architecture`(initial workitems 삭제).
 - Quick Start 단계·Codex 예시 줄의 `$plan-workitem F-001` → `$plan-workitem M1`.
-- 마무리로 `grep -n "initial workitem" README.md README_ko.md` 실행해 잔존 0건 확인.
+- 마무리로 `grep -n "initial workitem\|초기 workitem" README.md README_ko.md` 실행해 잔존 0건 확인(README_ko.md는 :8·:33에서 "초기 workitem"을 쓴다 — 영문 패턴만으로는 못 잡는다).
 
 **`docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`** — §15 Insight Backlog 주석의 `plan-workitem이 feature/task 생성 시 본 ID를 연결한다` → `plan-milestone(feature)·plan-workitem(task)이 생성 시 본 ID를 연결한다`(구 lifecycle 잔재 정정 — [관측됨] ADR-051 refocus 이후 낡은 서술).
 
@@ -1128,7 +1172,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 
 ## 3-커밋 (3회)
 
-**커밋 1** — ADR + 생성 통일 (대상: `docs/90-decisions/boilerplate/ADR-057-*.md`, `ADR-007-*.md`, `ADR-051-*.md`, `.claude/skills/bootstrap-project/SKILL.md`, `.claude/skills/plan-milestone/SKILL.md`, `docs/00-meta/{WORKFLOW,DELEGATION_STRATEGY,PROJECT_START_CHECKLIST,STRUCTURE}.md`, `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`(3-11 §15 정정), `README.md`, `README_ko.md`, `docs/90-decisions/boilerplate/README.md`):
+**커밋 1** — ADR + 생성 통일 (대상: `docs/90-decisions/boilerplate/ADR-057-*.md`, `ADR-007-*.md`, `ADR-051-*.md`, `.claude/skills/bootstrap-project/SKILL.md`, `.claude/skills/bootstrap-project/output-checklist.md`, `.claude/skills/bootstrap-project/examples/career-saas-example.md`, `.claude/skills/plan-milestone/SKILL.md`, `docs/00-meta/{WORKFLOW,DELEGATION_STRATEGY,PROJECT_START_CHECKLIST,STRUCTURE}.md`, `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`(3-11 §15 정정), `README.md`, `README_ko.md`, `docs/90-decisions/boilerplate/README.md`):
 
 ```
 feat(planning): unify all milestone creation under plan-milestone, drop bootstrap M1 seeding (ADR-057)
@@ -1186,7 +1230,7 @@ feat(planning): signal-gated cross-task seam contract with invariant table and r
 - stabilize/validator의 직접 ADR 작성 — read-only·판정 전용 계약 위반 + proposed ADR 남발 위험.
 
 ### Mutation Contract (ADR-047 D3, 압축)
-- Target: stabilize step 6/8, plan-milestone R0, DELEGATION 트리거 표, WORKFLOW §6, STRUCTURE :49, _ADR_GUIDE 1줄, ADR-053#amend-1.
+- Target: stabilize step 6/8, plan-milestone R0, DELEGATION 트리거 표, WORKFLOW §6, STRUCTURE 산출물 표 ADR(project) 행, _ADR_GUIDE 1줄, ADR-053#amend-1.
 - Failure mode: ADR 후보가 세션 종료와 함께 증발 / mid-project 결정의 작성 책임 부재(관측됨 — 경로 단절).
 - Predicted improvement: 후보가 IMPROVEMENT_GUIDE open 항목으로 잔존해 증발 차단, 회수·작성 주체가 결정적.
 - Preserved invariants: stabilize read-only(IMPROVEMENT_GUIDE 기록은 기존 정상 책임 범위) / validate 판정 전용 / ADR-055 tier 라우팅 / _ADR_GUIDE 양식.
@@ -1278,10 +1322,10 @@ feat(governance): ADR authoring trigger table and candidate recovery loop (ADR-0
 1. **Skill 로스터**: `.claude/skills/` 디렉터리 목록(21종 — 이번 라운드에 skill 신설 없음) ↔ `docs/00-meta/STRUCTURE.md`의 "Claude skill 본문" 행 괄호 목록 일치 확인.
 2. **Agent 로스터**: `.claude/agents/` 8종(designer 포함) ↔ STRUCTURE.md "Claude sub-agent" 행 ↔ DELEGATION_STRATEGY 위임 표에 designer 행 존재.
 3. **Codex wrapper 집합**: `.agents/skills/` 16종 ↔ README.md/README_ko.md wrapper 목록 16종 ↔ 자연어 목록 5종. 검증식: `(.claude/skills 집합) − (.agents/skills 집합) == README 자연어 목록`.
-4. **ADR 인덱스**: `docs/90-decisions/boilerplate/README.md`에 **056·057 신규 2행** 존재 + 이번에 amend된 ADR(000/007/010/026/027/040/042/044/049/051/053/054) 행의 Amendments 컬럼이 본문 `## Amendment N` 수와 일치 + **ADR-007에 `## 현재 유효 결정` 요약 신설·ADR-027 요약에 §10 반영 확인**(ADR-045 D5 — Stage 2·1B 지시).
+4. **ADR 인덱스**: `docs/90-decisions/boilerplate/README.md`에 **056·057 신규 2행** 존재 + 이번에 amend된 ADR(000/007/010/026/027/040/042/044/049/051/053/054) 행의 Amendments 컬럼이 본문 `## Amendment N` 수와 일치 + **ADR-007에 `## 현재 유효 결정` 요약 신설·ADR-027 요약에 §10 반영 확인**(ADR-045 D5 — Stage 2·1B 지시) + **ADR-010 요약 wrapper bullet이 #amend-4와 모순 없는지(Stage 0A 정정 2)·ADR-044/054에 `## 현재 유효 결정` 존재·ADR-049 요약에 designer 주체 bullet 존재 확인**(Stage 0A·1C 지시).
 5. **anchor 유효성**: 새로 인용된 anchor들이 실재하는지 grep — `adr-000-amend-2`, `adr-007-amend-5`, `adr-010-amend-4`, `adr-026-amend-3`, `adr-027-amend-5`, `adr-027-amend-6`, `adr-040-amend-4`, `adr-042-amend-1`, `adr-044-amend-1`, `adr-049-amend-2`, `adr-051-amend-2`, `adr-051-amend-3`, `adr-053-amend-1`, `adr-054-amend-1`.
 6. **깨진 참조 스캔** (2단계 — 자기 산출물 오탐 방지):
-   - **(a) 무조건 0건**: `grep -rn "ADR-058\|ADR-059\|ADR-060\|ADR-061" .claude .agents docs README.md README_ko.md` — 이번 라운드에서 만들지 않는 번호라 어디에도 등장하면 안 됨. 그리고 `grep -n "initial workitem\|seed된 첫 feature" README.md README_ko.md .claude/skills/bootstrap-project/SKILL.md` — 구체제 서술 잔존 0건.
+   - **(a) 무조건 0건**: `grep -rn "ADR-058\|ADR-059\|ADR-060\|ADR-061" .claude .agents docs README.md README_ko.md` — 이번 라운드에서 만들지 않는 번호라 어디에도 등장하면 안 됨. 그리고 `grep -n "initial workitem\|초기 workitem\|seed된 첫 feature" README.md README_ko.md .claude/skills/bootstrap-project/SKILL.md` — 구체제 서술 잔존 0건.
    - **(b) 허용 문맥 대조**: `grep -rn "plan-workitem F-001\|M1/F-001" .claude .agents docs README.md README_ko.md`의 hit는 다음 **whitelist만** 허용 — ① *제거를 서술하는* ADR/amend 텍스트(ADR-057 배경·결정 1, ADR-051#amend-3, ADR-007 표의 "seed는 ADR-057로 제거" 구절, ADR-007 `## 현재 유효 결정`), ② PROJECT_START_CHECKLIST의 `/plan-workitem F-001` *단일 모드 예시*, ③ validate-plan/repair-plan의 ID *형식 예시*. 그 외 hit(특히 "다음 단계" 권장·흐름 서술)는 잔존 결함 — 수정.
 7. **gitignore 정합**: `docs/20-system/prototypes/*/_drafts/`·`docs/40-validation/visual/`은 ignore, `docs/20-system/prototypes/M*/<screen>.html`(예: `M1/home.html` — `_drafts/` 제외 화면 파일)은 ignore되지 않음을 `git check-ignore`로 확인.
 8. **링크 체크**: `markdown-link-check`가 설치돼 있으면 docs/ 내부 링크 점검(외부 URL 제외 — stabilize preflight 1과 동일 방식). 미설치면 skip.
@@ -1306,6 +1350,7 @@ chore(docs): cross-surface sync for 2026-07 improvement round
 - **exemplar 디자인 프로파일 동봉 X** — live-fetch 파이프라인(researcher 디자인 모드)으로 대체(사용자 결정, ADR-040#amend-4).
 - **per-task 스크린샷 대조 X** — 준-hot-loop 토큰 트랩(ADR-056 비결정).
 - **잔여 자연어 5종 wrapper 승격 X** — 실수요 근거 0(ADR-010#amend-4 결정 5). 본문 Codex 안내 1줄만 추가.
+- **ADR-010 전면 `## Surfaces` fan-out 블록 retrofit X** — ADR-045 D3의 ADR-045 이전 ADR 소급 적용은 비범위(#amend-4의 Mutation Contract Target이 이번 fan-out을 기록) — 다음 라운드 후보.
 - **/draft-adr skill 신설 X** — 트리거 표 + [ADR-candidate] 회수로 대체(ADR-000#amend-2 비결정).
 - **concept 개수 4+ 확대 X** — 2~3개 유지, 다양성은 divergence 카드가 담당(ADR-049 비결정 유지).
 - **신규 ADR 남발 X** — 이번 라운드 신규 ADR은 056·057 딱 2개(umbrella — ADR-051/052 선례). 나머지 정책은 전부 기존 ADR Amendment.
