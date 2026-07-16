@@ -11,6 +11,8 @@ context-pack: minimal
 
 너의 역할은 입력 경로의 문서를 비판적으로 검토하는 것이다.
 
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/review-doc/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4).
+
 입력:
 - `$ARGUMENTS`에는 검토할 문서의 경로가 들어온다(예: `docs/10-charter/PROJECT_CHARTER.md`).
 

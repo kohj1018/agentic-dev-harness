@@ -8,8 +8,8 @@ accepted
 ## 현재 유효 결정 (요약 — 상세는 본문·amend SSOT)
 - AGENTS.md = 캐노니컬 진입 페이지, CLAUDE.md = `@AGENTS.md` import (D1·D2).
 - 워크플로우 본문 SSOT = `.claude/skills/<name>/SKILL.md`, `.agents/skills/`는 얇은 wrapper (D3·D4).
-- Codex wrapper는 inner-loop 빈도 높은 skill에만 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).
-- `.codex/config.toml` = 안전 baseline(secrets 차단 포함) + Codex 모델 ID 추적 (D5·D8).
+- Codex wrapper는 inner-loop 빈도 높은 skill + **cross-LLM 리뷰 skill과 그 repair 짝(빈도 무관 필수 — #amend-4)**에 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).
+- `.codex/config.toml` = 안전 baseline + Codex 모델 ID 추적 (D5·D8). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**.
 
 ## 배경
 이 보일러플레이트는 Claude Code 표면(`CLAUDE.md`, `.claude/`)에만 묶여 있어, 사용자가 Claude Code의 사용량 한도에 걸리거나 다른 사정으로 OpenAI Codex CLI로 전환할 때 동일 워크플로우를 이어가지 못한다.
@@ -24,7 +24,7 @@ accepted
 | D2 | `CLAUDE.md`는 `@AGENTS.md` import + Claude-only 추가지침 섹션만. |
 | D3 | `.claude/skills/<name>/SKILL.md`가 워크플로우 본문의 canonical owner. |
 | D4 | `.agents/skills/<name>/SKILL.md`는 얇은 wrapper만 — 본문은 D3 위치를 가리킴. |
-| D5 | `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, secrets 차단, 모델). |
+| D5 | `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, 모델. **secrets 차단은 Windows unelevated에서 OS-강제 불가 — AGENTS 정책 의존, 파일 주석 참조**). |
 | D6 | `.codex/agents/*.toml` custom subagents는 보류 (Phase 3). |
 | D7 | 본 ADR은 ADR-005 SSOT 패턴 1·4를 그대로 적용. 패턴 5("CLAUDE.md = 진입 페이지")는 본 ADR로 표현이 갱신됨 — 캐노니컬 진입 페이지가 `AGENTS.md`로 이동, `CLAUDE.md`는 `@AGENTS.md` import 한 줄. 매핑 표는 본 ADR 본문에 흡수, 별도 `AGENT_TOOL_MATRIX.md` 신설하지 않음. |
 | D8 | Codex는 모델 별칭 체계 없음 — 본 ADR이 Codex 모델 ID 추적 책임. ADR-004(별칭 정책)는 본문상 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화. |
@@ -49,17 +49,17 @@ accepted
 | Custom subagent | `.claude/agents/<name>.md` (markdown) | `.codex/agents/<name>.toml` (TOML) | Phase 3 보류 |
 | Hooks | `.claude/settings.json` 안 | `.codex/hooks.json` 또는 `[hooks]` | 본 작업 비범위 |
 | 모델 지정 | 별칭(`opus`/`sonnet`) — ADR-004 | 직접 ID(`gpt-5.5`) — 본 ADR 추적 | 도구별 다름 (구조적 차이) |
-| Read 차단 (.env, .env.*, secrets/**) | `.claude/settings.json` `permissions.deny` | `.codex/config.toml` `permissions.boilerplate-secure.filesystem` | 양쪽 동시 — 동일 결과를 도구별 표면에 박는다 |
+| Read 차단 (.env, .env.*, secrets/**) | `.claude/settings.json` `permissions.deny` | `AGENTS.md 정책 의존 (Windows unelevated sandbox — OS-강제 불가, config.toml 주석 참조)` | Claude=OS-강제 / Codex=정책 의존 (비대칭 — config.toml 주석 SSOT) |
 
 ## 결과
 - AGENTS.md 신설 — **프로젝트 루트 1곳만** 둔다(Codex가 root→cwd 누적 32 KiB cap이므로 nested AGENTS.md를 만들면 잘릴 위험). nested 지침이 필요하면 docs/ 하위 마크다운으로 분리.
 - CLAUDE.md는 `@AGENTS.md` import.
-- `.codex/config.toml` 안전 baseline (boilerplate-secure permissions 프로파일 포함, upstream default는 박지 않음).
+- `.codex/config.toml` 안전 baseline (legacy `sandbox_mode` 유지 — `boilerplate-secure` 프로파일은 미적용, 한계는 파일 주석 참조. upstream default는 박지 않음).
 - `.agents/skills/` wrapper 4개 (Phase 1: `implement/validate/repair/finalize-workitem`).
 - ADR-004 본문은 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화 — Codex는 본 ADR이 모델 ID 추적.
 - 본 ADR은 ADR-005 SSOT 패턴 1·4를 그대로 적용, 패턴 5는 본 ADR로 표현이 갱신됨 (entry page = `AGENTS.md`).
 - **운영 안내 1**: `docs/` 본문(예: `docs/00-meta/WORKFLOW.md`, `DELEGATION_STRATEGY.md`)에 등장하는 `/<skill-name>` 표기는 Claude 슬래시 커맨드다. Codex 사용자는 동일 skill을 `$<skill-name>`으로 읽는다 (Step 6 wrapper와 동일 변환).
-- **운영 안내 2**: `.claude/skills/<name>/SKILL.md`는 D3에 의해 canonical SSOT이므로 직접 편집은 Claude Code 측에서 수행한다. 현재 `.codex/config.toml` baseline에는 `.claude/skills/**` read-only 룰을 박지 않음 (project root `.` = write 만 박혀 있음) — Codex 측에서 `.claude/skills/<name>/SKILL.md` 직접 편집으로 SSOT drift가 발생하는 사례가 *관측되면* 본 ADR을 amend해 `.codex/config.toml` `permissions.boilerplate-secure.filesystem`에 명시적 read 룰을 박는다. 현재 baseline은 *관측된 실패 없음*([ADR-022](ADR-022-ratchet-principle.md) ratchet 약 정합).
+- **운영 안내 2**: `.claude/skills/<name>/SKILL.md`는 D3에 의해 canonical SSOT이므로 직접 편집은 Claude Code 측에서 수행한다. 현재 `.codex/config.toml` baseline에는 `.claude/skills/**` read-only 룰을 박지 않음 (project root `.` = write 만 박혀 있음) — Codex 측에서 `.claude/skills/<name>/SKILL.md` 직접 편집으로 SSOT drift가 발생하는 사례가 *관측되면* 본 ADR을 amend해 `.codex/config.toml` `permissions.boilerplate-secure.filesystem`에 명시적 read 룰을 박는다 (단, 현 config.toml에는 `boilerplate-secure` 프로파일 자체가 없어 그 시점엔 프로파일 신설부터 필요 — Windows unelevated에서 OS-강제 가능 여부도 재확인 대상, 파일 주석 참조). 현재 baseline은 *관측된 실패 없음*([ADR-022](ADR-022-ratchet-principle.md) ratchet 약 정합).
 
 ## 후속 작업
 - Phase 1.5 (적용됨): plan-workitem, bootstrap-project, bootstrap-stack, stabilize-milestone 4개 wrapper 추가. 근거 — fork 직후 첫 진입 시나리오(charter → architecture → 첫 분해)에서 자연어 호출 대비 wrapper 가성비가 inner-loop와 동등.
@@ -69,7 +69,7 @@ accepted
 - (Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.
 - ADR-005 SSOT 패턴 5("CLAUDE.md = 진입 페이지")의 표현을 "entry page (AGENTS.md)"로 갱신하는 후속 ADR 또는 in-place 수정 검토. 본 ADR 채택 후 캐노니컬 진입점이 AGENTS.md로 옮겨가므로 패턴 5의 단어가 어긋난다.
 - (Step 0-2에서 스키마 변경 또는 `.` 비상속 발견 시) 적용된 fallback 패턴을 본 ADR "결과" 또는 "후속 작업"에 명시해 추적성 유지.
-- `boilerplate-secure` permissions 프로파일 적용 (2026-05-28): `extends = ":workspace"`로 빌트인 워크스페이스 프로파일 상속 + `:workspace_roots` 하위 `**/.env`·`**/.env.*`·`**/secrets`·`**/secrets/**` deny + `network.domains "*" = "allow"`(domains 비우면 모든 도메인 차단됨). legacy `sandbox_mode`/`sandbox_workspace_write` 제거(프로파일과 공존 시 프로파일이 통째로 무시 — ADR-010 item 1 이행). `:workspace`는 filesystem path key가 아니라 built-in 프로파일 이름이므로 `extends`로만 사용한다는 점도 함께 정합화. **실측 검증**(`codex doctor` startup warning 0개 + `.env` read deny + 외부 네트워크 접근)은 커밋 직전 사용자 수행 책임.
+- **[정정 2026-07-16: 본 프로파일은 현재 config.toml에 적용돼 있지 않다(legacy workspace-write 유지 — Windows unelevated 한계, 파일 주석 참조). 아래는 이력 보존용 서술.]** `boilerplate-secure` permissions 프로파일 적용 (2026-05-28): `extends = ":workspace"`로 빌트인 워크스페이스 프로파일 상속 + `:workspace_roots` 하위 `**/.env`·`**/.env.*`·`**/secrets`·`**/secrets/**` deny + `network.domains "*" = "allow"`(domains 비우면 모든 도메인 차단됨). legacy `sandbox_mode`/`sandbox_workspace_write` 제거(프로파일과 공존 시 프로파일이 통째로 무시 — ADR-010 item 1 이행). `:workspace`는 filesystem path key가 아니라 built-in 프로파일 이름이므로 `extends`로만 사용한다는 점도 함께 정합화. **실측 검증**(`codex doctor` startup warning 0개 + `.env` read deny + 외부 네트워크 접근)은 커밋 직전 사용자 수행 책임.
 
 ## Amendment 1 (2026-05-16) — Phase 2.5: stack-guard wrapper 승격
 
@@ -135,3 +135,28 @@ Phase 2 *자연어 호출* Codex skill의 **목록·개수는 README.md / README
 ### 후속 작업
 
 없음.
+
+<a id="adr-010-amend-4"></a>
+## Amendment 4 (2026-07-16) — cross-LLM 리뷰 skill은 wrapper 필수 (분류 축 추가)
+
+### 결정
+1. wrapper 부여 기준에 축 하나를 추가한다: 기존 "호출 빈도" 기준 위에, **실행 표면이 정의상 타 LLM인 cross-LLM 리뷰 skill(validate-plan/validate-discovery/validate-milestone)과 그 repair 짝은 빈도와 무관하게 wrapper 필수**.
+2. 이에 따라 `validate-milestone`·`validate-discovery`·`repair-discovery` wrapper를 신설한다(`.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` — validate-plan 패턴 복제). **ADR-054 결정 5와 ADR-044 결과의 "Codex 호환(의도적 비대칭)" 단락을 본 amendment가 부분 supersede**한다(각 ADR에 superseded-by 표기).
+3. README.md/README_ko.md의 wrapper 목록 13→16종, 자연어 호출 목록 8→5종(discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack). **wrapper 신설과 README 갱신은 동일 커밋**(stabilize preflight 7 집합 검사가 어긋나면 P1 Roster-drift 발보).
+4. **재발 방지**: stabilize preflight 7에 "cross-LLM 리뷰 skill과 repair 짝의 wrapper 존재" deterministic 체크 추가.
+5. 잔여 자연어 5종은 승격하지 않는다(Codex 호출 실수요 근거 0건 — ADR-006 YAGNI, Phase 3 재평가 풀 유지). 단 그 5종의 skill 본문에 Codex 자연어 호출 안내 1줄을 일관 추가한다(discoverability 보수).
+
+### 근거
+- [관측됨] 사용자가 Codex에서 `$validate-milestone`을 호출했으나 wrapper 부재로 실패. '호출 빈도' 분류는 cross-LLM 리뷰 skill에 범주 오류 — 1차 실행 표면 자체가 Codex인데 Codex discoverability가 0이면 skill이 무력화된다. 같은 가족 내 validate-plan만 wrapper 보유(3층 3패턴 비일관)였고, 블랭킷 번역 규칙("docs의 `/skill`은 `$skill`로")이 stabilize 본문의 `/validate-milestone` 표기와 결합해 사용자를 정확히 실패 경로로 유도했다.
+- 본 개정은 ADR-054 Falsifying evaluation의 후퇴가 아니라 *접근성 수정* — read-only/single-origin·opt-in 성격은 전부 보존.
+
+### Mutation Contract (ADR-047 D3, 압축)
+- Target: wrapper 6파일 신설 / README 2종 목록 + 트리 라벨 / ADR-044·054 표기 amendment + `## 현재 유효 결정` 신설 / ADR-010 본문 과잉보장 정정 4곳 + 요약 정정 2곳 / stabilize preflight 7 / validate-milestone SKILL Codex 단락 / 자연어 5종 본문 1줄.
+- Failure mode: cross-LLM 리뷰 skill이 Codex에서 발견 불가(관측됨).
+- Predicted improvement: Codex `$` 표면에 가족 6종 전부 노출, 번역 규칙 모순 소멸.
+- Preserved invariants: D3/D4(wrapper=thin pointer), #amend-3(자연어 목록 SSOT=README), 각 skill의 read-only/opt-in 계약.
+- Falsifying evaluation: 승격 후에도 Codex 실사용 실패 재현 시 wrapper 형식 재검토.
+- Rollback: wrapper 3종 삭제 + README 원복 + ADR-044/054 원 결정 복원.
+
+### 강도 (ADR-022)
+- constraint(강, [관측됨]) — wrapper·README 동일 커밋 + preflight 체크. 나머지 enabling.

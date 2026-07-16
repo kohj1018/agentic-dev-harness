@@ -18,6 +18,8 @@ context-pack: minimal
 - 비-UI 프로젝트는 호출되지 않음 (ADR-031 직접 지원 범위 밖).
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4).
+
 ## 모드
 - `--fast`: R0(레퍼런스 1개 + `DESIGN_RESEARCH.md` minimal 1~2줄) + R1(원칙 1줄 minimal) + R3(토큰) + R5(저장 — 축약 섹션). **R2(concept 시안)·R4(컴포넌트 인벤토리)·R6(preview)는 생략** — R5 저장은 *생략하지 않는다*(생략하면 DESIGN.md 가 안 채워져 skill 목적 무산). R1은 *완전 생략 금지* — R3 토큰 결정의 근거이므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다. `--fast`에서 concept 시안이나 preview가 필요하면 종료 후 사용자가 "concept 시안 생성" 또는 "design-preview 생성"을 명시 발화 → R2 또는 R6만 단독 수행.
 - 기본: R0~R6 모두.

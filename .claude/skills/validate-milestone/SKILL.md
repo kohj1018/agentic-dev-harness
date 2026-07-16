@@ -25,7 +25,7 @@ context-pack: minimal
 
 가드: 코드·문서·실행·커밋 금지. 마지막 출력: 판정 + 카운트 + 파일 경로 + "origin에서 `/repair-milestone <M>`이 종합" 안내.
 
-**Codex**: 본 skill은 ADR-054 D5(ADR-044 선례)대로 Codex wrapper 미생성 — Codex에선 `$`-skill 호출이 아니라 *자연어*로 호출한다(`Follow .claude/skills/validate-milestone/SKILL.md` — README 자연어 목록).
+**Codex**: `$validate-milestone <M> --reviewer-tag <tag>`로 호출한다(wrapper 보유 — ADR-010#amend-4; 구 ADR-054 D5 자연어 정책은 superseded).
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 최소 충분.

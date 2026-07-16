@@ -106,12 +106,13 @@
 Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 1. 같은 저장소에서 `codex` 실행 — `AGENTS.md`가 자동 로드된다.
-2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery, validate-milestone)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
+2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
 3. 자주 쓰는 core workflow skill은 Codex skill로 호출 가능:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-milestone <milestone 아이디어>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
-4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`, `validate-milestone`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
+   - Discovery / stabilize 교차 리뷰 (선택, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (별 Codex 세션) + `$repair-milestone M1` (원본 세션)
+4. 나머지 skill(`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`)은 자연어로 호출: *"Follow `.claude/skills/<name>/SKILL.md`"*
 
 > 참고: `docs/` 하위 문서는 Claude의 `/<skill-name>` 슬래시 표기를 사용한다. Codex에서는 `$<skill-name>`으로 읽는다.
 
@@ -126,7 +127,7 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
 ├── AGENTS.md          # 캐노니컬 진입 지침 (도구 중립)
 ├── CLAUDE.md          # AGENTS.md를 import (Claude Code 진입점)
 ├── .claude/           # Claude 서브에이전트, 스킬, 설정
-├── .codex/            # Codex CLI 프로젝트 설정 (boilerplate-secure baseline)
+├── .codex/            # Codex CLI 프로젝트 설정 (안전 baseline — 한계는 config.toml 주석 참조)
 ├── .agents/           # Codex skill wrapper ($-prefixed, .claude/skills 본문을 가리킴)
 ├── docs/
 │   ├── 00-meta/       # 워크플로우, guardrail, 템플릿, 운영 가이드

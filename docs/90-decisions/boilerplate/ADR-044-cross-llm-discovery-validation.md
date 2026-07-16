@@ -5,6 +5,13 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- `/validate-discovery [--reviewer-tag <tag>]` = 다른 세션·다른 LLM에서 DISCOVERY.md를 Discovery Quality 8차원으로 **읽기 전용** 비판 검토 — 산출물은 임시 리뷰 파일 `docs/40-validation/discovery-reviews/DISCOVERY.<tag>.md` 1개뿐. DISCOVERY·charter 수정 금지.
+- `/repair-discovery`(architect) = 원본 세션에서 리뷰 N개 회수 → adopt/adopt-modified/reject-FP/reject-conflict 판정 → DISCOVERY.md 수정 → 리뷰 파일 삭제.
+- charter는 건드리지 않는다 — sync는 `/bootstrap-project`(--apply) 경로(ADR-035).
+- verdict는 리뷰 라벨일 뿐 차단 아님. 전체 흐름은 opt-in.
+- Codex 호출: `$validate-discovery`/`$repair-discovery`(wrapper — #amend-1; 구 "의도적 비대칭" 자연어 정책 superseded).
+
 ## 배경
 - [관측됨] ADR-038의 `/validate-plan`·`/repair-plan`은 *workitem 분해 plan*(milestone/feature/task) 층만 cross-LLM 검토한다 — *제품 기획 층*(DISCOVERY.md)을 비판적으로 교차 검토하는 대응물이 없다. discover-product는 *생성*만, review-doc은 *범용 단일 문서*(기획 전용 차원·repair 루프 없음), stabilize §6.5는 *기계적 staleness*만.
 - [외부실증] Teresa Torres / Cagan — discovery는 confirmation bias·leading evidence에 취약해 *외부 시선의 비판적 검토*가 품질의 핵심.
@@ -33,3 +40,7 @@ accepted
 
 ## 참고
 - ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027#amend-1(reviewer surface 패턴).
+
+<a id="adr-044-amend-1"></a>
+## Amendment 1 (2026-07-16) — Codex 호환 단락 supersede (ADR-010#amend-4)
+`## 결과`의 "Codex 호환 (의도적 비대칭)" 단락은 [ADR-010 Amendment 4](ADR-010-multi-agent-compatibility.md#adr-010-amend-4)가 supersede한다 — `validate-discovery`·`repair-discovery` wrapper가 신설되어 `$validate-discovery`/`$repair-discovery`로 호출한다. opt-in 성격·나머지 결정은 불변.

@@ -81,6 +81,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - `.claude/skills/*/` 디렉터리명 집합 ↔ `docs/00-meta/STRUCTURE.md`의 `Claude skill 본문` 행 괄호 목록이 일치하는가. 불일치 시 `P1 [Roster-drift] <skill> — STRUCTURE 로스터`.
    - `README.md`/`README_ko.md`의 *자연어 호출 skill 목록 두 곳*(정책 요약 문단의 "Remaining skills/나머지 skill" + "For remaining skills/나머지 skill(...)" 명시 목록)이 서로 일치하고, `(.claude/skills 집합) − (.agents/skills wrapper 집합)`과 같은가. 불일치 시 `P1 [Roster-drift] <skill> — README 자연어 목록(<어느 위치>)`.
    - **cross-LLM 리뷰 skill 등재 (D3 재발 지점, deterministic)**: `validate-plan`·`validate-discovery`·`validate-milestone` 각각이 `docs/00-meta/DELEGATION_STRATEGY.md` 위임 표에 등장하는가(skill 이름 grep). 미등재 시 `P2 [Roster-drift] <skill> — DELEGATION 위임 표`.
+   - **cross-LLM 리뷰 skill wrapper 존재 (ADR-010#amend-4, deterministic)**: `validate-plan`·`validate-discovery`·`validate-milestone`과 각 repair 짝(`repair-plan`·`repair-discovery`·`repair-milestone`)에 `.agents/skills/<name>/SKILL.md`가 존재하는가. 부재 시 `P1 [Roster-drift] <skill> — Codex wrapper 부재 (ADR-010#amend-4)`.
    - 발견은 IMPROVEMENT_GUIDE에 기록(보고만 — 차단 X). **한계**: WORKFLOW 산문 흐름 등재는 본 grep 범위 밖(reviewer 위임이 보조 catch).
 
 본 단계는 모두 *보고만* — 발견이 있어도 stabilize 후속 단계 차단 X (LLM 위임 단계로 계속). 다음 라운드의 `/plan-workitem`이 후속 task로 회수.

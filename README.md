@@ -107,12 +107,13 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 When you hit Claude Code's usage limit or prefer Codex:
 
 1. Run `codex` in the same repo — `AGENTS.md` is auto-loaded.
-2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, validate-discovery, repair-discovery, validate-milestone) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
+2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
    - Planning / bootstrap / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
-4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`, `validate-discovery`, `repair-discovery`, `validate-milestone`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
+   - Discovery / stabilize cross-review (opt-in, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (in fresh Codex session) + `$repair-milestone M1` (in origin session)
+4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.
 
 > Note: docs in `docs/` use Claude's `/<skill-name>` slash syntax. Read these as `$<skill-name>` when working in Codex.
 
@@ -127,7 +128,7 @@ For a full inventory of all artifacts (location, owner, lifecycle), see [STRUCTU
 ├── AGENTS.md          # Canonical entry instructions (tool-neutral)
 ├── CLAUDE.md          # Imports AGENTS.md (Claude Code entry)
 ├── .claude/           # Claude sub-agents, skills, settings
-├── .codex/            # Codex CLI project config (boilerplate-secure baseline)
+├── .codex/            # Codex CLI project config (safety baseline — limits in config.toml comments)
 ├── .agents/           # Codex skill wrappers ($-prefixed, point back to .claude/skills)
 ├── docs/
 │   ├── 00-meta/       # Workflow, guardrails, templates, operational guides

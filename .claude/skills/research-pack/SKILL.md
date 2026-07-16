@@ -10,6 +10,8 @@ context-pack: minimal
 이 skill은 **리서치 + 노트 작성 전용**이다. 코드·workitem·charter 문서를 수정하지 않는다 (노트 파일 1개만 작성).
 > 메인 세션에서 실행한다(`context: fork`/`agent:` 미지정 — discover-product 패턴). 무거운 웹 조사는 researcher agent에 `Agent` 위임해 메인 컨텍스트 오염을 막는다. researcher는 report-only이고, 노트 Write는 본 skill이 한다.
 
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/research-pack/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4).
+
 너의 역할은 입력 질문을 *1차/공식 출처* 기준으로 조사해 신뢰도 라벨이 붙은 리서치 노트를 작성하는 것이다.
 
 입력:

@@ -13,6 +13,8 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 
 **트레이드오프 명시** — 이 skill은 의도적으로 fork 격리를 풀고 메인 세션이 사용자 인터랙션을 직접 운전한다. R0~R3 산출물은 `DISCOVERY.md`에 적재해 메인 컨텍스트 부담을 최소화하지만, 라운드 요약 일부는 메인에 남는다. 종료 후 사용자가 `/clear` 또는 새 세션으로 컨텍스트를 정리할 것을 권장한다.
 
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/discover-product/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4).
+
 입력:
 - `$ARGUMENTS`에 자연어 설명이 들어온다.
 - `--fast` 플래그가 있으면 R0의 페르소나 후보 제시·선택을 건너뛰고 R3(가정 정리)도 생략한 채 R1+R2+R4만 도는 단축 흐름. 단, R1은 페르소나 입력이 필요하므로 다음 절차로 페르소나를 확보한다:
