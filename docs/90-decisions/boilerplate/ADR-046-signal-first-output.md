@@ -11,7 +11,7 @@ accepted
 - [관측됨] `plan-workitem`의 마지막 출력이 feature `## 7-1. FAC↔AC 매핑표`(영속 SSOT, ADR-037#amend-1)를 전체 echo한다 — 이미 파일에 적힌 내용을 대화에 재출력(ADR-005 SSOT 정신과 어긋남 + 토큰 낭비).
 - [관측됨] `discover-product`는 라운드형이라 라운드마다 자유 산문이 누적된다. 산출은 이미 DISCOVERY.md에 적재되는데 사용자-facing 표면 출력 포맷은 미규정.
 - [외부실증] caveman skill(github.com/JuliusBrussee/caveman)은 "기술 정확도 유지 + filler 제거"로 출력 토큰 평균 ~65% 감소를 보고. 단 관사 생략·문장 조각·wenyan 등 *문체*는 한국어 전문 문서에 부적합 — 본 ADR은 caveman의 *문체*가 아니라 *정보 밀도 원칙*만 차용한다.
-- 입력 컨텍스트 절감은 ADR-019(context-pack + JIT)가 이미 담당. 본 ADR은 미규정 영역인 *출력* 측을 다룬다.
+- 입력 컨텍스트 절감은 ADR-019(JIT 로딩)가 이미 담당. 본 ADR은 미규정 영역인 *출력* 측을 다룬다.
 
 ## 결정
 

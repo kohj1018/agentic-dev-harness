@@ -28,7 +28,7 @@ accepted
 - enabling (약) — 새 capability, opt-in. 단 researcher의 "report-only(코드/문서 미수정)"는 constraint(약) 가드.
 
 ## 참고
-- ADR-035 (Evidence Log 연결), ADR-041 (스택 추천 그라운딩), ADR-043 (MCP 설정 조회), ADR-019 (context-pack minimal).
+- ADR-035 (Evidence Log 연결), ADR-041 (스택 추천 그라운딩), ADR-043 (MCP 설정 조회), ADR-019 (JIT 로딩).
 
 <a id="adr-040-amend-1"></a>
 ## Amendment 1 (2026-06-05) — 의존성 설치 authoring(plan) + 실행(implement)

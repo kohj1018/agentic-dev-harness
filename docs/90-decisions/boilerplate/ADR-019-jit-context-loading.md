@@ -1,4 +1,4 @@
-# ADR-019 — Context Packs frontmatter + JIT 로딩
+# ADR-019 — JIT 컨텍스트 로딩 정책
 
 > scope: boilerplate
 
@@ -16,7 +16,7 @@ accepted
 
 모든 skill SKILL.md 본문 끝에 `## Context 정책 (ADR-019)` 섹션으로 명문화.
 
-### 2. Context Packs 2종
+### 2. Context Packs 2종 (이력 — 폐기됨)
 
 | pack | 포함 | 용도 |
 |------|------|------|

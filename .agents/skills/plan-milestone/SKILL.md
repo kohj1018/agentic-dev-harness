@@ -5,7 +5,7 @@ description: Use ONLY when the user explicitly types `$plan-milestone <milestone
 
 Source of truth: `.claude/skills/plan-milestone/SKILL.md` (skill 신설 근거: ADR-051). Read it and follow the workflow.
 
-Treat all frontmatter keys other than `name` and `description` (e.g., `agent:`, `disable-model-invocation:`, `allowed-tools:`, `context:`, `argument-hint:`, `model:`, `effort:`, `context-pack:`) as Claude-only and ignore them — execute locally in Codex.
+Treat all frontmatter keys other than `name` and `description` (e.g., `agent:`, `disable-model-invocation:`, `allowed-tools:`, `context:`, `argument-hint:`, `model:`, `effort:`) as Claude-only and ignore them — execute locally in Codex.
 
 **Slash command translation**: 본문 안의 `/plan-milestone`·`/plan-workitem`·`/bootstrap-design`·`/discover-product` 등 표기는 Claude 슬래시 커맨드다. Codex에서는 `$plan-milestone` 등으로 읽고 사용자에게 안내한다 (예: 본문 "다음 단계: `/plan-workitem F-002`" → Codex 응답에서는 "다음 단계: `$plan-workitem F-002`"). Codex CLI는 `/`를 빌트인 슬래시 커맨드에 쓰므로 명시적 치환이 필요.
 

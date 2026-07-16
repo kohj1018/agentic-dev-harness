@@ -84,11 +84,11 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md      — D9 re-anchor(foreman `## 3` step-path partition; write_set 5필드 스키마 폐지)
 - docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md       — Surfaces line 55(`## 9` 5필드) 제거 (5필드 삭제 정합)
 - docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md — D1 implement 부분 supersede note
-- docs/90-decisions/boilerplate/ADR-019-context-packs-and-jit.md      — `## Amendment 1` 조건부 re-read
+- docs/90-decisions/boilerplate/ADR-019-jit-context-loading.md      — `## Amendment 1` 조건부 re-read
 - .claude/skills/stack-guard/SKILL.md                             — §6-2-1 테스트 격리 권장 #amend-1
 
 ## 참고
-- ADR-007(lifecycle), ADR-014(graduation — plan-milestone가 5+1 authoring), ADR-019(context-pack — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
+- ADR-007(lifecycle), ADR-014(graduation — plan-milestone가 5+1 authoring), ADR-019(JIT 로딩 — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.3 (Optimized Workflow Topology) — 병렬성 위치 재배치의 survey-level 근거.
 
 <a id="adr-051-amend-1"></a>

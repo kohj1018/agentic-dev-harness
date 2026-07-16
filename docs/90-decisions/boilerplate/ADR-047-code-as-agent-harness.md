@@ -41,7 +41,7 @@ accepted
 - `.claude/agents/**.md`
 - `.agents/skills/**/SKILL.md` (Codex wrapper)
 - `.codex/config.toml`
-- *agent 행동을 직접 좁히는* boilerplate ADR (예: ADR-007 lifecycle, ADR-014 graduation, ADR-019 context-pack, ADR-022 ratchet, ADR-038 cross-LLM plan, ADR-044 cross-LLM discovery, ADR-046 signal-first 등)
+- *agent 행동을 직접 좁히는* boilerplate ADR (예: ADR-007 lifecycle, ADR-014 graduation, ADR-019 JIT 로딩, ADR-022 ratchet, ADR-038 cross-LLM plan, ADR-044 cross-LLM discovery, ADR-046 signal-first 등)
 
 **6 필드:**
 1. **Target** — 어떤 컴포넌트의 어떤 동작을 바꾸는가 (file:section).
@@ -134,4 +134,4 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
   - §5.2.1 Harness-Level Evaluation and Oracle Adequacy (D8 인용 owning)
   - §5.2.2 Semantic Verification Beyond Executable Feedback (D8 인용 owning)
   - §5.2.4 Transactional Shared Program State and Semantic Conflict Resolution (D9 인용 owning)
-- ADR-005 (SSOT — 본 ADR 영구 파일 인용 SSOT 역할 정합), ADR-017 (dogfood simulation — D4 default), ADR-019 (context-pack), ADR-022 (Ratchet — 정책 강도), ADR-045 (reference contract — Surfaces fan-out), ADR-046 (signal-first).
+- ADR-005 (SSOT — 본 ADR 영구 파일 인용 SSOT 역할 정합), ADR-017 (dogfood simulation — D4 default), ADR-019 (JIT 로딩), ADR-022 (Ratchet — 정책 강도), ADR-045 (reference contract — Surfaces fan-out), ADR-046 (signal-first).
