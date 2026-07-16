@@ -1,19 +1,19 @@
 ---
 name: plan-milestone
 description: Run a multi-round main-session conversation to author the next milestone(s) (M2+) and their feature docs. Additive — does not re-seed M1; hand off to /plan-workitem for tasks.
-argument-hint: "[milestone idea | feature idea]"
+argument-hint: "[milestone idea | feature idea] [--prototype [F-NNN]]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit Agent
+allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes/*/_drafts/*.html)
 ---
 
-이 skill은 메인 세션이 R0~R4 라운드를 직접 운전해 *다음* 마일스톤(M2+)과 그 feature 문서를 작성하는 절차서다.
+이 skill은 메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해 *다음* 마일스톤(M2+)과 그 feature 문서를 작성하는 절차서다.
 `/bootstrap-project`가 seed한 초기 M1/F-001 *이후*의 마일스톤을 다룬다 — **additive 모드**(기존 M1을 재생성·덮어쓰기 하지 않는다). **기존 마일스톤에 *새 feature만* 추가하는 경우도 본 skill(additive)이 담당** (외부 리뷰 반영 — 경계 공백 메움): 예: 진행 중인 M1에 F-00X를 추가할 때 M1 문서는 재생성하지 않고 feature 문서만 새로 작성한 뒤 M1 `## 3. 포함되는 기능`에 링크 한 줄을 추가한다. 그 feature를 *task로 분해*하는 것은 `/plan-workitem`이다(역할 경계 유지).
 무거운 추론(R2의 마일스톤 분할 판단)은 `Agent` 도구로 architect를 단발 sub-call로 위임한다.
-R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/feature 문서에 적재한다.
+각 라운드(R0~R5) 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/feature 문서에 적재한다.
 
 **패턴 차용** — `discover-product`/`bootstrap-design`와 동일하게 `context: fork`를 명시하지 않아 메인 세션이 라운드를 직접 운전한다. 종료 후 사용자가 `/clear` 또는 새 세션으로 컨텍스트를 정리할 것을 권장한다(라운드 인터랙션이 다음 task 컨텍스트에 잡음).
 
-**Codex**: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade — R2의 architect 단발 sub-call은 이 매핑 부재로 메인 세션이 직접 추론한다(품질 보장을 위해 충분히 깊게 사고).
+**Codex**: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade — R2의 architect·R5-2의 designer 단발 sub-call은 이 매핑 부재로 메인 세션이 직접 추론한다(품질 보장을 위해 충분히 깊게 사고).
 
 **경계** — 이 skill은 milestone + feature까지만 만든다. task 분해(`## 7-1` FAC↔AC 매핑·sizing)는 만들지 않는다 — `/plan-workitem`이 이어 수행한다(자동 호출 아님).
 
@@ -75,17 +75,35 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
 - `## 7-1. FAC ↔ AC 매핑표`는 **빈 shell만** 둔다(`- FAC-1 →` 등 우변 미채움) — task 분해 시 `/plan-workitem`이 채운다(영속 SSOT, ADR-036/ADR-037). 이 skill은 task를 만들지 않으므로 매핑을 채우지 않는다.
 - `## 11. 관련 문서`의 Milestone 링크를 R3 마일스톤으로 채운다. 비해당 스택의 Architecture-Iface/Design 줄은 삭제(placeholder 잔존 금지).
 
+**R5 — 프로토타입 라운드 (경험 계약, UI 마일스톤 한정 — ADR-056)**
+
+UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라운드 skip + "R5 skip: 비-UI" echo. **DESIGN.md `## 10` 부재(§10 신설 전 기존 fork)면 R5-4 전에 §10을 기본값으로 신설 + 채택/변경 확인 1회**(ADR-056 결정 8의 다운스트림 마이그레이션). feature 수가 많으면(3+) R4 종료 시 `/clear` 후 `/plan-milestone M<N> --prototype` 분리 재진입을 권장한다(R0~R4는 텍스트 협상, R5는 HTML 왕복이라 성격이 다름).
+
+- **R5-1 화면 목록 확정**: R4 feature 문서들의 `## 3 핵심 시나리오`에서 프로토타입 대상 화면을 도출(기본 feature당 대표 1화면 — 다화면 feature는 사용자 협의, 총 6~8화면 초과 시 우선순위 협상). 프로토타입이 무의미한 feature(순수 백엔드·내부 설정 등)는 이 시점에 해당 feature 문서 `## 7`에 `프로토타입 면제: <사유>` 한 줄을 기록한다(ADR-056 — plan-workitem 입구 계약의 통과 조건).
+- **R5-2 브로드 시안**: 화면(군)마다 designer 단발 sub-call로 *구성 방향이 다른* 시안 2~3안을 생성(divergence 카드 차용 — 단 축은 색이 아니라 **레이아웃·정보 위계·인터랙션 모델**: 예 A=테이블 고밀도 / B=카드 / C=분할 뷰). 모든 시안은 DESIGN.md `:root` 토큰만 참조(raw hex 금지 — 시각 아이덴티티는 R2에서 이미 확정, 여기선 구성만 탐색). 저장: `docs/20-system/prototypes/M<N>/_drafts/<screen>-{A,B,C}.html` (gitignore — 탐색용). GENERATED 헤더 주석 필수.
+- **R5-3 선택·수정 루프**: "브라우저에서 `_drafts/`를 열어 비교, 선호 방향(하이브리드 허용)을 알려주세요 — *원하시면 추천을 요청하실 수도 있어요*" 안내 → 피드백은 재생성으로 반영(직접 편집 X). 취향 오라클=사용자(먼저 추천·순위 제시 금지 — 사용자가 물으면 예외). 2사이클 미수렴 시 시안 반복 대신 brief(화면 정의·feature 시나리오)를 고친다.
+- **R5-4 경험 계약 완성 (의무 체크리스트 — 하나라도 빠지면 미완성)**:
+  1. 해피 패스 (정상 데이터 화면)
+  2. **못생긴 상태 5종** — 같은 파일 내 섹션으로 나란히: 긴 제목 / 빈 목록 / 로딩 / 에러 / 항목 과다
+  3. 실카피 — DESIGN.md `## 10` Voice & Writing 준수, placeholder 금지 (ADR-056 결정 9)
+  4. 인터랙션 캡션 — "이 버튼을 누르면 <무엇이 일어난다>"를 각 인터랙션 요소에 명시(정적 HTML의 '눌렀을 때' 계약)
+  5. `:root` 토큰만 참조 — 자기완결을 위해 DESIGN.md 토큰의 `:root` 정의 블록은 파일 내 포함하고, 정의 밖 스타일 규칙의 **토큰 대상 값**(색·타이포·spacing·radius·shadow)은 `var(--…)`만 사용 — 레이아웃 등 비토큰 속성은 무관 (DESIGN.md 파생임이 구조로 드러나게)
+  *확정하지 않는 것*(명시): 상태관리·fetch·컴포넌트 분리 등 엔지니어링 내부 — ARCH §7-4 영역.
+- **R5-5 승인·저장**: 사용자 승인 시 최종본을 **화면 단위**로 `docs/20-system/prototypes/M<N>/<screen>.html`에 저장한다(**커밋 대상** — Record; 재승인 시 같은 파일 대체. 화면-키인 이유: 한 화면은 여러 feature 표면의 합성 — ADR-056 결정 1). 저장 직전 **raw hex 정규식 1회 grep — `:root` 정의 블록은 검사 제외**(자기완결 파일이라 정의값 hex는 정상, 검사 대상은 정의 밖 사용처. 발견 시 토큰으로 수정 후 저장 — 상시 grep 제외(결정 7)의 승인-시점 보완). 각 feature 문서 `## 7`에 `프로토타입: [화면 파일](상대경로) (진입: <라우트/상태 진입 메모>)` 참조 줄을 기입한다(그 feature가 등장하는 화면 파일마다 1줄 — §3-V가 이 진입 메모로 화면을 찾는다). `_drafts/` 내 시안 파일을 삭제한다(빈 디렉터리 잔존 무해). 승인 전에는 종료 출력으로 진행하지 않는다.
+
+**`--prototype [F-NNN]` 재진입 모드 (ADR-056)**: R0~R4를 건너뛰고 R5만 수행한다(인자 F-NNN이 있으면 그 feature 화면만). 마일스톤 중간 화면 변경·재승인 경로. 갱신 승인 후에는 "영향받는 task를 `/plan-workitem F-NNN --refresh`로 동기화"를 종료 출력에 안내한다(stale 계약 대조 방지).
+
 **Evidence/Insight 연결 (ADR-035#amend-2)**: `Type: feature`이고 DISCOVERY `## 15. Insight Backlog`의 insight를 구현하는 feature면 `## 1. 요약`에 `근거 insight: I-N` 한 줄을 박고, 해당 Insight Backlog 행의 `status=planned` + `linked feature` 갱신을 *출력에 권장*한다(이 skill은 DISCOVERY를 직접 수정하지 않음 — `/discover-product --update`가 회수). 근거 insight 없는 즉흥 feature는 출력 "남은 미결정 사항"에 `- 근거 insight 부재: F-NNN — DISCOVERY 회수 권장` 명시. 비-feature 타입은 가정/기회·ADR 링크로 정당화되므로 insight 부재 경고를 내지 않는다.
 
-**단계별 출구 보장**: 어느 라운드에서 멈춰도 그때까지의 산출물(마일스톤 문서·feature 문서)이 `/plan-workitem`의 입력으로 의미가 있다.
+**단계별 출구 보장**: 어느 라운드에서 멈춰도 그때까지의 산출물(마일스톤 문서·feature 문서)이 `/plan-workitem`의 입력으로 의미가 있다(단 UI 확정 feature의 task 분해는 R5 승인/면제가 전제 — plan-workitem 입구 계약).
 
 **다국어**: 입력 언어를 따른다. 한국어 입력이면 산출물도 한국어, 영문 입력이면 영문.
 
 종료 후:
-- 사용자가 `/clear` 권장 — R0~R4 인터랙션이 다음 task 컨텍스트에 잡음.
+- 사용자가 `/clear` 권장 — R0~R5 인터랙션이 다음 task 컨텍스트에 잡음.
 
 마지막 출력 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
-- 생성·갱신한 문서 목록(상대 경로 — 마일스톤·feature)
+- 생성·갱신한 문서 목록(상대 경로 — 마일스톤·feature) — (UI 마일스톤) 승인 프로토타입 경로 목록 + 면제 feature 목록
 - 마일스톤 ↔ feature 구조 한 줄 요약
 - 핵심 가정
 - 남은 미결정 사항 (근거 insight 부재 / 부채 회수 후보 포함)

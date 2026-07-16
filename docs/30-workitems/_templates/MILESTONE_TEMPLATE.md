@@ -18,7 +18,7 @@ draft
 - [ ] E2E Pass (needed → must pass; needed + not-runnable = block) — UI 프로젝트(ADR-027#amend-3) 또는 아래 item 6에서 e2e 선언 시 필요; 필요한데 미통과(real)면 졸업 차단, 실행 불가(env)면 환경 복구 후 재실행 (ADR-052)
 - [ ] AC 매핑 100% (validation report 기준)
 - [ ] P0 severity finding 0건 (QA_FINDINGS의 본 마일스톤 헤더 기준)
-- [ ] (선택) 본 마일스톤 한정 추가 기준
+- [ ] (선택) 본 마일스톤 한정 추가 기준 <!-- UI 예시: "경험 게이트 [Experience-drift] P1 0건" (ADR-056 — 채택 시 본 항목이 졸업 차단으로 작동) -->
 
 ## 6. 관련 문서
 - Charter:

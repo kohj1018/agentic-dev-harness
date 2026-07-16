@@ -24,3 +24,7 @@ docs/40-validation/stabilize-reviews/*.md
 # design exploration/preview (ephemeral, never committed — ADR-049#d31 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
 docs/20-system/design-concepts/
 docs/20-system/design-preview.html
+# milestone experience contract (ADR-056): prototypes/M<N>/<screen>.html 승인본은 커밋 대상(ignore 금지).
+# 탐색 시안(_drafts)과 스크린샷 갤러리만 ephemeral.
+docs/20-system/prototypes/*/_drafts/
+docs/40-validation/visual/

@@ -10,6 +10,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 
 입력:
 - `$ARGUMENTS`에는 분해 대상 feature ID(예: `F-001`)가 들어온다. feature 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다).
+- **경험 계약 입구 점검 (ADR-056 결정 3 / ADR-007#amend-5)**: 입력 feature가 **UI 확정**(ADR-027#amend-3)인데 (a) feature 문서 `## 7`에 `프로토타입:` 참조도 없고 (b) `프로토타입 면제: <사유>` 기록도 없으면 — **분해를 시작하지 않고 `Needs Experience Contract`로 종료**한다. 안내: "`/plan-milestone M<N> --prototype F-NNN`으로 승인 프로토타입을 먼저 만들거나, feature 문서에 `프로토타입 면제: <사유>`를 기록 후 재실행". **UI 의심**(status=draft+신호)은 차단하지 않고 경고 1줄만 출력하고 진행(false positive 완충).
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
@@ -30,6 +31,8 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - "X를 적절히 처리한다" 같은 모호 지시 금지 — *어디를, 무엇으로, 어떻게* 바꾸는지 명시.
    - AC(`## 6`)는 여전히 RGR 사이클의 측정 단위다. `## 3` 가이드는 그 AC를 충족시키는 *집행 절차*이고, 각 단계는 가능하면 `(AC-N)` 태그로 대응 AC를 가리킨다.
    - 단계가 5개 파일을 넘으면 기존 sizing self-check(아래)대로 분해 권장 텍스트를 함께 출력.
+3-P. **승인 프로토타입 참조 authoring (ADR-056 결정 3 — 이중 잠금 2/2)**:
+   입력 feature가 UI 확정·비면제이면, feature `## 7`의 `프로토타입:` 참조 줄에서 화면 파일 경로를 회수해 읽고(UI 확정·비면제 한정 JIT — ADR-019 minimal 정합), 그 화면을 구현하는 *모든* UI task `## 3`에 프로토타입 참조 line item을 authoring한다(신규 요소 유무와 무관 — builder는 기계 실행). 형식: `- 구현 시 승인 프로토타입 참조 — <경로>의 <상태/섹션>과 동일 상태·문구로 구현 (AC-N)`.
 4. 관련 문서 링크를 함께 기록한다.
 5. 검증 포인트와 완료 기준을 포함한다.
 6. **task 단위 분해 시**: TASK_TEMPLATE의 `## 6. Acceptance Criteria`에 측정 가능한 AC를 최소 1개 이상 채운다. Given-When-Then 형식을 *강력 권장*하며 자세한 점검은 아래 9번 항목과 TASK_TEMPLATE 주석을 참조한다. AC가 비면 `/implement-workitem`이 RGR 사이클을 시작할 수 없다(정책: [ADR-009](../../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md), [ADR-026](../../../docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md)).
@@ -54,6 +57,8 @@ allowed-tools: Read Glob Grep Write Edit Agent
 
 본 self-check가 plan 단계에서 발화하면 [implement-workitem ambiguity surfacing](../implement-workitem/SKILL.md)은
 *재확인 surface*가 됨 — 2-layer defense (plan에서 잡으면 RGR 1회 절감).
+
+**경험 좁힘 무조건 질문 (ADR-056 결정 4)**: 해석 후보 중 어느 쪽을 골라도 무방한 *내부 엔지니어링 선택*은 지금처럼 자율 확정한다. 그러나 해석이 **사용자가 보고 느낄 것(보이는 것·눌렀을 때 일어나는 일·쓰여 있는 말)을 프로토타입·상위 약속보다 좁히는 경우**는 권장 선택을 확정하지 말고 "남은 미결정 사항"에 질문으로 올린다 — 질문 피로 방지선은 이 비대칭이 담당한다.
 
 10. **task 의존성 채움** — TASK_TEMPLATE `## 9. 의존성`을 분해 시 명시. 의존성이 없는 task는 비워둔다.
 

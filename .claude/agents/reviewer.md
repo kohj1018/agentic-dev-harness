@@ -107,7 +107,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 
 ## Design Consistency 5 차원 (design surface 전용 — ADR-027#amend-1 / ADR-056)
 
-stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용.
+stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용. 호출 측이 렌더 증거(스크린샷 갤러리 경로·visual-qa 결과)를 주입하면 Read로 이미지를 열람해 판단에 사용한다(ADR-027#amend-6). 증거 없으면 기존 grep·문서 기반 판정만.
 
 1. **[Design-token]** — raw hex / 토큰 외 색 사용 / typography family/scale 외 사용. (P1)
 2. **[Design-inventory]** — DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트 신설 / 등록 누락. (P1)

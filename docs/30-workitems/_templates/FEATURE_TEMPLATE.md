@@ -30,7 +30,10 @@ feature
 ## 7. Feature-level Acceptance Criteria
 <!-- FAC-1, FAC-2 ... 시나리오 수준 측정 가능 기준.
      task `## 6 AC`는 FAC를 만족시키는 구현 단위.
-     구 `## 8 검증 방법`을 흡수. -->
+     구 `## 8 검증 방법`을 흡수.
+     UI feature는 승인 프로토타입 참조 줄을 둔다(ADR-056 — 화면 단위 파일, 그 feature가 등장하는 화면마다 1줄):
+     `프로토타입: [M<N>/<screen>.html](../../20-system/prototypes/M<N>/<screen>.html) (진입: <라우트/상태 진입 메모>)`.
+     프로토타입이 무의미한 UI feature는 `프로토타입 면제: <사유>` 한 줄로 대체(plan-workitem 입구 계약의 통과 조건 — 둘 다 없으면 Needs Experience Contract). -->
 
 ## 7-1. FAC ↔ AC 매핑표 (subsection of ## 7)
 <!-- /plan-workitem이 task 분해 시 본 subsection을 채운다 (영속 SSOT — plan 출력은 echo).

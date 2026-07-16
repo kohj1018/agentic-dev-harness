@@ -5,6 +5,12 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT.
+- skill 간 흐름은 텍스트 제안 원칙 + 예외 3종: inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable(#amend-4), `Needs Stack Guard`(#amend-3), `Needs Experience Contract`(#amend-5).
+- lock file 자동 화이트리스트 11종은 #amend-1.
+- agent 단위 판정 범위 경계 SSOT는 `DELEGATION_STRATEGY.md`(#amend-2) — 본 ADR은 skill 단위만 정의.
+
 ## 배경
 이 보일러플레이트의 워크아이템 흐름은 단순한 "구현 → 검증" 두 단계가 아니라 다음 8단계로 정의되어야 한다. 각 단계의 책임이 분리되어 있어야 sub-agent fork 환경에서 결과 회수와 책임 경계가 명확해진다.
 
@@ -102,3 +108,12 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 `## 결정`의 "skill 간 흐름은 자동 호출이 아니라 텍스트 제안" 규약은 **실행 inner-loop(implement/validate/repair/finalize-workitem)에 한해** [ADR-050](ADR-050-main-session-lifecycle-skills.md)이 좁힌다(이 4종은 model-invocable — 메인 세션이 직접 호출 가능). 그 외 skill은 본 규약 유지. 실행 컨텍스트(fork vs 메인 세션) 분포·근거도 ADR-050 SSOT.
 
 또한 `## 결과`의 "repair 한 라운드는 P0/P1만 처리하고 P2 이하는 다음 라운드 추천" 정책은 **repair-workitem이 report를 삭제하게 되면서**(ADR-050 D3) 대체된다 — defer 시 삭제로 미처리 항목이 사라지므로 한 라운드에 P0/P1/P2를 모두 4-판정으로 완결한다(repair-plan 정합). 라운드 작업량 제한은 사용자의 부분 범위 인자(`T-001 "P0만"`)로 대신한다.
+
+<a id="adr-007-amend-5"></a>
+## Amendment 5 (2026-07-16) — plan-workitem 입구 계약 `Needs Experience Contract`
+### 결정
+"자동 차단 X — 권장 텍스트" 원칙의 명시 예외를 1건 추가한다(#amend-3 `Needs Stack Guard` 동형): `/plan-workitem`은 **UI 확정 feature**(ADR-027#amend-3) 분해 시 승인 프로토타입 참조·`프로토타입 면제:` 기록이 둘 다 없으면 `Needs Experience Contract`로 종료한다(상세: [ADR-056](ADR-056-milestone-experience-contract.md) 결정 3). UI 의심은 경고만.
+### 근거
+- [관측됨] 스킬 내부 권장 문구는 우회된다 — 입력 계약만이 집행력을 가진다(스펙=오라클 문제의 앞단 잠금).
+### 강도 (ADR-022)
+- constraint(강, [관측됨]) — 단 opt-out(문서 면제 필드) 상시 보유.

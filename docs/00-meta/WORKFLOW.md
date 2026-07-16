@@ -16,6 +16,7 @@
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
+- (UI 마일스톤) `/plan-milestone` R5 프로토타입 라운드가 화면 경험 계약(승인 프로토타입 — `docs/20-system/prototypes/M<N>/`)을 확정한 뒤 task 분해로 진행한다. UI 확정 feature는 승인 프로토타입(또는 면제 기록) 없이 `/plan-workitem` 분해가 차단된다 (ADR-056).
 
 ## 4. 구현 및 검증
 - 구현은 `/implement-workitem`으로 시작한다.
@@ -79,7 +80,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 ## 워크아이템 라이프사이클
 
 ```
-discover → bootstrap → plan ─┬─→ implement → validate ─┬─Pass─→ finalize → stabilize
+discover → bootstrap → plan(+UI: 프로토타입 라운드) ─┬─→ implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
                               │                          └─Needs Fix─→ repair → (validate 재실행)
                               └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
