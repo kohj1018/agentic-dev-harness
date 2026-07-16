@@ -18,7 +18,7 @@ accepted
 - [외부실증] Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747) §4.1.2 — cross-LLM critique-and-repair(ADR-038/044 계승).
 
 ## 결정
-1. `/validate-milestone [M] [--reviewer-tag <tag>]` 신설 — read-only 검토(qa 엣지케이스·회귀 + reviewer 부채), 임시 파일 `docs/40-validation/stabilize-reviews/<M>.<tag>.md`. **코드·문서·실행 X(Bash 없음 — e2e 충돌 차단).** 결정적 preflight·validate·e2e·audit 재실행 안 함. ADR-038 `/validate-plan` 패턴의 stabilize 층 mirror.
+1. `/validate-milestone [M] [--reviewer-tag <tag>]` 신설 — read-only 검토(qa 엣지케이스·회귀 + reviewer 부채), 임시 파일 `docs/40-validation/stabilize-reviews/<M>.<tag>.md`. **코드·문서·실행 X(실행 금지의 본체는 instruction 행동 계약 — allowed-tools 미등재는 권한 프롬프트 마찰(승인 시 실행 가능), `disable-model-invocation`은 skill 자동 로딩만 차단, allowed-tools는 hard 제한 아님·진짜 hard 제한은 `disallowed-tools`).** 결정적 preflight·validate·e2e·audit 재실행 안 함. ADR-038 `/validate-plan` 패턴의 stabilize 층 mirror.
 2. **실행 single-origin**: stabilize-milestone(origin)이 validate/e2e/audit + tracked-doc 쓰기 + 졸업판정을 *한 번만*. 같은 checkout 동시 stabilize 금지.
 3. `repair-milestone`(stabilize 짝, ADR-052 D4 소유) 확장 — stabilize-reviews 회수·4-판정·3중 dedup·적용·삭제. **종료 가드 확장**: QA_FINDINGS·IMPROVEMENT_GUIDE *그리고 stabilize-reviews*가 모두 비었을 때만 종료(peer P0 누락 방지). 삭제는 echo-then-rm(무제한 Bash라 prompt-level echo가 안전 가드).
 4. verdict는 리뷰 라벨이지 워크플로 차단 아님(ADR-038/007). opt-in.

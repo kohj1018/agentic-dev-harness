@@ -6,7 +6,7 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write
 ---
 
-이 skill은 **판정 + 임시 리뷰 파일 기록 전용**이다. 코드·문서 수정 금지, **`validate`/`validate:e2e`/`npm audit` 등 실행 금지**(allowed-tools에 Bash 없음 — e2e 충돌 원천 차단). stabilize-milestone(origin)이 실행·졸업판정·문서기록을 단일 수행하고, 본 skill은 *추가 모델의 읽기전용 2nd opinion*만 만든다.
+이 skill은 **판정 + 임시 리뷰 파일 기록 전용**이다. 코드·문서 수정 금지, **`validate`/`validate:e2e`/`npm audit` 등 실행 금지**(실행 금지의 본체는 skill instruction의 행동 계약이다 — allowed-tools에 Bash가 없으면 실행 시 권한 프롬프트가 뜨는 *마찰*일 뿐 사용자 승인 시 실행 가능하고, `disable-model-invocation`은 skill *자동 로딩*만 막을 뿐 도구 실행은 막지 않는다. Claude의 allowed-tools는 hard 제한이 아니라 사전승인 목록이며 진짜 hard 제한은 `disallowed-tools`이므로, "Bash 없음=원천 차단"은 부정확). stabilize-milestone(origin)이 실행·졸업판정·문서기록을 단일 수행하고, 본 skill은 *추가 모델의 읽기전용 2nd opinion*만 만든다.
 
 **⚠ 같은 checkout 제약**: 리뷰 파일은 `docs/40-validation/stabilize-reviews/`의 gitignore된 로컬 파일. origin의 `/repair-milestone`이 회수하려면 *같은 checkout*에서 실행(다른 worktree면 수동 이동).
 
