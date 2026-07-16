@@ -126,6 +126,16 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 
 > 주: `/discover-product`, `/stack-guard`는 현재 `.claude/skills/`에 모두 존재한다.
 
+## ADR 작성 트리거 (ADR-000#amend-2 SSOT — 요약 게시)
+
+| 신호 | 작성 주체 | 시점 |
+|---|---|---|
+| 초기 결정 | /bootstrap-project (ADR-100) · /bootstrap-stack (ADR-101) | 즉시 |
+| T2 스택 변경 | /bootstrap-stack --migrate (ADR-1NN) | 계약 시점 |
+| 고-stakes 설계 (ADR-053 게이트) | 라운드 운전 skill → architect sub-call 초안 | 결정 확정 시점 |
+| stabilize ADR 후보 (validator는 P1-finding 경로 — ADR-000 결정 2) | IMPROVEMENT_GUIDE `[ADR-candidate]` → 다음 /plan-milestone R0 회수·작성 | 다음 plan 라운드 |
+| 수동 결정 (MCP 등) | 사용자 | — |
+
 ## 모델 표기 정책
 
 shared 기본값에서는 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용한다.

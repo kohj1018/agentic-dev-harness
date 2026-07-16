@@ -54,3 +54,7 @@ accepted
 
 ## 참고
 - ADR-006(단순성 게이트), ADR-040(researcher·리서치 품질), ADR-038(cross-LLM 정신), ADR-031(지원 스택), ADR-014(마일스톤), ADR-047 D3(Mutation Contract).
+
+<a id="adr-053-amend-1"></a>
+## Amendment 1 (2026-07-16) — ④ "(해당 시) ADR"의 판정 기준·작성 주체 구체화
+결정 2의 ④ "(해당 시) ADR"은 [ADR-000 Amendment 2](ADR-000-boilerplate-decision-policy.md#adr-000-amend-2) 결정 3의 판정 기준(비-스택 프로세스/제품 범위/보안 결정 · boilerplate supersede · cross-마일스톤 재검토 트리거 필요)을 따르고, 작성 주체·시점은 그 트리거 표(그 라운드를 운전한 skill이 결정 확정 시점에 architect sub-call로 초안)가 SSOT다.

@@ -46,6 +46,7 @@ ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: 
 1. ADR 본문을 작성한다(번호 정책: [상위 README 허브](../README.md) "새 ADR을 어디 박는가" 참조 — boilerplate는 100 미만, project는 ADR-100+).
 2. [README.md](README.md) 인덱스 표에 한 줄 추가(번호, 제목, 상태, 한 줄 요약).
 3. 관련 agent/skill 본문에 ADR 링크를 박는다(정책 설명을 길게 박지 않는다).
+- 작성 주체·시점: DELEGATION_STRATEGY의 ADR 작성 트리거 표(ADR-000#amend-2)를 따른다.
 
 ## 참조 표기 (ADR-045#d1·#d2)
 - ADR 간 참조는 정규 ID로: `ADR-027` / `ADR-027#amend-1` / `ADR-027#d5`. **줄번호 참조 금지** — 대신 내용 서술자나 섹션 anchor.
