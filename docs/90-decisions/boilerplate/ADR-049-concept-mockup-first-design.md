@@ -10,6 +10,7 @@ accepted
 - `/bootstrap-design`의 *워크플로우 라운드 구조*는 본 ADR이 SSOT: R0(레퍼런스 추출 + `DESIGN_RESEARCH.md` 노트) → R1(원칙) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰, 선택 concept에서 추출) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 정리).
 - 시각 방향 *선택*은 R2 concept 시안(다중)이 PRIMARY, R6 preview는 SSOT 렌더 충실도 확인(사용자 생략 가능).
 - ADR-027은 *DESIGN.md 내용*(#5 Stitch 8섹션+Motion, #6 3-tier 토큰, #7/#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT를 유지. *라운드 구조·시안 시점·preview lifecycle(gitignore 포함)·R0 grounding*은 본 ADR이 ADR-027 #3/#13/#21/#d22/#d26/#27을 supersede(ADR-027 본문은 accepted 유지, 흐름만 이관). #d22의 design-preview.html *산출물 자체*는 R6이 계속 쓰지만 *삭제 시점(R5-3→R6-3)·gitignore 정책(보존 요청 시→기본 등재)*은 본 ADR이 갱신.
+- R0/R1 분해·R2 concept 시안·R5(ADR-056) 프로토타입의 authoring 주체 = **designer agent**(생성 전담 — 감사·비평은 reviewer[design], 취향 오라클=사용자·추천 금지). R0는 grounding 소스 위계 5단(사용자 URL → researcher 디자인 모드 → 디자인 MCP → 정성 소스 → 모델 지식+확인 게이트), R2는 divergence 카드 강제 (#amend-2 — #amend-1 "designer 미신설" 반전).
 
 ## 배경
 - [외부실증] [prg.sh — Why Your AI Keeps Building the Same Purple Gradient](https://prg.sh/ramblings/Why-Your-AI-Keeps-Building-the-Same-Purple-Gradient-Website) — 시각 결정 입력 없이는 median 미감(purple gradient SaaS) 회귀 (ADR-027 배경 계승).
@@ -82,3 +83,29 @@ accepted
 - .claude/skills/stack-guard/SKILL.md       — §6-4-1 visual-QA scaffold
 ### 참고
 - ADR-027(DESIGN §9 내용 SSOT), ADR-052 D3(졸업 e2e 게이트), ADR-014#amend-2(e2e MUST-run).
+
+<a id="adr-049-amend-2"></a>
+## Amendment 2 (2026-07-16) — designer agent + grounding 위계 + divergence 강제 + 취향 오라클
+
+### 결정
+1. **designer agent 신설 — #amend-1 "designer 페르소나 미신설"의 명시적 반전**. 근거가 바뀌었다: [관측됨] 실사용 fork에서 시각 어휘 없는 architect 위임 + 다양성 규율 부재로 시안 품질·다양성이 부족했다. `.claude/agents/designer.md`(생성 전담 — 감사(비평)는 reviewer[design] 유지, 생성/감사 분리). R0/R1 분해·R2 시안 authoring·R5(ADR-056) 프로토타입 authoring의 수행 주체를 architect → designer로 교체.
+2. **R0 grounding 소스 위계 5단** (#d28·#amend-1 강화): ① 사용자 제공 URL/스크린샷(스크린샷은 메인 세션이 Read로 vision 분해) → ② researcher *디자인 레퍼런스 모드*(ADR-040#amend-4)로 코드 수준 토큰 추출(웹 가용 시 기본 — 오픈소스 디자인 토큰 패키지 포함) → ③ 연결된 디자인 MCP(ADR-048 access 부여 시) → ④ 정성 소스(디자인 요약 사이트 — 어휘 보조) → ⑤ 모델 지식. **⑤로 떨어지기 전 사용자 확인 게이트 1회**("레퍼런스 0개 — URL을 주시겠어요, 아니면 모델 지식으로 진행할까요?") — 구 "기록 후 진행"을 "확인 후 진행"으로 강화. DESIGN_RESEARCH.md에 레퍼런스별 `#### 추출 토큰 (코드)` 소절 추가(h4 — 리스트 스키마 보존).
+3. **R2 divergence 카드**: 각 concept에 {배타적 레퍼런스 borrow 축, 전용 안티-레퍼런스 1개, 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정(R0 레퍼런스 수가 concept 수보다 적으면 borrow 축은 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션) 배타 배정으로 대체 — 산술 불충족 방지). 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 카드는 DESIGN_RESEARCH.md `## 시안 옵션`에 기록.
+4. **R2-1.5 구별성 비평(순차 1회)**: 생성 직후 **reviewer(design surface) 단발 sub-call**(입력 = divergence 카드 + concept별 토큰 요약 — HTML 전문 금지)로 ① concept 간 실질 구별성 ② 안티-레퍼런스/`## 9` Don'ts 근접도만 판정. **designer 자기 비평 금지**(결정 1의 생성/감사 분리 정합). **합의·병합·순위·추천 금지** — 출력은 "재생성 필요 concept 목록"만(선택은 R2-2 사용자).
+5. **취향 오라클 명문화**: R2-2에 "에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자 질문 시 예외)" 1줄. 전량 거부 시 divergence 카드부터 재설계(기존 2사이클 수렴 규칙과 결합).
+6. **실카피 의무 배선**(ADR-056): R1에 voice 기본값 확인 1회, R2/R6 대표 화면 실카피 렌더, R5에서 §10 authoring.
+7. **hot-loop carve-out 명문화**(#amend-1 3 정합): "스크린샷 vision 비평 금지"는 *RGR inner-loop 한정*이다 — 마일스톤 1회성 게이트(stabilize — ADR-056)와 사용자 승인 라운드의 스크린샷·렌더 확인은 허용 범위임을 명시(뒤집기 아님, carve-out의 체계화).
+8. **비결정 범위 한정 각주**: 비결정 "concept 시안을 commit·영속 — 영구 No"의 대상은 *R2 탐색용 concept*이다. 마일스톤 승인 프로토타입(ADR-056 — `docs/20-system/prototypes/`)은 별개 산출물 클래스로 본 비결정의 적용 대상이 아니다.
+
+### 근거
+- [관측됨] 사용자 실사용: 시안이 단조롭고 어디서 본 듯함 — 근본 원인은 (i) 웹 grounding 미배선(architect는 웹 도구 없음), (ii) 다양성 구조 강제 부재(같은 brief에서 3안 파생 → 수렴), (iii) 시각 어휘 없는 페르소나.
+- [외부실증] LLM 합의는 bland 수렴 — 논의(합의) 토폴로지를 도입하지 않고 축 분리(divergence 카드) + 사용자 선택으로 다양성 확보(ADR-053 parallel-merge 금지 정합).
+
+### 강도 (ADR-022)
+- 결정 2의 확인 게이트만 constraint(약한 강제 — 질문 1회), 나머지 enabling.
+
+### 적용 surface
+- .claude/agents/designer.md (신설)
+- .claude/skills/bootstrap-design/SKILL.md (헤더·R0~R2·R5·R6·--fast)
+- docs/00-meta/STRUCTURE.md (agent 로스터 7→8종)
+- docs/00-meta/DELEGATION_STRATEGY.md (designer 위임 행)

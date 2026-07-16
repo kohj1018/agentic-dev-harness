@@ -34,7 +34,7 @@
 | design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
 | design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (21종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
-| Claude sub-agent | `.claude/agents/<name>.md` (7종: architect/builder/validator/planner/reviewer/qa/researcher) | 수동 (boilerplate 제공) | Reference | baseline |
+| Claude sub-agent | `.claude/agents/<name>.md` (8종: architect/builder/validator/planner/reviewer/qa/researcher/designer) | 수동 (boilerplate 제공) | Reference | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/bootstrap-project`, `/plan-milestone` | Living | generated |
 | feature | `docs/30-workitems/features/F-*-*.md` | `/bootstrap-project`, `/plan-milestone`, `/plan-workitem` | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |

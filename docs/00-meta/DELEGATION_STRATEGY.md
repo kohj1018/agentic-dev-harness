@@ -28,6 +28,7 @@
 | task 문서가 존재하는 구현 작업 | builder | 범위 밖 변경 금지 |
 | 구현 완료 후 범위 검증 | validator | **단위**: workitem 단위 / **종류**: 판정 + report 전용 / **제약**: 코드·문서 수정 금지 (ADR-007). AC ↔ 테스트 매핑, 문서 범위 정합. |
 | 중요한 설계 변경, 큰 tradeoff, 상위 아키텍처 수정 | architect | 비용이 크므로 일상 작업에는 사용하지 않음 |
+| 시각/UX 디자인 authoring (레퍼런스 분해·원칙·concept 시안·마일스톤 프로토타입) | designer | **생성 전담** — 감사·비평은 reviewer(design surface). 취향 추천 금지(오라클=사용자). /bootstrap-design R0~R2·plan-milestone R5가 호출 (ADR-049#amend-2). Codex: 메인이 designer.md 인라인 수행. |
 | 요구사항 정리, workitem 분해 | planner | 아키텍처 결정은 architect로 |
 | 문서/코드의 모순·누락·숨은 복잡도 검토 | reviewer | **단위**: 코드·문서 단위 / **종류**: 구조적 모순 + 숨은 복잡도 + 정책 drift / **제약**: 수정 권장만, 직접 수정 X. Clean Code 6항목 (ADR-006). |
 | 구현 후 회귀 위험·엣지 케이스 점검 | qa | **단위**: milestone / user-flow 단위 / **종류**: 회귀 + 엣지 케이스 + 사용자 위험 / **제약**: 보고만, Write 권한 없음 (stabilize-milestone이 받아 적음). |
