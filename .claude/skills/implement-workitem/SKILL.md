@@ -17,6 +17,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 1. 관련 task 문서를 읽는다 (메인 세션이 *한 번*만 읽는다 — builder 에 task 전문을 넘기지 않는다).
 2. 필요하면 상위 feature/milestone/architecture 문서를 읽는다.
 3. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)와 `## 3. 구현 항목`을 회수한다.
+3-R. **draft 가이드 하드스탑 (ADR-057 결정 4 / ADR-026#amend-3)**: task `## 3`에 `## 3 상태: draft` 문자열(HTML 주석 마커 내)이 있으면 **분할·dispatch를 시작하지 않고 `Needs Plan Refresh`로 즉시 종료**한다 — `/plan-workitem F-NNN --refresh` 실행을 안내(배치 분해된 가이드는 앞 feature 구현으로 낡았을 수 있다 — 낡은 before/after는 기계 실행 builder에 파괴적).
 4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition; *partition 직전 `docs/00-meta/STACK_SETUP_PLAN.md`(있으면)의 "테스트 격리 미설정" 표식을 회수* — 공유 런타임 리소스 순차화 입력):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.

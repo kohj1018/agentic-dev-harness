@@ -1,7 +1,7 @@
 ---
 name: stabilize-milestone
 description: Stabilize a milestone — run E2E + regression + refactoring/ADR review. No code changes, no commits.
-argument-hint: "[milestone id] [--dry-run]"
+argument-hint: "[milestone id] [--dry-run | --feature F-NNN]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash Agent
 ---
@@ -23,6 +23,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 입력:
 - `$ARGUMENTS`에는 milestone ID(예: `M1`)가 들어온다.
 - `--dry-run` 플래그가 있으면 1.5 Graduation pre-check만 돌리고 종료(P0 검증 도구 — 전체 QA 없이 빠른 졸업 가능 여부 확인).
+- `--feature F-NNN` 플래그(ADR-057 결정 6): **입력 검증 먼저 — (a) F-NNN이 milestone `## 3. 포함되는 기능`에 없으면 "해당 milestone 소속 아님" 안내 후 종료(QA finding 오기록 방지), (b) `--dry-run`과 상호배타 — 둘 다 주면 안내 후 종료(`--dry-run`은 §1.5만 실행, `--feature`는 §1.5 skip이라 충돌).** 통과 시 **feature 스코프 점검** — §1.0 preflight는 항목 3(FAC unmapped)만 — **그 항목도 해당 feature의 `## 7-1`으로 한정**(뒤 feature의 unmapped FAC를 P0로 올리지 않는다 — 스코프 일탈 방지), **단계 2(task status 점검)는 해당 feature의 task만 대상**(뒤 feature의 미완료 task 명단으로 종료하지 않는다 — 마일스톤 중간 실행이 본 플래그의 존재 이유), §1.5 graduation pre-check는 skip(**졸업 판정은 milestone 전용** — 출력에 "본 실행은 졸업 판정이 아님"을 명시), 단계 3 validate 1회 + 3-P/3-V(ADR-056)/단계 4 qa fan-out을 해당 feature의 화면·시나리오 한정(**단, 3-V의 screen-keyed 프로토타입 대조는 composite 화면(여러 feature 합성)에서 그 feature가 소유한 영역만 판정 — 미구현 sibling feature 영역은 "부분 구현 — 판정 보류"로 처리해 false `[Experience-drift]`를 억제**). **skip 단계는 실제 헤딩 기준으로 단계 5(reviewer)·6(ADR 후보 제안)·6.5(staleness)·7(ARCH 3-1 권장)·7-T(telemetry)**. **단, 단계 4 qa fan-out을 실행하므로 그 결과 기록을 위해 6-S(self-synthesis)는 수행하되 qa 축만 종합**한다(reviewer(5)를 skip하므로 IMPROVEMENT_GUIDE의 reviewer 기록분은 없고 QA_FINDINGS만 갱신 — qa fan-out 결과가 미종합으로 유실되지 않게). **milestone 문서 `## 8. 회고` 자동 채움도 skip**(회고는 milestone 전체 stabilize 전용 — 중간 상태 덮어쓰기 방지). QA_FINDINGS 기록은 기존 스키마 유지 — `## M-N` 아래 `### P0/P1/P2` 섹션에 적되 각 항목 문두에 `(F-NNN)` scope 태그를 붙인다(**별도 `### F-NNN` 헤더 금지** — graduation의 "`### P0` 섹션 항목 수" 카운트와 repair-milestone 회수가 severity 섹션 스키마를 소비한다). read-only·실행 single-origin(ADR-054) 불변.
 
 수행:
 1. milestone 문서를 읽고 포함된 feature/task 목록을 회수한다.
@@ -210,7 +211,7 @@ Telemetry — M1
    - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
    - **다음 단계** ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
      - **졸업 가능 = YES + P0 후속 0건**:
-       - 기본 권장: `/plan-milestone` — 다음 milestone(M-(N+1)) + feature 문서 생성 (이후 각 feature를 `/plan-workitem F-NNN`로 task 분해)
+       - 기본 권장: `/plan-milestone` — 다음 milestone(M-(N+1)) + feature 문서 생성 (이후 `/plan-workitem M-(N+1)` 배치 분해 — 단일 feature는 `F-NNN`, ADR-057)
        - 프롬프트 동봉 권장: 본 라운드 Telemetry 의 신뢰도 분포 + Cross-stabilize 회귀 신호 (다음 milestone 의 우선순위 조정 입력)
      - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
        - **milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: `/repair-milestone M-N` 권장** (ADR-052) — 단일 task로 격리되지 않는 회귀·교차 결함과 실제 e2e 수정은 milestone 단위 repair로 라우팅. stabilize가 read-only로 남기 위한 코드 수정 경로다.

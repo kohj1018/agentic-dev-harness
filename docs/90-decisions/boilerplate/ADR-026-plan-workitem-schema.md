@@ -78,3 +78,14 @@ plan-workitem은 각 task의 `## 3. 구현 항목`을 *그 문서만 보고 따�
 ### 적용 surface
 - docs/30-workitems/_templates/TASK_TEMPLATE.md  — `## 3` 주석
 - .claude/skills/plan-workitem/SKILL.md           — "반드시 수행할 일" 3-G + 마지막 출력 self-check
+
+<a id="adr-026-amend-3"></a>
+## Amendment 3 (2026-07-16) — 배치 분해의 `## 3` draft 예외 + refresh 계약
+### 결정
+#amend-2의 "`## 3`은 실제 현재 상태를 JIT로 읽어 작성" 원칙에 예외 1건: `/plan-workitem M<N>` 배치 모드([ADR-057](ADR-057-planning-v2-batch-and-seam.md) 결정 2)에서 *첫 구현 대상이 아닌* feature의 task는 `## 3`을 의도 수준 초안 + 본문 첫 줄 HTML 주석 마커 `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->`로 둘 수 있다(heading이 아닌 주석 — 문서 스키마 보존). 단 (a) 구현 진입은 `--refresh`(그 시점 JIT 재접지 + 마커 제거) 후에만 — implement가 draft 마커에 `Needs Plan Refresh`로 하드스탑, (b) AC·범위·의존성·FAC 매핑은 draft 대상이 아니다(배치 시점에 완성).
+### 근거
+- [관측됨] per-feature 계획 세션 반복의 시간 비효율. 원칙 자체(현재 상태 근거)는 보존 — 보장 시점을 "분해 시"에서 "구현 직전"으로 옮긴 것.
+### 적용 surface
+- docs/30-workitems/_templates/TASK_TEMPLATE.md (`## 3` 주석)
+- .claude/skills/plan-workitem/SKILL.md
+- .claude/skills/implement-workitem/SKILL.md

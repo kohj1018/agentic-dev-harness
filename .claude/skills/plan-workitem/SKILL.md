@@ -1,7 +1,7 @@
 ---
 name: plan-workitem
-description: 기존 feature 문서를 task 단위로 분해하고, 그 task의 AC를 feature `## 7-1` FAC↔AC 매핑표에 채운다 (milestone·feature 문서 *생성*은 plan-milestone 담당 — ADR-050/ADR-051). Claude Code plan 모드와 다름 — task 분해기.
-argument-hint: "[feature id]"
+description: 기존 feature 문서를 task 단위로 분해하고, 그 task의 AC를 feature `## 7-1` FAC↔AC 매핑표에 채운다 (milestone·feature 문서 *생성*은 plan-milestone 담당 — ADR-050/ADR-051). Claude Code plan 모드와 다름 — task 분해기. M<N> 입력 시 마일스톤 배치 분해(2-tier — ADR-057).
+argument-hint: "[feature id | milestone id] [--refresh]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
 ---
@@ -9,14 +9,21 @@ allowed-tools: Read Glob Grep Write Edit Agent
 너의 역할은 입력으로 받은 feature ID를 task 단위로 분해하고, 그 task들의 AC를 feature `## 7-1` 매핑표에 채우는 것이다. milestone·feature 문서 *생성*은 `/plan-milestone` 담당이며, 본 skill은 *이미 존재하는* feature 문서를 입력으로 받는다.
 
 입력:
-- `$ARGUMENTS`에는 분해 대상 feature ID(예: `F-001`)가 들어온다. feature 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다).
+- `$ARGUMENTS`에는 분해 대상 feature ID(예: `F-001`) **또는 milestone ID(`M<N>` — 배치 모드)**가 들어온다. **feature ID 입력 시** feature 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다). **`M<N>` 입력이면 milestone 문서와 그 `## 3. 포함되는 기능`이 가리키는 feature들을 읽어 처리한다(종료 조건은 milestone 문서 부재 시 — 아래 배치 모드 단락).**
 - **경험 계약 입구 점검 (ADR-056 결정 3 / ADR-007#amend-5)**: 입력 feature가 **UI 확정**(ADR-027#amend-3)인데 (a) feature 문서 `## 7`에 `프로토타입:` 참조도 없고 (b) `프로토타입 면제: <사유>` 기록도 없으면 — **분해를 시작하지 않고 `Needs Experience Contract`로 종료**한다. 안내: "`/plan-milestone M<N> --prototype F-NNN`으로 승인 프로토타입을 먼저 만들거나, feature 문서에 `프로토타입 면제: <사유>`를 기록 후 재실행". **UI 의심**(status=draft+신호)은 차단하지 않고 경고 1줄만 출력하고 진행(false positive 완충).
+- **`M<N>` 입력 — 마일스톤 배치 분해 모드 (ADR-057 결정 2)**: 본 마일스톤 `## 3. 포함되는 기능`의 모든 feature를 한 세션에서 분해한다.
+  - *안정 tier (전 feature 완성)*: 각 task의 범위/비범위·`## 6` AC·`## 9` 의존성·feature `## 7-1` FAC↔AC 매핑·cross-task seam self-check(ADR-057 결정 9 — **마일스톤 전체 task 집합 대상 1회**, cross-feature seam 포함).
+  - *가이드 tier*: `## 3` 단계별 가이드는 **첫 구현 대상 feature(의존성상 최선두)만** 3-G full JIT로 작성. 나머지 feature의 task는 의도 수준 초안만 적고 `## 3` 본문 첫 줄에 HTML 주석 마커 `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->`를 박는다(heading 아님 — 스키마 보존, ADR-026#amend-3). AC 해석 확정(9-1)·경험 계약 입구 점검(ADR-056)은 배치 시점에 전 feature 수행.
+  - **멱등**: 분해 완결 feature(전 task에 `## 6` AC 존재 + `## 7-1` 매핑 완성)는 skip, 부분 생성 feature는 이어서 완성 — 배치 재실행 안전. **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
+  - 경험 계약 입구 점검은 마일스톤 내 *모든 UI 확정 feature*에 대해 1회 일괄 수행 — 하나라도 미충족이면 그 feature만 보류 목록으로 출력하고 나머지는 진행(전체 차단 X — ADR-056 결정 3의 배치 단서).
+- **`F-NNN --refresh` — 가이드 재접지 모드 (ADR-057 결정 3)**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 3-G 재작성하고 draft 마커를 제거한다. AC·범위·매핑은 손대지 않는다(변경이 필요해 보이면 "남은 미결정 사항"에 surface — 자동 수정 X). `## 8. 메모`의 repair 이력과 승인 프로토타입 갱신(`--prototype` 재승인)을 반영 입력으로 읽는다.
+  - **seam 재점검 (경량 — ADR-057 결정 9)**: `## 3` 재접지 결과 실제 write 대상·2차-write·상태 전이가 배치 시점 추정과 달라지면, 그 feature 관련 `## 7-2` invariant가 여전히 유효한지 확인하고 무효 의심 시 "남은 미결정 사항"에 surface한다(자동 수정 X). *배치 분해 시점엔 `## 3`가 draft라 구현 세부에서만 드러나는 cross-task seam을 못 볼 수 있으므로, --refresh가 그 seam의 마지막 재점검 지점이다.*
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
 - `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. UI 판정은 **ADR-027#amend-3 "UI 판정 다중신호 절차"** 적용(부재→비-UI / status≠draft→UI / status=draft→추가신호). UI 확정 시 본문 회수 + cross-check 활성, 비-UI/skip 시 사유 echo.
-- 입력 feature ID에 해당하는 feature 문서(필수 — 부재 시 `/plan-milestone` 안내 후 종료) 및 그 상위 milestone 문서
+- 입력 feature ID에 해당하는 feature 문서(필수 — 부재 시 `/plan-milestone` 안내 후 종료) 및 그 상위 milestone 문서 (**`M<N>` 배치 입력이면 대신 milestone 문서 + 그 `## 3. 포함되는 기능`이 가리키는 각 feature 문서를 읽는다**)
 - `docs/30-workitems/_templates/TASK_TEMPLATE.md` (task 생성 양식 SSOT)
 
 반드시 수행할 일:
@@ -110,6 +117,8 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   | M1        | F-001   | T-002 | 3     | T-001  |
   ```
 - task 분해 시: AC 매핑은 입력 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
+- (단일 feature 모드) 같은 milestone의 미분해 feature 목록 — 다음 `/plan-workitem` 대상 (ADR-057 결정 7)
+- (배치 모드) feature별 ## 3 상태 요약: full N개 / draft M개 (draft는 구현 직전 --refresh)
 - 핵심 가정
 - 남은 미결정 사항
 - **인터페이스·디자인 cross-check 결과** (정합성 self-check 결과 요약):

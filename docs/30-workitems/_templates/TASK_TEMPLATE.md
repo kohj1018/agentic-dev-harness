@@ -20,7 +20,8 @@ feature
 ## 3. 구현 항목
 <!-- plan-workitem이 *단계별 구현 가이드*로 채운다 (ADR-026#amend-2). 그 문서만 보고 따라 하면 구현이 끝날 만큼 구체적으로.
      각 단계 형식: `N. <파일경로[:라인/식별자]> — 현재: <상태> → 변경: <정확한 수정(필요 시 before/after)> → 확인: <검증 방법>` (가능하면 끝에 `(AC-N)` 태그).
-     모호 지시("적절히 처리") 금지. 새 외부 의존이 필요하면 설치 단계도 명시 (ADR-040#amend-1) — 예: N. 의존성 설치 — `pnpm add <pkg>@<ver>` 실행 (용도: ...) (AC-N). -->
+     모호 지시("적절히 처리") 금지. 새 외부 의존이 필요하면 설치 단계도 명시 (ADR-040#amend-1) — 예: N. 의존성 설치 — `pnpm add <pkg>@<ver>` 실행 (용도: ...) (AC-N).
+     배치 분해(ADR-057)된 뒤 feature의 task는 본 섹션이 의도 수준 초안 + 본문 첫 줄 draft 마커 HTML 주석일 수 있다(정확한 마커 문자열은 plan-workitem SKILL 배치 모드 단락이 SSOT) — implement는 draft 마커에서 Needs Plan Refresh로 정지한다(ADR-026#amend-3). -->
 
 ## 3-T. 트러블슈팅 (Type=bugfix 일 때만 — 아니면 본 섹션 삭제)
 <!-- 증상만 있고 AC가 없는 작업의 root-cause 절차. 채운 뒤 회귀 테스트 AC를 ## 6에 박는다. -->
