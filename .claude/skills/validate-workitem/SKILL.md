@@ -31,7 +31,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
        7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검)
      - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
-     - **small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 파일 ≤ 2 *또는* 변경 줄 합계 ≤ 50, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단).
+     - **small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 줄 합계 ≤ 50, *또는* (변경 파일 ≤ 2 *이고* 변경 줄 합계 ≤ 200), *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단. "2파일이면 줄 수 무관 inline"이던 구 기준은 구현+테스트 2파일의 대형 TDD diff를 놓쳐 보정됨 — ADR-051#amend-2). 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
      - **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent 병렬 파리티가 없으므로(ADR-010 매핑) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
 1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 **항상 실행**하고 stdout/stderr를 수집한다 (메인 세션 연쇄 실행이라도 implement 이후 코드 상태가 바뀌었으므로 직전 결과를 재사용하지 않는다).
    - **명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
@@ -88,6 +88,13 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 - 검증 시각: <ISO 8601 타임스탬프>
 - task-id: <task-id>
 - 판정: Pass | Needs Fix
+
+## Orchestration (ADR-051#amend-2)
+<!-- 5줄 이내. 팬아웃/inline 여부를 산출물로 검증 가능하게 하는 관측 섹션 -->
+- 모드: fan-out N축 | inline fallback | Codex 순차 degrade
+- spawn된 축: <번호·이름 목록 (예: 1 AC↔테스트, 2 diff-trace, 7 Evidence)>
+- skip된 축: <축 — 사유 (신호 없음 / 해당없음)>
+- fallback 사유 (해당 시): 파일 N개 · 변경 줄 M줄 (git diff --stat 기준)
 
 ## 통합 명령 실행 결과
 <있으면 명령어와 stdout/stderr 요약, 없으면 "통합 명령 미설정 — 정적 판정만 수행">
@@ -152,6 +159,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 - Pass / Needs Fix
 - 핵심 문제 최대 5개
 - report 파일 경로
+- orchestration 모드 1줄 (예: "fan-out 4축" / "inline fallback — 1파일 12줄")
 - 다음 추천 단계 (텍스트 제안임을 명시)
 
 ## Context 정책 (ADR-019)

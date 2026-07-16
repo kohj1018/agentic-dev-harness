@@ -104,3 +104,15 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - .claude/skills/implement-workitem/SKILL.md
 - .claude/agents/builder.md
 - .claude/skills/stack-guard/SKILL.md
+
+<a id="adr-051-amend-2"></a>
+## Amendment 2 (2026-07-16) — validate 팬아웃 관측 기록 + fallback 게이트 보정
+### 결정
+1. validate-workitem report 양식에 `## Orchestration` 섹션(모드/spawn 축/skip 사유/fallback 트리거 값, ≤5줄)을 의무 추가한다. 본 ADR Mutation Contract #4가 "validate report 양식"을 보존 invariant로 박았으므로 본 amendment가 그 invariant를 좁혀 완화한다(양식 *확장*만 허용).
+2. small-diff fallback을 "줄 ≤50, 또는 (파일 ≤2 이고 줄 ≤200)"으로 보정 — 구 OR 기준은 구현+테스트 2파일의 대형 diff를 inline으로 보냈다.
+### 근거
+- [관측됨] 사용자가 팬아웃/inline 여부를 산출물로 확인할 수단이 없어 "병렬이 아닌 것 같다"는 체감이 반증 불가능했다. 팬아웃 강제 강화는 하지 않는다(소형 task 비용 증가 — cost guard 정신 유지).
+### 강도 (ADR-022)
+- enabling(약) — 관측 기록 추가 + 경계값 보정. 경계값(200줄)은 실측 전 추정치로 명시.
+### 적용 surface
+- .claude/skills/validate-workitem/SKILL.md
