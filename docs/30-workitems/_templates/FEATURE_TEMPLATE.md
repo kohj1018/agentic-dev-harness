@@ -44,6 +44,13 @@ feature
 - FAC-2 →
 - FAC-3 →
 
+## 7-2. Cross-task invariant 계약 (subsection of ## 7)
+<!-- seam 신호(2+ task 동일 엔티티 write / 상태 머신 / 2차-write / 멱등 — ADR-057 결정 8) 발화 시에만 /plan-workitem이 채운다.
+     미발화 시 "(해당 없음 — seam 신호 미발화)" 한 줄.
+     형식: INV-N | 보장 (상태 전이 / 멱등 / 2차-write 재검증 / task 간 계약) | 관련 task:AC | 검증 방법
+     예: INV-1 | 주문 상태는 draft→paid→shipped 단방향 — 어떤 task도 역방향 write 금지 | T-003:AC-2, T-005:AC-1 | 상태 전이 가드 단위 테스트
+     unmapped INV는 plan 출력 "남은 미결정 사항"에 surface. validator가 task 검증 시 위반·테스트 커버를 점검. -->
+
 ## 8. Non-functional Requirements
 <!-- 성능·접근성·보안·i18n. 해당 없으면 "(해당 없음)" 명시. -->
 

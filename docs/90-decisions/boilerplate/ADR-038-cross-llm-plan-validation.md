@@ -117,7 +117,7 @@ ADR-027#d18 에 의해 Plan Quality 차원이 8 → 10 으로 확장됨. 추가 
 - `[Plan-design]` (UI 프로젝트 한정 — DESIGN.md 부재 시 skip)
 - `[Plan-arch-iface]` (해당 스택 한정 — ARCH 7-x sub-section 부재 시 skip)
 
-본 Amendment 는 *번호 확장 + 인용 sync* 만 책임. 차원 본문 정의는 ADR-027#amend-1 + reviewer.md `Plan Quality 10 차원` 단락 SSOT.
+본 Amendment 는 *번호 확장 + 인용 sync* 만 책임. 차원 본문 정의는 ADR-027#amend-1 + reviewer.md의 Plan Quality 차원 단락(ADR-057로 11차원) SSOT.
 
 <a id="adr-038-amend-2"></a>
 ## Amendment 2 — 리뷰 파일 충돌 정책 정정 (덮어쓰기 → 자동 suffix)

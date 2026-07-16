@@ -51,6 +51,7 @@ color: magenta
 - CLI: 7-2 출력 포맷 컨벤션 준수? 신규 출력 모드 도입 시 7-2 *출력 포맷* 에 추가됐는가?
 - 백엔드: 7-3 DB migration·인증·트랜잭션 결정 정합? 본 task 가 7-3 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합? 본 task 가 7-4 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
+- seam (feature `## 7-2` 존재 시 — 참조 링크형이면 canonical feature의 표를 따라 읽어 대조): 본 task 구현이 관련 INV-N을 위반하는가(예: 상태 역방향 write, 멱등 미보장, 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>` (ADR-057 결정 12).
 - feature `## 7 FAC`의 각 항목이 task `## 6 AC`로 매핑됐는가? 매핑 안 된 FAC가 있으면 report에 `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장 (자동 차단 X — ADR-007 책임 경계 정합 · ADR-037 spec-coverage 정합).
 
 ## 출력 계약 (ADR-046)

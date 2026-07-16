@@ -28,7 +28,8 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
        5. UI Design inventory audit (ADR-027#amend-1) — UI 프로젝트에 한해 spawn
        6. MCP 사용 audit (ADR-048#d5)
        7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검)
-     - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
+       8. Cross-task seam 축 (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 spawn — ADR-057 결정 12)
+     - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)·8(seam — feature `## 7-2` 실재)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item, 8 = feature `## 7-2` 실재. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
      - **small-diff fallback 기준** (cost guard): `git status --porcelain` 변경 파일 집합의 줄 합계(tracked 변경은 `git diff HEAD` 줄 수, untracked 신규 파일은 파일 전체 줄 수) ≤ 50, *또는* (변경 파일 ≤ 2 *이고* 줄 합계 ≤ 200), *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단. "2파일이면 줄 수 무관 inline"이던 구 기준은 구현+테스트 2파일의 대형 TDD diff를 놓쳐 보정됨 — ADR-051#amend-2). 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
      - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — 이 매핑이 없으므로(ADR-010) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
@@ -69,6 +70,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
 - **MCP 사용 audit** (ADR-048#d5): task `## 3. 구현 항목`에 `<capability> 작업 시 <mcp-name> MCP 사용` line item(plan authoring)이 있었는데 실행 흔적(diff / test / 출력)이 없으면 report에 `P2 [MCP-unused] <mcp-name> — plan이 박은 MCP 사용 line item 미실행` 기록. implement가 `Needs MCP Access`로 멈춘 경우(권한 미부여)는 `P2 [MCP-access] <mcp-name> — agent access 미부여(연결 절차 (e))`로 구분 기록. 자동 차단 X(report 신뢰 등급만 영향).
 - **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
+- **Cross-task seam audit** (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 — ADR-057 결정 12): 본 task 구현이 관련 INV-N을 위반하는가(상태 역방향 write / 멱등 미보장 / 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>`. §7-2가 참조 링크형이면 canonical feature 의 표를 따라 읽는다. (inline·fan-out 축 8 동일 기준 — small-diff inline 경로에서도 누락 없이 점검.)
 - **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 
 마지막 단계 — partial 집계 + report 파일 작성 (집계자=메인 세션 단독):

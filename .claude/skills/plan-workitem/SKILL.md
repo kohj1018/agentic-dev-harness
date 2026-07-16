@@ -119,6 +119,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 - task 분해 시: AC 매핑은 입력 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
 - (단일 feature 모드) 같은 milestone의 미분해 feature 목록 — 다음 `/plan-workitem` 대상 (ADR-057 결정 7)
 - (배치 모드) feature별 ## 3 상태 요약: full N개 / draft M개 (draft는 구현 직전 --refresh)
+- seam: INV N건 / unmapped K건 (또는 "신호 미발화 — skip")
 - 핵심 가정
 - 남은 미결정 사항
 - **인터페이스·디자인 cross-check 결과** (정합성 self-check 결과 요약):
@@ -143,6 +144,14 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 ## 정합성 self-check (분해 직후 1회 실행, ADR-026#amend-1 + ADR-027#amend-1)
 - charter `## 5. 비목표` 단락 키워드와 분해된 feature/task를 매칭. 위반 의심 시 출력의 "남은 미결정 사항"에 명시.
 - feature 범위가 상위 milestone `## 3. 포함되는 기능`에 매핑되는지 확인. 매핑 실패 시 동일 위치에 명시.
+
+### Cross-task seam self-check (신호 게이트 — ADR-057 결정 8~10)
+분해 직후 1회: 분해된 task 집합에서 seam 신호 4종(① 2+ task 동일 엔티티/저장소 write ② 상태 머신 키워드(status/state/전이/승인/취소/만료/lifecycle) ③ 2차-write 키워드(cache/index/검색/알림/event/projection/webhook 발신) ④ 멱등 키워드(retry/webhook 수신/at-least-once/중복/재시도) — 전체 taxonomy SSOT: ADR-057 결정 8)을 점검한다.
+- **발화 시**: architect 단발 sub-call로 cross-task invariant 표를 도출해 feature `## 7-2`에 영속(양식 SSOT는 FEATURE_TEMPLATE 주석). **ARCH `## 4-1. 상태 모델`이 채워져 있으면 sub-call 입력에 포함해 문서화된 상태·전이·2차-write와 대조한다(ADR-057 결정 13 — §4-1 참조 배선).** task `## 3` 관련 단계에 `(INV-N)` 태그, task `## 7`에 `Feature-invariants:` 링크. unmapped INV는 "남은 미결정 사항"에 surface. 출력엔 `seam: INV N건 / unmapped K건` 요약만(전체 표 echo 금지 — ADR-046).
+- **미발화 시**: feature `## 7-2`에 "(해당 없음 — seam 신호 미발화)" 기입 + skip 사유 echo.
+- 신호 ①(2+ task 동일 엔티티/저장소 write)은 단독 발화, **②~④는 복수 task에 걸쳐 등장할 때만 발화**(ADR-057 결정 8 과발동 보정).
+- **배치 모드(M<N>)에서는 마일스톤 전체 task 집합 대상 1회 수행** — cross-feature invariant는 **낮은 번호 feature `## 7-2`에 canonical 기재 + 상대 feature `## 7-2`엔 참조 링크 1줄**(ADR-005 SSOT — 양쪽 본문 중복 금지).
+- Codex: architect sub-call은 순차 단일 실행 degrade(기존 규약).
 
 ### Task type prefilter (context bloat 회피 — 본 prefilter 결과로 아래 cross-check sub-항목 적용 여부 결정)
 
