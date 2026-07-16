@@ -29,7 +29,7 @@
 | 모드 | 행동 | 위험 tier | 본 보일러 적용 |
 |------|------|----------|--------------|
 | `default` | 모든 Write/Edit 마다 confirm | 낮음 | — |
-| `acceptEdits` | Write/Edit 자동 수락, Bash·MCP는 confirm | **중간** | **shared 기본값** |
+| `acceptEdits` | Write/Edit + 작업 디렉터리 내 파일시스템 명령 자동 수락 — Bash `mkdir`/`touch`/`mv`/`cp`(공식문서 명시)·`rm`/`rmdir` 등, PowerShell `Set-Content`/`Remove-Item` 등 **(삭제 포함, 공식문서상 비완전 목록)**; 범위 밖 경로·protected path·그 외 Bash·MCP는 confirm | **중간** | **shared 기본값** |
 | `bypassPermissions` | 모든 도구 자동 수락 | 높음 | local-only 권장 (절대 shared X) |
 | `plan` | 읽기 전용 | 매우 낮음 | 사용자 명시 선택 |
 
@@ -38,7 +38,7 @@
 - 비-acceptEdits 모드에서는 builder가 매 Edit마다 confirm으로 중단 — RGR 사이클이 사실상 불가능해 보일러 디폴트와 충돌.
 
 **`acceptEdits`의 잔여 위험**:
-- builder가 *task 범위 밖* Write/Edit를 자동 수락 — validator의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 하지만 *비가역 파괴*는 후행 catch가 무의미.
+- builder가 *task 범위 밖* Write/Edit를 자동 수락 — validator의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 하지만 *비가역 파괴*(작업 디렉터리 내 `rm`/`Remove-Item` 등 삭제 명령도 acceptEdits가 자동 수락)는 후행 catch가 무의미 — 실수 삭제 위험을 감수하는 설정임을 명시.
 - 민감 파일 접근은 `permissions.deny`(현재 `.env`/`secrets/**`)에 박혀 있어 차단되지만, *프로젝트 외부 경로* 작업은 별도 sandbox 책임.
 
 **fork 사용자 대체 경로** (옵션 B):
