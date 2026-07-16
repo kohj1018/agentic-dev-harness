@@ -215,4 +215,4 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 - 무거운 추론(대규모 task 분해 설계·AC interpretation diversity 판단·sizing 협상·아키텍처 영향 분석)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론만 본 skill이 문서에 반영한다(architect의 `model: opus`가 추론 품질 보장). 본 skill이 직접 모든 task 본문을 펼쳐 inline으로 추론하지 않는다.
 - 대상 파일 JIT 읽기는 step 3-G대로 *그 task가 건드릴 실제 파일*에 한정한다(ADR-019 minimal).
 - 분해 완료 후 사용자에게 `/clear` 또는 새 세션을 권장한다 — 다음 단계(`/implement-workitem`)가 깨끗한 컨텍스트에서 시작하도록.
-- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent 병렬 fan-out parity가 없으므로, architect 단발 sub-call도 순차 단일 실행으로 동작한다(결과 동일, 처리량만 차이).
+- **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — 이 매핑 부재로 architect 단발 sub-call도 순차 단일 실행으로 동작한다(결과 동일, 처리량만 차이).

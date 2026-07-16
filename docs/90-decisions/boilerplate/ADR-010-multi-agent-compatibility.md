@@ -64,7 +64,7 @@ accepted
 ## 후속 작업
 - Phase 1.5 (적용됨): plan-workitem, bootstrap-project, bootstrap-stack, stabilize-milestone 4개 wrapper 추가. 근거 — fork 직후 첫 진입 시나리오(charter → architecture → 첫 분해)에서 자연어 호출 대비 wrapper 가성비가 inner-loop와 동등.
 - Phase 2 자연어 호출 skill: 목록·개수는 README.md / README_ko.md가 SSOT (#amend-3) — 본 ADR은 핀하지 않는다. wrapper 승격 여부는 fork 데이터 회수 후 재평가 (amend-1 후속 작업과 동일 정책).
-- Phase 3 `.codex/agents/` TOML (명시 subagent workflow 자주 쓰게 되면).
+- Phase 3: Codex 서브에이전트는 GA(2026-07 확인 — `features.multi_agent` stable·on-by-default, 직접 요청·`AGENTS.md`/skill 지침으로 spawn, 내장 default/worker/explorer agent로 커스텀 persona 없이도 fan-out 가능, 병렬 `agents.max_threads` 기본 6). 본 저장소는 Claude 전용 persona(builder/researcher/qa/reviewer/architect)·라우팅을 Codex subagent로 아직 매핑하지 않아 순차/인라인 degrade를 보수적 기본값으로 둔다 — 실제 Codex fan-out 배선은 별도 설계(Stage 5 item 11c).
 - Codex 모델 ID 갱신은 본 ADR을 새 ADR로 superseding.
 - (Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.
 - ADR-005 SSOT 패턴 5("CLAUDE.md = 진입 페이지")의 표현을 "entry page (AGENTS.md)"로 갱신하는 후속 ADR 또는 in-place 수정 검토. 본 ADR 채택 후 캐노니컬 진입점이 AGENTS.md로 옮겨가므로 패턴 5의 단어가 어긋난다.

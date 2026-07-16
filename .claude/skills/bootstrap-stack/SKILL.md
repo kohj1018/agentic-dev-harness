@@ -37,7 +37,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 확인 필요: <있으면 ≤3개, 없으면 생략>
 답변: skip / good / refine: …
 ```
-사용자가 *선택해야 하는* 옵션 목록(2~3 스택 조합)은 압축하지 않고 보존한다(ADR-046#d3). architect/researcher 단발 sub-call의 *과정*은 대화에 풀지 않고 결론만 surface한다. **(Codex: sub-agent 병렬 미지원 → R1 researcher·R2 architect 위임을 순차 인라인 추론으로 degrade — ADR-040#amend-3 / ADR-053 정합.)**
+사용자가 *선택해야 하는* 옵션 목록(2~3 스택 조합)은 압축하지 않고 보존한다(ADR-046#d3). architect/researcher 단발 sub-call의 *과정*은 대화에 풀지 않고 결론만 surface한다. **(Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 R1 researcher·R2 architect 위임을 순차 인라인 추론으로 degrade — ADR-040#amend-3 / ADR-053 정합.)**
 
 **R1 — 요구 grounding + 리서치.** `PROJECT_CHARTER ## 4 목표/## 5 비목표/## 6 성공 기준/## 7 제약` + `ARCH ## 8 품질 속성`(규모·성능·확장 기대)을 읽는다. 최신 프레임워크/버전 지형이 필요하면 `Agent`로 researcher에 직접 위임(ADR-040#amend-3 — bootstrap-stack은 Agent 보유). 결과는 출처·날짜·신뢰도 라벨(ADR-040 §3). **오프라인/미발견이면 날조 금지** — 조합을 `Needs Research`·저신뢰도로 표시하거나 BASE 문서화로 폴백한다.
 

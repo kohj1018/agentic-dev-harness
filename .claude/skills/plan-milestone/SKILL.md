@@ -13,7 +13,7 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
 
 **패턴 차용** — `discover-product`/`bootstrap-design`와 동일하게 `context: fork`를 명시하지 않아 메인 세션이 라운드를 직접 운전한다. 종료 후 사용자가 `/clear` 또는 새 세션으로 컨텍스트를 정리할 것을 권장한다(라운드 인터랙션이 다음 task 컨텍스트에 잡음).
 
-**Codex**: 병렬 위임 미지원 시 순차 단일 실행으로 degrade — R2의 architect 단발 sub-call은 Codex에서 sub-agent 병렬 parity가 없으므로 메인 세션이 직접 추론한다(품질 보장을 위해 충분히 깊게 사고).
+**Codex**: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade — R2의 architect 단발 sub-call은 이 매핑 부재로 메인 세션이 직접 추론한다(품질 보장을 위해 충분히 깊게 사고).
 
 **경계** — 이 skill은 milestone + feature까지만 만든다. task 분해(`## 7-1` FAC↔AC 매핑·sizing)는 만들지 않는다 — `/plan-workitem`이 이어 수행한다(자동 호출 아님).
 
@@ -57,7 +57,7 @@ R0~R4 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/featu
 - 위 재료를 *다음 마일스톤이 다룰 목표 후보*로 묶어 1~N개 제시. 사용자가 우선순위를 정한다.
 
 **R2 — architect 단발 sub-call: 분할 vs 단일 협상**
-- R1의 목표 후보를 *여러 마일스톤으로 쪼갤지, 한 마일스톤으로 묶을지* `Agent`(architect) 단발 sub-call로 판단(스코프 크기·의존·졸업 가능성 기준). (Codex: 병렬 위임 미지원 시 메인 세션이 직접 판단.)
+- R1의 목표 후보를 *여러 마일스톤으로 쪼갤지, 한 마일스톤으로 묶을지* `Agent`(architect) 단발 sub-call로 판단(스코프 크기·의존·졸업 가능성 기준). (Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 메인 세션이 직접 판단.)
 - architect 결론(분할 권고·각 마일스톤 한 줄 목표·feature 후보 목록)을 받아 사용자와 협상한다. 사용자가 분할 구조를 확정할 때까지 반복.
 - **고-stakes 설계 게이트 (ADR-053)**: R2 분할에 외부 기술 불확실성이 있으면 ADR-053 리서치-only 게이트(researcher 위임). 분할 자체는 다각도 패널 불요.
 

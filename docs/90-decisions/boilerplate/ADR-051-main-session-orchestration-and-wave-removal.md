@@ -21,14 +21,14 @@ accepted
 implement-workitem에서 `context: fork`(및 `agent: builder`)를 제거하고 **메인 세션 foreman**이 실행한다. foreman은 task를 1회 읽어 `## 3. 구현 항목`의 step 파일 경로로 *충돌 없는(file-disjoint) slice*를 싸게 나눈 뒤(`## 9. 의존성`은 자연어 *선행 순서*만 — 5필드 삭제됨), 각 slice를 `Agent`로 **builder에 위임**한다 — **파일 경계가 분리되면 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회)·파일이 겹치면 단일 builder로** 운전한다(과도한 분할 금지 — 본 ADR #d6 partition 규칙). 각 builder는 자기 slice의 AC에 대해 RGR을 돌리고, foreman이 결과·`## 4-1`을 *단일 writer*로 병합한다. 무거운 추론의 노이즈 격리는 bootstrap-project의 architect 위임과 동형이되, *동시성*은 file-disjoint slice에서만 적용한다(같은 파일을 쓰는 slice는 순차 또는 worktree).
 - foreman은 task 재해석(`Needs Plan Decision`)·권한 응답·`Needs Install`/`Needs Research` 분기를 메인 세션에서 직접 처리한다.
 - `context-pack: minimal` 유지. [정정 2026-07: context-pack은 no-op으로 제거됨(ADR-019 정정) — 본 '유지'는 실효 없음.] ADR-050 D2(model-invocable)는 그대로 — foreman이 inner-loop를 운전한다.
-- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — Codex는 sub-agent parallel parity가 없으므로 builder `Agent` 위임을 *메인 세션 인라인 단일 실행*으로 대체한다(ADR-010 정합, 행동 동일·격리만 없음).
+- **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — 이 매핑이 없으므로 builder `Agent` 위임을 *메인 세션 인라인 단일 실행*으로 대체한다(ADR-010 정합, 행동 동일·격리만 없음).
 
 ### D2. validate/stabilize 병렬 fan-out (ADR-038 병렬성 위치 재배치)
 병렬성은 plan-time wave가 아니라 *report-only 단계의 fan-out*으로 제공한다:
 - validate-workitem: 단일 workitem 검증을 **audit axis별**(AC↔테스트 / diff-trace / FAC↔AC spec / Arch-iface 7-x / UI Design-inventory / Evidence Bundle)로 **병렬 fan-out** — 각 validator는 *partial verdict만 반환*하고 **메인이 단일 report(`reports/<task-id>.md`)를 작성**(clobber 방지). 여러 task 동시 검증 시 task별 fan-out도 동형. 읽기·판정뿐이라 write 충돌 없음(작은 diff는 단일 inline validator로 fallback).
 - stabilize-milestone: qa·reviewer(code/design surface) 위임을 **병렬 fan-out**.
 - 두 단계 모두 report/판정 산출물이라 동시 실행이 git index race·빌드캐시 충돌을 일으키지 않는다(implement 병렬과 결정적 차이).
-- **Codex: 병렬 위임 미지원 시 순차 단일 실행으로 degrade** — fan-out 대상 task/verifier를 순차로 1개씩 처리(판정 결과 동일, wall-clock만 길어짐).
+- **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — fan-out 대상 task/verifier를 순차로 1개씩 처리(판정 결과 동일, wall-clock만 길어짐).
 
 ### D3. plan-workitem de-fork (ADR-050 D1 패턴 확장)
 plan-workitem에서 `context: fork`(및 `agent:`)를 제거해 메인 세션 인라인 실행한다 — planning은 사용자와의 상호작용(sizing·해석 확정·의존성 결정)이 잦아 fork 격리 이득보다 운전권 손실이 크다(ADR-050 D1 de-fork 논거 동형). 무거운 아키텍처 추론은 architect `Agent` 위임 유지.
