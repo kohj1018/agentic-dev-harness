@@ -29,7 +29,7 @@
 | 모드 | 행동 | 위험 tier | 본 보일러 적용 |
 |------|------|----------|--------------|
 | `default` | 모든 Write/Edit 마다 confirm | 낮음 | — |
-| `acceptEdits` | Write/Edit + 작업 디렉터리 내 파일시스템 명령 자동 수락 — Bash `mkdir`/`touch`/`mv`/`cp`(공식문서 명시)·`rm`/`rmdir` 등, PowerShell `Set-Content`/`Remove-Item` 등 **(삭제 포함, 공식문서상 비완전 목록)**; 범위 밖 경로·protected path·그 외 Bash·MCP는 confirm | **중간** | **shared 기본값** |
+| `acceptEdits` | Write/Edit + 작업 디렉터리 내 파일시스템 명령 자동 수락 — **Bash** `mkdir`/`touch`/`rm`/`rmdir`/`mv`/`cp`/`sed`, **PowerShell** `Set-Content`/`Add-Content`/`Clear-Content`/`Remove-Item`(+ 공통 별칭) *(공식문서 명시 전체 — 삭제 `rm`/`Remove-Item` 포함)*; 범위 밖 경로·protected path·그 외 Bash/PowerShell·MCP는 confirm | **중간** | **shared 기본값** |
 | `bypassPermissions` | 모든 도구 자동 수락 | 높음 | local-only 권장 (절대 shared X) |
 | `plan` | 읽기 전용 | 매우 낮음 | 사용자 명시 선택 |
 
