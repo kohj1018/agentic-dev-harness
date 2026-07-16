@@ -49,7 +49,7 @@ feature
      - primary task: 이 feature에서 사용자의 핵심 1행동.
      - empty / loading / error 흐름: 각 상태에서 사용자가 무엇을 보고 어떻게 복구하는가.
      - accessibility: 키보드·스크린리더·대비 등 흐름 레벨 요구.
-     - copy 톤: 핵심 메시지·에러 문구 방향.
+     - copy 톤: DESIGN.md §10 Voice & Writing(전역 규칙서 — ADR-056) 참조 + *이 feature 한정 delta만* 기록 (예: "이 화면만 축하 톤 허용"). 전역 규칙 재서술 금지.
      - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수. -->
 
 ## 9. 엣지 케이스

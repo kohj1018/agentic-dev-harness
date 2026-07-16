@@ -6,10 +6,10 @@
 accepted
 
 ## 현재 유효 결정
-- 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
+- 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056)), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
 - **`/bootstrap-design`의 *워크플로우 라운드 구조*(레퍼런스→원칙→시안→토큰→DESIGN.md→preview 순서·시점)는 ADR-049가 supersede(R0~R6 concept-mockup-first + 레퍼런스 노트). 본 ADR은 *DESIGN.md 내용*(아래 #5 Stitch 8섹션+Motion / #6 3-tier 토큰 / #7·#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT만 유지.** 본 ADR #3/#13/#21/#d22/#d26/#27의 라운드 구조·시안 시점·preview lifecycle(삭제 시점·gitignore 정책) 기술은 historical(net 규칙은 ADR-049). design-preview.html *산출물*은 ADR-049 R6이 계속 사용.
 - `/bootstrap-stack`이 7-1~7-4를 채운다.
-- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-049).
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-049). #amend-5(§10 Voice 규칙서 — ADR-056).
 - 적용 파일 전체는 아래 `## Surfaces` 참조.
 
 ## 배경
@@ -198,3 +198,10 @@ accepted
 
 ### Ratchet 강도 (ADR-022)
 - enabling(약) — 새 모드, opt-in.
+
+<a id="adr-027-amend-5"></a>
+## Amendment 5 (2026-07-16) — DESIGN.md 섹션 목록에 §10 Voice & Writing 확장
+### 결정
+결정 #5의 섹션 구성을 *"Stitch canonical 8섹션 + Motion 확장 + Voice & Writing 확장(§10)"*으로 정정한다(내용 SSOT는 [ADR-056](ADR-056-milestone-experience-contract.md) 결정 8~11). §10은 canonical 마지막 섹션(Do's and Don'ts) *뒤* 추가라 lint section-ordering 비위반 — #amend-2 결정 24(Motion 확장)와 동일 논리, 재번호 없음.
+### 적용 surface
+- docs/20-system/DESIGN.md (§10)
