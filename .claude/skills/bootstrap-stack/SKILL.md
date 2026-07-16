@@ -18,7 +18,7 @@ context-pack: minimal
    - **구체적 스택 감지** — $ARGUMENTS에 아래 "스택별 디폴트 디렉터리 구조" 표나 ARCH §7 sub-section으로 해석되는 프레임워크/언어/런타임 토큰이 1+ 있음, **또는** manifest가 이미 있어 스택이 물질화됨(brownfield) → **BASE 문서화 흐름**. brownfield는 스택을 새로 *결정하지 않고* manifest에서 감지해 문서화·정합한다.
    - **비어 있음/모호/불확실** — $ARGUMENTS가 비었거나, 앱 범주·목표만 있고 해석 가능한 프레임워크 토큰이 없거나("SaaS 하나", "웹앱", "백엔드"), 불확실 마커("추천", "뭐가 좋을까", "골라줘")가 있음 → **DEEP 결정 흐름**.
 3. **가드**:
-   - **charter/ARCH 얕음** — DEEP인데 `PROJECT_CHARTER §6/7/8/9`·`ARCH §8`이 비었으면 persona·제품 맥락을 *만들지 말고* "먼저 `/discover-product` 또는 `/bootstrap-project`" 안내 후 종료(DISCOVERY=SSOT, ADR-035).
+   - **charter/ARCH 얕음** — DEEP인데 `PROJECT_CHARTER §4/5/6/7`·`ARCH §8`이 비었으면 persona·제품 맥락을 *만들지 말고* "먼저 `/discover-product` 또는 `/bootstrap-project`" 안내 후 종료(DISCOVERY=SSOT, ADR-035).
    - **오라우팅 방지** — 프레임워크 토큰이 하나라도 있으면 BASE로 가되, 산출이 §7에 미달(예: API 필요 제품인데 백엔드 미정)이면 "추천을 원하면 스택 없이 재실행" 1줄만 echo — 몰래 라운드로 승격하지 않는다.
 
 반드시 먼저 읽을 파일:
@@ -40,7 +40,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 ```
 사용자가 *선택해야 하는* 옵션 목록(2~3 스택 조합)은 압축하지 않고 보존한다(ADR-046#d3). architect/researcher 단발 sub-call의 *과정*은 대화에 풀지 않고 결론만 surface한다. **(Codex: sub-agent 병렬 미지원 → R1 researcher·R2 architect 위임을 순차 인라인 추론으로 degrade — ADR-040#amend-3 / ADR-053 정합.)**
 
-**R1 — 요구 grounding + 리서치.** `PROJECT_CHARTER ## 6 목표/## 7 비목표/## 8 성공 기준/## 9 제약` + `ARCH ## 8 품질 속성`(규모·성능·확장 기대)을 읽는다. 최신 프레임워크/버전 지형이 필요하면 `Agent`로 researcher에 직접 위임(ADR-040#amend-3 — bootstrap-stack은 Agent 보유). 결과는 출처·날짜·신뢰도 라벨(ADR-040 §3). **오프라인/미발견이면 날조 금지** — 조합을 `Needs Research`·저신뢰도로 표시하거나 BASE 문서화로 폴백한다.
+**R1 — 요구 grounding + 리서치.** `PROJECT_CHARTER ## 4 목표/## 5 비목표/## 6 성공 기준/## 7 제약` + `ARCH ## 8 품질 속성`(규모·성능·확장 기대)을 읽는다. 최신 프레임워크/버전 지형이 필요하면 `Agent`로 researcher에 직접 위임(ADR-040#amend-3 — bootstrap-stack은 Agent 보유). 결과는 출처·날짜·신뢰도 라벨(ADR-040 §3). **오프라인/미발견이면 날조 금지** — 조합을 `Needs Research`·저신뢰도로 표시하거나 BASE 문서화로 폴백한다.
 
 **R2 — 옵션 + 트레이드오프 + 추천(수렴 루프).** architect 단발 sub-call로 **2~3개 스택 조합**을 서로 다른 각도(MVP/risk/scale-first)로 생성. 각 조합에 (a) 현재 복잡도 (b) 확장·마이그레이션 비용 (c) ADR-031 직접지원 5유형(web frontend/API/CLI/monorepo/Supabase) 정합 (d) 성장 경로("X로 시작 → Y로 성장") + **본 skill의 추천안 + 근거**를 함께 제시(ADR-006 단순성 가중 — 과한 스택 경고). 사용자가 `skip/good/refine`로 응답 → 피드백 시 재생성. **2사이클 미수렴 시 재생성 대신 brief를 고친다**(charter 재독·요구 명확화 — bootstrap-design R2 규칙). 선택 확정 전에는 R3로 진행하지 않는다.
 
