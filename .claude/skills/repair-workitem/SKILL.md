@@ -13,6 +13,7 @@ context-pack: minimal
 - `$ARGUMENTS`에는 task ID와 (선택) 부분 지정 메모가 들어온다.
   - 예: `T-001`
   - 예: `T-001 "P0 #1, P1 #3만"` — report의 일부 항목만 대상
+- **task-id sanitization 강제**: `T-[0-9]+` 패턴만 허용. `/`, 공백, glob 메타문자(`*`, `?`, `[`) 포함 시 *즉시 종료*(rm 경로에 들어가므로 안전 전제 — validate-plan `M[0-9]+`/repair-milestone `M[0-9]+` 가드와 대칭).
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다 (`## 6 AC`, `## 8 메모`의 기존 `해석 확정`/repair 결정 이력 포함).
