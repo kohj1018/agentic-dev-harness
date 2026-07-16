@@ -1,13 +1,13 @@
 ---
 name: plan-milestone
-description: Run a multi-round main-session conversation to author the next milestone(s) (M2+) and their feature docs. Additive — does not re-seed M1; hand off to /plan-workitem for tasks.
+description: Run a multi-round main-session conversation to author milestone(s) (M1 included — ADR-057) and their feature docs. Additive — never overwrites existing milestones; hand off to /plan-workitem for tasks.
 argument-hint: "[milestone idea | feature idea] [--prototype [F-NNN]]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes/*/_drafts/*.html)
 ---
 
-이 skill은 메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해 *다음* 마일스톤(M2+)과 그 feature 문서를 작성하는 절차서다.
-`/bootstrap-project`가 seed한 초기 M1/F-001 *이후*의 마일스톤을 다룬다 — **additive 모드**(기존 M1을 재생성·덮어쓰기 하지 않는다). **기존 마일스톤에 *새 feature만* 추가하는 경우도 본 skill(additive)이 담당** (외부 리뷰 반영 — 경계 공백 메움): 예: 진행 중인 M1에 F-00X를 추가할 때 M1 문서는 재생성하지 않고 feature 문서만 새로 작성한 뒤 M1 `## 3. 포함되는 기능`에 링크 한 줄을 추가한다. 그 feature를 *task로 분해*하는 것은 `/plan-workitem`이다(역할 경계 유지).
+이 skill은 메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해 마일스톤(M1 포함)과 그 feature 문서를 작성하는 절차서다.
+**첫 마일스톤(M1) 포함 모든 마일스톤**을 다룬다(ADR-057 결정 1 — bootstrap-project는 charter/ARCH까지, 마일스톤 생성은 본 skill 단일 경로). **additive 모드**(기존 마일스톤을 재생성·덮어쓰기 하지 않는다). **기존 마일스톤에 *새 feature만* 추가하는 경우도 본 skill(additive)이 담당** (외부 리뷰 반영 — 경계 공백 메움): 예: 진행 중인 M1에 F-00X를 추가할 때 M1 문서는 재생성하지 않고 feature 문서만 새로 작성한 뒤 M1 `## 3. 포함되는 기능`에 링크 한 줄을 추가한다. 그 feature를 *task로 분해*하는 것은 `/plan-workitem`이다(역할 경계 유지).
 무거운 추론(R2의 마일스톤 분할 판단)은 `Agent` 도구로 architect를 단발 sub-call로 위임한다.
 각 라운드(R0~R5) 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/feature 문서에 적재한다.
 
@@ -47,7 +47,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
   - `## 5. 완료 기준` 졸업 상태(graduation 미충족 항목이 남아 있으면 carry-over 후보).
   - 직전 마일스톤에서 *stabilize 이월*된 미완 항목(졸업 안 된 task / open finding).
 - `docs/40-validation/IMPROVEMENT_GUIDE.md`·`docs/40-validation/QA_FINDINGS.md`의 *open* 항목(특히 P0/P1)을 회수해, 다음 마일스톤이 회수할 부채 후보로 surface(자동 편입 X — 사용자 결정).
-- 직전 마일스톤 부재(첫 호출 — M1만 존재)면 R0를 건너뛰고 회고 carry-over는 "없음"으로 표시.
+- 직전 마일스톤 부재(첫 호출 — 마일스톤 0개, M1 생성 회차)면 R0를 건너뛰고 회고 carry-over는 "없음"으로 표시.
 
 **R1 — 입력 intake (다음 마일스톤의 재료)**
 - 다음 입력을 모아 사용자와 정렬한다:
@@ -59,16 +59,17 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 **R2 — architect 단발 sub-call: 분할 vs 단일 협상**
 - R1의 목표 후보를 *여러 마일스톤으로 쪼갤지, 한 마일스톤으로 묶을지* `Agent`(architect) 단발 sub-call로 판단(스코프 크기·의존·졸업 가능성 기준). (Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 메인 세션이 직접 판단.)
 - architect 결론(분할 권고·각 마일스톤 한 줄 목표·feature 후보 목록)을 받아 사용자와 협상한다. 사용자가 분할 구조를 확정할 때까지 반복.
+- architect 지시에 포함: "feature 경계를 가로지르는 상태 전이·2차-write·멱등 seam 후보가 보이면 각 feature 후보의 시나리오 메모와 ARCH §4-1(상태 모델) 기록 권장을 결론에 포함하라" (ADR-057 결정 13 — 라운드 신설 X).
 - **고-stakes 설계 게이트 (ADR-053)**: R2 분할에 외부 기술 불확실성이 있으면 ADR-053 리서치-only 게이트(researcher 위임). 분할 자체는 다각도 패널 불요.
 
 **R3 — 마일스톤 문서 authoring (MILESTONE_TEMPLATE에서)**
-- 확정된 각 마일스톤을 `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`를 복사해 `docs/30-workitems/milestones/M<N>-<이름>.md`로 작성한다. `<N>`은 기존 마일스톤 다음 번호(additive — M1 보존).
+- 확정된 각 마일스톤을 `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`를 복사해 `docs/30-workitems/milestones/M<N>-<이름>.md`로 작성한다. `<N>`은 기존 마일스톤 다음 번호(첫 호출이면 M1 — additive, 기존 보존).
 - `## 5. 완료 기준`은 graduation checklist 5+1 default 그대로 복사(ADR-014). 사용자가 협상한 추가 기준만 "(선택)" 행에 채운다 — 정책 중복 금지(MILESTONE_TEMPLATE·ADR-014가 SSOT).
 - `## 8. 회고`는 비워둔다 — `/stabilize-milestone`이 자동 채움(ADR-014).
 - `## 6. 관련 문서`에 Charter / Architecture / 관련 ADR 링크를 채운다.
 
 **R4 — feature 문서 authoring (FEATURE_TEMPLATE에서)**
-- 각 마일스톤의 feature 후보를 `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`를 복사해 `docs/30-workitems/features/F-<NNN>-<이름>.md`로 작성한다(기존 F-001 다음 번호 — additive).
+- 각 마일스톤의 feature 후보를 `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`를 복사해 `docs/30-workitems/features/F-<NNN>-<이름>.md`로 작성한다(기존 feature 다음 번호, 첫 호출이면 F-001 — additive).
 - `## 0-1. Type`을 채운다(ADR-039). `feature`면 `## 2`를 User Story로, 비-feature(technical-enabler/bugfix/refactor/migration/research-spike)면 기술적 근거 + 서비스하는 DISCOVERY ID·ADR 링크로 채운다(정책은 FEATURE_TEMPLATE 주석·ADR-039가 SSOT).
 - `## 3. 핵심 시나리오`(feature가 만족시킬 사용자 시나리오)와 `## 10. 의존성`(feature 간 선후·병렬)을 채운다 — FAC가 추적할 시나리오 + feature 의존 검토의 전제. 이 두 섹션 *신설*은 `/plan-milestone` 책임이다(plan-workitem 아님).
 - `## 7. Feature-level Acceptance Criteria`(FAC)를 시나리오 수준 측정 기준으로 채운다.
@@ -110,7 +111,7 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
 - 다음 단계:
   ```
   다음 단계:
-  - 기본 권장: 본 skill이 만든 각 feature마다 `/plan-workitem F-NNN` — feature를 task로 분해 (milestone+feature는 본 skill이 작성 완료; plan-workitem은 feature→task 전용)
+  - 기본 권장: `/plan-workitem M<N>` — 본 마일스톤 전체 feature를 배치 분해 (2-tier: AC·FAC·seam은 전부 확정, ## 3 상세 가이드는 첫 feature만 full — ADR-057). feature 1개만 분해하려면 `/plan-workitem F-NNN`.
   - 분기 옵션 (해당 시 — ≤3 개):
     - 마일스톤 plan 교차검토 원하면: 다른 세션·다른 LLM에서 `/validate-plan <M>`(milestone-plan mode) 후 원본에서 `/repair-plan <M>`
     - UI feature 포함 + DESIGN.md 미반영 시: `/bootstrap-design --update` 먼저

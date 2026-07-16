@@ -17,7 +17,7 @@
 - [ ] `README.md`가 새 프로젝트 기준으로 갱신되었다
 - [ ] `docs/10-charter/PROJECT_CHARTER.md`가 새 프로젝트 내용으로 채워졌다(DISCOVERY.md를 사용한 경우 페르소나·시나리오·핵심 가정 섹션이 함께 채워졌다)
 - [ ] `docs/20-system/ARCHITECTURE_OVERVIEW.md`가 초기 구조를 반영한다
-- [ ] 첫 milestone/feature 문서가 생성되었다
+- (참고) 마일스톤 문서는 이 시점엔 아직 없음이 정상 — 4단계에서 /plan-milestone으로 생성한다 (ADR-057)
 
 ## 2. 운영 결정 (스택 확정)
 > 스택이 아직 미정이면 이 절을 건너뛰고 `/bootstrap-stack`을 *무입력*으로 실행해 리서치+라운드로 결정할 수 있다(입력 적응형). 이미 정했으면 아래를 채운 뒤 `[스택 설명]`을 넘긴다.
@@ -40,11 +40,12 @@
 - [ ] shared 설정에 환경 종속적인 hook를 바로 넣지 않았다
 
 ## 4. 작업 구조 준비
-- [ ] `/plan-workitem F-NNN`로 seed된 feature(F-001)를 task로 분해했다 (M2+ 신규 milestone·feature 생성은 `/plan-milestone`)
+- [ ] `/plan-milestone`으로 첫 마일스톤(M1)과 feature 문서를 생성했다 (UI 마일스톤이면 R5 프로토타입 라운드까지)
+- [ ] `/plan-workitem M1`로 M1 전체 feature를 배치 분해했다 (또는 `/plan-workitem F-001` 단일)
   ```
-  /plan-workitem F-001
+  /plan-workitem M1
   ```
-- [ ] bootstrap 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md / M1 / F-001의 `## 0. Status`를 `draft → ready`로 전환했다
+- [ ] bootstrap·plan 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md / M1 / F-NNN의 `## 0. Status`를 `draft → ready`로 전환했다
 - [ ] `docs/30-workitems/milestones`에 첫 milestone 문서가 있다
 - [ ] `docs/30-workitems/features`에 첫 feature 문서가 있다
 - [ ] 필요하면 `docs/30-workitems/tasks`에 task 문서를 만들었다

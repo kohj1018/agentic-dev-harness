@@ -1,6 +1,6 @@
 ---
 name: bootstrap-project
-description: Convert discovery output (DISCOVERY.md) or a natural-language brief into charter/architecture/M1/F-001. Re-run safe with update mode.
+description: Convert discovery output (DISCOVERY.md) or a natural-language brief into charter/architecture/ADR-100. Milestones are created by /plan-milestone (ADR-057). Re-run safe with update mode.
 argument-hint: "[project brief or empty (uses DISCOVERY.md)] [--apply]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
@@ -21,8 +21,6 @@ allowed-tools: Read Glob Grep Write Edit Agent
 - `docs/00-meta/WORKFLOW.md`
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
 - `docs/00-meta/PROJECT_START_CHECKLIST.md`
-- `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md` (M1 생성 시 양식 SSOT — graduation checklist 5+1 / `## 8. 회고` 자동 채움 자리)
-- `docs/30-workitems/_templates/FEATURE_TEMPLATE.md` (F-001 생성 시 양식 SSOT — `## 0-1. Type` / 12 main sections / `## 7-1. FAC ↔ AC 매핑표` subsection)
 - `docs/90-decisions/boilerplate/_ADR_GUIDE.md` (ADR-100 작성 시 권장 섹션·area 태그·Mutation Contract 규약)
 - `docs/90-decisions/project/README.md` (project ADR 인덱스 — ADR-100 추가 후 한 줄 갱신 대상)
 - `brief-template.md`
@@ -31,7 +29,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 
 반드시 수행할 일:
 1. 입력 회수 — DISCOVERY.md 또는 자연어 입력.
-2. 기존 산출물(charter/architecture/M1/F-001) 존재 여부 점검.
+2. 기존 산출물(charter/architecture/ADR-100) 존재 여부 점검.
    - 없으면 새로 생성.
    - 있으면 **갱신 모드** — 본 skill은 메인 세션에서 실행된다. 기존 산출물 덮어쓰기는 사고 방지를 위해 명시적 승인(`--apply` 또는 사용자 확인)을 요구한다.
      - `--apply` 인자가 있으면: 기존 산출물을 읽고 architect로 갱신본을 생성해 즉시 반영한다.
@@ -45,9 +43,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - `docs/20-system/DESIGN.md`는 baseline placeholder (presence: conditional). UI 스택 포함 시 `/bootstrap-design`이 본 파일을 채운다. 비-UI는 fork 직후 본 파일 삭제 (본 skill에서는 갱신 X).
    - `docs/90-decisions/project/ADR-100-initial-project-decisions.md` — bootstrap 단계의 초기 결정 (project ADR은 100+ 번호 — boilerplate/ADR-002는 legacy reserved). _ADR_GUIDE.md 권장 섹션 + Ratchet evidence label 정합. 스택 선택 ADR은 `/bootstrap-stack`이 별도로 생성한다(`project/ADR-101-stack-selection.md` — 본 skill 책임 아님).
    - **ADR-100 작성 시 `docs/90-decisions/project/README.md` 인덱스 표에 한 줄 추가** (인덱스 표 컬럼 양식은 `docs/90-decisions/project/README.md` 본문 표 헤더가 SSOT — _ADR_GUIDE.md "새 ADR 추가 절차" §2 정합).
-6. 최초 workitem 문서를 만든다.
-   - `docs/30-workitems/milestones/M1-foundation.md`
-   - `docs/30-workitems/features/F-001-core-value.md`
+6. workitem 문서(milestone/feature)는 만들지 않는다 — 마일스톤 생성은 `/plan-milestone` 단일 경로다(ADR-057 결정 1). 종료 출력에서 안내한다.
 
 반드시 지켜야 할 원칙:
 - 추측은 사실처럼 쓰지 말고 가정으로 표시한다.
@@ -60,11 +56,11 @@ allowed-tools: Read Glob Grep Write Edit Agent
 - 갱신한 파일 목록
 - 핵심 가정
 - 남은 미결정 사항
-- 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-workitem` 순서가 SSOT):
+- 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-milestone → /plan-workitem` 순서가 SSOT):
   - 기본 권장: `/bootstrap-stack <스택 요약>` (스택 미정이면 **무입력**으로 실행 → 리서치+라운드 추천) — 스택 확정이 후속 lifecycle 의 전제 (스택 미정 상태에서 plan 은 가짜 작업).
   - 분기 옵션 (해당 시 ≤3):
-    - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-workitem F-001` — seed된 첫 feature(F-001)의 task 분해
-    - UI 프로젝트 + 스택 확정 후: `/bootstrap-design` 다음 `/plan-workitem F-001`
+    - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-milestone` — 첫 마일스톤(M1)과 feature 문서를 라운드 협상으로 생성 (ADR-057)
+    - UI 프로젝트 + 스택 확정 후: `/bootstrap-design` 다음 `/plan-milestone`
     - 기획 신뢰도 재확인 원하면: 다른 세션에서 `/validate-discovery --reviewer-tag <tag>` 후 원본에서 `/repair-discovery`
   - 프롬프트 동봉 권장:
     - charter `## 5. 비목표` 의 핵심 키워드 (다음 plan 라운드의 scope 가드 입력)

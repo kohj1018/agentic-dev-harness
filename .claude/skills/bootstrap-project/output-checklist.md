@@ -11,9 +11,8 @@
 - `docs/20-system/DESIGN.md` (UI 스택 포함 시 — `/bootstrap-design`이 채운다)
 - `docs/90-decisions/project/ADR-100-initial-project-decisions.md` (project ADR은 100+ 번호 — boilerplate/ADR-002는 legacy reserved)
 
-## 필수 생성 workitem
-- `docs/30-workitems/milestones/M1-foundation.md`
-- `docs/30-workitems/features/F-001-core-value.md`
+## workitem 생성 경계
+- milestone/feature 문서는 본 skill이 만들지 않는다 — `/plan-milestone`이 생성 (ADR-057).
 
 ## 출력 원칙
 - 사실, 가정, 열린 질문을 구분한다.

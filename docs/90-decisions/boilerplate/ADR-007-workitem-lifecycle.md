@@ -6,7 +6,7 @@
 accepted
 
 ## 현재 유효 결정
-- 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT.
+- 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT. bootstrap은 charter/ARCH/ADR-100까지 — M1/F-001 seed는 ADR-057로 plan 단계(plan-milestone)로 이동.
 - skill 간 흐름은 텍스트 제안 원칙 + 예외 3종: inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable(#amend-4), `Needs Stack Guard`(#amend-3), `Needs Experience Contract`(#amend-5).
 - lock file 자동 화이트리스트 11종은 #amend-1.
 - agent 단위 판정 범위 경계 SSOT는 `DELEGATION_STRATEGY.md`(#amend-2) — 본 ADR은 skill 단위만 정의.
@@ -22,8 +22,8 @@ accepted
 | # | 단계 | skill | 주체 agent | 책임 경계 |
 |---|------|-------|-----------|----------|
 | 1 | discover | `/discover-product` | (메인 세션 운전) | persona/pain/JTBD/시나리오 발굴 → DISCOVERY.md |
-| 2 | bootstrap | `/bootstrap-project` | architect | DISCOVERY.md → charter/architecture/M1/F-001 |
-| 3 | plan | `/plan-milestone`(M2+ milestone+feature) · `/plan-workitem`(feature→task) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone) + feature를 task로 분해(plan-workitem) |
+| 2 | bootstrap | `/bootstrap-project` | architect | DISCOVERY.md → charter/architecture/ADR-100 (M1/F-001 seed는 ADR-057로 제거 — plan 단계로 이동) |
+| 3 | plan | `/plan-milestone`(모든 milestone+feature — M1 포함, ADR-057) · `/plan-workitem`(feature→task; `M<N>` 배치 모드 — ADR-057) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone — M1 포함) + task 분해(plan-workitem — 단일/배치) |
 | 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) |
 | 5 | validate | `/validate-workitem` | validator | 판정 + report 기록. **status 변경·코드 수정·커밋 금지.** |
 | 6 | repair (Needs Fix일 때만) | `/repair-workitem` | builder | report의 실패 항목만 수정. **자동 커밋 금지, 새 기능 금지, 범위 밖 변경 금지.** |

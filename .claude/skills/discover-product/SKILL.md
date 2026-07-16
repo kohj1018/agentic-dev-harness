@@ -57,7 +57,7 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 
 **R4 — DISCOVERY.md 정리(저장 단계)**
 - 위 결과를 `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md` 양식에 맞춰 `docs/10-charter/DISCOVERY.md`에 저장.
-- 이 skill은 charter/architecture/workitem을 만들지 않는다 — `/bootstrap-project`가 이어 수행한다(자동 호출 아님).
+- 이 skill은 charter/architecture를 만들지 않는다 — `/bootstrap-project`가 이어 수행한다(자동 호출 아님).
 
 **단계별 출구 보장**: 어느 라운드에서 멈춰도 그때까지의 산출물이 `DISCOVERY.md`에 들어가 `/bootstrap-project`의 입력으로 의미가 있다.
 

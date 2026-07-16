@@ -91,15 +91,16 @@
 
 일반적인 프로젝트 진행에서의 추천 스킬 순서:
 
-1. `/bootstrap-project` → charter + architecture + 초기 workitem 생성
+1. `/bootstrap-project` → charter + architecture + ADR-100 (workitem 생성 X — ADR-057)
 2. `/bootstrap-stack` → 스택 확정 후 자동화 설계
-3. `/plan-milestone` → (M2+) milestone + feature 문서 생성 / `/plan-workitem F-NNN` → 기존 feature를 task로 분해
+3. `/plan-milestone` → (M1 포함) milestone + feature 문서 생성 (+UI: R5 프로토타입 라운드) / `/plan-workitem M<N>` → 마일스톤 배치 task 분해 (또는 `F-NNN` 단일; 구현 직전 `--refresh`)
 3a. (선택) `/validate-plan <workitem-id>` — 다른 세션·다른 LLM에서 cross-review. 임시 파일 작성 (ADR-038).
 3b. (선택) `/repair-plan <workitem-id>` — 원본 plan 세션에서 임시 파일 회수 + 적용 + 삭제 (ADR-038).
 4. `/implement-workitem` → task 구현
 5. `/validate-workitem` → 판정 + report 기록
 6. `/repair-workitem` (Needs Fix일 때만) → report의 실패 항목 수정
-7. `/finalize-workitem` (Pass일 때) → status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 (정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md), [ADR-008](../90-decisions/boilerplate/ADR-008-commit-convention.md))
+7. `/finalize-workitem` (Pass일 때) → status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 (정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md), [ADR-008](../90-decisions/boilerplate/ADR-008-commit-convention.md)) + feature 전 task done 시 FAC closure 요약(ADR-057 결정 5)
+7.5. feature의 모든 task가 done이면 finalize가 FAC closure를 요약하고 다음 feature refresh 또는 `/stabilize-milestone M-N --feature F-NNN`을 제안한다 (ADR-057).
 8. 마일스톤의 모든 task가 `done`이 되면 `/stabilize-milestone` — 통합 점검(코드 수정·커밋·status 변경 금지). 정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md).
    - `/stabilize-milestone`은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1) — generator=`/implement-workitem`, optimizer=`/repair-workitem`.
 

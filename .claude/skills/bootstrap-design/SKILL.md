@@ -193,7 +193,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html`를 열어 확인하고 피드백 주세요."*
 - 피드백 수령 시 **반드시 DESIGN.md(SSOT)를 먼저 수정** → 그 다음 preview 재생성. (preview를 먼저 고치지 않는다.)
 - **수렴 규칙 (ADR-049#amend-1)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
-- 사용자가 *승인*할 때까지 반복. 승인 전에는 R6-3(정리)과 `/plan-workitem` 권장을 수행하지 않는다.
+- 사용자가 *승인*할 때까지 반복. 승인 전에는 R6-3(정리)과 `/plan-milestone`(마일스톤·feature 미생성 시 — ADR-057; 이미 분해된 feature가 있으면 `/plan-workitem`) 권장을 수행하지 않는다.
 - `--fast`에서는 R6를 생략(위 `## 모드`). 사용자가 명시 요청 시 R6만 단독 수행.
 
 ### R6-3. 정리 (concept 시안 + preview 삭제)
@@ -211,7 +211,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - concept/preview 시안 상태: 삭제됨(승인 후 — 기본) / 유지(보존 요청 시) / 미생성(`--fast`). 재생성: `/bootstrap-design` R2/R6
 - 채워진 섹션 요약
 - 남은 열린 질문
-- 다음 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-workitem` (또는 `/implement-workitem`). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
+- 다음 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-milestone`(마일스톤·feature 미생성 시 — ADR-057; 이미 분해된 feature가 있으면 `/plan-workitem`). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

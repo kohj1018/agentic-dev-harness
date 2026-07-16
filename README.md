@@ -5,7 +5,7 @@
 
 A document-first agentic dev harness for Claude Code and Codex CLI — sets up document structure and sub-agent workflow all at once when starting a new project. Both CLIs are supported as first-class entry points.
 
-> **In short**: Fork this repo → optionally run `/discover-product` to ground your charter in real user data → run `/bootstrap-project` → get charter, architecture, and initial workitems in one shot. The main session orchestrates; sub-agents do the work.
+> **In short**: Fork this repo → optionally run `/discover-product` to ground your charter in real user data → run `/bootstrap-project` → get charter and architecture in one shot, then `/plan-milestone` creates milestones/features. The main session orchestrates; sub-agents do the work.
 
 ## Who is this for
 
@@ -20,7 +20,7 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
   └─ (optional) /validate-discovery (separate session) → /repair-discovery (origin session)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
   → /bootstrap-design (frontend only — researches references into DESIGN_RESEARCH.md, shows multiple concept mockups to pick a direction *before* writing DESIGN.md, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-049]
-  → /plan-workitem
+  → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /implement-workitem
   → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
@@ -31,7 +31,7 @@ For step-by-step details, see [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 For sub-agent delegation, see [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md).
 The Quick Start below walks through these commands as Steps 0–3.
 
-`/discover-product` is recommended for new projects to ground charter in concrete persona/pain/scenarios. It writes `docs/10-charter/DISCOVERY.md`, which `/bootstrap-project` then converts into charter/architecture/initial workitems. For a quick prototype, you can skip `/discover-product` and pass a natural-language brief directly to `/bootstrap-project`.
+`/discover-product` is recommended for new projects to ground charter in concrete persona/pain/scenarios. It writes `docs/10-charter/DISCOVERY.md`, which `/bootstrap-project` then converts into charter/architecture. For a quick prototype, you can skip `/discover-product` and pass a natural-language brief directly to `/bootstrap-project`.
 
 > **Note**: DISCOVERY.md is the SSOT; Charter is a snapshot. To re-sync the Charter after updating DISCOVERY mid-project, run `/bootstrap-project --apply` (see [ADR-035](docs/90-decisions/boilerplate/ADR-035-continuous-discovery.md)).
 
@@ -58,7 +58,7 @@ Skip this step for quick prototypes — pass a brief directly to `/bootstrap-pro
 /bootstrap-project [project brief or empty to use DISCOVERY.md]
 ```
 
-Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/ARCHITECTURE_OVERVIEW.md`, and initial milestone/feature documents.
+Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/ARCHITECTURE_OVERVIEW.md`.
 
 **Tip — what to include in the brief**: what you're building, who uses it, the problem it solves, and what's already decided vs. undecided. See [PROJECT_START_CHECKLIST.md](docs/00-meta/PROJECT_START_CHECKLIST.md) for examples.
 
@@ -78,8 +78,9 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 ### Step 3: Plan → Implement → Ship
 
 ```text
-# Plan (decompose a feature into tasks with ## 9. 의존성 ordering; M2+ milestone/feature authoring = /plan-milestone)
-/plan-workitem [feature id]
+# Plan (milestone/feature authoring = /plan-milestone (M1 included); decompose into tasks with ## 9. 의존성 ordering)
+/plan-milestone [milestone idea]
+/plan-workitem M1
 
 # (Optional) Cross-LLM peer review — see ADR-038
 #   In a separate terminal / fresh Claude session OR Codex:
@@ -110,7 +111,7 @@ When you hit Claude Code's usage limit or prefer Codex:
 2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem F-001`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
+   - Planning / bootstrap / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem M1`, `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
    - Discovery / stabilize cross-review (opt-in, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (in fresh Codex session) + `$repair-milestone M1` (in origin session)
 4. For remaining skills (`discover-product`, `review-doc`, `boilerplate-context`, `bootstrap-design`, `research-pack`), invoke in natural language: *"Follow `.claude/skills/<name>/SKILL.md`"*.

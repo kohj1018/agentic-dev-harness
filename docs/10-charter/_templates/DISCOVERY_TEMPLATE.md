@@ -69,7 +69,7 @@ draft
 
 ## 15. Insight Backlog
 <!-- Evidence(§14)를 해석한 인사이트. status: open(미반영) | planned(feature 연결됨) | rejected.
-     plan-workitem이 feature/task 생성 시 본 ID를 연결한다. 미반영 open 인사이트는 stabilize §6.5가 보고. -->
+     plan-milestone(feature)·plan-workitem(task)이 생성 시 본 ID를 연결한다. 미반영 open 인사이트는 stabilize §6.5가 보고. -->
 | ID  | insight (so-what) | 근거 evidence | status | linked feature | 비고 |
 |-----|-------------------|--------------|--------|----------------|-----|
 | I-1 | (예: 갱신 리마인더가 핵심 가치) | E-1 | open | - | M1 후보 |
