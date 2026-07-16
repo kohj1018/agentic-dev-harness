@@ -5,16 +5,16 @@
 
 ## 실행 규칙 (모든 Stage 공통)
 
-1. **실행 순서**: Stage 0A → 0B → 1A → 1B → 1C → 2 → 3 → 4 → 5. (0A/0B는 상호 독립이라 순서 교환 가능. 1A→1B→1C→2→3은 앞 Stage 산출물을 뒤 Stage가 인용하므로 반드시 직렬.)
+1. **실행 순서**: Stage 0A → 0B → 0C → 1A → 1B → 1C → 2 → 3 → 4 → 5. (0A/0B/0C는 대체로 상호 독립이나 **예외: 0C-7(2)가 0B-1(1)이 편집한 validate-workitem small-diff fallback 줄을 이어서 고치므로 0B → 0C 순서는 고정**이다. 그 외 0C는 라운드 테마와 무관한 pre-existing 정정. 1A→1B→1C→2→3은 앞 Stage 산출물을 뒤 Stage가 인용하므로 반드시 직렬.)
 2. **커밋**: 각 Stage 끝의 "커밋" 항목에 적힌 파일만 명시적으로 `git add` 한다 (`git add -A` / `git add .` 금지 — AGENTS.md 규율). 커밋 메시지는 각 Stage에 제공된 한 줄을 사용한다.
 3. **"현재:" 인용**: 이 가이드의 before 인용은 가이드가 커밋된 2026-07-14 repo 상태(3f18f93) 기준이다. 인용문이 파일과 1글자라도 다르면 그 주변 문맥(섹션 제목·키워드)으로 위치를 찾아 의도대로 적용하고, 의도 자체가 성립 불가능하면 멈추고 사용자에게 보고한다.
 4. **ADR 거버넌스 (이번 라운드는 umbrella 방식 — ADR-051/052 선례)**: 신규 ADR은 **2개만**(ADR-056 경험 계약·voice / ADR-057 플래닝 v2·seam) 만들고, 나머지 정책은 전부 **기존 ADR의 Amendment**로 담는다. 신규 ADR 작성 Stage에서 `docs/90-decisions/boilerplate/README.md`의 "Boilerplate ADR" 표에 한 줄 추가하고, Amendment를 추가한 Stage에서는 해당 행 "Amendments" 컬럼에 `+#amend-N: <키워드>`를 덧붙인다.
-5. **`.agents/skills/` wrapper**: 기존 wrapper는 15줄 thin pointer라 `.claude/skills/*/SKILL.md` 본문 수정 시 자동 반영된다 — 본문만 고치면 되고 wrapper는 건드리지 않는다(신설만 Stage 0A에서 수행).
+5. **`.agents/skills/` wrapper**: 기존 wrapper는 대개 15줄 thin pointer라 `.claude/skills/*/SKILL.md` 본문 수정 시 자동 반영된다 — 본문만 고치면 되고 wrapper는 건드리지 않는다(신설만 Stage 0A에서 수행). **단 예외: `plan-milestone`·`repair-milestone` wrapper는 thin pointer가 아니라 *자체 Codex degrade 문구*(:12)를 담고 있어 0C-10이 별도 정정한다.**
 6. **날짜**: Amendment 날짜는 실제 적용일을 쓴다(이 가이드는 `2026-07-14`로 표기 — 적용일이 다르면 교체).
 7. 이 가이드 파일 자체는 어떤 산출물에서도 링크·인용하지 않는다(완료 후 사용자가 삭제).
 8. **라운드는 통째로 적용한다**: Stage 간 예고 참조가 여럿 있다(1B의 ADR-056이 1C의 designer·R1 voice 훅과 Stage 2·3의 R5·`--refresh`를 예고 참조, Stage 3이 0B의 ADR-051#amend-2 앵커를 참조 등). 실행 순서를 지키면 전부 해소되지만, **라운드를 중간에 끊고 stabilize를 돌리면 [Ref-anchor]/[ADR-ref] preflight가 미존재 앵커를 P1로 보고**한다 — 전 Stage 적용 후 검증할 것.
 9. **한 파일이 한 Stage 안에서 여러 커밋에 걸치면**(Stage 3의 plan-workitem·TASK_TEMPLATE) 편집을 한꺼번에 하지 말고 **커밋 순서대로 "그 커밋 대상 편집 → 커밋"을 반복**한다(파일 단위 add만 가능 — 부분 스테이징 불가).
-10. **ADR-045 D6 거버넌스 노트**: ADR-007(amend 4개)·ADR-027(amend 4개)은 "다음 변경 시 통합 재발행 우선 검토" 대상이지만, 이번 라운드는 사용자 지시(신규 ADR 최소화)로 **amendment를 유지하고 재발행은 의도적으로 보류**한다(다음 변경 라운드의 재발행 후보로 기록). 대신 D5 트리거(amend 4+ 또는 base 결정을 뒤집는 amendment)에 따라 `## 현재 유효 결정` 요약을 신설/갱신한다(ADR-010=Stage 0A, ADR-044·054 신설=Stage 0A, ADR-027 갱신=Stage 1B, ADR-049 갱신=Stage 1C, ADR-007 신설=Stage 2, ADR-007 요약의 lifecycle 줄 동기=Stage 3). **일반 원칙: 기존 `## 현재 유효 결정` 요약을 가진 ADR에 amendment를 얹을 때는 그 요약도 같은 커밋에서 갱신한다** — 요약만(또는 본문만) 고치면 요약↔본문 모순을 새로 만든다. base 결정을 뒤집는 변경(ADR-049#amend-2, ADR-044/054#amend-1)도 같은 사용자 지시(신규 ADR 최소화)로 supersede 신규 ADR 대신 amendment로 담는다 — ADR-045 D6 표의 의도적 예외이며, 각 amendment의 반전 근거 명시 + D5 요약 신설이 보완 장치다(해당 ADR들도 다음 라운드 재발행 후보).
+10. **ADR-045 D6 거버넌스 노트**: ADR-007(amend 4개)·ADR-027(amend 4개)은 "다음 변경 시 통합 재발행 우선 검토" 대상이지만, 이번 라운드는 사용자 지시(신규 ADR 최소화)로 **amendment를 유지하고 재발행은 의도적으로 보류**한다(다음 변경 라운드의 재발행 후보로 기록). 대신 D5 트리거(amend 4+ 또는 base 결정을 뒤집는 amendment)에 따라 `## 현재 유효 결정` 요약을 신설/갱신한다(ADR-010=Stage 0A, ADR-044·054 신설=Stage 0A, ADR-040 신설=Stage 1A, ADR-027 갱신=Stage 1B, ADR-049 갱신=Stage 1C, ADR-007 신설=Stage 2, ADR-007 요약의 lifecycle 줄 동기=Stage 3). **일반 원칙: 기존 `## 현재 유효 결정` 요약을 가진 ADR에 amendment를 얹을 때는 그 요약도 같은 커밋에서 갱신한다** — 요약만(또는 본문만) 고치면 요약↔본문 모순을 새로 만든다. base 결정을 뒤집는 변경(ADR-049#amend-2, ADR-044/054#amend-1)도 같은 사용자 지시(신규 ADR 최소화)로 supersede 신규 ADR 대신 amendment로 담는다 — ADR-045 D6 표의 의도적 예외이며, 각 amendment의 반전 근거 명시 + D5 요약 신설이 보완 장치다(해당 ADR들도 다음 라운드 재발행 후보).
 
 ## 전체 그림 (무엇이 왜 바뀌나)
 
@@ -22,6 +22,7 @@
 |---|---|---|
 | 0A | ADR-010 Amendment 4 (+ADR-044/054 표기 amend) | cross-LLM 리뷰 skill 3종 Codex wrapper 승격 (validate-milestone Codex 미노출 해소) |
 | 0B | ADR-051 Amendment 2 | validate-workitem 팬아웃 관측 기록(`## Orchestration`) + small-diff fallback OR-결함 보정 |
+| 0C | — (pre-existing 결함 정정, 신규 ADR 없음) | pre-existing 결함 11건 (라운드 테마 무관): charter 참조 off-by-2 / graduation P0 resolved 미제외 / validate verdict가 통합검증 실패 무시 / repair-workitem sanitization / stabilize→repair 회수 단절(finding-mode) / finalize 원자성 / validate diff untracked 누락 / **context-pack 죽은 필드 제거 / allowed-tools 오해 정정 / Codex 서브에이전트 parity 문구 / settings.json defaultMode** |
 | 1A | ADR-040 Amendment 4 | researcher "디자인 레퍼런스 모드" — 실 사이트/오픈소스 토큰 패키지에서 코드 수준 추출 |
 | 1B | **ADR-056 신설** (+ADR-027#5/042#1 amend) | ADR-056(경험 계약 umbrella) 작성 + 그중 Voice 파트 적용: DESIGN.md §10 규칙서 + 집행 |
 | 1C | ADR-049 Amendment 2 | designer agent 신설 + bootstrap-design R0~R2 개편(grounding 위계·divergence 카드·구별성 비평·취향 오라클) |
@@ -67,7 +68,7 @@
 - constraint(강, [관측됨]) — wrapper·README 동일 커밋 + preflight 체크. 나머지 enabling.
 ```
 
-**추가 in-place 정정 (같은 파일 — 아래 6곳을 같은 커밋에서 모두 수정한다. 일부만 고치면 요약↔본문 모순이 남는다 — 실행 규칙 10)**:
+**추가 in-place 정정 (같은 파일 — 아래 7곳을 같은 커밋에서 모두 수정한다. 1~6은 현재-상태 과잉보장 정정, 7은 forward-looking 조항 정합. 일부만 고치면 요약↔본문 모순이 남는다 — 실행 규칙 10)**:
 
 근거: [관측됨] `.codex/config.toml` 실물에는 `boilerplate-secure` 프로파일이 없고(legacy `sandbox_mode = "workspace-write"` 유지) 상단 주석이 "Native Windows unelevated sandbox cannot enforce split read/write carveouts... Secret files remain protected by AGENTS.md policy"라고 명시 — ADR-010의 여러 곳이 실제보다 강하게 보장하고 있었다. (config.toml 자체의 보안 재설계는 본 라운드 비범위 — `codex doctor` 실측이 필요한 별도 작업으로 이월.)
 
@@ -77,6 +78,7 @@
 4. **`## 도구 표면 매핑` 표의 "Read 차단" 행** — Codex 셀 현재: `.codex/config.toml` `permissions.boilerplate-secure.filesystem` → 변경: `AGENTS.md 정책 의존 (Windows unelevated sandbox — OS-강제 불가, config.toml 주석 참조)`. SSOT 셀의 "양쪽 동시 — 동일 결과를..." 표현도 `Claude=OS-강제 / Codex=정책 의존 (비대칭 — config.toml 주석 SSOT)`로 정정.
 5. **`## 후속 작업`의 "`boilerplate-secure` permissions 프로파일 적용 (2026-05-28)" bullet** — 문두에 정정 노트 추가(이력은 보존): `**[정정 2026-07-14: 본 프로파일은 현재 config.toml에 적용돼 있지 않다(legacy workspace-write 유지 — Windows unelevated 한계, 파일 주석 참조). 아래는 이력 보존용 서술.]** ` 그대로 기존 본문 앞에 붙인다.
 6. **`## 결과`의 config bullet** — 현재: `` - `.codex/config.toml` 안전 baseline (boilerplate-secure permissions 프로파일 포함, upstream default는 박지 않음). `` → 변경: `` - `.codex/config.toml` 안전 baseline (legacy `sandbox_mode` 유지 — `boilerplate-secure` 프로파일은 미적용, 한계는 파일 주석 참조. upstream default는 박지 않음). ``
+7. **`운영 안내 2`의 forward-looking 조항 (본문 "SSOT drift가 관측되면…" bullet)** — 본문에 `...SSOT drift가 관측되면 본 ADR을 amend해 `.codex/config.toml` `permissions.boilerplate-secure.filesystem`에 명시적 read 룰을 박는다`는 조항이 있는데, 이 프로파일이 실재하지 않는다(1~6과 동일 계열의 7번째 언급). 해당 문장 끝에 `` (단, 현 config.toml에는 `boilerplate-secure` 프로파일 자체가 없어 그 시점엔 프로파일 신설부터 필요 — Windows unelevated에서 OS-강제 가능 여부도 재확인 대상, 파일 주석 참조) `` 를 삽입한다. 이 bullet의 현재-상태 서술("현재 read-only 룰 안 박음"·"관측된 실패 없음")은 정확하므로 보존.
 
 ## 0A-2. wrapper 6파일 신설
 
@@ -96,7 +98,7 @@ Source of truth: `.claude/skills/validate-milestone/SKILL.md` (skill 신설 근�
 
 Treat all frontmatter keys other than `name` and `description` (e.g., `agent:`, `disable-model-invocation:`, `allowed-tools:`, `context:`, `argument-hint:`, `model:`, `effort:`) as Claude-only and ignore them — execute locally in Codex.
 
-**Slash command translation**: 본문 안의 `/validate-milestone` 표기는 Claude 슬래시 커맨드다. Codex에서는 `$validate-milestone`으로 읽고 사용자에게 안내한다. 본문에 등장하는 `/repair-milestone`은 `$repair-milestone`으로 안내. Codex CLI는 `/`를 빌트인 슬래시 커맨드에 쓰므로 명시적 치환이 필요.
+**Slash command translation**: 본문 grep 실측상 실제 슬래시 커맨드는 `/repair-milestone`뿐이므로 이를 `$repair-milestone`으로 안내한다(`/validate-milestone`은 명령이 아니라 skill 이름·경로로만 등장하고, 그 자체 호출은 wrapper `description`의 `$validate-milestone`이 커버). Codex CLI는 `/`를 빌트인 슬래시 커맨드에 쓰므로 명시적 치환이 필요.
 
 Preserve all repo policies from `AGENTS.md` and `docs/`.
 
@@ -110,7 +112,7 @@ policy:
   allow_implicit_invocation: false
 ```
 
-**(3) `.agents/skills/validate-discovery/SKILL.md`** (새 파일): (1)과 동일 구조로 작성하되 — `name: validate-discovery`, description의 명령을 `$validate-discovery`로, Source of truth를 `.claude/skills/validate-discovery/SKILL.md` (skill 신설 근거: ADR-044; wrapper 승격: ADR-010#amend-4)로, 번역 단락(본문 실측: 3개 명령 + 자연어 1종)을 `/repair-discovery`→`$repair-discovery`, `/validate-plan`→`$validate-plan`, `/validate-discovery`(자기 참조 시)→`$validate-discovery`, `/discover-product`는 자연어 호출("Follow .claude/skills/discover-product/SKILL.md")로 안내.
+**(3) `.agents/skills/validate-discovery/SKILL.md`** (새 파일): (1)과 동일 구조로 작성하되 — `name: validate-discovery`, description의 명령을 `$validate-discovery`로, Source of truth를 `.claude/skills/validate-discovery/SKILL.md` (skill 신설 근거: ADR-044; wrapper 승격: ADR-010#amend-4)로, 번역 단락(본문 실측: wrapper 번역 대상 2개 + 자연어 1개)을 `/repair-discovery`→`$repair-discovery`, `/validate-plan`→`$validate-plan`, `/discover-product`는 자연어 호출("Follow .claude/skills/discover-product/SKILL.md")로 안내(자기 이름 `/validate-discovery` 표기는 현행 본문에 없음 — 작성 직전 재실측에서 등장하면 `$validate-discovery`로 추가 안내).
 
 **(4) `.agents/skills/validate-discovery/agents/openai.yaml`**: (2)와 동일 2줄.
 
@@ -221,7 +223,7 @@ feat(codex): add wrappers for cross-LLM review skills and unify invocation (ADR-
 
 **(1) small-diff fallback 기준 보정** —
 현재(0단계 내): `**small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 파일 ≤ 2 *또는* 변경 줄 합계 ≤ 50, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단).`
-변경:
+변경 (⚠ 이 줄은 실제 파일에서 `     - ` 리스트 프리픽스로 시작한다 — 프리픽스는 유지하고 `**small-diff fallback 기준**…` 본문만 교체할 것. 아래 블록이 이미 `     - `를 포함하므로 기존 프리픽스와 중복시키면 불릿이 이중이 된다):
 
 ```markdown
      - **small-diff fallback 기준** (cost guard): `git diff --stat`의 변경 줄 합계 ≤ 50, *또는* (변경 파일 ≤ 2 *이고* 변경 줄 합계 ≤ 200), *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단. "2파일이면 줄 수 무관 inline"이던 구 기준은 구현+테스트 2파일의 대형 TDD diff를 놓쳐 보정됨 — ADR-051#amend-2). 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
@@ -274,6 +276,219 @@ feat(validate): record orchestration mode in report and fix small-diff fallback 
 
 ---
 
+# Stage 0C — 사전 결함 11건 정정 (라운드 테마 무관 pre-existing 버그)
+
+목적: **실제 파일 대조로 확정**된, 이번 라운드 10개 테마와 무관하지만 보일러플레이트 실동작·문서정확성을 해치는 pre-existing 결함 **11건**을 정정한다(0C-1 charter 참조 / 0C-2 graduation P0 / 0C-3 validate verdict / 0C-4 repair-workitem sanitization / 0C-5 stabilize→repair 회수 단절 / 0C-6 finalize 원자성 / 0C-7 validate diff untracked 누락 / **0C-8 context-pack 죽은 필드 / 0C-9 allowed-tools 오해 / 0C-10 Codex 서브에이전트 parity 문구 / 0C-11 settings.json defaultMode** — 8~11은 최신 공식문서 기준). 0A/0B와 같은 독립 defect-fix라 대체로 순서 교환 가능(**단 0C-7은 0B-1과 같은 줄을 고치므로 0B 이후에 적용** — 실행 순서 규칙 1). 신규 ADR·amendment 없음(기존 skill/ADR 본문의 사실 오류·카운트·안전·실행계약·frontmatter 정확성 정정 — 필요 시 다음 라운드에 ADR 소급 기록 후보).
+
+## 0C-1. bootstrap-stack Charter 섹션 참조 off-by-2 정정
+
+`.claude/skills/bootstrap-stack/SKILL.md`가 PROJECT_CHARTER 섹션을 **2칸씩 어긋나게** 참조한다 — 실제 charter는 **§4 목표 / §5 비목표 / §6 성공 기준 / §7 제약** / §8 사용자 흐름 / §9 가정인데, skill은 §6/7/8/9를 "목표/비목표/성공/제약"으로 읽는다(§6은 실제로 성공기준, §7은 제약, §9는 가정). 결과: DEEP 스택 결정이 요구를 잘못 grounding하고, R0 얕음-가드가 엉뚱한 섹션의 공백을 검사한다. (교차 확인: stabilize 등 다른 skill은 `## 9 핵심 가정`으로 **정확히** 참조 — bootstrap-stack만 outlier라 명백한 정정 대상.)
+
+- **R1 (요구 grounding, DEEP 흐름)** — `PROJECT_CHARTER ## 6 목표/## 7 비목표/## 8 성공 기준/## 9 제약`을 `PROJECT_CHARTER ## 4 목표/## 5 비목표/## 6 성공 기준/## 7 제약`으로 정정(뒤의 `ARCH ## 8 품질 속성` 등 나머지 문장 보존).
+- **R0 얕음 가드** — `PROJECT_CHARTER §6/7/8/9`를 `PROJECT_CHARTER §4/5/6/7`로 정정(R1과 동일 집합 — 목표/비목표/성공/제약).
+
+> **비-정정 (§3-1 트리는 대상 아님)**: "ARCH §3-1 디렉터리 트리를 규모 무관 기재 → '모듈 3개 이상' 규칙과 충돌"로 볼 수도 있으나 정정하지 않는다 — §3-1 템플릿의 "모듈 3개 이상" 은 *soft 권장*이고, bootstrap-stack의 디폴트 트리 기재는 스파게티 차단 목적의 별개 자산이다(레이어 경계 규칙 텍스트 ≠ 디폴트 디렉터리 트리). 경미한 tension이나 correctness 버그가 아님.
+
+## 0C-2. graduation P0 카운트가 resolved 항목을 제외하도록 정정
+
+`.claude/skills/stabilize-milestone/SKILL.md` §1.5 graduation pre-check의 "P0 severity finding 0건" 판정이 `### P0` 섹션의 *항목 수*만 센다. 그런데 `/repair-milestone`(수행 5)은 해소한 P0를 **제거하지 않고 in-place로 `status: resolved` 표기만** 남긴다. → **한 번 뜬 P0는 고쳐도 그 마일스톤이 영구히 졸업 불가**(resolved 항목이 계속 카운트됨). 아직 실전 P0→repair→졸업 사이클을 안 밟아 잠복 중인 결함.
+
+- §1.5의 "`### P0` 섹션 항목 수 0" 판정을 → "`### P0` 섹션에서 **`status: resolved`가 아닌(미해소) 항목 수 0**"으로 정정한다(repair-milestone이 남긴 `status: resolved` 항목은 카운트 제외). 미해소 항목이 1+면 `졸업 가능: NO`. (telemetry 7-T의 "Findings 분포: P0 X" echo는 총계 그대로 유지 — 게이트가 아니므로 무관.)
+- ADR-014 graduation 5+1 계약의 *criterion 자체*(P0 0건)는 불변 — 카운트가 *resolution 상태를 반영*하도록 평가만 정정(5+1 구조 변경 아님 → Mutation Contract "graduation 5+1 본체" 보존 invariant 위반 아님). 이 라운드 Stage 3-8 `--feature`가 붙이는 `(F-NNN)` P0도 status 없이 미해소로 집계돼 정상 차단되고 repair 후 제외된다.
+
+## 0C-3. validate-workitem combined verdict에 통합 검증 실패 반영
+
+`.claude/skills/validate-workitem/SKILL.md`의 마지막 "집계 규칙 (combined verdict)"에서 **Needs Fix 트리거가 "P0 finding 또는 ❌ AC 매핑"뿐**이다. 그런데 AC↔테스트 매핑은 테스트 *존재*만 확인하고(pass/fail 아님), 통합 검증 명령(`validate`) 실패는 *confidence만* Low로 낮춘다 → **테스트가 존재하지만 suite가 실패해도 verdict=Pass**가 될 수 있다(finalize가 validate를 재실행해 최종 ship은 막지만, validate report 자체가 오판). finalize의 "통합 검증 명령 실패 → Needs Fix"(ADR-007#amend-3)와 정합하도록 정정한다.
+
+- combined verdict "Needs Fix 트리거" 조건에 **"통합 검증 명령이 실행됐고 exit≠0"**을 추가한다: `어느 한 축이라도 P0 finding이 있거나, AC↔테스트 매핑에 ❌ AC가 하나라도 있거나, 통합 검증 명령이 exit≠0이면 → Needs Fix`. (통합 명령 부재 스택은 해당 없음 — 기존 그대로.) 신규 정책 아님(finalize 동작과의 정합·validate 보고 정확성 정정).
+
+## 0C-4. repair-workitem task-id sanitization (rm 경로 안전)
+
+`.claude/skills/repair-workitem/SKILL.md`는 `$ARGUMENTS`의 task-id를 **형식 검증 없이** `rm docs/40-validation/reports/<task-id>.md` 경로에 보간한다(수행 4). 반면 repair-milestone·validate-plan은 동일 위험에 sanitization 가드(패턴 화이트리스트 + glob 메타문자 즉시 종료)를 이미 둔다 — repair-workitem만 누락이라, 오타 glob(`T-001*`)·경로 조각이 들어가면 다른 report까지 삭제될 수 있다.
+
+- repair-workitem "입력" 단락에 sanitization 가드 1줄 추가(repair-milestone 동형): **task-id는 `T-[0-9]+` 패턴만 허용 — `/`·공백·glob 메타문자(`*`,`?`,`[`) 포함 시 즉시 종료**(rm 경로에 들어가므로 안전 전제. validate-plan `M[0-9]+`/repair-milestone `M[0-9]+` 가드와 대칭).
+
+## 0C-5. repair-workitem이 stabilize/QA_FINDINGS 발견을 수리하도록 (finding-mode) + stabilize 라우팅 통일
+
+`/stabilize-milestone`이 찾은 회귀(→ `QA_FINDINGS`에 기록)를 수리 경로가 못 고친다. `repair-workitem`은 "직전 validate가 남긴 report의 실패 항목"만 대상이라 report=`Pass`면 즉시 종료한다 — 그런데 stabilize 발견은 report가 아니라 `QA_FINDINGS`에 있으므로, `repair-milestone`이 per-task로 위임하든 stabilize가 직접 부르든 끝에서 `repair-workitem`이 "Pass라 할 일 없음"으로 종료 → **회귀 미수리**. 또 per-task 직접 `repair-workitem`은 `QA_FINDINGS` status를 닫지 못해(QA_FINDINGS 미접근 계약) 졸업 카운트(0C-2)에도 남는다. 수리 진입점을 `repair-milestone`으로 통일하고 `repair-workitem`에 finding-mode를 추가한다.
+
+**(1) `.claude/skills/stabilize-milestone/SKILL.md` 단계 8 "다음 단계" 분기 통일** — 현재 두 분기:
+- `milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: /repair-milestone M-N 권장 ...`
+- `단일 task로 격리되는 회귀·엣지케이스 (QA_FINDINGS P0): /repair-workitem T-NNN 으로 해당 task 수정 → 재 validate`
+
+두 번째 분기를 아래로 교체(QA_FINDINGS 발견은 단일·교차 불문 `repair-milestone` 경유 — QA_FINDINGS status를 닫을 수 있는 유일 경로이기 때문):
+`QA_FINDINGS 발견(P0/P1)은 단일 task 격리든 교차든 /repair-milestone M-N 로 회수한다 — repair-milestone이 4-판정 후 cross-cutting은 직접 수정하고, per-task 코드 결함은 finding 요약과 함께 repair-workitem에 위임(아래 finding-mode)한 뒤 QA_FINDINGS status를 닫는다. (직전 validate가 Needs Fix report를 남긴 task는 기존대로 /repair-workitem T-NNN 직접 — report 기반이라 정상.)`
+
+**(2) `.claude/skills/repair-workitem/SKILL.md`에 finding-mode 추가** — "반드시 먼저 할 일" 2의 두 종료 조건(`파일이 없거나 stale ... 종료` / `파일이 Pass이면 ... 종료(repair 대상 없음)`) 뒤에 추가:
+`**단, 인자에 finding 요약(repair-milestone이 QA_FINDINGS 발견을 위임할 때 넘기는 "<finding>")이 있으면 report가 Pass·부재여도 종료하지 않고 그 finding을 대상으로 진행한다(finding-mode).** 아래 "비판적 재점검"을 그 finding에 적용해 코드를 수정하고 task ## 8. 메모에 결정 이력을 남긴다. finding-mode에서는 (a) Pass report를 삭제하지 않고(실패 report가 아님), (b) QA_FINDINGS는 건드리지 않으며(status 종료는 위임한 repair-milestone 책임 — 본 skill의 "다른 산출물 미접근" 계약 유지), (c) 마지막 출력에 "/validate-workitem <task-id> 재실행으로 수정 확인" 안내를 포함한다.`
+
+**(3) `.claude/skills/repair-milestone/SKILL.md` per-task 위임 문장 정정** — 현재(수행 2 per-task 결함): `... 직접 고치지 말고 /repair-workitem <T-NNN> "<finding 요약>"로 위임한다. report 부재면 먼저 /validate-workitem <T-NNN> 선행을 안내.`
+변경: `... 직접 고치지 말고 /repair-workitem <T-NNN> "<finding 요약>"로 위임한다(repair-workitem이 finding-mode로 report Pass·부재여도 그 finding을 수정 — validate 선행 불요). 위임 반영 후 해당 finding의 QA_FINDINGS/IMPROVEMENT_GUIDE status는 수행 5(원본 finding status 갱신)에서 resolved로 닫는다.`
+
+## 0C-6. finalize 상태 전이를 커밋 안전 검사 뒤로 (원자성)
+
+`.claude/skills/finalize-workitem/SKILL.md`가 status=`done`(수행 4)을 abort 가능한 staging·안전검사(수행 5-6: `## 4-1` 불일치 시 `Needs Review` 종료 / 민감경로 즉시 종료)보다 **먼저** 쓴다 → 검사가 중단되면 "task 문서는 done인데 커밋은 안 된" 불일치가 남고, graduation(모든 task done 카운트)까지 왜곡될 수 있다.
+
+- **수행 4("task 문서의 `## 0. Status`를 `done`으로 갱신한다.")를 수행 6 뒤·커밋(수행 7-8) 직전으로 이동**하고 문구를 바꾼다: `staging·안전검사(수행 5-6)가 abort 없이 통과한 뒤에만 task 문서의 `## 0. Status`를 `done`으로 갱신한다(커밋 성공 직전 — 검사 중단 시 done을 쓰지 않아 "done인데 미커밋" 방지).` (**이동 후 수행 항목 번호 재정렬**: 기존 4를 비우고 5·6·7·8을 앞으로 당기거나, 이동한 status-done을 "6 다음·커밋 전" 단계로 명명 — 핵심은 *안전검사 통과 → status=done → task 문서 add → commit* 순서.)
+- **수행 6-(0)의 step 참조 정정** — 현재 `본 skill이 step 4에서 갱신한 task 문서 자체는 항상 add 대상에 포함하고, 아래 (1)·(2) 비교에서는 제외한다.` → `본 skill이 갱신하는 task 문서 자체는 (안전검사 통과 후 status=done을 쓴 뒤) 항상 add 대상에 포함하고, 아래 (1)·(2) 비교에서는 제외한다.` — staging 목록 산정·안전검사는 코드 파일 대상으로 먼저 수행되고, 통과 후 done을 쓴 task 문서를 add에 합류시킨다(비교 시 task 문서 제외 규칙 불변).
+
+## 0C-7. validate diff-trace가 신규(untracked) 파일을 포함하도록
+
+`.claude/skills/validate-workitem/SKILL.md`의 diff-trace audit이 `git diff`(tracked 변경만) 기반이라, 아직 `git add` 안 된 신규 파일이 안 보인다. 첫 구현(대부분 신규 파일)에선 감사가 사실상 텅 비고, "diff trace 통과"가 신뢰도(High) 입력이라 신뢰도까지 허위 상승한다. finalize는 `git status --porcelain`(untracked 포함)을 쓰는데 validate가 안 맞춰져 있다.
+
+**(1) diff-trace audit 파일 회수 정정** — 현재(범위 밖 변경 + diff trace audit): "`git diff` 결과의 각 변경 줄(또는 hunk)이 task의 AC-N 또는 명시 요청으로 거꾸로 추적 가능한가?"
+변경: `변경 파일 회수를 git status --porcelain(untracked 신규 파일 포함) 기준으로 한다 — tracked 변경은 git diff HEAD의 각 줄로(staged+unstaged 모두 — plain git diff는 staged를 놓침), untracked 신규 파일은 파일 전체 내용을 대상으로, 각각이 task의 AC-N 또는 명시 요청으로 거꾸로 추적 가능한지 감사한다(신규 파일이 감사에서 누락되지 않게 — finalize의 git status 방식 정합).`
+
+**(2) small-diff fallback 크기 산정 정정 (0B-1(1)이 만든 같은 줄을 이어서)** — 0B-1(1)의 fallback 기준 줄은 아직 `git diff --stat`(tracked only)로 크기를 재어, 대형 신규-파일 변경을 소형으로 오판해 팬아웃을 건너뛰고 inline로 샐 수 있다. 측정을 untracked 신규 파일 포함으로 바꾼다 — 0B-1(1) 적용 결과 줄을 아래로 다시 교체한다(프리픽스 `     - ` 유지, 측정 구절만 달라짐):
+
+```markdown
+     - **small-diff fallback 기준** (cost guard): `git status --porcelain` 변경 파일 집합의 줄 합계(tracked 변경은 `git diff HEAD` 줄 수, untracked 신규 파일은 파일 전체 줄 수) ≤ 50, *또는* (변경 파일 ≤ 2 *이고* 줄 합계 ≤ 200), *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음이면 팬아웃을 건너뛰고 단일 inline validator로 수행한다(휴리스틱 — 경계값은 메인 세션 판단. "2파일이면 줄 수 무관 inline"이던 구 기준은 구현+테스트 2파일의 대형 TDD diff를 놓쳐 보정됨 — ADR-051#amend-2). 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
+```
+
+**(3) 신뢰도 사다리는 (1)로 자동 정합** — "diff trace audit 통과"가 이제 *untracked 포함 전수 추적*을 뜻하므로, 신규 파일 0줄 추적으로 인한 허위 High가 사라진다(별도 문구 수정 불요).
+
+## 0C-8. `context-pack` 죽은 frontmatter 필드 제거 + ADR-019 정정
+
+`context-pack`은 Claude Code 공식 skill/agent frontmatter 스키마에 **없는 필드**다(code.claude.com/docs 실측 2026-07) → 조용히 무시된다. grep 실측상 **23개 파일**(skill 21종 + agent 2종 = `architect`·`researcher`)이 `context-pack:` 필드를 달고 있고, ADR-019는 이 필드가 도구 로딩·토큰 절감을 *보장*한다고 서술한다(실효 없음). 실제로 동작하는 것은 각 skill/agent 본문의 수동 JIT 관례("반드시 먼저 읽을 파일 최소 충분")뿐이다.
+
+- **(1) 필드 삭제 (grep 전수)**: `grep -rln "^context-pack:" .claude/skills .claude/agents`로 회수한 모든 `.claude/skills/*/SKILL.md` + `.claude/agents/*.md`(작성 시점 23파일)의 frontmatter에서 `context-pack:` 줄을 삭제한다. 본문의 "## Context 정책 (ADR-019)" 단락·"반드시 먼저 읽을 파일" 지침은 **유지**(실효 있는 메커니즘). (designer.md는 1C-1에서 이미 context-pack 없이 생성 — 0C가 1C보다 앞서므로 별도 조치 불요.)
+- **(2) ADR-019 정정 (exact — Record ADR이므로 결정 원문 보존 + 정정 노트)**: `docs/90-decisions/boilerplate/ADR-019-context-packs-and-jit.md`를 2곳 정정한다.
+  - `## 결과` 섹션의 `- context-pack frontmatter로 도구가 로딩 범위를 명시적으로 제어 가능.` 줄을 → `- 로딩 범위 제어는 각 skill/agent 본문의 「## Context 정책 (ADR-019)」 JIT 지침이 담당한다. context-pack frontmatter 필드는 Claude Code 공식 스키마에 없어 실효 없음(no-op)이라 제거됨 — 실효 메커니즘은 본문 JIT 지침(최소 읽기 목록 + 발화 시 인용)이다(2026-07 공식문서 확인).` 로 교체.
+  - `## 결정`의 `### 2. Context Packs 2종` 아래 두 줄(`- skill frontmatter에 context-pack: minimal 필드 추가 (13개 skill 일괄).` / `- architect agent frontmatter에 context-pack: full.`) 바로 뒤에 정정 노트 한 줄 추가: `- [정정 2026-07: 위 두 줄의 frontmatter 필드는 Claude 공식 스키마에 없어 실효 없음(no-op) — 필드는 제거하고 로딩 정책은 결정 1의 본문 JIT 지침으로 일원화한다. 위 두 줄은 이력 보존용.]`
+  - (필드 실효성 사실 정정이라 결정 반전 아님 → amend 신설 불요. JIT·사전 fork-load 금지 정책 본체는 불변.)
+
+## 0C-9. `allowed-tools` 정확성 정정 (hard allowlist 아님 — 사전승인)
+
+Claude Code에서 skill의 `allowed-tools`는 **도구를 hard-제한하지 않는다** — 목록에 없는 도구도 호출 가능하고(권한 프롬프트만 뜸) 목록은 *사전승인*일 뿐이다(code.claude.com/docs 실측: "It does not restrict which tools are available: every tool remains callable"). 따라서 "allowed-tools에 Bash 없음 → 실행 원천 차단" 류 주장은 부정확하다. **grep 실측상 이 부정확 근거를 담은 곳은 2곳** — `validate-milestone` SKILL 도입부와, 그 skill을 신설한 `ADR-054` 결정 1(:14) — 이다(`validate-plan`·`validate-discovery`·`docs/00-meta/GUARDRAILS_STRATEGY.md`에는 해당 문구 없음 — 정정 대상 아님).
+
+- **정정 (exact)** — `.claude/skills/validate-milestone/SKILL.md` 도입부 문장의 괄호구:
+  현재: `**\`validate\`/\`validate:e2e\`/\`npm audit\` 등 실행 금지**(allowed-tools에 Bash 없음 — e2e 충돌 원천 차단).`
+  변경: `**\`validate\`/\`validate:e2e\`/\`npm audit\` 등 실행 금지**(실행 금지는 skill instruction + \`disable-model-invocation\` + 미승인 도구(Bash 등) 권한 프롬프트의 다중 게이트로 보장 — Claude에서 skill의 allowed-tools는 도구를 hard-제한하지 않으므로 "Bash 없음=원천 차단"이라는 단일 근거는 부정확).`
+  (read-only 계약 자체는 유지 — 보장 근거만 정확히.)
+- **정정 (exact) — ADR-054** `docs/90-decisions/boilerplate/ADR-054-cross-llm-stabilize-review.md` 결정 1(:14)의 `**코드·문서·실행 X(Bash 없음 — e2e 충돌 차단).**`를 → `**코드·문서·실행 X(실행 금지는 instruction + \`disable-model-invocation\` + 권한 프롬프트로 보장 — allowed-tools는 hard 제한 아님).**`로 정정(validate-milestone skill↔신설 ADR 동일 근거 정합).
+- **비-정정**: agent의 `tools` 필드는 서브에이전트 도구셋을 실제로 한정하므로(skills `allowed-tools`와 다름) 그 서술은 불변 — 예: designer의 `tools`(Bash 없음=생성 전담)은 유효한 제한.
+
+## 0C-10. Codex 서브에이전트 parity 문구 재프레이밍 (미지원→명시-요청 gated) + ADR-010 Phase 3 갱신
+
+Codex 서브에이전트는 **GA·default-on**이다(learn.chatgpt.com/docs 실측 2026-07: `features.multi_agent`=stable·on-by-default, `.codex/agents/*.toml` 커스텀 에이전트, 병렬 spawn `agents.max_threads` 기본 6). 따라서 보일러플레이트 전역의 "Codex sub-agent/병렬 위임 미지원" 문구는 **stale**다. **단 서브에이전트의 자동 팬아웃 트리거(명시 요청만이냐 vs AGENTS.md/skill 지침 기반이냐)는 버전·설정 의존이라 오프라인 확정 불가** — 보일러플레이트는 인라인/순차 degrade를 *보수적 기본값*으로 유지한다(어느 쪽이든 동작 안전; Stage 5 item 11에서 실측 확인). 정정 대상은 "미지원"이라는 *단정* 문구뿐이다(blocker 아님).
+
+- **(1) degrade 비지원-단정 문구 재프레이밍 — 대상 10개 파일·15곳(작성 시점 grep 실측 — skill 7파일 11곳 + ADR-051 2곳 + .agents wrapper 2파일 2곳)**: 아래 각 파일에서 *비지원을 단정하는 표현*("병렬 위임 미지원", "sub-agent 병렬 parity 부재/없음", "파리티가 없으므로", "sub-agent 병렬 미지원", "병렬 미지원")을 → **"Codex 서브에이전트는 GA이나 명시-요청 시에만 spawn되어 스킬 자동 팬아웃 미대응"** 취지로 바꾸고, **뒤따르는 순차/인라인 degrade 동작 서술(예: "순차 단일 실행으로 degrade", "메인 세션이 직접 …")은 그대로 둔다**. (적용 직전 `grep -rn "병렬.*미지원\|sub-agent 병렬\|병렬 parity\|파리티가 없" .claude .agents docs`로 위치·잔존 재확인.)
+  - `.claude/skills/validate-workitem/SKILL.md` (fan-out 위임 노트 1곳)
+  - `.claude/skills/stabilize-milestone/SKILL.md` (qa·reviewer 팬아웃 노트 2곳)
+  - `.claude/skills/plan-workitem/SKILL.md` (architect sub-call 노트 1곳)
+  - `.claude/skills/plan-milestone/SKILL.md` (R2 위임·R1 판단 2곳)
+  - `.claude/skills/implement-workitem/SKILL.md` (foreman degrade 2곳)
+  - `.claude/skills/repair-milestone/SKILL.md` (cross-cutting·per-task 위임 2곳)
+  - `.claude/skills/bootstrap-stack/SKILL.md` (DEEP R1/R2 위임 노트 1곳)
+  - `docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md` (:24 builder 위임·:31 fan-out — 결정/근거 본문 2곳; ADR-010과 동일하게 in-place 재프레이밍, ADR '결정' 자체는 불변이고 degrade *동작 서술*의 "미지원" 근거만 정정)
+  - `.agents/skills/plan-milestone/SKILL.md` (:12 "Sub-agent parity" 단락 — "Codex는 sub-agent 병렬 parity가 없으므로")
+  - `.agents/skills/repair-milestone/SKILL.md` (:12 "Codex 병렬 미지원" 단락) — ⚠ 이 두 wrapper는 thin pointer가 아니라 *자체 Codex degrade 문구*를 보유하므로(실행 규칙 5의 "본문 자동 반영" 예외) 여기서 명시 정정 대상. 나머지 wrapper(15줄 thin pointer)는 대상 아님.
+  - **예외(그대로 둠)**: `ADR-027#amend-6`·stabilize §3-V·reviewer의 "Codex 이미지 열람 parity 미확인"(멀티모달 판독 — 병렬 위임과 별개·미검증); `docs/00-meta/DELEGATION_STRATEGY.md`의 "sub-agent/병렬 위임 parity는 도구별 다름"(이미 중립 서술)·"/batch Codex 미지원"(별개 기능). 이 3종은 대상 아님.
+- **(2) ADR-010 후속작업 갱신 (exact)** — `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md`:
+  현재(실제 파일은 백틱 인라인코드): 후속 작업의 `Phase 3` 항목 — `.codex/agents/` TOML을 "명시 subagent workflow 자주 쓰게 되면" 도입한다는 줄.
+  변경: `- Phase 3: Codex 서브에이전트는 GA(2026-07 확인 — features.multi_agent stable·on-by-default, .codex/agents/*.toml 커스텀 에이전트, 병렬 agents.max_threads 기본 6). 스킬 흐름 중 자동 팬아웃 배선 여부(트리거 semantics는 버전·설정 의존)는 별도 검토.`
+- **주의**: 본 정정은 *문구*만 바꾼다 — Codex에서 스킬 자동 팬아웃을 실제 배선하는 것은 별도 설계 사안이라 본 라운드 비범위(Stage 5 item 11c에 이월 기록).
+
+## 0C-11. `.claude/settings.json` `defaultMode` 오배치 정정 (top-level → `permissions.defaultMode`)
+
+`.claude/settings.json`의 `defaultMode`가 **top-level 키**로 있는데, Claude Code 공식 스키마는 이를 **`permissions.defaultMode`로 nested** 요구한다(code.claude.com/docs/en/permission-modes 실측 2026-07: 예시가 `{ "permissions": { "defaultMode": "acceptEdits" } }`). → top-level `defaultMode`는 **미인식·무시**되어 의도한 `acceptEdits`가 적용되지 않고 built-in 기본(Manual)로 동작하는 실효 버그.
+
+⚠ **단순 format fix가 아니라 보안 결정이 얽혀 있다**: `acceptEdits`는 파일 편집(Edit/Write)뿐 아니라 **작업 디렉터리 내 `rm`·`mv`·`sed`·`cp`·`mkdir`·`touch`·`rmdir` Bash 명령도 프롬프트 없이 자동 승인**한다(code.claude.com/docs/en/permission-modes 실측). nesting으로 acceptEdits를 *활성화*하면 자동 `rm`이 켜져 `docs/00-meta/GUARDRAILS_STRATEGY.md`(:27 "Bash는 확인" 취지)와 충돌한다 — 지금(무효 상태)이 오히려 더 보수적(Manual)이다. author의 acceptEdits 의도와 GUARDRAILS의 "Bash 확인"이 애초에 상충.
+
+**→ 결정: 옵션 A 확정** (사용자 선택 — acceptEdits 활성화, 편의 우선). 두 편집을 커밋 11에서 **함께** 수행:
+1. **`.claude/settings.json`** — top-level `"defaultMode": "acceptEdits",` 줄을 삭제하고 `"permissions": {`의 첫 키로 옮긴다:
+   ```json
+   {
+     "$schema": "https://json.schemastore.org/claude-code-settings.json",
+     "model": "opus",
+     "permissions": {
+       "defaultMode": "acceptEdits",
+       "deny": [
+         "Read(./.env)",
+         "Read(./.env.*)",
+         "Read(./secrets/**)"
+       ]
+     }
+   }
+   ```
+2. **`docs/00-meta/GUARDRAILS_STRATEGY.md` `defaultMode 위험 tier` 표의 acceptEdits 행 정정 (필수 — docs↔behavior 동기)**:
+   현재: `| \`acceptEdits\` | Write/Edit 자동 수락, Bash·MCP는 confirm | **중간** | **shared 기본값** |`
+   변경: `| \`acceptEdits\` | Write/Edit + 작업 디렉터리 내 \`rm\`/\`mv\`/\`sed\`/\`cp\`/\`mkdir\`/\`touch\`/\`rmdir\` 자동 수락; 범위 밖 경로·protected path·그 외 Bash·MCP는 confirm | **중간** | **shared 기본값** |` (공식 문서상 acceptEdits는 이 파일-조작 Bash 명령도 자동 승인 — 기존 "Bash는 confirm"은 부정확).
+
+- **deny (두 옵션 공통 — 불변 + 선택 강화)**: `Read(./.env)`/`Read(./.env.*)`/`Read(./secrets/**)`는 **그대로 둔다** — 공식 문서상 `Read(./.env)`=`Read(.env)`로 any-depth 차단(nested `packages/app/.env` 포함). 참고: **Read deny는 Edit도 차단(v2.1.208+)하나 Write/NotebookEdit은 미차단** — secret을 어떤 도구로도 못 바꾸게 하려면 `Edit(./.env)`/`Write(./.env)` deny 추가(defense-in-depth, 선택).
+
+## 0C-커밋 (11회 — 파일·논리 단위 분리, AGENTS.md 소단위 커밋)
+
+> **다수 파일이 여러 0C 커밋에 걸쳐 편집된다** — 특히 0C-8(context-pack frontmatter sweep, 23파일)·0C-10(Codex degrade body sweep, 8파일)이 광범위하고, `validate-workitem`·`stabilize-milestone`·`repair-workitem`·`repair-milestone` 등은 0C-2~0C-10 중 여러 커밋에서 *서로 다른 영역*(frontmatter vs body vs 특정 단락)이 편집된다. 실행 규칙 9대로 **각 커밋의 대상 영역만 편집 → 커밋**을 커밋 번호 순서로 반복한다(부분 스테이징 불가). 0C-8·0C-10은 grep 전수 sweep이라 다수 파일을 한 커밋에 담는다.
+
+**커밋 1** — 대상 파일: `.claude/skills/bootstrap-stack/SKILL.md`
+
+```
+fix(bootstrap-stack): correct off-by-2 PROJECT_CHARTER section references (goals/non-goals/success/constraints = §4/5/6/7)
+```
+
+**커밋 2** — 대상 파일: `.claude/skills/stabilize-milestone/SKILL.md`
+
+```
+fix(stabilize): exclude resolved P0s from graduation count so fixed findings stop blocking graduation
+```
+
+**커밋 3** — 대상 파일: `.claude/skills/validate-workitem/SKILL.md` (Stage 0B와 다른 영역 — combined verdict)
+
+```
+fix(validate): treat integration validate exit!=0 as Needs Fix in combined verdict
+```
+
+**커밋 4** — 대상 파일: `.claude/skills/repair-workitem/SKILL.md` (입력 sanitization 영역 — 0C-5의 finding-mode 영역과 다름)
+
+```
+fix(repair-workitem): sanitize task-id before interpolating into rm path
+```
+
+**커밋 5** — 대상 파일: `.claude/skills/stabilize-milestone/SKILL.md`(단계 8 라우팅), `.claude/skills/repair-workitem/SKILL.md`(finding-mode), `.claude/skills/repair-milestone/SKILL.md`(위임 정정)
+
+```
+fix(repair): recover stabilize/QA_FINDINGS findings via repair-milestone and repair-workitem finding-mode
+```
+
+**커밋 6** — 대상 파일: `.claude/skills/finalize-workitem/SKILL.md`
+
+```
+fix(finalize): set status done only after commit-safety checks pass to avoid done-but-uncommitted
+```
+
+**커밋 7** — 대상 파일: `.claude/skills/validate-workitem/SKILL.md` (diff-trace·size gate — 커밋 3의 combined-verdict 영역과 다름)
+
+```
+fix(validate): include untracked files in diff-trace audit and small-diff size gate
+```
+
+**커밋 8** — 대상 파일: `context-pack:` 줄 보유 23파일(`.claude/skills/*/SKILL.md` 21종 + `.claude/agents/architect.md` + `.claude/agents/researcher.md`) + `docs/90-decisions/boilerplate/ADR-019-context-packs-and-jit.md`
+
+```
+fix(frontmatter): remove non-existent context-pack field and correct ADR-019 framing
+```
+
+**커밋 9** — 대상 파일: `.claude/skills/validate-milestone/SKILL.md` + `docs/90-decisions/boilerplate/ADR-054-cross-llm-stabilize-review.md`(0C-9가 :14의 동일 부정확 문구도 정정) (validate-plan/discovery·GUARDRAILS_STRATEGY는 해당 문구 없음, grep 실측)
+
+```
+fix(validate): correct allowed-tools claim (pre-approval, not hard tool restriction)
+```
+
+**커밋 10** — 대상 파일: 0C-10 (1)에 열거된 7개 skill 파일(validate-workitem·stabilize-milestone·plan-workitem·plan-milestone·implement-workitem·repair-milestone·bootstrap-stack) + `.agents/skills/plan-milestone/SKILL.md`·`.agents/skills/repair-milestone/SKILL.md`(자체 degrade 문구) + `docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md`(:24·:31) + `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md`(Phase 3) (DELEGATION_STRATEGY는 중립 서술이라 제외)
+
+```
+docs(codex): reframe Codex subagent notes from unsupported to explicit-request-gated (now GA)
+```
+
+**커밋 11** — 대상 파일: `.claude/settings.json` + `docs/00-meta/GUARDRAILS_STRATEGY.md` (옵션 A 확정 — acceptEdits 활성화 + GUARDRAILS 표 동기)
+
+```
+fix(settings): nest defaultMode under permissions to enable acceptEdits and sync GUARDRAILS bash scope
+```
+
+---
+
 # Stage 1A — researcher 디자인 레퍼런스 모드 (ADR-040 Amendment 4)
 
 목적: 디자인 레퍼런스 리서치가 generic해지는 근본 원인(웹 grounding 경로 부재 + 텍스트 요약 한정)을 해소 — researcher가 실 사이트/오픈소스 디자인 토큰 패키지에서 hex·font·spacing을 **코드 증거**로 추출한다. (2026-07-14 직접 테스트로 검증됨: raw .css URL fetch·오픈소스 토큰 패키지(Primer/Polaris)는 완벽 동작, 일반 HTML 페이지는 markdown 변환으로 stylesheet URL 소실, getdesign.md류는 콘텐츠 게이트라 정성 참고만 가능.)
@@ -299,6 +514,17 @@ feat(validate): record orchestration mode in report and fix small-diff fallback 
 - .claude/agents/researcher.md
 - .claude/skills/bootstrap-design/SKILL.md (R0 위계 배선은 ADR-049#amend-2 — Stage 1C)
 - docs/00-meta/DELEGATION_STRATEGY.md (researcher row 1줄)
+```
+
+**추가 in-place (같은 파일, 같은 커밋)**: 본 amendment로 ADR-040은 amend 4개 누적 — ADR-045 D5 트리거(amend 4+) 해당. `## Status` 바로 아래에 다음을 신설한다:
+
+```markdown
+## 현재 유효 결정
+- researcher agent = 외부 리서치 전담(WebSearch/WebFetch) — **report-only(Write/Edit 없음)** 불변. 리서치 노트 작성은 research-pack skill 책임(결정 2).
+- builder는 직접 웹서핑하지 않는다 — `Needs Research` soft 게이트(#amend-2) → `Agent` 보유 skill(implement foreman·plan-milestone)이 researcher에 자동 위임. Codex는 메인 세션 인라인 degrade.
+- 의존성 3분할: authoring=plan(#amend-1) / 설치 실행=implement(#amend-1) / 검증=stack-guard(#amend-2) — researcher는 설치 권한 없음.
+- 모든 발견에 출처 URL + 발행일 + 공식/1차/2차 신뢰도 라벨(결정 3).
+- 디자인 레퍼런스 모드(#amend-4): 호출 측 명시 시 코드 수준 토큰 추출 — 소스 위계 ①사용자 URL ②오픈소스 토큰 패키지 ③정성 소스, 추출 불가 시 정직 보고·값 통째 복제 금지.
 ```
 
 ## 1A-2. `.claude/agents/researcher.md` — 모드 섹션 추가
@@ -463,7 +689,7 @@ accepted
 - docs/20-system/DESIGN.md (§10)
 ```
 
-**추가 in-place 갱신 (같은 파일)**: ADR-027 상단 `## 현재 유효 결정` 요약의 첫 bullet(`시각 결정은 DESIGN.md(UI 한정, Stitch 8섹션 + Motion 확장)...`)에 `+ Voice & Writing 확장(§10 — ADR-056)`을 반영한다(ADR-045 D5 — amend 4+ ADR의 요약은 net 규칙을 유지해야 함).
+**추가 in-place 갱신 (같은 파일)**: ADR-027 상단 `## 현재 유효 결정` 요약의 첫 bullet(`시각 결정은 DESIGN.md(UI 한정, Stitch 8섹션 + Motion 확장)...`)에 `+ Voice & Writing 확장(§10 — ADR-056)`을 반영한다(ADR-045 D5 — amend 4+ ADR의 요약은 net 규칙을 유지해야 함). **+ 같은 요약의 amendment 열거 bullet**(`… UI 판정 다중신호 절차는 #amend-3. --update는 #amend-4(라운드 구조는 ADR-049).`로 끝나는 줄)에 `#amend-5(§10 Voice 규칙서 — ADR-056)`를 덧붙인다(요약의 amend 열거가 #amend-4에서 멈춰 있으므로 — 요약↔본문 amend 동기, 실행 규칙 10).
 
 ## 1B-4. ADR-042 Amendment 1
 
@@ -495,12 +721,12 @@ FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milesto
 
 - **surface 매핑 줄 동기**: 같은 파일 "호출 surface 명시" 목록의 `` `design`: Design Consistency 4 `` 표기(:63 — 여기는 "차원" 없이 숫자만)를 **5**로 갱신(제목만 바꾸면 본문 카운트와 자기모순).
 - 같은 파일 Plan Quality 9번 [Plan-design] 본문 끝에 한 구절 추가: `/ **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056)`.
-- **validate-plan 미러 동기**: `.claude/skills/validate-plan/SKILL.md`의 검토 차원 9번 [Plan-design] 항목 끝에도 동일 구절(`/ UI task 카피가 DESIGN.md §10 위반·미참조 (ADR-056)`)을 추가한다 — reviewer와 validate-plan은 같은 차원 목록의 미러(한쪽만 고치면 drift).
+- **validate-plan 미러 동기**: `.claude/skills/validate-plan/SKILL.md`의 검토 차원 9번 [Plan-design] 항목 끝에도 동일 구절(`/ UI task 카피가 DESIGN.md §10 위반·미참조 (ADR-056)`)을 추가한다 — reviewer와 validate-plan은 둘 다 9번=[Plan-design] 항목을 가지므로 이 구절만 양쪽에 추가한다(두 목록의 본문 상세도는 원래 다름 — 이 구절만 동기화하고 전체 재작성은 비범위).
 
 ## 1B-7. `.claude/agents/validator.md` — UI 체크 1줄
 
 "- UI: 본 task 가 새 컴포넌트를 추가했는가? ..." bullet 끝에 문장 추가:
-`task 의 use-case 화면 문구가 DESIGN.md §10 Voice & Writing(존댓말 규정·용어 번역표·예시 카피)과 정합한가 — placeholder 카피(`lorem ipsum` 등) 발견 시 `P1 [Design-voice]` 기록 (ADR-056).`
+`task 의 use-case 화면 문구가 DESIGN.md §10 Voice & Writing(존댓말 규정·용어 번역표·예시 카피)과 정합한가 — placeholder 카피(`lorem ipsum` 등, grep 가능 결정분) 발견 시 `P1 [Design-voice-grep]`, 존댓말 혼용·용어 노출 등 문맥 위반(LLM 판정분)은 `P1 [Design-voice]` 기록 (ADR-056 — 라벨 taxonomy는 stabilize preflight 5-2b·reviewer와 정합: grep 결정분=`[Design-voice-grep]`, 문맥=`[Design-voice]`).`
 
 ## 1B-8. `.claude/skills/stabilize-milestone/SKILL.md` — preflight 5-2b 신설
 
@@ -553,7 +779,6 @@ tools: Read, Glob, Grep, Write, Edit
 model: opus
 maxTurns: 16
 color: purple
-context-pack: minimal
 ---
 
 너는 시각/UX 디자인 전담 에이전트다. **생성(authoring) 전담** — 감사·비평은 reviewer(design surface)의 책임이다(같은 페르소나가 만들고 검사하지 않는다).
@@ -574,7 +799,7 @@ context-pack: minimal
 - 사실/가정/열린 질문을 구분한다. 레퍼런스 근거 없는 결정은 [가설]로 표시.
 - 산출 HTML은 자기완결(빌드·외부 의존 0, CSS 인라인 `<style>`) + GENERATED 헤더 주석.
 
-Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 인라인 수행한다(DELEGATION_STRATEGY researcher 행의 인라인 degrade 패턴과 동일).
+Codex: 서브에이전트는 GA이나, 스킬 흐름 중 자동 위임(팬아웃) 대응 여부는 버전·설정 의존이라 불확정 — 보수적으로 메인 세션이 본 파일을 읽고 인라인 수행한다(DELEGATION_STRATEGY researcher 행의 degrade 패턴과 동일).
 
 ## 출력 계약 (ADR-046)
 메인 반환 요약은 signal-first: 판정/결론 1~3줄 → 핵심 항목 ≤5 → 리스크·미결정 ≤3 → 다음 액션 1개(분기 시 ≤3).
@@ -593,8 +818,8 @@ Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 �
 
 ### 결정
 1. **designer agent 신설 — #amend-1 "designer 페르소나 미신설"의 명시적 반전**. 근거가 바뀌었다: [관측됨] 실사용 fork에서 시각 어휘 없는 architect 위임 + 다양성 규율 부재로 시안 품질·다양성이 부족했다. `.claude/agents/designer.md`(생성 전담 — 감사(비평)는 reviewer[design] 유지, 생성/감사 분리). R0/R1 분해·R2 시안 authoring·R5(ADR-056) 프로토타입 authoring의 수행 주체를 architect → designer로 교체.
-2. **R0 grounding 소스 위계 5단** (#d28·#amend-1 강화): ① 사용자 제공 URL/스크린샷(스크린샷은 메인 세션이 Read로 vision 분해) → ② researcher *디자인 레퍼런스 모드*(ADR-040#amend-4)로 코드 수준 토큰 추출(웹 가용 시 기본 — 오픈소스 디자인 토큰 패키지 포함) → ③ 연결된 디자인 MCP(ADR-048 access 부여 시) → ④ 정성 소스(디자인 요약 사이트 — 어휘 보조) → ⑤ 모델 지식. **⑤로 떨어지기 전 사용자 확인 게이트 1회**("레퍼런스 0개 — URL을 주시겠어요, 아니면 모델 지식으로 진행할까요?") — 구 "기록 후 진행"을 "확인 후 진행"으로 강화. DESIGN_RESEARCH.md에 레퍼런스별 `### 추출 토큰 (코드)` fenced block 추가.
-3. **R2 divergence 카드**: 각 concept에 {배타적 레퍼런스 borrow 축, 전용 안티-레퍼런스 1개, 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 카드는 DESIGN_RESEARCH.md `## 시안 옵션`에 기록.
+2. **R0 grounding 소스 위계 5단** (#d28·#amend-1 강화): ① 사용자 제공 URL/스크린샷(스크린샷은 메인 세션이 Read로 vision 분해) → ② researcher *디자인 레퍼런스 모드*(ADR-040#amend-4)로 코드 수준 토큰 추출(웹 가용 시 기본 — 오픈소스 디자인 토큰 패키지 포함) → ③ 연결된 디자인 MCP(ADR-048 access 부여 시) → ④ 정성 소스(디자인 요약 사이트 — 어휘 보조) → ⑤ 모델 지식. **⑤로 떨어지기 전 사용자 확인 게이트 1회**("레퍼런스 0개 — URL을 주시겠어요, 아니면 모델 지식으로 진행할까요?") — 구 "기록 후 진행"을 "확인 후 진행"으로 강화. DESIGN_RESEARCH.md에 레퍼런스별 `#### 추출 토큰 (코드)` 소절 추가(h4 — 리스트 스키마 보존).
+3. **R2 divergence 카드**: 각 concept에 {배타적 레퍼런스 borrow 축, 전용 안티-레퍼런스 1개, 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정(R0 레퍼런스 수가 concept 수보다 적으면 borrow 축은 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션) 배타 배정으로 대체 — 산술 불충족 방지). 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 카드는 DESIGN_RESEARCH.md `## 시안 옵션`에 기록.
 4. **R2-1.5 구별성 비평(순차 1회)**: 생성 직후 **reviewer(design surface) 단발 sub-call**(입력 = divergence 카드 + concept별 토큰 요약 — HTML 전문 금지)로 ① concept 간 실질 구별성 ② 안티-레퍼런스/`## 9` Don'ts 근접도만 판정. **designer 자기 비평 금지**(결정 1의 생성/감사 분리 정합). **합의·병합·순위·추천 금지** — 출력은 "재생성 필요 concept 목록"만(선택은 R2-2 사용자).
 5. **취향 오라클 명문화**: R2-2에 "에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자 질문 시 예외)" 1줄. 전량 거부 시 divergence 카드부터 재설계(기존 2사이클 수렴 규칙과 결합).
 6. **실카피 의무 배선**(ADR-056): R1에 voice 기본값 확인 1회, R2/R6 대표 화면 실카피 렌더, R5에서 §10 authoring.
@@ -610,7 +835,7 @@ Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 �
 
 ### 적용 surface
 - .claude/agents/designer.md (신설)
-- .claude/skills/bootstrap-design/SKILL.md (R0~R2·--fast)
+- .claude/skills/bootstrap-design/SKILL.md (헤더·R0~R2·R5·R6·--fast)
 - docs/00-meta/STRUCTURE.md (agent 로스터 7→8종)
 - docs/00-meta/DELEGATION_STRATEGY.md (designer 위임 행)
 ```
@@ -650,7 +875,7 @@ Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 �
 **(4) R2-1** — 목록에 추가 (기존 "각 concept은 *방향이 분명히 다르게*" bullet을 아래로 교체):
 
 ```markdown
-- **divergence 카드 (ADR-049#amend-2)**: 각 concept에 {① 배타적 레퍼런스 borrow 축(R0 레퍼런스 중 concept별 배정 — 공유 금지), ② 전용 안티-레퍼런스 1개, ③ 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 카드를 기록한다. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 단 모든 concept이 R0 안티-레퍼런스와 `## 9` Don'ts는 공통 회피.
+- **divergence 카드 (ADR-049#amend-2)**: 각 concept에 {① 배타적 레퍼런스 borrow 축(R0 레퍼런스 중 concept별 배정 — 공유 금지; 레퍼런스 수 < concept 수면 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션)을 배타 배정), ② 전용 안티-레퍼런스 1개, ③ 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 카드를 기록한다. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 단 모든 concept이 R0 안티-레퍼런스와 `## 9` Don'ts는 공통 회피.
 - concept HTML authoring은 **designer 단발 sub-call**로 위임한다(HTML 전문이 메인 컨텍스트에 쌓이지 않게 — 파일 적재 + 경로 반환).
 - **실카피 렌더 (ADR-056)**: 대표 화면 문구는 charter 페르소나·시나리오 기반 실제 문구(placeholder 금지). §10 확정 전이므로 "방향 선택용 후보 카피"임을 GENERATED 헤더에 1줄 명시.
 ```
@@ -671,6 +896,10 @@ Codex: 서브에이전트 미지원 시 메인 세션이 본 파일을 읽고 �
 변경: `` `--fast`: R0(위계 ①·⑤만 — 사용자 URL 있으면 사용, 없으면 확인 게이트 후 모델 지식 + minimal 노트) + R1(원칙 1줄 + voice 기본값 확인 1회) + R3(토큰) + R5(저장 — 축약 섹션, §10 포함). ``
 
 **(8) R5** — 목록에 1줄 추가: `- `## 10 Voice & Writing`을 R1 확인 결과(기본값 채택/변경)로 확정 저장한다 (ADR-056).`
+
+**(9) R6** — preview 렌더 지시 목록에 1줄 추가: `- 대표 화면 preview는 실카피(`## 10` 준수)로 렌더한다 (ADR-056 결정 9 / ADR-049#amend-2 결정 6).`
+
+**(10) DESIGN.md 상태 승격 — "UI 확정" 도달 가능화 (ADR-027#amend-3 전제 / ADR-056 hard gate 활성 조건)**: **R5(DESIGN.md 저장) 완료 시** `docs/20-system/DESIGN.md` `## 0. Status`를 `draft` → **`living`**(DESIGN.md는 Living Doc — ADR-027#amend-3의 "status≠draft(예: accepted/living)" 중 Living-doc에 맞는 값; workitem lifecycle의 ready/done과는 별개 vocabulary)으로 갱신한다. **R5는 정식·`--fast` 경로 모두 수행하므로 두 경로 다 승격된다**(R6는 preview 확인·정리 단계라 `--fast`가 건너뛰어도 무방 — 승격을 R6에 두면 --fast 프로젝트가 draft로 남는 결함 보정). 근거: [관측됨] 현행 bootstrap-design 본문에 status 승격이 0건이라 완성된 DESIGN.md도 `draft`로 남는다 → (a) ADR-027#amend-3 "UI 확정"(=DESIGN.md 존재 ∧ status≠draft)이 정상 흐름으로 **도달 불가**라, plan-workitem 입구 계약(ADR-056 결정 3 / ADR-007#amend-5)이 항상 "UI 의심(경고만)"에 머물러 hard-block이 발동하지 못한다, (b) stabilize §5-1 `P1 [Design-draft]` 경고가 bootstrap-design 완료 *후에도* 영구 재발한다. 두 잠재 결함을 status 승격 1줄이 동시에 해소한다. 비-UI 삭제 경로는 불변(§10과 함께 파일 삭제). (ADR-056은 Stage 1B에서 이미 존재; ADR-007#amend-5는 Stage 2 예고 참조 — 실행 규칙 8.)
 
 ## 1C-4. `docs/00-meta/STRUCTURE.md` — agent 로스터 7→8종
 
@@ -734,6 +963,8 @@ stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **�
 - .claude/agents/reviewer.md
 ```
 
+**추가 in-place 갱신 (같은 파일 — 실행 규칙 10)**: ADR-027 `## 현재 유효 결정` 요약의 amendment 열거 bullet 끝(1B-3에서 `#amend-5`까지 확장된 상태)에 `#amend-6(design reviewer 렌더 증거 주입)`을 덧붙인다(요약↔본문 amend 열거 동기 — 2-2가 amend-6을 추가하므로).
+
 ## 2-3. `.claude/skills/plan-milestone/SKILL.md` — R5 라운드 신설 + `--prototype`
 
 **(1) frontmatter** — `argument-hint`를 `"[milestone idea | feature idea] [--prototype [F-NNN]]"`으로 갱신. `allowed-tools`에 `Bash(rm docs/20-system/prototypes/*/_drafts/*.html)` 추가(탐색 시안 정리용).
@@ -753,7 +984,7 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
   2. **못생긴 상태 5종** — 같은 파일 내 섹션으로 나란히: 긴 제목 / 빈 목록 / 로딩 / 에러 / 항목 과다
   3. 실카피 — DESIGN.md `## 10` Voice & Writing 준수, placeholder 금지 (ADR-056 결정 9)
   4. 인터랙션 캡션 — "이 버튼을 누르면 <무엇이 일어난다>"를 각 인터랙션 요소에 명시(정적 HTML의 '눌렀을 때' 계약)
-  5. `:root` 토큰만 참조 — 자기완결을 위해 DESIGN.md 토큰의 `:root` 정의 블록은 파일 내 포함하고, 정의 밖 스타일 규칙은 `var(--…)`만 사용 (DESIGN.md 파생임이 구조로 드러나게)
+  5. `:root` 토큰만 참조 — 자기완결을 위해 DESIGN.md 토큰의 `:root` 정의 블록은 파일 내 포함하고, 정의 밖 스타일 규칙의 **토큰 대상 값**(색·타이포·spacing·radius·shadow)은 `var(--…)`만 사용 — 레이아웃 등 비토큰 속성은 무관 (DESIGN.md 파생임이 구조로 드러나게)
   *확정하지 않는 것*(명시): 상태관리·fetch·컴포넌트 분리 등 엔지니어링 내부 — ARCH §7-4 영역.
 - **R5-5 승인·저장**: 사용자 승인 시 최종본을 **화면 단위**로 `docs/20-system/prototypes/M<N>/<screen>.html`에 저장한다(**커밋 대상** — Record; 재승인 시 같은 파일 대체. 화면-키인 이유: 한 화면은 여러 feature 표면의 합성 — ADR-056 결정 1). 저장 직전 **raw hex 정규식 1회 grep — `:root` 정의 블록은 검사 제외**(자기완결 파일이라 정의값 hex는 정상, 검사 대상은 정의 밖 사용처. 발견 시 토큰으로 수정 후 저장 — 상시 grep 제외(결정 7)의 승인-시점 보완). 각 feature 문서 `## 7`에 `프로토타입: [화면 파일](상대경로) (진입: <라우트/상태 진입 메모>)` 참조 줄을 기입한다(그 feature가 등장하는 화면 파일마다 1줄 — §3-V가 이 진입 메모로 화면을 찾는다). `_drafts/` 내 시안 파일을 삭제한다(빈 디렉터리 잔존 무해). 승인 전에는 종료 출력으로 진행하지 않는다.
 
@@ -785,7 +1016,7 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
 
 ```markdown
 3-V. **경험 게이트 — 구현 화면 vs 승인 프로토타입 대조 (ADR-056 결정 5, UI 확정 마일스톤 한정)**: 3-P(옵션·MCP-gated *탐색* QA)와 별개의 **MCP 불요 체계 감사**다. **UI 확정 마일스톤에서 실행 자체는 의무 — silent skip 금지**(미실행 시 사유를 단계 8 출력에 echo; 판정은 report-only). `--dry-run`에는 포함하지 않는다.
-   - (a) 앱 기동(dev server) — **기동 명령은 `docs/00-meta/STACK_SETUP_PLAN.md`의 기록·`package.json` scripts(`dev`/`start`)에서 회수**(불명·실패면 blocked-on-env 라벨: §3-b 환경 실패 처리와 동형 — 사용자 환경 복구 안내 + 미실행 사유 echo). 본 마일스톤 핵심 화면(승인 프로토타입 보유 화면, ≤6~8개, 기본 뷰포트 1종)을 Playwright CLI로 스크린샷 → `docs/40-validation/visual/M-N/`에 저장(gitignore ephemeral). **각 화면의 진입 라우트·상태는 feature 문서 `프로토타입:` 참조 줄의 진입 메모에서 회수**.
+   - (a) 앱 기동(dev server) — **기동 명령은 `docs/00-meta/STACK_SETUP_PLAN.md`의 기록·`package.json` scripts(`dev`/`start`)에서 회수**(불명·실패면 blocked-on-env 라벨: §3-b 환경 실패 처리와 동형 — 사용자 환경 복구 안내 + 미실행 사유 echo). 본 마일스톤 핵심 화면(승인 프로토타입 보유 화면, ≤6~8개, 기본 뷰포트 1종)을 Playwright CLI로 스크린샷 → `docs/40-validation/visual/M-N/`에 저장(gitignore ephemeral). **각 화면의 진입 라우트·상태는 feature 문서 `프로토타입:` 참조 줄의 진입 메모에서 회수**. **촬영 전 readiness 확인(포트 응답 대기) 후 촬영하고, 완료 후 본 단계가 기동한 dev server를 종료한다**(기동 시 PID 회수 → 촬영 후 kill; 프로세스 누수·포트 잔류 방지. 3-P 등이 이미 서버를 띄운 상태면 재기동 대신 재사용 — "본 단계가 처음 기동" 가정 금지).
    - (b) 각 스크린샷을 Read(멀티모달)로 열람해 대조. **앵커 위계**: ① `docs/20-system/prototypes/M<N>/<screen>.html`(커밋된 승인본 — 존재 시. 같은 뷰포트로 `file://` 렌더-캡처해 나란히 대조 가능) ② 부재·면제 화면은 DESIGN.md §2 토큰/§7 컴포넌트/§9 Don'ts/§10 voice 파생 체크리스트로 fallback. 대조 관점: 레이아웃·상태(빈/에러 표현)·카피·토큰 준수 — 픽셀 일치가 아니라 *경험 계약 준수*(best-effort — 최종 확인은 사용자 육안).
    - (c) 불일치는 QA_FINDINGS에 `P1 [Experience-drift] <화면> — <불일치 1줄> (앵커: 프로토타입|DESIGN 파생)` report-only 기록(졸업 차단 X — item 6 채택 시만 차단). 판독 자체가 불확실하면 finding 대신 "판독 불확실" 명시.
    - (d) 최종 출력(단계 8)에 갤러리 경로 + "사용자 육안 확인 권장(스펙 자체의 오류는 사람이 잡는다)" 1줄.
@@ -796,16 +1027,16 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
 현재(5-2): `**DESIGN.md 자체 파일은 grep 대상 *제외*** (token 정의 영역이라 false positive 회피).`
 변경: `**DESIGN.md 자체 파일과 `docs/20-system/prototypes/` 하위는 grep 대상 *제외*** (token 정의 영역·자기완결 프로토타입 — false positive 회피, ADR-056 결정 7).`
 
-**(3) design reviewer 렌더 증거 주입** — 단계 5의 "UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃" 문장 뒤에 추가:
+**(3) design reviewer 렌더 증거 주입** — 단계 5에서 "UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃 …"으로 시작하는 **문장 전체의 끝**(그 문장은 "… `## 9. Do's and Don'ts` 위반 의심 grep 결과를 입력으로 받아 비판적 검토."로 끝남 — ⚠ "팬아웃"은 문장 중간이므로 그 바로 뒤가 아니라 *문장 끝*에 이어 붙일 것)에 추가:
 `design reviewer 입력에는 grep 결과에 더해 **렌더 증거**를 주입한다 — §3-V 갤러리 경로(`docs/40-validation/visual/M-N/`) + visual-qa.spec 최근 결과(존재 시). reviewer는 Read로 이미지를 열람한다(ADR-027#amend-6). Codex: 경로 echo + 텍스트 결과만 전달로 degrade.`
 
 **(4) 단계 8 출력** — 목록에 항목 추가: `- (UI) 경험 게이트 결과: [Experience-drift] N건 + 스크린샷 갤러리 경로 (사용자 육안 확인 권장) — 미실행 시 사유 필수 echo (silent skip 금지)`
 
-**(5) 단계 8 instruction improvement 후보 문단 보강 (ADR-056 결정 12)** — "instruction improvement 후보:" 항목 끝에 1줄 추가: `**경험·사용 관점 교훈(제품을 실제로 써 본 결과에서 나온 것) 유무를 별도로 확인**한다 — 교훈이 검증-정교화 방향으로만 쌓이는 편향 방지([관측됨] 실사용에서 경험 축 교훈 0건).`
+**(5) 단계 8 instruction improvement 후보 문단 보강 (ADR-056 결정 12)** — "instruction improvement 후보:" 항목의 문단 본문 끝(`*AGENTS.md / agent / skill body는 자동 수정 X — 보고만*.` 문장 뒤, 그 아래 `- DESIGN.md / ARCH 7-x …` sub-bullet 앞)에 문단 본문과 같은 들여쓰기로 1줄 추가: `**경험·사용 관점 교훈(제품을 실제로 써 본 결과에서 나온 것) 유무를 별도로 확인**한다 — 교훈이 검증-정교화 방향으로만 쌓이는 편향 방지([관측됨] 실사용에서 경험 축 교훈 0건).`
 
 ## 2-6. `.claude/agents/builder.md` — 경험 좁힘 비대칭 1줄
 
-"**AC ambiguity 하드스탑 (ADR-006#amend-2)**" bullet의 `(사소한 표현 차이는 제외)` 설명 뒤에 문장 추가:
+"**AC ambiguity 하드스탑 (ADR-006#amend-2)**" bullet **끝**(`implement는 집행 전용 — 해석 결정은 plan 책임.` 뒤)에 문장 추가 — ⚠ `(사소한 표현 차이는 제외)`는 *문장 중간*이라 그 바로 뒤에 붙이면 원문 문장이 깨진다(bullet 끝에 append할 것):
 `**단, slice에 승인 프로토타입 참조(경험 계약 — ADR-056)가 있으면 *사용자가 보고 느낄 것(보이는 것·눌렀을 때·문안)의 차이는 "사소한 표현 차이"로 분류하지 않는다*** — 프로토타입과 다르게 해석될 여지가 있으면 `Needs Plan Decision`으로 멈춘다(silent narrowing 차단).`
 
 ## 2-7. `.claude/agents/reviewer.md` — design surface 렌더 증거 1줄
@@ -906,10 +1137,10 @@ accepted
    - **멱등(재개 안전)**: 분해가 *완결된* feature는 skip하고 이어간다 — 배치 세션이 중간에 끊겨도 재실행이 안전하다. skip 판정은 task 문서 존재만이 아니라 완결 기준(전 task `## 6` AC 존재 + feature `## 7-1` 매핑 완성)으로 한다 — 부분 생성 feature를 통째로 skip하면 task가 유실된다.
    - **사이즈 가드**: feature 5+ 마일스톤은 배치를 2회로 분할 실행 권장(컨텍스트 소진으로 인한 부분 완료가 최빈 실패 모드).
    - 기존 `/plan-workitem F-NNN`(단일 feature full 분해)은 그대로 유지(마일스톤 중간 feature 추가 등).
-3. **`--refresh F-NNN`**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 재접지(JIT read)하고 draft 마커를 제거한다. 협상·AC 재작성 없음(경량). repair 이력(`## 8. 메모`)과 승인 프로토타입 갱신을 반영.
+3. **`--refresh F-NNN`**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 재접지(JIT read)하고 draft 마커를 제거한다. 협상·AC 재작성 없음(경량). repair 이력(`## 8. 메모`)과 승인 프로토타입 갱신을 반영. + 재접지로 write 대상·2차-write·전이가 배치 추정과 달라지면 그 feature 관련 seam(§7-2 invariant) 유효성을 재점검하고 무효 의심 시 surface(자동 수정 X — 결정 9의 배치 draft 사각 보정).
 4. **`Needs Plan Refresh` 하드스탑**: `/implement-workitem`은 task `## 3`에 draft 마커가 있으면 dispatch 전에 종료하고 `--refresh`를 안내한다(`Needs Plan Decision` 동형). refresh를 잊어도 stale 가이드로 구현하는 사고가 원천 차단된다.
 5. **feature-완료 체크포인트**: `/finalize-workitem`이 status 갱신 후 sibling task를 회수해 해당 feature의 전 task가 done이면 출력에 Feature-완료 블록을 추가 — (a) FAC closure 요약(feature `## 7-1`의 각 매핑 AC가 최신 validation report에서 ✅인지; report 부재는 "확인 불가" degrade), (b) 다음 단계 제안(남은 미-refresh feature의 `--refresh`, 또는 `/stabilize-milestone M-N --feature F-NNN`). 텍스트 제안만 — disable-model-invocation 정책 불변.
-6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만, graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056)를 해당 feature 화면·시나리오 한정. QA_FINDINGS는 기존 `### P0/P1/P2` severity 스키마를 유지하고 각 항목 문두에 `(F-NNN)` scope 태그만 붙인다(별도 `### F-NNN` 헤더 금지 — graduation P0 카운트·repair-milestone 회수가 severity 섹션 스키마를 소비). read-only·실행 single-origin(ADR-054) 불변.
+6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만(**해당 feature `## 7-1` 한정** — 뒤 feature FAC 미포함), task-done 점검은 해당 feature 한정(뒤 feature 미완료로 종료 금지), graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056)를 해당 feature 화면·시나리오 한정(qa 결과는 6-S self-synthesis로 QA_FINDINGS에 종합 — reviewer(5)·6·6.5·7·7-T는 skip). QA_FINDINGS는 기존 `### P0/P1/P2` severity 스키마를 유지하고 각 항목 문두에 `(F-NNN)` scope 태그만 붙인다(별도 `### F-NNN` 헤더 금지 — graduation P0 카운트·repair-milestone 회수가 severity 섹션 스키마를 소비). read-only·실행 single-origin(ADR-054) 불변.
 7. **plan-workitem 조망 echo**: 단일 feature 모드 출력에 "같은 milestone의 미분해 feature 목록"을 1줄 echo.
 
 ## 결정 — B. Cross-task seam 계약 (8~14)
@@ -1008,13 +1239,14 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 5. **마지막 출력 "다음 단계"** — 분기 옵션 갱신:
 현재: `- 스택이 이미 brief/charter 에 명시됐고 /bootstrap-stack + /stack-guard 도 끝났다면: /plan-workitem F-001 — seed된 첫 feature(F-001)의 task 분해` / `- UI 프로젝트 + 스택 확정 후: /bootstrap-design 다음 /plan-workitem F-001`
 변경: `- 스택이 이미 brief/charter 에 명시됐고 /bootstrap-stack + /stack-guard 도 끝났다면: /plan-milestone — 첫 마일스톤(M1)과 feature 문서를 라운드 협상으로 생성 (ADR-057)` / `- UI 프로젝트 + 스택 확정 후: /bootstrap-design 다음 /plan-milestone`
+5-1. **같은 "다음 단계"의 도입부 SSOT 순서 문자열 정정 (위 분기 옵션과 *다른 줄* — orphan)**: `다음 단계 (… PROJECT_START_CHECKLIST 의 /bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-workitem 순서가 SSOT)` 도입부의 순서 문자열에서 `/bootstrap-design(UI) → /plan-workitem` 부분을 `/bootstrap-design(UI) → /plan-milestone → /plan-workitem`으로 정정한다. (M1-seed 제거 후 이 줄이 /plan-milestone을 빠뜨리면 — 자신이 "SSOT"로 인용한 PROJECT_START_CHECKLIST(3-11이 /plan-milestone 삽입)와 모순 + bootstrap-design→plan-workitem 라우팅이 feature 부재로 실패. seed/F-001/M2+ 토큰이 없어 Stage 5 grep이 못 잡는 orphan이므로 여기서 명시 정정.)
 6. **`output-checklist.md` (같은 skill 디렉터리)**: 기대 산출물 목록의 `docs/30-workitems/milestones/M1-foundation.md`·`docs/30-workitems/features/F-001-core-value.md` 두 줄을 삭제하고 그 자리에 `- (milestone/feature 문서는 /plan-milestone이 생성 — ADR-057)` 참고 1줄을 둔다(안 고치면 체크리스트가 skill이 더 이상 만들지 않는 산출물을 요구).
 7. **`examples/career-saas-example.md` (같은 skill 디렉터리)**: 예시 산출물의 `M1-foundation.md 생성`·`F-001-core-value.md 생성` 두 줄을 `- (이후 /plan-milestone이 M1-foundation.md·F-001-core-value.md 생성 — ADR-057)` 한 줄로 교체.
 
 ## 3-4. `.claude/skills/plan-milestone/SKILL.md` — "모든 마일스톤" 전환 + R2 seam 1줄
 
 1. **frontmatter description**: `Run a multi-round main-session conversation to author the next milestone(s) (M2+) and their feature docs. Additive — does not re-seed M1; ...` → `Run a multi-round main-session conversation to author milestone(s) (M1 included — ADR-057) and their feature docs. Additive — never overwrites existing milestones; hand off to /plan-workitem for tasks.`
-2. **도입부 :10-11**: `\`/bootstrap-project\`가 seed한 초기 M1/F-001 *이후*의 마일스톤을 다룬다` 문장을 → `**첫 마일스톤(M1) 포함 모든 마일스톤**을 다룬다(ADR-057 결정 1 — bootstrap-project는 charter/ARCH까지, 마일스톤 생성은 본 skill 단일 경로). **additive 모드**(기존 마일스톤을 재생성·덮어쓰기 하지 않는다)`로 교체. **같은 도입부 첫 문장(:10)의 `*다음* 마일스톤(M2+)과 그 feature 문서를 작성하는`도 `마일스톤(M1 포함)과 그 feature 문서를 작성하는`으로 정정**(잔재 "M2+" 프레이밍 제거).
+2. **도입부 :10-11**: `\`/bootstrap-project\`가 seed한 초기 M1/F-001 *이후*의 마일스톤을 다룬다 — **additive 모드**(기존 M1을 재생성·덮어쓰기 하지 않는다).` 구간 **전체**를 → `**첫 마일스톤(M1) 포함 모든 마일스톤**을 다룬다(ADR-057 결정 1 — bootstrap-project는 charter/ARCH까지, 마일스톤 생성은 본 skill 단일 경로). **additive 모드**(기존 마일스톤을 재생성·덮어쓰기 하지 않는다).`로 교체(⚠ 인용을 "다룬다"까지만 잡으면 뒤의 구 additive 절이 남아 같은 절이 2번 연속됨 — :11의 "기존 마일스톤에 *새 feature만* 추가하는 경우도..." 이후 문장은 보존). **같은 도입부 첫 문장(:10)의 `*다음* 마일스톤(M2+)과 그 feature 문서를 작성하는`도 `마일스톤(M1 포함)과 그 feature 문서를 작성하는`으로 정정**(잔재 "M2+" 프레이밍 제거).
 3. **R0**: 현재 `직전 마일스톤 부재(첫 호출 — M1만 존재)면 R0를 건너뛰고 회고 carry-over는 "없음"으로 표시.` → `직전 마일스톤 부재(첫 호출 — 마일스톤 0개, M1 생성 회차)면 R0를 건너뛰고 회고 carry-over는 "없음"으로 표시.`
 4. **R2** — architect 위임 문장 뒤에 추가: `architect 지시에 포함: "feature 경계를 가로지르는 상태 전이·2차-write·멱등 seam 후보가 보이면 각 feature 후보의 시나리오 메모와 ARCH §4-1(상태 모델) 기록 권장을 결론에 포함하라" (ADR-057 결정 13 — 라운드 신설 X).`
 5. **R3**: `\`<N>\`은 기존 마일스톤 다음 번호(additive — M1 보존)` → `\`<N>\`은 기존 마일스톤 다음 번호(첫 호출이면 M1 — additive, 기존 보존)`.
@@ -1025,8 +1257,10 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 
 ## 3-5. `.claude/skills/plan-workitem/SKILL.md` — 배치 모드 + `--refresh` + 조망 echo + seam self-check
 
-1. **frontmatter**: `argument-hint: "[feature id]"` → `argument-hint: "[feature id | milestone id] [--refresh]"`. description 끝에 ` M<N> 입력 시 마일스톤 배치 분해(2-tier — ADR-057).` 추가.
-2. **입력 단락** — 기존 feature-id 설명과 Stage 2가 넣은 "경험 계약 입구 점검" 항목 **뒤에** 추가(삽입 순서 고정 — 같은 앵커에 두 Stage가 삽입):
+> ⚠ 이 파일은 커밋 2·3에 걸친다(실행 규칙 9). 아래 각 항목의 **(커밋 N)** 태그대로 나눠 편집·커밋한다 — 항목 1·2와 항목 4의 앞 두 bullet = **커밋 2**(배치·refresh·echo), 항목 3과 항목 4의 `seam:` bullet = **커밋 3**(seam self-check). TASK_TEMPLATE(3-9)와 동일 방식.
+
+1. **(커밋 2)** **frontmatter**: `argument-hint: "[feature id]"` → `argument-hint: "[feature id | milestone id] [--refresh]"`. description 끝에 ` M<N> 입력 시 마일스톤 배치 분해(2-tier — ADR-057).` 추가.
+2. **(커밋 2)** **입력 단락** — 먼저 기존 첫 bullet(:13)의 `분해 대상 feature ID(예: \`F-001\`)가 들어온다`를 `분해 대상 feature ID(예: \`F-001\`) **또는 milestone ID(\`M<N>\` — 배치 모드)**가 들어온다`로 정정한다("feature 문서 부재 시 /plan-milestone 안내 후 종료" 규칙은 *feature ID 입력*에만 적용 — M<N> 입력이 이 종료 조건에 걸리지 않게 명확화). 그다음 기존 feature-id 설명과 Stage 2가 넣은 "경험 계약 입구 점검" 항목 **뒤에** 추가(삽입 순서 고정 — 같은 앵커에 두 Stage가 삽입):
 
 ```markdown
 - **`M<N>` 입력 — 마일스톤 배치 분해 모드 (ADR-057 결정 2)**: 본 마일스톤 `## 3. 포함되는 기능`의 모든 feature를 한 세션에서 분해한다.
@@ -1035,9 +1269,10 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
   - **멱등**: 분해 완결 feature(전 task에 `## 6` AC 존재 + `## 7-1` 매핑 완성)는 skip, 부분 생성 feature는 이어서 완성 — 배치 재실행 안전. **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
   - 경험 계약 입구 점검은 마일스톤 내 *모든 UI 확정 feature*에 대해 1회 일괄 수행 — 하나라도 미충족이면 그 feature만 보류 목록으로 출력하고 나머지는 진행(전체 차단 X — ADR-056 결정 3의 배치 단서).
 - **`F-NNN --refresh` — 가이드 재접지 모드 (ADR-057 결정 3)**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 3-G 재작성하고 draft 마커를 제거한다. AC·범위·매핑은 손대지 않는다(변경이 필요해 보이면 "남은 미결정 사항"에 surface — 자동 수정 X). `## 8. 메모`의 repair 이력과 승인 프로토타입 갱신(`--prototype` 재승인)을 반영 입력으로 읽는다.
+  - **seam 재점검 (경량 — ADR-057 결정 9)**: `## 3` 재접지 결과 실제 write 대상·2차-write·상태 전이가 배치 시점 추정과 달라지면, 그 feature 관련 `## 7-2` invariant가 여전히 유효한지 확인하고 무효 의심 시 "남은 미결정 사항"에 surface한다(자동 수정 X). *배치 분해 시점엔 `## 3`가 draft라 구현 세부에서만 드러나는 cross-task seam을 못 볼 수 있으므로, --refresh가 그 seam의 마지막 재점검 지점이다.*
 ```
 
-3. **seam self-check 단락** — "## 정합성 self-check" 섹션 안(Task type prefilter 앞)에 추가:
+3. **(커밋 3)** **seam self-check 단락** — "## 정합성 self-check" 섹션 안(Task type prefilter 앞)에 추가:
 
 ```markdown
 ### Cross-task seam self-check (신호 게이트 — ADR-057 결정 8~10)
@@ -1049,7 +1284,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 - Codex: architect sub-call은 순차 단일 실행 degrade(기존 규약).
 ```
 
-4. **마지막 출력** — 목록에 항목 추가:
+4. **마지막 출력** — 목록에 항목 추가(**앞 두 줄=커밋 2, 세 번째 `seam:` 줄=커밋 3**):
 `- (단일 feature 모드) 같은 milestone의 미분해 feature 목록 — 다음 \`/plan-workitem\` 대상 (ADR-057 결정 7)` / `- (배치 모드) feature별 ## 3 상태 요약: full N개 / draft M개 (draft는 구현 직전 --refresh)` / `- seam: INV N건 / unmapped K건 (또는 "신호 미발화 — skip")`
 
 ## 3-6. `.claude/skills/implement-workitem/SKILL.md` — `Needs Plan Refresh` 하드스탑
@@ -1065,7 +1300,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 "마지막 출력" 목록 앞에 수행 항목 추가:
 
 ```markdown
-9. **feature-완료 감지 (ADR-057 결정 5)**: step 4에서 done으로 갱신한 각 task의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아님) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
+9. **feature-완료 감지 (ADR-057 결정 5)**: 직전 단계에서 status를 `done`으로 갱신한 각 task(⚠ 0C-6이 status=done을 커밋 안전검사 뒤로 옮겼으므로 옛 "step 4" 번호에 의존하지 말 것)의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아님) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
    - FAC closure 요약: feature `## 7-1` 매핑표의 각 `T-NNN:AC-N`이 `docs/40-validation/reports/<task-id>.md`에서 ✅인지 (report 부재 task는 "확인 불가 — report checkout-local" degrade).
    - 다음 단계 제안(텍스트만): 미-refresh feature 있으면 `/plan-workitem F-next --refresh`, FAC 시나리오 통합 확인 원하면 `/stabilize-milestone M-N --feature F-NNN`, 마일스톤 마지막 feature면 `/stabilize-milestone M-N`.
    - Feature 링크 부재 시 "feature 소속 불명 — task `## 7` 링크 보강 권장" 1줄만.
@@ -1078,13 +1313,17 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 **(2) 입력 단락**에 추가:
 
 ```markdown
-- `--feature F-NNN` 플래그(ADR-057 결정 6): **feature 스코프 점검** — §1.0 preflight는 항목 3(FAC unmapped)만, §1.5 graduation pre-check는 skip(**졸업 판정은 milestone 전용** — 출력에 "본 실행은 졸업 판정이 아님"을 명시), 단계 3 validate 1회 + 3-P/3-V(ADR-056)/단계 4 qa fan-out을 해당 feature의 화면·시나리오 한정, 단계 5(reviewer)·6·6.5·7-T는 skip. **milestone 문서 `## 8. 회고` 자동 채움도 skip**(회고는 milestone 전체 stabilize 전용 — 중간 상태 덮어쓰기 방지). QA_FINDINGS 기록은 기존 스키마 유지 — `## M-N` 아래 `### P0/P1/P2` 섹션에 적되 각 항목 문두에 `(F-NNN)` scope 태그를 붙인다(**별도 `### F-NNN` 헤더 금지** — graduation의 "`### P0` 섹션 항목 수" 카운트와 repair-milestone 회수가 severity 섹션 스키마를 소비한다). read-only·실행 single-origin(ADR-054) 불변.
+- `--feature F-NNN` 플래그(ADR-057 결정 6): **feature 스코프 점검** — §1.0 preflight는 항목 3(FAC unmapped)만 — **그 항목도 해당 feature의 `## 7-1`으로 한정**(뒤 feature의 unmapped FAC를 P0로 올리지 않는다 — 스코프 일탈 방지), **단계 2(task status 점검)는 해당 feature의 task만 대상**(뒤 feature의 미완료 task 명단으로 종료하지 않는다 — 마일스톤 중간 실행이 본 플래그의 존재 이유), §1.5 graduation pre-check는 skip(**졸업 판정은 milestone 전용** — 출력에 "본 실행은 졸업 판정이 아님"을 명시), 단계 3 validate 1회 + 3-P/3-V(ADR-056)/단계 4 qa fan-out을 해당 feature의 화면·시나리오 한정(**단, 3-V의 screen-keyed 프로토타입 대조는 composite 화면(여러 feature 합성)에서 그 feature가 소유한 영역만 판정 — 미구현 sibling feature 영역은 "부분 구현 — 판정 보류"로 처리해 false `[Experience-drift]`를 억제**). **skip 단계는 실제 헤딩 기준으로 단계 5(reviewer)·6(ADR 후보 제안)·6.5(staleness)·7(ARCH 3-1 권장)·7-T(telemetry)**. **단, 단계 4 qa fan-out을 실행하므로 그 결과 기록을 위해 6-S(self-synthesis)는 수행하되 qa 축만 종합**한다(reviewer(5)를 skip하므로 IMPROVEMENT_GUIDE의 reviewer 기록분은 없고 QA_FINDINGS만 갱신 — qa fan-out 결과가 미종합으로 유실되지 않게). **milestone 문서 `## 8. 회고` 자동 채움도 skip**(회고는 milestone 전체 stabilize 전용 — 중간 상태 덮어쓰기 방지). QA_FINDINGS 기록은 기존 스키마 유지 — `## M-N` 아래 `### P0/P1/P2` 섹션에 적되 각 항목 문두에 `(F-NNN)` scope 태그를 붙인다(**별도 `### F-NNN` 헤더 금지** — graduation의 "`### P0` 섹션 항목 수" 카운트와 repair-milestone 회수가 severity 섹션 스키마를 소비한다). read-only·실행 single-origin(ADR-054) 불변.
 ```
+
+**(3) 단계 8 "다음 단계" 기본 권장 배치 전환** —
+현재(:203): `기본 권장: \`/plan-milestone\` — 다음 milestone(M-(N+1)) + feature 문서 생성 (이후 각 feature를 \`/plan-workitem F-NNN\`로 task 분해)`
+변경: `기본 권장: \`/plan-milestone\` — 다음 milestone(M-(N+1)) + feature 문서 생성 (이후 \`/plan-workitem M-(N+1)\` 배치 분해 — 단일 feature는 \`F-NNN\`, ADR-057)` (3-4 항목 7과 쌍둥이 문장 — 한쪽만 바꾸면 기본 권장이 skill마다 다름).
 
 ## 3-9. 템플릿 3곳 + ARCH §4-1
 
 **`docs/30-workitems/_templates/TASK_TEMPLATE.md`** — ⚠ 본 파일은 커밋 2·3에 걸치므로 **두 번에 나눠 편집**한다(실행 규칙 9):
-- **(커밋 2에서)** `## 3` 주석 끝에 추가: `배치 분해(ADR-057)된 뒤 feature의 task는 본 섹션이 의도 수준 초안 + 본문 첫 줄 HTML 주석 마커 "<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->"일 수 있다 — implement는 draft 마커에서 Needs Plan Refresh로 정지한다(ADR-026#amend-3).`
+- **(커밋 2에서)** `## 3` 주석(기존 단일 HTML 주석) 끝에 추가: `배치 분해(ADR-057)된 뒤 feature의 task는 본 섹션이 의도 수준 초안 + 본문 첫 줄 draft 마커 HTML 주석일 수 있다(정확한 마커 문자열은 plan-workitem SKILL 배치 모드 단락이 SSOT) — implement는 draft 마커에서 Needs Plan Refresh로 정지한다(ADR-026#amend-3).` ⚠ **템플릿 주석 안에 마커 리터럴을 원문으로 넣지 않는다** — `-->`가 포함돼 기존 주석을 조기 종료시키고(HTML 주석은 중첩 불가), grep 문자열 `## 3 상태: draft` 원문이 템플릿에 있으면 주석을 유지한 채 생성된 task에서 implement 하드스탑이 오탐된다.
 - **(커밋 3에서)** `## 3` 주석 끝에 추가: `단계가 feature ## 7-2의 invariant를 집행하면 끝에 (INV-N) 태그를 붙일 수 있다 (ADR-057).`
 - **(커밋 3에서)** `## 7. 관련 문서` 목록의 Feature 줄 뒤에 추가: `- Feature-invariants: <!-- feature ## 7-2가 채워진 경우만. 예: [F-001 ## 7-2](../features/F-001-core-value.md). 비해당 시 줄 삭제. 정책: ADR-057. -->`
 
@@ -1127,6 +1366,10 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 - 카운트 표에 `| Plan-seam | 0 | 0 | 0 |` 행 추가(Plan-arch-iface 행 뒤).
 - milestone-plan mode 게이팅 단락에 `[Plan-seam]은 task 0건이면 비활성` 1줄 추가.
 
+**`docs/00-meta/DELEGATION_STRATEGY.md`** — (커밋 3에서 — 본 파일은 커밋 1(3-11)에서도 편집되므로 실행 규칙 9대로 커밋별로 나눠 편집) 위임 표의 `reviewer (plan surface, Plan Quality 10 차원)` → `11 차원`으로 갱신(:37의 `Discovery Quality 8 차원`은 그대로 — reviewer/validate-plan만 올리면 이 governance 문서가 "10"으로 남아 자기모순).
+
+**`docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md`** — :120의 `... reviewer.md \`Plan Quality 10 차원\` 단락 SSOT` 포인터는 본 rename으로 섹션명이 바뀌어 stale해진다(by-name 참조). → `reviewer.md의 Plan Quality 차원 단락(ADR-057로 11차원) SSOT`로 **count-agnostic 갱신**(향후 재-sync 불요). ⚠ **:52·:100의 `Plan Quality 10 차원 (ADR-027#amend-1)` / `Plan Quality 10(#amend-1)`과 ADR-027:98의 `8 → 10 차원`, ADR-027:114 Surfaces 주석의 `#amend-1 Plan Quality 10`은 *amend-1이 10으로 만든 이력 서술*이라 보존한다**(11로 고치면 "amend-1이 11로 만들었다"는 거짓 이력이 됨). 어떤 preflight도 텍스트 카운트 drift를 못 잡으므로 본 정정이 유일 방어.
+
 **`.claude/agents/validator.md`** — 인터페이스 CHECK 목록(FAC 매핑 bullet 앞)에 추가:
 `- seam (feature \`## 7-2\` 존재 시): 본 task 구현이 관련 INV-N을 위반하는가(예: 상태 역방향 write, 멱등 미보장, 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 \`P1 [Seam] INV-N — <증상>\` (ADR-057 결정 12).`
 
@@ -1139,6 +1382,12 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 **`docs/00-meta/WORKFLOW.md`**:
 - §3 첫 항목 앞에 추가: `- 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).`
 - §3의 **"실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다." 항목** 바로 뒤에 추가(2-11이 목록 끝에 넣은 UI 항목과 혼동 금지): `배치 분해는 \`/plan-workitem M<N>\`(2-tier + --refresh — ADR-057), 단일 feature는 \`/plan-workitem F-NNN\`.`
+- §2의 R0~R6 설명 줄 끝 `concept/preview 시안을 삭제하고 \`/plan-workitem\`으로 진행 권장`을 → `concept/preview 시안을 삭제하고 \`/plan-milestone\`으로 진행 권장(첫 마일스톤·feature 생성 — ADR-057; 이미 분해된 feature가 있으면 \`/plan-workitem\`)`으로 갱신(1B-10이 같은 줄의 R1·R2 구간을 먼저 편집함 — 본 편집은 줄 끝부분이라 충돌 없음).
+
+**`.claude/skills/bootstrap-design/SKILL.md`** — 다음 단계 안내 2곳 갱신(M1 seed 제거 후 이 시점엔 feature가 아직 없을 수 있음):
+- :177 `승인 전에는 R6-3(정리)과 \`/plan-workitem\` 권장을 수행하지 않는다`와 :195 `다음 권장 단계: **사용자가 시안을 승인한 뒤** \`/plan-workitem\` (또는 \`/implement-workitem\`)`의 `/plan-workitem`을 → `/plan-milestone`(마일스톤·feature 미생성 시 — ADR-057; 이미 분해된 feature가 있으면 `/plan-workitem`)으로 갱신.
+
+**`.claude/skills/stack-guard/SKILL.md`** — :90 `다음 권장 단계 (\`/plan-workitem\` 또는 \`/implement-workitem\`)`를 → `다음 권장 단계 (\`/plan-milestone\` — 첫 마일스톤 미생성 시(ADR-057); 이미 분해된 workitem이 있으면 \`/plan-workitem\`/\`/implement-workitem\`)`로 갱신.
 
 **`docs/00-meta/DELEGATION_STRATEGY.md`** — "스킬 실행 순서 가이드":
 - 1번: `\`/bootstrap-project\` → charter + architecture + 초기 workitem 생성` → `\`/bootstrap-project\` → charter + architecture + ADR-100 (workitem 생성 X — ADR-057)`
@@ -1161,8 +1410,10 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 - "In short" 소개문의 `get charter, architecture, and initial workitems in one shot` → `get charter and architecture in one shot, then /plan-milestone creates milestones/features`(한국어판 대응 문구 동일).
 - **Overall Flow 다이어그램**: `→ /bootstrap-design (...) → /plan-workitem` 구간을 `→ /bootstrap-design (...) → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)`로 교체.
 - discover-product 설명 문장의 `which /bootstrap-project then converts into charter/architecture/initial workitems` → `... into charter/architecture`(initial workitems 삭제).
-- Quick Start 단계·Codex 예시 줄의 `$plan-workitem F-001` → `$plan-workitem M1`.
-- 마무리로 `grep -n "initial workitem\|초기 workitem" README.md README_ko.md` 실행해 잔존 0건 확인(README_ko.md는 :8·:33에서 "초기 workitem"을 쓴다 — 영문 패턴만으로는 못 잡는다).
+- **Quick Start Step 3 "# Plan" 코드블록 재구성 (README:80-82) + Codex 예시 줄 갱신**: (a) Step 3 코드블록은 현재 `/plan-workitem [feature id]` 한 줄뿐이라 M1 seed 제거 후엔 마일스톤·feature가 없어 실패한다 — `# Plan` 주석 아래를 **`/plan-milestone [milestone idea]`**(첫 마일스톤·feature 생성; +UI면 R5 프로토타입 라운드) 줄 + **`/plan-workitem M1`**(배치 분해; 단일은 `F-NNN`) 줄 2개로 교체(README_ko.md 동일 위치). (b) Codex 예시 목록(README:113)의 `$plan-workitem F-001` → `$plan-workitem M1`(목록에 `$plan-milestone`은 이미 존재).
+- Generates/생성 결과 줄(README:61·README_ko:60)의 `initial milestone/feature documents` / `초기 milestone/feature 문서`를 목록에서 삭제(더 이상 bootstrap 산출물이 아님).
+- Plan 주석 줄(README:81·README_ko:80)의 `M2+ milestone/feature authoring = /plan-milestone` / `M2+ milestone/feature 생성은 /plan-milestone`을 → `milestone/feature authoring = /plan-milestone (M1 포함)` / `milestone/feature 생성은 /plan-milestone (M1 포함)`으로 갱신("M2+" 잔재 제거).
+- 마무리로 `grep -n "initial workitem\|초기 workitem\|initial milestone\|초기 milestone\|M2+" README.md README_ko.md` 실행해 잔존 0건 확인(README_ko.md는 한글 표현("초기 workitem" 등)을 써서 영문 패턴만으로는 못 잡는다).
 
 **`docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`** — §15 Insight Backlog 주석의 `plan-workitem이 feature/task 생성 시 본 ID를 연결한다` → `plan-milestone(feature)·plan-workitem(task)이 생성 시 본 ID를 연결한다`(구 lifecycle 잔재 정정 — [관측됨] ADR-051 refocus 이후 낡은 서술).
 
@@ -1172,7 +1423,7 @@ D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되
 
 ## 3-커밋 (3회)
 
-**커밋 1** — ADR + 생성 통일 (대상: `docs/90-decisions/boilerplate/ADR-057-*.md`, `ADR-007-*.md`, `ADR-051-*.md`, `.claude/skills/bootstrap-project/SKILL.md`, `.claude/skills/bootstrap-project/output-checklist.md`, `.claude/skills/bootstrap-project/examples/career-saas-example.md`, `.claude/skills/plan-milestone/SKILL.md`, `docs/00-meta/{WORKFLOW,DELEGATION_STRATEGY,PROJECT_START_CHECKLIST,STRUCTURE}.md`, `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`(3-11 §15 정정), `README.md`, `README_ko.md`, `docs/90-decisions/boilerplate/README.md`):
+**커밋 1** — ADR + 생성 통일 (대상: `docs/90-decisions/boilerplate/ADR-057-*.md`, `ADR-007-*.md`, `ADR-051-*.md`, `.claude/skills/bootstrap-project/SKILL.md`, `.claude/skills/bootstrap-project/output-checklist.md`, `.claude/skills/bootstrap-project/examples/career-saas-example.md`, `.claude/skills/plan-milestone/SKILL.md`, `.claude/skills/bootstrap-design/SKILL.md`(3-11 다음 단계), `.claude/skills/stack-guard/SKILL.md`(3-11 다음 단계), `docs/00-meta/{WORKFLOW,DELEGATION_STRATEGY,PROJECT_START_CHECKLIST,STRUCTURE}.md`, `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md`(3-11 §15 정정), `README.md`, `README_ko.md`, `docs/90-decisions/boilerplate/README.md`):
 
 ```
 feat(planning): unify all milestone creation under plan-milestone, drop bootstrap M1 seeding (ADR-057)
@@ -1184,7 +1435,7 @@ feat(planning): unify all milestone creation under plan-milestone, drop bootstra
 feat(planning): milestone batch decomposition with draft/refresh gate and feature checkpoint (ADR-057)
 ```
 
-**커밋 3** — seam 계약 (대상: `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`, `docs/30-workitems/_templates/TASK_TEMPLATE.md`(INV 태그·##7 줄), `.claude/skills/plan-workitem/SKILL.md`(seam self-check), `docs/20-system/ARCHITECTURE_OVERVIEW.md`, `.claude/agents/reviewer.md`, `.claude/skills/validate-plan/SKILL.md`, `.claude/agents/validator.md`, `.claude/skills/validate-workitem/SKILL.md`, `.claude/skills/repair-plan/SKILL.md`):
+**커밋 3** — seam 계약 (대상: `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`, `docs/30-workitems/_templates/TASK_TEMPLATE.md`(INV 태그·##7 줄), `.claude/skills/plan-workitem/SKILL.md`(seam self-check), `docs/20-system/ARCHITECTURE_OVERVIEW.md`, `.claude/agents/reviewer.md`, `.claude/skills/validate-plan/SKILL.md`, `.claude/agents/validator.md`, `.claude/skills/validate-workitem/SKILL.md`, `.claude/skills/repair-plan/SKILL.md`, `docs/00-meta/DELEGATION_STRATEGY.md`(3-10 카운트), `docs/90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md`(3-10 :120 포인터 count-agnostic)):
 
 ```
 feat(planning): signal-gated cross-task seam contract with invariant table and review axes (ADR-057)
@@ -1218,10 +1469,10 @@ feat(planning): signal-gated cross-task seam contract with invariant table and r
 | stabilize/validator의 ADR 후보 | IMPROVEMENT_GUIDE `P2 [ADR-candidate]` 영속 → **다음 `/plan-milestone` R0가 회수**, 사용자 채택 시 architect sub-call로 ADR-1NN 작성 + 인덱스 등재 | 다음 plan 라운드 |
 | MCP 연결 등 수동 결정 | 사용자 수동 | 현행 |
 
-2. **`[ADR-candidate]` 라벨 규약**: stabilize step 6은 후보를 IMPROVEMENT_GUIDE **항목 스키마(필수 4필드 `ID | severity | evidence | linked workitem` — 본문 `## 항목 스키마` SSOT)** 로 영속한다. 형식(2줄 — 4필드 헤더 + 하위 라벨 줄):
+2. **`[ADR-candidate]` 라벨 규약**: stabilize step 6은 후보를 IMPROVEMENT_GUIDE **항목 스키마(필수 4필드 `ID | severity | evidence label | linked workitem` — 본문 `## 항목 스키마` SSOT)** 로 영속한다. 형식(2줄 — 4필드 헤더 + 하위 라벨 줄):
    `- **M<N>-adrc-<K>** | P2 | [관측됨] | linked: M-N | status: open`
    `  - [ADR-candidate] <결정 한 줄> — 회수: 다음 /plan-milestone R0`
-라벨 기록 전 _ADR_GUIDE의 ADR 대상 기준(되돌리기 어려움/대안 2+/큰 범위) self-check(남발 방지). **후보 ≠ 자동 작성** — 채택은 plan 라운드에서 사용자 결정. **validator의 "ADR 후보 표시"는 별도 영속 채널을 만들지 않는다** — 후보 표시는 P1 finding(`[Arch-iface-7-N]` 등)에 실려 repair-workitem이 task `## 8. 메모`로 영속하는 기존 경로를 타며, *P2-only 후보의 report 소멸은 수용 잔여 gap*으로 명시한다(배경 (b)의 부분 해소 — 완전 봉합 아님).
+라벨 기록 전 _ADR_GUIDE의 ADR 대상 기준(되돌리기 어려움/대안 2+/큰 범위) self-check(남발 방지). **후보 ≠ 자동 작성** — 채택은 plan 라운드에서 사용자 결정. **validator의 "ADR 후보 표시"는 별도 영속 채널을 만들지 않는다** — 후보 표시는 P1 finding(`[Arch-iface-7-N]` 등)에 실려 repair-workitem이 task `## 8. 메모`로 영속하는 기존 경로를 타며, *P2-only 후보의 report 소멸은 수용 잔여 gap*으로 명시한다(배경 (b)의 부분 해소 — 완전 봉합 아님). **회수·처리 후 해당 후보 항목 status를 갱신한다(채택→resolved / 기각→rejected) — 미갱신 시 다음 R0가 이미 처리된 후보를 재surface해 중복 ADR을 낳는다.**
 3. **ADR-053 ④ "(해당 시) ADR" 판정 기준** (ADR-053#amend-1 동반): ARCH §7 결정 블록으로 부족한 경우 = 비-스택 프로세스/제품 범위/보안 결정, boilerplate ADR supersede, 여러 마일스톤에 걸친 재검토 트리거가 필요한 결정.
 4. **품질 계약**: 작성 주체는 _ADR_GUIDE 권장 섹션을 self-check(필독 로드). preflight는 참조 유효성만 유지(본문 품질 heuristic 신설 X — `/review-doc` on-demand 재사용, YAGNI).
 
@@ -1270,8 +1521,8 @@ feat(planning): signal-gated cross-task seam contract with invariant table and r
 
 ## 4-4. `.claude/skills/plan-milestone/SKILL.md` — R0 회수
 
-R0의 IMPROVEMENT_GUIDE 회수 문장 끝에 추가:
-`\`[ADR-candidate]\` 라벨 항목은 별도로 surface하고, 사용자가 채택하면 **R3 진입 전에 architect 단발 sub-call로 \`docs/90-decisions/project/ADR-1NN-<slug>.md\` 초안(proposed) 작성 + project 인덱스 등재**까지 수행한다(ADR-000#amend-2 — 기각 시 IMPROVEMENT_GUIDE status만 갱신 제안).`
+R0에서 IMPROVEMENT_GUIDE/QA_FINDINGS open 항목을 회수하는 문장(`… 부채 후보로 surface(자동 편입 X — 사용자 결정).`으로 끝나는 줄 — R0의 여러 IMPROVEMENT_GUIDE 언급 중 이 회수 문장) 끝에 추가:
+`\`[ADR-candidate]\` 라벨 항목은 별도로 surface하고, 사용자가 채택하면 **R3 진입 전에 architect 단발 sub-call로 \`docs/90-decisions/project/ADR-1NN-<slug>.md\` 초안(proposed) 작성 + project 인덱스 등재 + 해당 후보 항목 status를 open → resolved(adopted: ADR-1NN)로 갱신**까지 수행한다(ADR-000#amend-2 — 미갱신 시 다음 R0가 이미 채택된 후보를 재surface해 중복 ADR 위험). 기각 시에도 IMPROVEMENT_GUIDE 후보 status를 open → rejected로 갱신한다.`
 
 ## 4-5. 메타 문서 4곳
 
@@ -1322,11 +1573,12 @@ feat(governance): ADR authoring trigger table and candidate recovery loop (ADR-0
 1. **Skill 로스터**: `.claude/skills/` 디렉터리 목록(21종 — 이번 라운드에 skill 신설 없음) ↔ `docs/00-meta/STRUCTURE.md`의 "Claude skill 본문" 행 괄호 목록 일치 확인.
 2. **Agent 로스터**: `.claude/agents/` 8종(designer 포함) ↔ STRUCTURE.md "Claude sub-agent" 행 ↔ DELEGATION_STRATEGY 위임 표에 designer 행 존재.
 3. **Codex wrapper 집합**: `.agents/skills/` 16종 ↔ README.md/README_ko.md wrapper 목록 16종 ↔ 자연어 목록 5종. 검증식: `(.claude/skills 집합) − (.agents/skills 집합) == README 자연어 목록`.
-4. **ADR 인덱스**: `docs/90-decisions/boilerplate/README.md`에 **056·057 신규 2행** 존재 + 이번에 amend된 ADR(000/007/010/026/027/040/042/044/049/051/053/054) 행의 Amendments 컬럼이 본문 `## Amendment N` 수와 일치 + **ADR-007에 `## 현재 유효 결정` 요약 신설·ADR-027 요약에 §10 반영 확인**(ADR-045 D5 — Stage 2·1B 지시) + **ADR-010 요약 wrapper bullet이 #amend-4와 모순 없는지(Stage 0A 정정 2)·ADR-044/054에 `## 현재 유효 결정` 존재·ADR-049 요약에 designer 주체 bullet 존재 확인**(Stage 0A·1C 지시).
+4. **ADR 인덱스**: `docs/90-decisions/boilerplate/README.md`에 **056·057 신규 2행** 존재 + 이번에 amend된 ADR(000/007/010/026/027/040/042/044/049/051/053/054) 행의 Amendments 컬럼이 본문 `## Amendment N` 수와 일치 + **ADR-007에 `## 현재 유효 결정` 요약 신설·ADR-027 요약에 §10 반영 확인**(ADR-045 D5 — Stage 2·1B 지시) + **ADR-010 요약 wrapper bullet이 #amend-4와 모순 없는지(Stage 0A 정정 2)·ADR-044/054에 `## 현재 유효 결정` 존재·ADR-049 요약에 designer 주체 bullet 존재·ADR-040에 `## 현재 유효 결정` 존재 확인**(Stage 0A·1A·1C 지시) + **Plan Quality 11 카운트가 reviewer.md·validate-plan·DELEGATION_STRATEGY 3곳에서 일치 + ADR-038:120 by-name 포인터가 rename과 동기(count-agnostic 또는 "11") 확인**(Stage 3-10; ADR-038:52/:100·ADR-027:98·:114의 "8→10"/"amend-1 10"은 이력이라 보존 — 카운트 drift는 어떤 preflight도 못 잡으니 육안 확인).
 5. **anchor 유효성**: 새로 인용된 anchor들이 실재하는지 grep — `adr-000-amend-2`, `adr-007-amend-5`, `adr-010-amend-4`, `adr-026-amend-3`, `adr-027-amend-5`, `adr-027-amend-6`, `adr-040-amend-4`, `adr-042-amend-1`, `adr-044-amend-1`, `adr-049-amend-2`, `adr-051-amend-2`, `adr-051-amend-3`, `adr-053-amend-1`, `adr-054-amend-1`.
 6. **깨진 참조 스캔** (2단계 — 자기 산출물 오탐 방지):
-   - **(a) 무조건 0건**: `grep -rn "ADR-058\|ADR-059\|ADR-060\|ADR-061" .claude .agents docs README.md README_ko.md` — 이번 라운드에서 만들지 않는 번호라 어디에도 등장하면 안 됨. 그리고 `grep -n "initial workitem\|초기 workitem\|seed된 첫 feature" README.md README_ko.md .claude/skills/bootstrap-project/SKILL.md` — 구체제 서술 잔존 0건.
-   - **(b) 허용 문맥 대조**: `grep -rn "plan-workitem F-001\|M1/F-001" .claude .agents docs README.md README_ko.md`의 hit는 다음 **whitelist만** 허용 — ① *제거를 서술하는* ADR/amend 텍스트(ADR-057 배경·결정 1, ADR-051#amend-3, ADR-007 표의 "seed는 ADR-057로 제거" 구절, ADR-007 `## 현재 유효 결정`), ② PROJECT_START_CHECKLIST의 `/plan-workitem F-001` *단일 모드 예시*, ③ validate-plan/repair-plan의 ID *형식 예시*. 그 외 hit(특히 "다음 단계" 권장·흐름 서술)는 잔존 결함 — 수정.
+   - **(a) 무조건 0건**: `grep -rn "ADR-058\|ADR-059\|ADR-060\|ADR-061" .claude .agents docs README.md README_ko.md` — 이번 라운드에서 만들지 않는 번호라 어디에도 등장하면 안 됨. 그리고 `grep -rn "initial workitem\|초기 workitem\|initial milestone\|초기 milestone\|seed된 첫 feature" .claude docs README.md README_ko.md` — 구체제 서술 잔존 0건(**3-11 interim grep보다 넓게**: `initial/초기 milestone`까지 + README뿐 아니라 전 surface 대상 — 최종 게이트가 interim보다 약하지 않게). 추가로 `grep -rn "M2+" .claude docs README.md README_ko.md`의 hit는 **ADR-051 D4·#amend-3의 구 범위 서술 문맥만 허용** — 그 외 "다음 단계" 권장·흐름·소개 산문에 남으면 잔존 결함(수정).
+   - **(b) 허용 문맥 대조**: `grep -rn "plan-workitem F-001\|M1/F-001" .claude .agents docs README.md README_ko.md`의 hit는 다음 **whitelist만** 허용 — ① *제거를 서술하는* ADR/amend 텍스트(ADR-057 배경·결정 1, ADR-051#amend-3, ADR-007 표의 "seed는 ADR-057로 제거" 구절, ADR-007 `## 현재 유효 결정`), ② PROJECT_START_CHECKLIST의 `/plan-workitem F-001` *단일 모드 예시*. 그 외 hit(특히 "다음 단계" 권장·흐름 서술)는 잔존 결함 — 수정.
+   - **(c) 0C sweep 완결 확인 (전부 grep 0건이어야 함)**: `grep -rn "^context-pack:" .claude/skills .claude/agents`(0C-8 — 23파일 전부 제거됐는지) · `grep -rn "병렬.*미지원\|파리티가 없\|병렬 parity" .claude .agents docs`(0C-10 — 10파일: skill 7 + .agents wrapper 2 + ADR-051 전부 재프레이밍됐는지) · `grep -rn "Bash 없음 — e2e 충돌" .claude docs`(0C-9 — validate-milestone SKILL + ADR-054 둘 다). 잔존 hit는 해당 0C 항목이 그 파일을 놓친 것 → 보정.
 7. **gitignore 정합**: `docs/20-system/prototypes/*/_drafts/`·`docs/40-validation/visual/`은 ignore, `docs/20-system/prototypes/M*/<screen>.html`(예: `M1/home.html` — `_drafts/` 제외 화면 파일)은 ignore되지 않음을 `git check-ignore`로 확인.
 8. **링크 체크**: `markdown-link-check`가 설치돼 있으면 docs/ 내부 링크 점검(외부 URL 제외 — stabilize preflight 1과 동일 방식). 미설치면 skip.
 9. 발견된 불일치를 수정하고 커밋:
@@ -1336,7 +1588,7 @@ chore(docs): cross-surface sync for 2026-07 improvement round
 ```
 
 10. **ADR-017 dogfood 재실행 (적용 후 필수 — 별도 세션)**: 본 라운드는 ADR-017의 재실행 트리거 3종(새 ADR 도입·lifecycle 단계 변경·skill 본문 큰 변경)에 **전부 해당**한다 — 적용 완료 후 `.boilerplate/validation/SIMULATION_RUN.md`에 새 라운드를 추가하는 dogfood 시뮬레이션(fresh-fork 기준: UI 마일스톤 1개로 R5 프로토타입 라운드 → 배치 분해 → §3-V 경험 게이트 → Codex에서 `$validate-milestone` 발견까지 관통)을 수행/스케줄한다. Stage 5의 정적 검사는 이를 대체하지 않는다.
-11. **적용 후 사용자 확인 항목 (수동)**: (a) Codex 세션에서 `$validate-milestone`이 자동완성에 뜨는지 실측(ADR-010 관례 — 실측 검증은 사용자 수행), (b) 다음 실전 fork에서 R5 프로토타입 라운드·배치 분해의 체감 시간을 기록해 ADR-056/057 Falsifying evaluation 입력으로 남길 것, (c) **Codex 최신 버전의 native sub-agent(`.codex/agents/*.toml`) 지원 여부를 확인**해 ADR-010 D6(Phase 3 보류) 재평가 입력으로 기록 — 지원이 실측되면 designer/researcher 위임의 Codex 인라인 degrade를 native 위임으로 승격하는 별도 라운드 후보.
+11. **적용 후 사용자 확인 항목 (수동)**: (a) Codex 세션에서 `$validate-milestone`이 자동완성에 뜨는지 실측(ADR-010 관례 — 실측 검증은 사용자 수행), (b) 다음 실전 fork에서 R5 프로토타입 라운드·배치 분해의 체감 시간을 기록해 ADR-056/057 Falsifying evaluation 입력으로 남길 것, (c) **[사실 확인 완료 2026-07 — 공식 문서]** Codex 서브에이전트는 이미 GA/default-on이다(learn.chatgpt.com/docs: `features.multi_agent`=stable·on-by-default; `.codex/agents/*.toml` 커스텀 에이전트; 병렬 spawn `agents.max_threads` 기본 6). **단 스킬이 흐름 중 자동으로 팬아웃하는지(명시 요청만이냐 vs AGENTS.md/skill 지침 기반이냐)는 버전·설정 의존이라 오프라인 확정 불가** — 따라서 보일러플레이트의 "Codex 병렬 위임 미지원 → 인라인 degrade"는 *동작 자체는 여전히 안전*(자동 팬아웃을 전제하지 않는 보수적 기본값)하나 *근거 문구("미지원")는 stale*다. → ADR-010 D6(Phase 3)·DELEGATION_STRATEGY·각 skill/ADR의 Codex degrade 문구를 "미지원"에서 "명시-요청 gated(스킬 자동 팬아웃 미대응)"로 재프레이밍하고 native 위임 승격 여부를 검토하는 것은 **별도 Codex-parity 라운드로 이월**(본 라운드 비범위 — 동작은 안전하므로 blocker 아님).
 
 ---
 
