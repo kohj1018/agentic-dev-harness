@@ -41,7 +41,7 @@ context-pack: minimal
 수행:
 1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 처리한다.
 2. **라우팅 — finding의 scope에 따라 처리 주체가 다르다**:
-   - **per-task 결함** (특정 `T-NNN`에 귀속되는 코드/AC 결함): 직접 고치지 말고 `/repair-workitem <T-NNN> "<finding 요약>"`로 위임한다. report 부재면 먼저 `/validate-workitem <T-NNN>` 선행을 안내. (Codex: 병렬 미지원 시 task별로 순차 단일 실행.)
+   - **per-task 결함** (특정 `T-NNN`에 귀속되는 코드/AC 결함): 직접 고치지 말고 `/repair-workitem <T-NNN> "<finding 요약>"`로 위임한다(repair-workitem이 finding-mode로 report Pass·부재여도 그 finding을 수정 — validate 선행 불요). 위임 반영 후 해당 finding의 QA_FINDINGS/IMPROVEMENT_GUIDE status는 수행 5(원본 finding status 갱신)에서 resolved로 닫는다. (Codex: 병렬 미지원 시 task별로 순차 단일 실행.)
    - **cross-cutting 결함** (단일 task에 귀속되지 않는 milestone-level 결함): 본 skill이 **직접 수정**한다. 대표 3종:
      - **doc-consistency P0** (예: deterministic preflight가 올린 `[Doc-link]`/`[ADR-ref]`/`[Spec-gap]`/`[Arch-iface-violation]`): 해당 문서·매핑표를 직접 수정.
      - **e2e wiring scaffold/install** (E2E 미정의 스택에 재현 케이스를 영속 테스트로 묶는 scaffold, `validate:e2e` 배선, 의존성 install): 직접 scaffold·install.

@@ -205,7 +205,7 @@ Telemetry — M1
        - 프롬프트 동봉 권장: 본 라운드 Telemetry 의 신뢰도 분포 + Cross-stabilize 회귀 신호 (다음 milestone 의 우선순위 조정 입력)
      - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
        - **milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: `/repair-milestone M-N` 권장** (ADR-052) — 단일 task로 격리되지 않는 회귀·교차 결함과 실제 e2e 수정은 milestone 단위 repair로 라우팅. stabilize가 read-only로 남기 위한 코드 수정 경로다.
-       - 단일 task로 격리되는 회귀·엣지케이스 (QA_FINDINGS P0): `/repair-workitem T-NNN` 으로 해당 task 수정 → 재 validate
+       - QA_FINDINGS 발견(P0/P1)은 단일 task 격리든 교차든 `/repair-milestone M-N` 로 회수한다 — repair-milestone이 4-판정 후 cross-cutting은 직접 수정하고, per-task 코드 결함은 finding 요약과 함께 repair-workitem에 위임(아래 finding-mode)한 뒤 QA_FINDINGS status를 닫는다. (직전 validate가 Needs Fix report를 남긴 task는 기존대로 `/repair-workitem T-NNN` 직접 — report 기반이라 정상.)
        - `[Spec-gap]` finding 있음: `/plan-workitem F-NNN` 으로 미커버 task 추가
        - `[Doc-link]` / `[ADR-ref]` 등 문서 정합 P0: 사용자 직접 수정 (architect 또는 메인)
        - **e2e blocked-on-env (ENVIRONMENT failure)**: real failure가 아니므로 repair 대상 아님 — 사용자에게 환경 복구(브라우저 설치 / 앱 기동 / E2E MCP 등재·access)를 안내하고 환경 복구 후 `/stabilize-milestone M-N` 재실행 권장.

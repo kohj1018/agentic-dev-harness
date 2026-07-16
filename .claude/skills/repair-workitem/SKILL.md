@@ -21,6 +21,7 @@ context-pack: minimal
 2. `docs/40-validation/reports/<task-id>.md`를 읽는다 (report는 매 validate phase 새로 쓰이므로 **항상 새로 읽는다** — 캐시 대상 아님).
    - 파일이 없거나 stale(파일 mtime이 task 문서/구현 파일보다 오래됨)하면 `/validate-workitem` 선행을 안내하고 종료한다.
    - 파일이 `Pass`이면 `/finalize-workitem`을 안내하고 종료한다(repair 대상 없음).
+   - **단, 인자에 finding 요약(repair-milestone이 QA_FINDINGS 발견을 위임할 때 넘기는 "<finding>")이 있으면 report가 Pass·부재여도 종료하지 않고 그 finding을 대상으로 진행한다(finding-mode).** 아래 "비판적 재점검"을 그 finding에 적용해 코드를 수정하고 task `## 8. 메모`에 결정 이력을 남긴다. finding-mode에서는 (a) Pass report를 삭제하지 않고(실패 report가 아님), (b) QA_FINDINGS는 건드리지 않으며(status 종료는 위임한 repair-milestone 책임 — 본 skill의 "다른 산출물 미접근" 계약 유지), (c) 마지막 출력에 "/validate-workitem <task-id> 재실행으로 수정 확인" 안내를 포함한다.
 3. 사용자가 인자로 부분 지정을 줬으면 그 부분만 대상으로 한다.
 4. 실패 항목을 우선순위(P0 > P1 > P2)로 정렬한다.
 
