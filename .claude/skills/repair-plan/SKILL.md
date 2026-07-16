@@ -4,7 +4,6 @@ description: 원본 plan 세션에서 실행. docs/40-validation/plan-reviews/<w
 argument-hint: "[milestone or feature or task id]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews/*.md)
-context-pack: minimal
 ---
 
 이 skill은 `/validate-plan`이 생성한 임시 리뷰 파일을 모두 회수해 plan 문서를 수정하는 단계다. **코드 수정·커밋 금지**.

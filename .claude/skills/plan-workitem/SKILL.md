@@ -4,7 +4,6 @@ description: 기존 feature 문서를 task 단위로 분해하고, 그 task의 A
 argument-hint: "[feature id]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
-context-pack: minimal
 ---
 
 너의 역할은 입력으로 받은 feature ID를 task 단위로 분해하고, 그 task들의 AC를 feature `## 7-1` 매핑표에 채우는 것이다. milestone·feature 문서 *생성*은 `/plan-milestone` 담당이며, 본 skill은 *이미 존재하는* feature 문서를 입력으로 받는다.

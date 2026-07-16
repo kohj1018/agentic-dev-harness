@@ -4,7 +4,6 @@ description: Run a multi-round main-session conversation to author the next mile
 argument-hint: "[milestone idea | feature idea]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
-context-pack: minimal
 ---
 
 이 skill은 메인 세션이 R0~R4 라운드를 직접 운전해 *다음* 마일스톤(M2+)과 그 feature 문서를 작성하는 절차서다.

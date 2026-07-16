@@ -5,7 +5,6 @@ argument-hint: "[task identifier(s)] [--apply --rationale \"<why>\"]"
 allowed-tools: Read Glob Grep Write Edit Bash(git add *) Bash(git status *) Bash(git diff *) Bash(git commit *) Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *)
 context: fork
 agent: builder
-context-pack: minimal
 ---
 
 이 skill은 검증을 통과한 workitem을 마감한다 — status 갱신 + 명시적 파일 add + 커밋.

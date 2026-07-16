@@ -4,7 +4,6 @@ description: 외부 공식문서·1차 자료·논문을 조사해 신뢰도 라
 argument-hint: "[research question or topic]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep WebSearch WebFetch Write Agent
-context-pack: minimal
 ---
 
 이 skill은 **리서치 + 노트 작성 전용**이다. 코드·workitem·charter 문서를 수정하지 않는다 (노트 파일 1개만 작성).

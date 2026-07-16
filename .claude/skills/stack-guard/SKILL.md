@@ -4,7 +4,6 @@ description: After /bootstrap-stack, generate verify scripts and a unified `vali
 argument-hint: "[stack summary | empty to read existing docs]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
-context-pack: minimal
 ---
 
 너의 역할은 스택이 확정된 직후 통합 검증 명령(`validate`)과 검증 스크립트를 생성하는 것이다.

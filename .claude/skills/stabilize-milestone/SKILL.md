@@ -4,7 +4,6 @@ description: Stabilize a milestone — run E2E + regression + refactoring/ADR re
 argument-hint: "[milestone id] [--dry-run]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash Agent
-context-pack: minimal
 ---
 
 본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1).

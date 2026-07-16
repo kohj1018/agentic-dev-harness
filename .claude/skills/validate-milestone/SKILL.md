@@ -4,7 +4,6 @@ description: 다른 세션·다른 LLM에서 stabilize 대상 마일스톤을 �
 argument-hint: "[milestone id] [--reviewer-tag <tag>]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write
-context-pack: minimal
 ---
 
 이 skill은 **판정 + 임시 리뷰 파일 기록 전용**이다. 코드·문서 수정 금지, **`validate`/`validate:e2e`/`npm audit` 등 실행 금지**(allowed-tools에 Bash 없음 — e2e 충돌 원천 차단). stabilize-milestone(origin)이 실행·졸업판정·문서기록을 단일 수행하고, 본 skill은 *추가 모델의 읽기전용 2nd opinion*만 만든다.

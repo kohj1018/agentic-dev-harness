@@ -4,7 +4,6 @@ description: Critically recheck milestone-level QA/improvement findings and fix 
 argument-hint: "[milestone id] [optional notes]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash Agent
-context-pack: minimal
 ---
 
 이 skill은 `/stabilize-milestone`이 누적 기록한 milestone-level finding을 **비판적으로 재점검**한 뒤, 진짜 결함만 수정한다. 메인 세션에서 실행되므로 풀 프로젝트 컨텍스트로 판단한다.

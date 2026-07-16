@@ -4,7 +4,6 @@ description: UI 시각 결정 발굴 라운드 (R0~R6). 레퍼런스 노트 + DE
 argument-hint: "[product description | --fast | --update]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html) Bash(rm docs/20-system/design-concepts/concept-*.html)
-context-pack: minimal
 ---
 
 # /bootstrap-design

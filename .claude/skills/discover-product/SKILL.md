@@ -4,7 +4,6 @@ description: Run a multi-round discovery (persona / pain / JTBD / scenario / MVP
 argument-hint: "[product description | --fast]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
-context-pack: minimal
 ---
 
 이 skill은 메인 세션이 R0~R4 라운드를 직접 운전하는 절차서다.

@@ -6,7 +6,6 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write
 context: fork
 agent: reviewer
-context-pack: minimal
 ---
 
 이 skill은 **판정 + 임시 리뷰 파일 기록 전용**이다. DISCOVERY.md / PROJECT_CHARTER.md / 코드 일체 수정 금지. (ADR-038 `/validate-plan` 패턴의 discovery 층 mirror)

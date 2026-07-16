@@ -25,6 +25,7 @@ accepted
 
 - skill frontmatter에 `context-pack: minimal` 필드 추가 (13개 skill 일괄).
 - architect agent frontmatter에 `context-pack: full`.
+- [정정 2026-07: 위 두 줄의 frontmatter 필드는 Claude 공식 스키마에 없어 실효 없음(no-op) — 필드는 제거하고 로딩 정책은 결정 1의 본문 JIT 지침으로 일원화한다. 위 §2(표 포함) 전체가 이력 보존용이다.]
 
 ## 비결정 (No)
 - frontend/backend 영역별 pack 사전 정의 — 과설계. 사용자가 필요 시 fork 프로젝트에서 자체 정의.
@@ -34,7 +35,7 @@ accepted
 
 ## 결과
 - 모든 skill이 JIT 로딩 정책을 명문화 → 과도한 사전 로딩 방지.
-- context-pack frontmatter로 도구가 로딩 범위를 명시적으로 제어 가능.
+- 로딩 범위 제어는 각 skill 본문의 「## Context 정책 (ADR-019)」 JIT 지침이 담당한다(architect·researcher agent는 전용 JIT 섹션 없이 위임 task 범위로 로딩). context-pack frontmatter 필드는 Claude Code 공식 스키마에 없어 실효 없음(no-op)이라 제거됨 — 실효 메커니즘은 본문 JIT 지침(최소 읽기 목록 + 발화 시 인용)이다(2026-07 공식문서 확인).
 
 ## 후속 작업
 없음

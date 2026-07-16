@@ -2,7 +2,6 @@
 name: boilerplate-context
 description: Use when working in this repository to understand the boilerplate's layered documentation system, workitem flow, and guardrail philosophy.
 user-invocable: false
-context-pack: minimal
 ---
 
 이 저장소는 Claude Code용 문서 중심 보일러플레이트다.

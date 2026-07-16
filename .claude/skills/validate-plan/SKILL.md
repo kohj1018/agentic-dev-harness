@@ -4,7 +4,6 @@ description: 다른 세션·다른 LLM에서 `/plan-workitem`이 생성·갱신�
 argument-hint: "[milestone or feature or task id] [--reviewer-tag <tag>]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write
-context-pack: minimal
 ---
 
 이 skill은 **판정 + 임시 리뷰 파일 기록 전용**이다. milestone/feature/task 문서 일체 수정 금지. 코드 수정 금지. 커밋 금지.

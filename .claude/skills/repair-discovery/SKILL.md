@@ -6,7 +6,6 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/discovery-reviews/*.md)
 context: fork
 agent: architect
-context-pack: minimal
 ---
 
 `/validate-discovery`가 만든 임시 리뷰 파일을 모두 회수해 DISCOVERY.md를 수정하는 단계. **charter·코드 수정·커밋 금지.** (ADR-038 `/repair-plan` 패턴의 discovery 층 mirror)

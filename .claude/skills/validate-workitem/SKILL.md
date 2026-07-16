@@ -3,7 +3,6 @@ name: validate-workitem
 description: Validate whether a completed workitem implementation matches its documented scope and is ready for the next step.
 argument-hint: "[task identifier]"
 allowed-tools: Read Glob Grep Write Agent Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *) Bash(git diff *) Bash(git log *) Bash(git status *)
-context-pack: minimal
 ---
 
 이 skill은 **판정 + report 기록 전용**이다. status 변경, 코드 수정, 커밋은 하지 않는다.

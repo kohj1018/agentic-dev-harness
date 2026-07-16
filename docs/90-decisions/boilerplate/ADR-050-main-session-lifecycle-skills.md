@@ -15,7 +15,7 @@ accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR
 ### D1. 일부 lifecycle skill을 메인 세션 실행으로 전환 — implement-workitem 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1 (fork builder → foreman 병렬/단일 builder 위임: file-disjoint면 병렬, 작거나 겹치면 단일)
 다음 7종에서 `context: fork`(및 죽은 `agent:`)를 제거해 메인 세션 인라인 실행한다: bootstrap-project, bootstrap-stack, stack-guard, validate-plan, repair-plan, validate-workitem, repair-workitem.
 - bootstrap-project/bootstrap-stack은 무거운 아키텍처 추론을 `Agent`로 architect sub-call 위임(discover-product·bootstrap-design 패턴). 나머지는 메인 세션이 직접 수행.
-- `context-pack: minimal`은 유지(메인 세션 skill도 사용 — discover-product 선례).
+- `context-pack: minimal`은 유지(메인 세션 skill도 사용 — discover-product 선례). [정정 2026-07: context-pack은 no-op으로 확인돼 전 skill/agent에서 제거됨(ADR-019 정정) — 본 '유지'는 실효 없음, 로딩은 본문 JIT 지침.]
 - finalize-workitem은 fork 유지(git 조작 격리 이득). *implement-workitem은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman(메인 세션 오케스트레이터)으로 supersede — 위 D1 헤딩 참조.*
 
 ### D2. task 실행 inner-loop 4종 model-invocable

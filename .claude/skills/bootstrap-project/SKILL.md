@@ -4,7 +4,6 @@ description: Convert discovery output (DISCOVERY.md) or a natural-language brief
 argument-hint: "[project brief or empty (uses DISCOVERY.md)] [--apply]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
-context-pack: minimal
 ---
 
 너의 역할은 이 보일러플레이트를 기준으로 새 프로젝트의 초기 문서 세팅을 완료하는 것이다.

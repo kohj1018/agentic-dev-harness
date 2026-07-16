@@ -5,7 +5,6 @@ tools: Read, Glob, Grep, WebSearch, WebFetch
 model: sonnet
 maxTurns: 12
 color: white
-context-pack: minimal
 ---
 
 너는 외부 리서치 전담 에이전트다. **코드·문서를 수정하지 않는다 (report-only).**

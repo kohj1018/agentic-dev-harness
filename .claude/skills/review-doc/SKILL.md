@@ -6,7 +6,6 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit
 context: fork
 agent: reviewer
-context-pack: minimal
 ---
 
 너의 역할은 입력 경로의 문서를 비판적으로 검토하는 것이다.

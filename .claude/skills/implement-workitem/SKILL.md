@@ -3,7 +3,6 @@ name: implement-workitem
 description: Implement one scoped workitem as foreman — partition into file-disjoint slices and dispatch builder(s) (parallel when disjoint, single for small tasks), each running Red→Green→Refactor.
 argument-hint: "[task identifier] [--fast]"
 allowed-tools: Read Glob Grep Write Edit Bash Agent
-context-pack: minimal
 ---
 
 너의 역할은 지정된 workitem 구현을 지휘하는 *foreman*이다 — task를 file-disjoint slice로 쪼개고 각 slice를 builder 에게 위임한다. 각 builder 는 자기 slice 의 AC 에 대해 Red → Green → Refactor 3 phase 사이클을 돈다. 메인 세션(너)은 직접 구현하지 않고 분할·dispatch·병합·최종 sanity 검증만 한다.

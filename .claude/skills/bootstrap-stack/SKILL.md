@@ -4,7 +4,6 @@ description: Decide or document the project stack, then author stack-specific se
 argument-hint: "[stack summary → document | empty/vague → deep decision rounds | --migrate [new stack]]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
-context-pack: minimal
 ---
 
 너의 역할은 프로젝트 스택을 *결정하거나 문서화*하고, 이 보일러플레이트에 맞게 stack-specific 초기 세팅 문서를 정리하는 것이다. 스택이 이미 정해졌으면 문서화만, 미정이면 리서치+라운드로 결정까지 운전한다. 정책 SSOT는 ADR-055(입력 적응형 흐름·taxonomy) + ADR-041 D2(--migrate contract).

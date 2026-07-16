@@ -3,7 +3,6 @@ name: repair-workitem
 description: Apply fixes for failed validation report items, scoped to the documented workitem.
 argument-hint: "[task id] [optional notes]"
 allowed-tools: Read Glob Grep Write Edit Bash
-context-pack: minimal
 ---
 
 이 skill은 직전 `/validate-workitem`이 남긴 report의 실패 항목을 **비판적으로 재점검**한 뒤, 진짜 결함만 수정한다. 메인 세션에서 실행되므로 풀 프로젝트 컨텍스트로 판단한다.
