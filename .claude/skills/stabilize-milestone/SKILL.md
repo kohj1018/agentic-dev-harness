@@ -101,7 +101,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
   - **e2e 필요 ∧ `validate:e2e` exit code ≠ 0 (스펙 실행 후 real failure)** → **`졸업 가능: NO` (hard)**. 조기 종료 옵션이 아니라 *졸업 차단*이다. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.
   - **e2e 필요 ∧ `validate:e2e` 실행 불가 (ENVIRONMENT failure — 브라우저 미설치 / 대상 앱 미기동 / E2E MCP 미등재)** → **`졸업 가능: NO` (hard, blocked-on-env)**. 단 이것은 *실제 e2e 실패가 아니다* — 사용자에게 환경 복구를 안내(`E2E 환경 미충족: <원인> — 브라우저 설치 / 앱 기동 후 재실행 권장`)하고, real failure와 라벨을 구분해 출력한다.
 - `AC 매핑 100%` → 본 milestone의 모든 task의 최신 `docs/40-validation/reports/<task-id>.md` `## AC ↔ 테스트 매핑` 섹션 항목이 모두 `✅`. report 부재 task는 미충족 처리.
-- `P0 severity finding 0건` → `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션 항목 수 0.
+- `P0 severity finding 0건` → `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌(미해소) 항목 수 0**(`/repair-milestone`이 해소한 P0는 항목을 제거하지 않고 `status: resolved`만 표기하므로 이를 카운트에서 제외한다). 미해소 항목이 1+면 `졸업 가능: NO`.
 - `(선택) 본 마일스톤 한정 추가 기준` → 본문 텍스트 그대로 평가(사용자가 자유 기재한 영역 — 해당 항목만 LLM 해석 허용).
 - *UI 프로젝트의 자연스러운 추가 기준 example*: `DESIGN.md 모든 컴포넌트가 코드에 1+ 회 사용 + 8 상태 매트릭스 충족` — 채택은 사용자 결정.
 
