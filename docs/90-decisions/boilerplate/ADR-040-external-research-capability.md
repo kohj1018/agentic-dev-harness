@@ -5,6 +5,13 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- researcher agent = 외부 리서치 전담(WebSearch/WebFetch) — **report-only(Write/Edit 없음)** 불변. 리서치 노트 작성은 research-pack skill 책임(결정 2).
+- builder는 직접 웹서핑하지 않는다 — `Needs Research` soft 게이트(#amend-2) → `Agent` 보유 skill(implement foreman·plan-milestone)이 researcher에 자동 위임. Codex는 메인 세션 인라인 degrade.
+- 의존성 3분할: authoring=plan(#amend-1) / 설치 실행=implement(#amend-1) / 검증=stack-guard(#amend-2) — researcher는 설치 권한 없음.
+- 모든 발견에 출처 URL + 발행일 + 공식/1차/2차 신뢰도 라벨(결정 3).
+- 디자인 레퍼런스 모드(#amend-4): 호출 측 명시 시 코드 수준 토큰 추출 — 소스 위계 ①사용자 URL ②오픈소스 토큰 패키지 ③정성 소스, 추출 불가 시 정직 보고·값 통째 복제 금지.
+
 ## 배경
 - [관측됨] 기존 6개 agent(architect/planner/builder/validator/reviewer/qa)의 tools에 WebSearch/WebFetch가 없다 → 구현 중 외부 라이브러리(결제/인증/SDK)의 *최신 공식문서*를 확인할 수 없고, 모델 지식 컷오프로 stale API를 쓸 위험이 있다.
 - [관측됨] 딥리서치·스택 추천·MCP 최신 설정 조회 모두 "사용자가 직접 붙여넣기"에만 의존.
@@ -70,3 +77,20 @@ accepted
 - constraint(약, 소스 품질) + 정정성(행동 불변).
 ### 적용 surface
 - .claude/agents/researcher.md — 소스 품질 규율(standing)
+
+<a id="adr-040-amend-4"></a>
+## Amendment 4 (2026-07-16) — researcher 디자인 레퍼런스 모드 (코드 수준 토큰 추출)
+### 결정
+1. researcher에 **디자인 레퍼런스 모드**를 추가한다(전용 agent 신설 X — 모드로 처리). 호출 측(`/bootstrap-design` R0 등)이 모드를 명시하면, 레퍼런스의 시각 시스템을 *코드 증거*(CSS custom property·font-family stack·hex·spacing/radius/shadow 수치)로 추출해 DESIGN_RESEARCH.md 양식으로 반환한다.
+2. **소스 위계**: ① 사용자 제공 URL(raw CSS 파일이면 직접 fetch·추출) → ② 오픈소스 디자인 토큰 패키지(WebSearch로 발견 — GitHub Primer/Shopify Polaris/IBM Carbon/Adobe Spectrum/Atlassian 등 → unpkg/GitHub raw에서 CSS/JSON fetch) → ③ 정성 소스(디자인 시스템 요약 사이트 — 방향 어휘 보조로만, 값 추출 소스 아님).
+3. **한계 정직 보고**: 일반 HTML 페이지는 fetch 시 markdown 변환으로 stylesheet URL·CSS가 소실된다([관측됨] 2026-07-14 실측). stylesheet URL을 발견할 수 없으면 "추출 불가 — <사유>"를 반환하고 날조하지 않는다. CSS-in-JS/Tailwind JIT 사이트는 수율 낮음을 명시.
+4. **값 복제 금지 규율**: 추출 토큰은 *구조 학습용*(스케일 짜임새·시맨틱 네이밍·대비 수치) — 특정 서비스 값의 통째 복제는 클론화라 금지. what-to-borrow/avoid 판단(bootstrap-design R0)이 계속 관문.
+### 근거
+- [관측됨] bootstrap-design R0의 무거운 분해가 웹 도구 없는 architect에 위임돼 있어 실 웹 grounding 경로가 0 → "모델 지식 기반" fallback으로 median 회귀(ADR-049#amend-1 근거가 자인한 슬롭 근본원인). 텍스트 4축 요약은 코드 증거가 없어 R2 concept 생성 입력이 빈약.
+- [외부실증] 오픈소스 디자인 토큰 패키지는 대형 실서비스의 진짜 값 + 시맨틱 이름 + 주석을 오픈 라이선스로 제공(2026-07-14 Primer·Polaris fetch 실측).
+### 강도 (ADR-022)
+- enabling(약) — report-only 불변, 모드 추가.
+### 적용 surface
+- .claude/agents/researcher.md
+- .claude/skills/bootstrap-design/SKILL.md (R0 위계 배선은 ADR-049#amend-2 — Stage 1C)
+- docs/00-meta/DELEGATION_STRATEGY.md (researcher row 1줄)

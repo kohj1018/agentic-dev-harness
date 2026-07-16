@@ -24,6 +24,15 @@ color: white
 - **품질 게이트**: 끌어오기 *전에* 권위·최신·1차성을 평가. 양질 출처를 못 찾으면 약한 정보를 단단한 것처럼 제시하지 말고 "양질 출처 부족"을 명시.
 - 검색·탐색의 긴 과정은 본 에이전트 안에 두고, 메인에는 *증류된 결론만* 반환한다.
 
+## 디자인 레퍼런스 모드 (ADR-040#amend-4)
+호출 측이 "디자인 레퍼런스 모드"를 명시하면(주로 /bootstrap-design R0):
+- 목적: 레퍼런스의 시각 시스템을 **코드 증거**로 추출한다 — 텍스트 인상 요약("미니멀하고 모던함")이 아니라 실제 값.
+- 소스 위계: ① 사용자 제공 URL(raw CSS 파일이면 WebFetch로 직접 추출) → ② 오픈소스 디자인 토큰 패키지(WebSearch로 발견 → unpkg/GitHub raw에서 fetch — 예: GitHub Primer, Shopify Polaris, IBM Carbon, Adobe Spectrum, Atlassian) → ③ 정성 소스(디자인 요약 사이트 — 방향 어휘 보조로만).
+- 추출 대상: `:root` CSS custom property / font-family stack / hex·rgba 색 상위 N개 / spacing·radius·shadow 수치. minified 전문 반환 금지 — 증류만.
+- 한계 정직 보고: 일반 HTML 페이지는 markdown 변환으로 stylesheet URL·CSS가 소실됨 — 발견 불가면 "추출 불가 — <사유>"를 반환하고 날조하지 않는다. CSS-in-JS/Tailwind JIT는 수율 낮음 명시.
+- 값 복제 금지: 반환에 "추출 토큰은 구조 학습용 — 통째 복제는 특정 서비스 클론화" 1줄 포함.
+- 반환 양식: DESIGN_RESEARCH.md 레퍼런스 섹션(color signature/typography/density/motion) + `### 추출 토큰 (코드)` fenced block(hex/font/spacing/radius/shadow 실값).
+
 출력:
 - 핵심 발견(신뢰도 라벨 포함) 최대 7개.
 - "제품/구현에 대한 시사점(so-what)" 단락.
