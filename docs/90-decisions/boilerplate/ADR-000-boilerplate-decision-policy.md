@@ -84,12 +84,12 @@ accepted
 - stabilize/validator의 직접 ADR 작성 — read-only·판정 전용 계약 위반 + proposed ADR 남발 위험.
 
 ### Mutation Contract (ADR-047 D3, 압축)
-- Target: stabilize step 6/8, plan-milestone R0, DELEGATION 트리거 표, WORKFLOW §6, STRUCTURE 산출물 표 ADR(project) 행, _ADR_GUIDE 1줄, ADR-053#amend-1.
+- Target: stabilize step 6/8, plan-milestone R0(candidate 회수)·R2(high-stakes 결정 3 authoring), DELEGATION 트리거 표, WORKFLOW §6, STRUCTURE 산출물 표 ADR(project) 행, _ADR_GUIDE 1줄, ADR-053#amend-1.
 - Failure mode: ADR 후보가 세션 종료와 함께 증발 / mid-project 결정의 작성 책임 부재(관측됨 — 경로 단절).
 - Predicted improvement: 후보가 IMPROVEMENT_GUIDE open 항목으로 잔존해 증발 차단, 회수·작성 주체가 결정적.
 - Preserved invariants: stabilize read-only(IMPROVEMENT_GUIDE 기록은 기존 정상 책임 범위) / validate 판정 전용 / ADR-055 tier 라우팅 / _ADR_GUIDE 양식.
 - Falsifying evaluation: [ADR-candidate] 남발로 plan R0가 비대해지면 라벨 기준 강화; 미회수 반복이면 /draft-adr 재검토.
-- Rollback: 라벨·표 제거(기록된 후보는 일반 P2로 잔존, 무해).
+- Rollback: Target에 열거한 배선·요약 게시(plan-milestone R0·R2 authoring 포함)를 전부 제거한다. 기록된 후보는 일반 P2로 잔존(무해).
 
 ### 강도 (ADR-022)
 - enabling(약) — 표는 소프트 규범, 후보는 보고. 강제 게이트 없음.
