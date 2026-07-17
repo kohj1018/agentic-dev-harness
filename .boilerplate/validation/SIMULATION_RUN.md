@@ -192,3 +192,57 @@
 - ADR-056·057 Predicted improvement 항목은 현재 `[가설]` — fresh-fork 5종 중 UI 2종+ 실측 통과 시 `[관측됨]` 승격.
 - **Falsifying evaluation 입력 수집 예정**(item 11 (b)): R5 프로토타입 라운드가 마일스톤당 계획 시간을 과도하게 늘리는지 / 배치 세션 컨텍스트 소진으로 부분 완료가 나는지 / seam 신호 소형 feature 과발동 / [Experience-drift] 재실행 불일치율.
 - **미수행으로 남는 실측**(정적 기록이 대체 못 함): (a) 이 라운드 fresh-fork 관통 실측, (b) Round 3이 예고한 ADR-027#amend-1 #d16…#d20 fresh-fork 실측(여전히 미수행), (c) Codex 자동 팬아웃 여부 실측(→ Codex-parity 재프레이밍 별도 라운드).
+
+---
+
+### Round 4 실측 (2026-07-17, isolated-fork in-session AI-driven run — QuickTodo UI 마일스톤)
+
+> 위 정적 기록의 "예약"을 실제로 수행한 결과. fork `C:\tmp\dogfood-ui-todo`(QuickTodo — 계정 없는 로컬 todo 웹앱, React 19 + Vite 8 CSR), git baseline부터 **21커밋**. **대부분의** 위임 지점에 **실제 서브에이전트**(architect ×2, designer ×2, builder ×4, qa ×1, reviewer ×1) + 실제 `npm install`/vitest/Playwright 실행. **단 3개 위임 지점 미실행** — 아래 "fidelity deviations" 참조.
+
+**정직한 프레이밍 (한계 명시)**: fork를 cwd로 한 fresh Claude/Codex 세션을 별도 기동할 수 없어 harness auto-load·settings 자동검증·"fresh-세션 taste 게이트"는 in-session 서브에이전트 + AskUserQuestion으로 근사했다 → 순수 fresh-session 실측이 아닌 **isolated-fork in-session AI-driven run**(별도 fork 디렉터리는 맞으나 새 세션 harness auto-load 검증은 아님). Codex 관통(아래 7단계)·위 (b)(c) 실측은 여전히 미수행.
+
+**fidelity deviations (lifecycle 완전 준수 아님 — 정직 기록)**:
+- **bootstrap-design R0 researcher(코드 토큰추출)·R2-1.5 reviewer(구별성) sub-call 생략** — fresh-세션 재현 불가(fork `DESIGN_RESEARCH.md` grounding에 기록).
+- **validate-workitem validator fan-out 미실행** — T-002(10파일 +249/-380)·T-003(6파일 +89/-9)·T-004(5파일 +65/-5) 전부 small-diff 임계 초과라 fan-out 대상이나 **inline 처리**. 특히 T-002는 명백한 fan-out 규모인데 "단일 vertical slice" 판단으로 inline — 경계 판단 오용. per-task validator fan-out 메커니즘은 이번 dogfood에서 **미실측**(후속 stabilize의 qa/reviewer fan-out은 다른 단계라 대체 아님). (T-004 validation report가 diff를 ~40줄로 축소 기록 — 실제 70 changed lines.)
+- **stabilize read-only 계약 deviation** — stabilize 도중 미포맷 e2e를 발견해 `a78b095` 포맷 커밋을 직접 생성(정식 경로는 finding 기록 후 `/repair-milestone` 라우팅). 최종 코드는 정상이나 read-only 위반으로 기록.
+- 결론: "lifecycle 그대로 관통 / 모든 위임 지점 실행"은 **부정확** — *대부분* 관통 + 위 3개 미실행.
+
+#### 관통 시나리오 실측 ([가설] → [관측됨])
+
+1. **생성 통일** `[관측됨]` — bootstrap-project는 charter/ARCH/ADR-100까지, M1 seed 안 함(ADR-057 결정1). plan-milestone이 M1+F-001/F-002 생성. ✓
+2. **R5 프로토타입 라운드** `[관측됨]` — (선행 bootstrap-design R2에서 concept 3안 **A Command Bar / B Plaintext Terminal / C Quiet Sheet** 중 사용자가 **A Command Bar** 선택.) plan-milestone R5-2 designer sub-call이 *레이아웃* 시안 3안(**A 상단고정 / B 중앙런처 / C 그룹시트**) 생성 → 사용자 **B 중앙런처** 선택 → 못생긴 5종+corrupt+실카피(§10)+인터랙션 캡션 → 승인본 `prototypes/M1/main.html`("시안 B 중앙런처 · Concept A") 커밋 + feature §7 참조. ✓ **단 friction: 승인 프로토타입(전체 경험 타깃)이 M1 비범위(완료항목지우기·undo·j/k·is-focus)를 포함 → §3-V 대조 타깃이 마일스톤 범위와 불일치. 트림 필요했음.**
+3. **배치 분해 2-tier** `[관측됨]` — plan-workitem M1 입구 계약 통과(프로토타입 존재), architect sub-call 분해, full 3-G={T-001 storage seam, T-002 capture}, intent-draft+마커={T-003, T-004}. FAC↔AC 100% 매핑, **seam 신호 발화**(todos store 2-writer: add+toggle) → INV-1/2/3 §7-2 canonical. 3-P 프로토타입 참조 line item. ✓
+4. **draft 하드스탑 / --refresh** `[관측됨, 변형]` — T-003/T-004는 구현 진입 *전에* `/plan-workitem F-002 --refresh`로 draft 마커를 선제 제거(실 코드 기준 3-G 재작성) → **하드스탑 자체는 미발동(정상 흐름), --refresh 경로는 실측**. seam 재점검 무효화 0. ✓
+5. **feature 체크포인트** `[관측됨]` — finalize T-002 → F-001 완료, finalize T-004 → F-002+M1 전 task done. ✓
+6. **§3-V 경험 게이트** `[관측됨 — 핵심 수확]` — 앱 기동 + Playwright 6-상태 스크린샷(`visual/M1/`) + 멀티모달 대조 → **P1 [Experience-drift] 실제 검출**: 프로토타입 §2-e의 입력 sticky-pin 구성결정이 구현에 없음(`.stage padding:28vh` 고정, sticky 부재). per-task validate·unit·e2e 전부 green이었으나 경험 계약 drift는 §3-V만 잡음. **게이트가 plan→implement 갭을 설계대로 catch — ADR-056 가치 실증.** ✓✓
+7. **Codex 관통** `[미실측]` — 구조적 한계.
+
+#### ADR-017 gate 3지표 실측
+
+| 지표 | 목표 | 실측 | 판정 |
+|------|------|------|------|
+| 사용자 개입 | ≤1 | **0회** — ADR-017 결정2 정의(skill 산출물 *직접 편집* 행위 기준, **질문 응답 제외**)상 concept·프로토타입 선택은 질문 응답이라 제외. 사용자의 fork 파일 직접 편집 0 (모든 편집은 에이전트 수행) | **통과** |
+| placeholder 충원율 | ≥80% | ~100% (DISCOVERY 16 / CHARTER / ARCH / ADR-100·101 / DESIGN / DESIGN_RESEARCH / M1 / F-001·002 / T-001~004 전부 실콘텐츠, 미충원 0) | **통과** |
+| graduation pre-check 미통과 | ≤2 | 1건 (6기준 중 task done·validate exit0·e2e suite 6/6·AC 100%·P0 0 통과, (선택)[Experience-drift] P1 0 미통과=sticky-pin) | **통과** |
+
+- **ADR-017 gate: 3/3 통과** — 본 dogfood는 유효한 gate-통과 실측(초기 오기록: 지표1 "미달" + "UI 재정의" finding은 ADR-017 정의 오독이었음 — 정정. 질문 응답은 개입 아님).
+- **M1 graduation: NO** (gate 통과와 *별개*) — 채택된 경험 게이트([Experience-drift] P1 0건)를 sticky-pin 1건이 위반해 차단. 기능·validate·e2e·AC는 완성. → `/repair-milestone M1` 라우팅. *graduation NO 자체가 유효한 실측 결과*(§3-V가 실 drift catch).
+- **e2e suite 6/6의 범위 한정**: 기능 e2e 1(add→toggle→reload) + root smoke 1 + overflow advisory 3 + axe advisory 1. **overflow·axe는 결과 무관 상시 통과하는 report-only**이고 axe는 빈 화면만 검사 → "suite pass"는 맞으나 **접근성·responsive 검증 완료는 아님**(done-항목 대비 가설 미검증 — QA_FINDINGS F-M1-003).
+
+#### 발견된 실 friction (harness 개선 후보 — fork IMPROVEMENT_GUIDE INST-1~5 + QA_FINDINGS 회수)
+
+- **INST-1 (P1, 최대 수확)**: plan-workitem이 프로토타입 구성/인터랙션 결정(sticky-pin §2-e)을 AC로 분해하지 않아 §3-V가 뒤늦게 drift catch. 3-P/분해에 **프로토타입 상태 ↔ task AC cross-check 단계** 권장.
+- **INST-2 (P2)**: stabilize raw-hex preflight(5-2)가 DTCG 토큰 정의 CSS(`src/index.css :root`)를 false-positive 플래그(DESIGN.md·prototypes만 제외). **token `:root` 정의 파일/블록도 제외** 권장.
+- **INST-3 (P2)**: plan-workitem §153 cross-feature INV canonical "낮은 번호 feature" 규칙이 **비대칭 seam**(한 feature가 write-through 소유)에서 의미 역전 배치 → "소유 feature 우선" 예외 단서 검토.
+- **INST-4 (P2)**: 서브에이전트가 최종 구조화 반환 전 **중간 사고 문장으로 정지** 2건(T-002 builder, qa) → foreman always-verify + SendMessage 재개로 회수(이번에 실제로 catch). 위임 프롬프트 "최종=구조화 blob" 강조 + foreman 검증 규율 명문화.
+- **INST-5 (P2)**: bootstrap-design R0 researcher·R2-1.5 reviewer sub-call이 fresh-세션 재현 불가로 생략 — degraded 경로 fidelity 손실 지점(정직 문서화).
+- **프로토타입 범위 friction**: 승인 프로토타입(전체 경험 타깃)이 마일스톤 비범위를 포함 → §3-V 대조가 올바르게 범위 지킨 앱을 drift로 오판 위험. **프로토타입 승인/§3-V에 "마일스톤 범위 대조" 단서** 권장(이번엔 트림으로 해소).
+- **저장실패 계약 갭**: plan seam self-check가 "예외 삼키지 않음"(INV)은 잡았으나 `add()` **성공-신호 인터페이스**(App의 clear 판단용)는 못 잡아 T-002/T-004 계약 충돌 → 외부 리뷰로 사전 교정. seam 관점에 "성공/실패 신호 전파" 추가 검토.
+- **커밋 규율**: e2e 커밋 시 `validate:e2e`만 확인하고 full `npm run validate` 미실행 → 미포맷 파일 커밋(format:check FAIL, qa fan-out이 검출). foreman/finalize **커밋 전 full validate 필수(테스트/e2e 파일 포함)**.
+
+#### 승격 판정
+
+- **ADR-056 §3-V 경험 게이트** → `[관측됨]` 승격: 실 drift(sticky-pin) 검출로 가치 실증(정적 [가설]에서 승격). 다관점 fan-out(qa가 broken 커밋·design reviewer가 sticky-pin/대비 독립 검출)도 실효 확인.
+- **ADR-057 배치 2-tier·seam self-check·--refresh·feature 체크포인트** → `[관측됨]` 승격(관통 실행 완료, seam 신호 실발화).
+- **지표 1·2·3 전부 통과** (ADR-017 gate 3/3). M1 graduation NO는 gate와 별개(경험 게이트가 실 drift catch — 정상).
+- **여전히 미실측**: Codex 관통, bootstrap-design researcher/reviewer sub-call, **validate-workitem validator fan-out**(전 task inline), 위 (b)(c). 순수 fresh-session 실측은 별도 세션 필요(구조적 한계).
