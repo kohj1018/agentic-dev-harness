@@ -245,4 +245,12 @@
 - **ADR-056 §3-V 경험 게이트** → `[관측됨]` 승격: 실 drift(sticky-pin) 검출로 가치 실증(정적 [가설]에서 승격). 다관점 fan-out(qa가 broken 커밋·design reviewer가 sticky-pin/대비 독립 검출)도 실효 확인.
 - **ADR-057 배치 2-tier·seam self-check·--refresh·feature 체크포인트** → `[관측됨]` 승격(관통 실행 완료, seam 신호 실발화).
 - **지표 1·2·3 전부 통과** (ADR-017 gate 3/3). M1 graduation NO는 gate와 별개(경험 게이트가 실 drift catch — 정상).
-- **여전히 미실측**: Codex 관통, bootstrap-design researcher/reviewer sub-call, **validate-workitem validator fan-out**(전 task inline), 위 (b)(c). 순수 fresh-session 실측은 별도 세션 필요(구조적 한계).
+- **여전히 미실측**(repair 후속 전 기준): Codex 관통, bootstrap-design researcher/reviewer sub-call, **validate-workitem large-diff validator fan-out**(전 task inline), 위 (b)(c). 순수 fresh-session 실측은 별도 세션 필요(구조적 한계).
+
+#### repair 라운드 후속 (M1-repair-1 — 졸업 달성)
+
+- 위 graduation NO(sticky-pin)를 **`/repair-milestone M1`로 회수** — 마지막 미실행 스테이지(**repair-milestone + repair-workitem finding-mode**) 실측. sticky-pin을 `.capture{position:sticky;top:0}` wrapper로 수정(repair-workitem T-002 위임, 중앙런처 28vh 유지), corrupt scope를 ADR-100에 **load-scope 명문화**(cross-cutting 직접 수정, 코드 무변경). §5 Repair decision log 기록.
+- **re-stabilize §3-V**: many-items 스크롤 재촬영으로 입력 상단 sticky 시각 확인 → [Experience-drift] P1 0. **M1 graduation 6/6 = YES**(validate exit0 · e2e 7/7 · AC 100% · P0 0 · 경험 게이트 통과). fork **23커밋 clean**.
+- 추가 finding: sticky builder가 `pnpm`을 무심코 실행해 stray `pnpm-lock.yaml` 생성(프로젝트는 npm — `package-lock.json`) → 제거. **INST-4 인접**(서브에이전트 규율): 위임 프롬프트에 "프로젝트 패키지매니저(npm) 고정" 명시 검토.
+- **이제 실측된 스테이지**: discover→bootstrap→stack→guard→design→plan-milestone(R5)→plan-workitem(배치)→implement×4→validate→finalize→stabilize(§3-V)→**repair-milestone→repair-workitem**→re-stabilize→졸업. 관통 커버리지 완결(초기 NO→repair→YES 서사가 §3-V 게이트 실효를 이중 실증).
+- **여전히 미실측(최종)**: Codex 관통, bootstrap-design researcher/reviewer sub-call, validate-workitem *large-diff* fan-out(INST-6 — 전 task inline; repair의 sticky fix는 small-diff라 inline 정상), 위 (b)(c).
