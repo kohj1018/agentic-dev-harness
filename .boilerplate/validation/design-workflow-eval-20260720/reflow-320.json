@@ -1,0 +1,234 @@
+[
+  {
+    "id": "concepts/b0/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b0/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b0/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b0/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b1/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b1/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b1/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b1/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b2/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b2/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b2/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b2/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b3/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b3/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b3/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/b3/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b0/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b0/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b0/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b0/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b1/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b1/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b1/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [
+      "div.beat",
+      "b",
+      "div.beat",
+      "b"
+    ],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b1/ops-b",
+    "documentWidth": 349,
+    "overflow": true,
+    "escaped": [
+      "div.handoff",
+      "b"
+    ],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b2/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b2/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b2/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b2/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b3/coffee-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b3/coffee-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b3/ops-a",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  },
+  {
+    "id": "concepts/r2-b3/ops-b",
+    "documentWidth": 320,
+    "overflow": false,
+    "escaped": [],
+    "clipped": []
+  }
+]

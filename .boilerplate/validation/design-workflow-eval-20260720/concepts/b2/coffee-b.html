@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stillroom Coffee Subscription Counter</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --white: #ffffff;
+      --canvas: #eef2ef;
+      --ink: #172023;
+      --muted: #5e6a6d;
+      --line: #cbd2cf;
+      --cobalt: #174fa3;
+      --cobalt-soft: #e7effd;
+      --coral: #d6573c;
+      --mint: #c9e1d2;
+      --mint-dark: #285f49;
+      --focus: #0c5aa6;
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--canvas); color: var(--ink); }
+    button, input { font: inherit; letter-spacing: 0; }
+    button, label { cursor: pointer; }
+    input:focus-visible + label, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .skip { position: fixed; top: -60px; left: 12px; z-index: 20; padding: 10px 14px; background: var(--ink); color: white; }
+    .skip:focus { top: 12px; }
+    header { height: 58px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--white); }
+    .brand { font-size: 18px; font-weight: 800; }
+    .roast-note { margin-left: 14px; padding-left: 14px; border-left: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .secure { margin-left: auto; color: var(--mint-dark); font-size: 11px; font-weight: 750; }
+    .hero { position: relative; height: 205px; overflow: hidden; background: #263336; }
+    .hero img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 54%; }
+    .hero-copy { position: absolute; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; width: min(540px, 58%); padding: 22px clamp(24px, 5vw, 70px); background: rgba(19, 28, 31, .82); color: white; }
+    .hero-copy p { margin: 0 0 6px; color: #c9e1d2; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .hero-copy h1 { margin: 0; max-width: 390px; font-size: 30px; line-height: 1.12; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, .72fr); max-width: 1180px; margin: 0 auto; background: var(--white); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .builder { padding: 28px clamp(22px, 4vw, 52px) 38px; }
+    .builder-intro { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    fieldset { margin: 0; padding: 0; border: 0; }
+    fieldset + fieldset { margin-top: 25px; }
+    legend { width: 100%; margin-bottom: 10px; font-size: 14px; font-weight: 800; }
+    .step-no { color: var(--coral); margin-right: 7px; font-variant-numeric: tabular-nums; }
+    input[type="radio"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .taste-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--ink); }
+    .taste-tabs label { min-height: 47px; display: flex; align-items: center; justify-content: center; padding: 8px; border-right: 1px solid var(--ink); text-align: center; font-size: 12px; font-weight: 760; }
+    .taste-tabs label:last-child { border-right: 0; }
+    .taste-tabs input:checked + label { background: var(--cobalt); color: white; }
+    .taste-detail { position: relative; display: grid; grid-template-columns: 8px 1fr auto; gap: 13px; align-items: center; min-height: 63px; padding: 12px 14px; border: 1px solid var(--line); border-top: 0; background: var(--cobalt-soft); }
+    .taste-detail::before { content: ""; align-self: stretch; width: 3px; margin-left: 2px; background: var(--coral); }
+    .taste-detail strong { display: block; margin-bottom: 2px; font-size: 13px; }
+    .taste-detail span { color: var(--muted); font-size: 12px; }
+    .profile { color: var(--cobalt) !important; font-weight: 750; white-space: nowrap; }
+    .order-table { border-top: 1px solid var(--line); }
+    .order-table label { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 11px; align-items: center; min-height: 52px; padding: 8px 7px; border-bottom: 1px solid var(--line); }
+    .mark { width: 16px; height: 16px; border: 1px solid #83908c; border-radius: 50%; }
+    .order-table input:checked + label { background: #f2f7ff; color: var(--cobalt); font-weight: 760; }
+    .order-table input:checked + label .mark { border: 5px solid var(--cobalt); }
+    .meta { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .value { font-size: 13px; font-weight: 760; font-variant-numeric: tabular-nums; }
+    .save { display: inline-block; margin-left: 6px; padding: 2px 5px; background: var(--mint); color: var(--mint-dark); font-size: 10px; font-weight: 800; }
+    .receipt { display: flex; flex-direction: column; padding: 29px 25px 31px; border-left: 1px solid var(--line); background: #f7f8f5; }
+    .receipt-title { margin: 0 0 5px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .receipt h2 { margin: 0 0 21px; font-size: 21px; line-height: 1.2; }
+    .tasting-stamp { margin-bottom: 18px; padding: 11px 12px; border-left: 4px solid var(--coral); background: var(--cobalt-soft); }
+    .tasting-stamp strong { display: block; color: var(--cobalt); font-size: 13px; }
+    .tasting-stamp span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .receipt-lines { margin: 0; border-top: 1px dashed #9ea9a5; }
+    .receipt-lines div { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 11px 0; border-bottom: 1px dashed #9ea9a5; }
+    dt { color: var(--muted); font-size: 11px; }
+    dd { margin: 0; text-align: right; font-size: 12px; font-weight: 750; }
+    .total { margin-top: auto; padding-top: 25px; }
+    .total-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; margin-bottom: 12px; }
+    .total-row span { color: var(--muted); font-size: 11px; }
+    .total-row strong { max-width: 160px; color: var(--cobalt); font-size: 20px; text-align: right; }
+    .subscribe { width: 100%; min-height: 48px; border: 0; background: var(--coral); color: white; font-weight: 800; }
+    .reassure { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.4; text-align: center; }
+    .mobile-checkout { display: none; }
+    @media (max-width: 760px) {
+      header { height: 52px; padding: 0 14px; }
+      .roast-note { display: none; }
+      .hero { height: 176px; }
+      .hero-copy { width: 75%; padding: 18px 15px; }
+      .hero-copy h1 { font-size: 23px; }
+      .workspace { display: block; border: 0; padding-bottom: 72px; }
+      .builder { padding: 22px 14px 29px; }
+      .taste-tabs { grid-template-columns: 1fr; }
+      .taste-tabs label { min-height: 40px; border-right: 0; border-bottom: 1px solid var(--ink); }
+      .taste-tabs label:last-child { border-bottom: 0; }
+      .taste-detail { grid-template-columns: 6px 1fr; }
+      .profile { grid-column: 2; }
+      .receipt { padding: 24px 16px 29px; border-left: 0; border-top: 1px solid var(--line); }
+      .receipt .total { padding-top: 22px; }
+      .receipt .subscribe { display: none; }
+      .mobile-checkout { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 68px; padding: 8px 11px; border-top: 1px solid #314043; background: var(--ink); color: white; }
+      .mobile-checkout span { display: block; color: #bed0cc; font-size: 10px; }
+      .mobile-checkout strong { display: block; margin-top: 2px; font-size: 13px; }
+      .mobile-checkout button { min-height: 43px; padding: 8px 12px; border: 0; background: var(--coral); color: white; font-weight: 800; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction: compact roaster counter with a receipt and tasting signal. CANDIDATE only. -->
+  <a class="skip" href="#builder">Skip to subscription options</a>
+  <header><div class="brand">Stillroom Coffee</div><div class="roast-note">Small lots / roasted to order</div><div class="secure">Subscription checkout</div></header>
+  <section class="hero" aria-labelledby="hero-title">
+    <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="Fresh roasted coffee beans in a wooden scoop">
+    <div class="hero-copy"><p>Your coffee, on repeat</p><h1 id="hero-title">Pick by taste. We handle the rotation.</h1></div>
+  </section>
+  <main class="workspace">
+    <form class="builder" id="builder">
+      <p class="builder-intro">Choose the profile you enjoy, then set the amount and delivery rhythm.</p>
+      <fieldset>
+        <legend><span class="step-no">01</span>Taste</legend>
+        <div class="taste-tabs">
+          <input type="radio" name="taste-b" id="taste-bright-b" checked><label for="taste-bright-b">Bright &amp; juicy</label>
+          <input type="radio" name="taste-b" id="taste-sweet-b"><label for="taste-sweet-b">Sweet &amp; balanced</label>
+          <input type="radio" name="taste-b" id="taste-deep-b"><label for="taste-deep-b">Deep &amp; chocolatey</label>
+        </div>
+        <div class="taste-detail"><span aria-hidden="true"></span><div><strong>Citrus, ripe peach, and jasmine.</strong><span>Fresh, fruit-forward coffees with a clean finish.</span></div><span class="profile">Bright &amp; juicy</span></div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="step-no">02</span>Amount</legend>
+        <div class="order-table">
+          <input type="radio" name="amount-b" id="one-b"><label for="one-b"><span class="mark"></span><span>1 bag <span class="meta">/ 12 oz</span></span><span class="value">$24</span></label>
+          <input type="radio" name="amount-b" id="two-b" checked><label for="two-b"><span class="mark"></span><span>2 bags <span class="meta">/ 24 oz total</span><span class="save">Save $4</span></span><span class="value">$44</span></label>
+          <input type="radio" name="amount-b" id="three-b"><label for="three-b"><span class="mark"></span><span>3 bags <span class="meta">/ 36 oz total</span></span><span class="value">$63</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="step-no">03</span>Delivery rhythm</legend>
+        <div class="order-table">
+          <input type="radio" name="cadence-b" id="two-weeks-b" checked><label for="two-weeks-b"><span class="mark"></span><span>Every 2 weeks <span class="meta">/ 2-3 daily cups</span></span><span class="value">Selected</span></label>
+          <input type="radio" name="cadence-b" id="four-weeks-b"><label for="four-weeks-b"><span class="mark"></span><span>Every 4 weeks <span class="meta">/ about 1 daily cup</span></span><span></span></label>
+        </div>
+      </fieldset>
+    </form>
+    <aside class="receipt" aria-labelledby="receipt-title">
+      <p class="receipt-title">Order review</p><h2 id="receipt-title">Your Stillroom rotation</h2>
+      <div class="tasting-stamp"><strong>Bright &amp; juicy</strong><span>Citrus, ripe peach, and jasmine. Whole bean.</span></div>
+      <dl class="receipt-lines"><div><dt>Amount</dt><dd>2 bags</dd></div><div><dt>Cadence</dt><dd>Every 2 weeks</dd></div><div><dt>First shipment</dt><dd>July 24, 2026</dd></div><div><dt>Shipping</dt><dd>Included</dd></div></dl>
+      <div class="total"><div class="total-row"><span>Recurring total</span><strong>$44 every 2 weeks</strong></div><button class="subscribe" type="button">Subscribe - $44 every 2 weeks</button><p class="reassure">Pause, skip, or cancel before your next roast date.</p></div>
+    </aside>
+  </main>
+  <div class="mobile-checkout"><div><span>Bright &amp; juicy / 2 bags</span><strong>$44 every 2 weeks</strong></div><button type="button">Subscribe</button></div>
+</body>
+</html>

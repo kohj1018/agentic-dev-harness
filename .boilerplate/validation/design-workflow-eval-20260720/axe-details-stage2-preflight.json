@@ -1,0 +1,577 @@
+[
+  {
+    "id": "concepts/b0/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".stepmark"
+            ],
+            "html": "<div class=\"stepmark\">Build your subscription</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #d94f3d, background color: #fffdf8, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(1) > .notes"
+            ],
+            "html": "<span class=\"notes\">berry · citrus · floral</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.68 (foreground color: #d94f3d, background color: #edf5ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(2) > .notes"
+            ],
+            "html": "<span class=\"notes\">caramel · stone fruit</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #d94f3d, background color: #fffdf8, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(3) > .notes"
+            ],
+            "html": "<span class=\"notes\">cocoa · toasted nuts</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #d94f3d, background color: #fffdf8, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "button"
+            ],
+            "html": "<button type=\"button\" class=\"subscribe\">Review subscription</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.08 (foreground color: #ffffff, background color: #d94f3d, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b0/coffee-b",
+    "violations": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "help": "Elements must only use permitted ARIA attributes",
+        "nodes": [
+          {
+            "target": [
+              ".progress"
+            ],
+            "html": "<div class=\"progress\" aria-label=\"Step 1 of 3\"><span></span><span></span><span></span></div>",
+            "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a div with no valid role attribute."
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".subscribe"
+            ],
+            "html": "<button type=\"button\" class=\"subscribe\">Continue to subscribe</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.36 (foreground color: #ffffff, background color: #d7462f, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b1/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<p class=\"eyebrow\">Build your subscription</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.79 (foreground color: #d95b45, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b2/coffee-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "fieldset:nth-child(2) > legend > .step-no"
+            ],
+            "html": "<span class=\"step-no\">01</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #d6573c, background color: #ffffff, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "fieldset:nth-child(3) > legend > .step-no"
+            ],
+            "html": "<span class=\"step-no\">02</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #d6573c, background color: #ffffff, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "fieldset:nth-child(4) > legend > .step-no"
+            ],
+            "html": "<span class=\"step-no\">03</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #d6573c, background color: #ffffff, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".subscribe"
+            ],
+            "html": "<button class=\"subscribe\" type=\"button\">Subscribe - $44 every 2 weeks</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #ffffff, background color: #d6573c, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b2/ops-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".updated"
+            ],
+            "html": "<p class=\"updated\">Updated 02:17 UTC</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.35 (foreground color: #7d888d, background color: #f5f6f3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b3/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<div class=\"eyebrow\">Build your recurring order</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #d34b3b, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "button"
+            ],
+            "html": "<button class=\"cta\" type=\"button\">Continue to subscribe</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #ffffff, background color: #d34b3b, font size: 11.3pt (15px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b3/coffee-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "button"
+            ],
+            "html": "<button class=\"review\" type=\"button\">Review subscription</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.26 (foreground color: #ffffff, background color: #d64b39, font size: 11.3pt (15px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<div class=\"eyebrow\">Choose your coffee routine</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.26 (foreground color: #d64b39, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/b3/ops-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".mitigate"
+            ],
+            "html": "<button class=\"mitigate\">Move to Mitigating</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.14 (foreground color: #ffffff, background color: #d94d35, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b0/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "fieldset:nth-child(2) > legend > .num"
+            ],
+            "html": "<span class=\"num\">01</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #c9505b, background color: #ffffff, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label[for=\"bright-a-r2\"] > span:nth-child(2) > small"
+            ],
+            "html": "<small>Citrus, ripe peach, and jasmine.</small>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #65706f, background color: #f7e4e4, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "fieldset:nth-child(3) > legend > .num"
+            ],
+            "html": "<span class=\"num\">02</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #c9505b, background color: #ffffff, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "fieldset:nth-child(4) > legend > .num"
+            ],
+            "html": "<span class=\"num\">03</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #c9505b, background color: #ffffff, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "div:nth-child(1) > dt"
+            ],
+            "html": "<dt>Amount</dt>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "div:nth-child(2) > dt"
+            ],
+            "html": "<dt>Delivery</dt>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "div:nth-child(3) > dt"
+            ],
+            "html": "<dt>First shipment</dt>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "div:nth-child(4) > dt"
+            ],
+            "html": "<dt>Shipping</dt>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".total > span"
+            ],
+            "html": "<span>Recurring total</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".subscribe"
+            ],
+            "html": "<button class=\"subscribe\" type=\"button\">Subscribe - $44 every 2 weeks</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #ffffff, background color: #c9505b, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".reassure"
+            ],
+            "html": "<p class=\"reassure\">Pause, skip, or cancel before your next roast date.</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #65706f, background color: #f1eee5, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b0/coffee-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".club"
+            ],
+            "html": "<div class=\"club\">Coffee Club</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.12 (foreground color: #ffffff, background color: #d84f36, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".header-note"
+            ],
+            "html": "<div class=\"header-note\">Fresh roast / flexible delivery</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.12 (foreground color: #ffffff, background color: #d84f36, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".subscribe"
+            ],
+            "html": "<button class=\"subscribe\" type=\"button\">Subscribe - $44 every 2 weeks</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.12 (foreground color: #ffffff, background color: #d84f36, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b0/ops-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".current > span"
+            ],
+            "html": "<span>Current since 02:02</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #8d8d8d, background color: #102749, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".btn:nth-child(3)"
+            ],
+            "html": "<button class=\"btn\" type=\"button\">Assign to me</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.34 (foreground color: #ffffff, background color: #4589ff, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b1/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<div class=\"eyebrow\">Build your recurring order</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.11 (foreground color: #d94b3d, background color: #fffdf8, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(1) > .flavors"
+            ],
+            "html": "<span class=\"flavors\">berry · citrus · floral</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.62 (foreground color: #d94b3d, background color: #e7f1ec, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(2) > .flavors"
+            ],
+            "html": "<span class=\"flavors\">caramel · stone fruit</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.11 (foreground color: #d94b3d, background color: #fffdf8, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "label:nth-child(3) > .flavors"
+            ],
+            "html": "<span class=\"flavors\">cocoa · toasted nuts</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.11 (foreground color: #d94b3d, background color: #fffdf8, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "button"
+            ],
+            "html": "<button class=\"cta\" type=\"button\">Review subscription</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #ffffff, background color: #d94b3d, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b1/coffee-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<div class=\"eyebrow\">No origin quiz</div>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #dc4c33, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              "button"
+            ],
+            "html": "<button type=\"button\" class=\"cta\">Review subscription</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #dc4c33, font size: 11.3pt (15px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b1/ops-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".now > b"
+            ],
+            "html": "<b>Ownership</b>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #ffffff, background color: #e5532f, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".mitigate"
+            ],
+            "html": "<button class=\"mitigate\">Move to Mitigating</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #ffffff, background color: #e5532f, font size: 10.5pt (14px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b2/coffee-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".eyebrow"
+            ],
+            "html": "<p class=\"eyebrow\">Build your subscription</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.31 (foreground color: #ce4f43, background color: #fffefa, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b3/ops-a",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".publish"
+            ],
+            "html": "<button class=\"btn publish\" type=\"button\">Publish update</button>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.22 (foreground color: #ffffff, background color: #2f8a6c, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concepts/r2-b3/ops-b",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".head > .eyebrow"
+            ],
+            "html": "<p class=\"eyebrow\">3 active</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.77 (foreground color: #768286, background color: #f8faf8, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".incident > .eyebrow"
+            ],
+            "html": "<p class=\"eyebrow\">INC-2417 / Payments API</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #768286, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".event:nth-child(2) > .source"
+            ],
+            "html": "<span class=\"source\">Alert</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #768286, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".event:nth-child(3) > .source"
+            ],
+            "html": "<span class=\"source\">Deploy</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #768286, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".event:nth-child(4) > .source"
+            ],
+            "html": "<span class=\"source\">Database</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #768286, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".event:nth-child(5) > .source"
+            ],
+            "html": "<span class=\"source\">System</span>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #768286, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".audience"
+            ],
+            "html": "<p class=\"audience\">Status page + #incident-updates</p>",
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.81 (foreground color: #768286, background color: #fafbf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ]
+  }
+]

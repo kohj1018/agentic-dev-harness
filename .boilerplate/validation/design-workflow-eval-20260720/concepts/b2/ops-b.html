@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpsRelay Incident Workspace</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f6f3;
+      --surface: #ffffff;
+      --ink: #172127;
+      --muted: #5e6a70;
+      --quiet: #7d888d;
+      --line: #d7dcda;
+      --line-strong: #aab4b2;
+      --critical: #a52822;
+      --critical-soft: #fae9e7;
+      --amber: #8a5c00;
+      --amber-soft: #fff2cf;
+      --blue: #155f8f;
+      --blue-soft: #e7f3fa;
+      --green: #1d6a4c;
+      --focus: #075e9a;
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--paper); color: var(--ink); }
+    body { margin: 0; min-width: 320px; }
+    button, textarea { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    button:focus-visible, textarea:focus-visible, a:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .skip {
+      position: fixed; left: 12px; top: -60px; z-index: 20;
+      padding: 10px 14px; background: var(--ink); color: white;
+    }
+    .skip:focus { top: 12px; }
+    header {
+      min-height: 58px; display: flex; align-items: center; gap: 20px;
+      padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--surface);
+    }
+    .brand { font-weight: 760; font-size: 18px; }
+    .shift { color: var(--muted); font-size: 13px; }
+    .header-alert {
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+      color: var(--critical); font-size: 13px; font-weight: 700;
+    }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--critical); }
+    main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 28px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 9px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 2px; font-size: 21px; line-height: 1.25; }
+    .eyebrow { margin: 0 0 3px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .updated { margin: 0; color: var(--quiet); font-size: 12px; }
+    .queue-wrap { border: 1px solid var(--line-strong); background: var(--surface); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th {
+      padding: 9px 12px; border-bottom: 1px solid var(--line-strong); background: #ecefeb;
+      color: var(--muted); font-size: 11px; text-align: left; text-transform: uppercase;
+    }
+    td { padding: 11px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr.selected { background: var(--critical-soft); box-shadow: inset 4px 0 0 var(--critical); }
+    .incident-title { display: block; margin-top: 2px; font-weight: 720; }
+    .incident-id { color: var(--muted); font-size: 11px; }
+    .severity { display: inline-flex; gap: 6px; align-items: center; font-weight: 750; }
+    .severity::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .critical { color: var(--critical); }
+    .major { color: var(--amber); }
+    .owner-missing { color: var(--critical); font-weight: 700; }
+    .selected-incident {
+      margin-top: 16px; border: 1px solid var(--line-strong); background: var(--surface);
+    }
+    .incident-head {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px;
+      padding: 16px 18px; border-bottom: 1px solid var(--line);
+    }
+    .incident-head h2 { margin: 0 0 5px; font-size: 24px; line-height: 1.2; }
+    .impact { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+    .priority {
+      align-self: start; padding: 7px 9px; border: 1px solid #db9d99;
+      background: var(--critical-soft); color: var(--critical); font-size: 12px; font-weight: 760;
+    }
+    .tempo {
+      display: grid; grid-template-columns: repeat(4, 1fr); min-height: 84px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tempo-step { position: relative; padding: 14px 14px 12px 32px; border-right: 1px solid var(--line); }
+    .tempo-step:last-child { border-right: 0; }
+    .tempo-step::before {
+      content: ""; position: absolute; left: 13px; top: 18px; width: 9px; height: 9px;
+      border: 2px solid var(--line-strong); border-radius: 50%; background: var(--surface);
+    }
+    .tempo-step.done::before { border-color: var(--green); background: var(--green); }
+    .tempo-step.current { background: var(--blue-soft); }
+    .tempo-step.current::before { border-color: var(--blue); background: var(--blue); }
+    .tempo-step.blocked { background: var(--critical-soft); }
+    .tempo-step.blocked::before { border-color: var(--critical); }
+    .tempo-label { display: block; font-size: 12px; font-weight: 740; }
+    .tempo-time { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.3; }
+    .workbench { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, .75fr); }
+    .evidence { padding: 17px 18px 22px; border-right: 1px solid var(--line); }
+    .decision { padding: 17px 18px 22px; background: #fafbf9; }
+    h3 { margin-bottom: 11px; font-size: 14px; }
+    .evidence-row {
+      display: grid; grid-template-columns: 54px 92px minmax(0, 1fr); gap: 10px;
+      padding: 10px 0; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.42;
+    }
+    .evidence-row:last-of-type { border-bottom: 1px solid var(--line); }
+    time { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .source { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .stale {
+      margin: 12px 0 0; padding: 9px 11px; border-left: 3px solid var(--amber);
+      background: var(--amber-soft); color: #5d430d; font-size: 12px;
+    }
+    .owner-callout { margin-bottom: 14px; padding: 10px 11px; border: 1px solid #dfa9a6; background: var(--critical-soft); }
+    .owner-callout strong { display: block; color: var(--critical); font-size: 13px; }
+    .owner-callout span { display: block; margin-top: 2px; color: #6c4745; font-size: 12px; }
+    .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { min-height: 40px; padding: 8px 11px; border: 1px solid var(--ink); background: var(--ink); color: white; font-weight: 700; }
+    .btn.secondary { background: var(--surface); color: var(--ink); }
+    .btn:disabled { cursor: not-allowed; border-color: var(--line); background: #e6e9e6; color: var(--quiet); }
+    label { display: block; margin: 18px 0 7px; font-size: 12px; font-weight: 750; }
+    textarea { width: 100%; min-height: 126px; resize: vertical; padding: 10px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); line-height: 1.45; }
+    .audience { margin: 8px 0 11px; color: var(--muted); font-size: 11px; }
+    .publish { width: 100%; background: var(--blue); border-color: var(--blue); }
+    @media (max-width: 760px) {
+      header { min-height: 52px; padding: 0 14px; }
+      .shift { display: none; }
+      main { padding: 12px 12px 90px; }
+      .section-head { align-items: start; }
+      .updated { max-width: 100px; text-align: right; }
+      .queue-wrap { order: 3; margin-top: 14px; overflow: visible; border: 0; background: transparent; }
+      .queue-wrap table, .queue-wrap tbody { display: block; }
+      .queue-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .queue-wrap tr { display: grid; grid-template-columns: 1fr auto; margin-bottom: 7px; border: 1px solid var(--line); background: var(--surface); }
+      .queue-wrap tr.selected { border-color: #c9807c; box-shadow: inset 4px 0 0 var(--critical); }
+      .queue-wrap td { display: block; padding: 7px 10px; border: 0; }
+      .queue-wrap td:nth-child(2), .queue-wrap td:nth-child(3), .queue-wrap td:nth-child(4), .queue-wrap td:nth-child(5), .queue-wrap td:nth-child(6) { font-size: 11px; }
+      .queue-wrap td:nth-child(1) { grid-row: span 3; padding-top: 10px; }
+      .queue-wrap td:nth-child(2), .queue-wrap td:nth-child(3), .queue-wrap td:nth-child(4), .queue-wrap td:nth-child(5), .queue-wrap td:nth-child(6) { text-align: right; }
+      .selected-incident { display: flex; flex-direction: column; margin-top: 12px; }
+      .incident-head { grid-template-columns: 1fr; gap: 10px; padding: 14px; }
+      .incident-head h2 { font-size: 20px; }
+      .priority { justify-self: start; }
+      .tempo { grid-template-columns: 1fr 1fr; }
+      .tempo-step:nth-child(2) { border-right: 0; }
+      .tempo-step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .workbench { display: contents; }
+      .decision { order: 3; padding: 15px 14px 18px; border-bottom: 1px solid var(--line); }
+      .evidence { order: 4; padding: 15px 14px 19px; border-right: 0; }
+      .evidence-row { grid-template-columns: 47px minmax(0, 1fr); }
+      .source { grid-column: 2; grid-row: 1; }
+      .evidence-row span:last-child { grid-column: 2; }
+      .button-row { grid-template-columns: 1fr; }
+      textarea { min-height: 112px; }
+      .mobile-layout { display: flex; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction: comparison table with a horizontal lifecycle docket. CANDIDATE only. -->
+  <a class="skip" href="#selected">Skip to selected incident</a>
+  <header>
+    <div class="brand">OpsRelay</div>
+    <div class="shift">Night shift / US East</div>
+    <div class="header-alert"><span class="pulse" aria-hidden="true"></span>1 critical incident</div>
+  </header>
+  <main class="mobile-layout">
+    <section aria-labelledby="queue-title">
+      <div class="section-head">
+        <div><p class="eyebrow">Active queue</p><h1 id="queue-title">Incidents requiring attention</h1></div>
+        <p class="updated">Updated 02:17 UTC</p>
+      </div>
+      <div class="queue-wrap">
+        <table>
+          <thead><tr><th style="width:32%">Incident</th><th>Severity</th><th>Age</th><th>Service</th><th>State</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr class="selected" aria-current="true"><td><span class="incident-id">INC-2417</span><span class="incident-title">Elevated payment errors</span></td><td><span class="severity critical">P1 Critical</span></td><td>19m</td><td>Payments API</td><td>Investigating</td><td class="owner-missing">Unconfirmed</td></tr>
+            <tr><td><span class="incident-id">INC-2412</span><span class="incident-title">Login latency above SLO</span></td><td><span class="severity major">P2 Major</span></td><td>42m</td><td>Identity</td><td>Mitigating</td><td>A. Chen</td></tr>
+            <tr><td><span class="incident-id">INC-2409</span><span class="incident-title">Image processing delays</span></td><td><span class="severity major">P2 Major</span></td><td>1h 18m</td><td>Media pipeline</td><td>Monitoring</td><td>R. Singh</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <article class="selected-incident" id="selected" aria-labelledby="incident-title">
+      <div class="incident-head">
+        <div><p class="eyebrow">INC-2417 / Payments API</p><h2 id="incident-title">Elevated payment errors</h2><p class="impact">31% of payment attempts are failing in US and EU regions. Retries are elevated; no data loss is confirmed.</p></div>
+        <div class="priority">P1 Critical / 19m</div>
+      </div>
+      <div class="tempo" aria-label="Incident lifecycle">
+        <div class="tempo-step done"><span class="tempo-label">Declared</span><span class="tempo-time">01:58 / complete</span></div>
+        <div class="tempo-step current"><span class="tempo-label">Investigating</span><span class="tempo-time">02:02 / current for 15m</span></div>
+        <div class="tempo-step blocked"><span class="tempo-label">Mitigating</span><span class="tempo-time">Awaiting confirmed owner</span></div>
+        <div class="tempo-step"><span class="tempo-label">Monitoring</span><span class="tempo-time">Not started</span></div>
+      </div>
+      <div class="workbench">
+        <section class="evidence" aria-labelledby="evidence-title">
+          <h3 id="evidence-title">Evidence timeline</h3>
+          <div class="evidence-row"><time>02:17</time><span class="source">Alert</span><span>Checkout error rate grouped above 25% across US and EU regions.</span></div>
+          <div class="evidence-row"><time>02:13</time><span class="source">Deploy</span><span>API gateway release <strong>8d3f</strong>, 7 minutes before the spike.</span></div>
+          <div class="evidence-row"><time>02:08</time><span class="source">Database</span><span>Connection pool saturation reached 91%; write latency remains within range.</span></div>
+          <div class="evidence-row"><time>01:58</time><span class="source">System</span><span>Incident declared after the multi-region alert was confirmed.</span></div>
+          <p class="stale"><strong>Telemetry delayed:</strong> payment processor metrics are 4 minutes behind.</p>
+        </section>
+        <aside class="decision" aria-labelledby="decision-title">
+          <h3 id="decision-title">Next responsible action</h3>
+          <div class="owner-callout"><strong>No confirmed incident owner</strong><span>Assign ownership before changing lifecycle state.</span></div>
+          <div class="button-row"><button class="btn" type="button">Assign to me</button><button class="btn secondary" type="button" disabled>Move to Mitigating</button></div>
+          <label for="update">Stakeholder update</label>
+          <textarea id="update">Payment failures are elevated in US and EU regions. The team is investigating a recent API gateway release. No data loss is confirmed. Next update in 20 minutes.</textarea>
+          <p class="audience">Audience: Status page + #incident-updates</p>
+          <button class="btn publish" type="button">Publish update</button>
+        </aside>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

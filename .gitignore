@@ -28,3 +28,8 @@ docs/20-system/design-preview.html
 # 탐색 시안(_drafts)과 스크린샷 갤러리만 ephemeral.
 docs/20-system/prototypes/*/_drafts/
 docs/40-validation/visual/
+# design-workflow eval 근거 (ADR-058): 텍스트·데이터 산출물(REPORT/protocol/HTML/JSON/CJS)만 커밋,
+# 무거운 스크린샷(PNG/JPG)은 제외 — 판정 추적성은 텍스트로 충분, 이미지 재현 불필요.
+.boilerplate/validation/**/*.png
+.boilerplate/validation/**/*.jpg
+.boilerplate/validation/**/*.jpeg

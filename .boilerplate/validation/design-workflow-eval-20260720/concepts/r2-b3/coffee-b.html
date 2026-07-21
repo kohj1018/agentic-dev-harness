@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Configure a Stillroom specialty coffee subscription.">
+  <title>Choose your cup | Stillroom Coffee</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f6f5ef;
+      --white: #ffffff;
+      --ink: #111816;
+      --muted: #52605b;
+      --signal: #b83a24;
+      --cobalt: #174b9b;
+      --mint: #cce7da;
+      --yellow: #ffd44a;
+      --pale-blue: #e5edf8;
+      --line: #aeb8b3;
+      --radius: 5px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-synthesis: none;
+    }
+
+    * {
+      box-sizing: border-box;
+      letter-spacing: 0;
+    }
+
+    html {
+      background: var(--canvas);
+      color: var(--ink);
+    }
+
+    body {
+      min-width: 0;
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .masthead {
+      min-height: 64px;
+      border-bottom: 2px solid var(--ink);
+      background: var(--white);
+    }
+
+    .masthead-inner {
+      width: min(1220px, calc(100% - 40px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .brand em {
+      color: var(--signal);
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    .masthead-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .page {
+      width: min(1220px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 26px 0 54px;
+    }
+
+    .subscription-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 38px;
+      align-items: start;
+    }
+
+    .builder,
+    .review {
+      min-width: 0;
+    }
+
+    .product-heading {
+      display: grid;
+      grid-template-columns: 138px minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .product-image {
+      width: 138px;
+      aspect-ratio: 1 / 1;
+      margin: 0;
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--mint);
+      box-shadow: 7px 7px 0 var(--mint);
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--signal);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    h1 {
+      max-width: 680px;
+      margin: 0 0 7px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 42px;
+      line-height: 1.02;
+    }
+
+    .product-copy {
+      max-width: 590px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      width: 100%;
+      margin: 0 0 10px;
+      padding: 0;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .choice-question {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+    }
+
+    .choice-question strong {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+    }
+
+    .choice-question span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .taste-board {
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--white);
+    }
+
+    .taste-band {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(180px, 1fr) minmax(215px, 0.9fr);
+      gap: 16px;
+      align-items: center;
+      min-height: 96px;
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--ink);
+      background: var(--white);
+      cursor: pointer;
+    }
+
+    .taste-band:last-child {
+      border-bottom: 0;
+    }
+
+    .taste-band:hover {
+      background: var(--pale-blue);
+    }
+
+    .taste-band:has(input:checked) {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .taste-band:has(input:focus-visible) {
+      z-index: 1;
+      outline: 4px solid var(--cobalt);
+      outline-offset: -4px;
+    }
+
+    .radio-cell {
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+    }
+
+    .radio-cell span {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .radio-cell input {
+      width: 21px;
+      height: 21px;
+      margin: 0;
+      accent-color: var(--yellow);
+      cursor: pointer;
+    }
+
+    .taste-name {
+      min-width: 0;
+    }
+
+    .taste-name strong,
+    .taste-name span {
+      display: block;
+    }
+
+    .taste-name strong {
+      margin-bottom: 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      line-height: 1.05;
+    }
+
+    .taste-name span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .taste-band:has(input:checked) .taste-name span {
+      color: #d9e0dd;
+    }
+
+    .profile-plot {
+      display: grid;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .profile-row {
+      display: grid;
+      grid-template-columns: 72px minmax(80px, 1fr) 26px;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .taste-band:has(input:checked) .profile-row {
+      color: var(--white);
+    }
+
+    .profile-track {
+      height: 8px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 3px;
+    }
+
+    .profile-track i {
+      display: block;
+      min-width: 0;
+      background: #cbd3cf;
+    }
+
+    .profile-track[data-value="1"] i:nth-child(-n+1),
+    .profile-track[data-value="2"] i:nth-child(-n+2),
+    .profile-track[data-value="3"] i:nth-child(-n+3),
+    .profile-track[data-value="4"] i:nth-child(-n+4),
+    .profile-track[data-value="5"] i:nth-child(-n+5) {
+      background: var(--cobalt);
+    }
+
+    .taste-band:has(input:checked) .profile-track i {
+      background: #4c5652;
+    }
+
+    .taste-band:has(input:checked) .profile-track[data-value="1"] i:nth-child(-n+1),
+    .taste-band:has(input:checked) .profile-track[data-value="2"] i:nth-child(-n+2),
+    .taste-band:has(input:checked) .profile-track[data-value="3"] i:nth-child(-n+3),
+    .taste-band:has(input:checked) .profile-track[data-value="4"] i:nth-child(-n+4),
+    .taste-band:has(input:checked) .profile-track[data-value="5"] i:nth-child(-n+5) {
+      background: var(--yellow);
+    }
+
+    .delivery-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .control-block {
+      min-width: 0;
+    }
+
+    .control-block legend {
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--white);
+    }
+
+    .segment {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      place-items: center;
+      min-height: 66px;
+      padding: 8px 5px;
+      border-right: 2px solid var(--ink);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .segment:last-child {
+      border-right: 0;
+    }
+
+    .segment:has(input:checked) {
+      background: var(--cobalt);
+      color: var(--white);
+    }
+
+    .segment:has(input:focus-visible) {
+      z-index: 1;
+      outline: 4px solid var(--yellow);
+      outline-offset: -4px;
+    }
+
+    .segment input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .segment strong,
+    .segment small {
+      display: block;
+    }
+
+    .segment strong {
+      font-size: 13px;
+    }
+
+    .segment small {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .segment:has(input:checked) small {
+      color: #e0e8f5;
+    }
+
+    .review {
+      position: sticky;
+      top: 20px;
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: 8px 8px 0 var(--mint);
+    }
+
+    .review-title {
+      padding: 19px 20px 16px;
+      border-bottom: 2px solid var(--ink);
+      background: var(--yellow);
+    }
+
+    .review-label {
+      margin: 0 0 3px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .review h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .total {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .total span,
+    .total strong {
+      display: block;
+    }
+
+    .total span {
+      margin-bottom: 3px;
+      color: #cfd8d4;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .total strong {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 44px;
+      line-height: 0.9;
+    }
+
+    .total small {
+      max-width: 90px;
+      color: #d8e1dd;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .review-taste {
+      display: grid;
+      grid-template-columns: 13px minmax(0, 1fr);
+      gap: 12px;
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--pale-blue);
+    }
+
+    .taste-mark {
+      min-height: 48px;
+      background: var(--cobalt);
+    }
+
+    .review-taste span,
+    .review-taste strong,
+    .review-taste small {
+      display: block;
+    }
+
+    .review-taste span {
+      margin-bottom: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .review-taste strong {
+      margin-bottom: 2px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 20px;
+    }
+
+    .review-taste small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .review-details {
+      margin: 0;
+      padding: 6px 20px;
+    }
+
+    .review-details div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid #dce1de;
+    }
+
+    .review-details div:last-child {
+      border-bottom: 0;
+    }
+
+    .review-details dt {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .review-details dd {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .checkout {
+      padding: 14px 20px 20px;
+      border-top: 2px solid var(--ink);
+    }
+
+    .shipping {
+      margin: 0 0 11px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .subscribe-button {
+      width: 100%;
+      min-height: 50px;
+      border: 2px solid var(--signal);
+      border-radius: 3px;
+      background: var(--signal);
+      color: var(--white);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .subscribe-button:hover {
+      border-color: #8f2919;
+      background: #8f2919;
+    }
+
+    .subscribe-button:focus-visible {
+      outline: 4px solid var(--cobalt);
+      outline-offset: 3px;
+    }
+
+    .reassurance {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .mobile-order {
+      display: none;
+    }
+
+    @media (max-width: 980px) {
+      .subscription-form {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .review {
+        position: static;
+        width: min(100%, 640px);
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding-bottom: 82px;
+      }
+
+      .masthead-inner,
+      .page {
+        width: min(100% - 28px, 1220px);
+      }
+
+      .masthead,
+      .masthead-inner {
+        min-height: 56px;
+      }
+
+      .brand {
+        font-size: 21px;
+      }
+
+      .masthead-note {
+        font-size: 10px;
+      }
+
+      .page {
+        padding-top: 17px;
+      }
+
+      .product-heading {
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: 14px;
+        margin-bottom: 19px;
+      }
+
+      .product-image {
+        width: 92px;
+        box-shadow: 5px 5px 0 var(--mint);
+      }
+
+      .eyebrow {
+        font-size: 10px;
+      }
+
+      h1 {
+        margin-bottom: 4px;
+        font-size: 28px;
+      }
+
+      .product-copy {
+        font-size: 12px;
+      }
+
+      .choice-question {
+        display: block;
+      }
+
+      .choice-question strong {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 21px;
+      }
+
+      .taste-band {
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 10px;
+        min-height: 0;
+        padding: 12px 11px;
+      }
+
+      .radio-cell {
+        align-self: start;
+      }
+
+      .radio-cell span {
+        font-size: 10px;
+      }
+
+      .radio-cell input {
+        width: 19px;
+        height: 19px;
+      }
+
+      .taste-name strong {
+        font-size: 19px;
+      }
+
+      .taste-name span {
+        font-size: 11px;
+      }
+
+      .profile-plot {
+        grid-column: 2;
+      }
+
+      .delivery-controls {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 21px;
+      }
+
+      .review {
+        width: 100%;
+        box-shadow: 5px 5px 0 var(--mint);
+      }
+
+      .review .subscribe-button {
+        display: none;
+      }
+
+      .mobile-order {
+        position: fixed;
+        z-index: 20;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 70px;
+        padding: 9px max(12px, env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+        border-top: 2px solid var(--ink);
+        background: var(--yellow);
+      }
+
+      .mobile-selection {
+        min-width: 0;
+      }
+
+      .mobile-selection strong,
+      .mobile-selection span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mobile-selection strong {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 13px;
+      }
+
+      .mobile-selection span {
+        color: #444a47;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .mobile-price strong,
+      .mobile-price span {
+        display: block;
+        text-align: right;
+      }
+
+      .mobile-price strong {
+        font-size: 19px;
+      }
+
+      .mobile-price span {
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .mobile-order .subscribe-button {
+        width: auto;
+        min-height: 44px;
+        padding: 0 14px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .masthead-inner,
+      .page {
+        width: min(100% - 22px, 1220px);
+      }
+
+      .masthead-note {
+        display: none;
+      }
+
+      .product-heading {
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 11px;
+      }
+
+      .product-image {
+        width: 78px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .product-copy {
+        font-size: 11px;
+      }
+
+      .profile-row {
+        grid-template-columns: 64px minmax(64px, 1fr) 24px;
+        gap: 6px;
+        font-size: 9px;
+      }
+
+      .segment {
+        min-height: 62px;
+        padding-right: 3px;
+        padding-left: 3px;
+      }
+
+      .segment strong {
+        font-size: 11px;
+      }
+
+      .segment small {
+        font-size: 9px;
+      }
+
+      .review-title,
+      .total,
+      .review-taste,
+      .checkout {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .review-details {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .mobile-order {
+        gap: 7px;
+        padding-right: 9px;
+        padding-left: 9px;
+      }
+
+      .mobile-order .subscribe-button {
+        padding-right: 10px;
+        padding-left: 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <p class="brand">Stillroom <em>Coffee</em></p>
+      <p class="masthead-note">Roasted fresh · shipped on your schedule</p>
+    </div>
+  </header>
+
+  <main class="page">
+    <form class="subscription-form" id="subscription-b" action="#" method="post">
+      <div class="builder">
+        <section class="product-heading" aria-labelledby="page-title">
+          <figure class="product-image">
+            <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="Roasted coffee beans beside a white cup." width="640" height="640">
+          </figure>
+          <div>
+            <p class="eyebrow">Roaster's choice · whole bean</p>
+            <h1 id="page-title">Find your cup, then keep it coming.</h1>
+            <p class="product-copy">A rotating pair of freshly roasted coffees, chosen for the cup you like to brew.</p>
+          </div>
+        </section>
+
+        <fieldset>
+          <legend>
+            <span class="choice-question">
+              <strong>Choose your taste</strong>
+              <span>Compare brightness and body</span>
+            </span>
+          </legend>
+          <div class="taste-board">
+            <label class="taste-band">
+              <span class="radio-cell">
+                <span>01</span>
+                <input type="radio" name="taste" value="bright-juicy" checked>
+              </span>
+              <span class="taste-name">
+                <strong>Bright &amp; Juicy</strong>
+                <span>Citrus, berry, floral · light roast</span>
+              </span>
+              <span class="profile-plot" aria-label="Cup profile: brightness 5 out of 5, body 2 out of 5">
+                <span class="profile-row">
+                  <span>Brightness</span>
+                  <span class="profile-track" data-value="5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>5/5</span>
+                </span>
+                <span class="profile-row">
+                  <span>Body</span>
+                  <span class="profile-track" data-value="2" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>2/5</span>
+                </span>
+              </span>
+            </label>
+
+            <label class="taste-band">
+              <span class="radio-cell">
+                <span>02</span>
+                <input type="radio" name="taste" value="smooth-sweet">
+              </span>
+              <span class="taste-name">
+                <strong>Smooth &amp; Sweet</strong>
+                <span>Caramel, stone fruit, cocoa · medium-light roast</span>
+              </span>
+              <span class="profile-plot" aria-label="Cup profile: brightness 3 out of 5, body 3 out of 5">
+                <span class="profile-row">
+                  <span>Brightness</span>
+                  <span class="profile-track" data-value="3" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>3/5</span>
+                </span>
+                <span class="profile-row">
+                  <span>Body</span>
+                  <span class="profile-track" data-value="3" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>3/5</span>
+                </span>
+              </span>
+            </label>
+
+            <label class="taste-band">
+              <span class="radio-cell">
+                <span>03</span>
+                <input type="radio" name="taste" value="deep-comforting">
+              </span>
+              <span class="taste-name">
+                <strong>Deep &amp; Comforting</strong>
+                <span>Dark chocolate, toasted nuts · medium roast</span>
+              </span>
+              <span class="profile-plot" aria-label="Cup profile: brightness 1 out of 5, body 5 out of 5">
+                <span class="profile-row">
+                  <span>Brightness</span>
+                  <span class="profile-track" data-value="1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>1/5</span>
+                </span>
+                <span class="profile-row">
+                  <span>Body</span>
+                  <span class="profile-track" data-value="5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                  <span>5/5</span>
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="delivery-controls">
+          <fieldset class="control-block">
+            <legend>2. How much?</legend>
+            <div class="segmented">
+              <label class="segment">
+                <input type="radio" name="amount" value="1-bag">
+                <span><strong>1 bag</strong><small>$24 / delivery</small></span>
+              </label>
+              <label class="segment">
+                <input type="radio" name="amount" value="2-bags" checked>
+                <span><strong>2 bags</strong><small>$44 / delivery</small></span>
+              </label>
+              <label class="segment">
+                <input type="radio" name="amount" value="3-bags">
+                <span><strong>3 bags</strong><small>$63 / delivery</small></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="control-block">
+            <legend>3. How often?</legend>
+            <div class="segmented">
+              <label class="segment">
+                <input type="radio" name="cadence" value="weekly">
+                <span><strong>Every week</strong><small>Next: Jul 24</small></span>
+              </label>
+              <label class="segment">
+                <input type="radio" name="cadence" value="two-weeks" checked>
+                <span><strong>Every 2 weeks</strong><small>Next: Jul 24</small></span>
+              </label>
+              <label class="segment">
+                <input type="radio" name="cadence" value="four-weeks">
+                <span><strong>Every 4 weeks</strong><small>Next: Jul 24</small></span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <aside class="review" aria-labelledby="review-title">
+        <div class="review-title">
+          <p class="review-label">Review before subscribing</p>
+          <h2 id="review-title">Your recurring order</h2>
+        </div>
+        <div class="total">
+          <div><span>Recurring total</span><strong>$44</strong></div>
+          <small>Every 2 weeks · Free US shipping</small>
+        </div>
+        <div class="review-taste">
+          <span class="taste-mark" aria-hidden="true"></span>
+          <span>
+            <span>Taste direction</span>
+            <strong>Bright &amp; Juicy</strong>
+            <small>Brightness 5/5 · Body 2/5</small>
+          </span>
+        </div>
+        <dl class="review-details">
+          <div><dt>Amount</dt><dd>2 × 12 oz bags</dd></div>
+          <div><dt>Delivery</dt><dd>Every 2 weeks</dd></div>
+          <div><dt>First shipment</dt><dd><time datetime="2026-07-24">July 24, 2026</time></dd></div>
+        </dl>
+        <div class="checkout">
+          <p class="shipping">Your card is charged $44 before each shipment.</p>
+          <button class="subscribe-button" type="submit">Subscribe for $44</button>
+          <p class="reassurance">Pause or cancel before your next roast date.</p>
+        </div>
+      </aside>
+
+      <div class="mobile-order" aria-label="Selected recurring order">
+        <div class="mobile-selection">
+          <strong>Bright &amp; Juicy</strong>
+          <span>2 bags · every 2 weeks</span>
+        </div>
+        <div class="mobile-price">
+          <strong>$44</strong>
+          <span>recurring</span>
+        </div>
+        <button class="subscribe-button" type="submit">Subscribe</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

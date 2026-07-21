@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mobile overlap fixture</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px; color: #17211b; background: #f5f7f2; font: 16px/1.4 Arial, sans-serif; }
+    .panel { position: relative; max-width: 680px; min-height: 280px; padding: 32px; border: 1px solid #ccd5ca; background: white; }
+    .badge { position: absolute; top: 24px; right: 24px; padding: 8px 12px; background: #fff1c2; border: 1px solid #8a6812; }
+    button { position: absolute; right: 24px; bottom: 24px; min-height: 44px; padding: 0 20px; color: white; background: #175c3a; border: 0; }
+    @media (max-width: 400px) {
+      body { padding: 12px; }
+      .panel { min-height: 250px; padding: 20px; }
+      .badge { top: auto; right: 20px; bottom: 24px; width: 170px; text-align: center; z-index: 2; }
+      button { right: 20px; bottom: 24px; width: 170px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="panel"><h1>Roaster's Choice</h1><p>Two bags every two weeks.</p><span class="badge" data-critical="status">Ships Jul 28</span><button data-critical="action">Subscribe for $48</button></main>
+</body>
+</html>

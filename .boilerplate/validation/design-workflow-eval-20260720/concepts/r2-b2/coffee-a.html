@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stillroom Coffee Tasting Line</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f0;
+      --surface: #fffefa;
+      --ink: #17201c;
+      --muted: #5d6862;
+      --line: #c9d0cb;
+      --forest: #164d3b;
+      --forest-dark: #0c3427;
+      --mint: #dbeadc;
+      --coral: #ce4f43;
+      --coral-soft: #f8dfd9;
+      --blue: #2e64b4;
+      --blue-soft: #dce8f7;
+      --focus: #1458ce;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--bg); }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--bg); font-family: "Segoe UI", "Helvetica Neue", sans-serif; font-size: 15px; line-height: 1.45; letter-spacing: 0; }
+    button, input { font: inherit; letter-spacing: 0; }
+    button:focus-visible, input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+    h1, h2, p { margin-top: 0; }
+
+    .header { min-height: 60px; display: flex; align-items: center; gap: 18px; padding: 8px 20px; color: #ffffff; background: var(--forest-dark); }
+    .brand { font-family: Georgia, serif; font-size: 22px; font-weight: 700; }
+    .brand-note { color: #c9ddd3; font-size: 12px; }
+    .header-price { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .page { display: grid; grid-template-columns: minmax(290px, 34%) minmax(440px, 1fr) minmax(250px, 290px); min-height: calc(100vh - 60px); }
+
+    .image-panel { position: relative; min-height: 540px; overflow: hidden; background: #2e332f; }
+    .image-panel img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .image-copy { position: absolute; right: 16px; bottom: 18px; left: 16px; padding: 13px 14px; color: var(--ink); background: rgba(255, 255, 255, .94); border-top: 5px solid var(--coral); }
+    .image-copy strong { display: block; font-family: Georgia, serif; font-size: 19px; }
+    .image-copy span { color: var(--muted); font-size: 12px; }
+
+    .form-panel { min-width: 0; padding: 25px clamp(20px, 3.4vw, 46px) 40px; background: var(--surface); }
+    .eyebrow { margin: 0 0 6px; color: var(--coral); font-size: 11px; font-weight: 850; text-transform: uppercase; }
+    h1 { max-width: 650px; margin-bottom: 8px; font-family: Georgia, serif; font-size: 29px; line-height: 1.14; }
+    .intro { max-width: 650px; margin-bottom: 21px; color: var(--muted); }
+
+    .tasting-line { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 22px; }
+    .tasting-line::before { content: ""; position: absolute; top: 14px; right: 11%; left: 11%; height: 2px; background: var(--line); }
+    .line-step { position: relative; z-index: 1; text-align: center; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .line-step span { width: 29px; height: 29px; display: grid; place-items: center; margin: 0 auto 5px; border: 2px solid var(--forest); border-radius: 50%; color: var(--forest); background: var(--surface); }
+    .line-step.current span { color: #ffffff; background: var(--forest); }
+    .line-step.final span { border-color: var(--coral); color: var(--coral); }
+
+    fieldset { margin: 0 0 20px; padding: 0; border: 0; }
+    legend { width: 100%; margin-bottom: 9px; font-weight: 780; }
+    .helper { margin-left: 6px; color: var(--muted); font-size: 11px; font-weight: 500; }
+    .taste-list { display: grid; gap: 7px; }
+    .choice, .segment { position: relative; display: block; cursor: pointer; }
+    .choice input, .segment input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice-body { min-height: 61px; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--radius); background: #ffffff; }
+    .radio { width: 17px; height: 17px; border: 2px solid #79847e; border-radius: 50%; background: #ffffff; }
+    .choice input:checked + .choice-body { border-color: var(--forest); background: var(--mint); box-shadow: inset 0 0 0 1px var(--forest); }
+    .choice input:checked + .choice-body .radio { border: 5px solid var(--forest); }
+    .choice-title { display: block; font-weight: 760; }
+    .choice-notes { display: block; color: var(--muted); font-size: 12px; }
+    .fit { padding: 3px 7px; border-radius: 4px; color: #75271f; background: var(--coral-soft); font-size: 10px; font-weight: 800; }
+
+    .control-row { display: grid; grid-template-columns: .8fr 1.2fr; gap: 18px; }
+    .segments { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .segment span { min-height: 41px; display: grid; place-items: center; padding: 7px 8px; border: 1px solid var(--line); border-radius: var(--radius); background: #ffffff; text-align: center; font-size: 12px; font-weight: 720; }
+    .segment input:checked + span { border-color: var(--blue); color: #ffffff; background: var(--blue); }
+
+    .summary { padding: 25px 18px; background: var(--blue-soft); border-left: 1px solid #b7c8dc; }
+    .summary-inner { position: sticky; top: 18px; }
+    .summary h2 { margin-bottom: 15px; font-family: Georgia, serif; font-size: 20px; }
+    .summary dl { margin: 0; }
+    .row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #b3c4d6; }
+    .row dt { color: #4b6070; }
+    .row dd { margin: 0; text-align: right; font-weight: 730; }
+    .total { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding: 18px 0 4px; }
+    .total span { color: #4b6070; }
+    .total strong { font-family: Georgia, serif; font-size: 29px; font-variant-numeric: tabular-nums; }
+    .per { margin: 0 0 15px; color: #4b6070; font-size: 11px; text-align: right; }
+    .subscribe { width: 100%; min-height: 47px; border: 1px solid var(--forest-dark); border-radius: var(--radius); color: #ffffff; background: var(--forest-dark); font-weight: 820; cursor: pointer; }
+    .subscribe:hover { background: var(--forest); }
+    .reassure { margin: 11px 0 0; color: #475c6b; font-size: 11px; text-align: center; }
+    .mobile-buy { display: none; }
+
+    @media (max-width: 980px) {
+      .page { grid-template-columns: 32% minmax(0, 1fr); }
+      .summary { grid-column: 1 / -1; border-top: 1px solid #b7c8dc; border-left: 0; }
+      .summary-inner { position: static; display: grid; grid-template-columns: 1fr 240px; gap: 20px; }
+      .summary h2 { grid-column: 1 / -1; margin-bottom: 0; }
+    }
+    @media (max-width: 650px) {
+      body { padding-bottom: 74px; font-size: 14px; }
+      .header { min-height: 52px; padding: 7px 12px; }
+      .brand { font-size: 19px; }
+      .brand-note, .header-price { display: none; }
+      .page { display: flex; min-height: auto; flex-direction: column; }
+      .image-panel { min-height: 150px; max-height: 150px; }
+      .image-copy { right: 10px; bottom: 10px; left: 10px; padding: 7px 9px; }
+      .image-copy strong { font-size: 15px; }
+      .form-panel { padding: 17px 12px 22px; }
+      h1 { font-size: 23px; }
+      .intro { margin-bottom: 15px; }
+      .tasting-line { margin-bottom: 17px; }
+      .line-step { font-size: 8px; }
+      .line-step span { width: 25px; height: 25px; }
+      .tasting-line::before { top: 12px; }
+      .choice-body { min-height: 56px; padding: 7px 9px; }
+      .fit { display: none; }
+      .control-row { grid-template-columns: 1fr; gap: 15px; }
+      .control-row fieldset { margin-bottom: 0; }
+      .cadence .segments { grid-template-columns: 1fr; }
+      .cadence .segment span { min-height: 38px; }
+      .summary { padding: 18px 12px 22px; }
+      .summary-inner { display: block; }
+      .summary h2 { margin-bottom: 8px; }
+      .summary .total, .summary .per, .summary .subscribe, .summary .reassure { display: none; }
+      .mobile-buy { position: fixed; z-index: 10; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; min-height: 68px; padding: 8px 12px; color: #ffffff; background: var(--forest-dark); border-top: 1px solid #08241b; }
+      .mobile-price strong { display: block; font-size: 17px; font-variant-numeric: tabular-nums; }
+      .mobile-price span { display: block; color: #c9ddd3; font-size: 10px; }
+      .mobile-buy .subscribe { width: auto; min-width: 112px; color: var(--forest-dark); background: #ffffff; border-color: #ffffff; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction. Standalone evaluation artifact; not a design SSOT. -->
+  <header class="header"><div class="brand">Stillroom Coffee</div><div class="brand-note">Roaster's rotation / fresh every week</div><div class="header-price">Selected: $42 every 2 weeks</div></header>
+  <main class="page">
+    <section class="image-panel" aria-label="Subscription coffee"><img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="Fresh roasted coffee beans in a wooden scoop"><div class="image-copy"><strong>A fresh single origin, matched to your taste.</strong><span>We choose the coffee. You choose the direction.</span></div></section>
+    <form class="form-panel"><p class="eyebrow">Build your subscription</p><h1>Choose what sounds good, not what sounds technical.</h1><p class="intro">Three plain-language choices lead to one recurring order. You can change the route before any roast date.</p>
+      <div class="tasting-line" aria-label="Subscription steps"><div class="line-step current"><span>1</span>Taste</div><div class="line-step"><span>2</span>Amount</div><div class="line-step"><span>3</span>Cadence</div><div class="line-step final"><span>4</span>Review</div></div>
+      <fieldset><legend>1. Pick a taste direction <span class="helper">No quiz required</span></legend><div class="taste-list">
+        <label class="choice"><input type="radio" name="taste" checked><span class="choice-body"><span class="radio" aria-hidden="true"></span><span><span class="choice-title">Bright &amp; juicy</span><span class="choice-notes">Citrus, berry, floral; lively and clean</span></span><span class="fit">Fruit-forward</span></span></label>
+        <label class="choice"><input type="radio" name="taste"><span class="choice-body"><span class="radio" aria-hidden="true"></span><span><span class="choice-title">Balanced &amp; sweet</span><span class="choice-notes">Caramel, ripe fruit, round finish</span></span><span class="fit">Easygoing</span></span></label>
+        <label class="choice"><input type="radio" name="taste"><span class="choice-body"><span class="radio" aria-hidden="true"></span><span><span class="choice-title">Deep &amp; chocolatey</span><span class="choice-notes">Cocoa, toasted nuts, full body</span></span><span class="fit">Comforting</span></span></label>
+      </div></fieldset>
+      <div class="control-row"><fieldset><legend>2. How much?</legend><div class="segments"><label class="segment"><input type="radio" name="amount"><span>1 bag</span></label><label class="segment"><input type="radio" name="amount" checked><span>2 bags</span></label><label class="segment"><input type="radio" name="amount"><span>3 bags</span></label></div></fieldset><fieldset class="cadence"><legend>3. How often?</legend><div class="segments"><label class="segment"><input type="radio" name="cadence"><span>Every week</span></label><label class="segment"><input type="radio" name="cadence" checked><span>Every 2 weeks</span></label><label class="segment"><input type="radio" name="cadence"><span>Every 4 weeks</span></label></div></fieldset></div>
+    </form>
+    <aside class="summary" aria-labelledby="summary-title"><div class="summary-inner"><div><h2 id="summary-title">Review your recurring order</h2><dl><div class="row"><dt>Taste</dt><dd>Bright &amp; juicy</dd></div><div class="row"><dt>Amount</dt><dd>2 x 250 g bags</dd></div><div class="row"><dt>Delivery</dt><dd>Every 2 weeks</dd></div><div class="row"><dt>First shipment</dt><dd>Friday, Jul 24</dd></div></dl></div><div><div class="total"><span>Recurring total</span><strong>$42</strong></div><p class="per">per shipment, delivery included</p><button class="subscribe" type="button">Subscribe for $42</button><p class="reassure">Pause, skip, or cancel before any roast date.</p></div></div></aside>
+  </main>
+  <div class="mobile-buy" aria-label="Mobile order action"><div class="mobile-price"><strong>$42 every 2 weeks</strong><span>Bright &amp; juicy / 2 bags / ships Jul 24</span></div><button class="subscribe" type="button">Subscribe</button></div>
+</body>
+</html>

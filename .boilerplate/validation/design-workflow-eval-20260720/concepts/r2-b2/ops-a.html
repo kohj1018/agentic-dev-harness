@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpsRelay Command Workspace</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef1ef;
+      --surface: #ffffff;
+      --surface-2: #f7f8f7;
+      --ink: #171b19;
+      --muted: #5e6863;
+      --line: #ccd3cf;
+      --line-strong: #929d97;
+      --danger: #a12c2a;
+      --danger-soft: #f8e4e1;
+      --amber: #815200;
+      --amber-soft: #fff0c7;
+      --teal: #00675c;
+      --teal-soft: #dceeea;
+      --focus: #175bcc;
+      --radius: 5px;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+    button, textarea { font: inherit; letter-spacing: 0; }
+    button:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    button { cursor: pointer; }
+
+    .header {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 9px 18px;
+      color: #ffffff;
+      background: #1a201d;
+      border-bottom: 1px solid #313a35;
+    }
+    .brand { font-size: 17px; font-weight: 800; }
+    .rotation { color: #cbd2ce; }
+    .utc { margin-left: auto; color: #d7e9df; font-family: ui-monospace, "Cascadia Code", monospace; font-variant-numeric: tabular-nums; }
+    .stale {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 18px;
+      color: #583700;
+      background: var(--amber-soft);
+      border-bottom: 1px solid #d5af63;
+    }
+    .stale strong { text-transform: uppercase; }
+    .stale button { border: 0; color: inherit; background: transparent; text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 320px) minmax(430px, 1fr) minmax(250px, 300px);
+      min-height: calc(100vh - 96px);
+    }
+    .queue, .action-spine { background: var(--surface); }
+    .queue { border-right: 1px solid var(--line); }
+    .action-spine { border-left: 1px solid var(--line); }
+    .panel-head {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 7px; font-size: 25px; line-height: 1.14; }
+    h2 { margin: 0; font-size: 14px; }
+    h3 { margin-bottom: 6px; font-size: 14px; }
+    .small { color: var(--muted); font-size: 12px; }
+
+    .queue-list { list-style: none; margin: 0; padding: 0; }
+    .incident {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 9px;
+      padding: 13px 14px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+      background: #ffffff;
+      text-align: left;
+    }
+    .incident:hover { background: var(--surface-2); }
+    .incident.selected { background: var(--danger-soft); box-shadow: inset 4px 0 0 var(--danger); }
+    .sev {
+      min-height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .sev.p1 { color: var(--danger); background: #ffffff; }
+    .sev.p2 { color: var(--amber); background: #ffffff; }
+    .incident-name { display: block; margin-bottom: 3px; font-weight: 760; }
+    .incident-meta { display: block; color: var(--muted); font-size: 12px; }
+    .incident-meta.alert { color: var(--danger); font-weight: 750; }
+    .age { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+    .detail { min-width: 0; padding: 23px clamp(18px, 3vw, 38px) 38px; }
+    .labels { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+    .label { min-height: 25px; padding: 3px 7px; border-radius: 4px; font-size: 12px; font-weight: 780; }
+    .label.phase { color: #563600; background: var(--amber-soft); border: 1px solid #d4a958; }
+    .label.owner { color: #7f211f; background: var(--danger-soft); border: 1px solid #d98c85; }
+    .label.service { color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); font-family: ui-monospace, "Cascadia Code", monospace; }
+    .lede { max-width: 720px; color: #3f4743; font-size: 15px; }
+    .impact-table { width: 100%; margin: 20px 0; border-collapse: collapse; background: var(--surface); }
+    .impact-table th, .impact-table td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; }
+    .impact-table th { width: 34%; color: var(--muted); background: var(--surface-2); font-size: 12px; font-weight: 650; }
+    .impact-table td { font-weight: 740; font-variant-numeric: tabular-nums; }
+    .timeline { margin-top: 24px; }
+    .timeline h2 { margin-bottom: 10px; }
+    .events { list-style: none; margin: 0; padding: 0; }
+    .event { display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .event time { color: var(--muted); font-family: ui-monospace, "Cascadia Code", monospace; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .event p { margin: 0; }
+
+    .action-spine { min-width: 0; }
+    .action-status { padding: 16px; color: #ffffff; background: var(--danger); }
+    .action-status span { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .action-status strong { display: block; margin-top: 3px; font-size: 17px; }
+    .action-body { padding: 17px 16px 24px; }
+    .action-body > p { color: #4c4542; }
+    .primary, .secondary {
+      width: 100%;
+      min-height: 42px;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-weight: 780;
+    }
+    .primary { border: 1px solid var(--teal); color: #ffffff; background: var(--teal); }
+    .primary:hover { background: #004f47; }
+    .secondary { border: 1px solid var(--line-strong); color: var(--ink); background: #ffffff; }
+    .secondary:hover { background: var(--surface-2); }
+    .transition { margin: 15px 0; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .transition-label { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .transition strong { display: block; margin-top: 4px; }
+    .update-label { display: block; margin: 17px 0 6px; font-weight: 740; }
+    textarea { width: 100%; min-height: 116px; padding: 10px; resize: vertical; border: 1px solid var(--line-strong); border-radius: var(--radius); color: var(--ink); background: #ffffff; }
+    .publish { margin-top: 8px; }
+
+    @media (max-width: 940px) {
+      .layout { grid-template-columns: 280px minmax(0, 1fr); }
+      .action-spine { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+      .action-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+      .action-body h3, .action-body > p, .transition { grid-column: 1 / -1; }
+      .action-body form { grid-column: 1 / -1; }
+    }
+    @media (max-width: 620px) {
+      .header { min-height: 51px; padding: 8px 12px; }
+      .rotation { display: none; }
+      .stale { align-items: flex-start; padding: 8px 12px; }
+      .stale span { display: block; }
+      .layout { display: flex; flex-direction: column; }
+      .detail { order: 1; padding: 16px 12px 22px; }
+      .action-spine { order: 2; border-right: 0; }
+      .queue { order: 3; border-top: 1px solid var(--line); border-right: 0; }
+      h1 { font-size: 20px; }
+      .impact-table th { width: 43%; }
+      .timeline .events li:nth-child(n+4) { display: none; }
+      .action-body { display: block; padding: 14px 12px 20px; }
+      .action-body textarea { min-height: 82px; }
+      .queue-list li:nth-child(n+4) { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction. Standalone evaluation artifact; not a design SSOT. -->
+  <header class="header"><div class="brand">OpsRelay</div><div class="rotation">Night rotation / Mina Chen</div><time class="utc" datetime="2026-07-20T02:17:00Z">02:17 UTC</time></header>
+  <div class="stale" role="status"><div><strong>Data delayed</strong> <span>Last complete sync 42 seconds ago. Command actions remain available.</span></div><button type="button">Retry sync</button></div>
+  <main class="layout">
+    <aside class="queue" aria-labelledby="queue-title">
+      <div class="panel-head"><h2 id="queue-title">Active incidents</h2><span class="small">4 open</span></div>
+      <ol class="queue-list">
+        <li><button class="incident selected" type="button" aria-current="true"><span class="sev p1">P1</span><span><span class="incident-name">Checkout write failures</span><span class="incident-meta">payments-api / Investigating</span><span class="incident-meta alert">Owner unconfirmed</span></span><span class="age">18m</span></button></li>
+        <li><button class="incident" type="button"><span class="sev p2">P2</span><span><span class="incident-name">Search latency elevated</span><span class="incident-meta">catalog-search / Monitoring</span><span class="incident-meta">A. Shah</span></span><span class="age">31m</span></button></li>
+        <li><button class="incident" type="button"><span class="sev p2">P2</span><span><span class="incident-name">Webhook delivery lag</span><span class="incident-meta">events-worker / Mitigating</span><span class="incident-meta">L. Park</span></span><span class="age">47m</span></button></li>
+        <li><button class="incident" type="button"><span class="sev p2">P2</span><span><span class="incident-name">EU image uploads failing</span><span class="incident-meta">media-ingest / Investigating</span><span class="incident-meta">M. Diaz</span></span><span class="age">54m</span></button></li>
+      </ol>
+    </aside>
+
+    <section class="detail" aria-labelledby="incident-title">
+      <div class="labels"><span class="sev p1">P1</span><span class="label phase">Investigating</span><span class="label owner">Owner unconfirmed</span><span class="label service">payments-api</span></div>
+      <h1 id="incident-title">Checkout write failures</h1>
+      <p class="lede">Card payments are authorized, but order writes are timing out in us-east-1. Customers see a retry message after submitting payment.</p>
+      <table class="impact-table"><tbody><tr><th scope="row">Customer impact</th><td>27% checkout failures</td></tr><tr><th scope="row">Incident age</th><td>18 minutes</td></tr><tr><th scope="row">Latest signal</th><td>Database pool at 96%</td></tr></tbody></table>
+      <section class="timeline" aria-labelledby="timeline-title"><h2 id="timeline-title">Evidence stream</h2><ol class="events"><li class="event"><time>02:16:48</time><p><strong>Alert grouped:</strong> checkout write timeout crossed 20% for 5 minutes.</p></li><li class="event"><time>02:12:05</time><p><strong>Deploy checked:</strong> no payments-api deploys in the last 3 hours.</p></li><li class="event"><time>02:08:31</time><p><strong>Database signal:</strong> primary connection pool reached 96% saturation.</p></li><li class="event"><time>01:59:42</time><p><strong>First symptom:</strong> order persistence p95 exceeded 8 seconds.</p></li></ol></section>
+    </section>
+
+    <aside class="action-spine" aria-labelledby="action-title">
+      <div class="action-status"><span>Next responsible action</span><strong>Confirm incident command</strong></div>
+      <div class="action-body"><h3 id="action-title">Ownership is blocking mitigation</h3><p>No incident commander has acknowledged this P1. Assign an owner before changing the lifecycle state.</p><button class="primary" type="button">Assign myself</button><button class="secondary" type="button">Choose another owner</button><div class="transition"><span class="transition-label">Then move state</span><strong>Investigating -> Mitigating</strong></div><button class="secondary" type="button">Begin mitigation</button><form><label class="update-label" for="update-a">Stakeholder update</label><textarea id="update-a">We are investigating elevated checkout failures in us-east-1. Payment authorization is healthy; order writes are delayed. Next update by 02:35 UTC.</textarea><button class="primary publish" type="button">Publish update</button></form></div>
+    </aside>
+  </main>
+</body>
+</html>

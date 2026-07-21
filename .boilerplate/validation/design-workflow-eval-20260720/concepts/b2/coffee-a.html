@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stillroom Coffee Subscription</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f2ec;
+      --white: #fffef9;
+      --ink: #142c32;
+      --muted: #5e6c69;
+      --line: #c9cec6;
+      --coral: #c94f39;
+      --coral-soft: #f7e3dc;
+      --blue: #245e72;
+      --leaf: #4d7154;
+      --focus: #126b92;
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--paper); color: var(--ink); }
+    button, input { font: inherit; letter-spacing: 0; }
+    button, label { cursor: pointer; }
+    input:focus-visible + label, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .skip { position: fixed; top: -60px; left: 12px; z-index: 20; padding: 10px 14px; background: var(--ink); color: white; }
+    .skip:focus { top: 12px; }
+    header {
+      height: 64px; display: flex; align-items: center; padding: 0 28px;
+      border-bottom: 1px solid var(--line); background: var(--white);
+    }
+    .brand { font-family: Georgia, serif; font-size: 23px; font-weight: 700; }
+    .step { margin-left: auto; color: var(--muted); font-size: 12px; }
+    main { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(400px, 1.05fr) minmax(280px, .72fr); min-height: calc(100vh - 64px); }
+    .product { position: relative; min-height: 620px; overflow: hidden; background: #233a3c; }
+    .product img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .product::after { content: ""; position: absolute; inset: auto 0 0; height: 150px; background: rgba(15, 35, 37, .72); }
+    .product-copy { position: absolute; z-index: 1; left: 26px; right: 26px; bottom: 25px; color: white; }
+    .product-copy p { margin: 0 0 5px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .product-copy h1 { margin: 0; max-width: 360px; font-family: Georgia, serif; font-size: 30px; line-height: 1.12; }
+    .configure { padding: 30px clamp(24px, 3vw, 52px) 46px; background: var(--white); }
+    .intro { margin: 0 0 25px; max-width: 540px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    fieldset { margin: 0; padding: 0; border: 0; }
+    fieldset + fieldset { margin-top: 27px; }
+    legend { width: 100%; margin-bottom: 11px; font-family: Georgia, serif; font-size: 19px; font-weight: 700; }
+    .number { display: inline-flex; width: 23px; height: 23px; align-items: center; justify-content: center; margin-right: 8px; border: 1px solid var(--ink); border-radius: 50%; font-family: "Segoe UI", sans-serif; font-size: 11px; }
+    input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .taste-line { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+    .taste-line::before { content: ""; position: absolute; top: -2px; left: 0; width: 33.333%; height: 3px; background: var(--coral); }
+    .taste-line label { min-height: 106px; padding: 13px 13px 11px; border-right: 1px solid var(--line); }
+    .taste-line label:last-child { border-right: 0; }
+    .taste-name { display: block; margin-bottom: 6px; font-weight: 760; line-height: 1.25; }
+    .taste-note { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .taste-line input:checked + label { background: var(--coral-soft); color: #7b251a; }
+    .taste-line input:checked + label .taste-note { color: #74453d; }
+    .choice-list { border-top: 1px solid var(--line); }
+    .choice-list label { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 51px; padding: 9px 5px; border-bottom: 1px solid var(--line); }
+    .radio-mark { width: 17px; height: 17px; border: 1px solid #87938d; border-radius: 50%; background: white; }
+    .choice-list input:checked + label .radio-mark { border: 5px solid var(--blue); }
+    .choice-list input:checked + label { color: var(--blue); font-weight: 700; }
+    .choice-detail { color: var(--muted); font-size: 12px; font-weight: 400; }
+    .price { font-variant-numeric: tabular-nums; font-weight: 700; }
+    .save { margin-left: 5px; color: var(--leaf); font-size: 11px; font-weight: 700; }
+    .summary { display: flex; flex-direction: column; padding: 31px 26px; background: var(--ink); color: white; }
+    .summary .eyebrow { margin: 0 0 10px; color: #a9c4c2; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .summary h2 { margin: 0 0 26px; font-family: Georgia, serif; font-size: 25px; }
+    .flavor-thread { display: grid; grid-template-columns: 16px 1fr; gap: 12px; margin-bottom: 21px; }
+    .thread { position: relative; width: 2px; margin-left: 7px; background: var(--coral); }
+    .thread::before, .thread::after { content: ""; position: absolute; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); }
+    .thread::before { top: 3px; } .thread::after { bottom: 3px; }
+    .flavor-thread strong { display: block; margin-bottom: 4px; }
+    .flavor-thread span { color: #c7d5d3; font-size: 12px; line-height: 1.45; }
+    dl { margin: 0; border-top: 1px solid #476066; }
+    dl div { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid #476066; }
+    dt { color: #afc4c2; font-size: 12px; }
+    dd { margin: 0; text-align: right; font-size: 13px; font-weight: 700; }
+    .total { margin-top: auto; padding-top: 28px; }
+    .recurring { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+    .recurring span { color: #afc4c2; font-size: 12px; }
+    .recurring strong { font-family: Georgia, serif; font-size: 21px; text-align: right; }
+    .subscribe { width: 100%; min-height: 48px; border: 0; background: var(--coral); color: white; font-weight: 760; }
+    .reassure { margin: 11px 0 0; color: #afc4c2; font-size: 11px; line-height: 1.45; text-align: center; }
+    .mobile-checkout { display: none; }
+    @media (max-width: 850px) {
+      header { height: 54px; padding: 0 16px; }
+      main { display: block; min-height: 0; padding-bottom: 78px; }
+      .product { min-height: 0; height: 225px; }
+      .product-copy { left: 18px; right: 18px; bottom: 18px; }
+      .product-copy h1 { font-size: 25px; }
+      .configure { padding: 23px 17px 31px; }
+      .intro { margin-bottom: 22px; }
+      .taste-line { grid-template-columns: 1fr; }
+      .taste-line::before { width: 3px; height: 100%; top: 0; }
+      .taste-line label { min-height: 73px; padding: 11px 13px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .summary { padding: 25px 18px 31px; }
+      .summary .total { padding-top: 24px; }
+      .summary .subscribe { display: none; }
+      .mobile-checkout { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 70px; padding: 9px 12px; border-top: 1px solid #486066; background: var(--ink); color: white; }
+      .mobile-checkout span { display: block; color: #b9cdca; font-size: 10px; }
+      .mobile-checkout strong { display: block; margin-top: 2px; font-size: 13px; }
+      .mobile-checkout button { min-height: 44px; padding: 8px 13px; border: 0; background: var(--coral); color: white; font-weight: 760; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction: image-led tasting ledger with a continuous flavor thread. CANDIDATE only. -->
+  <a class="skip" href="#configure">Skip to subscription options</a>
+  <header><div class="brand">Stillroom Coffee</div><div class="step">Build your subscription</div></header>
+  <main>
+    <section class="product" aria-labelledby="product-title">
+      <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="Fresh roasted coffee beans in a wooden scoop">
+      <div class="product-copy"><p>Roasted to order</p><h1 id="product-title">Coffee matched to how you like it</h1></div>
+    </section>
+    <form class="configure" id="configure">
+      <p class="intro">Start with the flavors you reach for. We will rotate fresh coffees within that taste profile.</p>
+      <fieldset>
+        <legend><span class="number">1</span>Choose your taste</legend>
+        <div class="taste-line">
+          <input type="radio" name="taste-a" id="taste-bright-a" checked><label for="taste-bright-a"><span class="taste-name">Bright &amp; juicy</span><span class="taste-note">Citrus, ripe peach, and jasmine.</span></label>
+          <input type="radio" name="taste-a" id="taste-sweet-a"><label for="taste-sweet-a"><span class="taste-name">Sweet &amp; balanced</span><span class="taste-note">Caramel, red apple, and cocoa.</span></label>
+          <input type="radio" name="taste-a" id="taste-deep-a"><label for="taste-deep-a"><span class="taste-name">Deep &amp; chocolatey</span><span class="taste-note">Dark cocoa, roasted nut, and spice.</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="number">2</span>How much coffee?</legend>
+        <div class="choice-list">
+          <input type="radio" name="amount-a" id="one-a"><label for="one-a"><span class="radio-mark"></span><span>1 bag <span class="choice-detail">12 oz</span></span><span class="price">$24</span></label>
+          <input type="radio" name="amount-a" id="two-a" checked><label for="two-a"><span class="radio-mark"></span><span>2 bags <span class="choice-detail">24 oz total</span><span class="save">Save $4</span></span><span class="price">$44</span></label>
+          <input type="radio" name="amount-a" id="three-a"><label for="three-a"><span class="radio-mark"></span><span>3 bags <span class="choice-detail">36 oz total</span></span><span class="price">$63</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span class="number">3</span>How often?</legend>
+        <div class="choice-list">
+          <input type="radio" name="cadence-a" id="two-weeks-a" checked><label for="two-weeks-a"><span class="radio-mark"></span><span>Every 2 weeks <span class="choice-detail">For 2-3 daily cups</span></span><span></span></label>
+          <input type="radio" name="cadence-a" id="four-weeks-a"><label for="four-weeks-a"><span class="radio-mark"></span><span>Every 4 weeks <span class="choice-detail">For about 1 daily cup</span></span><span></span></label>
+        </div>
+      </fieldset>
+    </form>
+    <aside class="summary" aria-labelledby="summary-title">
+      <p class="eyebrow">Your subscription</p><h2 id="summary-title">Bright, fresh, and ready to brew</h2>
+      <div class="flavor-thread"><span class="thread" aria-hidden="true"></span><div><strong>Bright &amp; juicy</strong><span>Citrus, ripe peach, and jasmine. Whole bean, roasted for your next shipment.</span></div></div>
+      <dl><div><dt>Amount</dt><dd>2 bags</dd></div><div><dt>Delivery</dt><dd>Every 2 weeks</dd></div><div><dt>First shipment</dt><dd>July 24, 2026</dd></div><div><dt>Shipping</dt><dd>Included</dd></div></dl>
+      <div class="total"><div class="recurring"><span>Recurring total</span><strong>$44 every 2 weeks</strong></div><button class="subscribe" type="button">Subscribe - $44 every 2 weeks</button><p class="reassure">Pause, skip, or cancel before your next roast date.</p></div>
+    </aside>
+  </main>
+  <div class="mobile-checkout"><div><span>2 bags / every 2 weeks</span><strong>$44 recurring</strong></div><button type="button">Subscribe</button></div>
+</body>
+</html>

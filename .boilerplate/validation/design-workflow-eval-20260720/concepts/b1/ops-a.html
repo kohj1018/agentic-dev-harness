@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpsRelay Incident Command</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f3f4f1;
+      --surface: #ffffff;
+      --surface-muted: #e8ebe7;
+      --ink: #151917;
+      --muted: #5d6661;
+      --line: #cfd5d0;
+      --line-strong: #9ba49e;
+      --critical: #a72d2a;
+      --critical-soft: #f8e5e2;
+      --warning: #875500;
+      --warning-soft: #fff0c7;
+      --active: #0c6659;
+      --active-soft: #dceee9;
+      --focus: #1457d9;
+      --radius: 6px;
+      --shadow: 0 1px 2px rgba(15, 23, 19, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--canvas); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+    button { font: inherit; letter-spacing: 0; }
+    button:focus-visible, a:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .app-header {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 18px;
+      background: #151917;
+      color: #ffffff;
+      border-bottom: 1px solid #303633;
+    }
+    .brand { font-weight: 760; font-size: 17px; }
+    .shift {
+      color: #c7cec9;
+      padding-left: 18px;
+      border-left: 1px solid #49504c;
+    }
+    .header-actions { margin-left: auto; display: flex; gap: 8px; }
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #626b66;
+      border-radius: var(--radius);
+      color: #ffffff;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .freshness {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 18px;
+      background: var(--warning-soft);
+      color: #5f3b00;
+      border-bottom: 1px solid #dcb665;
+      font-weight: 650;
+    }
+    .freshness span { font-weight: 500; }
+    .freshness button {
+      border: 0;
+      color: #5f3b00;
+      background: transparent;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(280px, 330px) minmax(420px, 1fr) minmax(260px, 310px);
+      min-height: calc(100vh - 94px);
+    }
+    .queue, .evidence { background: var(--surface); }
+    .queue { border-right: 1px solid var(--line); }
+    .evidence { border-left: 1px solid var(--line); }
+    .section-head {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 4px; font-size: 22px; line-height: 1.2; }
+    h2 { margin: 0; font-size: 15px; line-height: 1.25; }
+    h3 { margin-bottom: 6px; font-size: 14px; }
+    .count {
+      min-width: 26px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--surface-muted);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .queue-list { list-style: none; margin: 0; padding: 0; }
+    .incident {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 45px 1fr auto;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+      background: #ffffff;
+      text-align: left;
+      cursor: pointer;
+    }
+    .incident:hover { background: #f7f8f6; }
+    .incident.selected {
+      background: var(--critical-soft);
+      box-shadow: inset 4px 0 0 var(--critical);
+    }
+    .severity {
+      align-self: start;
+      padding: 3px 5px;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+    }
+    .severity.p1 { color: var(--critical); background: #ffffff; }
+    .severity.p2 { color: var(--warning); background: #ffffff; }
+    .incident-title { display: block; margin-bottom: 3px; font-weight: 720; }
+    .incident-meta { display: block; color: var(--muted); font-size: 12px; }
+    .age { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+
+    .command { min-width: 0; padding: 22px 24px 40px; }
+    .incident-kicker {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .state-label, .owner-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .state-label { color: #684000; background: var(--warning-soft); border: 1px solid #d5ac55; }
+    .owner-label { color: #8f211f; background: var(--critical-soft); border: 1px solid #db918a; }
+    .service-label { color: var(--muted); font-family: ui-monospace, "Cascadia Code", monospace; }
+    .summary-line { max-width: 730px; color: #343b37; font-size: 15px; }
+
+    .impact {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 22px 0;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .metric { min-width: 0; padding: 14px 16px; }
+    .metric + .metric { border-left: 1px solid var(--line); }
+    .metric dt { color: var(--muted); font-size: 12px; }
+    .metric dd { margin: 3px 0 0; font-weight: 760; font-variant-numeric: tabular-nums; }
+
+    .next-action {
+      padding: 18px;
+      border: 1px solid #d58c86;
+      border-radius: var(--radius);
+      background: #fff8f7;
+    }
+    .next-action h2 { margin-bottom: 7px; }
+    .next-action p { margin-bottom: 16px; color: #4e3c39; }
+    .action-row { display: flex; flex-wrap: wrap; gap: 9px; }
+    .primary, .secondary {
+      min-height: 40px;
+      padding: 8px 13px;
+      border-radius: var(--radius);
+      font-weight: 740;
+      cursor: pointer;
+    }
+    .primary { border: 1px solid var(--critical); color: #ffffff; background: var(--critical); }
+    .primary:hover { background: #84221f; }
+    .secondary { border: 1px solid var(--line-strong); color: var(--ink); background: #ffffff; }
+    .secondary:hover { background: var(--surface-muted); }
+
+    .update-form { margin-top: 22px; }
+    .update-label { display: block; margin-bottom: 7px; font-weight: 720; }
+    .update-box {
+      width: 100%;
+      min-height: 78px;
+      padding: 11px 12px;
+      resize: vertical;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: #ffffff;
+      font: inherit;
+    }
+    .update-box:focus { outline: 3px solid var(--focus); outline-offset: 1px; }
+    .form-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .evidence-list { list-style: none; margin: 0; padding: 0 16px 24px; }
+    .event { position: relative; padding: 16px 0 16px 22px; border-bottom: 1px solid var(--line); }
+    .event::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 2px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--active);
+    }
+    .event::after {
+      content: "";
+      position: absolute;
+      top: 29px;
+      bottom: -17px;
+      left: 5px;
+      width: 1px;
+      background: var(--line);
+    }
+    .event:last-child::after { display: none; }
+    .event time { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .event p { margin: 0; }
+
+    .mobile-queue-title { display: none; }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 270px minmax(0, 1fr); }
+      .evidence { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+      .evidence-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .event::after { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 13px; }
+      .app-header { min-height: 52px; padding: 8px 12px; }
+      .shift { display: none; }
+      .header-actions .icon-button:first-child { display: none; }
+      .freshness { align-items: flex-start; padding: 8px 12px; }
+      .freshness span { display: block; }
+      .workspace { display: flex; flex-direction: column; }
+      .command { order: 1; padding: 16px 12px 24px; }
+      .queue { order: 2; border-top: 1px solid var(--line); border-right: 0; }
+      .evidence { order: 3; }
+      .command h1 { font-size: 19px; }
+      .summary-line { font-size: 14px; }
+      .impact { grid-template-columns: 1fr; margin: 16px 0; }
+      .metric { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 9px 12px; }
+      .metric + .metric { border-top: 1px solid var(--line); border-left: 0; }
+      .action-row { display: grid; grid-template-columns: 1fr 1fr; }
+      .primary, .secondary { width: 100%; }
+      .form-foot { flex-direction: column; }
+      .queue .section-head { min-height: 48px; }
+      .incident { grid-template-columns: 42px 1fr auto; padding: 12px; }
+      .queue-list li:nth-child(n+4) { display: none; }
+      .evidence-list { display: block; padding: 0 12px 20px; }
+      .event { padding-left: 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- GENERATED concept direction. Standalone evaluation artifact; not a design SSOT. -->
+  <header class="app-header">
+    <div class="brand">OpsRelay</div>
+    <div class="shift">Night rotation / Mina Chen</div>
+    <div class="header-actions">
+      <button class="icon-button" type="button" aria-label="Open command menu">/</button>
+      <button class="icon-button" type="button" aria-label="Open notifications">3</button>
+    </div>
+  </header>
+
+  <div class="freshness" role="status">
+    <div>Data delayed <span>Last full sync 42 seconds ago. Incident actions are still available.</span></div>
+    <button type="button">Retry sync</button>
+  </div>
+
+  <main class="workspace">
+    <aside class="queue" aria-labelledby="queue-heading">
+      <div class="section-head">
+        <h2 id="queue-heading">Active incidents</h2>
+        <span class="count" aria-label="4 active incidents">4</span>
+      </div>
+      <ol class="queue-list">
+        <li>
+          <button class="incident selected" type="button" aria-current="true">
+            <span class="severity p1">P1</span>
+            <span><span class="incident-title">Checkout write failures</span><span class="incident-meta">payments-api / Investigating / Owner unconfirmed</span></span>
+            <span class="age">18m</span>
+          </button>
+        </li>
+        <li>
+          <button class="incident" type="button">
+            <span class="severity p2">P2</span>
+            <span><span class="incident-title">Search latency elevated</span><span class="incident-meta">catalog-search / Monitoring / A. Shah</span></span>
+            <span class="age">31m</span>
+          </button>
+        </li>
+        <li>
+          <button class="incident" type="button">
+            <span class="severity p2">P2</span>
+            <span><span class="incident-title">Webhook delivery lag</span><span class="incident-meta">events-worker / Mitigating / L. Park</span></span>
+            <span class="age">47m</span>
+          </button>
+        </li>
+        <li>
+          <button class="incident" type="button">
+            <span class="severity p2">P2</span>
+            <span><span class="incident-title">EU image uploads failing</span><span class="incident-meta">media-ingest / Investigating / M. Diaz</span></span>
+            <span class="age">54m</span>
+          </button>
+        </li>
+      </ol>
+    </aside>
+
+    <section class="command" aria-labelledby="incident-title">
+      <div class="incident-kicker">
+        <span class="severity p1">P1</span>
+        <span class="state-label">Investigating</span>
+        <span class="owner-label">Owner unconfirmed</span>
+        <span class="service-label">payments-api</span>
+      </div>
+      <h1 id="incident-title">Checkout write failures</h1>
+      <p class="summary-line">Card payments are authorized, but order writes are timing out in us-east-1. Customers see a retry message after submitting payment.</p>
+
+      <dl class="impact">
+        <div class="metric"><dt>Customer impact</dt><dd>27% checkout failures</dd></div>
+        <div class="metric"><dt>Incident age</dt><dd>18 minutes</dd></div>
+        <div class="metric"><dt>Latest signal</dt><dd>DB pool at 96%</dd></div>
+      </dl>
+
+      <section class="next-action" aria-labelledby="next-heading">
+        <h2 id="next-heading">Next handoff: confirm command, then mitigate</h2>
+        <p>No incident commander has acknowledged ownership. Assign yourself or name another lead before changing state.</p>
+        <div class="action-row">
+          <button class="primary" type="button">Assign myself</button>
+          <button class="secondary" type="button">Choose another owner</button>
+          <button class="secondary" type="button">Begin mitigation</button>
+        </div>
+      </section>
+
+      <form class="update-form">
+        <label class="update-label" for="stakeholder-update">Stakeholder update</label>
+        <textarea class="update-box" id="stakeholder-update">We are investigating elevated checkout failures in us-east-1. Payment authorization is healthy; order writes are delayed. Next update by 02:35 UTC.</textarea>
+        <div class="form-foot"><span>Posts to #incident-checkout and status workspace</span><button class="secondary" type="button">Publish update</button></div>
+      </form>
+    </section>
+
+    <aside class="evidence" aria-labelledby="evidence-heading">
+      <div class="section-head">
+        <h2 id="evidence-heading">Evidence stream</h2>
+        <span class="age">UTC</span>
+      </div>
+      <ol class="evidence-list">
+        <li class="event"><time>02:16:48</time><p><strong>Alert grouped</strong><br>Checkout write timeout crossed 20% for 5 minutes.</p></li>
+        <li class="event"><time>02:12:05</time><p><strong>Deploy checked</strong><br>No payments-api deploys in the last 3 hours.</p></li>
+        <li class="event"><time>02:08:31</time><p><strong>Database signal</strong><br>Primary connection pool reached 96% saturation.</p></li>
+        <li class="event"><time>01:59:42</time><p><strong>First symptom</strong><br>Order persistence p95 exceeded 8 seconds.</p></li>
+      </ol>
+    </aside>
+  </main>
+</body>
+</html>
