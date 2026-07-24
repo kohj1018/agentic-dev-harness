@@ -4,7 +4,7 @@
 
 ## 이 가이드를 쓰는 법 (먼저 읽기)
 
-- **순서가 곧 의존관계다.** Phase 1(거버넌스 기반)을 먼저 해야 이후 ADR들이 참조할 검증 방법·링크 체커가 존재한다. Phase 3(디자인)은 Phase 4(경험 계약)가 참조하는 게이트를 먼저 놓는다.
+- **순서가 곧 의존관계다.** Phase 1에서 변경 검증 방법과 디자인 거버넌스 ADR을 먼저 확정한다. Phase 3(디자인 구현)은 Phase 4(경험 계약)가 참조하는 게이트를 먼저 놓는다.
 - **날짜**: 아래 ADR amendment/신규 ADR의 날짜는 placeholder다(가이드 작성 중 `2026-07-20`·`2026-07-21`이 혼재). **실제로 커밋하는 날짜 하나로 통일해 기입**한다(placeholder를 그대로 두지 말 것). (거버넌스 스킴의 grandfather 판정용 *생성일*은 실제 ADR 생성일이므로 바꾸지 않는다 — amendment 날짜만 통일.)
 - **원문 인용 규칙**: "기존:" 블록은 저장소의 현재 원문 그대로다. 편집 시 그 문자열을 찾아 "변경:"으로 교체한다. 줄번호는 참고용이며(파일이 편집되며 밀린다) 실제 매칭은 문자열로 한다.
 - **커밋**: 각 커밋 메시지는 영어 Conventional Commits 한 줄이다. 제시된 위치에서 커밋한다. 커밋 전 관련 문서와 구현 범위가 일치하는지 확인한다(AGENTS.md 규율).
@@ -23,27 +23,27 @@
 | INST-6 · INST-4a · INST-4b | **`ADR-051` Amendment 4** (fan-out 자동 판정 + 회수 규율 + PM 고정) | **amend 4개째 → `## 현재 유효 결정` 요약 섹션 신설 필수**(ADR-045 D5 — 트리거: amend 4개+ *또는* 정정/뒤집기 amend) |
 | HN-4 | **`ADR-050` Amendment 1** (dispatcher 사전판정 금지) | ADR-050 현재 amend 0개 |
 | HN-5 | **`ADR-010` Amendment 5** (도구별 memory 비캐노니컬) | ADR-010 현재 amend 4개 |
-| HN-2 · HN-1 | **`ADR-047` Amendment 1** (변경 검증법 + 링크 체커 러너) | |
-| RD-1 (graduation 영속) | **`ADR-014`** 회고 스키마 amend | MILESTONE_TEMPLATE 동반 |
+| HN-2 | **`ADR-047` Amendment 1** (변경 검증법) | 보일러플레이트 공통 검증 런타임은 추가하지 않음 |
+| RD-1 (graduation 영속) | **`ADR-014` Amendment 3** (회고 graduation 영속) | MILESTONE_TEMPLATE 동반 |
 
 - **amendment 양식** (모든 amend 공통): 헤딩 바로 위 줄에 stable anchor `<a id="adr-NNN-amend-M"></a>` → `## Amendment M (2026-07-20) — <제목>` → `### 결정`(번호 목록) → `### 적용 surface`(파일 경로 1줄 1개). 필요 시 `### 근거`(evidence label `[관측됨]`/`[외부실증]`/`[가설]`) + `### 강도 (ADR-022)`.
 - **Mutation Contract (ADR-047 D3 — *enabling*, 자동 차단 0)**: D3는 enabling이라 계약/delta 누락은 reviewer **P2 보고**에 그치고 *어떤 게이트도 막지 않는다*(ADR-047 §정책강도 원문: "자동 차단 0건. 6 필드 누락 시 reviewer P2 라벨로 보고만"). 따라서 어떤 amend도 계약 누락으로 차단되지 않는다 — 아래는 그 위에서의 이번 라운드 관례일 뿐(하드 요건 아님):
-  - **신규 standalone `ADR-058` = 본문에 `## Mutation Contract` full 6필드**(Target / Failure mode / Predicted improvement / Preserved invariants / Falsifying evaluation / Rollback path). Phase 12+ 신규 harness ADR이라 full이 자연스럽다. 그 "Falsifying evaluation"은 Phase 1에서 만든 방법(ADR-047 Amendment 1)을 따른다 — 그래서 Phase 1이 맨 앞이다.
+  - **신규 standalone `ADR-058` = 본문에 `## Mutation Contract` full 6필드**(Target / Failure mode / Predicted improvement / Preserved invariants / Falsifying evaluation / Rollback path). Phase 12+ 신규 harness ADR이라 full이 자연스럽다. 그 "Falsifying evaluation"은 Phase 1에서 만든 방법(ADR-047 Amendment 1)을 따른다.
   - **base에 `## Mutation Contract`가 있는 ADR(051·010·047·050·056·057 — grep 확인)의 harness amend = base 계약 승계 + `### 결정`/`### 강도`에 delta 한 줄**(failure·falsifier·rollback 축). 반전·강도변경 amend(ADR-051 amend-4가 fan-out을 enabling→constraint로 승격, ADR-057 amend-2가 seam canonical 위치를 정정)엔 특히 이 delta를 명시한다. (enabling이라 누락은 P2 — 하드 요건 아님.)
   - **base 계약이 없는 pre-047 ADR(027·014)의 amend = 새 계약을 억지로 붙이지 않는다.** ADR-047:121 "기존 ADR 사후 retrofit X (Surgical Changes)"는 *기존 본문을 소급 개조하지 말라*는 뜻이지 "신규 amend가 면제"란 뜻이 아니다 — 다만 D3가 enabling이라 신규 amend의 계약 부재는 P2에 그치고, 저장소 관례상 pre-047 ADR의 amend는 계약을 두지 않는다(ADR-027 amend-5/6·ADR-040 amend-4 실측 0개). 정책 강도를 바꾸는 pre-047 amend라면 `### 결정`에 그 사실 한 줄만 남기면 충분.
   - amend는 full 6필드를 반복하지 않는다(양식: 헤딩 anchor → `### 결정` → `### 적용 surface` (+ `### 근거`/`### 강도`)).
-- **인덱스 동기**: 모든 신규 ADR/amend는 `docs/90-decisions/boilerplate/README.md` 인덱스 행의 Amendments 컬럼을 함께 갱신한다(stabilize preflight가 amend 수 불일치를 `P1 [ADR-index]`로 잡음). Phase 5에서 일괄 정리한다.
+- **인덱스 동기**: 모든 신규 ADR/amend는 `docs/90-decisions/boilerplate/README.md` 인덱스 행의 Amendments 컬럼을 **그 ADR을 만드는 같은 커밋에서** 갱신한다(stabilize preflight가 amend 수 불일치를 `P1 [ADR-index]`로 잡음). Phase 5는 최종 감사만 한다.
 
 ### D6 거버넌스: grandfather vs 의도적 override (정직 명시)
 
 이번 라운드 amend 중 일부는 ADR-045 D6상 *통합 재발행/supersede* 우선 대상이다. 생성일 기준으로 **grandfather**(ADR-045 = 2026-05-27 *이전* 생성)와 **override**(이후 생성 → D6 적용)를 구분한다:
 
 - **grandfather (amend 정당)**: `ADR-027`(2026-05-16)·`ADR-010`(2026-05-16) — D6 grandfather 조항이 재발행을 "우선 검토(권고)"로만 두므로 amend + `## 현재 유효 결정` 정리로 충분.
-- **의도적 override (D6는 재발행을 요구하나 minimal-churn 적용)**: 아래는 ADR-045 *이후* 생성이라 grandfather가 아니며 D6 트리거에 해당한다. **§1.6에서 amend-count 재발행 임계를 4→8로 올렸으므로, "amend 4개 누적" 사유는 override 대상에서 제거**됐다 — 아래는 *reversal·surface-5+* 트리거만 남은 것. 이번 라운드는 사용자 minimal-churn 결정으로 amend override한다:
-  - `ADR-051`(생성 2026-06-26) amend-4: #amend-2 정책 뒤집기(enabling→constraint) — **reversal** 트리거(4개 amend 사유는 §1.6로 소멸).
+- **의도적 override (D6는 재발행을 요구하나 minimal-churn 적용)**: 아래는 ADR-045 *이후* 생성이라 grandfather가 아니며 D6 트리거에 해당한다. **§1.3에서 amend-count 재발행 임계를 4→8로 올렸으므로, "amend 4개 누적" 사유는 override 대상에서 제거**됐다 — 아래는 *reversal·surface-5+* 트리거만 남은 것. 이번 라운드는 사용자 minimal-churn 결정으로 amend override한다:
+  - `ADR-051`(생성 2026-06-26) amend-4: #amend-2 정책 뒤집기(enabling→constraint) — **reversal** 트리거(4개 amend 사유는 §1.3으로 소멸).
   - `ADR-056`(생성 2026-07-16) amend-1: **surface 5+** 추가(PX가 7 surface).
   - `ADR-057`(생성 2026-07-16) amend-1: **surface 5+** (로드맵 6 surface) + R3 의미 변경.
-  - `ADR-045` amend-1 (§1.6, 재발행 임계 4→8): 재발행 임계 *자체*를 바꾸는 것은 D6상 **정책 파라미터 변경**(경계적 "정책 의미 변경")이라 엄밀히는 supersede 대상이다. **self-amend 특수성** — D6를 *완화*하는 변경을 D6가 제약하는 amend로 처리하므로(부트스트랩 역설), override임을 특히 명시적으로 남긴다. 정책의 *의미*(누적 amend가 많으면 재발행)는 유지하고 트리거 *수치*만 조정하는 enabling 변경이라 amend가 과하지 않다는 판단.
+  - `ADR-045` amend-1 (§1.3, 재발행 임계 4→8): 재발행 임계 *자체*를 바꾸는 것은 D6상 **정책 파라미터 변경**(경계적 "정책 의미 변경")이라 엄밀히는 supersede 대상이다. **self-amend 특수성** — D6를 *완화*하는 변경을 D6가 제약하는 amend로 처리하므로(부트스트랩 역설), override임을 특히 명시적으로 남긴다. 정책의 *의미*(누적 amend가 많으면 재발행)는 유지하고 트리거 *수치*만 조정하는 enabling 변경이라 amend가 과하지 않다는 판단.
   → **각 해당 amend 본문(`### 결정` 말미 또는 `### 강도`)에** "D6 재발행 대신 minimal-churn amend — 근거: 이번 개선 라운드 결정, 다음 변경 시 통합 재발행" **한 줄을 영속 기록**한다(override 출처가 삭제될 이 가이드가 아니라 ADR에 남게 — 거버넌스 추적성). 위치는 amend마다 다를 수 있으나(예: ADR-045 amend-1은 `### 결정`, ADR-056 amend-1은 `### 강도`, ADR-051 amend-4는 별도 거버넌스 주 callout) *ADR 본문 어딘가에 반드시 영속*되면 된다.
 - **대안(strict D6)**: override가 부담스러우면 위 override 대상들(콘텐츠 ADR 051·056·057)을 각각 신규 번호로 통합 재발행(supersede)하고 참조를 re-point한다 — 단 각 ADR#dK 인용이 많아 churn이 커서 "minimal-churn" 취지와 상충한다. (ADR-045 self-amend의 strict 대안은 *ADR-045 자체를 supersede*하는 신규 doc-reference-contract ADR 발행이다 — 콘텐츠 ADR 재발행과 별개 축.) **어느 쪽을 택할지는 사용자 결정**(기본은 override — 사용자가 minimal-churn 선택).
 
@@ -55,205 +55,16 @@
 - **INST-5** — 디자인 조사·시안 검토 하청 생략. 스킬은 이미 부르라고 돼 있어 **규칙 문제 아님**(깨끗한 별도 세션 재측정 숙제).
 - **기타 미검증 3건** — Codex 동일 흐름 / fresh 세션 자동 로드 / 큰 작업 정식 fan-out 실측. 별도 세션 필요, 재측정 숙제.
 - **HN-3** — 형제 스킬 혼동. 설명문이 이미 상당히 구분돼 **실제 오호출 재현 시에만** 착수(지금은 보류).
+- **HN-1** — repo-local 공통 문서 검증 스크립트. 보일러플레이트는 프로젝트 스택이 정해지기 전 특정 런타임에 의존하지 않는다는 상위 규칙과 충돌하므로 **도입하지 않는다**. 링크 검증은 프로젝트가 선택한 스택·CI 도구로 프로젝트 초기화 후 구성한다.
 - **백로그 문서 정규화(PH-0)** — 두 백로그는 곧 삭제할 세션 메모라 정규화 편집은 무의미(이 가이드가 그 내용을 정책으로 옮긴다).
 
 ---
 
-# Phase 1 — 거버넌스 기반 (HN-2 + HN-1)
+# Phase 1 — 거버넌스 기반 (HN-2 + 디자인 정책 SSOT)
 
-**왜 먼저**: 이후 모든 harness ADR은 `## Mutation Contract`의 "Falsifying evaluation" 필드가 필요한데, 그걸 *어떻게 쓰는지*가 HN-2다. 그리고 HN-1의 링크 체커는 HN-2가 지목하는 검증 러너이자, Phase 3~5에서 대량 편집한 문서 링크가 안 깨졌는지 마지막에 확인하는 도구다.
+**왜 먼저**: 이후 모든 harness ADR은 `## Mutation Contract`의 "Falsifying evaluation" 필드가 필요하므로 그 작성법(HN-2)을 먼저 정한다. 또한 디자인 구현보다 먼저 ADR-058·ADR-049 상태·평가 provenance를 한 커밋에서 확정해, Phase 3의 모든 surface가 이미 존재하는 상위 정책을 참조하게 한다.
 
-## 1.1 문서 링크·앵커 무결성 체커 신설 (HN-1)
-
-**기존**: `scripts/`에는 `README.md` 하나뿐이고 실행 스크립트가 0개다. 문서를 옮기거나 이름을 바꾸면 상대 링크·`#anchor`가 조용히 죽고, 에이전트가 죽은 경로로 안내받아 헛돌거나 없는 내용을 지어낸다(최근 커밋에 ADR 리네임·문서 삭제가 많았음).
-
-**변경**: 아래 내용으로 새 파일 `scripts/check-doc-links.mjs`를 만든다. Node ESM(Claude·Codex 공통), 외부 의존 0(Node 내장 `fs`/`path`만). 저장소 전 `.md`의 상대 링크·`#anchor`가 실제 파일/헤딩(또는 `<a id>`)을 가리키는지 검사하고, 죽은 것을 "파일:줄 → 죽은 경로"로 출력하며 하나라도 있으면 exit code 1. `--frontmatter` 모드는 스킬 SKILL.md의 `name:`/`description:` frontmatter 존재를 검사한다(HN-6b 흡수).
-
-> **지원 범위 (정직 명시 — "전수"의 경계)**: inline `[텍스트](경로#anchor)` 링크 + `<a id>` 앵커 + GFM heading 슬러그(중복 -1/-2 접미)만 검사한다. **미지원**: reference-style `[x][y]` 링크·HTML `<a href>`·`~~~` 코드펜스·중첩 괄호 URL. 현재 저장소는 이 미지원 형식을 **쓰지 않으므로**(grep 확인 — docs/ 전체 0건) 실질적으로 전수 검사지만, 그 형식을 도입하는 fork는 이 체커를 확장해야 한다(그때까지 이 4종은 검사 사각지대).
-
-**오탐 방지가 핵심**(아래 스크립트가 이미 반영): ① `<!-- -->` 주석 + **코드펜스(```` ``` ````) + 인라인코드(`` ` ``)** 안의 예시 링크는 공백 처리해 검사 대상에서 뺀다(줄번호는 보존). ② `DESIGN_RESEARCH.md`·`ROADMAP.md`·`design-preview.html`·`prototypes/`·`reports/` 등 **generated/ephemeral 타깃**은 아직 없어도 dead로 잡지 않는다. ③ 임시 세션 문서(이 가이드 등)는 **런타임 `--ignore`로만** 스캔 제외 — **영구 스크립트엔 그 파일명을 박지 않는다**(삭제될 문서를 영구 코드가 참조하면 안 됨). ④ **로컬 전용 eval 번들 `.boilerplate/validation/design-workflow-eval-20260720/`만 스캔 제외**(무거운 1회성 산출물이라 gitignored; 같은 영역 tracked SSOT `SIMULATION_RUN.md`·다른 tracked 하위는 그대로 검사 — 하위 전체 제외 아님). **외부 프로세스(git 등) 미사용 — pure Node라 Codex 샌드박스에서도 그대로 실행**(git spawn 의존 금지). *개선 적용 중* 실행: `node scripts/check-doc-links.mjs --ignore IMPROVE-GUIDE.md`(백로그 2종은 이미 삭제됨). *완료 후* IMPROVE-GUIDE.md까지 지운 뒤엔 flag 없이 돌린다. Node 미설치 환경은 §1.3의 fallback으로 대체.
-
-```javascript
-#!/usr/bin/env node
-// 문서 상대링크·앵커 무결성 체커 (ADR-047#amend-1 변경 검증 러너). 외부 의존 0 — Node 내장만.
-// (위 ADR-047 참조는 이 파일이 ADR-047 ## Surfaces에 등재돼 stabilize [Surface-backref] forward-check가 역참조를 요구하기 때문 — design-gate.mjs의 "(ADR-058 D3)"와 동형.)
-// 사용:
-//   node scripts/check-doc-links.mjs            # 모든 .md의 상대링크·#anchor 검사
-//   node scripts/check-doc-links.mjs --frontmatter   # + 스킬 SKILL.md frontmatter(name/description) 검사
-//   node scripts/check-doc-links.mjs --ignore a.md,b.md   # 특정 basename 검사 제외(예: 임시 세션 문서)
-// 죽은 링크/앵커가 하나라도 있으면 exit 1.
-import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
-import { join, dirname, resolve, relative, extname, basename } from 'node:path';
-
-const ROOT = resolve(process.cwd());
-const IGNORE_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', 'coverage']);
-// 검사 제외 파일 basename — 런타임 `--ignore a.md,b.md`로만 지정(삭제될 임시 문서명을 영구 스크립트에 박지 않는다). 기본값 없음.
-const IGNORE_FILES = (() => { const i = process.argv.indexOf('--ignore'); return new Set(i >= 0 && process.argv[i + 1] ? process.argv[i + 1].split(',').map((s) => s.trim()).filter(Boolean) : []); })();
-// generated/ephemeral 타깃(아직 없거나 회차마다 생김) 은 dead 로 잡지 않는다
-const IGNORE_TGT = [/DESIGN_RESEARCH\.md$/, /ROADMAP\.md$/, /design-preview\.html$/,
-  /\/(design-concepts|prototypes|reports|plan-reviews|discovery-reviews|stabilize-reviews|visual)\//];
-const wantFrontmatter = process.argv.includes('--frontmatter');
-
-function walk(dir, out = []) {
-  for (const name of readdirSync(dir)) {
-    if (IGNORE_DIRS.has(name)) continue;
-    const p = join(dir, name);
-    const st = statSync(p);
-    if (st.isDirectory()) {
-      // 로컬 전용 design-workflow eval 번들(무거운 1회성 산출물, gitignored)만 스캔 제외.
-      // 같은 영역의 tracked SSOT(SIMULATION_RUN.md)·다른 tracked 하위는 그대로 검사 — 핵심 판정은 SIMULATION_RUN에 distill.
-      if (relative(ROOT, p).split('\\').join('/') === '.boilerplate/validation/design-workflow-eval-20260720') continue;
-      walk(p, out);
-    } else if (extname(p) === '.md' && !IGNORE_FILES.has(basename(p))) out.push(p);
-  }
-  return out;
-}
-
-// HTML 주석·코드펜스·인라인코드를 공백 치환(줄번호 보존). 백틱은 \x60(hex) — 이 가이드 코드펜스와 충돌 방지
-function blankOut(s) {
-  return s
-    .replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '))
-    .replace(/\x60\x60\x60[\s\S]*?\x60\x60\x60/g, (m) => m.replace(/[^\n]/g, ' '))
-    .replace(/\x60[^\x60\n]*\x60/g, (m) => m.replace(/[^\n]/g, ' '));
-}
-
-// GitHub 스타일 heading slug (유니코드 글자 보존, 문장부호 제거, 공백→하이픈)
-function slug(text) {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s-]/gu, '')
-    .replace(/\s+/g, '-');
-}
-
-// 파일의 앵커 집합: <a id="X"> + heading slug. *둘 다* 코드 제거된 본문(body)에서만 뽑는다
-// (펜스/인라인코드 안 가짜 heading·가짜 <a id> 예시 배제 — 그런 앵커를 실재로 인정하면 죽은 앵커를 놓친다) + GFM 중복 heading -1/-2 접미
-function anchorsOf(content) {
-  const set = new Set();
-  const body = blankOut(content);
-  for (const m of body.matchAll(/<a\s+id="([^"]+)"\s*>/g)) set.add(m[1]); // body(펜스 blank) — 펜스 안 예시 <a id>는 실앵커로 세지 않음
-  const counts = {};
-  for (const m of body.matchAll(/^#{1,6}\s+(.+?)\s*$/gm)) {
-    const base = slug(m[1]);
-    const n = counts[base] = (counts[base] ?? -1) + 1;
-    set.add(n === 0 ? base : `${base}-${n}`);
-  }
-  return set;
-}
-
-const files = walk(ROOT);
-const anchorCache = new Map();
-function getAnchors(file) {
-  if (!anchorCache.has(file)) anchorCache.set(file, anchorsOf(readFileSync(file, 'utf8')));
-  return anchorCache.get(file);
-}
-
-const problems = [];
-const linkRe = /\[[^\]]*\]\(([^)]+)\)/g; // [text](target)
-
-for (const file of files) {
-  const stripped = blankOut(readFileSync(file, 'utf8')); // 코드 안 예시 링크 오탐 방지(위 blankOut — 주석·펜스·인라인코드 공백화)
-  for (const m of stripped.matchAll(linkRe)) {
-    let target = m[1].trim().split(/\s+/)[0]; // "path "title" 형태의 title 제거
-    if (/^(https?:|mailto:|tel:)/i.test(target)) continue; // 외부 링크 skip
-    const lineNo = stripped.slice(0, m.index).split('\n').length;
-    const [pathPart, anchor] = target.split('#');
-    if (pathPart === '') {
-      // 같은 파일 앵커
-      if (anchor && !getAnchors(file).has(anchor)) {
-        problems.push(`${relative(ROOT, file)}:${lineNo} → 죽은 앵커 #${anchor} (같은 파일)`);
-      }
-      continue;
-    }
-    const resolved = resolve(dirname(file), pathPart);
-    const exists = existsSync(resolved);
-    // generated/ephemeral 타깃은 *아직 없을 때만* 무시 — 생성된 뒤엔 정상 검사(미래 실제 dead link도 잡음)
-    if (!exists && IGNORE_TGT.some((re) => re.test(pathPart))) continue;
-    if (!exists) {
-      problems.push(`${relative(ROOT, file)}:${lineNo} → 죽은 경로 ${pathPart}`);
-      continue;
-    }
-    if (anchor && extname(resolved) === '.md') {
-      if (!getAnchors(resolved).has(anchor)) {
-        problems.push(`${relative(ROOT, file)}:${lineNo} → ${pathPart} 에 앵커 #${anchor} 없음`);
-      }
-    }
-  }
-}
-
-if (wantFrontmatter) {
-  for (const base of ['.claude/skills', '.agents/skills']) {
-    const dir = join(ROOT, base);
-    if (!existsSync(dir)) continue;
-    for (const name of readdirSync(dir)) {
-      const skill = join(dir, name, 'SKILL.md');
-      if (!existsSync(skill)) continue;
-      const c = readFileSync(skill, 'utf8');
-      const fm = c.startsWith('---') ? c.slice(3, c.indexOf('\n---', 3)) : '';
-      if (!/^name:\s*\S/m.test(fm) || !/^description:\s*\S/m.test(fm)) {
-        problems.push(`${base}/${name}/SKILL.md → frontmatter name/description 누락`);
-      }
-    }
-  }
-}
-
-if (problems.length) {
-  console.error(`문서 링크·앵커 문제 ${problems.length}건:`);
-  for (const p of problems) console.error('  ' + p);
-  process.exit(1);
-}
-console.log(`OK — 검사한 .md ${files.length}개, 죽은 링크·앵커 0건`);
-```
-
-**왜**: Node 내장만 쓰므로 스택·OS 무관하게 즉시 실행 가능하고, HN-2의 falsifying-eval 러너로도 재사용된다. 백로그 3차 정정대로 "스킬 5개 누락"은 오류였으므로(의도적 자연어 호출 스킬 + preflight 7이 이미 roster 검사) roster 검사는 새로 만들지 않고 링크 무결성만 새로 더한다.
-
-## 1.2 scripts/README.md 갱신 (HN-1)
-
-**기존** (`scripts/README.md` 앞부분 — 이 뒤로 "예시:" 스택별 목록이 더 있으나 편집과 무관):
-
-```
-# scripts
-
-이 디렉터리는 프로젝트별 자동화 스크립트를 두는 자리다.
-
-기본 보일러플레이트에서는 OS/셸/런타임 종속성을 피하기 위해
-공유 스크립트를 강제로 포함하지 않는다.
-
-권장 방식:
-- 프로젝트의 스택이 정해진 뒤
-- 그 스택에 맞는 검증 스크립트, hook 스크립트, CI 스크립트를 생성한다
-```
-
-**변경**: 파일 전체를 교체하지 말 것 — **삽입만** 한다. "공유 스크립트를 강제로 포함하지 않는다." 로 끝나는 문단 *바로 다음*(그 아래 빈 줄과 "권장 방식:" 사이)에 아래 블록을 넣는다(스택 무관 Node 내장 스크립트는 예외임을 명시):
-
-```
-> 예외: `check-doc-links.mjs`는 스택·OS 무관(Node 내장만)이라 보일러플레이트가 기본 포함한다 —
-> 모든 `.md`의 상대링크·`#anchor` 무결성을 검사한다(문서 이동 시 죽은 경로 사전 차단).
-> 실행: `node scripts/check-doc-links.mjs` (frontmatter까지: `--frontmatter`).
-```
-
-**왜**: 현행 README의 "강제 포함 안 함" 스탠스와 새 checker가 충돌하지 않게, Node 내장 스크립트만 예외임을 명문화.
-
-## 1.3 stabilize-milestone preflight에 링크 체커 연결 (HN-1)
-
-**기존** (`.claude/skills/stabilize-milestone/SKILL.md` §1.0 항목 1, 발췌):
-
-```
-1. **docs/ 내부 markdown link 유효성** (기본: *내부 / ADR 참조 / 로컬 파일* 만 점검 — 외부 URL 검사는 optional):
-
-   - **기본 (내부 link only — deterministic 보장)**: `markdown-link-check --config <(echo '{"ignorePatterns":[{"pattern":"^https?://"}]}') docs/**/*.md` (외부 URL 무시).
-```
-
-**변경**: 이 항목 1의 "기본" 줄 바로 위에, repo-local checker를 1순위로 쓰라는 한 줄을 넣는다("기본" 불릿을 다음으로 교체):
-
-```
-   - **기본 (repo-local checker — deterministic·의존 0)**: `node scripts/check-doc-links.mjs` 실행(모든 `.md`의 상대링크·`#anchor`가 실제 파일/헤딩/`<a id>`를 가리키는지 검사, exit 1 on 실패). 이 스크립트가 항목 2의 내부 anchor 링크(ADR-045#d9)까지 함께 커버한다. 외부 URL·flaky 네트워크 검사는 아래 optional.
-   - **(fallback) markdown-link-check** (checker 미가용 시): `markdown-link-check --config <(echo '{"ignorePatterns":[{"pattern":"^https?://"}]}') docs/**/*.md` (외부 URL 무시).
-```
-
-**왜**: 기존 preflight는 외부 npm 도구(`markdown-link-check`)에 의존해 미설치 시 통째로 skip됐다. repo-local checker를 1순위로 두면 의존 없이 항상 돈다. roster 검사(항목 7)는 이미 결정적이라 손대지 않는다.
-
-## 1.4 ADR-047 Amendment 1 — 변경 검증법 (HN-2)
+## 1.1 ADR-047 Amendment 1 — 변경 검증법 (HN-2)
 
 **기존**: `docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md`의 D3(6필드)·D4(falsifying eval default = ADR-017 dogfood 재실행)는 *무엇을 적어야 하는지*만 정하고, **그 falsifying evaluation을 어떻게 값싸게 만드는지 방법이 없다**. 그래서 실제로는 "검증했다"고 글로만 적고 넘어간다. `## 참고` 다음이 파일 끝이며 amendment는 0개다.
 
@@ -271,14 +82,12 @@ console.log(`OK — 검사한 .md ${files.length}개, 죽은 링크·앵커 0건
 1. **실패 유형 분류 먼저**: harness 문구를 바꾸기 전에 막으려는 실패가 *규율 실패*인지 *모양 실패*인지 분류한다. 규율 실패 → 금지문 OK. 모양 실패 → 금지문 금지, 긍정 레시피("이 입력이면 이렇게 출력")로 작성.
 2. **대조군을 둔 초저비용 문구 테스트를 기본 falsifying evaluation으로**: 바꾼 문구가 실제로 행동을 바꿨는지, *바꾸기 전 문구(대조군)* 대비 소수(≈5회) 시행으로 비교한다. 비싼 전체 dogfood 재실행(D4 default) 전에 이 값싼 테스트를 먼저 통과해야 한다.
 3. **정적 검사 vs 행동 fixture 분리**:
-   - *정적 검사*(링크·앵커·roster·frontmatter 등 결정적으로 판정 가능한 것)는 `scripts/check-doc-links.mjs`(+ stabilize preflight)를 러너로 지목한다 — 이 스크립트를 falsifying evaluation의 결정적 부분으로 쓴다.
+   - *정적 검사*는 프로젝트 스택이 정해진 뒤 그 스택의 formatter·linter·CI로 구성한다. 보일러플레이트 공통 런타임·검증 스크립트는 두지 않는다.
    - *행동 fixture*(스킬이 특정 입력에 특정 판정을 내리는지)는 드리프트 잦은 소수 스킬(validate-*·bootstrap-stack 등)에 한해 "이 입력 → 이 판정" 예시 3~5개를 **사람이 확인하는 체크리스트**로 둔다(자동 실행 X — 스킬은 여러 파일·상태를 다뤄 자동화 불가, 21개 파일화 금지).
 4. D4의 dogfood 재실행 default는 유지하되, 본 Amendment의 값싼 테스트가 그 *앞단 게이트*임을 명시.
 
 ### 적용 surface
 - docs/90-decisions/boilerplate/_ADR_GUIDE.md
-- scripts/check-doc-links.mjs
-- .claude/skills/stabilize-milestone/SKILL.md
 
 ### 강도 (ADR-022)
 - enabling(약) — 방법·러너 명시. 자동 차단 없음.
@@ -286,7 +95,7 @@ console.log(`OK — 검사한 .md ${files.length}개, 죽은 링크·앵커 0건
 
 **왜**: 우리 스스로 의무화한 필드에 실체를 준다. 외부 레포 3개(superpowers 방법론·remotion 러너·marketing-skills 픽스처)가 독립적으로 이 구멍을 지목했다.
 
-## 1.5 _ADR_GUIDE.md 포인터 (HN-2)
+## 1.2 _ADR_GUIDE.md 포인터 (HN-2)
 
 **기존** (`docs/90-decisions/boilerplate/_ADR_GUIDE.md` 마지막 섹션):
 
@@ -299,12 +108,12 @@ console.log(`OK — 검사한 .md ${files.length}개, 죽은 링크·앵커 0건
 **변경**: 이 문단 끝에 한 줄을 덧붙인다:
 
 ```
-- **"Falsifying evaluation" 필드 작성법**: 실패 유형(규율 실패→금지문 / 모양 실패→긍정 레시피)을 분류하고, 대조군을 둔 초저비용 문구 테스트를 기본 검증으로 삼는다. 정적 검사는 `scripts/check-doc-links.mjs`를 러너로, 행동 fixture는 소수 스킬 사람-확인 체크리스트로 (상세: [ADR-047](ADR-047-code-as-agent-harness.md)#amend-1).
+- **"Falsifying evaluation" 필드 작성법**: 실패 유형(규율 실패→금지문 / 모양 실패→긍정 레시피)을 분류하고, 대조군을 둔 초저비용 문구 테스트를 기본 검증으로 삼는다. 정적 검사는 프로젝트 스택 확정 후 그 스택의 도구로 구성하고, 행동 fixture는 소수 스킬 사람-확인 체크리스트로 둔다(상세: [ADR-047](ADR-047-code-as-agent-harness.md)#amend-1).
 ```
 
 **왜**: ADR-047 본문이 SSOT이고, _ADR_GUIDE는 한 줄 포인터만 둔다(문서 비대 방지).
 
-## 1.6 ADR-045 Amendment 1 — D6 통합 재발행 임계 4→8 상향 (사용자 결정)
+## 1.3 ADR-045 Amendment 1 — D6 통합 재발행 임계 4→8 상향 (사용자 결정)
 
 **왜 먼저**: 이 규칙 상향이 뒤 Phase의 override 판단에 영향을 주므로 Phase 1(거버넌스 기반)에서 먼저 반영한다.
 
@@ -362,6 +171,7 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 ### 적용 surface
 - docs/90-decisions/boilerplate/ADR-045-doc-reference-contract.md (`## 현재 유효 결정` 요약 — D6 표 원행은 Record로 *보존*, 덮어쓰지 않음)
 - docs/90-decisions/boilerplate/_ADR_GUIDE.md (amend/supersede 기준 줄 — 운영 가이드라 현재 규칙 반영)
+- .claude/skills/stabilize-milestone/SKILL.md (`[ADR-index]` fence-aware amendment count)
 
 ### 강도 (ADR-022)
 - enabling(약) — 임계 조정, 되돌리기 쉬움.
@@ -383,12 +193,178 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 ```
 (D2 본문 규칙 "anchor id 규칙: `adr-<번호>-amend-<M>`"과 일관된 예시가 된다.)
 
-**(e-2)** stabilize `[ADR-index]` preflight를 fence-aware로 만든다. `.claude/skills/stabilize-milestone/SKILL.md`의 인덱스 동기 항목 문구를 "본문 `## Amendment N` 수 일치"에서 **"코드펜스(```)·`<!-- -->` 주석 *밖의* 본문 `## Amendment N` 수 일치(예시·주석 헤딩 제외 — `check-doc-links.mjs` blankOut과 동일 원칙)"** 로 바꾼다. 그래야 앞으로 어떤 ADR이 D2류 예시를 둬도 오탐이 없다.
+**(e-2)** stabilize `[ADR-index]` preflight를 fence-aware로 만든다. `.claude/skills/stabilize-milestone/SKILL.md`의 인덱스 동기 항목 문구를 "본문 `## Amendment N` 수 일치"에서 **"코드펜스(```)·`<!-- -->` 주석 *밖의* 본문 `## Amendment N` 수 일치(예시·주석 헤딩 제외)"** 로 바꾼다. 그래야 앞으로 어떤 ADR이 D2류 예시를 둬도 오탐이 없다.
 
 **왜**: 4개는 (D5 요약 의무화 임계와 같은 값으로 첫 커밋부터 함께 설정된) 초기 보수값으로, D5 요약이 4~7 구간 가독성을 담당하는 지금 기준으론 과소다. 8로 올리면 **ADR-051(4 amends)의 *amend-count* 재발행 트리거가 사라진다**(→ 아래 §2.1의 override 근거가 "reversal(정책 뒤집기)"만 남음). surface-5+·reversal 트리거는 그대로라 ADR-056(7 surface)·ADR-057(6 surface+정책변경) override는 유지된다.
 
-> **커밋 (Phase 1 종료)**:
-> `feat(governance): raise D6 reissue threshold (ADR-045 amend 1), add doc link checker + change-verification method (ADR-047 amend 1)`
+**같은 커밋의 인덱스 동기** (`docs/90-decisions/boilerplate/README.md`): ADR-047 행에 `+#amend-1: 변경 검증법(falsifying evaluation 작성법)`, ADR-045 행에 `+#amend-1: D6 재발행 임계 4→8`을 추가한다. 본문 amendment와 인덱스 중 하나만 있는 중간 커밋을 만들지 않는다.
+
+> **커밋 (Phase 1-A — 변경 거버넌스)**:
+> `feat(governance): raise D6 reissue threshold and add change-verification method (ADR-045/047 amend 1)`
+
+
+## 1.4 신규 `ADR-058` — Design Workflow (ADR-049 supersede) [DS-1 · DS-3 · DS-5]
+
+**변경**: 새 파일 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md`를 만든다:
+
+```markdown
+# ADR-058 — Design Workflow (reference flow + acceptance gate + concept cards)
+
+> scope: boilerplate
+> area: design
+
+## Status
+accepted
+
+> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-027](ADR-027-interface-decision-allocation.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
+> 승격 범위(정직 — *status 축*과 *검증 축*은 별개다):
+> - **status = `accepted`** — 저장소 `_ADR_GUIDE`상 accepted는 *운영 채택*을 뜻하지 검증 완료가 아니다(wiring이 이미 accepted 전제로 짜여 정합; `trial`은 허용 status가 아니라 분리 불가).
+> - **D3 수용 게이트는 지금 constraint** — ADR-022는 constraint에 `[관측됨]` *또는* `[외부실증]`을 요구하고(둘 중 하나면 자격 충족), repo-local `[관측됨]`으로 충족된다. **실측 개선 축은 serious/critical axe**(design-eval — repair loop로 serious 5/8→0/8). 320 overflow·clip은 게이트가 *결정적으로 상시 검사*하는 축이지만 이 eval에서 5/8→0/8 수치를 낸 건 axe다(320/clip을 같은 수치로 뭉뚱그리지 않는다). 별도 "강 승격" 관문은 없다(constraint 자체가 ADR-022 '강').
+> - **나머지(R0 evidence-on-demand·REFINE/EXPLORE·cross-model·실화면 a11y)는 directional/enabling — 미검증 명시.**
+> - **REPORT §13 용어 정정**: REPORT는 7기준을 "`accepted` 승격 조건"으로 적었으나, 이는 저장소 status(accepted=채택)보다 엄격한 *완전 실증* 의미다. 저장소 거버넌스에선 그 7기준을 **신뢰도(Medium→High)·외부 일반화 승격 조건**으로 읽는다(원본 REPORT는 local-only/gitignored이고 핵심 판정은 SIMULATION_RUN.md design-eval에 distill·보존, 본 ADR이 용어를 정정 — 조용한 덮어쓰기 아님). 기준 2(게이트 결함 0)·3(blind visual 5% 이내 — *게이트와 다른 축*)만 탐색적 충족, 나머지 5개 미검증. 미검증 부분은 아래 재검토 트리거가 관장(충족 시 신뢰도·일반화 승격; 미충족 신호 누적 시 그 부분 후퇴).
+
+## 현재 유효 결정
+- `/bootstrap-design` 라운드 구조 SSOT는 본 ADR: R0(리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(파생 preview 확인 + 정리).
+- **R0 = evidence-on-demand**(D2): AI 자율 리서치가 디폴트, 사용자 입력은 옵션 힌트. Layer A(방향)/B(값 grounding — 핀 URL)/C(포맷 — R5 fixture만). role 3종, counter-reference 조건부, 고정 쿼터 없음(coverage 정지, 최종 3~5개), 최소 기록 schema.
+- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). *진짜 품질 지렛대*.
+- **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
+- 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
+
+## 배경
+- [관측됨] 실사용 fork에서 시안이 단조롭고 어디서 본 듯함 + R0 grounding이 median으로 조용히 후퇴(슬롭 근본원인). 레퍼런스 값 추출이 실제 제품 페이지에서 자주 실패(Linear/Stripe/Vercel 0/3 — markdown 변환으로 CSS 소실).
+- [관측됨] repo-local 엄밀 재검증(`.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션 — Stage1 24안 블라인드 2인 + B3 8안 + holdout 2인, 2브랜드, 실제 1280/375/320 렌더+axe. 원본 산출물(REPORT·concept HTML·metrics)은 무거워 local-only/gitignored, distill이 판정 기록 보존(원자료 수치검산·재현은 불가). ADR-022상 저장소-로컬 평가는 `[관측됨]` — `[외부실증]`은 외부 다중 repo 실증에만): ① 레퍼런스 규칙을 잔뜩 더해도 평균 시각 점수 향상 0, 문맥 +76% ② 최초 24안 중 12안이 serious axe 위반 ③ 실패 selector 되먹임 1회 repair로 3/8→8/8 통과. → 품질을 만든 건 리서치가 아니라 **수용 게이트 폐쇄 루프**.
+
+## 결정
+1. **라운드 구조 R0~R6** — 위 현재 유효 결정 순서. `--fast`(R2·R4·R6 생략, R5 저장은 유지) / `--update`(부분 갱신) 존재.
+2. **R0 evidence-on-demand**:
+   - 디폴트는 **AI 자율 리서치**. 사용자 제공 URL·취향은 *우선 힌트*(prerequisite 아님) — 있으면 Layer A에 우선 반영, 없어도 확인 게이트 없이 자율 진행.
+   - **Layer A (방향)**: charter의 기획 방향·서비스 성격에 맞는 디자인 방향·레퍼런스 제품을 AI가 스스로 탐색(정성 방향 어휘).
+   - **Layer B (값 grounding)**: Layer A 방향에 맞는 오픈소스 토큰 패키지에서 실제 값 추출 — **핀 고정 목록**(Primer/Radix/Polaris/Tailwind/shadcn 검증된 원본 주소)으로 추측·404 제거. raw CSS + JSON 토큰 엔드포인트까지. mobbin·copycats류 가짜 요약 사이트 거부. 닫힌 제품(Linear 등)은 "추출 불가 — <사유>" 정직 표기.
+   - **Layer C (포맷·완성도)**: Google 공식 예시 DESIGN.md(`google-labs-code/design.md/examples`)로 섹션 완성도·빠짐 점검 — **선택이 끝난 R5에서 format fixture로만**(창작 컨텍스트 R0~R2에 넣지 않는다 — 공식 예시 `atmospheric-glass`가 glassmorphism/보라 그라디언트로 §9 anti-slop 위반이라 미감 오염). authoritative는 Google 공식 예시 3종만, `designmd.directory`·커뮤니티 미러는 lead로만.
+   - **role 3종**: `task/behavior` · `identity/craft` · `implementation system`. **한 canonical 레퍼런스가 여러 role을 겸하면 우선**(brand-fit과 groundable을 동시에 만족하는 소스 — role은 다중값 허용); 겸비가 불가할 때만 role별로 분리한다(겸용 우선, 안 될 때 분리). counter-reference(안티-레퍼런스)는 별도 role이 아니라 *미해결 tension이나 실제 monoculture가 있을 때만* 추가(mandatory anti-pole 폐기).
+   - **고정 최소 개수 없음** — evidence coverage가 차면 정지. designer 최종 입력 보통 3~5개 이하(단순 내부 도구는 더 적게). primary task·결정 순간·실패/복구·정체성 tension을 먼저 적어 리서치의 방향타로 삼는다.
+   - concept 안에서는 **coherent primary system 1개**. 명시 gap 시에만 secondary primitive(**Radix는 *색만* fallback** — 타이포/레이아웃/IA/모션은 ground 못함, semantic mapping·대비검증 별도).
+   - **관측 기반 주장만**: visual 주장은 실제 화면/스크린샷을 봤을 때만, behavior 주장은 docs/interaction을 봤을 때만 기록. broad search·gallery·Dribbble/Behance는 이름 찾는 lead로만 허용 후 canonical 제품·공식 문서·live 스크린샷·source/token 코드로 승격.
+   - **최소 기록 schema** (DESIGN_RESEARCH.md): `source/canonical | role | 뒷받침한 결정 | 검증유형(visual/behavior/code) | 관측일 | borrow | avoid | confidence/caveat`. quality-tier·cluster-quota·groundable-count 같은 실험용 label은 정책 필드로 만들지 않는다(기록 비용 > 결정 품질).
+3. **R2/R6 수용 게이트**:
+   - **항상(값싼·결정적 — 러너가 계산)**: **320px 브라우저 geometry** — page overflow + **element viewport escape + clipped/truncated text**(narrow ≤375 — design-workflow eval(SIMULATION_RUN.md design-eval; 원본 local-only)의 `check-reflow-320.cjs` `getBoundingClientRect`·overflow-clip 로직 이식) + **populated-state axe**(실데이터 채운 화면 *전제* — 입력 계약; 러너는 axe를 돌리고 "실제로 채워졌는지"는 reviewer 스크린샷이 backstop으로 확인). **overflow·escape·clip은 러너가 결정적으로 잡는다**(design-eval 실측 검증분 — geometry는 픽셀 취향이 아니라 좌표 계산이라 결정 가능). **단 정상 UI 오탐 제외**: sr-only/visually-hidden(1px·clip/clip-path)·aria-hidden/inert/닫힌 drawer·overflow scroll/auto 조상 안(contained 가로스크롤=의도적, 예: 넓은 표)·의도적 `text-overflow:ellipsis`는 escape/clip에서 뺀다(실브라우저 검증분 — 러너 코드에 반영). reviewer 픽셀은 *주관적* 판정(위계·밀도·slop·overlap)만 담당한다.
+   - **full 모드**: 각 concept을 1280 + 375로 항상 렌더 → **독립 reviewer(design surface)가 픽셀로** 위계·밀도·domain fit·장식 slop 판정(HTML-read source 감사와 별개 — 세 검사가 서로 다른 결함을 잡아 대체 불가). LLM reviewer는 1명이면 충분.
+   - **차단(block) — 러너 결정적**(design-gate.mjs가 계산): serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry). **차단(block) — reviewer 픽셀 판정**(스크린샷으로 판단, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding. **수동 smoke**(자동 불가분): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
+   - **repair loop**(핵심): 실패 selector + 요약을 designer에 되먹여 재실행. **retry ≤2, 초과 시 승인 보류 + brief/source 재검토**(무한 루프 방지), 여전히 fail이면 승인 불가. 통과본 외 임시 렌더/스크린샷은 정리.
+   - 게이트는 concept/preview·선택 프로토타입 **1회성에서만**(per-task hot-loop 금지). Playwright/axe는 stack-guard 선설치분 재사용(추가 의존 0).
+   - `--fast`/`--update`: research·독립 reviewer 생략은 명시 사유 echo(silent skip 금지). **게이트 적용은 모드가 아니라 산출물 기준** — `--fast`는 R2·R6를 생성하지 않으므로 게이트 적용 대상 없음(N/A), `--update`가 concept/preview를 생성·재생성하면 그 산출물엔 게이트 필수.
+4. **R2 시안 카드 REFINE / EXPLORE**: 두 기본안을 **REFINE**(익숙한 task convention 우선 + restrained signature) / **EXPLORE**(signature-led이되 *같은* 익숙한 control/flow 보존)로 정의(안전/과감 아님 — novelty가 목표라는 오해 차단). 3번째 안은 *풀리지 않은 명시적 tension이 있을 때만*. 카드 필드: `task hypothesis | preserved convention | visible signature | failure sign`. **signature가 primary task를 더 빨리 이해시키지 못하면 장식 → 제거**(실험에서 rail·route 장식이 coherence를 해침).
+5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계)**: 취향 오라클=사용자(선호 추천·순위 금지, 물으면 예외). concept authoring=designer, 구별성·픽셀 감사=reviewer[design](자기 비평 금지). parallel-merge 금지(순차 생성→비평→선택). **harness degradation (Codex 등 독립 subagent 미지원 경로)**: 독립 subagent 격리가 없는 harness에서는 gen/audit가 동일 세션 *순차 페르소나*로 degrade한다 — 이때 (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 감사 독립성 저하를 산출물에 `under-verified: 동일 세션 감사`로 명시하며, (c) 완전 독립 감사가 요구되면 사용자 승인 보류. **단 결정적 렌더 게이트(`design-gate.mjs`)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 결정적으로 차단된다(감사 *독립성*이 degrade해도 *안전 게이트*는 유지).
+
+## 근거
+- 대안 A(현행 유지 B0): raw 시각/비용은 최선이나, acceptance gate 없이는 배포불가 결함(serious axe)이 승인까지 통과 — 유지 불가.
+- 대안 B(리서치 대폭 강화 B1/B2): 평균 시각 향상 0, 문맥 +76%, 고정 lane이 무관 근거를 끌어와 task 적합도↓ — 채택 안 함(축소).
+- 채택(B3형 = 얇은 evidence-on-demand + task 기여 2안 + 독립 렌더/DOM 수용 게이트): 실험상 serious 5/8→0/8, holdout 최고안이 incumbent와 0.5/50 차이.
+- 신뢰도: **Medium** — 2브랜드·same-model·static prototype·B3 post-hoc라 cross-project 다양성·작은 시각점수 차는 일반화 금지(design-eval 신뢰도·한계 — SIMULATION_RUN.md). directional 근거.
+- 재검토 트리거(SIMULATION_RUN.md design-eval = 원 REPORT §13) 7기준(동일 brief 2회 비교 / archetype별 serious·320·clipping 0안 매 반복 제공 / blind 평균 5% 이내 / quota 없음 확인 / --fast·--update silent skip 없음 / Claude·Codex 축소 경로 실행 / 키보드·focus·escape·SR name·동적 상태 실화면 검사)은 **신뢰도(Medium→High)·외부 일반화 승격 조건**이다(accepted 채택 자체를 막는 조건이 아님 — accepted는 이미 성립, D3 constraint는 [관측됨]으로 충족). 미충족 신호가 누적되면 해당 부분(리서치·카드 등 directional)을 후퇴시킨다. archetype 확대·cross-project 다양성 측정 시 재검토.
+
+## Mutation Contract (ADR-047 D3)
+1. **Target** — bootstrap-design SKILL R0~R6·`--fast`·`--update` + `allowed-tools`(렌더·axe 실행) / `scripts/design-gate.mjs` 러너 / plan-milestone R5 게이트(allowed-tools + R5-5) / researcher.md 디자인 레퍼런스 모드 / designer.md(카드·signature·PX 마커) / reviewer.md(design surface 렌더 증거·픽셀 판정·bootstrap-design 호출자 등재) / DESIGN_RESEARCH.md 스키마 / stack-guard(populated axe·320 reflow) / DESIGN.md §0 주석 R0~R6 / STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point.
+2. **Failure mode** — R0 grounding이 median으로 조용히 후퇴 + 독립 감사가 렌더·DOM을 안 봐 배포불가 결함(serious axe·320 overflow) 통과 + 시안이 "다르기만" 하고 안전·평범(전부 관측됨/실측).
+3. **Predicted improvement** — serious axe 제거(실측 5/8→0/8) + 320 geometry 결함 차단(별도 결정적 축 — 같은 수치로 뭉뚱그리지 않음), 레퍼런스 값 확보 안정화, REFINE/EXPLORE로 의도된 개성.
+4. **Preserved invariants** — DESIGN.md 시각 SSOT / preview·concept ephemeral(ADR-005) / 취향 오라클=사용자 / 생성·감사 분리 / RGR inner-loop 스크린샷 hot-loop 금지(게이트는 1회성 carve-out) / 비-UI DESIGN.md 삭제 경로 / skill auto-invocation 금지 / ADR-027 DESIGN 내용·인터페이스 SSOT 지위.
+5. **Falsifying evaluation** — SIMULATION_RUN.md design-eval의 재검토 트리거(= REPORT §13 7기준) 재실행에서 새 흐름이 archetype별 serious/320/clipping 0안을 매 반복 제공 못 하거나 blind 평균이 current 대비 5% 초과 하락하면 게이트·리서치 강도 재조정(ADR-047#amend-1 방법 — 대조군을 둔 저비용 비교 먼저). 정적 검사는 프로젝트 스택 확정 후 해당 도구로 구성한다.
+6. **Rollback path** — ADR-058을 *새 supersede ADR*로 되돌린다: ADR-058을 supersede하는 신규 ADR을 발행해 라운드 구조(R0 5단 위계·divergence 카드·visual-QA scaffold)를 재채택하고 렌더 게이트·evidence-on-demand·REFINE/EXPLORE를 제거하며 surface를 새 ADR로 re-point한다. **ADR-049 status를 accepted로 되돌리지 않는다** — supersede는 history 영속(ADR-045)이라 status 되돌리기는 기록 왜곡이다.
+
+## 정책 강도 (ADR-022)
+- D3 수용 게이트의 block 등급(serious/critical axe·320 overflow·viewport escape·clipped text)은 **constraint(ADR-022 '강')**. ADR-022는 constraint에 `[관측됨]` *또는* `[외부실증]`을 요구하는데(둘 중 하나면 충족), 게이트가 배포불가 결함(serious/critical axe·320 geometry — WCAG·브라우저 기준)을 제거하는 효과가 `[관측됨]` repo-local 평가(design-eval — serious 5/8→0/8)로 확인되므로 **지금 constraint 자격을 충족**한다. 신뢰도는 Medium 유지 — 외부 다중 repo 실증이 쌓이면 `[관측됨+외부실증]`으로 신뢰도·일반화가 오른다(ADR-022 "제약 강하게"; constraint *자격*은 이미 충족이라 별도 승격 관문 아님). R0 evidence-on-demand·REFINE/EXPLORE·report 등급은 enabling(약).
+
+## 결과
+- 디자인 흐름의 품질 지렛대가 "리서치 양"에서 "수용 게이트 폐쇄 루프"로 이동. 레퍼런스는 얇게, 게이트는 결정적으로.
+
+## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
+- .claude/skills/bootstrap-design/SKILL.md
+- .claude/skills/stack-guard/SKILL.md
+- docs/20-system/DESIGN.md                  — 현재 디자인 흐름 근거
+- docs/00-meta/STRUCTURE.md
+- docs/00-meta/WORKFLOW.md
+- docs/00-meta/DELEGATION_STRATEGY.md
+- docs/00-meta/PROJECT_START_CHECKLIST.md
+- docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md
+- docs/90-decisions/boilerplate/ADR-040-external-research-capability.md
+- docs/90-decisions/boilerplate/ADR-056-milestone-experience-contract.md
+- README.md
+- README_ko.md
+- .gitignore
+
+## 참고
+- ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
+```
+
+**왜**: 사용자 URL 1순위(ADR-049 R0)를 "AI 자율 디폴트"로 뒤집는 것은 기존 결정 번복이라 ADR-045 D6상 amend가 아니라 supersede(신규 ADR)가 맞다. 게이트를 constraint로 박아 배포불가 결함을 빌드 전에 실제로 제거한다.
+
+**Surface 순서 규칙**: Phase 3/4에서 실제 producer·caller를 만들 때 `researcher.md`·`designer.md`·`reviewer.md`·`scripts/design-gate.mjs`·`plan-milestone/SKILL.md`를 각각 **그 producer/caller 커밋에서** ADR-058 `## Surfaces`에 추가한다. 존재하지 않거나 ADR-058 역참조가 없는 surface를 Phase 1에서 미리 등재하지 않는다.
+
+## 1.5 design-workflow eval 산출물 처리 — gitignore + SIMULATION_RUN.md distill (사용자 결정, 이번 라운드 선반영)
+
+ADR-058이 `[관측됨]`으로 인용하는 평가 산출물(`design-workflow-eval-20260720/` — 293파일·~35MB: REPORT 462줄 + concept HTML 32안 + metrics JSON + blind/holdout + microtests)은 무겁다. **소형 evidence bundle을 커밋하는 대신, 폴더 전체를 gitignore(local-only)하고 핵심 판정만 `.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션에 distill한다**(사용자 결정 — bundle 커밋의 backlog dead-link·이미지 참조·로컬 절대경로·내부 링크 깨짐 문제를 한 번에 회피). ADR-058의 `[관측됨]` provenance는 그 distill 섹션이 소유한다.
+
+**이 처리는 ADR-058과 같은 Phase 1-B 커밋에서 실행한다**:
+- `.gitignore`에 `.boilerplate/validation/design-workflow-eval-20260720/` 폴더 전체 ignore(기존 PNG/JPG-only 블록 대체).
+- `git rm -r --cached`로 기존 tracked 산출물 79파일 untrack(worktree엔 local-only로 잔존).
+- `SIMULATION_RUN.md` "Design Workflow Eval" 섹션 = 질문·설계 · 핵심 판정 6건 · DS-1~7 판정 · 신뢰도 · §13 재검토 트리거 distill(판정 기록 보존 — 원자료 수치검산·재현은 local-only라 불가; `[관측됨]` provenance).
+
+**ADR-058 작성과 같은 Phase 1-B 커밋에서**: `[관측됨]` 근거·Falsifying evaluation 재검토 트리거는 폴더 경로가 아니라 **`.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션**을 가리킨다(ADR-058 본문 §배경·Falsifying evaluation에 반영됨). 별도 evidence-bundle 커밋은 **없다**.
+
+## 1.6 ADR-049 → superseded 표기
+
+**기존** (`docs/90-decisions/boilerplate/ADR-049-concept-mockup-first-design.md` 상단 — `## Status` 아래 값 줄만 대상):
+
+```
+## Status
+accepted
+```
+
+**변경**: `_ADR_GUIDE` "대체 절차"를 정확히 따른다 — **Status 값은 상태어(`superseded`)만** 두고, 대체 정보는 **ADR 제목 아래 별도 줄**로 기록한다(저장소 관례상 Status 값에 긴 설명을 욱여넣지 않는다 — 부분 supersede만 짧은 괄호를 달고 그건 `accepted` 유지; ADR-049는 *전면* supersede라 bare `superseded`). `## 현재 유효 결정` 헤딩·본문은 건드리지 않는다(history 잔존).
+
+(1) `## Status` 값 교체:
+```
+## Status
+superseded
+```
+(2) ADR-049 제목(H1) 바로 아래에 대체 줄 1개 추가:
+```
+> 대체: [ADR-058](ADR-058-design-workflow.md) (2026-07-21 — 라운드 구조·R0 grounding·시안 정책 전부 ADR-058로 이관; 본 ADR 본문은 history로 보존)
+```
+
+**왜**: `_ADR_GUIDE` "대체 절차"(① status→`superseded` ② 상단 "대체: ADR-xxx" 별도 표기 ③ 신규 ADR이 구 ADR 참조) 준수 — Status 값에 서술을 섞지 않는다.
+
+**변경 (b) — orphan `## Surfaces` 제거 (F1 — [Surface-backref] 오탐 차단)**: ADR-049는 본문 끝에 `## Surfaces` 블록(fan-out SSOT)을 갖는다. §1.7이 그 등재 파일들의 `ADR-049` 역참조를 `ADR-058`로 re-point하면 역참조가 사라지는데, stabilize `[Surface-backref]` forward-check(`.claude/skills/stabilize-milestone/SKILL.md`의 "Surfaces forward check" 항목)는 `## Surfaces`를 가진 *모든* ADR에 각 파일의 `ADR-NNN` 역참조 존재를 요구하며 **superseded 예외가 없다** → 완전 re-point된 파일마다 `P1 [Surface-backref] ADR-049 → <file>`가 터진다(이건 인용의 [Ref-dead] P2와는 *별개* 검사라 P2 강등으로 안 덮인다). 그래서 supersede 시 **ADR-049 본문 끝의 `## Surfaces` 블록을 통째로 삭제**한다 — superseded ADR은 live sync 소스가 아니고, 그 surface는 이제 ADR-058 `## Surfaces`가 소유한다(결정 본문·`## 현재 유효 결정`은 history로 남기고, fan-out 포인터인 Surfaces 블록만 제거 — 결정 history 손실 0).
+
+**변경 (c) — forward-check에 superseded 예외 (F1 일반화 — 미래 supersede 대비)**: (b)와 별개로, 앞으로의 어떤 supersede에서도 같은 오탐이 안 나게 `.claude/skills/stabilize-milestone/SKILL.md`의 "Surfaces forward check" 항목 문구에 한 줄을 더한다 — **"대상 ADR의 `## Status`가 `superseded`/`deprecated`면 forward-check에서 skip한다(live sync 소스만 점검 — 죽은 ADR의 잔존 Surfaces는 별도 [Ref-dead]가 담당)."** (b)는 지금 ADR-049를 정리하고, (c)는 클래스 전체를 막는다.
+
+## 1.7 ADR-058 인덱스·현재 정책 참조 동기 (Phase 1-B 원자성)
+
+ADR-058 생성과 ADR-049 supersede를 커밋한 뒤 Phase 5까지 참조 정리를 미루지 않는다. **다음 항목을 1.4~1.6과 같은 커밋에서 함께 처리**한다.
+
+1. `docs/90-decisions/boilerplate/README.md`에 ADR-058 행을 057 다음에 추가하고, ADR-049 행 Status를 `superseded (by ADR-058)`로 바꾼다.
+   ```
+   | 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | — | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
+   ```
+2. `README.md`·`README_ko.md` Overall Flow의 `/bootstrap-design` 정책 근거를 ADR-049에서 ADR-058로 바꾸고 evidence-on-demand·수용 게이트를 반영한다. 두 언어 파일은 같은 커밋에서 동기한다.
+   ```
+     → /bootstrap-design (frontend only — evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-058]
+   ```
+   `README_ko.md`도 같은 정보량의 한국어 문장으로 바꾸며 Codex wrapper 목록은 변경하지 않는다.
+3. `docs/00-meta/STRUCTURE.md` Canonical Owner 표의 "UI 디자인 워크플로우" owner를 ADR-058로 바꾼다. `docs/00-meta/WORKFLOW.md`의 R0~R6 설명도 ADR-058을 현재 정책으로 가리키게 한다. **로드맵 행·design-gate runner 산출물 행은 아직 만들지 않는다** — 각각 Phase 4·Phase 3의 producer 커밋에서 추가한다.
+   ```
+   | UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
+   ```
+   WORKFLOW의 디자인 흐름은 아래 완결 문장으로 교체한다.
+   ```
+   - UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-058(design workflow): R0(evidence-on-demand 리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 REFINE/EXPLORE — 실카피 렌더 + 수용 게이트(320·populated axe·repair loop), 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 게이트). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장한다(첫 마일스톤·feature 생성 — ADR-057; 이미 분해된 feature가 있으면 `/plan-workitem`). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
+   ```
+4. `rg --hidden -n "ADR-049" --glob "*.md" --glob ".gitignore" --glob "!.git/**" --glob "!IMPROVE-GUIDE.md" --glob "!.boilerplate/validation/design-workflow-eval-20260720/**" .`로 전수 분류한다(**`--hidden`과 `.gitignore` glob이 필수** — 이 둘이 없으면 rg가 숨김 디렉터리 `.claude/`와 비-md `.gitignore`를 뒤지지 않아 아래 대상 중 bootstrap-design·stack-guard·`.gitignore`를 통째로 놓친다. eval 번들 REPORT.md의 ADR-049는 historical이라 제외). 현재 정책 인용만 ADR-058로 바꾸고, ADR-049의 역사적 사실은 유지한다. 대상은 bootstrap-design·stack-guard·ADR-027·ADR-056·DELEGATION_STRATEGY·PROJECT_START_CHECKLIST·DESIGN.md(§0·§1·§9 주석)·ADR-040 amend-4·`.gitignore` 주석이다. `#dK`/`#amend-M` 접미는 ADR-058에 실제 대응 anchor가 없으면 제거하고 bare `ADR-058`로 쓴다. **Phase 3·4가 나중에 절 전체를 재작성하는 design surface(bootstrap-design R0~R6·DESIGN.md §1/§9·ADR-027 amend roster 등)의 ADR-049 인용도 예외 없이 여기서 함께 ADR-058로 shallow-swap한다** — 그래야 Phase 1-B 커밋이 superseded ADR-049의 live 인용 없이 자기정합한다. Phase 3·4는 이미 ADR-058이 된 텍스트 위에서 *내용만* 재작성하므로 그 절들의 "기존" 블록은 ADR-058 기준이다(중복 re-point 아님).
+5. 위에서 re-point한 `README.md`·`README_ko.md`·`docs/00-meta/DELEGATION_STRATEGY.md`·`docs/00-meta/PROJECT_START_CHECKLIST.md`가 ADR-058 `## Surfaces`에 빠짐없이 등재됐는지 확인한다. 각 등재 파일에는 ADR-058 역참조가 같은 커밋에 존재해야 한다.
+6. 커밋 직전 `rg --hidden -n "ADR-049|ADR-058\s*#" --glob "*.md" --glob ".gitignore" --glob "!.git/**" --glob "!IMPROVE-GUIDE.md" --glob "!.boilerplate/validation/design-workflow-eval-20260720/**" .` 결과를 다시 분류하고, 변경한 Markdown 상대 링크의 파일·fragment를 실제 대상에서 직접 확인한다.
+
+> **커밋 (Phase 1-B — 디자인 정책 SSOT·평가 provenance)**:
+> `feat(design): establish ADR-058 and preserve design-workflow evaluation provenance`
 
 ---
 
@@ -446,7 +422,7 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
 ```
 
-> **거버넌스 주의 (ADR-045 D6 — 의도적 override + 검증)**: amend-4는 #amend-2의 "팬아웃 강제 강화 안 함"을 *뒤집는다*(fan-out 크기 판정 enabling→constraint) — D6의 **"기존 결정 뒤집기(reversal)" 트리거**에 해당해 통합 재발행 대상이다. (§1.6에서 amend-count 재발행 임계를 4→8로 올렸으므로 "4번째 amend"는 더 이상 트리거가 아니다 — 남는 건 *reversal* 하나. 단 amend 4개라 D5 `## 현재 유효 결정` 요약은 여전히 필수 — 위 변경(a).) **ADR-051은 grandfather가 아니다**(2026-06-26 생성 > ADR-045 2026-05-27 — grandfather는 ADR-045 *이전* 생성 ADR(예: ADR-027·010)만). 따라서 D6는 이 reversal에 통합 재발행을 요구한다. 이번 개선 라운드는 사용자 **minimal-churn 결정**으로 이를 *의도적으로 override*하여 amend로 처리한다 — **override 근거는 (삭제될 이 가이드가 아니라) 본 amend `### 결정` 말미에 "D6 reversal 재발행 대신 minimal-churn amend 적용 — 근거: 이번 라운드 결정, 다음 변경 시 ADR-051 통합 재발행" 한 줄로 영속 기록**한다. (전면 재발행을 원하면 §전역 거버넌스의 대안 경로 참조.) **검증(ADR-047#amend-1)**: 이 기계 판정이 실제로 놓친 결함을 잡는지는 SIMULATION_RUN 재실행(대조군=구 inline 재량)으로 확인 — falsifying eval은 ADR-051 base Mutation Contract를 승계하되 이 축의 반증 신호("임계 초과 diff를 inline으로 보내 P0 누락")를 추가 관찰.
+> **거버넌스 주의 (ADR-045 D6 — 의도적 override + 검증)**: amend-4는 #amend-2의 "팬아웃 강제 강화 안 함"을 *뒤집는다*(fan-out 크기 판정 enabling→constraint) — D6의 **"기존 결정 뒤집기(reversal)" 트리거**에 해당해 통합 재발행 대상이다. (§1.3에서 amend-count 재발행 임계를 4→8로 올렸으므로 "4번째 amend"는 더 이상 트리거가 아니다 — 남는 건 *reversal* 하나. 단 amend 4개라 D5 `## 현재 유효 결정` 요약은 여전히 필수 — 위 변경(a).) **ADR-051은 grandfather가 아니다**(2026-06-26 생성 > ADR-045 2026-05-27 — grandfather는 ADR-045 *이전* 생성 ADR(예: ADR-027·010)만). 따라서 D6는 이 reversal에 통합 재발행을 요구한다. 이번 개선 라운드는 사용자 **minimal-churn 결정**으로 이를 *의도적으로 override*하여 amend로 처리한다 — **override 근거는 (삭제될 이 가이드가 아니라) 본 amend `### 결정` 말미에 "D6 reversal 재발행 대신 minimal-churn amend 적용 — 근거: 이번 라운드 결정, 다음 변경 시 ADR-051 통합 재발행" 한 줄로 영속 기록**한다. (전면 재발행을 원하면 §전역 거버넌스의 대안 경로 참조.) **검증(ADR-047#amend-1)**: 이 기계 판정이 실제로 놓친 결함을 잡는지는 SIMULATION_RUN 재실행(대조군=구 inline 재량)으로 확인 — falsifying eval은 ADR-051 base Mutation Contract를 승계하되 이 축의 반증 신호("임계 초과 diff를 inline으로 보내 P0 누락")를 추가 관찰.
 
 **왜**: "규칙은 있는데 실행자가 우회 가능"한 구조를 없앤다. 크기 판정을 계산으로 확정하고 예외를 기록으로 강제하면 재량 우회가 불가능해진다.
 
@@ -598,6 +574,8 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 - enabling(약) — 한 줄 규율.
 ```
 
+**같은 커밋의 인덱스·surface 동기**: `docs/90-decisions/boilerplate/README.md`의 ADR-051 행에 `+#amend-4: fan-out 크기 판정 기계화 + 하청 정지 회수 + PM 고정`, ADR-050 행에 `+#amend-1: dispatcher 사전판정 금지`를 추가한다. 두 amend의 `### 적용 surface`가 base `## Surfaces`에 이미 있는지 확인하고, 실제로 없는 파일만 같은 커밋에 추가한다.
+
 > **커밋 (2.1~2.6 — 오케스트레이션·위임)**:
 > `feat(orchestration): mechanize validate fan-out sizing, foreman recovery, PM pinning, dispatcher pre-judgment ban (ADR-051 amend 4, ADR-050 amend 1)`
 
@@ -680,6 +658,8 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 
 **왜**: 마일스톤 헤더로만 자르는 기존 회수가 carry-over P0를 놓칠 수 있다는 백로그 경고를 반영. `stabilize`/`plan-milestone R0`는 이미 마일스톤 무관 open 항목을 회수하므로 별도 편집 불요(WORKFLOW 규율로 커버).
 
+**같은 커밋의 인덱스 동기**: `docs/90-decisions/boilerplate/README.md` ADR-010 행에 `+#amend-5: 도구별 memory 비캐노니컬`을 추가한다. ADR-010에는 base `## Surfaces` 블록이 없으므로 이번 amend를 이유로 새 블록을 만들지 않고 amendment의 `### 적용 surface`만 유지한다.
+
 > **커밋 (2.7~2.8 — memory·recall 규율)**:
 > `feat(continuity): make tool memory non-canonical and add index-first recall (ADR-010 amend 5)`
 
@@ -687,143 +667,11 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 
 # Phase 3 — 디자인 게이트·정체성 (DS-1 · DS-2 · DS-3 · DS-5 · DS-6 · DS-7)
 
-당신의 핵심 목표("세련되고 창의적인, AI스럽지 않은 디자인")를 정면으로 겨냥하는 Phase다. 실험 근거상 진짜 지렛대는 **수용 게이트(DS-2/3/7)**이고, 리서치 강화(DS-1)·정체성(DS-5)은 그 위에 얇게 얹는다. 순서: 거버넌스 ADR → DESIGN.md 내용 → 스킬·에이전트 배선.
+당신의 핵심 목표("세련되고 창의적인, AI스럽지 않은 디자인")를 정면으로 겨냥하는 Phase다. Phase 1-B에서 이미 확정한 ADR-058을 전제로 DESIGN.md 내용 계약을 갱신한 뒤 스킬·에이전트·게이트 러너를 배선한다.
 
-> **거버넌스 주의**: ADR-058은 `ADR-049`를 supersede한다. 그래서 이 Phase에서 bootstrap-design을 재작성할 때 그 안의 `ADR-049#...` 인용은 자연히 `ADR-058`로 바뀐다. 그 밖에 남는 `ADR-049` 인용(ADR-027·ADR-040·DESIGN.md §0 주석·.gitignore 주석·STRUCTURE·WORKFLOW)은 **Phase 5의 re-point 스윕**에서 정리한다(Phase 3에서 편집하는 파일 안의 것은 그때그때 함께 바꾼다).
+> **선행조건**: Phase 1-B의 ADR-058 생성·ADR-049 supersede·현재 정책 참조 re-point가 한 커밋으로 끝나 있어야 한다. Phase 3에서는 새 상위 정책을 만들지 않고 그 정책의 surface를 구현한다.
 
-## 3.1 신규 `ADR-058` — Design Workflow (ADR-049 supersede) [DS-1 · DS-3 · DS-5]
-
-**변경**: 새 파일 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md`를 만든다:
-
-```markdown
-# ADR-058 — Design Workflow (reference flow + acceptance gate + concept cards)
-
-> scope: boilerplate
-> area: design
-
-## Status
-accepted
-
-> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-027](ADR-027-interface-decision-allocation.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
-> 승격 범위(정직 — *status 축*과 *검증 축*은 별개다):
-> - **status = `accepted`** — 저장소 `_ADR_GUIDE`상 accepted는 *운영 채택*을 뜻하지 검증 완료가 아니다(wiring이 이미 accepted 전제로 짜여 정합; `trial`은 허용 status가 아니라 분리 불가).
-> - **D3 수용 게이트는 지금 constraint** — ADR-022는 constraint에 `[관측됨]` *또는* `[외부실증]`을 요구하고(둘 중 하나면 자격 충족), repo-local `[관측됨]`으로 충족된다. **실측 개선 축은 serious/critical axe**(design-eval — repair loop로 serious 5/8→0/8). 320 overflow·clip은 게이트가 *결정적으로 상시 검사*하는 축이지만 이 eval에서 5/8→0/8 수치를 낸 건 axe다(320/clip을 같은 수치로 뭉뚱그리지 않는다). 별도 "강 승격" 관문은 없다(constraint 자체가 ADR-022 '강').
-> - **나머지(R0 evidence-on-demand·REFINE/EXPLORE·cross-model·실화면 a11y)는 directional/enabling — 미검증 명시.**
-> - **REPORT §13 용어 정정**: REPORT는 7기준을 "`accepted` 승격 조건"으로 적었으나, 이는 저장소 status(accepted=채택)보다 엄격한 *완전 실증* 의미다. 저장소 거버넌스에선 그 7기준을 **신뢰도(Medium→High)·외부 일반화 승격 조건**으로 읽는다(원본 REPORT는 local-only/gitignored이고 핵심 판정은 SIMULATION_RUN.md design-eval에 distill·보존, 본 ADR이 용어를 정정 — 조용한 덮어쓰기 아님). 기준 2(게이트 결함 0)·3(blind visual 5% 이내 — *게이트와 다른 축*)만 탐색적 충족, 나머지 5개 미검증. 미검증 부분은 아래 재검토 트리거가 관장(충족 시 신뢰도·일반화 승격; 미충족 신호 누적 시 그 부분 후퇴).
-
-## 현재 유효 결정
-- `/bootstrap-design` 라운드 구조 SSOT는 본 ADR: R0(리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(파생 preview 확인 + 정리).
-- **R0 = evidence-on-demand**(D2): AI 자율 리서치가 디폴트, 사용자 입력은 옵션 힌트. Layer A(방향)/B(값 grounding — 핀 URL)/C(포맷 — R5 fixture만). role 3종, counter-reference 조건부, 고정 쿼터 없음(coverage 정지, 최종 3~5개), 최소 기록 schema.
-- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). *진짜 품질 지렛대*.
-- **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
-- 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
-
-## 배경
-- [관측됨] 실사용 fork에서 시안이 단조롭고 어디서 본 듯함 + R0 grounding이 median으로 조용히 후퇴(슬롭 근본원인). 레퍼런스 값 추출이 실제 제품 페이지에서 자주 실패(Linear/Stripe/Vercel 0/3 — markdown 변환으로 CSS 소실).
-- [관측됨] repo-local 엄밀 재검증(`.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션 — Stage1 24안 블라인드 2인 + B3 8안 + holdout 2인, 2브랜드, 실제 1280/375/320 렌더+axe. 원본 산출물(REPORT·concept HTML·metrics)은 무거워 local-only/gitignored, distill이 판정 기록 보존(원자료 수치검산·재현은 불가). ADR-022상 저장소-로컬 평가는 `[관측됨]` — `[외부실증]`은 외부 다중 repo 실증에만): ① 레퍼런스 규칙을 잔뜩 더해도 평균 시각 점수 향상 0, 문맥 +76% ② 최초 24안 중 12안이 serious axe 위반 ③ 실패 selector 되먹임 1회 repair로 3/8→8/8 통과. → 품질을 만든 건 리서치가 아니라 **수용 게이트 폐쇄 루프**.
-
-## 결정
-1. **라운드 구조 R0~R6** — 위 현재 유효 결정 순서. `--fast`(R2·R4·R6 생략, R5 저장은 유지) / `--update`(부분 갱신) 존재.
-2. **R0 evidence-on-demand**:
-   - 디폴트는 **AI 자율 리서치**. 사용자 제공 URL·취향은 *우선 힌트*(prerequisite 아님) — 있으면 Layer A에 우선 반영, 없어도 확인 게이트 없이 자율 진행.
-   - **Layer A (방향)**: charter의 기획 방향·서비스 성격에 맞는 디자인 방향·레퍼런스 제품을 AI가 스스로 탐색(정성 방향 어휘).
-   - **Layer B (값 grounding)**: Layer A 방향에 맞는 오픈소스 토큰 패키지에서 실제 값 추출 — **핀 고정 목록**(Primer/Radix/Polaris/Tailwind/shadcn 검증된 원본 주소)으로 추측·404 제거. raw CSS + JSON 토큰 엔드포인트까지. mobbin·copycats류 가짜 요약 사이트 거부. 닫힌 제품(Linear 등)은 "추출 불가 — <사유>" 정직 표기.
-   - **Layer C (포맷·완성도)**: Google 공식 예시 DESIGN.md(`google-labs-code/design.md/examples`)로 섹션 완성도·빠짐 점검 — **선택이 끝난 R5에서 format fixture로만**(창작 컨텍스트 R0~R2에 넣지 않는다 — 공식 예시 `atmospheric-glass`가 glassmorphism/보라 그라디언트로 §9 anti-slop 위반이라 미감 오염). authoritative는 Google 공식 예시 3종만, `designmd.directory`·커뮤니티 미러는 lead로만.
-   - **role 3종**: `task/behavior` · `identity/craft` · `implementation system`. **한 canonical 레퍼런스가 여러 role을 겸하면 우선**(brand-fit과 groundable을 동시에 만족하는 소스 — role은 다중값 허용); 겸비가 불가할 때만 role별로 분리한다(겸용 우선, 안 될 때 분리). counter-reference(안티-레퍼런스)는 별도 role이 아니라 *미해결 tension이나 실제 monoculture가 있을 때만* 추가(mandatory anti-pole 폐기).
-   - **고정 최소 개수 없음** — evidence coverage가 차면 정지. designer 최종 입력 보통 3~5개 이하(단순 내부 도구는 더 적게). primary task·결정 순간·실패/복구·정체성 tension을 먼저 적어 리서치의 방향타로 삼는다.
-   - concept 안에서는 **coherent primary system 1개**. 명시 gap 시에만 secondary primitive(**Radix는 *색만* fallback** — 타이포/레이아웃/IA/모션은 ground 못함, semantic mapping·대비검증 별도).
-   - **관측 기반 주장만**: visual 주장은 실제 화면/스크린샷을 봤을 때만, behavior 주장은 docs/interaction을 봤을 때만 기록. broad search·gallery·Dribbble/Behance는 이름 찾는 lead로만 허용 후 canonical 제품·공식 문서·live 스크린샷·source/token 코드로 승격.
-   - **최소 기록 schema** (DESIGN_RESEARCH.md): `source/canonical | role | 뒷받침한 결정 | 검증유형(visual/behavior/code) | 관측일 | borrow | avoid | confidence/caveat`. quality-tier·cluster-quota·groundable-count 같은 실험용 label은 정책 필드로 만들지 않는다(기록 비용 > 결정 품질).
-3. **R2/R6 수용 게이트**:
-   - **항상(값싼·결정적 — 러너가 계산)**: **320px 브라우저 geometry** — page overflow + **element viewport escape + clipped/truncated text**(narrow ≤375 — design-workflow eval(SIMULATION_RUN.md design-eval; 원본 local-only)의 `check-reflow-320.cjs` `getBoundingClientRect`·overflow-clip 로직 이식) + **populated-state axe**(실데이터 채운 화면 *전제* — 입력 계약; 러너는 axe를 돌리고 "실제로 채워졌는지"는 reviewer 스크린샷이 backstop으로 확인). **overflow·escape·clip은 러너가 결정적으로 잡는다**(design-eval 실측 검증분 — geometry는 픽셀 취향이 아니라 좌표 계산이라 결정 가능). **단 정상 UI 오탐 제외**: sr-only/visually-hidden(1px·clip/clip-path)·aria-hidden/inert/닫힌 drawer·overflow scroll/auto 조상 안(contained 가로스크롤=의도적, 예: 넓은 표)·의도적 `text-overflow:ellipsis`는 escape/clip에서 뺀다(실브라우저 검증분 — 러너 코드에 반영). reviewer 픽셀은 *주관적* 판정(위계·밀도·slop·overlap)만 담당한다.
-   - **full 모드**: 각 concept을 1280 + 375로 항상 렌더 → **독립 reviewer(design surface)가 픽셀로** 위계·밀도·domain fit·장식 slop 판정(HTML-read source 감사와 별개 — 세 검사가 서로 다른 결함을 잡아 대체 불가). LLM reviewer는 1명이면 충분.
-   - **차단(block) — 러너 결정적**(design-gate.mjs가 계산): serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry). **차단(block) — reviewer 픽셀 판정**(스크린샷으로 판단, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding. **수동 smoke**(자동 불가분): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
-   - **repair loop**(핵심): 실패 selector + 요약을 designer에 되먹여 재실행. **retry ≤2, 초과 시 승인 보류 + brief/source 재검토**(무한 루프 방지), 여전히 fail이면 승인 불가. 통과본 외 임시 렌더/스크린샷은 정리.
-   - 게이트는 concept/preview·선택 프로토타입 **1회성에서만**(per-task hot-loop 금지). Playwright/axe는 stack-guard 선설치분 재사용(추가 의존 0).
-   - `--fast`/`--update`: research·독립 reviewer 생략은 명시 사유 echo(silent skip 금지). **게이트 적용은 모드가 아니라 산출물 기준** — `--fast`는 R2·R6를 생성하지 않으므로 게이트 적용 대상 없음(N/A), `--update`가 concept/preview를 생성·재생성하면 그 산출물엔 게이트 필수.
-4. **R2 시안 카드 REFINE / EXPLORE**: 두 기본안을 **REFINE**(익숙한 task convention 우선 + restrained signature) / **EXPLORE**(signature-led이되 *같은* 익숙한 control/flow 보존)로 정의(안전/과감 아님 — novelty가 목표라는 오해 차단). 3번째 안은 *풀리지 않은 명시적 tension이 있을 때만*. 카드 필드: `task hypothesis | preserved convention | visible signature | failure sign`. **signature가 primary task를 더 빨리 이해시키지 못하면 장식 → 제거**(실험에서 rail·route 장식이 coherence를 해침).
-5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계)**: 취향 오라클=사용자(선호 추천·순위 금지, 물으면 예외). concept authoring=designer, 구별성·픽셀 감사=reviewer[design](자기 비평 금지). parallel-merge 금지(순차 생성→비평→선택). **harness degradation (Codex 등 독립 subagent 미지원 경로)**: 독립 subagent 격리가 없는 harness에서는 gen/audit가 동일 세션 *순차 페르소나*로 degrade한다 — 이때 (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 감사 독립성 저하를 산출물에 `under-verified: 동일 세션 감사`로 명시하며, (c) 완전 독립 감사가 요구되면 사용자 승인 보류. **단 결정적 렌더 게이트(`design-gate.mjs`)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 결정적으로 차단된다(감사 *독립성*이 degrade해도 *안전 게이트*는 유지).
-
-## 근거
-- 대안 A(현행 유지 B0): raw 시각/비용은 최선이나, acceptance gate 없이는 배포불가 결함(serious axe)이 승인까지 통과 — 유지 불가.
-- 대안 B(리서치 대폭 강화 B1/B2): 평균 시각 향상 0, 문맥 +76%, 고정 lane이 무관 근거를 끌어와 task 적합도↓ — 채택 안 함(축소).
-- 채택(B3형 = 얇은 evidence-on-demand + task 기여 2안 + 독립 렌더/DOM 수용 게이트): 실험상 serious 5/8→0/8, holdout 최고안이 incumbent와 0.5/50 차이.
-- 신뢰도: **Medium** — 2브랜드·same-model·static prototype·B3 post-hoc라 cross-project 다양성·작은 시각점수 차는 일반화 금지(design-eval 신뢰도·한계 — SIMULATION_RUN.md). directional 근거.
-- 재검토 트리거(SIMULATION_RUN.md design-eval = 원 REPORT §13) 7기준(동일 brief 2회 비교 / archetype별 serious·320·clipping 0안 매 반복 제공 / blind 평균 5% 이내 / quota 없음 확인 / --fast·--update silent skip 없음 / Claude·Codex 축소 경로 실행 / 키보드·focus·escape·SR name·동적 상태 실화면 검사)은 **신뢰도(Medium→High)·외부 일반화 승격 조건**이다(accepted 채택 자체를 막는 조건이 아님 — accepted는 이미 성립, D3 constraint는 [관측됨]으로 충족). 미충족 신호가 누적되면 해당 부분(리서치·카드 등 directional)을 후퇴시킨다. archetype 확대·cross-project 다양성 측정 시 재검토.
-
-## Mutation Contract (ADR-047 D3)
-1. **Target** — bootstrap-design SKILL R0~R6·`--fast`·`--update` + `allowed-tools`(렌더·axe 실행) / `scripts/design-gate.mjs` 러너 / plan-milestone R5 게이트(allowed-tools + R5-5) / researcher.md 디자인 레퍼런스 모드 / designer.md(카드·signature·PX 마커) / reviewer.md(design surface 렌더 증거·픽셀 판정·bootstrap-design 호출자 등재) / DESIGN_RESEARCH.md 스키마 / stack-guard(populated axe·320 reflow) / DESIGN.md §0 주석 R0~R6 / STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point.
-2. **Failure mode** — R0 grounding이 median으로 조용히 후퇴 + 독립 감사가 렌더·DOM을 안 봐 배포불가 결함(serious axe·320 overflow) 통과 + 시안이 "다르기만" 하고 안전·평범(전부 관측됨/실측).
-3. **Predicted improvement** — serious axe 제거(실측 5/8→0/8) + 320 geometry 결함 차단(별도 결정적 축 — 같은 수치로 뭉뚱그리지 않음), 레퍼런스 값 확보 안정화, REFINE/EXPLORE로 의도된 개성.
-4. **Preserved invariants** — DESIGN.md 시각 SSOT / preview·concept ephemeral(ADR-005) / 취향 오라클=사용자 / 생성·감사 분리 / RGR inner-loop 스크린샷 hot-loop 금지(게이트는 1회성 carve-out) / 비-UI DESIGN.md 삭제 경로 / skill auto-invocation 금지 / ADR-027 DESIGN 내용·인터페이스 SSOT 지위.
-5. **Falsifying evaluation** — SIMULATION_RUN.md design-eval의 재검토 트리거(= REPORT §13 7기준) 재실행에서 새 흐름이 archetype별 serious/320/clipping 0안을 매 반복 제공 못 하거나 blind 평균이 current 대비 5% 초과 하락하면 게이트·리서치 강도 재조정(ADR-047#amend-1 방법 — 대조군 둔 저비용 비교 먼저). 정적 부분은 `scripts/check-doc-links.mjs`.
-6. **Rollback path** — ADR-058을 *새 supersede ADR*로 되돌린다: ADR-058을 supersede하는 신규 ADR을 발행해 라운드 구조(R0 5단 위계·divergence 카드·visual-QA scaffold)를 재채택하고 렌더 게이트·evidence-on-demand·REFINE/EXPLORE를 제거하며 surface를 새 ADR로 re-point한다. **ADR-049 status를 accepted로 되돌리지 않는다** — supersede는 history 영속(ADR-045)이라 status 되돌리기는 기록 왜곡이다.
-
-## 정책 강도 (ADR-022)
-- D3 수용 게이트의 block 등급(serious/critical axe·320 overflow·viewport escape·clipped text)은 **constraint(ADR-022 '강')**. ADR-022는 constraint에 `[관측됨]` *또는* `[외부실증]`을 요구하는데(둘 중 하나면 충족), 게이트가 배포불가 결함(serious/critical axe·320 geometry — WCAG·브라우저 기준)을 제거하는 효과가 `[관측됨]` repo-local 평가(design-eval — serious 5/8→0/8)로 확인되므로 **지금 constraint 자격을 충족**한다. 신뢰도는 Medium 유지 — 외부 다중 repo 실증이 쌓이면 `[관측됨+외부실증]`으로 신뢰도·일반화가 오른다(ADR-022 "제약 강하게"; constraint *자격*은 이미 충족이라 별도 승격 관문 아님). R0 evidence-on-demand·REFINE/EXPLORE·report 등급은 enabling(약).
-
-## 결과
-- 디자인 흐름의 품질 지렛대가 "리서치 양"에서 "수용 게이트 폐쇄 루프"로 이동. 레퍼런스는 얇게, 게이트는 결정적으로.
-
-## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- .claude/skills/bootstrap-design/SKILL.md
-- .claude/agents/researcher.md
-- .claude/agents/designer.md
-- .claude/agents/reviewer.md
-- docs/20-system/DESIGN.md                  — §0 주석 R0~R6 + §1 DESIGN_RESEARCH 링크
-- scripts/design-gate.mjs                    — R2-G/R6 수용 게이트 러너
-- .claude/skills/plan-milestone/SKILL.md      — R5 프로토타입 게이트 호출자(allowed-tools + R5-5 게이트)
-- .claude/skills/stack-guard/SKILL.md
-- docs/00-meta/STRUCTURE.md
-- docs/00-meta/WORKFLOW.md
-- .gitignore
-
-## 참고
-- ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
-```
-
-**왜**: 사용자 URL 1순위(ADR-049 R0)를 "AI 자율 디폴트"로 뒤집는 것은 기존 결정 번복이라 ADR-045 D6상 amend가 아니라 supersede(신규 ADR)가 맞다. 게이트를 constraint로 박아 배포불가 결함을 빌드 전에 실제로 제거한다.
-
-## 3.1b design-workflow eval 산출물 처리 — gitignore + SIMULATION_RUN.md distill (사용자 결정, 이번 라운드 선반영)
-
-ADR-058이 `[관측됨]`으로 인용하는 평가 산출물(`design-workflow-eval-20260720/` — 293파일·~35MB: REPORT 462줄 + concept HTML 32안 + metrics JSON + blind/holdout + microtests)은 무겁다. **소형 evidence bundle을 커밋하는 대신, 폴더 전체를 gitignore(local-only)하고 핵심 판정만 `.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션에 distill한다**(사용자 결정 — bundle 커밋의 backlog dead-link·이미지 참조·로컬 절대경로·내부 링크 깨짐 문제를 한 번에 회피). ADR-058의 `[관측됨]` provenance는 그 distill 섹션이 소유한다.
-
-**이 처리는 이번 개선 라운드에서 이미 반영됐다**(Phase 1 배치와 함께 커밋):
-- `.gitignore`에 `.boilerplate/validation/design-workflow-eval-20260720/` 폴더 전체 ignore(기존 PNG/JPG-only 블록 대체).
-- `git rm -r --cached`로 기존 tracked 산출물 79파일 untrack(worktree엔 local-only로 잔존).
-- `SIMULATION_RUN.md` "Design Workflow Eval" 섹션 = 질문·설계 · 핵심 판정 6건 · DS-1~7 판정 · 신뢰도 · §13 재검토 트리거 distill(판정 기록 보존 — 원자료 수치검산·재현은 local-only라 불가; `[관측됨]` provenance).
-- `check-doc-links.mjs`가 `.boilerplate/validation/` 하위 eval 번들을 스캔 제외(§1.1 ④, pure Node·git 미사용) → 폴더에 잔존하는 REPORT의 삭제된 backlog 참조도 자동 무해화(별도 정리 불요).
-
-**Phase 3에서 ADR-058 작성 시**: `[관측됨]` 근거·Falsifying evaluation 재검토 트리거는 폴더 경로가 아니라 **`.boilerplate/validation/SIMULATION_RUN.md`의 "Design Workflow Eval" 섹션**을 가리킨다(ADR-058 본문 §배경·Falsifying evaluation에 반영됨). 별도 evidence-bundle 커밋은 **없다**.
-
-## 3.2 ADR-049 → superseded 표기
-
-**기존** (`docs/90-decisions/boilerplate/ADR-049-concept-mockup-first-design.md` 상단 — `## Status` 아래 값 줄만 대상):
-
-```
-## Status
-accepted
-```
-
-**변경**: `_ADR_GUIDE` "대체 절차"를 정확히 따른다 — **Status 값은 상태어(`superseded`)만** 두고, 대체 정보는 **ADR 제목 아래 별도 줄**로 기록한다(저장소 관례상 Status 값에 긴 설명을 욱여넣지 않는다 — 부분 supersede만 짧은 괄호를 달고 그건 `accepted` 유지; ADR-049는 *전면* supersede라 bare `superseded`). `## 현재 유효 결정` 헤딩·본문은 건드리지 않는다(history 잔존).
-
-(1) `## Status` 값 교체:
-```
-## Status
-superseded
-```
-(2) ADR-049 제목(H1) 바로 아래에 대체 줄 1개 추가:
-```
-> 대체: [ADR-058](ADR-058-design-workflow.md) (2026-07-21 — 라운드 구조·R0 grounding·시안 정책 전부 ADR-058로 이관; 본 ADR 본문은 history로 보존)
-```
-
-**왜**: `_ADR_GUIDE` "대체 절차"(① status→`superseded` ② 상단 "대체: ADR-xxx" 별도 표기 ③ 신규 ADR이 구 ADR 참조) 준수 — Status 값에 서술을 섞지 않는다.
-
-**변경 (b) — orphan `## Surfaces` 제거 (F1 — [Surface-backref] 오탐 차단)**: ADR-049는 본문 끝에 `## Surfaces` 블록(fan-out SSOT)을 갖는다. §5.5가 그 등재 파일들의 `ADR-049` 역참조를 `ADR-058`로 re-point하면 역참조가 사라지는데, stabilize `[Surface-backref]` forward-check(`.claude/skills/stabilize-milestone/SKILL.md`의 "Surfaces forward check" 항목)는 `## Surfaces`를 가진 *모든* ADR에 각 파일의 `ADR-NNN` 역참조 존재를 요구하며 **superseded 예외가 없다** → 완전 re-point된 파일마다 `P1 [Surface-backref] ADR-049 → <file>`가 터진다(이건 인용의 [Ref-dead] P2와는 *별개* 검사라 P2 강등으로 안 덮인다). 그래서 supersede 시 **ADR-049 본문 끝의 `## Surfaces` 블록을 통째로 삭제**한다 — superseded ADR은 live sync 소스가 아니고, 그 surface는 이제 ADR-058 `## Surfaces`가 소유한다(결정 본문·`## 현재 유효 결정`은 history로 남기고, fan-out 포인터인 Surfaces 블록만 제거 — 결정 history 손실 0).
-
-**변경 (c) — forward-check에 superseded 예외 (F1 일반화 — 미래 supersede 대비)**: (b)와 별개로, 앞으로의 어떤 supersede에서도 같은 오탐이 안 나게 `.claude/skills/stabilize-milestone/SKILL.md`의 "Surfaces forward check" 항목 문구에 한 줄을 더한다 — **"대상 ADR의 `## Status`가 `superseded`/`deprecated`면 forward-check에서 skip한다(live sync 소스만 점검 — 죽은 ADR의 잔존 Surfaces는 별도 [Ref-dead]가 담당)."** (b)는 지금 ADR-049를 정리하고, (c)는 클래스 전체를 막는다.
-
-## 3.3 ADR-027 Amendment 7 + `## 현재 유효 결정` 갱신 [DS-2 · DS-5 · DS-6 · DS-7]
+## 3.1 ADR-027 Amendment 7 + `## 현재 유효 결정` 갱신 [DS-2 · DS-5 · DS-6 · DS-7]
 
 **기존** (`docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md`의 `## 현재 유효 결정` 첫·넷째 불릿):
 
@@ -831,7 +679,7 @@ superseded
 - 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056)), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
 ```
 
-**변경 (a)**: 첫 불릿 끝에 내용 계약 확장을 덧붙이고, 흐름 SSOT 참조를 ADR-049→ADR-058로 바꾼다. 첫 불릿을 다음으로 교체:
+**변경 (a)**: 첫 불릿 끝에 내용 계약 확장을 덧붙이고, 흐름 SSOT(ADR-058) 참조를 명시한다(ADR-049 인용 자체는 §1.7에서 이미 re-point됨 — 여기선 SSOT 문장 추가). 첫 불릿을 다음으로 교체:
 
 ```
 - 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056) + **내용 계약 확장(§1 긍정적 정체성 · §3 tabular · §4 responsive invariant · §7 category state · §8 semantic motion · §9 WCAG 2.2 a11y — #amend-7)**), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다. **디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede).
@@ -840,8 +688,9 @@ superseded
 **기존** (amend roster 불릿):
 
 ```
-- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-049). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입).
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입).
 ```
+(위 "기존" roster의 `ADR-058`은 §1.7 re-point 반영분 — Phase 3 진입 시 이미 이 상태다. 본 절은 amend-7만 덧붙인다.)
 
 **변경 (b)**: 끝에 amend-7을 덧붙인다:
 
@@ -881,7 +730,7 @@ superseded
 - §9 a11y의 grep 가능분(포커스 제거·색-단독)·§4 320 reflow는 constraint(강). 나머지 enabling(약).
 ```
 
-**변경 (d) — grandfather amend 근거 명시**: Amendment 7 헤딩 바로 아래에 한 줄을 넣어, ADR-027이 grandfather라 D6 재발행 강제 없이 amend가 정당함을 남긴다(체커·유지보수자 혼동 방지):
+**변경 (d) — grandfather amend 근거 명시**: Amendment 7 헤딩 바로 아래에 한 줄을 넣어, ADR-027이 grandfather라 D6 재발행 강제 없이 amend가 정당함을 남긴다(검증자·유지보수자 혼동 방지):
 
 ```
 > **amend 근거(ADR-045 D6 grandfather 조항)**: ADR-027은 ADR-045(2026-05-27) *이전* 생성(2026-05-16)이라 **grandfather** — D6 재발행은 "우선 검토(권고)"일 뿐 즉시 강제가 아니다. 본 개선 라운드는 *최소 churn*을 택해 Amendment 7로 처리한다(사용자 결정 — 번호·참조 churn 회피). `## 현재 유효 결정`이 이미 net 규칙을 요약하므로 fold 부담은 낮다. 다음 변경 시 통합 재발행 우선 검토.
@@ -889,15 +738,15 @@ superseded
 
 **왜**: 사용자가 Q3에서 "최소 churn: 027 번호 유지"를 택했다. §1 긍정적 정체성이 당신 목표("AI스럽지 않은 좋은 디자인")의 실제 지렛대이고, a11y·category state·responsive는 기본 웹 스택의 최대 품질 구멍을 값싸게 닫는다.
 
-## 3.4 DESIGN.md §1 — 긍정적 정체성 (DS-5)
+## 3.2 DESIGN.md §1 — 긍정적 정체성 (DS-5)
 
 **기존**:
 
 ```
 ## 1. Overview
 <!-- 디자인 원칙 3~5개 (actionable verb. "modern/clean/sleek" 같은 모호어 금지).
-     + [디자인 리서치](DESIGN_RESEARCH.md) 링크 + what-to-borrow/avoid 1~2줄 (ADR-049#d28).
-     + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-049#d30 — /bootstrap-design R2 선택 결과). -->
+     + [디자인 리서치](DESIGN_RESEARCH.md) 링크 + what-to-borrow/avoid 1~2줄 (ADR-058).
+     + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-058 — /bootstrap-design R2 선택 결과). -->
 ```
 
 **변경**:
@@ -914,7 +763,7 @@ superseded
      + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-058 — /bootstrap-design R2 선택 결과). -->
 ```
 
-## 3.5 DESIGN.md §3 — tabular figures (DS-6/DS-7)
+## 3.3 DESIGN.md §3 — tabular figures (DS-6/DS-7)
 
 **기존**:
 
@@ -931,7 +780,7 @@ superseded
      + Data-table 계약 (ADR-027#amend-7): 표·정렬이 필요한 숫자 열은 tabular figures(`font-variant-numeric: tabular-nums`)로 정렬 흔들림 방지. -->
 ```
 
-## 3.6 DESIGN.md §4 — responsive invariant (DS-7)
+## 3.4 DESIGN.md §4 — responsive invariant (DS-7)
 
 **기존**:
 
@@ -949,7 +798,7 @@ superseded
        content order(작은 화면에서도 읽기 순서 보존) / container transition(고정폭→유동) / table strategy(가로 스크롤은 표 자체 영역만, page 넘침 금지) / sticky occlusion(고정 요소가 콘텐츠 가림 방지) / 320 CSS px reflow(가로 스크롤·클리핑 없음) / text fit(말줄임보다 줄바꿈 우선) / essential-2D exception(표·캔버스 등 본질적 2차원은 contained region만 스크롤 + 그 region은 keyboard focus/name 보유). -->
 ```
 
-## 3.7 DESIGN.md §7 — category state 계약 (DS-7)
+## 3.5 DESIGN.md §7 — category state 계약 (DS-7)
 
 **기존**:
 
@@ -972,7 +821,7 @@ superseded
      N/A는 category상 expected 상태를 *의도적으로* 뺄 때만 명시. -->
 ```
 
-## 3.8 DESIGN.md §8 — semantic motion contract (DS-6)
+## 3.6 DESIGN.md §8 — semantic motion contract (DS-6)
 
 **기존**:
 
@@ -996,7 +845,7 @@ superseded
      수치는 project token의 *시작 default*로만 (보편 법칙 아님): 버튼 100~160ms / 라우팅 UI 160~240ms / entrance·exit 240~360ms (Material 3 참고). -->
 ```
 
-## 3.9 DESIGN.md §9 — 접근성 + category 정합 (DS-2)
+## 3.7 DESIGN.md §9 — 접근성 + category 정합 (DS-2)
 
 **기존** (§9 주석 내 두 줄):
 
@@ -1022,12 +871,13 @@ superseded
      - 모든 컴포넌트에 ## 7 의 category별 expected 상태 정의 (interactive/data/static — 특히 empty/loading/error/success 누락 빈번)
 ```
 
-**왜**: 접근성은 기본 웹 스택의 기본기다. LLM이 못 잡는 정밀 비율은 §3.17의 실화면 axe가 결정적으로 잡고, 여기 문서 계약은 "확실히 잡히는 것"을 강하게 못박는다.
+**왜**: 접근성은 기본 웹 스택의 기본기다. LLM이 못 잡는 정밀 비율은 §3.15의 실화면 axe가 결정적으로 잡고, 여기 문서 계약은 "확실히 잡히는 것"을 강하게 못박는다.
 
-> **커밋 (Phase 3 전반 — 거버넌스 ADR + DESIGN 내용)**:
-> `feat(design): add Design Workflow ADR-058 (supersede ADR-049) and reissue DESIGN.md contract via ADR-027 amend 7`
+**같은 커밋의 인덱스·surface 동기**: `docs/90-decisions/boilerplate/README.md` ADR-027 행에 `+#amend-7: DESIGN 내용 계약 확장(정체성·a11y·semantic motion·category state·responsive·tabular)`을 추가한다. Amendment 7의 새 적용 surface가 base `## Surfaces`에 없으면 같은 커밋에만 추가한다.
 
-## 3.10 researcher.md — 디자인 레퍼런스 모드 재설계 (DS-1)
+> **중간 커밋 금지**: ADR-027/DESIGN 내용 계약만 먼저 커밋하지 않는다. 아래 스킬·에이전트·게이트 러너까지 배선한 뒤 Phase 3 종료 지점에서 한 번에 커밋한다.
+
+## 3.8 researcher.md — 디자인 레퍼런스 모드 재설계 (DS-1)
 
 **기존** (`.claude/agents/researcher.md` `## 디자인 레퍼런스 모드` 전체):
 
@@ -1086,9 +936,9 @@ superseded
 
 **왜**: 레퍼런스 값 확보가 "운 좋으면 됨"에서 "핀 목록으로 안정적 확보 + 방향은 자율 리서치"로 바뀐다. ADR-040이 구 위계를 SSOT로 남기면 두 ADR이 모순되므로 부분 supersede를 명문화(ADR-045 부분 supersede 관례 — ADR-041/050 동형).
 
-## 3.11 bootstrap-design R0 — evidence-on-demand (DS-1) + DESIGN_RESEARCH 최소 schema (DS-1e/DS-7b)
+## 3.9 bootstrap-design R0 — evidence-on-demand (DS-1) + DESIGN_RESEARCH 최소 schema (DS-1e/DS-7b)
 
-**기존**: `.claude/skills/bootstrap-design/SKILL.md`의 `## R0 — 레퍼런스 추출 + 안티-레퍼런스 + 레퍼런스 노트 영속화 (ADR-049#d28)` 라운드 전체(heading부터 `## R1` 직전까지). 현재 R0는 5단 grounding 위계(①=사용자 URL 1순위), 안티-레퍼런스 1~2개 **필수**, DESIGN_RESEARCH.md 템플릿(color signature/typography/density/motion 4축).
+**기존**(§1.7 re-point 후 상태 — ADR 토큰은 ADR-058): `.claude/skills/bootstrap-design/SKILL.md`의 `## R0 — 레퍼런스 추출 + 안티-레퍼런스 + 레퍼런스 노트 영속화 (ADR-058)` 라운드 전체(heading부터 `## R1` 직전까지). 현재 R0는 5단 grounding 위계(①=사용자 URL 1순위), 안티-레퍼런스 1~2개 **필수**, DESIGN_RESEARCH.md 템플릿(color signature/typography/density/motion 4축). (절 전체를 교체하므로 매칭은 `## R0` heading으로 하고 내용은 아래로 갈음.)
 
 **변경**: 그 R0 라운드 전체를 아래로 교체한다:
 
@@ -1141,11 +991,12 @@ superseded
 **기존** (skill 헤더 패턴 줄):
 
 ```
-> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R6를 직접 운전한다. R0(레퍼런스 분해)과 R1(원칙 추출)의 무거운 추론은 `Agent` 도구로 **designer**를 단발 sub-call로 위임(ADR-049#amend-2 — 코드 증거 수집은 researcher 디자인 레퍼런스 모드). 종료 후 사용자가 `/clear` 권장 (R0~R6 인터랙션이 다음 task 컨텍스트에 잡음).
-> 라운드 구조 SSOT는 ADR-049(concept-mockup-first). DESIGN.md *내용*(8섹션+Motion / 3-tier 토큰 / Don'ts)·인터페이스 할당 SSOT는 ADR-027.
+> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R6를 직접 운전한다. R0(레퍼런스 분해)과 R1(원칙 추출)의 무거운 추론은 `Agent` 도구로 **designer**를 단발 sub-call로 위임(ADR-058 — 코드 증거 수집은 researcher 디자인 레퍼런스 모드). 종료 후 사용자가 `/clear` 권장 (R0~R6 인터랙션이 다음 task 컨텍스트에 잡음).
+> 라운드 구조 SSOT는 ADR-058(concept-mockup-first). DESIGN.md *내용*(8섹션+Motion / 3-tier 토큰 / Don'ts)·인터페이스 할당 SSOT는 ADR-027.
 ```
+(ADR 토큰은 §1.7 re-point 반영분. §1.7은 토큰만 swap하므로 옛 제목 `(concept-mockup-first)`이 남아 있고, 아래 변경이 위임 구조와 함께 이를 정리한다.)
 
-**변경**: `ADR-049` 참조를 `ADR-058`로 바꾼다(라운드 구조 SSOT 이관):
+**변경**: 위임 구조를 researcher(방향·값 grounding)+designer(분해·시안)로 갱신하고 SSOT 문구를 정리한다(ADR 토큰 자체는 §1.7에서 이미 ADR-058):
 
 ```
 > 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R6를 직접 운전한다. R0 방향 리서치·값 grounding은 `Agent` 도구로 **researcher**(디자인 레퍼런스 모드) + 분해·시안 authoring은 **designer** 단발 sub-call 위임(ADR-058). 종료 후 사용자가 `/clear` 권장.
@@ -1164,7 +1015,7 @@ superseded
 - `--fast`: R0(Layer A/B minimal — 있으면 사용자 힌트 우선, 없으면 자율 조사 1~2개로 최소 grounding + minimal 노트) + R1(원칙 1줄 + voice 기본값 확인 1회) + R3(토큰) + R5(저장 — 축약 섹션, §10 포함). **R2(concept 시안)·R4(컴포넌트 인벤토리)·R6(preview)는 생략** — R5 저장은 *생략하지 않는다*. R1은 *완전 생략 금지*(minimal 1줄). 게이트는 산출물 기준 — `--fast`는 R2·R6(concept/preview) 미생성이라 게이트 적용 대상 없음(N/A, ADR-058 D3). `--fast`에서 concept·preview가 필요하면 종료 후 명시 발화로 R2/R6 단독 수행.
 ```
 
-## 3.11b bootstrap-design R5 — Google 포맷 fixture point-check (DS-1 Layer C)
+## 3.9b bootstrap-design R5 — Google 포맷 fixture point-check (DS-1 Layer C)
 
 **기존** (`.claude/skills/bootstrap-design/SKILL.md` R5 상태 승격 불릿):
 
@@ -1181,12 +1032,12 @@ superseded
 
 **왜**: ADR-058 D2의 Layer C("R5에서 format fixture")가 실제 R5 단계로 실체화된다 — 지금까진 정책만 있고 실행 지점이 없었다.
 
-## 3.12 bootstrap-design R2 — REFINE/EXPLORE 카드 (DS-5) + 수용 게이트 (DS-3)
+## 3.10 bootstrap-design R2 — REFINE/EXPLORE 카드 (DS-5) + 수용 게이트 (DS-3)
 
 **기존** (`## R2 — 다중 concept 시안` 의 R2-1 divergence 카드 불릿):
 
 ```
-- **divergence 카드 (ADR-049#amend-2)**: 각 concept에 {① 배타적 레퍼런스 borrow 축(R0 레퍼런스 중 concept별 배정 — 공유 금지; 레퍼런스 수 < concept 수면 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션)을 배타 배정), ② 전용 안티-레퍼런스 1개, ③ 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 카드를 기록한다. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 단 모든 concept이 R0 안티-레퍼런스와 `## 9` Don'ts는 공통 회피.
+- **divergence 카드 (ADR-058)**: 각 concept에 {① 배타적 레퍼런스 borrow 축(R0 레퍼런스 중 concept별 배정 — 공유 금지; 레퍼런스 수 < concept 수면 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션)을 배타 배정), ② 전용 안티-레퍼런스 1개, ③ 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 카드를 기록한다. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 단 모든 concept이 R0 안티-레퍼런스와 `## 9` Don'ts는 공통 회피.
 ```
 
 **변경**:
@@ -1202,7 +1053,7 @@ superseded
 **기존** (R2-1.5 구별성 비평):
 
 ```
-### R2-1.5. 구별성 비평 (순차 1회 — ADR-049#amend-2)
+### R2-1.5. 구별성 비평 (순차 1회 — ADR-058)
 - 생성 직후 **reviewer(design surface) 단발 sub-call**(입력은 divergence 카드 + concept별 토큰 요약만, HTML 전문 투입 금지) 1회로 판정: ① concept 간 실질 구별성(같은 카드 축을 침범했는가) ② 안티-레퍼런스·`## 9` Don'ts 근접도. designer 자기 비평 금지(생성/감사 분리).
 - **합의·병합·순위·추천 금지** — 출력은 "재생성 필요 concept 목록 + 사유"만. 재생성 필요 concept은 카드를 유지한 채 재생성 후 R2-2로.
 ```
@@ -1232,7 +1083,7 @@ superseded
 
 **왜**: 실측상 진짜 품질 지렛대는 이 폐쇄 루프(serious 5/8→0/8)다. 스크린샷만 본 사람은 대비 실패를 놓치므로 axe·320이 결정적으로 잡고, 픽셀 감사는 장식 slop·위계를 잡는다.
 
-## 3.13 bootstrap-design R3 밀도 힌트 (DS-7f) + R6 게이트 (DS-3) + R4 category state (DS-7d)
+## 3.11 bootstrap-design R3 밀도 힌트 (DS-7f) + R6 게이트 (DS-3) + R4 category state (DS-7d)
 
 **기존** (R3 토큰 불릿 마지막):
 
@@ -1294,7 +1145,7 @@ superseded
 
 **왜**: R2(concept)와 R6(preview) 두 지점에서 렌더·DOM을 결정적으로 검사해 배포불가 결함을 승인 전에 제거한다.
 
-## 3.14 designer.md — R0 evidence-on-demand + REFINE/EXPLORE + repair 되먹임 (DS-1/5/3)
+## 3.12 designer.md — R0 evidence-on-demand + REFINE/EXPLORE + repair 되먹임 (DS-1/5/3)
 
 **기존** (`.claude/agents/designer.md` 역할 목록):
 
@@ -1315,9 +1166,9 @@ superseded
 - **수용 게이트 repair(R2-G/R6)**: reviewer/게이트가 되먹인 실패 selector + 요약을 받아 그 지점만 재생성한다(retry ≤2 — 그 안에서 못 고치면 brief 재검토로 에스컬레이션). identity·layout 전면 재설계가 아니라 지목된 결함(대비·overflow·clipping 등)만 고친다.
 ```
 
-**왜**: designer가 evidence-on-demand 입력과 REFINE/EXPLORE 카드, repair 되먹임을 명시적으로 다루게 한다. (R5 프로토타입 PX 마커 의무는 `ADR-056#amend-1` surface라 Phase 4 §4.1에서 amend와 *원자 적용*한다 — Phase 3 forward-ref 방지. **§3.14 designer 편집은 PX를 참조하지 않는다** — P1-6.)
+**왜**: designer가 evidence-on-demand 입력과 REFINE/EXPLORE 카드, repair 되먹임을 명시적으로 다루게 한다. (R5 프로토타입 PX 마커 의무는 `ADR-056#amend-1` surface라 Phase 4 §4.1에서 amend와 *원자 적용*한다 — Phase 3 forward-ref 방지. **§3.12 designer 편집은 PX를 참조하지 않는다** — P1-6.)
 
-## 3.15 reviewer.md — a11y 차원 신설 + category state + bootstrap-design 게이트 호출자 (DS-2/3/7)
+## 3.13 reviewer.md — a11y 차원 신설 + category state + bootstrap-design 게이트 호출자 (DS-2/3/7)
 
 **기존** (호출 surface `design` 줄):
 
@@ -1427,23 +1278,23 @@ stabilize-milestone(구현 후) 및 bootstrap-design R2-G/R6 수용 게이트(AD
 
 **왜**: reviewer가 접근성을 6번째 차원으로 감사하고, 8상태→category 정합을 맞추며, bootstrap-design 게이트의 픽셀 판정자로 등재된다.
 
-## 3.16 validate-plan [Plan-design] 미러 (DS-2/DS-7d)
+## 3.14 validate-plan [Plan-design] 미러 (DS-2/DS-7d)
 
-**기존** (`.claude/skills/validate-plan/SKILL.md` 차원 9 — **validate-plan 전용**. reviewer.md의 [Plan-design]는 문구가 다른 별도 버전으로 §3.15가 이미 처리했다 — 여기서 다시 손대지 않는다):
+**기존** (`.claude/skills/validate-plan/SKILL.md` 차원 9 — **validate-plan 전용**. reviewer.md의 [Plan-design]는 문구가 다른 별도 버전으로 §3.13가 이미 처리했다 — 여기서 다시 손대지 않는다):
 
 ```
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / 8 상태 매트릭스 누락 / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
 ```
 
-**변경** (validate-plan 차원 9만 — reviewer.md는 §3.15에서 이미 category/a11y로 바뀜):
+**변경** (validate-plan 차원 9만 — reviewer.md는 §3.13에서 이미 category/a11y로 바뀜):
 
 ```
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
 ```
 
-**왜**: plan surface의 [Plan-design]을 category state·a11y로 정합. reviewer.md [Plan-design]은 §3.15가 담당한다(둘은 *개념적* 미러 — 각자 형식이 달라 byte-identical 아님). 차원 *개수*를 안 늘리므로 카운트 표는 그대로다.
+**왜**: plan surface의 [Plan-design]을 category state·a11y로 정합. reviewer.md [Plan-design]은 §3.13가 담당한다(둘은 *개념적* 미러 — 각자 형식이 달라 byte-identical 아님). 차원 *개수*를 안 늘리므로 카운트 표는 그대로다.
 
-## 3.17 stack-guard — populated axe·320 reflow (DS-3) + @google/design.md lint version-pin (DS-7g)
+## 3.15 stack-guard — populated axe·320 reflow (DS-3) + @google/design.md lint version-pin (DS-7g)
 
 **기존** (`.claude/skills/stack-guard/SKILL.md` 6-4-1 visual-QA breakpoint 루프):
 
@@ -1483,11 +1334,11 @@ stabilize-milestone(구현 후) 및 bootstrap-design R2-G/R6 수용 게이트(AD
 
 > **기존 fork 마이그레이션**: stack-guard는 `이미 e2e/visual-qa.spec.* 있으면 덮어쓰지 않는다`. 그래서 이 변경 *전에* scaffold된 fork는 여전히 advisory axe·375-only다 — 그 fork에서는 `e2e/visual-qa.spec.*`의 axe 단언을 blocking으로, breakpoint에 320을 수동으로 올려야 한다(신규 scaffold만 자동 반영). 신규 프로젝트는 해당 없음.
 
-**왜**: 렌더·DOM 검사(populated axe·320)를 stack-guard 런타임에 심어 bootstrap-design 게이트(§3.12/3.13)와 졸업 e2e가 같은 결정적 검사를 공유한다. google lint는 버전 변동에 안전하게 pin + runtime 조회로.
+**왜**: 렌더·DOM 검사(populated axe·320)를 stack-guard 런타임에 심어 bootstrap-design 게이트(§3.10/3.13)와 졸업 e2e가 같은 결정적 검사를 공유한다. google lint는 버전 변동에 안전하게 pin + runtime 조회로.
 
-## 3.18 DS-3 게이트 실행 배선 — allowed-tools + 러너 스크립트 (실행 불가 결함 해소)
+## 3.16 DS-3 게이트 실행 배선 — allowed-tools + 러너 스크립트 (실행 불가 결함 해소)
 
-**왜 필요**: §3.12 R2-G·§3.13 R6 게이트가 "Playwright로 렌더 + axe"를 요구하지만, 현재 `bootstrap-design` frontmatter의 `allowed-tools`는 `Bash(rm ...)` 2개뿐이라 **렌더·axe를 실행할 권한이 없다**(게이트가 글로만 존재). 실행 배선을 준다.
+**왜 필요**: §3.10 R2-G·§3.11 R6 게이트가 "Playwright로 렌더 + axe"를 요구하지만, 현재 `bootstrap-design` frontmatter의 `allowed-tools`는 `Bash(rm ...)` 2개뿐이라 **렌더·axe를 실행할 권한이 없다**(게이트가 글로만 존재). 실행 배선을 준다.
 
 **변경 (a) — bootstrap-design allowed-tools 확장**.
 
@@ -1503,7 +1354,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html) Bash(rm docs/20-system/design-concepts/concept-*.html) Bash(node scripts/design-gate.mjs*) Bash(npx playwright*) WebFetch(domain:github.com)
 ```
 
-**변경 (b) — 게이트 러너 신설**. 새 파일 `scripts/design-gate.mjs`(Node ESM). concept/preview HTML을 1280/375/320에서 렌더 → **결정적 검사**(page-overflow[전 뷰포트] + viewport escape·clipped text[narrow ≤375만; sr-only·aria-hidden/inert·contained-scroll·ellipsis 제외] + populated axe serious/critical[1280·320]) → `{blockers[], reports[], screenshots[]}` JSON(블록에 실패 selector 포함 — designer repair 되먹임용) + blocker 있으면 exit 1. **위계·밀도·slop·overlap(장식 요소 겹침)은 러너가 검출하지 않는다** — 대신 1280/375 스크린샷(`screenshots[]`)을 출력해 reviewer가 픽셀로 판정한다(design-eval 실측: source-slop·hierarchy는 axe·layout으로 clean이라 vision 필요). geometry(overflow·escape·clip)는 러너가 결정적으로 잡으므로 reviewer 몫이 아니다. `@axe-core/playwright`가 `browser.newContext()`에서 만든 page를 요구하므로 러너는 context→page로 생성한다(`browser.newPage()` 직접 사용 시 예외 — 실브라우저 검증됨). Playwright/axe 미설치면 `Needs Install` echo 후 exit 2(승인 보류는 호출 측 판단 — 날조·통과 위장 금지). stack-guard가 UI 프로젝트에 깐 **Playwright를 재사용** + **`@axe-core/playwright`를 devDep로 추가**(stack-guard가 설치 — §3.17; 비-UI 프로젝트엔 둘 다 없음). 없으면 러너가 exit 2(Needs Install)로 정직하게 멈춘다. **최초 1회는 의도적 결함(저대비·가로 overflow) 샘플 HTML로 스모크 확인** 후 신뢰:
+**변경 (b) — 게이트 러너 신설**. 새 파일 `scripts/design-gate.mjs`(Node ESM). concept/preview HTML을 1280/375/320에서 렌더 → **결정적 검사**(page-overflow[전 뷰포트] + viewport escape·clipped text[narrow ≤375만; sr-only·aria-hidden/inert·contained-scroll·ellipsis 제외] + populated axe serious/critical[1280·320]) → `{blockers[], reports[], screenshots[]}` JSON(블록에 실패 selector 포함 — designer repair 되먹임용) + blocker 있으면 exit 1. **위계·밀도·slop·overlap(장식 요소 겹침)은 러너가 검출하지 않는다** — 대신 1280/375 스크린샷(`screenshots[]`)을 출력해 reviewer가 픽셀로 판정한다(design-eval 실측: source-slop·hierarchy는 axe·layout으로 clean이라 vision 필요). geometry(overflow·escape·clip)는 러너가 결정적으로 잡으므로 reviewer 몫이 아니다. `@axe-core/playwright`가 `browser.newContext()`에서 만든 page를 요구하므로 러너는 context→page로 생성한다(`browser.newPage()` 직접 사용 시 예외 — 실브라우저 검증됨). Playwright/axe 미설치면 `Needs Install` echo 후 exit 2(승인 보류는 호출 측 판단 — 날조·통과 위장 금지). stack-guard가 UI 프로젝트에 깐 **Playwright를 재사용** + **`@axe-core/playwright`를 devDep로 추가**(stack-guard가 설치 — §3.15; 비-UI 프로젝트엔 둘 다 없음). 없으면 러너가 exit 2(Needs Install)로 정직하게 멈춘다. **최초 1회는 의도적 결함(저대비·가로 overflow) 샘플 HTML로 스모크 확인** 후 신뢰:
 
 ```javascript
 #!/usr/bin/env node
@@ -1564,7 +1415,7 @@ try {
           // (1) sr-only/visually-hidden — 1px 클립 또는 clip/clip-path (2) aria-hidden/inert/hidden 조상(닫힌 drawer·off-canvas) (3) overflow scroll/auto 조상 안(contained 가로스크롤=의도적, 예: 넓은 표)
           const srOnly = (el) => { const s = getComputedStyle(el); return (el.clientWidth <= 1 && el.clientHeight <= 1) || (s.clip && s.clip !== 'auto') || (s.clipPath && s.clipPath !== 'none'); };
           const inaccessible = (el) => el.closest('[aria-hidden="true"],[inert],[hidden]') != null;
-          const inScrollable = (el) => { let p = el.parentElement; while (p && p !== document.body) { const s = getComputedStyle(p); if (/(auto|scroll)/.test(s.overflowX)) return true; p = p.parentElement; } return false; }; // 가로 escape 판정용 — *가로* 스크롤 조상만 제외(세로 전용 스크롤 조상은 가로 넘침을 담지 못하므로 escape 유효). 조상 overflow:hidden clipping 검출은 미구현 — §5.7 smoke fixture로 검증 후 추가(테스트 없이 미검증 로직 투입 금지).
+          const inScrollable = (el) => { let p = el.parentElement; while (p && p !== document.body) { const s = getComputedStyle(p); if (/(auto|scroll)/.test(s.overflowX)) return true; p = p.parentElement; } return false; }; // 가로 escape 판정용 — *가로* 스크롤 조상만 제외(세로 전용 스크롤 조상은 가로 넘침을 담지 못하므로 escape 유효). 조상 overflow:hidden clipping 검출은 미구현 — §5.3 smoke fixture로 검증 후 추가(테스트 없이 미검증 로직 투입 금지).
           const skip = (el) => !vis(el) || srOnly(el) || inaccessible(el);
           const overflow = document.documentElement.scrollWidth > innerWidth + 1;
           let escapes = [], clips = [];
@@ -1609,13 +1460,13 @@ console.log(JSON.stringify({ blockers, reports: findings.filter((x) => !x.block)
 process.exit(blockers.length ? 1 : 0);
 ```
 
-**변경 (c) — R2-G·R6 게이트가 이 러너를 호출**. §3.12 R2-G와 §3.13 R6의 "렌더/axe" 검사는 다음으로 실체화된다:
+**변경 (c) — R2-G·R6 게이트가 이 러너를 호출**. §3.10 R2-G와 §3.11 R6의 "렌더/axe" 검사는 다음으로 실체화된다:
 - 실행: `node scripts/design-gate.mjs <concept 또는 preview HTML 경로들>`.
 - exit 1 + JSON `blockers`(page-overflow / serious·critical axe) → **차단**: 실패 selector를 designer에 되먹여 재생성(repair loop, retry ≤2). `reports`(moderate/minor·취향) → 보고.
 - exit 2(Needs Install) → 게이트 **미실행 사유를 echo하고 승인 보류**(silent skip 금지 — ADR-058 D3). browser 미가용(비-UI 환경 등)도 동일.
-- 독립 픽셀 판정(위계·밀도·domain fit·장식 slop)은 러너 JSON에 더해 reviewer(design surface)가 1280/375 스크린샷을 Read로 열람해 수행(§3.15 — 게이트 자동 검사 ≠ 픽셀 취향 판정, 둘 다 필요).
+- 독립 픽셀 판정(위계·밀도·domain fit·장식 slop)은 러너 JSON에 더해 reviewer(design surface)가 1280/375 스크린샷을 Read로 열람해 수행(§3.13 — 게이트 자동 검사 ≠ 픽셀 취향 판정, 둘 다 필요).
 
-**확인 (d) — ADR-058 Surfaces·Target에 러너 등재 (신규 작업 아님)**: `scripts/design-gate.mjs`는 §3.1에서 ADR-058을 만들 때 이미 `## Surfaces`(러너 줄)와 Mutation Contract Target에 등재된다 — 여기서 *추가로 할 일은 없고*, §3.1 편집 시 그 두 곳에 러너가 들어갔는지 **확인만** 한다. (plan-milestone R5 게이트 호출자도 §3.1 Surfaces·Target에 포함 — §4.11 상단 주석 참조.)
+**변경 (d) — producer와 같은 커밋에서 ADR-058 surface 추가**: ADR-058 `## Surfaces`에 이번 Phase에서 실제로 배선한 `.claude/agents/researcher.md`·`designer.md`·`reviewer.md`와 새 `scripts/design-gate.mjs`를 추가한다. 각 파일에는 ADR-058 역참조가 있어야 하며, 러너 파일을 만들기 전 Phase 1에서 경로만 미리 등재하지 않는다. Mutation Contract `Target`은 최종 목표 목록이므로 그대로 둔다. `plan-milestone` caller는 Phase 4 producer 커밋에서 별도로 추가한다.
 
 **변경 (e) — `design-gate-shots/` gitignore (F6 — stray-commit 방지)**: 러너는 스크린샷을 cwd의 `design-gate-shots/`에 쓴다(reviewer 픽셀 판정 입력 — 통과 후 정리 대상, ephemeral). `git add -A`류에 딸려 커밋되지 않게 `.gitignore`에 한 줄을 추가한다:
 ```
@@ -1625,8 +1476,13 @@ design-gate-shots/
 
 **왜**: 게이트가 "글"에서 "실행 가능한 결정적 검사"가 된다. axe·overflow는 러너(도구)가 판정(LLM 추정 아님), 픽셀 취향은 reviewer가. Playwright 미설치 UI 환경은 Needs Install로 정직 처리(통과 위장 금지).
 
-> **커밋 (Phase 3 후반 — 디자인 배선)**:
-> `feat(design): wire evidence-on-demand R0, REFINE/EXPLORE cards, acceptance gate runner, a11y dimension into design pipeline (ADR-058)`
+**같은 커밋의 산출물 인벤토리 동기**: `docs/00-meta/STRUCTURE.md` 산출물 표의 verify scripts 근처에 다음 행을 추가한다. 러너 파일·ADR-058 surface·`.gitignore`의 `design-gate-shots/`와 한 커밋으로 묶는다.
+```
+| design gate runner (UI) | `scripts/design-gate.mjs` | 수동 (UI 프로젝트에서 stack-guard Playwright/axe 재사용) | Reference | baseline |
+```
+
+> **커밋 (Phase 3 — DESIGN 계약 + 디자인 배선 + 러너)**:
+> `feat(design): expand DESIGN contract and wire the ADR-058 acceptance workflow (ADR-027 amend 7)`
 
 ---
 
@@ -1682,7 +1538,7 @@ design-gate-shots/
 - **Mutation delta (ADR-047 D3)**: failure=PX가 어떤 AC에도 안 매핑돼 dead field · PX가 실제 구현 feature와 다른 feature에 귀속(오배정) / falsifier=unmapped PX·오배정을 `[Plan-FAC-coverage]`(구조+의미, plan 단계)가 못 잡음 / rollback=PX 인벤토리·매핑·`(PX-…)` 태그 제거.
 ```
 
-**변경 (designer.md — PX 마커, ADR-056#amend-1 surface)**: `.claude/agents/designer.md`의 R5 프로토타입 authoring 불릿 끝에 **각 경험 결정에 `<!-- PX-M<N>-<screen>-NN: <한 줄 결정> -->` 마커를 의무로 단다**(이 마커가 PX 단일 source, R5-5가 그대로 복사; 재추출 drift 방지)를 추가한다. — *AGENTS.md 상위-우선 정합: designer(하위)의 PX 참조를 ADR-056 amend-1(상위)과 **같은 Phase(4)·적용 단위**로 묶어 Phase 3 forward-ref를 없앤다(§3.14 designer 편집은 PX를 전혀 참조하지 않는다 — R5 PX 마커 의무는 본 §4.1가 유일 소유).*
+**변경 (designer.md — PX 마커, ADR-056#amend-1 surface)**: `.claude/agents/designer.md`의 R5 프로토타입 authoring 불릿 끝에 **각 경험 결정에 `<!-- PX-M<N>-<screen>-NN: <한 줄 결정> -->` 마커를 의무로 단다**(이 마커가 PX 단일 source, R5-5가 그대로 복사; 재추출 drift 방지)를 추가한다. — *AGENTS.md 상위-우선 정합: designer(하위)의 PX 참조를 ADR-056 amend-1(상위)과 **같은 Phase(4)·적용 단위**로 묶어 Phase 3 forward-ref를 없앤다(§3.12 designer 편집은 PX를 전혀 참조하지 않는다 — R5 PX 마커 의무는 본 §4.1가 유일 소유).*
 
 ## 4.2 ADR-056 Amendment 2 — raw-hex 토큰 정의 예외 (INST-2)
 
@@ -1939,11 +1795,11 @@ amend-3의 "`## 3` draft 예외 + refresh 계약"을 **supersede**한다.
 - `FEATURE_TEMPLATE.md` `## 7-1` 주석의 "unmapped 항목은 미커버 task 추가 권장"을 **"unmapped 0건이 plan-workitem task ready 승격 조건; 발견 시 성공 종료 금지"**로 바꾼다.
 - `stabilize-milestone`은 §4.12c(m)의 graduation NO 문구를 적용한다.
 
-## 4.6 ADR-014 Amendment — 회고에 graduation 줄 (RD-1)
+## 4.6 ADR-014 Amendment 3 — 회고에 graduation 줄 (RD-1)
 
 **기존**: `docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md` 결정 2("회고 4 항목")는 목표 달성도/scope creep/비목표 위반/핵심 학습만 정한다. accepted ADR이므로 결정을 in-place로 덮어쓰지 않고 **amendment로 확장**한다(Record 문서 규약 — 충돌 없는 확장은 `## Amendment N`).
 
-**변경**: 파일 맨 끝에 amendment를 추가한다. **번호는 README 인덱스의 ADR-014 행에서 현재 마지막 amend 다음 번호를 확인해 쓴다**(dossier 기준 amend-2까지 확인됨 → 보통 **Amendment 3**):
+**변경**: 파일 맨 끝에 **Amendment 3**을 추가한다(현재 본문·README 인덱스 모두 amend-2까지 실측됨):
 
 ```
 <a id="adr-014-amend-3"></a>
@@ -2104,8 +1960,7 @@ amend-3의 "`## 3` draft 예외 + refresh 계약"을 **supersede**한다.
      UI task로 프로토타입 경험 결정을 구현하는 AC는 끝에 `(PX-M<N>-<screen>-NN)` 태그를 붙일 수 있다(ADR-056#amend-1 — (AC-N)·(INV-N) 태그와 동형). feature `## 7-3` PX↔AC 매핑의 근거. -->
 ```
 
-> **커밋 (Phase 4 전반 — 경험 계약·플래닝 ADR + 로드맵 파일·템플릿)**:
-> `feat(planning): add PX coverage, transition map, seam ownership, milestone roadmap; drop 2-tier/draft/refresh for locked full snapshot (ADR-056 amend 1-3, ADR-057 amend 1-3, ADR-014)`
+> **중간 커밋 금지**: 경험 계약 ADR·로드맵·템플릿만 먼저 커밋하지 않는다. 아래 plan/implement/validate/stabilize skill 배선과 메타 문서 동기까지 끝낸 뒤 Phase 4 종료 지점에서 한 번에 커밋한다.
 
 ## 4.11 plan-milestone — R0 로드맵 재조정 + R3 로드맵 갱신 + R5-1 전환 표 + R5-5 PX 인벤토리 + R5 게이트 권한 + 출력 (RD-1 · DS-4 · INST-1 · DS-3)
 
@@ -2123,7 +1978,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes/*/_drafts/*.html) Bash(node scripts/design-gate.mjs*) Bash(npx playwright*)
 ```
 
-> ADR-058 `## Surfaces`·Mutation Contract Target에도 `plan-milestone`(R5 게이트 호출자)이 추가돼 있어야 한다(§3.1에서 반영). `_drafts/*.html` rm은 R5-5 승격 후 시안 정리용(active 화면은 Write로 대체 — 별도 삭제 권한 불요).
+> ADR-058 `## Surfaces`·Mutation Contract Target에도 `plan-milestone`(R5 게이트 호출자)이 추가돼 있어야 한다(Phase 4 같은 커밋에서 반영). `_drafts/*.html` rm은 R5-5 승격 후 시안 정리용(active 화면은 Write로 대체 — 별도 삭제 권한 불요).
 
 **변경 (프로토타입 확정 재대조 · `--prototype` 재진입 제거 · additive feature 제한)**: 화면 폐기 모드(`--retire-screen`)는 **두지 않고**, 별도 `--prototype` 재진입 모드도 **제거**한다(마일스톤 확정 후 화면·계획 변경은 다음 마일스톤의 새 M<N> — 마일스톤 경계 = 버전 경계, ADR-056#amend-1 / ADR-057#amend-3).
 - **argument-hint**: `"[milestone idea | M<N>]"` (`--prototype [F-NNN]`·`--retire-screen`·별도 `feature idea` 진입 제거; `M<N>`으로 기존 M 재개·상태 판정, `milestone idea`로 신규 M).
@@ -2575,7 +2430,7 @@ draft
 
 > reviewer.md의 milestone-mode 게이팅 문장("빈 `## 7-1` shell은 정상이므로 unmapped FAC를 P0로 올리지 않고…")에도 같은 취지로 "및 `## 7-3` PX 빈 매핑" 을 더한다(미러 동기).
 
-**기존** (`.claude/skills/validate-plan/SKILL.md` 차원 9 — **§3.16에서 이미 category/a11y로 바뀐 상태**):
+**기존** (`.claude/skills/validate-plan/SKILL.md` 차원 9 — **§3.14에서 이미 category/a11y로 바뀐 상태**):
 
 ```
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
@@ -2587,7 +2442,7 @@ draft
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **마일스톤 `## 9. 화면 전환`(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
 ```
 
-> 주의: reviewer.md의 `[Plan-design]`(§3.15에서 category/a11y로 바뀐 상태)에도 DS-4 recovery path 절을 같은 문구로 더한다(미러 동기). reviewer.md `[Plan-design]` 문단 끝의 `/ **UI task 카피가 …** (ADR-056) (P1 권장)` 앞에 `/ **마일스톤 ## 9 화면 전환(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3)`를 삽입.
+> 주의: reviewer.md의 `[Plan-design]`(§3.13에서 category/a11y로 바뀐 상태)에도 DS-4 recovery path 절을 같은 문구로 더한다(미러 동기). reviewer.md `[Plan-design]` 문단 끝의 `/ **UI task 카피가 …** (ADR-056) (P1 권장)` 앞에 `/ **마일스톤 ## 9 화면 전환(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3)`를 삽입.
 >
 > **milestone-mode 가드 (F9와 동형 — 거짓 P1 방지)**: 이 recovery-path 절의 "…**·AC**에 존재" 절반은 plan-workitem이 AC를 만든 뒤에만 성립한다. task 0건(plan-milestone 직후 milestone-mode)에서는 **프로토타입 존재만 확인하고 AC 커버 절반은 유예**한다 — `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(정상 상태). AC 커버는 plan-workitem 후 정상 모드 재점검에서 확인. validate-plan·reviewer.md 양쪽 milestone-mode 문구에 이 유예를 명시(F9의 `## 7-3` PX 유예와 같은 절에 한 줄 추가).
 
@@ -2658,175 +2513,48 @@ draft
 
 **왜**: stabilize는 로드맵을 직접 안 쓰고 graduation 판정만 회고에 남긴다(read-only 계약 유지). 그 줄을 다음 plan-milestone R0가 읽어 로드맵을 재조정 — 단일 작성자 규율이 안 깨진다. **판정 시점은 단계 4~6 뒤**라 이번 라운드가 찾은 P0까지 반영된다(§1.5 조기 기록 금지).
 
-> **커밋 (Phase 4 후반 — 계획·경험 스킬 배선)**:
+**같은 커밋의 인덱스·surface·메타 동기**:
+
+1. `docs/90-decisions/boilerplate/README.md`에서 ADR-056 amend 1~3, ADR-057 amend 1~3, ADR-014 amend-3(graduation 영속), ADR-026 amend-4, ADR-037 amend-3을 본문과 같은 번호·요약으로 갱신한다. ADR-057 요약은 `M 단위 전체 계획 스냅샷·잠금`, ADR-037 요약은 `plan ready gate + 구현 후 Spec Gap 사용자 결정`을 반영한다.
+2. base `## Surfaces`에 실제 신규 surface만 추가한다: ADR-056=`TASK_TEMPLATE`; ADR-057=`ROADMAP`·`MILESTONE_TEMPLATE`·repair-workitem/milestone·review-doc·bootstrap-design/stack·stack-guard·repair-discovery·PROJECT_START_CHECKLIST·ADR-037; ADR-026=`implement-workitem`; ADR-037=`validate-plan`·`reviewer`. 각 파일의 역참조도 같은 커밋에서 확인한다.
+3. ADR-058 `## Surfaces`에 이번 Phase에서 실제 게이트 caller가 된 `.claude/skills/plan-milestone/SKILL.md`를 추가한다. Phase 1에서 미리 등재하지 않는다.
+4. `docs/00-meta/STRUCTURE.md` 산출물 표에 ROADMAP 행을, Canonical Owner 표에 로드맵 SSOT 행을 추가한다. `docs/00-meta/WORKFLOW.md`에도 plan-milestone 단일 작성자·R3 기록·R0 graduation 재조정 규칙을 같은 커밋에서 반영한다.
+   ```
+   | milestone roadmap | `docs/30-workitems/ROADMAP.md` | `/plan-milestone` (R3 생성/갱신, R0 재조정 — 단일 작성자) | Living | baseline |
+   | 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md` (단일 작성자 = plan-milestone). |
+   ```
+   WORKFLOW `## 3. 작업 단위 분해`에는 다음 줄을 추가한다.
+   ```
+   - `/plan-milestone`은 `docs/30-workitems/ROADMAP.md`(Done/Now/Next/Later forward 지도)를 단독으로 유지한다 — **R3에서 현재(Now) 행 + 미래 후보(Next/Later) 기록(candidate-key 포함), R0에서 회고 `graduation:` 기반으로 Done/Now 재조정**(직전 Now 행의 Done 전환은 **R0가 담당** — R3는 강제하지 않음; candidate-key는 전 구간 보존) (ADR-057#amend-1). 예정(Next/Later) 행은 "목표 1줄 + 확신도"만 둔다.
+   ```
+   같은 파일의 `/bootstrap-design` 흐름 문장 후반도 새 잠금 모델에 맞춘다: draft M은 `/plan-milestone M<N>`으로 재개하고, `ready` M은 `/plan-workitem M<N>` 전체 스냅샷으로 진행하며, 구현 시작 뒤 변경은 다음 M을 따른다고 명시한다(ADR-057#amend-3). Phase 1-B에서 이미 바꾼 ADR-058 디자인 흐름 전반은 보존한다.
+5. `ROADMAP.md`·템플릿·skill·ADR·인덱스·STRUCTURE·WORKFLOW 중 하나라도 빠지면 Phase 4 커밋을 만들지 않는다.
+
+> **커밋 (Phase 4 — 계획·경험 계약 + 전체 실행 배선)**:
 > `feat(planning): wire PX/transition/roadmap/seam + full-snapshot preflight into plan-milestone, plan-workitem, implement-workitem, validate-plan, reviewer, stabilize, TASK_TEMPLATE`
 
 ---
 
-# Phase 5 — 마무리 sync · 조건부 옵션 · 검증
+# Phase 5 — 원자성 최종 감사 · 조건부 옵션 · 검증
 
-인덱스·구조·워크플로우 정합을 맞추고, ADR-049 참조를 정리하고, 조건부 옵션을 기록한 뒤, 링크 체커로 전수 검증한다.
+앞선 Phase 커밋에서 닫은 인덱스·surface·메타 문서 정합을 최종 감사하고 조건부 옵션만 처리한다.
 
-## 5.1 ADR 인덱스 (`docs/90-decisions/boilerplate/README.md`)
+## 5.1 원자 커밋 정합 최종 감사
 
-인덱스 표(`| # | 제목 | Status | Amendments | 한 줄 요약 |`)를 갱신한다. **이미 반영된 행·컬럼은 재확인만 하고 건너뛴다** — Phase 1~3에서 ADR-058 행·ADR-049 `superseded`·027/051/050/010/047/045 amend 컬럼이 이미 적용됐다. 아래 (a)~(m)는 *완결 목표 상태*이며 **누락분(056·057·014·026·037 amend 컬럼)만 채운다**(중복 행/컬럼 생성 금지 — 이미 있으면 skip). 목표 상태: **신규 행 1개(ADR-058) + ADR-049 Status→`superseded` + Amendments 컬럼 11개**(027·051·056·057·050·010·047·014·045·026·037).
+Phase 5는 인덱스·surface·현재 정책 참조를 **처음 반영하는 단계가 아니다**. 아래 표로 앞선 커밋이 스스로 닫혔는지 확인하고, 누락이 있으면 Phase 5 커밋에 섞지 말고 해당 Phase 변경으로 되돌려 보완한 뒤 그 커밋 경계를 다시 검토한다.
 
-> **커밋 원자성 (R2-22)**: 이상적으로는 *각 ADR의 인덱스 행 + base `## Surfaces`(§5.1b) + 그 ADR을 인용하는 surface 편집*을 **그 ADR을 만드는 Phase 커밋에 함께** 넣어 중간 커밋 drift를 없앤다. Phase별 커밋을 쓸 경우, 각 Phase 커밋 안에서 그 Phase가 만든 ADR의 인덱스·Surfaces를 함께 갱신하고, 아래 §5.1·§5.1b는 *놓친 분 일괄 정리 + 최종 확인*으로 쓴다(preflight를 중간에 돌리면 미동기 ADR이 `[ADR-index]`/`[Surface-backref]`로 잡히므로, 커밋 단위로 닫는 편이 낫다).
+| 커밋 | 같은 커밋에 반드시 포함된 것 |
+|---|---|
+| Phase 1-A | ADR-047/045 amendment + `_ADR_GUIDE`/stabilize 변경 + 두 ADR 인덱스 |
+| Phase 1-B | ADR-058 생성 + ADR-049 supersede + eval bundle gitignore/untrack + SIMULATION_RUN distill + 058/049 인덱스 + 현재 정책 re-point + 활성 Surfaces |
+| Phase 2-A | ADR-051/050 amendment + 실행 surface + 인덱스·신규 surface |
+| Phase 2-B | ADR-010 amendment + PROJECT_START_CHECKLIST + 인덱스 |
+| Phase 3 | ADR-027 amend-7 + DESIGN 내용 + bootstrap/researcher/designer/reviewer/validate/stack-guard + design-gate runner·shots ignore + ADR 인덱스·Surfaces·STRUCTURE runner 행 |
+| Phase 4 | ADR-056/057/014/026/037 amendments + ROADMAP·templates + 모든 plan/implement/validate/stabilize surface + 인덱스·Surfaces·STRUCTURE·WORKFLOW |
 
-**(a) ADR-058 행 신설** — 057 행 다음에 추가:
+**실패 조건**: README Amendments 수 불일치, base `## Surfaces`의 파일 부재·역참조 부재, superseded ADR-049의 live 정책 인용, producer 없는 `.gitignore` 항목, producer와 산출물 인벤토리 행이 서로 다른 커밋이면 최종 감사 실패다.
 
-```
-| 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | — | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
-```
-
-**(b) ADR-049 행** — Status를 `accepted` → `superseded (by ADR-058)`로:
-
-기존 행의 `| accepted |`를 `| superseded (by ADR-058) |`로 바꾼다(제목·Amendments·요약은 그대로 — history).
-
-**(c) ADR-027 행** — Amendments 컬럼 닫는 괄호 앞에 추가: `, +#amend-7: DESIGN 내용 계약 확장(정체성·a11y·semantic motion·category state·responsive·tabular)`.
-
-**(d) ADR-051 행** — Amendments 닫는 괄호 앞에 추가: `, +#amend-4: fan-out 크기 판정 기계화 + 하청 정지 회수 + PM 고정`.
-
-**(e) ADR-056 행** — Amendments `—`를 `(+#amend-1: 프로토타입 PX 커버리지, +#amend-2: raw-hex 토큰 정의 예외, +#amend-3: 화면 전환 표)`로.
-
-**(f) ADR-057 행** — Amendments `—`를 `(+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: seam canonical 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기)`로.
-또한 같은 행의 한 줄 요약 `M1 포함 생성 통일 + 배치 분해(2-tier/refresh) + feature 체크포인트 + seam 계약`을 **`M1 포함 생성 통일 + M 단위 전체 계획 스냅샷·잠금 + 의존성·seam 계약`**으로 바꾼다. Amendments 컬럼만 갱신하고 인덱스의 사용자-facing 요약을 stale로 남기지 않는다.
-
-**(g) ADR-050 행** — Amendments `—`를 `(+#amend-1: dispatcher 사전판정 금지)`로.
-
-**(h) ADR-010 행** — Amendments 컬럼 닫는 괄호 앞에 추가: `, +#amend-5: 도구별 memory 비캐노니컬`.
-
-**(i) ADR-047 행** — Amendments `—`(또는 기존 목록)에 `+#amend-1: 변경 검증법(falsifying eval 작성법 + link checker 러너)` 추가.
-
-**(j) ADR-014 행** — Amendments 컬럼 닫는 괄호 앞에 추가: `, +#amend-3: 회고 graduation 줄`. **(§4.6에서 실제 amend 번호를 확인해 그 번호로 일치시킨다.)**
-
-**(k) ADR-045 행** — Amendments `—`(또는 기존)에 `(+#amend-1: D6 재발행 임계 4→8)` 추가(§1.6).
-
-**(l) ADR-026 행** — Amendments 컬럼 닫는 괄호 앞에 추가: `, +#amend-4: ## 3 전체 계획 스냅샷 (draft/refresh 예외 폐기)`. (§4.5c에서 실제 amend 추가 — 본문 `## Amendment 4` ↔ 인덱스 수 일치.)
-
-**(m) ADR-037 행** — Amendments 컬럼 닫는 괄호 앞에 `, +#amend-3: unmapped FAC 계획-시점 차단 + 구현-후 사용자 결정`을 추가한다. 같은 행의 한 줄 요약 `FAC→AC 매핑 추적, Spec Gap report, 자동 차단 X`는 **`FAC→AC 매핑 추적 + plan ready gate + 구현 후 Spec Gap 사용자 결정`**으로 바꾼다(§4.5d).
-
-**왜**: stabilize preflight 항목 2("인덱스 amend 수 ↔ 본문 `## Amendment N` 수 일치")가 불일치를 `P1 [ADR-index]`로 잡는다. 본문 amend를 추가했으면 인덱스도 반드시 동기.
-
-## 5.1b amend 신규 surface → base `## Surfaces` 동기
-
-amend가 *새* surface 파일을 추가하면(amend의 `### 적용 surface`), 그 파일이 ADR base `## Surfaces` 블록에도 있어야 fan-out SSOT가 완전해지고 stabilize preflight의 forward-check(등재 파일 존재 + 역참조)가 커버한다(ADR-027이 amend surface를 base `## Surfaces`에 `#amend-N` 주석으로 넣는 관례). **이미 base에 있는 surface는 건드리지 말고, *새로 생긴 것만* 추가**한다. 각 ADR base `## Surfaces`를 열어 아래를 추가:
-
-- **ADR-047**: `- scripts/check-doc-links.mjs — #amend-1 변경 검증 러너` (신규).
-- **ADR-056**: `- docs/30-workitems/_templates/TASK_TEMPLATE.md — #amend-1 (PX-M<N>-<screen>-NN) 태그` (base에 FEATURE_TEMPLATE만 있고 TASK_TEMPLATE 없으므로 추가).
-- **ADR-057**: base에 이미 있는 surface는 중복하지 말고 아래 **신규**만 추가한다.
-  - `docs/30-workitems/ROADMAP.md — #amend-1`
-  - `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md — #amend-1 회고 graduation·§9 전환표 + #amend-3 상태`
-  - `.claude/skills/repair-milestone/SKILL.md`·`.claude/skills/repair-workitem/SKILL.md — `#amend-3` 완료 결함 repair 라우팅·상태 writer
-  - `.claude/skills/review-doc/SKILL.md` — `#amend-3` 잠금 뒤 finding 라우팅
-  - `.claude/skills/bootstrap-design/SKILL.md`·`.claude/skills/bootstrap-stack/SKILL.md`·`.claude/skills/stack-guard/SKILL.md`·`.claude/skills/repair-discovery/SKILL.md` — `#amend-3` M 단위 다음 단계·잠금 경계
-  - `docs/00-meta/PROJECT_START_CHECKLIST.md` — `#amend-3` M 단위 전체 snapshot 체크
-  - `docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md` — `#amend-3` 잠금 뒤 Spec-gap 라우팅 정합
-- **ADR-026**: `.claude/skills/implement-workitem/SKILL.md — #amend-4 실행 전 접지·T:AC 보장 확인`을 base `## Surfaces`에 추가한다(TASK_TEMPLATE·plan-workitem은 이미 있음).
-- **ADR-037**: amend-3에서 새로 미러 검사에 들어온 `.claude/skills/validate-plan/SKILL.md`와 `.claude/agents/reviewer.md`가 base `## Surfaces`에 없으면 각각 `#amend-3` 주석으로 추가한다. validator·validate-workitem·plan-workitem·FEATURE_TEMPLATE·stabilize는 이미 base에 있으므로 중복 추가하지 않는다.
-- **ADR-058**(신규): base `## Surfaces`는 §3.1에서 이미 작성(DESIGN_RESEARCH.md 제외·design-gate.mjs 포함 확인).
-- **ADR-010**: **`## Surfaces` 블록이 아예 없다**(확인됨) → amend-5의 `PROJECT_START_CHECKLIST.md`는 amend `### 적용 surface`에만 두고 base 추가 불요(블록이 없으므로 — Surfaces 없는 ADR도 기존 관례상 정상. 원하면 블록 신설 가능하나 필수 아님).
-- **그 외**(ADR-051/050/014/027): amend `### 적용 surface`의 각 파일이 base `## Surfaces`에 이미 있는지 *확인하고* **실제로 없는 것만** 추가한다. 대부분 이미 있다(예: ADR-051의 `builder.md`·validate-workitem·implement-workitem·DELEGATION은 base에 이미 등재 — 추가 불필요). 있으면 그대로 둔다.
-
-**왜**: base `## Surfaces`가 fan-out의 유일 정의(ADR-045#d3)라, amend가 새 파일을 건드렸는데 base에 없으면 그 파일의 역참조 정합이 검증 밖에 남는다. `node scripts/check-doc-links.mjs`는 링크만 보고 Surfaces backref는 stabilize preflight가 보므로, 이 동기를 빠뜨리면 다음 stabilize에서 `[Surface-backref]`가 뜬다.
-
-## 5.2 README / README_ko — 디자인 흐름 참조 (ADR-049 → ADR-058)
-
-**기존** (`README.md` Overall Flow의 bootstrap-design 줄):
-
-```
-  → /bootstrap-design (frontend only — researches references into DESIGN_RESEARCH.md, shows multiple concept mockups to pick a direction *before* writing DESIGN.md, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-049]
-```
-
-**변경**: 흐름 SSOT 참조를 ADR-058로 바꾸고 게이트를 한 조각 반영:
-
-```
-  → /bootstrap-design (frontend only — evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-058]
-```
-
-**변경 (README_ko)**: `README_ko.md`의 동일 flow 줄도 같은 취지로 `[ADR-049]` → `[ADR-058]` + evidence-on-demand·수용 게이트 반영(README.md와 동시 갱신 — L1 주석 규율). Codex wrapper 목록은 **변경 없음**(신규 skill 없음 — ADR-058은 기존 bootstrap-design을 고칠 뿐).
-
-## 5.3 STRUCTURE.md — 산출물 표 + Canonical Owner
-
-**변경 (a) — 산출물 표에 2행 추가**. `milestone` 행 근처(30-workitems 블록)에 로드맵 행, `verify scripts` 행 근처(scripts 블록)에 체커 행:
-
-```
-| milestone roadmap | `docs/30-workitems/ROADMAP.md` | `/plan-milestone` (R3 생성/갱신, R0 재조정 — 단일 작성자) | Living | baseline |
-```
-
-```
-| doc link/anchor checker | `scripts/check-doc-links.mjs` | 수동 (boilerplate 제공 — 스택 무관 Node 내장) | Reference | baseline |
-```
-
-```
-| design gate runner (UI) | `scripts/design-gate.mjs` | 수동 (boilerplate 제공 — UI 프로젝트에서 stack-guard Playwright/axe 재사용) | Reference | baseline |
-```
-
-**변경 (b) — Canonical Owner 표**. 기존 "UI 디자인 워크플로우 라운드 구조" 행의 owner를 ADR-058로 바꾸고, 로드맵 행을 추가한다.
-
-기존:
-
-```
-| UI 디자인 워크플로우 라운드 구조 (R0~R6 concept-first) + 레퍼런스 노트 | [ADR-049](../90-decisions/boilerplate/ADR-049-concept-mockup-first-design.md) (정책 SSOT — 라운드 구조·시안 시점). → ADR-049 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
-```
-
-변경:
-
-```
-| UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
-| 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md` (단일 작성자 = plan-milestone). |
-```
-
-## 5.4 WORKFLOW.md — 디자인 흐름 참조 + 로드맵 surface
-
-**기존** (§2 시스템 설계의 디자인 흐름 줄):
-
-```
-- UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-049(concept-mockup-first): R0(레퍼런스 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 — 실카피 렌더, 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장(첫 마일스톤·feature 생성 — ADR-057; 이미 분해된 feature가 있으면 `/plan-workitem`) (ADR-049#d29·#d31). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
-```
-
-**변경**: ADR-049 참조를 ADR-058로 바꾸고 수용 게이트를 한 조각 반영:
-
-```
-- UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-058(design workflow): R0(evidence-on-demand 리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 REFINE/EXPLORE — 실카피 렌더 + 수용 게이트(320·populated axe·repair loop), 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 게이트). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장한다(첫 M/F 생성 또는 draft M 재개 — ADR-057). 이미 `ready` M이 있고 task가 아직 0/draft이면 `/plan-workitem M<N>`, 구현이 시작됐으면 기존 task workflow 또는 다음 M을 따른다(ADR-057#amend-3). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
-```
-
-**기존** (§3 작업 단위 분해 초입):
-
-```
-## 3. 작업 단위 분해
-- 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).
-```
-
-**변경**: 로드맵 한 줄 추가:
-
-```
-## 3. 작업 단위 분해
-- 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).
-- `/plan-milestone`은 `docs/30-workitems/ROADMAP.md`(Done/Now/Next/Later forward 지도)를 단독으로 유지한다 — **R3에서 현재(Now) 행 + 미래 후보(Next/Later) 기록(candidate-key 포함), R0에서 회고 `graduation:` 기반으로 Done/Now 재조정**(직전 Now 행의 Done 전환은 **R0가 담당** — R3는 강제하지 않음; candidate-key는 전 구간 보존) (ADR-057#amend-1). 예정(Next/Later) 행은 "목표 1줄 + 확신도"만(얇음 규율).
-```
-
-## 5.5 ADR-049 참조 re-point 스윕
-
-ADR-049가 `superseded`가 됐으므로, 그것을 **현재 정책으로 인용하는** 참조는 ADR-058로 바꾼다(순수 *역사적 언급*은 그대로 둬도 되나 P2 [Ref-dead]로 보고될 수 있음).
-
-1. `grep -rn "ADR-049" --include="*.md" .` (또는 Grep 도구)로 전수 확인.
-2. **판정 규칙 (핵심 — 단순 치환 금지)**: 각 `ADR-049` hit를 두 종류로 나눈다. **(현재 정책 인용)** = "라운드 구조/R0 grounding/게이트/시안 정책은 ADR-049" 같이 *지금 따르는 규칙*을 가리키면 → **`ADR-058`로 re-point**. **(역사적 사실)** = "ADR-049가 ADR-027 #3/#13…을 supersede했다" 같이 *과거에 일어난 일*을 서술하면 → **그대로 둔다**(ADR-049는 `superseded`로 history 잔존하므로 역사 인용은 유효). old-decision→new-decision 매핑을 이 기준으로 판단.
-   **re-point 대상 파일 (grep 결과 전수 — 현재 정책 인용분만)**:
-   - `.claude/skills/bootstrap-design/SKILL.md` — §3.11에서 R0/intro만 ADR-058로; 남은 `ADR-049#dK`/`#amend-M` 인라인 토큰(R2·R5·R6·수렴·취향·`--update` 등 다수 잔존) — step 1 grep로 전수 재확인.
-   - `.claude/skills/stack-guard/SKILL.md` — §6-4-1 Visual-QA smoke scaffold의 `ADR-049#amend-1`(같은 절이 이미 ADR-058 D3를 인용하므로 이 토큰만 잔존 → ADR-058).
-   - `docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md` — §3.3에서 현재유효결정(:9/:10)·`## Surfaces`(:120)는 이미 ADR-058로 처리됨(step 1 grep로 재확인만; `#amend-4`엔 ADR-049 토큰 없음). 남은 *현재 정책* 인용은 **`#amend-6` :212**(`"스크린샷 vision hot-loop 제외"(ADR-049#amend-1)`) 1곳 — 이 근거 링크만 판정. "ADR-049가 supersede" *역사 서술*은 유지.
-   - `docs/90-decisions/boilerplate/ADR-056-milestone-experience-contract.md` — **5곳**. R5·§3-V가 ADR-049 ephemeral 정책·R2 concept을 *현재 정책*으로 인용하면 ADR-058로.
-   - `docs/00-meta/DELEGATION_STRATEGY.md` (1곳 — designer 행) · `docs/00-meta/PROJECT_START_CHECKLIST.md` (1곳 — design flow 단계) · `docs/20-system/DESIGN.md` (§0 주석 :10은 이미 ADR-058 — 확인만; **§9 :91 클래스레벨 규율 `ADR-049#amend-1`도 ADR-058로 re-point**) · `docs/90-decisions/boilerplate/ADR-040...` #amend-4("R0 위계 배선 ADR-049#amend-2"→ADR-058).
-   - `.gitignore`의 `ADR-049#d31`만 → `ADR-058`(같은 L24 줄 `ADR-027#d22`는 ADR-027 역사 앵커 — 건드리지 말 것; `ADR-049#d22`는 없음).
-   - **ADR-058 `## Surfaces` 보강**: 위에서 ADR-058로 re-point한 `docs/00-meta/DELEGATION_STRATEGY.md`(designer 위임 행 — 생성/감사 분리 D5)·`docs/00-meta/PROJECT_START_CHECKLIST.md`(design flow 단계)를 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md`의 `## Surfaces`에 두 줄 등재한다 — §3.1 ADR-058 생성 시 목록에 없었으므로 re-point과 **같은 커밋에서** 추가해 [Surface-backref] 정합을 닫는다.
-   - **접미(`#dK`/`#amend-M`) 처리 (F3 — 없는 토큰 생성 금지)**: ADR-058은 결정 구조가 ADR-049와 달라 **결정 1~5·amend 0개**라, ADR-049의 `#d28`~`#d31`·`#amend-2`에 1:1 대응 앵커가 **없다**. re-point 시 그 접미는 **떼고 bare `ADR-058`로** 쓴다(명백히 대응하는 ADR-058 결정번호가 있으면 그 번호로만). `ADR-058#d30`·`ADR-058#amend-2` 같은 *존재하지 않는* 토큰을 만들지 말 것. `#dK`는 clickable anchor가 아니라 grep 토큰(ADR-045 D1)이라 `check-doc-links.mjs`가 산문 속 dead grep 토큰은 **못 잡는다**(markdown 링크 `[..](..#anchor)` 앵커만 검사) → 자동 검출이 안 되니 접미 제거는 **수기**로 확실히 한다.
-3. **그대로 둘 것**: ADR-049 본문 자체(history) + ADR-027 본문에서 이미 §3.3이 처리한 참조.
-4. 확인: `node scripts/check-doc-links.mjs --ignore IMPROVE-GUIDE.md`(가이드가 아직 존재하므로 가이드 내부 의도된 pseudo-link 오탐 제외 — 가이드 삭제 후 최종 1회만 flag 없이) — markdown 링크 앵커의 dead(예: 없어진 `[..](..#dK)`)는 잡는다. **산문 grep 토큰(`ADR-058#dK`)의 dead는 체커가 못 잡으니** 위 접미 규칙을 수기로 적용했는지 `grep -rn "ADR-058#" --include="*.md" .`로 육안 확인한다.
-
-**왜**: 죽은/역사 ADR 인용을 정리해 에이전트가 현재 정책 문서로 안내받게 한다. checker가 markdown 앵커는 자동 확인, grep 토큰은 위 육안 확인.
-
-## 5.6 조건부 옵션 (OPT-1 · OPT-2 — opt-in 기록만)
+## 5.2 조건부 옵션 (OPT-1 · OPT-2 — opt-in 기록만)
 
 기본 틀에 강제 도입하지 않고, 프로젝트가 실제로 요구할 때만 쓰는 opt-in 어댑터로 **기록만** 남긴다. 공통 규율: 결과는 `DESIGN_RESEARCH.md`에 provenance를 남기고, 승인된 결정만 정식 문서로 정규화.
 
@@ -2844,10 +2572,10 @@ ADR-049가 `superseded`가 됐으므로, 그것을 **현재 정책으로 인용�
 
 **왜**: "가져오지 않기로 한 것"과 구분해, 프로젝트가 필요로 할 때의 경로만 최소 기록(과잉 도입 회피).
 
-## 5.7 최종 검증
+## 5.3 최종 검증
 
-1. **링크·앵커 전수**: `node scripts/check-doc-links.mjs --ignore IMPROVE-GUIDE.md` (+ `--frontmatter`)(가이드가 아직 존재하므로 가이드 내부 의도된 pseudo-link 오탐 제외 — **가이드 삭제 후 최종 1회만 flag 없이** 실행) — 죽은 링크·앵커·frontmatter 0건 확인. 이번 개선에서 새로 만든 anchor(`adr-045-amend-1`, `adr-027-amend-7`, `adr-056-amend-1..3`, `adr-057-amend-1..3`, `adr-051-amend-4`, `adr-050-amend-1`, `adr-010-amend-5`, `adr-047-amend-1`, `adr-014-amend-3`, `adr-026-amend-4`, `adr-037-amend-3`)를 인용한 링크가 실제로 존재하는지 걸린다. (**ADR-058은 amendment가 없어 `adr-058-*` 앵커가 없다** — ADR-058 인용은 파일 링크 `ADR-058-design-workflow.md`(fragment 없음)뿐이라 이 목록에 넣지 않는다.)
-2. **인덱스 amend + 현재 규칙 요약 동기**: 각 ADR 본문 `## Amendment N` 개수 ↔ `boilerplate/README.md` Amendments 컬럼 일치(§5.1). 추가로 정정/뒤집기 또는 amend 4개 임계에 걸린 **ADR-056·ADR-057·ADR-026·ADR-037** 모두 `## Status` 바로 뒤 `## 현재 유효 결정`이 있고, 각각 `--prototype/부분보류 폐기`, `M 전체 snapshot/잠금/후속 finding`, `## 3 full+T:AC 의존성`, `FAC ready gate+구현후 사용자 보고`라는 net 규칙을 담는지 확인한다. 역사 amendment만 고치고 fast-path 요약을 stale로 두면 실패. stabilize preflight 항목 2의 `P1 [ADR-index]` + ADR-045 D5 수기 확인과 동일.
+1. **링크·앵커 감사(런타임 비종속)**: 이번 diff에서 추가·변경한 Markdown 상대 링크를 `git diff --unified=0 -- '*.md'`로 목록화하고 각 대상 파일·fragment를 직접 대조한다. 새 anchor(`adr-045-amend-1`, `adr-027-amend-7`, `adr-056-amend-1..3`, `adr-057-amend-1..3`, `adr-051-amend-4`, `adr-050-amend-1`, `adr-010-amend-5`, `adr-047-amend-1`, `adr-014-amend-3`, `adr-026-amend-4`, `adr-037-amend-3`)는 정의 1개·참조 대상 실재를 `rg`로 확인한다. ADR-058은 amendment가 없어 fragment 없는 파일 링크만 허용한다. 프로젝트 초기화 후에는 선택한 스택의 문서 검사 도구를 CI에 구성한다.
+2. **인덱스 amend + 현재 규칙 요약 동기**: 각 ADR 본문 `## Amendment N` 개수 ↔ `docs/90-decisions/boilerplate/README.md` Amendments 컬럼이 각 Phase 동기 지시와 일치하는지 확인한다(§5.1은 원자 커밋 최종 감사표). 추가로 정정/뒤집기 또는 amend 4개 임계에 걸린 **ADR-056·ADR-057·ADR-026·ADR-037** 모두 `## Status` 바로 뒤 `## 현재 유효 결정`이 있고, 각각 `--prototype/부분보류 폐기`, `M 전체 snapshot/잠금/후속 finding`, `## 3 full+T:AC 의존성`, `FAC ready gate+구현후 사용자 보고`라는 net 규칙을 담는지 확인한다. 역사 amendment만 고치고 fast-path 요약을 stale로 두면 실패. stabilize preflight 항목 2의 `P1 [ADR-index]` + ADR-045 D5 수기 확인과 동일.
 3. **Surfaces 정합**: 새 ADR-058 `## Surfaces`에 등재한 파일들이 실제로 `ADR-058` 역참조를 갖는지(preflight 항목 2 Surfaces forward check). 각 surface 파일에 ADR-058 링크를 이미 박았으므로 통과해야 한다.
 4. **미러 동기 확인**: (a) reviewer.md **Plan Quality 차원** ↔ validate-plan **검토 차원 + 카테고리 카운트 표** 미러 일치 — [Plan-FAC-coverage](PX 확장·PX 태그↔매핑 ⑦·milestone-mode PX 반전 포함)·[Plan-design](category/a11y/recovery)·**기존 [Plan-dep] 6번 차원 확장(존재성·비순환·AC-보장 — 신설·행 추가 아님, 전체 차원 수 11 불변)**을 *양쪽 동일 문구*로 바꿨는지(§4.12d f). (b) reviewer.md **Design Consistency**는 *reviewer 내부* 검사라 validate-plan엔 없다 — reviewer.md 안에서만 헤더가 `6 차원`이고 [Design-state] category·신설 [Design-a11y]·"상태 매트릭스 책임 분배" 표 제목·근거까지 category로 바뀌었는지 확인.
 5. **Mutation Contract 준수 (D3 enabling — P2 보고만, 하드 게이트 아님)**: ADR-058에 full 6필드가 있는지(신규 standalone ADR 관례). base 계약이 있는 ADR(051·010·047·050·056·057)의 harness amend에 delta 한 줄(failure/falsifier/rollback)이 있는지 — *권장*, 누락은 P2. pre-047 ADR(027·014) amend는 계약 불요. **어느 것도 통과 차단 조건이 아니다**(ADR-047 §정책강도: 자동 차단 0)(§전역 거버넌스).
@@ -2923,16 +2651,16 @@ ADR-049가 `superseded`가 됐으므로, 그것을 **현재 정책으로 인용�
 
 한 행이라도 규칙과 어긋나면 그 규칙(§4.1 결정1~4 / §4.12 plan-workitem 전체 스냅샷·의존성 self-check / §4.11 R5-5·확정 재대조 / §4.12b preflight(접지·선행·산출))을 먼저 고친다.
 
-> **커밋 (Phase 5 — 인덱스·구조·워크플로우 sync + 옵션)**:
-> `docs: sync ADR index, STRUCTURE, WORKFLOW, README for the design/planning improvement round; re-point ADR-049→058`
+> **커밋 (Phase 5 — 최종 감사 + 조건부 옵션)**:
+> `docs: audit atomic phase boundaries and record optional adapters`
 
 ---
 
 # 완료 후
 
 - 이 `IMPROVE-GUIDE.md`는 개선 실행용 임시 문서다 — 모든 Phase 적용·커밋이 끝나면 삭제한다(저장소 어디에서도 이 파일을 참조하지 않는다).
-- 커밋 순서 요약(제안): Phase 1 → Phase 2(2.1~2.6, 2.7~2.8) → Phase 3(전반, 후반) → Phase 4(전반, 후반) → Phase 5. 각 커밋 전 `node scripts/check-doc-links.mjs --ignore IMPROVE-GUIDE.md`로 링크 무결성을 빠르게 확인하면 좋다.
-- **Phase 사이 일시적 비정합은 *최종 적용 상태*에서만 검사한다 (F5 및 그 클래스)**: Phase별 커밋 사이엔 몇몇 참조가 일시적으로 dangling일 수 있다 — (a) README ADR-index·amend surface 동기는 Phase 5에서 일괄 처리됨(*구 `designer.md` 산문 `ADR-056#amend-1` forward-ref는 §4.1로 이전해 제거 — 이제 Phase 3엔 Phase-4 amend 산문 참조가 없다; P1-6*). `check-doc-links.mjs`는 markdown 링크만 보지만 **stabilize preflight의 `[Ref-anchor]`는 `ADR-NNN#amend-M`를 산문에서도 grep**(그 검사가 `<!-- -->` 주석을 예외로 두는 것 자체가 산문 grep 증거)하고 `[ADR-index]`·`[Surface-backref]`도 부분 상태에서 P1을 낼 수 있다. **이들은 전 Phase 적용 후 전부 해소**된다. → 규칙: Phase들을 연속 적용하고(특히 3·4는 함께/연속), **부분 Phase 상태에서 stabilize preflight를 돌리지 않는다**. 정합 검사는 Phase 5 + §5.7(최종 적용 상태)에서만 결정적으로 수행. 각 커밋 전 `check-doc-links.mjs`(markdown 링크·앵커)는 언제든 안전.
+- 커밋 순서: Phase 1-A → Phase 1-B → Phase 2-A(2.1~2.6) → Phase 2-B(2.7~2.8) → Phase 3 → Phase 4 → Phase 5. 각 커밋은 해당 ADR 인덱스·신규 surface까지 함께 닫고, 커밋 전 변경된 Markdown 상대 링크를 실제 대상과 대조한다.
+- **Phase 커밋은 스스로 정합해야 한다**: ADR 본문·인덱스 행·새 surface·역참조를 해당 커밋에서 함께 반영한다. Phase 5는 앞선 커밋의 누락을 정상 절차로 보충하는 단계가 아니라 최종 감사다. 중간 커밋에서 `[ADR-index]`·`[Surface-backref]`·`[Ref-anchor]` 불일치를 남긴 채 다음 Phase로 넘기지 않는다.
 - **가설 표시 항목**(DS-4 화면 전환·DS-5 signature·DS-6 motion 세부)은 정책상 채택했으나 design-eval 재검토 트리거(SIMULATION_RUN.md) 실측 전까지는 *directional*이다 — 다운스트림에서 과신 금지(각 amend `### 강도`에 명시).
 - **전체 검증(ADR-017 dogfood)은 *의무*다 — 권장 아님**: [ADR-017](docs/90-decisions/boilerplate/ADR-017-dogfood-simulation.md)은 "재실행 트리거 3종"(신규 ADR(amendment 포함)·lifecycle 단계 변경·skill 본문 큰 변경) 중 1개라도 발생하면 Round N+1 dogfood를 **의무화**한다. 이번 라운드는 셋 다 해당하므로 적용 후 todo-CLI baseline dogfood 1회가 **필수**다(ADR-017 gate). **Phase 5는 정적 정합(링크·인덱스·미러·게이트 스모크)만** 결정적으로 확인 — 그것으로 dogfood 의무가 면제되지 않는다. 회귀 검출은 이 적용-후 dogfood가 담당하고(ADR-047 D4: falsifying evaluation 기본값 = ADR-017 baseline 재실행; falsifying eval은 사전 게이트가 아니라 rollback 트리거이므로 *적용 후*가 맞다), 검출 시 해당 Mutation Contract의 rollback path로 되돌린다.
 - **착수 안 한 항목**은 이 문서 상단 "착수하지 않는 항목"에 근거와 함께 명시돼 있다(INST-4 관찰·INST-5·기타 미검증·HN-3·백로그 정규화).
