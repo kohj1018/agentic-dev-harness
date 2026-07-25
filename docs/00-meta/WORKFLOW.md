@@ -51,6 +51,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 - `/stabilize-milestone [milestone-id]`으로 통합 점검을 수행한다.
 - E2E + 회귀 + 리팩토링 후보 + ADR 후보 점검.
 - **코드 수정·커밋·status 변경 금지** — 결과는 `QA_FINDINGS.md`와 `IMPROVEMENT_GUIDE.md`에 누적 기록.
+- **index-first recall (ADR-019 정합)**: 누적된 `QA_FINDINGS.md`·`IMPROVEMENT_GUIDE.md`를 회수할 때는 통째로 읽지 말고 *상태·심각도 색인*(open·P0/P1)으로 먼저 걸러 해당 항목만 읽는다. **마일스톤 헤더로만 자르지 않는다** — 이전 마일스톤에서 넘어온 미해결 P0(carry-over)를 놓치기 때문.
 - 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 연결.
 - **선택 (opt-in, ADR-054)**: stabilize 후 다른 세션·다른 LLM에서 `/validate-milestone <M> --reviewer-tag <tag>`(읽기 전용)로 2nd opinion → 원본 세션에서 `/repair-milestone <M>`이 peer 리뷰를 종합. 건너뛰어도 정상.
 

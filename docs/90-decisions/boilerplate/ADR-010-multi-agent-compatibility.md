@@ -10,6 +10,7 @@ accepted
 - 워크플로우 본문 SSOT = `.claude/skills/<name>/SKILL.md`, `.agents/skills/`는 얇은 wrapper (D3·D4).
 - Codex wrapper는 inner-loop 빈도 높은 skill + **cross-LLM 리뷰 skill과 그 repair 짝(빈도 무관 필수 — #amend-4)**에 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).
 - `.codex/config.toml` = 안전 baseline + Codex 모델 ID 추적 (D5·D8). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**.
+- 도구별 memory(Claude MEMORY.md·Codex memories)는 비캐노니컬 — 지속될 결정은 checked-in 문서(마일스톤/feature/ADR)에도 (#amend-5).
 
 ## 배경
 이 보일러플레이트는 Claude Code 표면(`CLAUDE.md`, `.claude/`)에만 묶여 있어, 사용자가 Claude Code의 사용량 한도에 걸리거나 다른 사정으로 OpenAI Codex CLI로 전환할 때 동일 워크플로우를 이어가지 못한다.
@@ -160,3 +161,21 @@ Phase 2 *자연어 호출* Codex skill의 **목록·개수는 README.md / README
 
 ### 강도 (ADR-022)
 - constraint(강, [관측됨]) — wrapper·README 동일 커밋 + preflight 체크. 나머지 enabling.
+
+<a id="adr-010-amend-5"></a>
+## Amendment 5 (2026-07-25) — 도구별 memory는 비캐노니컬 (필수 결정은 checked-in 문서에)
+
+### 배경
+- [관측됨] Claude Code는 내장 `MEMORY.md`, Codex도 native Memories 기능(`~/.codex/memories/`)을 갖는다 — *둘 다 존재*한다("Codex엔 memory 없음"은 오류). 단 Codex 쪽은 **버전에 따라 experimental·기본 비활성일 수 있다**(예: 일부 codex-cli 배포에서 memories=experimental off — 구체 버전은 핀하지 않는다). on이든 off든 본 amend 결정(비캐노니컬)은 불변이다. 둘 다 로컬·생성물이라 cross-machine sync가 없고 비캐노니컬이다.
+- 위험: "OAuth는 M3로 미룸" 같은 결정이 *오직 도구 memory에만* 있으면, 다른 도구·다른 머신·fresh 세션으로 이어받은 사람은 그걸 못 보고 다시 계획한다(연속성 깨짐 + SSOT 위반).
+
+### 결정
+1. **도구별 memory(Claude `MEMORY.md`·Codex memories 둘 다)는 로컬 가속기일 뿐 사실의 유일 소유자가 되면 안 된다.** 지속돼야 할 결정(범위·마일스톤 순서·연기 결정·기술 선택 등)은 반드시 checked-in 문서(마일스톤/feature 문서 또는 ADR)에도 내려가야 한다.
+2. 프로젝트 시작 시 1회 점검(PROJECT_START_CHECKLIST).
+
+### 적용 surface
+- docs/00-meta/PROJECT_START_CHECKLIST.md
+
+### 강도 (ADR-022)
+- enabling(약) — 규율 + 프로젝트 시작 시 점검(강제 불가 — 내장 memory는 자동 기록).
+- **Mutation Contract delta**(base 승계): failure = 결정이 memory에만 남아 다른 도구·머신·세션에서 증발; falsifier(ADR-047#amend-1) = dogfood에서 checked-in 없이 memory에만 기록되는지; rollback = 체크리스트 §5 항목 제거.

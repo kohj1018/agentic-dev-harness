@@ -52,6 +52,7 @@
 
 ## 5. 의사결정 기록
 - [ ] 중요한 선택을 `docs/90-decisions`에 ADR로 남겼다
+- [ ] 지속돼야 할 결정(범위·마일스톤 순서·연기 결정 등)이 도구 memory(Claude MEMORY.md·Codex memories)에만 있지 않고 checked-in 문서(마일스톤/feature/ADR)에도 있다 (ADR-010#amend-5 — 도구별 memory는 비캐노니컬)
 
 ## 6. 첫 커밋 전
 - [ ] 예전 프로젝트 예시 문구가 남아 있지 않다
