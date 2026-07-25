@@ -57,3 +57,19 @@ repair-workitem은 validator report를 기계적으로 수정하지 않고, repa
 
 ## 참고
 - ADR-007(lifecycle), ADR-038(repair-plan 4-판정 대칭), ADR-040(연구·의존성), ADR-046(signal-first), ADR-047(harness mutation), ADR-019(JIT 로딩), ADR-014(evaluator-optimizer).
+
+<a id="adr-050-amend-1"></a>
+## Amendment 1 (2026-07-25) — dispatcher 사전판정 금지 (자기검증 편향 차단)
+
+### 배경
+- [관측됨] 메인 세션이 구현·계획을 하고 그 검증(validate-workitem 등)도 직접 운전하므로(D2 model-invocable), 자기가 낸 지름길을 "이 정도는 괜찮다"고 프레이밍해 통과시킬 편향 위험. 기존 규칙은 *감사자*의 "수정 금지·보고만"만 정하고 *일 시키는 쪽*의 프레이밍은 막지 않는다.
+
+### 결정
+1. 검증/감사 위임 시 dispatcher는 검증자에게 **무엇을 지적하지 말라고 미리 말하거나 심각도를 미리 정해 주지 않는다**. 계획·구현과 충돌하는 발견은 숨기지 말고 사람에게 에스컬레이션한다.
+2. 단, *지켜야 할 기준·계약*(AC·승인 프로토타입·DESIGN 토큰·seam INV 등)을 그대로 전달하는 것은 필수 맥락이지 사전판정이 아니다 — 예외로 명시.
+
+### 적용 surface
+- docs/00-meta/DELEGATION_STRATEGY.md
+
+### 강도 (ADR-022)
+- enabling(약) — 한 줄 규율.

@@ -5,6 +5,14 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- implement는 foreman(메인 세션)이 운전 — `## 3` step 파일 경로로 file-disjoint slice를 나눠 병렬 builder, 작거나 겹치면 단일/순차(D1·#d6).
+- validate/stabilize는 report-only fan-out. **inline vs fan-out은 dispatch 전 파일·줄 수 기계 계산으로 결정** — 임계 초과면 inline 불가(강행=규칙 위반), 임계 미달이어도 inline을 택하면 `## Orchestration`에 계산값+"임계 미달" 기록(#amend-4가 #amend-2를 이 축에서 뒤집음).
+- plan de-fork + plan-milestone 신설, ADR-038 wave(#d3/#d6)·write_set 5필드 제거(D5).
+- 하청이 구조화 반환 없이 멈추면 foreman/dispatcher가 1회 재개→실패 시 결과 직접 회수 — builder는 파일 확인, report-only 감사자는 재실행→재위임→직접 감사→unavailable 기록(always-verify, #amend-4).
+- 위임 시 scope별 의존성 도구 고정 — builder는 기존 도구만(새 도구 도입·전환 금지); scope→tool은 STACK_SETUP_PLAN `## Dependency Tools`가 SSOT(모노레포·비-JS 지원, #amend-4).
+- 공유 런타임 리소스 partition 가드(#amend-1), validate orchestration 관측 기록(#amend-2), D4 범위 M1 통일(#amend-3).
+
 ## 대체
 - [ADR-050](ADR-050-main-session-lifecycle-skills.md) D1 중 implement-workitem 부분을 **supersede** — implement-workitem은 fork builder 격리가 아니라 *foreman(메인 세션 오케스트레이터)*이 builder 위임을 운전한다. **파일 경계가 분리되면(file-disjoint) 여러 builder를 병렬로, 작거나(파일 ≤~2-3개·RGR 1회) 파일이 겹치면 단일 builder로** 운전한다.
 - [ADR-038](ADR-038-cross-llm-plan-validation.md) `## 결정` #d3(parallel waves echo) + #d6(wave별 worktree 병렬 권장)을 **supersede** — plan-workitem은 wave 그룹을 계산·echo하지 않는다. 병렬성은 validate/stabilize *fan-out*으로 이전.
@@ -86,6 +94,9 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md — D1 implement 부분 supersede note
 - docs/90-decisions/boilerplate/ADR-019-jit-context-loading.md      — `## Amendment 1` 조건부 re-read
 - .claude/skills/stack-guard/SKILL.md                             — §6-2-1 테스트 격리 권장 #amend-1
+- .claude/skills/bootstrap-stack/SKILL.md                         — #amend-4 scope→tool STACK_SETUP_PLAN 기록
+- .claude/skills/bootstrap-stack/stack-brief-template.md          — #amend-4 scope→tool 기록
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md            — #amend-4 `## Dependency Tools` 표
 
 ## 참고
 - ADR-007(lifecycle), ADR-014(graduation — plan-milestone가 5+1 authoring), ADR-019(JIT 로딩 — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
@@ -120,3 +131,36 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 <a id="adr-051-amend-3"></a>
 ## Amendment 3 (2026-07-16) — D4 범위 갱신 (plan-milestone이 M1 포함 전 마일스톤 생성)
 D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되, 그 범위가 [ADR-057](ADR-057-planning-v2-batch-and-seam.md) 결정 1로 확장된다 — plan-milestone은 M2+가 아니라 **M1 포함 전 마일스톤**을 생성하고, bootstrap-project의 M1/F-001 seed는 제거된다. plan-workitem의 feature→task 집중(D4 후단)은 ADR-057 결정 2의 배치 모드(M<N> 입력)로 보완된다(단일 feature 모드 유지).
+
+<a id="adr-051-amend-4"></a>
+## Amendment 4 (2026-07-25) — fan-out 크기 판정 기계화 + 하청 정지 회수 + 패키지 매니저 고정
+
+### 배경
+- [관측됨] SIMULATION_RUN Round 4 — T-002(10파일 +249/-380 = 629줄)가 small-diff 임계를 명백히 초과했는데 "단일 vertical slice"라는 실행자 판단으로 inline 처리됐다(경계 판단 오용). 뒤늦게 fan-out 오케스트레이션 패턴으로 재검증하니 inline이 놓친 P1 2건([Doc-code-mismatch]·[Repair-bookkeeping-gap])이 검출됐다. #amend-2의 "경계값은 메인 세션 판단" 문구가 명확한 규칙을 우회하는 핑계가 됐다.
+- [관측됨] 서브에이전트가 구조화 최종 반환 전 중간 사고 문장에서 정지하는 패턴 5+건(빌더 2·qa 1·validator 1은 빈 반환) — foreman이 재개·직접 회수로 매번 챙겼으나 규범 문서엔 없었다.
+- [관측됨] builder가 npm 프로젝트에서 무심코 `pnpm`을 실행해 stray `pnpm-lock.yaml` 생성.
+
+### 결정
+1. **fan-out 크기 판정 기계화**: validate-workitem의 inline vs fan-out은 dispatch 전 계산한 값으로 결정한다 — 변경 파일 수 F, 줄 합계 L(`git status --porcelain`; tracked=`git diff HEAD`, untracked=파일 전체). inline 허용은 **(L≤50) 또는 (F≤2 그리고 L≤200)**, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상 명백히 해당없음 — 셋 다 충족일 때만. 하나라도 미충족이면 **fan-out 필수(inline 재량 0)**. 조건 충족 시에도 inline을 택했으면 `## Orchestration`에 F·L과 "임계 미달"을 기록. **임계 초과인데 inline이면 그 자체가 규칙 위반**(산출물로 반증 가능). #amend-2의 "팬아웃 강제 강화 안 함"을 *이 축에 한해* 뒤집는다.
+2. **하청 정지 회수 규율**: foreman/dispatcher는 위임한 서브에이전트가 구조화 최종 반환 없이 멈추면 1회 재개(예: SendMessage) → 그래도 미반환이면 결과를 직접 회수한다 — **builder**는 그 slice가 건드린 파일을 직접 열어 회수, **report-only 감사자(validator/qa/reviewer — 산출 파일 없음)**는 재실행→다른 감사자 재위임→메인 직접 감사→불가 시 `감사 미완(unavailable): <축>` 기록(DELEGATION_STRATEGY 정합). "결과 없음"을 조용히 통과시키지 않는다. *멈춤의 근본 원인은 모델/런타임 행동으로 추정되어 불확실하므로, 위임 프롬프트 문구를 더 늘리지 않고 회수 규율만 둔다*(원인 확정 전 과잉 문구 금지).
+3. **의존성 도구 고정 (scope별)**: builder는 프로젝트/워크스페이스가 *이미 쓰는* 의존성 도구만 쓰고 새 도구 도입·전환을 하지 않는다. 전역 단일 PM이 아니라 **scope별 도구**(모노레포·비-JS 지원). 정보 흐름: bootstrap-stack이 확정한 scope→tool을 STACK_SETUP_PLAN `## Dependency Tools`에 기록 → stack-guard가 실제 lockfile과 교차 확인·보완 → plan-workitem은 설치 line item 작성 시 그 표로 도구를 맞추고 → implement preflight가 scope→tool을 회수(표 우선, 없으면 slice 인접 lockfile/tool-manifest 추론)해 slice별 dispatch에 전달 → builder는 지정 scope 도구만 실행. 동일 scope 신호 충돌·표↔저장소 불일치·slice→scope 불명확이면 그 slice만 `Needs Dependency Tool Decision`으로 중단. (install-ownership 경계는 [ADR-052](ADR-052-stack-provisioning-and-e2e-readiness.md); 도구 선택 *근거*는 ARCHITECTURE §7.)
+
+거버넌스 주: 결정 1은 #amend-2의 "팬아웃 강제 강화 안 함"을 뒤집는 reversal이라 ADR-045 D6상 통합 재발행 대상이나(§1.3 amend-count 임계 상향으로 "4개째 amend" 사유는 소멸 — reversal만 남음), 이번 라운드는 사용자 minimal-churn 결정으로 amend 처리한다. D6 reversal 재발행 대신 minimal-churn amend 적용 — 근거: 이번 라운드 결정, 다음 변경 시 ADR-051 통합 재발행.
+
+### 근거
+- [관측됨] 위 3건 전부 SIMULATION_RUN Round 4 실측.
+
+### 강도 (ADR-022)
+- **결정 1(fan-out 크기 판정)은 constraint(강)로 승격** — #amend-2 D2의 enabling에서 올린다(큰 변경에서 검증 누락은 파괴적, 실측으로 효과 입증). 결정 2·3은 enabling(약).
+- **Mutation Contract delta**(base 계약 승계): failure = 임계 초과 diff를 inline으로 보내 P0 누락 · 하청 정지를 조용히 통과 · 오도구로 stray lock 생성 / falsifying evaluation(ADR-047#amend-1) = SIMULATION_RUN 재실행(대조군 = 구 inline 재량)에서 임계 초과 inline이 재발하거나 inline이 놓친 결함이 그대로 통과하면 반증 / rollback = 기계 판정·회수 규율·scope→tool 고정을 제거하고 #amend-2의 재량 기준으로 복귀.
+
+### 적용 surface
+- .claude/skills/validate-workitem/SKILL.md
+- .claude/skills/implement-workitem/SKILL.md
+- .claude/agents/builder.md
+- docs/00-meta/DELEGATION_STRATEGY.md
+- .claude/skills/bootstrap-stack/SKILL.md
+- .claude/skills/bootstrap-stack/stack-brief-template.md
+- .claude/skills/stack-guard/SKILL.md
+- .claude/skills/plan-workitem/SKILL.md
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md

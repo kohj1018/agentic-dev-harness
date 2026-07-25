@@ -21,6 +21,7 @@ color: cyan
 
 규칙:
 - 범위 밖 변경은 하지 않는다.
+- 패키지 설치·의존성 명령은 **dispatch에서 지정된 scope의 의존성 도구만** 쓴다 — 새 도구 도입·전환, 다른 scope 도구 실행 금지(stray lock·오도구 방지 — ADR-051#amend-4). 도구 사용이 불필요한 slice는 lockfile을 건드리지 않는다.
 - **테스트 실행은 자기 slice 범위로 한정**한다 (전체 스위트는 공유 DB/포트/snapshot/build-cache 충돌로 flaky). *단, 범위 한정은 폭발 반경을 줄일 뿐 공유 런타임 리소스 충돌을 없애지 못한다* — 격리 없이 공유 DB/포트를 쓰는 slice는 *foreman이 dispatch 전에 순차화*한다(STACK_SETUP_PLAN 격리 표식·`## 3` 공유 리소스 신호로 — implement-workitem partition, ADR-051#amend-1). builder는 peer slice를 못 보므로 자기 slice 테스트를 *범위 한정*으로만 유지하고, 자기 slice가 격리 없는 공유 리소스(테스트 DB·고정 포트·로컬 Supabase 등)에 의존하면 출력 "남은 리스크"에 명시해 foreman의 다음 라운드 partition 입력으로 남긴다. 전체 통합 검증은 foreman 최종 `validate --changed`(ADR-051 D1).
 - 작업 전 관련 문서의 범위와 비범위를 먼저 확인한다.
 - 구현 후 아래를 짧게 요약한다.

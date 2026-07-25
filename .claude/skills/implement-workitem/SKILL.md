@@ -17,6 +17,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 1. 관련 task 문서를 읽는다 (메인 세션이 *한 번*만 읽는다 — builder 에 task 전문을 넘기지 않는다).
 2. 필요하면 상위 feature/milestone/architecture 문서를 읽는다.
 3. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)와 `## 3. 구현 항목`을 회수한다.
+3-DT. **의존성 도구 확인 (scope별, ADR-051#amend-4)**: slice별로 쓸 의존성 도구(npm/pnpm/yarn/bun · pip/poetry/uv · cargo · go 등)를 회수한다 — ① `docs/00-meta/STACK_SETUP_PLAN.md`의 `## Dependency Tools`(scope→tool)를 *우선* 조회 + 인접 lockfile 등 실제 신호와 모순 없는지 교차 확인, ② 매핑이 없을 때만 각 slice 경로에 *인접한 고신뢰 신호*(`pnpm-lock.yaml`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod` 등 tool-specific)로 추론(일반 manifest만으로 단정 금지), ③ slice 경로와 가장 구체적으로 일치하는 scope의 도구를 그 slice dispatch(step 5)에 전달(한 slice가 여러 scope면 각 도구 함께). **충돌·불일치·slice→scope 불명확이면 그 slice만 `Needs Dependency Tool Decision`으로 중단**(출력에 scope·관측 신호·충돌 사유·해결 포함; 명확한 slice는 계속). 도구 명령이 불필요한 slice는 lockfile 변경 없이 진행.
 3-R. **draft 가이드 하드스탑 (ADR-057 결정 4 / ADR-026#amend-3)**: task `## 3`에 `## 3 상태: draft` 문자열(HTML 주석 마커 내)이 있으면 **분할·dispatch를 시작하지 않고 `Needs Plan Refresh`로 즉시 종료**한다 — `/plan-workitem F-NNN --refresh` 실행을 안내(배치 분해된 가이드는 앞 feature 구현으로 낡았을 수 있다 — 낡은 before/after는 기계 실행 builder에 파괴적).
 4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition; *partition 직전 `docs/00-meta/STACK_SETUP_PLAN.md`(있으면)의 "테스트 격리 미설정" 표식을 회수* — 공유 런타임 리소스 순차화 입력):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
@@ -31,6 +32,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - 그 slice 가 책임지는 AC subset (예: builder-A → AC-1·AC-2, builder-B → AC-3)
    - **task `## 7. 관련 문서` 의 `Design:` / `Architecture-Iface:` link 가 있고 그 slice 와 관련되면** 그 sub-section (예: `DESIGN.md ## 7 Components`, `ARCH ## 7-1`) 경로만 — *plan 이 박은 결정을 충실히 실행하기 위함* (builder 의 독립 디자인 판단 X — EXECUTE 전용). 전체 fork-load 금지. 관련 link 없으면 생략.
    - 그 slice 의 step 에 *등록 line item* (예: `+ DESIGN.md ## 7 등록`, `+ ARCH ## 7-1 error 레지스트리 등록`) 이 있으면 함께 전달 — builder 가 구현과 *동일 commit* 에 기계적으로 수행한다 (builder 가 등록 여부를 *독립 판단하지 않는다*). (ADR-027)
+   - **이 slice의 의존성 도구**(3-DT에서 scope별 회수 — 예: `apps/web`→npm, `apps/api`→uv). builder는 지정된 scope의 그 도구만 쓴다 — 새 도구 도입·전환·다른 scope 도구 실행 금지(stray lock·오도구 방지 — ADR-051#amend-4).
    - 병렬 builder 는 *file-disjoint* slice 에만 띄운다. 같은 파일에 실제 write-conflict 가능성이 있으면 *그 slice 들은 순차로* 돌린다(또는 사용자가 별도 worktree 로 격리) — disjoint 인 일반 경우엔 불필요.
    - **same-checkout 제약(WORKFLOW.md 정합)**: worktree 를 쓴 builder 의 변경은 *최종 minimal validate 전에 메인 checkout 으로 병합*한다. validate/finalize 는 같은 checkout 에서 실행해야 하고, validation report(`docs/40-validation/reports/<task-id>.md`)는 gitignored·checkout-local 이라 worktree 에 흩어지면 후속 finalize 가 `Needs Validation` 으로 못 찾는다. 일반 disjoint 병렬(worktree 미사용)은 본 제약과 무관.
 6. **`## 6-2. TDD opt-out` 점검 (메인이 먼저)** — 사유와 follow-up이 모두 있으면 opt-out 모드를 해당 slice builder 에 지시, 둘 중 하나만 비어 있으면 형식 위반으로 표시하고 *분할/dispatch 전에 종료*(사용자에게 보강 요청).
@@ -79,6 +81,7 @@ AC 해석 처리 (각 builder 가 자기 AC subset 에 대해 수행 — ADR-006
 `--fast`면 단일 builder 가 첫 AC만 완료하고 종료, 나머지 AC는 후속 호출 권장.
 
 각 builder 는 *자기 slice 가 건드린 파일* 을 메인 foreman 에 반환한다.
+**builder가 구조화 최종 반환 없이 멈추면** foreman은 1회 재개를 시도(SendMessage 등)하고, 그래도 미반환이면 그 slice가 건드렸을 파일을 직접 열어 결과를 회수한다(always-verify — "결과 없음"을 조용히 통과 금지, ADR-051#amend-4).
 **메인 foreman 은 모든 builder 의 변경 파일 목록을 합쳐 task 문서의 `## 4-1. 변경 예정 파일/경로` 를 *한 번* 갱신한다** (slice 별 중복 제거 — finalize 의 add 참조 목록). builder 가 같은 `## 4-1` 을 동시에 쓰지 않게 갱신 주체는 메인으로 단일화한다.
 
 최종 sanity 검증 (메인 foreman 이 모든 builder 수합 후 1회 — *minimal*):

@@ -3,8 +3,9 @@
 ## 언어/프레임워크
 [예: Next.js 16 + TypeScript]
 
-## 패키지 매니저
-[예: pnpm]
+## 의존성 도구 (scope별 — ADR-051#amend-4)
+[단일 패키지면 1개: 예 `. → pnpm`. 모노레포·polyglot이면 scope별로: 예 `apps/web → npm`, `apps/api → uv`.
+ 확정 결과는 STACK_SETUP_PLAN `## Dependency Tools` 표로 기록된다.]
 
 ## 백엔드/DB
 [예: Supabase / PostgreSQL]

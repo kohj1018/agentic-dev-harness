@@ -4,6 +4,19 @@
 
 > 모드: Reference (스택 설정 절차 + 자동화 권장)
 
+## Dependency Tools
+<!-- scope → 의존성 도구 SSOT (ADR-051#amend-4). 정보 흐름: `/bootstrap-stack`이 확정 도구를 기록 →
+     `/stack-guard`가 실제 lockfile과 교차 확인·보완 → `/plan-workitem`이 설치 line item의 도구를 이 표에 맞춤 →
+     `/implement-workitem` 3-DT가 slice별로 회수해 builder에 전달 → builder는 지정 scope 도구만 실행.
+     모노레포는 scope별 1행(경로 prefix), 단일 패키지는 `.` 1행. 비-JS 스택도 같은 표에 적는다.
+     근거 컬럼엔 그 판정을 뒷받침한 *tool-specific* 신호(lockfile·tool-manifest)를 적는다 — 일반 manifest만으론 단정 금지.
+     lockfile이 아직 없는 green-field는 `(신규 — lockfile 미생성)`. 표↔저장소 불일치는 자동 수정하지 않고 사용자 결정.
+     도구 *선택 근거*는 ARCHITECTURE `## 7. 기술 선택`, 설치 소유 경계는 ADR-052. -->
+| scope | 도구 | 근거 (lockfile / tool-manifest) |
+|-------|------|----------------------------------|
+| (예: `.`) | (예: npm) | (예: `package-lock.json`) |
+| (예: `apps/api`) | (예: uv) | (예: `uv.lock`) |
+
 ## 외부 의존 부트업 (DB / Redis / S3 등, ADR-025)
 `/bootstrap-stack`이 스택 감지 시 다음 권장 출력:
 - Postgres: `docker-compose.yml` 또는 `supabase start` 권장.
