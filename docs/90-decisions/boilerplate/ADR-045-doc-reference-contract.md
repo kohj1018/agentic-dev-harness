@@ -11,7 +11,7 @@ accepted
 - 다른 파일에서 인용되는 amendment 헤딩 위에는 stable anchor를 둔다(결정은 anchor 없이 `#dK` 토큰).
 - cross-surface 정책 ADR은 `## Surfaces` 블록을 *fan-out SSOT*로 둔다. STRUCTURE.md Canonical Owner 셀은 그 포인터만 둔다(산문 나열 중복 제거).
 - 다개정(amend **4개 이상** 또는 정정성 amend 포함) ADR은 상단에 `## 현재 유효 결정` 요약(≤6줄)을 둔다.
-- amend는 작게 유지. 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가·개정(amend) 4개 이상 누적은 신규 supersede ADR로 간다(ADR-045 이후 *신규 변경* 기준 — 기존 ADR은 grandfather, D6).
+- amend는 작게 유지. 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가는 신규 supersede ADR로 간다. 개정(amend) 8개 이상 누적도 통합 재발행(4~7개는 D5 요약으로 충분 — #amend-1로 4→8 상향). (ADR-045 이후 *신규 변경* 기준 — 기존 ADR은 grandfather, D6.)
 - **비-ADR 문서끼리의 링크·섹션 참조도 동일 규약**(상대경로 markdown 링크 + cross-ref 섹션엔 stable anchor) — D9.
 - 신규 ADR은 본 계약을 의무 적용. 기존 ADR/문서는 *많이 인용되는 것부터* 점진 이관.
 
@@ -43,8 +43,8 @@ ADR·하위 단위의 *canonical 참조 ID*는 다음으로 통일한다. 인용
 ### D2. stable anchor
 다른 파일에서 인용되는 **amendment 헤딩** *바로 위 줄*에 명시 anchor를 둔다(한글 자동 anchor의 heading-edit rot 회피). *결정(decision)은 헤딩이 아니라 번호 목록 항목이라 anchor를 박지 않는다 — `#dK`는 grep 토큰일 뿐(D1).*
 ```
-<a id="adr-027-amend-1"></a>
-## Amendment 1 — ...
+<a id="adr-027-amend-M"></a>
+## Amendment <M> — ...
 ```
 anchor id 규칙: `adr-<번호>-amend-<M>`. *외부 인용이 없는* amendment에는 강제하지 않는다(enabling — cited-only, Phase 5.A 정합).
 
@@ -111,3 +111,20 @@ ADR 외 문서끼리의 참조도 동일 원칙을 따른다 — *이 계약은 
 - ADR-019 (JIT 컨텍스트 — Surfaces가 ADR와 동거해 사전 fork-load 불필요)
 - ADR-022 (Ratchet Principle)
 - ADR-000 (scope/번호 정책)
+
+<a id="adr-045-amend-1"></a>
+## Amendment 1 (2026-07-25) — D6 통합 재발행 임계 4→8 상향
+
+### 결정
+D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 이상**으로 올린다. 근거: D5가 amend 4개+에서 `## 현재 유효 결정` 요약을 의무화해 **4~7개 구간의 가독성을 이미 담당**하므로, 하드 재발행 캡은 요약이 있어도 탐색이 힘들어지는 수준(≈8)에 두는 게 맞다. (원래 '4'는 ADR-045 첫 커밋부터 **D5 요약 의무화 임계와 같은 값으로 함께 설정된** 초기 보수값이다 — D5 도입과 선후 관계가 아니라 동시 설정. 실사용상 과소로 판단해 상향.) **정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가 트리거는 불변** — 그건 *변경 규모* 기준이지 *누적* 기준이 아니다.
+
+거버넌스 주: 재발행 임계 자체를 바꾸는 것은 D6상 경계적 "정책 의미 변경"이라 엄밀히는 supersede 대상이나, 정책의 *의미*는 유지하고 트리거 *수치*만 조정하는 enabling 변경이므로 이번 라운드 minimal-churn 결정에 따라 amend로 처리한다(D6 재발행 대신 minimal-churn amend — 근거: 이번 개선 라운드 결정, 다음 변경 시 통합 재발행).
+
+### 적용 surface
+- docs/90-decisions/boilerplate/ADR-045-doc-reference-contract.md (`## 현재 유효 결정` 요약 — D6 표 원행은 Record로 *보존*, 덮어쓰지 않음)
+- docs/90-decisions/boilerplate/_ADR_GUIDE.md (amend/supersede 기준 줄 — 운영 가이드라 현재 규칙 반영)
+- .claude/skills/stabilize-milestone/SKILL.md (`[ADR-index]` fence-aware amendment count)
+- .claude/skills/review-doc/SKILL.md (Amendments 컬럼 대조도 fence-aware — 동일 검사 클래스)
+
+### 강도 (ADR-022)
+- enabling(약) — 임계 조정, 되돌리기 쉬움.

@@ -24,7 +24,7 @@
 ## amend / supersede / 신규 ADR 기준 (ADR-045#d6)
 - 문구 정정·surface 1~2개 추가·충돌 없는 확장 → `## Amendment N` 추가.
 - 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가 → 신규 ADR로 supersede.
-- 개정(amend) 4개 이상 누적 → 통합 재발행(supersede)로 클린 ADR 재작성, 구 ADR은 `superseded`로 잔존.
+- 개정(amend) 8개 이상 누적 → 통합 재발행(supersede)로 클린 ADR 재작성, 구 ADR은 `superseded`로 잔존. 4~7개는 `## 현재 유효 결정` 요약(D5)이 가독성 담당(재발행 불요 — ADR-045#amend-1).
 
 ## area 태그 (장기 분류 — project ADR 권장)
 ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: `product | design | dev | infra | process | tooling`. project ADR이 쌓일 때 종류별 필터·sprawl 추적에 쓴다(폴더 분리 대신 메타데이터 — 단순성).
@@ -63,3 +63,4 @@ ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: 
 ## Harness Mutation Contract (ADR-047)
 
 본 ADR이 `.claude/skills` / `.claude/agents` / `AGENTS.md` / `.agents/skills` / `.codex/config.toml` / lifecycle ADR 중 *어느 하나라도* 수정한다면 ([ADR-047](ADR-047-code-as-agent-harness.md) D3 대상 surface), 본문에 `## Mutation Contract` 섹션 6 필드(Target / Failure mode / Predicted improvement / Preserved invariants / Falsifying evaluation / Rollback path)를 명시한다. ADR-022와 양립 — evidence label은 그대로, Mutation Contract는 변경 governance 양식.
+- **"Falsifying evaluation" 필드 작성법**: 실패 유형(규율 실패→금지문 / 모양 실패→긍정 레시피)을 분류하고, 대조군을 둔 초저비용 문구 테스트를 기본 검증으로 삼는다. 정적 검사는 프로젝트 스택 확정 후 그 스택의 도구로 구성하고, 행동 fixture는 소수 스킬 사람-확인 체크리스트로 둔다(상세: [ADR-047](ADR-047-code-as-agent-harness.md)#amend-1).

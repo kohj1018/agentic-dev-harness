@@ -38,9 +38,9 @@
 | 042 | UX 흐름 품질 (HEART) | accepted | +#amend-1: §8-1 delta 재정의 | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 |
 | 043 | Optional MCP Connectors | accepted | — | 기본 자동연결 X + STACK_SETUP_PLAN 연결 절차(researcher 기반, 전용 skill 없음) + 보안 가드 |
 | 044 | Cross-LLM Discovery Validation | accepted | +#amend-1: Codex 단락 supersede | /validate-discovery + /repair-discovery (기획 층 peer review, ADR-038 패턴 mirror) + reviewer discovery surface |
-| 045 | Document reference contract | accepted | — | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
+| 045 | Document reference contract | accepted | +#amend-1: D6 재발행 임계 4→8 | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
 | 046 | Signal-first output contract | accepted | — | sub-agent 반환 cap 축소(1~2k→≤600) + signal-first 대화/반환 계약 + auto-clarity 보존 리스트 |
-| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | — | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
+| 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | +#amend-1: 변경 검증법(falsifying evaluation 작성법) | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 | 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
 | 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | accepted | (+#amend-1: R0 필수 + 수렴 + visual-QA scaffold + 클래스 anti-slop, +#amend-2: designer agent + grounding 위계 + divergence) | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
 | 050 | Main-session, model-invocable lifecycle skills | accepted (부분 superseded by 051) | — | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |

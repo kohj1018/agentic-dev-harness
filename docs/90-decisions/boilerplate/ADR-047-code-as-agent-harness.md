@@ -120,7 +120,7 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 ## 후속 작업
 - 다음 보일러플레이트 진화 라운드(Phase 12+)부터 *harness mutation surface*를 건드리는 ADR은 본 contract를 적용. 기존 ADR은 사후 retrofit X (Surgical Changes — ADR-006).
 - 첫 fork 사용자 라운드에서 mutation contract 양식 부담 신호 추적 (ADR-022 evidence 회수).
-- D5~D9 중 본문이 *비대*해지는 항목 (특히 D7 — 적용 surface 다수) 은 별도 ADR로 분할 supersede 검토 (ADR-045 D6 기준 amend 4+ 또는 정책 의미 변경 시).
+- D5~D9 중 본문이 *비대*해지는 항목 (특히 D7 — 적용 surface 다수) 은 별도 ADR로 분할 supersede 검토 (ADR-045 D6 임계 도달 또는 정책 의미 변경 시).
 
 ## 참고
 - arXiv:2605.18747v1, Ning et al. 2026-05-18, *Code as Agent Harness: Toward Executable, Verifiable, and Stateful Agent Systems*:
@@ -135,3 +135,24 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
   - §5.2.2 Semantic Verification Beyond Executable Feedback (D8 인용 owning)
   - §5.2.4 Transactional Shared Program State and Semantic Conflict Resolution (D9 인용 owning)
 - ADR-005 (SSOT — 본 ADR 영구 파일 인용 SSOT 역할 정합), ADR-017 (dogfood simulation — D4 default), ADR-019 (JIT 로딩), ADR-022 (Ratchet — 정책 강도), ADR-045 (reference contract — Surfaces fan-out), ADR-046 (signal-first).
+
+<a id="adr-047-amend-1"></a>
+## Amendment 1 (2026-07-25) — 변경 검증법 (falsifying evaluation을 값싸게 만드는 방법)
+
+### 배경
+- [관측됨] D3/D4는 falsifying evaluation을 *의무화*했으나 *만드는 방법·러너*가 없어, 실제로는 "검증함"을 산문으로만 적고 넘어갔다(문서 전수 확인).
+- [외부실증] 규칙 문구 실패는 두 종류다 — **규율 실패**(모델이 규칙을 무시)와 **모양 실패**(모델이 규칙을 따르려 하나 출력 형태가 틀림). superpowers 실측: *금지문("~하지 마라")*은 규율 실패엔 유효하나 **모양 실패엔 오히려 역효과**(대조군보다 나쁜 출력)이며, 모양 실패는 "이렇게 해라" 긍정 레시피로 고쳐야 한다.
+
+### 결정
+1. **실패 유형 분류 먼저**: harness 문구를 바꾸기 전에 막으려는 실패가 *규율 실패*인지 *모양 실패*인지 분류한다. 규율 실패 → 금지문 OK. 모양 실패 → 금지문 금지, 긍정 레시피("이 입력이면 이렇게 출력")로 작성.
+2. **대조군을 둔 초저비용 문구 테스트를 기본 falsifying evaluation으로**: 바꾼 문구가 실제로 행동을 바꿨는지, *바꾸기 전 문구(대조군)* 대비 소수(≈5회) 시행으로 비교한다. 비싼 전체 dogfood 재실행(D4 default) 전에 이 값싼 테스트를 먼저 통과해야 한다.
+3. **정적 검사 vs 행동 fixture 분리**:
+   - *정적 검사*는 프로젝트 스택이 정해진 뒤 그 스택의 formatter·linter·CI로 구성한다. 보일러플레이트 공통 런타임·검증 스크립트는 두지 않는다.
+   - *행동 fixture*(스킬이 특정 입력에 특정 판정을 내리는지)는 드리프트 잦은 소수 스킬(validate-*·bootstrap-stack 등)에 한해 "이 입력 → 이 판정" 예시 3~5개를 **사람이 확인하는 체크리스트**로 둔다(자동 실행 X — 스킬은 여러 파일·상태를 다뤄 자동화 불가, 21개 파일화 금지).
+4. D4의 dogfood 재실행 default는 유지하되, 본 Amendment의 값싼 테스트가 그 *앞단 게이트*임을 명시.
+
+### 적용 surface
+- docs/90-decisions/boilerplate/_ADR_GUIDE.md
+
+### 강도 (ADR-022)
+- enabling(약) — 방법·러너 명시. 자동 차단 없음.
