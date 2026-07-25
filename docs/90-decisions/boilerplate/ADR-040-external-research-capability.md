@@ -10,7 +10,7 @@ accepted
 - builder는 직접 웹서핑하지 않는다 — `Needs Research` soft 게이트(#amend-2) → `Agent` 보유 skill(implement foreman·plan-milestone)이 researcher에 자동 위임. Codex는 메인 세션 인라인 degrade.
 - 의존성 3분할: authoring=plan(#amend-1) / 설치 실행=implement(#amend-1) / 검증=stack-guard(#amend-2) — researcher는 설치 권한 없음.
 - 모든 발견에 출처 URL + 발행일 + 공식/1차/2차 신뢰도 라벨(결정 3).
-- 디자인 레퍼런스 모드(#amend-4): 호출 측 명시 시 코드 수준 토큰 추출 — 소스 위계 ①사용자 URL ②오픈소스 토큰 패키지 ③정성 소스, 추출 불가 시 정직 보고·값 통째 복제 금지.
+- 디자인 레퍼런스 모드(#amend-4): 호출 측 명시 시 코드 수준 토큰 추출 — **소스 위계·"사용자 URL 1순위"는 [ADR-058](ADR-058-design-workflow.md)이 evidence-on-demand(AI 자율 리서치 디폴트 + 핀 목록 값 grounding, 사용자 입력=옵션 힌트)로 부분 supersede**. 추출 대상·정직 보고·값 통째 복제 금지 규율은 유효.
 
 ## 배경
 - [관측됨] 기존 6개 agent(architect/planner/builder/validator/reviewer/qa)의 tools에 WebSearch/WebFetch가 없다 → 구현 중 외부 라이브러리(결제/인증/SDK)의 *최신 공식문서*를 확인할 수 없고, 모델 지식 컷오프로 stale API를 쓸 위험이 있다.

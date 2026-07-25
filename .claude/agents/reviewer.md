@@ -60,7 +60,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
 - `plan`: Plan Quality 11 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
-- `design`: Design Consistency 5 (아래 별도 섹션 — ADR-027#amend-1). UI 프로젝트에서 stabilize-milestone 이 호출.
+- `design`: Design Consistency 6 (아래 별도 섹션 — ADR-027#amend-1·#amend-7). UI 프로젝트에서 stabilize-milestone(구현 후 감사) 및 **bootstrap-design R2-G/R6 수용 게이트(ADR-058 — concept/preview 픽셀·구별성 판정)**가 호출.
 - `discovery`: Discovery Quality 8 (아래 별도 섹션 — ADR-044). `/validate-discovery` 가 호출. Clean Code / Scope / Doc / Plan / Design 미적용.
 
 ## Plan Quality 11 차원 (plan surface 전용 — ADR-038 + ADR-027#amend-1 + ADR-057)
@@ -75,7 +75,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요). (P1 권장)
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
-9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027#amend-1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 8 상태 매트릭스 (default/hover/active/focus/disabled/loading/error/empty) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 8 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056) (P1 권장)
+9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027#amend-1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 category state (ADR-027#amend-7 — interactive/data/static) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 그 category의 expected 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). / **AC·task 본문에 색-단독 상태표시·포커스 제거·아이콘 버튼 라벨 누락이 명시적으로 드러나면** DESIGN.md §9 a11y 위반 의심(ADR-027#amend-7) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056) (P1 권장)
 10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027#amend-1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
 11. **[Plan-seam]** (ADR-057 결정 11 — seam 신호 해당 feature 한정) — 신호 4종(2+ writer/상태 머신/2차-write/멱등) 해당인데 feature `## 7-2` 부재·형식 파손 / task 간 입출력 계약 불일치 의심 / INV가 어떤 task AC에도 안 걸림. **신호 미해당 시 skip + "핵심 관찰"에 명시.** (P1 권장)
 
@@ -106,25 +106,28 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 
 라벨링 예: `P0 [Disc-scope] MVP 범위에 "협업 권한 관리" — JTBD 핵심(주간 갱신)과 무관, M3 이후로 비범위 권장`.
 
-## Design Consistency 5 차원 (design surface 전용 — ADR-027#amend-1 / ADR-056)
+## Design Consistency 6 차원 (design surface 전용 — ADR-027#amend-1·#amend-7 / ADR-056 / ADR-058)
 
-stabilize-milestone 이 UI 프로젝트 surface 호출 시 본 차원 적용. 호출 측이 렌더 증거(스크린샷 갤러리 경로·visual-qa 결과)를 주입하면 Read로 이미지를 열람해 판단에 사용한다(ADR-027#amend-6). 증거 없으면 기존 grep·문서 기반 판정만.
+stabilize-milestone(구현 후) 및 bootstrap-design R2-G/R6 수용 게이트(ADR-058 — concept/preview)에서 호출. 호출 측이 렌더 증거(스크린샷·1280/375 캡처·axe 결과)를 주입하면 Read로 이미지를 열람해 픽셀 판정(위계·밀도·domain fit·장식 slop)에 쓴다. 증거 없으면 grep·문서 기반 판정만.
+
+**단계 스코프 (중요)**: **concept(R2-G)** 단계는 DESIGN.md 확정 전이라 `[Design-token]`·`[Design-inventory]`·`[Design-state]`·`[Design-donts]`·`[Design-voice]`(= DESIGN.md 계약 의존 5차원)를 **적용하지 않는다** — 픽셀 판정(위계·밀도·domain fit·slop) + `[Design-a11y]`만(concept의 *정상* raw hex·미등록 컴포넌트 P1 오판 금지). **preview(R6)·stabilize**에서만 6차원 전부(DESIGN.md 확정 후).
 
 1. **[Design-token]** — raw hex / 토큰 외 색 사용 / typography family/scale 외 사용. (P1)
 2. **[Design-inventory]** — DESIGN.md `## 7. Components` 인벤토리 외 컴포넌트 신설 / 등록 누락. (P1)
-3. **[Design-state]** — **DESIGN.md `## 7` 본문에 등록된 컴포넌트 정의** 가 default/hover/active/focus/disabled/loading/error/empty 8 상태 매트릭스를 *모두 설계* 했는가 (문서 설계 기준 — task 구현이 8 상태 모두 구현했는지는 별도 차원). 누락 발견 시 `P1 [Design-state] DESIGN.md ## 7 의 <component> 정의에 <상태> 누락`. *task 구현 단계의 use-case 한정 상태 검증* 은 validator (validate-workitem) 책임 — 본 차원과 책임 분리. (P1)
+3. **[Design-state]** — **DESIGN.md `## 7` 본문에 등록된 컴포넌트 정의**가 그 category의 expected 상태(ADR-027#amend-7 — interactive: default/hover/active/focus-visible/disabled[+loading] · data/screen: default/loading/empty/error/success · static: 없음)를 *모두 설계* 했는가. 누락 발견 시 `P1 [Design-state] DESIGN.md ## 7 의 <component>(category) 정의에 <상태> 누락`. *task 구현 단계의 use-case 한정 상태 검증*은 validator 책임 — 본 차원과 분리. (P1)
 4. **[Design-donts]** — DESIGN.md `## 9. Do's and Don'ts` 명시 위반. *deterministic 예*(grep 가능): primary CTA 2+ / color 5색 초과 / raw hex / motion `prefers-reduced-motion` 미분기. *LLM-판정 anti-slop 예*(ADR-027#d23 — grep 어려움): 보라/violet gradient·cyan-on-dark 디폴트, nested cards, gradient heading text, glassmorphism·neon glow, 전면 center-align, 획일적 card grid 반복, icon-tile-above-heading, monospace 장식 남용, bounce/elastic easing, 장식용 sparkline. (P0) *DESIGN.md `## 9` 가 SSOT — 본 목록은 그 일부를 echo한 것이며, 프로젝트의 `## 9` 추가 룰도 함께 점검한다.*
 5. **[Design-voice]** — DESIGN.md `## 10. Voice & Writing` 위반(LLM-판정분): 어조 규정 위반(존댓말 혼용 등 grep이 못 잡는 문맥), 내부용어의 사용자 표면 노출, 금지 표현의 [LLM-판정] 항목. *grep 가능분(placeholder 카피 등)은 stabilize preflight 5-2b·validator가 담당* — 본 차원은 문맥 판정 + grep 누락분 백스톱만. DESIGN.md §10 부재 시 skip + 명시. (P1)
+6. **[Design-a11y]** (ADR-027#amend-7) — WCAG 2.2 접근성. *deterministic·강*(렌더 증거 있으면 axe 결과 반영, 없으면 grep): 포커스 링 제거(`outline:none`만) / 아이콘 버튼 accessible name 누락(computed name 부재 — aria-label·aria-labelledby·visible text·alt·title 어느 것도 없음) / 색-단독 상태표시. *LLM·권고*: 대비 비율 미달 의심(정밀 비율·computed name은 실화면 axe가 결정적 — stack-guard populated axe·design-gate.mjs). 색·포커스·라벨은 P1, 정밀 대비는 P2 권고. DESIGN.md 부재 시 skip + 명시. (P1)
 
-**8 상태 매트릭스 책임 분배**:
+**상태 매트릭스 책임 분배 (category 계약 — ADR-027#amend-7)**:
 | 단계 | 책임 surface | 점검 기준 |
 |------|------------|----------|
 | plan-workitem self-check | planner | task 본문 use-case 에 등장하는 상태가 AC 에 누락? |
 | validate-plan [Plan-design] | reviewer (plan surface) | 동일 — use-case 한정 |
 | validate-workitem | validator | task 구현이 use-case 해당 상태 코드 구현? |
-| stabilize-milestone design surface [Design-state] | reviewer (design surface) | DESIGN.md `## 7` 본문에 *컴포넌트 정의가 8 상태 전체* 설계됐는가? |
+| stabilize-milestone design surface [Design-state] | reviewer (design surface) | DESIGN.md `## 7` 본문에 *컴포넌트 정의가 그 category의 expected 상태 전부* 설계됐는가? (ADR-027#amend-7) |
 
-**근거**: DESIGN.md 는 *설계 문서* (8 상태 전 설계가 컴포넌트 인벤토리의 책임). task 는 *구현 단위* (1 task 1 RGR 사이클 — 8 상태 전부 1 task 강제는 ADR-026 sizing 위반). 두 surface 가 다른 기준으로 점검해야 정합.
+**근거**: DESIGN.md 는 *설계 문서* (category별 expected 상태 전 설계가 컴포넌트 인벤토리의 책임). task 는 *구현 단위* (1 task 1 RGR 사이클 — category 전체를 1 task 에 강제하면 ADR-026 sizing 위반). 두 surface 가 다른 기준으로 점검해야 정합.
 
 라벨링 예: `P0 [Design-donts] components/Hero.tsx:42 — primary CTA 2개 (DESIGN.md ## 9 위반)`.
 

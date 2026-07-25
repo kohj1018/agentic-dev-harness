@@ -81,6 +81,10 @@ accepted
 - README.md
 - README_ko.md
 - .gitignore
+- .claude/agents/researcher.md               — 디자인 레퍼런스 모드 evidence-on-demand(Layer A/B/C)
+- .claude/agents/designer.md                 — R0 분해 + REFINE/EXPLORE 시안 + repair 되먹임
+- .claude/agents/reviewer.md                 — Design Consistency 6차원 + R2-G/R6 게이트 호출자
+- scripts/design-gate.mjs                    — D3 수용 게이트 러너(신설)
 
 ## 참고
-- ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
+- ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).

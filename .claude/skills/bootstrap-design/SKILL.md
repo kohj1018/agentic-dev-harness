@@ -3,24 +3,24 @@ name: bootstrap-design
 description: UI 시각 결정 발굴 라운드 (R0~R6). 레퍼런스 노트 + DESIGN.md 작성 전 다중 concept 시안 선택. DESIGN.md 채움. UI 스택 포함 프로젝트 전용.
 argument-hint: "[product description | --fast | --update]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html) Bash(rm docs/20-system/design-concepts/concept-*.html)
+allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-preview.html) Bash(rm docs/20-system/design-concepts/concept-*.html) Bash(node scripts/design-gate.mjs*) Bash(npx playwright*) WebFetch(domain:github.com)
 ---
 
 # /bootstrap-design
 
 > 모드: How-to (UI 시각 결정 라운드)
-> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R6를 직접 운전한다. R0(레퍼런스 분해)과 R1(원칙 추출)의 무거운 추론은 `Agent` 도구로 **designer**를 단발 sub-call로 위임(ADR-058 — 코드 증거 수집은 researcher 디자인 레퍼런스 모드). 종료 후 사용자가 `/clear` 권장 (R0~R6 인터랙션이 다음 task 컨텍스트에 잡음).
-> 라운드 구조 SSOT는 ADR-058(design workflow). DESIGN.md *내용*(8섹션+Motion / 3-tier 토큰 / Don'ts)·인터페이스 할당 SSOT는 ADR-027.
+> 패턴: `discover-product` 차용 — `context: fork`를 명시하지 않아 메인 세션이 R0~R6를 직접 운전한다. R0 방향 리서치·값 grounding은 `Agent` 도구로 **researcher**(디자인 레퍼런스 모드) + 분해·시안 authoring은 **designer** 단발 sub-call 위임(ADR-058). 종료 후 사용자가 `/clear` 권장.
+> 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 ADR-058(design workflow). DESIGN.md *내용*(8섹션+Motion / 3-tier 토큰 / Don'ts / 정체성·a11y·category state·responsive)·인터페이스 할당 SSOT는 ADR-027.
 
 ## 트리거
 - `/bootstrap-stack` 종료 출력에 "frontend 감지됨. `/bootstrap-design` 권장" 텍스트 한 줄. 사용자 발화로 시작.
 - 비-UI 프로젝트는 호출되지 않음 (ADR-031 직접 지원 범위 밖).
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
-**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4). 본문의 `Agent` 위임(R0 researcher 디자인 레퍼런스 조사 · R0~R2 designer authoring · R2-1.5 reviewer 구별성 비평)은 Codex에 persona 매핑이 없어 메인 세션이 각 persona 파일(researcher.md/designer.md/reviewer.md)을 읽고 순차 인라인 수행하며 생략하지 않는다(ADR-010).
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4). 본문의 `Agent` 위임(R0 researcher 디자인 레퍼런스 조사 · R0~R2 designer authoring · R2-1.5 reviewer 구별성 비평 · **R2-G/R6 reviewer 픽셀 판정 · 게이트 repair designer 재생성**)은 Codex에 persona 매핑이 없어 메인 세션이 각 persona 파일(researcher.md/designer.md/reviewer.md)을 읽고 순차 인라인 수행하며 생략하지 않는다(ADR-010). **동일 세션 degrade 계약 (ADR-058 D5)**: (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 그 라운드 산출물과 최종 출력에 `under-verified: 동일 세션 감사`를 명시하며, (c) 완전 독립 감사가 요구되면 승인 보류한다. **결정적 렌더 게이트(`node scripts/design-gate.mjs`)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 차단된다.
 
 ## 모드
-- `--fast`: R0(위계 ①·⑤만 — 사용자 URL 있으면 사용, 없으면 확인 게이트 후 모델 지식 + minimal 노트) + R1(원칙 1줄 + voice 기본값 확인 1회) + R3(토큰) + R5(저장 — 축약 섹션, §10 포함). **R2(concept 시안)·R4(컴포넌트 인벤토리)·R6(preview)는 생략** — R5 저장은 *생략하지 않는다*(생략하면 DESIGN.md 가 안 채워져 skill 목적 무산). R1은 *완전 생략 금지* — R3 토큰 결정의 근거이므로 *minimal 1줄*(예: "monochrome + 1 accent")이라도 채운다. `--fast`에서 concept 시안이나 preview가 필요하면 종료 후 사용자가 "concept 시안 생성" 또는 "design-preview 생성"을 명시 발화 → R2 또는 R6만 단독 수행.
+- `--fast`: R0(Layer A/B minimal — 있으면 사용자 힌트 우선, 없으면 자율 조사 1~2개로 최소 grounding + minimal 노트) + R1(원칙 1줄 + voice 기본값 확인 1회) + R3(토큰) + R5(저장 — 축약 섹션, §10 포함). **R2(concept 시안)·R4(컴포넌트 인벤토리)·R6(preview)는 생략** — R5 저장은 *생략하지 않는다*. R1은 *완전 생략 금지*(minimal 1줄). 게이트는 산출물 기준 — `--fast`는 R2·R6(concept/preview) 미생성이라 게이트 적용 대상 없음(N/A, ADR-058 D3). `--fast`에서 concept·preview가 필요하면 종료 후 명시 발화로 R2/R6 단독 수행.
 - 기본: R0~R6 모두.
 - `--update`: 기존 DESIGN.md가 있을 때의 부분 갱신/재디자인 모드(아래 `## --update 모드`). 처음부터 R0~R6를 다시 돌지 않는다.
 
@@ -43,59 +43,49 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 본 skill은 baseline placeholder `docs/20-system/DESIGN.md`를 *채운다* (생성 X). 파일이 없으면 fork 사용자가 비-UI 프로젝트로 판단해 삭제한 경우 — 작업 중단 + 사용자에게 *"본 프로젝트는 비-UI라 판단됨. /bootstrap-design 실행 의도 확인 필요"* 보고.
 - DESIGN.md 본문 상단 주석(`baseline placeholder`)을 변경하지 않는다 — 정책 SSOT는 STRUCTURE.md presence 컬럼 + 본 파일 주석.
 
-## R0 — 레퍼런스 추출 + 안티-레퍼런스 + 레퍼런스 노트 영속화 (ADR-058)
-- 좋아하는 제품 1~3개 (예: Linear / Notion / Stripe / Vercel / Arc / Things)의 시각 메커니즘 분해:
-  - color signature
-  - typography pairing
-  - density
-  - motion 톤
-- **안티-레퍼런스 1~2개 필수**: "purple gradient generic SaaS 같지 말 것", "indigo-on-slate Tailwind 디폴트 회피".
-- **grounding 소스 위계 (ADR-058 — 위에서부터 시도, 확보된 소스만 사용)**:
-  1. 사용자 제공 URL/스크린샷 — raw CSS URL이면 researcher가 직접 추출, 스크린샷은 메인 세션이 Read로 vision 분해.
-  2. **researcher 디자인 레퍼런스 모드 위임 (웹 가용 시 기본, ADR-040#amend-4)**: 레퍼런스 1~3개에 대해 `Agent`(researcher — 디자인 레퍼런스 모드 명시)로 코드 수준 토큰 추출(hex/font/spacing/radius/shadow). 오픈소스 디자인 토큰 패키지(Primer/Polaris/Carbon/Spectrum 등)가 주력 소스 — 값 통째 복제 금지(구조 학습용), what-to-borrow/avoid 판단은 본 라운드 책임.
-  3. 연결된 디자인 MCP (STACK_SETUP_PLAN `## Optional MCP Connectors`에 agent access 부여된 경우만 — ADR-048).
-  4. 정성 소스(디자인 요약 사이트) — 방향 어휘 보조로만, 값 추출 소스 아님.
-  5. 모델 지식 — **①~④ 전부 불가 시, 사용자 확인 게이트 1회 후에만**: "레퍼런스 확보 0건 — URL/스크린샷을 주시겠어요, 아니면 모델 지식 기반으로 진행할까요?" 진행 시 `DESIGN_RESEARCH.md` `## grounding 출처`에 `모델 지식 기반 + <사유>` 명시(silent degrade 금지 — #amend-1 계승).
-- 분해(위계로 확보한 증거 → 4축 + borrow/avoid)는 **designer 단발 sub-call**로 위임한다(architect 아님 — ADR-058).
-- **MCP·계정 도구를 보일러플레이트 기본 의존으로 추가하지 않는다** (불변 — ADR-027#amend-2 비결정 존중).
-- **레퍼런스 노트 영속화 (필수, `--fast`는 minimal)**: 위 분해 결과를 `docs/20-system/DESIGN_RESEARCH.md`에 *문서로* 남긴다. 양식:
+## R0 — 리서치: evidence-on-demand (ADR-058)
+
+> 디폴트는 **AI 자율 리서치**. 사용자 제공 URL·취향은 *우선 힌트*(prerequisite 아님) — 있으면 Layer A에 우선 반영, 없어도 확인 게이트 없이 자율 진행.
+
+- **먼저 방향타를 적는다**: primary task / 결정 순간 / 실패·복구 / 정체성 tension을 1줄씩. 리서치는 이 방향타를 채우는 것.
+- **Layer A (방향 — 자율)**: charter 기획 방향·서비스 성격에 맞는 디자인 방향·레퍼런스 제품을 **researcher(디자인 레퍼런스 모드)** 위임으로 탐색 → 방향 어휘 + what-to-borrow/avoid. (Codex: 메인 세션이 researcher.md를 읽고 인라인 수행.)
+- **Layer B (값 grounding)**: Layer A 방향에 맞는 오픈소스 토큰 패키지에서 실제 값 추출 — researcher 핀 목록(Primer/Radix/Polaris/Tailwind/shadcn). raw CSS 없으면 JSON 토큰 엔드포인트. 닫힌 제품은 "추출 불가 — <사유>" 정직 표기.
+- **Layer C (포맷)**: Google 공식 예시 DESIGN.md는 **R5에서만** format fixture로 씀 — R0~R2 창작 컨텍스트에 넣지 않는다(glassmorphism/보라 예시가 §9 anti-slop 오염).
+- **role 3종**: `task/behavior` · `identity/craft` · `implementation system`. counter-reference(안티-레퍼런스)는 *미해결 tension이나 실제 monoculture가 있을 때만* — **필수 아님**(구 "안티-레퍼런스 1~2개 필수"를 조건부로 완화).
+- **정지 규칙**: 고정 최소 개수 없음 — evidence coverage가 차면 멈춘다. designer 최종 입력 보통 **3~5개 이하**(단순 내부 도구는 더 적게).
+- **관측 기반 주장만**: visual 주장은 실화면/스크린샷 봤을 때만, behavior 주장은 docs/interaction 봤을 때만 기록. broad search·gallery·Dribbble/Behance는 이름 찾는 lead로만 허용 후 canonical로 승격.
+- concept 안에서는 **coherent primary system 1개**. 명시 gap 시에만 secondary primitive(**Radix는 색만 fallback** — 타이포/레이아웃/IA/모션은 ground 못함).
+- **MCP·계정 도구를 보일러플레이트 기본 의존으로 추가하지 않는다**(불변 — ADR-027#amend-2 비결정 존중).
+- **레퍼런스 노트 영속화 (필수, `--fast`는 minimal)**: `docs/20-system/DESIGN_RESEARCH.md`에 **최소 schema**로 남긴다:
 
   ```markdown
   # 디자인 리서치 (레퍼런스 + 시안 선택 근거)
 
-  > 모드: Reference (DESIGN.md 시각 방향의 근거 — /bootstrap-design R0/R2 산출)
-  > SSOT는 DESIGN.md(확정 결정). 본 노트는 *왜 그 방향인가*의 근거 보존.
+  > 모드: Reference (/bootstrap-design R0/R2 산출). SSOT는 DESIGN.md(확정 결정).
   - 조사일: <YYYY-MM-DD>
 
-  ## 레퍼런스   <!-- R0 -->
-  ### <제품명> — <URL 또는 출처(사용자 제공 / MCP / 라이브러리)>
-  - color signature: <...>
-  - typography pairing: <...>
-  - density: <...>
-  - motion 톤: <...>
-  - **what to borrow**: <1~2줄>
-  - **what to avoid**: <1~2줄>
+  ## 레퍼런스   <!-- R0 — 각 항목 최소 schema (ADR-058) -->
+  ### <source/canonical> — <URL>
+  - role: task/behavior | identity/craft | implementation system
+  - 뒷받침한 결정: <이 레퍼런스가 뒷받침하는 디자인 결정>
+  - 검증(provenance): visual | behavior | code   <!-- 실제로 본 것 기준 (provenance) -->
+  - 관측일: <YYYY-MM-DD>
+  - borrow: <1줄> / avoid: <1줄>
+  - confidence/caveat: <1줄>
+  #### 추출 토큰 (코드)   <!-- Layer B — hex/font/spacing/radius/shadow·JSON 실값. 미추출 시 "추출 불가 — <사유>" -->
 
-  #### 추출 토큰 (코드)   <!-- researcher 디자인 레퍼런스 모드 산출 (ADR-040#amend-4) — fenced block에 hex/font/spacing/radius/shadow 실값. 미추출 시 "추출 불가 — <사유>" 1줄 -->
+  (레퍼런스는 coverage가 찰 때까지 — 보통 3~5개 이하)
 
-  (레퍼런스 1~3개 반복)
-
-  ## 안티-레퍼런스   <!-- R0 -->
+  ## counter-reference   <!-- 조건부 — 미해결 tension·실제 monoculture 시에만 -->
   - <"~같지 말 것"> — <이유 1줄>
 
-  ## grounding 출처   <!-- R0 -->
-  - <사용자 URL / 디자인 MCP 이름 / refero·getdesign.md / "직접 제공 없음 — 모델 지식 기반">
+  ## grounding 출처   <!-- 자율 조사 / 사용자 URL / "추출 불가" 등 -->
 
-  ## 시안 옵션   <!-- R2 — concept별 방향·근거 (선택 후 채움) -->
-  - concept A: <방향 한 줄> — <레퍼런스/원칙 근거>
-  - concept B: <...>
-  - (concept C: <...>)
-
+  ## 시안 옵션   <!-- R2 REFINE/EXPLORE 카드 (선택 후 채움) -->
   ## 최종 선택   <!-- R2 -->
-  - 선택: <A / B / 하이브리드("A 색 + B 타이포")> — <선택 이유 1~2줄>
   ```
 
-- DESIGN.md `## 1 Overview`는 본 노트를 *상대경로 링크*(`[디자인 리서치](DESIGN_RESEARCH.md)`)하고 핵심 1~2줄(what to borrow / avoid 요약)만 인라인. `## 시안 옵션`·`## 최종 선택`은 R2 종료 후 채운다(아래 R2-2).
+- DESIGN.md `## 1 Overview`는 본 노트를 상대경로 링크(`[디자인 리서치](DESIGN_RESEARCH.md)`) + borrow/avoid 1~2줄 + 긍정적 정체성(§1 필드)만 인라인. `## 시안 옵션`·`## 최종 선택`은 R2 종료 후 채운다(아래 R2-2).
 
 ## R1 — 디자인 원칙 3~5개
 - actionable verb. 모호어("modern/clean/sleek") 금지.
@@ -109,7 +99,11 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 
 ### R2-1. 생성
 - R1 원칙 + R0 레퍼런스(`DESIGN_RESEARCH.md`) + DESIGN.md `## 9` Don'ts에 근거해 **서로 다른 시각 방향 2~3개**를 생성한다. 각 방향을 자기완결 HTML/CSS 파일로 `docs/20-system/design-concepts/concept-A.html`, `concept-B.html`, (`concept-C.html`)에 저장(빌드·외부 의존 0 — CSS는 `<style>` 인라인). 디렉터리가 없으면 생성.
-- **divergence 카드 (ADR-058)**: 각 concept에 {① 배타적 레퍼런스 borrow 축(R0 레퍼런스 중 concept별 배정 — 공유 금지; 레퍼런스 수 < concept 수면 동일 레퍼런스의 서로 다른 축(색/밀도/타이포/모션)을 배타 배정), ② 전용 안티-레퍼런스 1개, ③ 밀도/타이포/색 전략 중 최소 2축 상이}를 명시 배정하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 카드를 기록한다. 두 concept이 같은 accent 전략·같은 borrow를 공유하면 재생성. 단 모든 concept이 R0 안티-레퍼런스와 `## 9` Don'ts는 공통 회피.
+- **REFINE / EXPLORE 카드 (ADR-058 — 안전/과감 아님)**: 두 기본안을 이렇게 정의한다:
+  - **REFINE**: 익숙한 task convention 우선 + restrained signature (검증된 패턴을 깔끔하게).
+  - **EXPLORE**: signature-led이되 *같은* 익숙한 control/flow를 보존 (개성은 시각·마감에, 조작 흐름은 익숙하게).
+  - 3번째 안은 *풀리지 않은 명시적 tension이 있을 때만*.
+  각 concept 카드에 `task hypothesis | preserved convention | visible signature | failure sign`을 명시하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 기록한다. **signature가 primary task를 더 빨리 이해시키지 못하면 장식 → 제거**(실험에서 rail·route 장식이 coherence를 해침). counter-reference(안티-레퍼런스)는 R0에서 조건부로 확보된 경우에만 공통 회피 대상으로 둔다. 모든 concept은 `## 9` Don'ts를 공통 회피. **익숙한 control/flow(조작 흐름)는 두 안 모두 보존하는 *공통 통제변수*** — 달라야 하는 건 layout hypothesis·visible signature다. 두 concept이 같은 **layout hypothesis·signature**를 공유하면 재생성(control/flow가 같은 건 재생성 사유 아님 — 통제변수). **concept 대표 화면은 실카피 + 대표 실데이터로 채워 렌더한다(빈 화면 금지 — R2-G populated axe가 유효하려면; dogfood 빈-화면 3.70:1 맹점 방지).**
 - concept HTML authoring은 **designer 단발 sub-call**로 위임한다(HTML 전문이 메인 컨텍스트에 쌓이지 않게 — 파일 적재 + 경로 반환).
 - **실카피 렌더 (ADR-056)**: 대표 화면 문구는 charter 페르소나·시나리오 기반 실제 문구(placeholder 금지). §10 확정 전이므로 "방향 선택용 후보 카피"임을 GENERATED 헤더에 1줄 명시.
 - 모든 concept은 charter `## 2.1 페르소나` / `## 3.1 핵심 시나리오` 기반 **동일 대표 화면**(예: 랜딩 hero / 입력 폼 / 카드 리스트)을 렌더해 *직접 비교* 가능하게 한다.
@@ -122,9 +116,20 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
   -->
   ```
 
-### R2-1.5. 구별성 비평 (순차 1회 — ADR-058)
-- 생성 직후 **reviewer(design surface) 단발 sub-call**(입력은 divergence 카드 + concept별 토큰 요약만, HTML 전문 투입 금지) 1회로 판정: ① concept 간 실질 구별성(같은 카드 축을 침범했는가) ② 안티-레퍼런스·`## 9` Don'ts 근접도. designer 자기 비평 금지(생성/감사 분리).
+### R2-1.5. 구별성·조화 비평 (순차 1회 — ADR-058)
+- 생성 직후 **reviewer(design surface) 단발 sub-call**(입력은 REFINE/EXPLORE 카드 + concept별 토큰 요약 — 이 단계는 렌더 *전* 값싼 개념 점검이라 HTML 전문 투입 금지; *픽셀* 판정은 뒤의 R2-G가 스크린샷으로 한다) 1회로 판정: ① concept 간 실질 구별성(REFINE/EXPLORE 성격이 실제로 다른가, signature가 task를 돕는가) ② `## 9` Don'ts·(있으면) counter-reference 근접도 ③ **시안 내부 조화 — *카드·토큰 수준의 선언된 짜깁기 신호만***(예: 상충하는 소스를 한 시안에 섞겠다는 카드). *렌더 픽셀의 실제 조화*는 R2-G 스크린샷 리뷰가 확인한다(R2-1.5는 카드만 보므로 여기서 픽셀 조화를 단정하지 않는다). designer 자기 비평 금지(생성/감사 분리).
 - **합의·병합·순위·추천 금지** — 출력은 "재생성 필요 concept 목록 + 사유"만. 재생성 필요 concept은 카드를 유지한 채 재생성 후 R2-2로.
+
+### R2-G. 수용 게이트 (ADR-058 D3 — full 모드)
+`--fast`는 R2 자체를 생성하지 않으므로 본 게이트 N/A(ADR-058 D3 — 산출물 기준). full 모드는:
+- **실행**: 각 concept을 `node scripts/design-gate.mjs docs/20-system/design-concepts/concept-*.html`로 검사 — **exit 0** 통과 / **exit 1** JSON `blockers`(serious·critical axe·320/375 geometry) 차단(실패 selector를 designer에 되먹여 재생성) / **exit 2**(Needs Install) 사유 echo 후 승인 보류(silent skip 금지).
+- **렌더**: 각 concept HTML을 Playwright로 **1280 + 375** 캡처(desktop 폭은 프로젝트 target 명시 시 그 값). stack-guard가 깐 Playwright 재사용.
+- **상시 결정적 검사**: **320 CSS px reflow**(page overflow / viewport escape / clipped text) + **populated DOM axe**(빈 화면 아님 — 대표 화면에 실데이터 채운 상태).
+- **독립 픽셀 판정**: reviewer(design surface)가 1280/375 스크린샷을 Read로 열람해 위계·밀도·domain fit·장식 slop 판정(생성자 designer와 분리). LLM reviewer 1명.
+- **차단(block) — 러너 결정적**(design-gate.mjs가 계산): serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry — check-reflow-320.cjs 이식). **차단(block) — reviewer 픽셀 판정**(스크린샷 열람, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding.
+- **수동 smoke**(사람 몫): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
+- **repair loop**: 차단 finding이 있으면 실패 selector + 요약을 **designer에 되먹여 재생성** → 재검사. **retry ≤2**, 초과 시 승인 보류 + brief(R0/R1) 재검토. 여전히 fail이면 그 concept은 선택지에서 제외(사용자에게 사유 echo).
+- **정리**: 게이트용 임시 렌더/스크린샷은 통과 판정 후 정리(concept HTML은 R2-2 선택까지 유지 — R6-3에서 최종 삭제).
 
 ### R2-2. 선택 루프
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-concepts/concept-*.html`를 열어 비교하고, 선호 방향(또는 하이브리드: 예 'A 색 + B 타이포')을 알려주세요."*
@@ -132,7 +137,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - **수렴 규칙 (ADR-058)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
 - **선택 전에는 R3~R6로 진행하지 않는다.** 하이브리드 선택이면 그 조합을 메모로 확정.
 - 선택 확정 시 *각 concept의 방향·근거 + 최종 선택 이유*를 `docs/20-system/DESIGN_RESEARCH.md`의 `## 시안 옵션` / `## 최종 선택`에 기록(근거 추적 — DESIGN.md는 최종 *결정*만 담는다, ADR-058).
-- **취향 오라클 (ADR-058)**: 에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자가 물으면 예외). 사용자 안내 문구에 *"원하시면 추천을 요청하실 수 있어요"*를 노출한다(예외 경로를 사용자가 놓치지 않게). 사용자가 전량 거부하면 divergence 카드부터 재설계(수렴 규칙과 결합).
+- **취향 오라클 (ADR-058)**: 에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자가 물으면 예외). 사용자 안내 문구에 *"원하시면 추천을 요청하실 수 있어요"*를 노출한다(예외 경로를 사용자가 놓치지 않게). 사용자가 전량 거부하면 REFINE/EXPLORE 카드부터 재설계(수렴 규칙과 결합).
 
 ## R3 — 디자인 토큰 (선택 concept에서 추출, W3C DTCG + Stitch 정렬 — ADR-027#d6)
 - **선택된 concept(R2)의 CSS에서 토큰을 추출**해 3-tier로 정리: primitive → semantic → component.
@@ -140,12 +145,13 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - color: brand 1 + neutral 1 + accent 1 + semantic 4 (success/warning/error/info), 12~16 hex.
 - typography: 1~2 family, 4~5 size scale, modular ratio (1.125/1.25/1.333), weight pair.
 - spacing: 4 or 8 base, t-shirt scale 또는 numeric.
-- radius / shadow / motion (duration·easing·`prefers-reduced-motion`).
-- WCAG 4.5:1 텍스트 대비 검증 권장.
+- radius / shadow / motion (duration·easing·`prefers-reduced-motion` — §8 semantic motion contract 정합).
+- WCAG 4.5:1 텍스트 대비 검증 권장(정밀 검사는 R6/게이트의 axe가 결정적).
+- **밀도 힌트**: 제품 성격에 맞는 밀도를 1줄 — 대시보드=조밀 / 마케팅·랜딩=여유 (DESIGN.md §1 contextual density와 정합).
 
-## R4 — 컴포넌트 인벤토리 + 상태 매트릭스 (ADR-027#d6/#d7)
+## R4 — 컴포넌트 인벤토리 + category state 계약 (ADR-027#amend-7)
 - primitives (Button/Input/Text/Icon), composites (Card/Modal/Toast), patterns (Form/EmptyState/ErrorState/LoadingState).
-- 각 컴포넌트마다 상태 매트릭스 강제: default / hover / active / focus / disabled / loading / error / empty.
+- 상태 = category별 expected (DESIGN.md §7 정합): interactive primitive(default/hover/active/focus-visible/disabled, async면 loading) · data composite/screen(default/loading/empty/error/success) · static primitive(상태 매트릭스 없음). N/A는 category상 expected를 의도적으로 뺄 때만.
 - 스택별 시작점:
 
   | 스택 | 시작점 |
@@ -165,6 +171,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 토큰은 fenced `yaml` 블록 또는 frontmatter YAML로.
 - `## 1 Overview`에: (a) `DESIGN_RESEARCH.md` 상대경로 링크 + what-to-borrow/avoid 1~2줄, (b) `선택 concept: <X>(+하이브리드 메모)` 한 줄(ADR-058).
 - `## 10 Voice & Writing`을 R1 확인 결과(기본값 채택/변경)로 확정 저장한다 (ADR-056).
+- **포맷 완성도 point-check (ADR-058 Layer C)**: R5 저장 직후 Google 공식 예시 DESIGN.md(`google-labs-code/design.md/examples` — authoritative, 예: `examples/paws-and-paths/DESIGN.md`(실측 확인된 완성 예시: Brand&Style/Colors/Typography/Layout/Elevation/Shapes/Components + 토큰))와 대조해 메인 세션이 *섹션 완성도·빠짐*만 advisory 점검한다(별도 agent 호출 불요 — 예시 fetch + 비교). **미감·값·시각 방향은 참조 금지**(공식 예시가 glassmorphism/보라 그라디언트라 §9 anti-slop 오염 — format fixture로만). (옵션) UI+Node면 `@google/design.md lint`(stack-guard 권장 명령)도 이 시점에 실행 가능.
 - **DESIGN.md 상태 승격 (ADR-027#amend-3 / ADR-056)**: 본 R5 저장 완료 시 `docs/20-system/DESIGN.md` `## 0. Status`를 `draft` → **`living`**으로 갱신한다(정식·`--fast` 경로 모두 수행 — R6 생략 프로젝트도 승격되도록). 비-UI 삭제 경로는 불변.
 
 ## R6 — DESIGN.md 파생 최종 preview + 검토 루프 + 정리 (ADR-058, 구 ADR-027#d21·#d22 계승)
@@ -184,10 +191,11 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
   ```
 - preview가 포함할 섹션(순서):
   1. **Tokens** — color(primitive/semantic/component) swatch + hex + 텍스트 대비비 표시 / typography scale(각 size·weight 샘플) / spacing scale(시각 막대) / radius·shadow 샘플.
-  2. **Components** — DESIGN.md `## 7` 인벤토리의 각 컴포넌트를 8 상태(default/hover/active/focus/disabled/loading/error/empty)로 나란히 렌더. hover/active/focus는 CSS pseudo + *상태 클래스 변형*(예: `.is-hover`)을 둘 다 둬서 정적 캡처에서도 보이게 한다.
+  2. **Components** — DESIGN.md `## 7` 인벤토리의 각 컴포넌트를 그 category의 expected 상태(§7 계약 — interactive: default/hover/active/focus-visible/disabled[+loading] · data/screen: default/loading/empty/error/success · static: 없음)로 나란히 렌더. hover/active/focus-visible는 CSS pseudo + *상태 클래스 변형*(예: `.is-hover`)을 둘 다 둬서 정적 캡처에서도 보이게 한다.
   3. **대표 화면 2~3개** — charter `## 2.1 페르소나` / `## 3.1 핵심 시나리오` 기반 실사용 맥락. (R2 선택 concept과 일관되어야 — 불일치 시 DESIGN.md를 먼저 점검.)
   - 대표 화면 preview는 실카피(`## 10` 준수)로 렌더한다 (ADR-056 결정 9 / ADR-058).
 - 생성 직후 DESIGN.md `## 9 Do's and Don'ts` 위반을 self-check해 위반 의심 항목을 출력에 보고(자동 차단 X).
+- **수용 게이트 (ADR-058 D3 — full 모드)**: preview를 `node scripts/design-gate.mjs docs/20-system/design-preview.html`로 검사한다(R2-G와 동일 분리 — **러너 결정적 차단**: serious/critical axe·320/375 geometry(page overflow·viewport escape·clipped text); **reviewer 픽셀 차단**(스크린샷): 위계 붕괴·밀도·장식 slop·critical overlap; moderate/minor+취향 = 보고). **픽셀 판정은 R2-G와 동일하게 reviewer(design surface)를 단발 호출해 1280/375 스크린샷을 Read로 열람·판정한다**(생성자 designer와 분리, LLM reviewer 1명 — R6에도 이 호출이 명시적으로 있어야 선언한 픽셀 차단이 실제로 집행된다). 차단 발견 시 **DESIGN.md(SSOT)를 먼저 고치고** preview 재생성(retry ≤2, 초과 시 승인 보류 + brief 재검토). exit 2(Needs Install)면 사유 echo 후 승인 보류. `--fast`는 preview(R6) 미생성이라 본 게이트 N/A(산출물 기준).
 
 ### R6-2. 검토 루프
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html`를 열어 확인하고 피드백 주세요."*

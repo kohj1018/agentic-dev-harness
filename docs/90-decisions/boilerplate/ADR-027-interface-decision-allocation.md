@@ -6,10 +6,10 @@
 accepted
 
 ## 현재 유효 결정
-- 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056)), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다.
+- 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056) + **내용 계약 확장(§1 긍정적 정체성 · §3 tabular · §4 responsive invariant · §7 category state · §8 semantic motion · §9 WCAG 2.2 a11y — #amend-7)**), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)에 둔다. **디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede).
 - **`/bootstrap-design`의 *워크플로우 라운드 구조*(레퍼런스→원칙→시안→토큰→DESIGN.md→preview 순서·시점)는 ADR-058이 supersede(R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안 — ADR-049를 거쳐 ADR-058로 이관). 본 ADR은 *DESIGN.md 내용*(아래 #5 Stitch 8섹션+Motion / #6 3-tier 토큰 / #7·#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT만 유지.** 본 ADR #3/#13/#21/#d22/#d26/#27의 라운드 구조·시안 시점·preview lifecycle(삭제 시점·gitignore 정책) 기술은 historical(net 규칙은 ADR-058). design-preview.html *산출물*은 ADR-058 R6이 계속 사용.
 - `/bootstrap-stack`이 7-1~7-4를 채운다.
-- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입).
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입). #amend-7(DESIGN 내용 계약 확장 — §1 정체성·§9 a11y·§8 semantic motion·§7 category state·§4 responsive invariant·§3 tabular; reviewer a11y 차원·category state 미러).
 - 적용 파일 전체는 아래 `## Surfaces` 참조.
 
 ## 배경
@@ -213,3 +213,33 @@ stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **�
 ### 적용 surface
 - .claude/skills/stabilize-milestone/SKILL.md
 - .claude/agents/reviewer.md
+
+<a id="adr-027-amend-7"></a>
+## Amendment 7 (2026-07-25) — DESIGN.md 내용 계약 확장 (정체성 · a11y · semantic motion · category state · responsive invariant · tabular)
+
+> **amend 근거(ADR-045 D6 grandfather 조항)**: ADR-027은 ADR-045(2026-05-27) *이전* 생성(2026-05-16)이라 **grandfather** — D6 재발행은 "우선 검토(권고)"일 뿐 즉시 강제가 아니다. 본 개선 라운드는 *최소 churn*을 택해 Amendment 7로 처리한다(사용자 결정 — 번호·참조 churn 회피). `## 현재 유효 결정`이 이미 net 규칙을 요약하므로 fold 부담은 낮다. 다음 변경 시 통합 재발행 우선 검토.
+
+### 배경
+- [관측됨] §9는 "하지 마라"(금지)만 잔뜩이고 "이렇게 되어라"(긍정)가 없어 결과가 *깨끗하지만 평범한* UI로 수렴. §9에 reduced-motion·2축 위계는 있으나 **대비/키보드/aria/포커스 규칙이 없다**("아예 없음"은 과장, 부재는 이 넷). §8 Motion은 Material 3 수치 한 줄뿐. §7은 전 컴포넌트 8상태 강제라 planning paperwork 과다(실측 136 entry→category 74, -46% + 빠졌던 success 추가). §4에 반응형 설계 규정 부재, dogfood에서 overflow·axe가 결과무관 통과라 반응형 미검증.
+- [관측됨] dogfood(QuickTodo)에서 완료 텍스트 대비 3.70:1(AA 4.5:1 미달)이 통과됨 — 빈 화면만 본 axe advisory가 못 잡음.
+
+### 결정 (DESIGN.md 내용 계약 — SSOT는 ADR-027, 실제 규칙 텍스트는 DESIGN.md 각 섹션 주석)
+1. **§1 긍정적 정체성**: design thesis 1문장 + signature mechanism 1개 + imagery/icon 방향(또는 N/A) + contextual density. actionable 가드(공허한 buzzword 금지). variance/motion 다이얼은 도입 안 함(divergence 카드·§8과 중복).
+2. **§9 접근성 (WCAG 2.2)**: 정상 텍스트 4.5:1 / 큰 텍스트 3:1 / 비텍스트 UI·아이콘 3:1 / 포커스 링 제거 금지 / 키보드 조작 / 아이콘 버튼 accessible name(computed name — aria-label·aria-labelledby·visible text·alt·title 등 어느 출처든; aria-label 강제 아님) / 색-단독 표시 금지. LLM이 정밀 비율·computed name을 못 계산하므로 포커스 제거·색-단독은 강하게, 정밀 대비·name은 권고 + 실화면 axe(stack-guard populated axe · design-gate.mjs 러너)가 결정적으로 잡음.
+3. **§8 semantic motion contract**: 목적(feedback/continuity/orientation/state-change) · 빈도(반복 흐름일수록 budget↓) · 실행(project token duration/easing · interruptible · no layout shift) · 접근성(reduced-motion 정보손실 없는 대체) · 금지(decorative infinite/repeated). Emil 정확 수치는 project token *시작 default*로만(보편 법칙 아님). tabular-nums는 모션 아님 → §3으로.
+4. **§7 category state 계약**: interactive primitive(default/hover/active/focus-visible/disabled, async면 loading) · data composite/screen(default/loading/empty/error/success) · static primitive(상태 매트릭스 없음). N/A는 category상 expected를 의도적으로 뺄 때만. 전 컴포넌트 8상태 강제 폐기.
+5. **§4 responsive invariant**: content order / container transition / table strategy / sticky occlusion / 320 reflow / text fit / essential-2D exception 소유. 임의 breakpoint 숫자 목록 강제 아님.
+6. **§3 tabular figures**: 표·정렬 숫자 열은 tabular-nums.
+7. **reviewer 미러**: reviewer[design] 5→**6차원**(a11y 신설), [Design-state]는 8상태→category state 판정으로, [Plan-design]의 "8 상태 매트릭스" 문구도 category로 동기(#amend-1 미러 계약 유지).
+
+### 적용 surface
+- docs/20-system/DESIGN.md (§1/§3/§4/§7/§8/§9)
+- .claude/agents/reviewer.md (a11y 차원 신설 + [Design-state] category + [Plan-design] 미러)
+- .claude/skills/validate-plan/SKILL.md ([Plan-design] 미러)
+- .claude/skills/bootstrap-design/SKILL.md (R4 category state · R6 preview 상태 렌더 문구)
+
+### 근거
+- [관측됨] 위 배경 + design-eval(SIMULATION_RUN.md) serious axe 12/24·category state -46%. [외부실증] WCAG 2.2.
+
+### 강도 (ADR-022)
+- §9 a11y의 grep 가능분(포커스 제거·색-단독)·§4 320 reflow는 constraint(강). 나머지 enabling(약).

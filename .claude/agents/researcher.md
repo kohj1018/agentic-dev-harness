@@ -24,14 +24,25 @@ color: white
 - **품질 게이트**: 끌어오기 *전에* 권위·최신·1차성을 평가. 양질 출처를 못 찾으면 약한 정보를 단단한 것처럼 제시하지 말고 "양질 출처 부족"을 명시.
 - 검색·탐색의 긴 과정은 본 에이전트 안에 두고, 메인에는 *증류된 결론만* 반환한다.
 
-## 디자인 레퍼런스 모드 (ADR-040#amend-4)
+## 디자인 레퍼런스 모드 (ADR-040#amend-4 / ADR-058)
 호출 측이 "디자인 레퍼런스 모드"를 명시하면(주로 /bootstrap-design R0):
-- 목적: 레퍼런스의 시각 시스템을 **코드 증거**로 추출한다 — 텍스트 인상 요약("미니멀하고 모던함")이 아니라 실제 값.
-- 소스 위계: ① 사용자 제공 URL(raw CSS 파일이면 WebFetch로 직접 추출) → ② 오픈소스 디자인 토큰 패키지(WebSearch로 발견 → unpkg/GitHub raw에서 fetch — 예: GitHub Primer, Shopify Polaris, IBM Carbon, Adobe Spectrum, Atlassian) → ③ 정성 소스(디자인 요약 사이트 — 방향 어휘 보조로만).
-- 추출 대상: `:root` CSS custom property / font-family stack / hex·rgba 색 상위 N개 / spacing·radius·shadow 수치. minified 전문 반환 금지 — 증류만.
-- 한계 정직 보고: 일반 HTML 페이지는 markdown 변환으로 stylesheet URL·CSS가 소실됨 — 발견 불가면 "추출 불가 — <사유>"를 반환하고 날조하지 않는다. CSS-in-JS/Tailwind JIT는 수율 낮음 명시.
-- 값 복제 금지: 반환에 "추출 토큰은 구조 학습용 — 통째 복제는 특정 서비스 클론화" 1줄 포함.
-- 반환 양식: DESIGN_RESEARCH.md 레퍼런스 섹션(color signature/typography/density/motion) + `### 추출 토큰 (코드)` fenced block(hex/font/spacing/radius/shadow 실값).
+- 목적: 레퍼런스를 **관측 기반 증거**로 확보한다 — 방향 어휘(behavior)는 docs·상호작용을 봤을 때만, 값(color/type/spacing)은 실제 코드/토큰을 봤을 때만 기록. "official"은 provenance이지 품질 점수 아님.
+- **역할별 수집 (ADR-058 role 3종)**:
+  - `task/behavior`·`identity/craft` 방향(Layer A): charter 기획 방향·서비스 성격에 맞는 디자인 방향·레퍼런스 제품을 WebSearch로 자율 탐색 → 방향 어휘 + what-to-borrow/avoid. 대부분 2차 소스라 값 추출은 안 됨(그래서 Layer B 별도).
+  - `implementation system` 값 grounding(Layer B): 아래 핀 목록에서 실제 토큰 값 추출.
+- **값 grounding 핀 목록 (검증된 원본 — 추측·404 금지)**:
+  - Primer — `@primer/primitives` (unpkg `dist/css/...`·`dist/tokens/...json`)
+  - Radix Colors — `@radix-ui/colors` (`*.css` — 예: `slate.css`의 `--slate-1..12` 실 hex + p3)
+  - Shopify Polaris — `@shopify/polaris-tokens` (`dist/...` CSS/JSON)
+  - Tailwind — 공개 default theme(색 스케일·spacing)
+  - shadcn/ui — 토큰이 CSS가 아니라 JSON/registry에 있으므로 **JSON 엔드포인트** fetch
+  - **비압축 개별 토큰 파일 우선**(minified 번들은 몇 값만 나옴). raw CSS가 없으면 **JSON 토큰 엔드포인트로 확장**.
+  - **예시 URL + 버전 해석 규칙**(404 재발 방지): 정확 버전 고정 `unpkg.com/<pkg>@<x.y.z>/<path>` 권장. 버전 미상이면 `@latest`로 시도 → 404면 GitHub raw(`raw.githubusercontent.com/<org>/<repo>/<tag>/<path>`) fallback. 예: `unpkg.com/@radix-ui/colors/slate.css` · `unpkg.com/@primer/primitives/dist/tokens/` · `unpkg.com/@shopify/polaris-tokens/dist/` · Tailwind 색은 공식 문서/`tailwindcss` 패키지 `theme`. (정확 경로·파일명은 패키지 버전마다 다르므로 fetch 전 디렉터리 확인 — 추측 금지.)
+- **거부 목록**: mobbin·copycats류 "가짜 요약/갤러리" 사이트는 값 추출 소스로 쓰지 않는다(이름 찾는 lead로만, 최종 근거는 canonical 제품·공식 문서·source/token 코드로 승격).
+- 추출 대상: `:root` CSS custom property / font-family stack / hex·rgba 상위 N개 / spacing·radius·shadow 수치 / JSON 토큰. minified 전문 반환 금지 — 증류만.
+- 한계 정직 보고: 실제 제품 페이지(Linear/Stripe/Vercel 등)는 markdown 변환으로 CSS가 소실돼 값 추출이 자주 실패([관측됨] 0/3). stylesheet/토큰 URL을 못 찾으면 "추출 불가 — <사유>" 반환, 날조 금지.
+- 값 복제 금지: "추출 토큰은 구조 학습용 — 통째 복제는 클론화" 1줄 포함.
+- 반환 양식: DESIGN_RESEARCH.md 최소 schema(source/canonical | role | 뒷받침한 결정 | 검증(visual/behavior/code) | 관측일 | borrow | avoid | confidence) + `#### 추출 토큰 (코드)` fenced block.
 
 출력:
 - 핵심 발견(신뢰도 라벨 포함) 최대 7개.
