@@ -261,3 +261,52 @@
 - **여전히 미실측(최종)**: Codex 관통, bootstrap-design researcher/reviewer sub-call, validate-workitem *large-diff*(대형 per-task) fan-out(mechanism은 repair diff로 실측; 대형 diff는 inline이었음), 위 (b)(c).
 - **graduation 불변 + P2 명시 carry-over**: retrospective review가 잡은 2 P1은 문서/북키핑 정합(코드 결함·[Experience-drift]·P0 아님)이라 graduation 기준 불변 — M1 **YES 유지**. **P2 4-판정 결과(정확히)**: hover/rise/테스트 커버리지 = resolved(Adopt); **대비(F-M1-003)·corrupt+savefail 교차케이스(F-M1-008) = Reject-context 수용 residual(open carry-over)** — "P2 전부 resolved/완결"은 부정확, 2건은 의도적으로 남긴 carry-over.
 - **배포 품질 carry-over(dogfood 비차단, 실배포 시 별도 수정)**: done 텍스트 대비 opacity .65 = **~3.70:1 < normal-text AA 4.5:1**. 실배포 시 수정 필요 — 예: opacity .8 ≈ 5.03:1로 AA 충족(단 dim 신호 약화). done=dim(§원칙4) vs AA는 **디자인 오너 결정**이라 dogfood에서 코드 변경 안 함(명시 carry-over). axe e2e는 빈 화면만·결과무관 통과(advisory-gate 부재)라 이 대비를 못 잡음 — 함께 carry-over.
+
+## Design Workflow Eval (2026-07-20, ADR-058 근거 distill)
+
+> 원본 산출물(`REPORT.md` 462줄 + concept HTML 32안 + metrics/axe/reflow JSON + blind/holdout 평가 + microtests)은 `.boilerplate/validation/design-workflow-eval-20260720/`에 local-only 보존(`.gitignore` — 무거워 커밋 안 함, 원자료 수치검산·재현 불가). 본 섹션은 ADR-058이 인용하는 핵심 판정만 distill한다. **[관측됨]** — repo-local 단일 평가, 외부 다중 repo 실증(`[외부실증]`)은 아직 없음.
+
+### 질문·설계
+- 질문: "어떤 R0-R2 흐름이 과도한 비용 없이 가장 쓸 수 있는 디자인 방향을 만드는가" — 2 브랜드 × B0(현행, 사용자-URL 1순위)/B1/B2(레퍼런스 강화)/B3(evidence-on-demand + 수용 게이트) 흐름 비교.
+- Stage 1: 24안(B0/B1/B2 각 브랜드×4) 블라인드 2인 평가. Stage 2: B3 8안(브랜드×4) adaptive holdout + fresh blind holdout 2인.
+- 렌더: 1280(desktop)+375(mobile) 항상, 320 CSS px 결정적 reflow(`check-reflow-320.cjs` 로직), populated axe(serious/critical).
+
+### 핵심 판정 6건 (가설 판정)
+| 가설 | 판정 | 근거 |
+|---|---|---|
+| H0 현행(B0)이 충분 | 부분 유지 | raw 시각/비용은 B0 승리. 단 수용 게이트 없이는 현행 유지 불가 |
+| H1 광범위 레퍼런스 lane + identity가 향상 | 기각 | B1 종합 개선 없음, 문맥 +76%, 강제 lane의 관련성 저하 |
+| H2 task-first가 항상 최적 | 조건부 | Ops 승리·Coffee 패배 — state 복잡도에 따라 적응 필요 |
+| H3 HTML-read만으론 부족 | 강하게 지지 | 스크린샷·axe·320 geometry가 서로 다른 결함을 검출 |
+| H4 signature는 convention 보존 시 유효 | 조건부 지지 | rail/route 장식은 coherence를 해쳤고 task-helping signature는 상위권 가능 |
+| H5 Google 예시는 format-only | 실험 미조작 | 공식 예시 분석은 지지하나 포함/미포함 A/B는 미실행 |
+
+### 수치 핵심
+- B1/B2는 B0 대비 평균 시각 점수 미향상(각 -0.72/-1.19), 레퍼런스 문맥은 +68~76%.
+- 최초 24안 중 12안 serious axe 위반. 개선된 B3도 생성 직후 8안 중 5안 serious 위반 → **실패 selector 되먹임 1회 repair로 8/8 통과**(1280/375 렌더·320 reflow·serious/critical axe 게이트 전부).
+- Fresh blind holdout: B3 최고안이 OpsRelay 전체 1위와 0.5/50 점수 차이, Stillroom에서는 게이트 통과 최고점.
+
+### DS-1~DS-7 판정
+| ID | 판정 | 최종 형태 |
+|---|---|---|
+| DS-1 | 수정 채택 | evidence-on-demand, role별 검증, stop rule, 최종 3~5개 상한 |
+| DS-2 | 강하게 채택 | reviewer a11y 차원 + populated axe hard gate + 수동 keyboard/focus |
+| DS-3 | 수정 채택 | R2/R6 항상 풀 렌더, 320 자동 reflow, R5 선택 프로토타입만 독립 검토 |
+| DS-4 | 수정 채택 | 기존 R5-1/Feature §8-1에 전환 표 + consumer 추가(신규 문서/에이전트 X) |
+| DS-5 | 조건부 채택 | REFINE/EXPLORE, signature는 primary task 설명 시에만 |
+| DS-6 | 의미 중심 채택 | 목적·빈도·interruptibility·no layout shift·reduced-motion; 수치는 project token 시작값 |
+| DS-7 | 선별 채택 | category state·responsive invariant·provenance·coherence·tabular figures |
+
+### 신뢰도
+**Medium** — 2브랜드·same-model·static prototype·post-hoc(B3는 B0/B1/B2 결과를 보고 설계) → cross-project 다양성 미검증, 작은 시각점수 차는 일반화 금지. 재현 불가(원자료 local-only) — 판정 기록만 distill.
+
+### §13 재검토 트리거 (ADR-058 재검토 트리거 원문 = 이 7기준)
+1. 동일 brief로 current vs 새 흐름 generator 2회+ 비교.
+2. archetype별 serious/critical 0 · 320 overflow 0 · clipped primary text 0 선택지 1개+를 매 반복 제공.
+3. fresh blind visual 평균(또는 제품별 최고안)이 current 대비 5% 이내 유지.
+4. reference 문맥·human/tool 시간 기록 + fixed quota 없음 확인.
+5. `--fast`/`--update` 경로도 silent skip 없이 실행/생략 사유 기록.
+6. Claude·Codex 양쪽 persona 축소 경로 실제 수행.
+7. keyboard primary path·visible focus·modal escape·screen reader name·동적 loading/error/success를 실제 구현 화면에서 검사.
+
+**충족 현황**: 기준 2·3만 탐색적 충족(B3 repair loop 8/8, holdout 0.5/50). 나머지 5개는 미검증 — 미충족 신호 누적 시 해당 directional 부분(리서치·시안 카드)을 후퇴시킨다.

@@ -92,5 +92,5 @@ accepted
 - enabling(약) — report-only 불변, 모드 추가.
 ### 적용 surface
 - .claude/agents/researcher.md
-- .claude/skills/bootstrap-design/SKILL.md (R0 위계 배선은 ADR-049#amend-2 — Stage 1C)
+- .claude/skills/bootstrap-design/SKILL.md (R0 위계 배선은 ADR-058 — Stage 1C)
 - docs/00-meta/DELEGATION_STRATEGY.md (researcher row 1줄)

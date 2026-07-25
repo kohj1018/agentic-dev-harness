@@ -42,7 +42,7 @@
 | 046 | Signal-first output contract | accepted | — | sub-agent 반환 cap 축소(1~2k→≤600) + signal-first 대화/반환 계약 + auto-clarity 보존 리스트 |
 | 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | +#amend-1: 변경 검증법(falsifying evaluation 작성법) | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 | 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
-| 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | accepted | (+#amend-1: R0 필수 + 수렴 + visual-QA scaffold + 클래스 anti-slop, +#amend-2: designer agent + grounding 위계 + divergence) | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
+| 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | superseded (by ADR-058) | (+#amend-1: R0 필수 + 수렴 + visual-QA scaffold + 클래스 anti-slop, +#amend-2: designer agent + grounding 위계 + divergence) | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
 | 050 | Main-session, model-invocable lifecycle skills | accepted (부분 superseded by 051) | — | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |
 | 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | (+#amend-1: 공유 런타임 리소스 partition 가드, +#amend-2: validate orchestration 관측 + fallback 보정, +#amend-3: D4 범위 갱신(M1 통일)) | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
 | 052 | Stack provisioning (install) + E2E readiness | accepted | — | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) |
@@ -51,6 +51,7 @@
 | 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
 | 056 | Milestone experience contract | accepted | — | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
 | 057 | Planning v2 (unification + batch + seam) | accepted | — | M1 포함 생성 통일 + 배치 분해(2-tier/refresh) + feature 체크포인트 + seam 계약 |
+| 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | — | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
 
 ## Reserved / Parked / Dropped 번호
 

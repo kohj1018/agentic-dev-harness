@@ -35,7 +35,7 @@
   /bootstrap-stack Next.js 16 + TypeScript + pnpm + Supabase + Playwright + Vercel
   ```
 - [ ] `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행해 통합 `validate` 진입점·verify 스크립트를 생성했다
-- [ ] (프론트엔드 스택이면) `/bootstrap-design`을 실행해 레퍼런스 조사(`DESIGN_RESEARCH.md`) + concept 시안 방향 선택을 거쳐 `docs/20-system/DESIGN.md`를 채웠다 (ADR-049)
+- [ ] (프론트엔드 스택이면) `/bootstrap-design`을 실행해 레퍼런스 조사(`DESIGN_RESEARCH.md`) + concept 시안 방향 선택을 거쳐 `docs/20-system/DESIGN.md`를 채웠다 (ADR-058)
 - [ ] 필요하면 `.claude/settings.local.json`에 개인 자동화를 추가했다
 - [ ] shared 설정에 환경 종속적인 hook를 바로 넣지 않았다
 

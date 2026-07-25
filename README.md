@@ -19,7 +19,7 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
 /discover-product (optional)
   └─ (optional) /validate-discovery (separate session) → /repair-discovery (origin session)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (frontend only — researches references into DESIGN_RESEARCH.md, shows multiple concept mockups to pick a direction *before* writing DESIGN.md, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-049]
+  → /bootstrap-design (frontend only — evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-058]
   → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /implement-workitem

@@ -21,15 +21,13 @@ docs/40-validation/discovery-reviews/*.md
 # stabilize-reviews (ephemeral) — ADR-054
 docs/40-validation/stabilize-reviews/*.md
 !docs/40-validation/stabilize-reviews/.gitkeep
-# design exploration/preview (ephemeral, never committed — ADR-049#d31 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
+# design exploration/preview (ephemeral, never committed — ADR-058 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
 docs/20-system/design-concepts/
 docs/20-system/design-preview.html
 # milestone experience contract (ADR-056): prototypes/M<N>/<screen>.html 승인본은 커밋 대상(ignore 금지).
 # 탐색 시안(_drafts)과 스크린샷 갤러리만 ephemeral.
 docs/20-system/prototypes/*/_drafts/
 docs/40-validation/visual/
-# design-workflow eval 근거 (ADR-058): 텍스트·데이터 산출물(REPORT/protocol/HTML/JSON/CJS)만 커밋,
-# 무거운 스크린샷(PNG/JPG)은 제외 — 판정 추적성은 텍스트로 충분, 이미지 재현 불필요.
-.boilerplate/validation/**/*.png
-.boilerplate/validation/**/*.jpg
-.boilerplate/validation/**/*.jpeg
+# design-workflow eval 근거 (ADR-058): 원본 산출물(REPORT/concept HTML/metrics/스크린샷 등)은 무거워 local-only —
+# 폴더 전체를 ignore하고 핵심 판정만 .boilerplate/validation/SIMULATION_RUN.md "Design Workflow Eval" 섹션에 distill.
+.boilerplate/validation/design-workflow-eval-20260720/

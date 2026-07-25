@@ -7,13 +7,13 @@ draft
 
 <!-- 본 문서는 UI 프로젝트의 시각 결정 SSOT.
      baseline에는 placeholder로 존재한다 (presence: conditional, STRUCTURE.md 참조).
-     - UI 프로젝트: /bootstrap-design이 R0~R6 라운드로 본 파일을 채운다 (ADR-049).
+     - UI 프로젝트: /bootstrap-design이 R0~R6 라운드로 본 파일을 채운다 (ADR-058).
      - 비-UI 프로젝트(API 서버 / CLI 도구 등): fork 직후 본 파일을 삭제한다. -->
 
 ## 1. Overview
 <!-- 디자인 원칙 3~5개 (actionable verb. "modern/clean/sleek" 같은 모호어 금지).
-     + [디자인 리서치](DESIGN_RESEARCH.md) 링크 + what-to-borrow/avoid 1~2줄 (ADR-049#d28).
-     + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-049#d30 — /bootstrap-design R2 선택 결과). -->
+     + [디자인 리서치](DESIGN_RESEARCH.md) 링크 + what-to-borrow/avoid 1~2줄 (ADR-058).
+     + `선택 concept: <X>(+하이브리드 메모)` 한 줄 (ADR-058 — /bootstrap-design R2 선택 결과). -->
 
 <a id="design-2-colors"></a>
 ## 2. Colors
@@ -63,7 +63,7 @@ draft
      - monospace를 "기술적 느낌" 장식용으로 남용 금지 (실제 코드·수치에만)
      - bounce/elastic easing 디폴트 금지 (모션은 의미 전달 목적에 한정 — 장식 모션 회피)
      - sparkline 등 데이터 시각요소를 장식으로 사용 금지
-     [클래스 레벨 규율 — 특정 유행 인스턴스 추격 대신, ADR-049#amend-1]
+     [클래스 레벨 규율 — 특정 유행 인스턴스 추격 대신, ADR-058]
      - 브랜드 근거 없이 *현재 인기 fontstack·시각 트렌드*를 디폴트로 쓰지 않는다(Inter 단독 금지의 일반화). 채택 시 ## 1 Overview에 브랜드 근거 명시. -->
 
 <a id="design-10-voice"></a>

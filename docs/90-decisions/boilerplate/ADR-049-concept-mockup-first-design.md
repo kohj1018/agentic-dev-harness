@@ -1,10 +1,12 @@
 # ADR-049 — Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트
 
+> 대체: [ADR-058](ADR-058-design-workflow.md) (2026-07-25 — 라운드 구조·R0 grounding·시안 정책 전부 ADR-058로 이관; 본 ADR 본문은 history로 보존)
+
 > scope: boilerplate
 > area: design
 
 ## Status
-accepted
+superseded
 
 ## 현재 유효 결정
 - `/bootstrap-design`의 *워크플로우 라운드 구조*는 본 ADR이 SSOT: R0(레퍼런스 추출 + `DESIGN_RESEARCH.md` 노트) → R1(원칙) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰, 선택 concept에서 추출) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 정리).
@@ -48,16 +50,6 @@ accepted
 
 ## 결과
 - 사용자가 *DESIGN.md 작성 전* 다중 concept 시안으로 시각 방향을 눈으로 선택하고, 레퍼런스 분해 근거가 `DESIGN_RESEARCH.md`로 보존된다. ADR-027은 DESIGN.md 내용·인터페이스 할당 SSOT로 유지.
-
-## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- .claude/skills/bootstrap-design/SKILL.md  — #d28~#d31 R0~R6 + --fast/--update #amend-1
-- docs/20-system/DESIGN.md                  — #d28 §1 DESIGN_RESEARCH 링크 + §0 주석 R0~R6 + #d30 선택 concept 기록 #amend-1
-- docs/00-meta/STRUCTURE.md                  — #d28 DESIGN_RESEARCH 행 + #d29 design-concepts 행 + canonical owner
-- docs/00-meta/WORKFLOW.md                   — #d29 §2 concept 선택 게이트
-- .gitignore                                 — #d31 concept/preview ephemeral ignore
-- .claude/skills/stack-guard/SKILL.md        — §6-4-1 visual-QA scaffold #amend-1
-
-> 적용 위치(Surfaces 아님 — ADR-045#d3 "README·요약·문맥 언급 등재 금지"): `README.md`/`README_ko.md` 흐름 1줄 + `docs/00-meta/PROJECT_START_CHECKLIST.md` design flow 단계는 *마이그레이션 적용 대상*이지 fan-out surface가 아니다(단순 참조 `[ADR-049]` 토큰만 유지, 역방향 미점검 — ADR-045#d4).
 
 ## 참고
 - ADR-027 (DESIGN.md 내용·인터페이스 할당 SSOT — 본 ADR이 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede. ADR-027은 accepted 유지)

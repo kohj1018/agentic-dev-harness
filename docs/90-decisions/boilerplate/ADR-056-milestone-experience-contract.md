@@ -7,7 +7,7 @@
 accepted
 
 ## 배경
-- [관측됨] 모든 게이트의 채점 기준이 문서(AC/FAC)로 닫혀 있다 — validate-workitem의 판정 축 전부가 task/feature 문서 대비이고, 사용자가 눈으로 승인한 artifact가 오라클로 쓰이는 지점이 0곳이다. 잘못된 스펙일수록 테스트가 붙어 더 단단히 굳는다. 유일한 승인 artifact(R2 concept/R6 preview)는 승인 즉시 삭제 + .gitignore(ADR-049 #d31).
+- [관측됨] 모든 게이트의 채점 기준이 문서(AC/FAC)로 닫혀 있다 — validate-workitem의 판정 축 전부가 task/feature 문서 대비이고, 사용자가 눈으로 승인한 artifact가 오라클로 쓰이는 지점이 0곳이다. 잘못된 스펙일수록 테스트가 붙어 더 단단히 굳는다. 유일한 승인 artifact(R2 concept/R6 preview)는 승인 즉시 삭제 + .gitignore(ADR-058).
 - [관측됨] 사용자의 첫 시각 확인 시점이 구현 완료 후라 마일스톤 종료 후 요구사항 미반영·불만족이 잦다(사용자 fork 보고).
 - [관측됨] reviewer[design]은 grep 기반 토큰 대조만 가능했다 — 렌더 증거(스크린샷) 생산·주입 파이프라인 부재. 단 Playwright는 stack-guard가 UI 프로젝트에 선설치(ADR-052 D1)하고 Read 도구는 이미지를 읽을 수 있어 MCP 없이도 기술적으로 가능하다.
 - [관측됨] voice/UX writing 규칙서가 repo 어디에도 없다 — 카피 관련 항목은 FEATURE §8-1 "copy 톤" 필드뿐이고 그마저 downstream 소비자 0인 죽은 필드. 전역 규칙 없이 feature 필드만 있어 feature마다 톤이 즉흥 재결정된다(ADR-027이 시각에 진단한 "명시 결정 자리 부재 → 매번 즉흥 결정"과 동형). placeholder 카피 금지 규칙도 0건.
@@ -17,7 +17,7 @@ accepted
 2. **plan-milestone R5 프로토타입 라운드** — R4 뒤 신설(UI 마일스톤 한정, 비-UI는 skip+사유 echo): R5-1 화면 목록 확정(feature당 대표 1화면 기본, 면제 feature는 이 시점 기록) → R5-2 브로드 시안 2~3안(designer 위임 — divergence 카드 차용, DESIGN.md 토큰만 참조) → R5-3 선택·수정 루프(취향 오라클=사용자, 2사이클 미수렴 시 brief 수정) → R5-4 경험 계약 완성(못생긴 상태 5종 + 실카피 + 인터랙션 캡션 + `:root` 토큰 참조 — 의무 체크리스트) → R5-5 승인 시 커밋 경로(`<screen>.html`) 저장 + 승인 직전 raw hex 1회 grep(`:root` 토큰 *정의* 블록 제외 — 자기완결 파일의 정의값 hex는 정상) + feature 문서 `## 7`에 프로토타입 참조 줄(화면 파일 + 진입 메모) + `_drafts/` 내 시안 파일 삭제. **`/plan-milestone M<N> --prototype [F-NNN]`** 재진입 모드(R0~R4 skip — 마일스톤 중간 화면 변경·재승인).
 3. **plan-workitem 입구 계약 (이중 잠금)** — UI **확정** feature 분해 시 해당 승인 프로토타입 참조도 면제 기록도 없으면 **`Needs Experience Contract`로 종료** + `--prototype` 안내(ADR-007#amend-3 `Needs Stack Guard` 동형 — ADR-007#amend-5로 예외 등재). UI **의심**(status=draft+신호)은 경고만(false positive 완충). opt-out: feature 문서에 `프로토타입 면제: <사유>` 기재 시 통과(TDD opt-out 동형 — 사유 영속). 배치 모드(ADR-057 결정 2)에서는 미충족 feature만 보류 목록으로 분리하고 나머지는 진행한다(전체 차단 X). 분해된 task `## 3`에 프로토타입 참조 line item을 plan이 authoring(builder는 기계 실행).
 4. **경험 좁힘 질문 규칙** — plan-workitem 9-1 self-check에 추가: "AC 해석이 프로토타입·상위 약속이 보여주는 사용자 체감(보이는 것·눌렀을 때·문안)을 *좁히면* 무조건 질문 — 내부 엔지니어링 선택은 자율". implement 단계 비대칭: builder의 AC-ambiguity 하드스탑에서 *경험 계약이 존재하는 slice의 보이는 것·문안 차이는 "사소한 표현 차이" 분류 금지*(silent narrowing 차단).
-5. **stabilize §3-V 경험 게이트 (스크린샷 vs 승인본)** — UI 확정 마일스톤이면 메인 세션이 앱 기동 → 핵심 화면(≤6~8, 기본 뷰포트 1종) Playwright CLI 스크린샷 → `docs/40-validation/visual/M-N/` 갤러리(gitignore ephemeral) → Read 멀티모달로 대조. **실행 자체는 UI 확정 마일스톤에서 의무 — silent skip 금지**(미실행 시 사유(blocked-on-env 등)를 최종 출력에 echo; *판정*은 report-only 유지 — ADR-052 e2e silent-skip 금지와 동형). **대조 앵커 위계: ① 커밋된 승인 프로토타입 `<screen>.html`(존재 시 — 같은 뷰포트로 file:// 렌더 캡처해 나란히 대조 가능) → ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면 fallback)**. 불일치는 `P1 [Experience-drift]` report-only(enabling — 졸업 필수 승격은 fork 실증 후 ratchet; MILESTONE item 6 선택 기준 예시 제공). 갤러리 경로를 최종 출력에 실어 사용자 육안 확인 유도(스펙 자체 오류는 인간 오라클). 환경 실패는 기존 blocked-on-env 라벨 재사용. `--dry-run`에는 미포함. Codex(멀티모달 편차): 갤러리 생성 + 사용자 수동 대조로 degrade. hot-loop 배치 금지(per-task validate에 넣지 않음 — ADR-049#amend-2 결정 7 carve-out 정합).
+5. **stabilize §3-V 경험 게이트 (스크린샷 vs 승인본)** — UI 확정 마일스톤이면 메인 세션이 앱 기동 → 핵심 화면(≤6~8, 기본 뷰포트 1종) Playwright CLI 스크린샷 → `docs/40-validation/visual/M-N/` 갤러리(gitignore ephemeral) → Read 멀티모달로 대조. **실행 자체는 UI 확정 마일스톤에서 의무 — silent skip 금지**(미실행 시 사유(blocked-on-env 등)를 최종 출력에 echo; *판정*은 report-only 유지 — ADR-052 e2e silent-skip 금지와 동형). **대조 앵커 위계: ① 커밋된 승인 프로토타입 `<screen>.html`(존재 시 — 같은 뷰포트로 file:// 렌더 캡처해 나란히 대조 가능) → ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면 fallback)**. 불일치는 `P1 [Experience-drift]` report-only(enabling — 졸업 필수 승격은 fork 실증 후 ratchet; MILESTONE item 6 선택 기준 예시 제공). 갤러리 경로를 최종 출력에 실어 사용자 육안 확인 유도(스펙 자체 오류는 인간 오라클). 환경 실패는 기존 blocked-on-env 라벨 재사용. `--dry-run`에는 미포함. Codex(멀티모달 편차): 갤러리 생성 + 사용자 수동 대조로 degrade. hot-loop 배치 금지(per-task validate에 넣지 않음 — ADR-058 carve-out 정합).
 6. **렌더 증거 주입** — stabilize design-surface reviewer 입력에 §3-V 갤러리 경로·visual-qa 결과를 주입(ADR-027#amend-6), reviewer는 Read로 이미지 열람.
 7. **grep 오탐 방지** — stabilize §5-2 raw hex grep 대상에서 `docs/20-system/prototypes/` 제외(자기완결 HTML — DESIGN.md 제외와 동형. 단 프로토타입 최종본은 `:root` 토큰 참조가 원칙이므로 위반 의심은 R5-4 체크리스트가 잡음).
 
@@ -32,7 +32,7 @@ accepted
 
 ## 비결정 (No)
 - 프로토타입 코드의 구현 재사용 — 스펙이지 코드가 아니다.
-- 이미지 생성·Figma 의존 — HTML/CSS 자기완결로 충분(ADR-049 정합).
+- 이미지 생성·Figma 의존 — HTML/CSS 자기완결로 충분(ADR-058 정합).
 - 비-UI 마일스톤 의무화.
 - per-task 스크린샷 대조(validate-workitem) — repair 루프 재실행마다 이미지 토큰 소모(준-hot-loop 트랩).
 - 별도 VOICE.md 파일 / ux-writer agent — §10 규칙서로 흡수(단순성 1순위).
@@ -41,7 +41,7 @@ accepted
 1. Target — plan-milestone(R5+--prototype)/plan-workitem(입구 계약+9-1+voice cross-check)/stabilize(§3-V·§5-2 제외·voice grep·출력)/builder(비대칭 1줄)/reviewer(렌더 증거+[Design-voice])/validator(§10 정합)/DESIGN.md §10/FEATURE·MILESTONE 템플릿/.gitignore/STRUCTURE/WORKFLOW + ADR-007#amend-5 + ADR-027#amend-5·6 + ADR-042#amend-1.
 2. Failure mode — 사용자 승인 artifact가 오라클로 쓰이는 지점 0 + 승인본이 ephemeral 경로에서 증발 + 첫 시각 확인이 구현 후 + 전역 voice 규칙 부재로 톤 즉흥 재결정(전부 관측됨).
 3. Predicted improvement — 구현 전 경험(화면·인터랙션·카피) 확정으로 마일스톤 종료 후 재작업 감소, 승인본이 독립 오라클로 영속, [Experience-drift]/[Design-voice]로 drift 가시화.
-4. Preserved invariants — stabilize read-only(§3-V는 촬영·판독·보고만)/ADR-049 R2 concept ephemeral 정책(범위 한정 — ADR-049#amend-2 결정 8)/hot-loop 스크린샷 금지/ADR-014 graduation 5+1 본체/DESIGN.md 시각 SSOT 지위/비-UI 삭제 경로/자동 차단 X(결정 3 제외).
+4. Preserved invariants — stabilize read-only(§3-V는 촬영·판독·보고만)/ADR-058 R2 concept ephemeral 정책(범위 한정 — ADR-058)/hot-loop 스크린샷 금지/ADR-014 graduation 5+1 본체/DESIGN.md 시각 SSOT 지위/비-UI 삭제 경로/자동 차단 X(결정 3 제외).
 5. Falsifying evaluation — R5가 마일스톤당 계획 시간을 과도하게 늘리거나 [Experience-drift] 재실행 불일치율이 높으면 R5를 opt-in으로 후퇴; [Design-voice] false positive가 노이즈를 유의하게 늘리면 LLM-판정분 후퇴(grep분만 유지).
 6. Rollback path — superseded → R5·입구 계약·§3-V·§10·집행 지점 제거, prototypes/ 경로 폐기(기존 문서 잔존 무해), ADR-007#amend-5 철회, §8-1 원 의미 복원.
 
@@ -66,4 +66,4 @@ accepted
 - docs/00-meta/WORKFLOW.md
 
 ## 참고
-- ADR-049(#amend-2 — R2 원형·carve-out·실카피 라운드 배선), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-014(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.
+- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-014(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.

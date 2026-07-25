@@ -19,7 +19,7 @@
 /discover-product (선택)
   └─ (선택) /validate-discovery (별 세션) → /repair-discovery (원본 세션)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (UI 전용 — 레퍼런스를 DESIGN_RESEARCH.md로 조사 + DESIGN.md 작성 *전* 다중 concept 시안으로 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-049]
+  → /bootstrap-design (UI 전용 — evidence-on-demand로 레퍼런스를 DESIGN_RESEARCH.md에 조사 + DESIGN.md 작성 *전* 다중 concept 시안(REFINE/EXPLORE)으로 렌더·axe 수용 게이트를 거쳐 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-058]
   → /plan-milestone (+UI: R5 프로토타입 라운드) → /plan-workitem M1 (배치)
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
   → /implement-workitem
