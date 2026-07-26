@@ -95,7 +95,7 @@
 
 1. `/bootstrap-project` → charter + architecture + ADR-100 (workitem 생성 X — ADR-057)
 2. `/bootstrap-stack` → 스택 확정 후 자동화 설계
-3. `/plan-milestone` → (M1 포함) milestone + feature 문서 생성·확정 (+UI: R5 프로토타입 라운드) / `/plan-workitem M<N>` → 마일스톤 전체 계획 스냅샷 1회 (feature 단위 `F-NNN`·`--refresh` 없음 — ADR-057#amend-3)
+3. `/plan-milestone` → (M1 포함) milestone + feature 문서 생성·확정 (+UI: R5 프로토타입 라운드) / `/plan-workitem M<N>` → 마일스톤 전체 계획 스냅샷 1회 (ADR-057#amend-3)
 3a. (선택) `/validate-plan <workitem-id>` — 다른 세션·다른 LLM에서 cross-review. 임시 파일 작성 (ADR-038).
 3b. (선택) `/repair-plan <workitem-id>` — 원본 plan 세션에서 임시 파일 회수 + 적용 + 삭제 (ADR-038).
 4. `/implement-workitem` → task 구현
@@ -123,7 +123,7 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 | charter 부분 갱신 | 자연어로 메인 세션에 변경 요청 → `planner` agent에 fork 위임 |
 | charter 전면 재정의 | `/discover-product` 재실행(또는 산출물만 갱신) → `/bootstrap-project`로 charter 재생성 |
 | architecture 스택 변경 (T2 — 언어/런타임/프레임워크/DB/인증 등 토대 변경, ADR-055) | `/bootstrap-stack --migrate` (타깃 미정이면 DEEP 라운드로 수렴) 후 `/stack-guard` 이어 실행 |
-| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1) — 다음 plan-milestone/plan-workitem 범위에 포함, 즉시 generic 호출 아님. 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
+| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1) — 해당 마일스톤 계획 범위에 포함하며 즉시 generic 호출하지 않음. 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
 | architecture 시스템 경계만 갱신 | 자연어 + `architect` 단발 호출 |
 
 > 주: `/discover-product`, `/stack-guard`는 현재 `.claude/skills/`에 모두 존재한다.

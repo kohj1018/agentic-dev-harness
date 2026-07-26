@@ -2,7 +2,7 @@
 
 ## 0. Status
 draft
-<!-- 값은 헤딩 바로 다음 줄(위)에 둔다 — 주석은 값 *뒤*(finalize 등 "헤딩+1=상태값" 파서 보호). draft(계획 중) → ready(plan-milestone 확정 재대조 통과·잠금). M·feature는 이 단방향만 쓴다 — 완료 판정은 graduation(`## 8` 회고)이 담당하고 stabilize는 M `## 0. Status`를 바꾸지 않는다. ready 뒤 상위 계약 변경은 다음 마일스톤이 기본이고, 현재 M 진행 불가 P0는 자동 역전이 없이 사용자 보고. plan-workitem은 M·산하 feature가 모두 ready일 때만 동작. ADR-057#amend-3 결정 5. -->
+<!-- 값은 헤딩+1 줄(위)에 둔다 — 주석은 값 *뒤*(finalize 등 "헤딩+1=상태값" 파서 보호). draft(계획 중) → ready(plan-milestone 확정 재대조 통과·잠금). M·feature는 이 단방향만 쓴다 — 완료 판정은 graduation(`## 8` 회고)이 담당하고 stabilize는 M `## 0. Status`를 바꾸지 않는다. ready 뒤 상위 계약 변경은 새 마일스톤이 기본이고, 현재 M 진행 불가 P0는 자동 역전이 없이 사용자 보고. plan-workitem은 M·산하 feature가 모두 ready일 때만 동작. ADR-057#amend-3 결정 5. -->
 
 ## 0-1. Type
 <!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
@@ -73,7 +73,8 @@ feature
      - empty / loading / error 흐름: 각 상태에서 사용자가 무엇을 보고 어떻게 복구하는가.
      - accessibility: 키보드·스크린리더·대비 등 흐름 레벨 요구.
      - copy 톤: DESIGN.md §10 Voice & Writing(전역 규칙서 — ADR-056) 참조 + *이 feature 한정 delta만* 기록 (예: "이 화면만 축하 톤 허용"). 전역 규칙 재서술 금지.
-     - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수. -->
+     - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수.
+     - (옵션, 마케팅·랜딩 화면 한정) 포지셔닝: audience / JTBD / objection / proof / voice / key action을 *이 필드에 매핑*해 랜딩 카피 근거로 둔다(별도 마케팅 SSOT·스킬 설치 없음 — §10 Voice와 자연 연결). 마케팅 스코프 도입이 아니라 카피 근거 기록 수준. -->
 
 ## 9. 엣지 케이스
 

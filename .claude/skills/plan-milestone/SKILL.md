@@ -8,7 +8,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 
 이 skill은 메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해 마일스톤(M1 포함)과 그 feature 문서를 작성하는 절차서다.
 **첫 마일스톤(M1) 포함 모든 마일스톤**을 다룬다(ADR-057 결정 1 — bootstrap-project는 charter/ARCH까지, 마일스톤 생성은 본 skill 단일 경로). **입력 분기 (상태기계 — ADR-057#amend-3 결정 5)**: (a) **기존 `draft` M<N>** → 그 M의 최초 미완 라운드부터 **재개**(완료 라운드는 멱등 skip). (b) **`ready`(이상) M<N>** → 이미 계획 확정·잠금이므로 **변경 거부** + "그 변경은 다음 마일스톤(M<N+1>)" 안내. (c) **존재하지 않는 M ID** → 오류 종료. (d) **새 아이디어**(자유 텍스트) → 다음 번호 M 생성.
-**additive 모드**(기존 마일스톤을 재생성·덮어쓰기 하지 않는다). **기존 마일스톤에 *새 feature만* 추가하는 경우는 `draft` M<N> 재개 대화 안에서만** 처리한다(별도 `feature idea` 진입 제거 — draft 마일스톤이 여럿이면 대상이 모호): 예: 진행 중인 draft M1에 F-00X를 추가할 때 M1 문서는 재생성하지 않고 feature 문서만 새로 작성한 뒤 M1 `## 3. 포함되는 기능`에 링크 한 줄을 추가한다. **`ready` 이상 M엔 feature 추가를 금지**한다(결정 5e) — 그 feature는 다음 마일스톤(M<N+1>). 그 feature를 *task로 분해*하는 것은 `/plan-workitem`이다(역할 경계 유지).
+**additive 모드**(기존 마일스톤을 재생성·덮어쓰기 하지 않는다). **기존 마일스톤에 *새 feature만* 추가하는 경우는 `draft` M<N> 재개 대화 안에서만** 처리한다(별도 `feature idea` 진입 제거 — draft 마일스톤이 여럿이면 대상이 모호): 예: 진행 중인 draft M1에 F-00X를 추가할 때 M1 문서는 재생성하지 않고 feature 문서만 새로 작성한 뒤 M1 `## 3. 포함되는 기능`에 링크 한 줄을 추가한다. **`ready` 이상 M엔 feature 추가를 금지**한다(결정 5e) — 그 feature는 새 마일스톤(M<N+1>) 범위다. task 분해는 마일스톤 전체 계획 스냅샷에서 수행한다(역할 경계 유지).
 무거운 추론(R2의 마일스톤 분할 판단)은 `Agent` 도구로 architect를 단발 sub-call로 위임한다.
 각 라운드(R0~R5) 산출물은 메인 컨텍스트에 누적시키지 않고 milestone/feature 문서에 적재한다.
 

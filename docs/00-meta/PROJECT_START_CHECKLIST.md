@@ -41,7 +41,7 @@
 
 ## 4. 작업 구조 준비
 - [ ] `/plan-milestone`으로 첫 마일스톤(M1)과 feature 문서를 생성했다 (UI 마일스톤이면 R5 프로토타입 라운드까지)
-- [ ] `/plan-workitem M1`로 M1 전 feature의 task를 1회 전체 계획했다 (전체 스냅샷 — `F-NNN` 단일·`--refresh` 없음, ADR-057#amend-3)
+- [ ] `/plan-workitem M1`로 M1 전 feature의 task를 1회 전체 계획했다 (전체 스냅샷, ADR-057#amend-3)
   ```
   /plan-workitem M1
   ```

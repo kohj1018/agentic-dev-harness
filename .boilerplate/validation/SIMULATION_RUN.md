@@ -310,3 +310,146 @@
 7. keyboard primary path·visible focus·modal escape·screen reader name·동적 loading/error/success를 실제 구현 화면에서 검사.
 
 **충족 현황**: 기준 2·3만 탐색적 충족(B3 repair loop 8/8, holdout 0.5/50). 나머지 5개는 미검증 — 미충족 신호 누적 시 해당 directional 부분(리서치·시안 카드)을 후퇴시킨다.
+
+---
+
+## Phase 5 Acceptance (2026-07-26, planning snapshot + design gate)
+
+> 실행 방식: 현재 skill 본문을 읽은 메인 세션이 `C:\tmp\phase5-plan-acceptance-20260726`의 공유 fixture를 순차 role-execution하고, HTML/PX·상태·의존성 구조는 독립 Node evaluator로 재검산했다. 별도 Claude/Codex 세션이나 sub-agent를 호출한 결과는 아니다. 계약 표 45행 중 C20과 C25의 명시 분기를 나눠 **48 executable branches**로 실행했다. 입력 7개 SHA-256과 결과는 local-only `result.json`에 보존했고, 동일 입력 2회 결과 bytes가 일치했다(`SHA-256 5B079E54A652607088534F11455AEEE40CFDD69D205177D202EFA7223F120F08`).
+
+### Actor별 실제 read set
+
+| actor | 읽은 파일 |
+|---|---|
+| plan-milestone | `PROJECT_CHARTER.md`, `ROADMAP.md`, M/F templates, fixture M/F 상태, `dashboard.html`과 화면 PX |
+| plan-workitem | `PROJECT_CHARTER.md`, `ARCHITECTURE_OVERVIEW.md`, UI용 `DESIGN.md`, fixture M/F, `TASK_TEMPLATE.md`, active prototype HTML |
+| validate-plan / reviewer(plan) | Charter, Architecture, DESIGN, fixture M/F/T 전체, M/F/T templates, active prototype glob |
+| implement-workitem | 대상 task `## 3/6/9`, 부모 F/M, `STACK_SETUP_PLAN.md`, 선행 task status·참조 AC·약속 artifact, plan-review 존재 여부 |
+| repair-plan | review fixture, 입력 ID의 부모 M과 전 F/T, Charter 비목표·제약, Architecture |
+| finalize-workitem | task status·`## 4-1/6`, validation report, git diff/index 상태 |
+| stabilize / repair actors | M/F/T, QA_FINDINGS, IMPROVEMENT_GUIDE, validation evidence, finding이 가리킨 task/report |
+
+### A. 계획 스냅샷 (11/11)
+
+| ID | 실입력 | 관측 출력 |
+|---|---|---|
+| A1 | dashboard HTML PX 01·02·03 + 최종 승인 | HTML `(id, 설명)`과 inventory가 동일, 첫 번호 01 |
+| A2 | F-001=PX-01, F-002=PX-02·03 | disjoint union, 각 PX 소유 feature 정확히 1개 |
+| A3 | M1/F-001/F-002 전체 snapshot | task·단계·AC·FAC map·PX map을 한 번에 완성 |
+| A4 | `F-001`, 추가 모드 인자가 붙은 M1 | 둘 다 입력 문법 거부, `M<N>` 안내 |
+| A5 | feature 6개 중 앞 3개 완결 후 재실행 | 앞 3개 skip, 뒤 3개만 생성, task ID 중복 0 |
+| A6 | UI feature의 prototype/면제 둘 다 없음 | task 배열 bytes 불변, 0건 상태에서 일괄 halt |
+| A7 | draft / ready / 없는 M9 / 새 아이디어 | resume / reject+새 M / error / 다음 번호 생성 |
+| A8 | M/F ready 후보 + 열린 질문 0 | cross-check 후에만 M/F 모두 ready |
+| A9 | feature 일부 ready, M draft | 남은 feature 먼저 승격하고 M을 마지막에 ready |
+| A10 | task ready/draft 혼합 | dead state 아님, 전체 재검증 후 전부 ready |
+| A11 | todo CLI git snapshot `00635ec` (task 0→3) | T-001~003 모두 완성 후 ready, 중복 0 |
+
+### B. 읽기전용 validator negative (9/9)
+
+| ID | 실입력 | 관측 finding |
+|---|---|---|
+| B1 | inventory에 없는 `orphan.html` PX | P0 orphan |
+| B2 | 한 HTML에 같은 PX id 2개 | P0 duplicate id |
+| B3 | PX-01을 F-001/F-002가 함께 소유 | P0 duplicate ownership |
+| B4 | `user`와 `user-settings` 화면 | 정확 regex가 prefix 충돌 없이 분리 |
+| B5 | 같은 PX id, 설명만 변경 | P0 mirror drift |
+| B6 | M1 + task 0건 | PX 소유·문법·경로·중복·설명 검사는 실행, coverage만 유예 |
+| B7 | task PX tag와 PX map RHS 불일치 | P1 tag-to-map mismatch |
+| B8 | 없는 선행 / cycle / 참조 AC artifact 부재 | 각각 P0 `[Plan-dep]` missing / cycle / AC-guarantee |
+| B9 | Status heading + `ready` + 후행 주석 | heading+1 값은 `ready`로 파싱 |
+
+입력 HTML/JSON SHA-256은 두 실행 사이 불변이고 finding 집합·순서·result bytes가 동일했다. validator fixture는 입력을 수정하지 않았다.
+
+### C. 실행 시점 lifecycle (25행, 28 branches 전부 통과)
+
+| ID | 실입력 요약 | 관측 출력 |
+|---|---|---|
+| C1 | 선행 ready | 대상 ready 유지, 의존순 대기 |
+| C2 | 선행 done + artifact 없음 | 선행 repair 라우팅, 대상 ready 유지 |
+| C3 | 상위 계약 경로 부재 | 사용자 보고 + 새 M 경계, 자동 계획 변경 없음 |
+| C4 | repair-plan, sibling in-progress | 부모 M 잠금으로 거부 |
+| C5 | 전 preflight 통과 | dispatch 직전 ready→in-progress |
+| C6 | 대상 draft/done | implement 거부 |
+| C7 | plan-workitem, in-progress 존재 | 계획 잠금으로 거부 |
+| C8 | 전 task ready+완결 | read-only no-op |
+| C9 | graduation의 unmapped FAC | graduation NO + 사용자 보고 |
+| C10 | sibling draft 존재 | 대상 ready 유지, 착수 거부 |
+| C11 | 구현 전 ready plan finding | status 유지한 제자리 repair + 전체 self-check |
+| C12 | 대상 in-progress | 정상 재개 |
+| C13 | 선행 done+artifact 실재 | 후행 정상 착수 |
+| C14 | ready task finalize | 거부, status/index 무변경 |
+| C15 | 상위 M/F/prototype P0 | ready 유지 + 사용자 보고 |
+| C16 | 다중 finalize 중 ready 포함 | 전부 일괄 중단, file/index/status 무변경 |
+| C17 | done task finding 채택 | repair-milestone은 위임만, repair-workitem이 재개방 |
+| C18 | 하위 ID repair-plan + sibling done | 부모 M 잠금으로 거부 |
+| C19 | repair 후 전체 self-check 실패 | review 보존, implement 계속 차단 |
+| C20 | done finding Reject / Adopt 후 중단 | done 불변 / in-progress 유지 후 repair 재개 |
+| C21 | 구현을 가르는 AC 해석 2개 | dispatch 전 halt, ready 유지, 사용자 해석 요청 |
+| C22 | 구현 후 unmapped FAC | P0 Spec-gap + Needs Fix, 사용자 보고 |
+| C23 | stabilize 새 범위 | 새 task 없이 새 M 후보로 보고 |
+| C24 | stabilize 기존 AC 위반 | 해당 task repair→validate→finalize |
+| C25 | 구현 전 task map / 잠긴 prototype / 구현 후 새 범위 | validate+repair-plan / 사용자 보고+새 M / 사용자 보고+새 M |
+
+### Design Gate Smoke
+
+| fixture | exit | blocker/report |
+|---|---:|---|
+| 모듈 미설치 | 2 | `Needs Install`(module) |
+| browser binary 부재 | 2 | `Needs Install`(Chromium) |
+| low contrast | 1 | `axe:color-contrast` |
+| horizontal overflow | 1 | `page-overflow`, `viewport-escape` |
+| self clipping | 1 | `clipped-text` |
+| clean control | 0 | blocker 0, screenshot 3 |
+| vertical-only scroll + horizontal escape | 1 | `viewport-escape` (+ axe scrollable-region finding) |
+| ancestor clipping | 1 | `clipped-text` |
+| sr-only + named horizontal table + ellipsis | 0 | geometry blocker 0, screenshot 3 |
+| WCAG 2.1 A negative | 1 | `axe:label-content-name-mismatch` |
+
+- 설치된 axe에서 `wcag21a`의 유일 규칙은 experimental 기본 비활성이라 tag-only 실행이 negative fixture를 놓쳤다. tag runOnly를 유지하고 해당 규칙을 명시 활성화한 뒤 serious finding을 1280/320 모두 검출했다.
+- 조상 `overflow:hidden`은 수정 전 blocker 0이었고 수정 후 `clipped-text` 2건(375/320)으로 Red→Green 됐다.
+- 정상 제외 control과 clean control은 blocker 0이다.
+
+---
+
+## Round 5 (2026-07-26, todo CLI / Node 24 + TypeScript + Vitest)
+
+> ADR-017 재실행 트리거(신규 ADR/amendment, lifecycle 변경, skill 본문 큰 변경) 적용 후 baseline. isolated fork `C:\tmp\dogfood-cli-round5-20260726-a`, root baseline부터 **9 commits**, 최종 working tree clean. fresh CLI 세션 auto-load나 sub-agent persona dispatch는 실행하지 못해 메인 세션이 current skill을 순차 적용했다(Codex degrade 경로). 코드·테스트·git commit은 실제 실행했다.
+
+### 단계별 관측
+
+1. **Discovery/Bootstrap**: DISCOVERY→Charter snapshot→Architecture→project ADR-100/101 순서. 비-UI 판정 뒤 DESIGN.md와 AGENTS 링크를 함께 제거. 상위 문서 없는 하위 생성 0.
+2. **Stack guard**: npm scope를 `STACK_SETUP_PLAN.md`에 고정하고 TypeScript 7.0.2, Vitest 4.1.10, Node types를 provision. registry audit 취약점 0.
+3. **Plan milestone**: M1/F-001을 task 0건 `ready`로 확정, ROADMAP Now는 `tasks: unplanned` 유지.
+4. **Plan workitem**: T-001~003을 모두 draft 작성 → FAC 4/4·INV 3/3·dependency 존재/비순환/AC-guarantee self-check → 순차 ready. plan-workitem이 ROADMAP 진척을 쓰려던 실행자 deviation은 snapshot commit 전에 제거(단일 writer 계약이 catch).
+5. **Implement**: T-001 store → T-002 service → T-003 CLI 순서. 각 task에서 import/build 실패 Red를 먼저 관측하고 Green 후 진행. 선행 status+artifact preflight를 실제 수행.
+6. **Validate**: T-001 store 3, T-002 전체 unit 6, T-003 최종 unit 6 + subprocess E2E 3. report는 checkout-local 경로에 생성.
+7. **Finalize**: 각 task를 in-progress에서만 done으로 전환하고 `## 4-1` 명시 경로만 세 번 별도 commit.
+8. **Stabilize**: full validate exit 0, manual add→done→list smoke count 1/completed true, FAC 4/4, P0 0. M1 회고 `graduation: YES (2026-07-26)`. ROADMAP Done 전환은 후속 plan-milestone R0 소유라 본 라운드에서 쓰지 않음.
+
+### 실제 커밋
+
+`dfa725c` baseline → `7a4408e` product contracts → `35a8907` stack → `3897cd5` M1/F → `00635ec` plan snapshot → `fbb2be2` store → `ee0d6bb` service → `72b5177` CLI/E2E → `08eb984` graduation.
+
+### ADR-017 성공 기준
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---:|---|
+| 사용자 개입 | ≤1 | 0 (파일 직접 편집 0, 질문도 없음) | 통과 |
+| placeholder 충원율 | ≥80% | 100% (생성·소유 산출물 Discovery/Charter/ARCH/Stack/ADR/M/F/T 11개 모두 실콘텐츠) | 통과 |
+| graduation pre-check 미통과 사유 | ≤2 | 0 | 통과 |
+
+**ADR-017 gate: 3/3 통과. M1 graduation: YES.**
+
+### 발견된 마찰점
+
+- **[관측됨] Node types wiring**: `@types/node` 설치만으로 TypeScript 7이 Node globals를 노출하지 않아 T-001 Green 뒤 typecheck가 실패. `tsconfig`의 `types: ["node"]`를 task 문서에 먼저 추가한 뒤 수정.
+- **[관측됨] build/test artifact 중복**: 초기 `rootDir: .`가 tests를 `dist/tests`로 방출해 Vitest가 unit/E2E를 2회 실행. source-only build + `tsconfig.test.json` noEmit + Vitest `--dir`로 분리해 최종 unit 6/E2E 3을 각 1회로 고정.
+- **[관측됨] ROADMAP writer discipline**: 실행자가 plan snapshot에서 진척을 쓰려 했으나 plan-milestone 단일 작성자 계약과 대조해 commit 전 제거. harness 문구 누락이 아니라 executor deviation으로 분류.
+- **한계**: 별도 fresh agent session auto-load, Claude persona fan-out, cross-model review는 본 실행에서 미검증. 구조 acceptance는 deterministic evaluator, 의미 route는 main-session sequential execution이다.
+
+### 결정에 미친 영향
+
+- Phase 5 planning/lifecycle acceptance와 ADR-017 baseline이 모두 통과해 Phase 1~5 rollback 조건은 발화하지 않았다.
+- design-gate의 조상 clipping과 WCAG 2.1 A 실행 누락은 Phase 5에서 수정·실측돼 declared gate와 실제 runner가 일치한다.
+- Node/Vitest 두 마찰점은 fork stack 설정에서 같은 task 범위 안에 해결됐고 boilerplate 공통 정책 변경을 정당화하지 않는다.

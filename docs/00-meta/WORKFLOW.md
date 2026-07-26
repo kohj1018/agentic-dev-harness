@@ -17,7 +17,7 @@
 - 마일스톤 단위 목표를 `docs/30-workitems/milestones`에 만든다.
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
-- task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**(2-tier/draft/refresh 없음, feature 단위 `F-NNN`·refresh 사용자 경로 없음 — ADR-057#amend-3).
+- task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**으로 전 feature를 함께 확정한다(ADR-057#amend-3).
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
 - (UI 마일스톤) `/plan-milestone` R5 프로토타입 라운드가 화면 경험 계약(승인 프로토타입 — `docs/20-system/prototypes/M<N>/`)을 확정한 뒤 task 분해로 진행한다. UI 확정 feature는 승인 프로토타입(또는 면제 기록) 없이 `/plan-workitem` 분해가 차단된다 (ADR-056).
 

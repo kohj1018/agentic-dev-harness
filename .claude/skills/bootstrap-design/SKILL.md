@@ -115,6 +115,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
     concept: <A/B/C> — <방향 한 줄 요약>
   -->
   ```
+- **(옵션) 외부 concept generator**: UI 프로젝트가 원하면 Google Stitch 등 외부 도구를 concept 생성 보조로 쓸 수 있다 — 단 **기본 의존 금지**(계정·도구 의존 — ADR-027#amend-2 비결정 존중). 산출물은 DESIGN_RESEARCH.md에 provenance 기록 후, 승인된 방향만 DESIGN.md로 정규화(생성/감사 분리·취향 오라클=사용자 불변).
 
 ### R2-1.5. 구별성·조화 비평 (순차 1회 — ADR-058)
 - 생성 직후 **reviewer(design surface) 단발 sub-call**(입력은 REFINE/EXPLORE 카드 + concept별 토큰 요약 — 이 단계는 렌더 *전* 값싼 개념 점검이라 HTML 전문 투입 금지; *픽셀* 판정은 뒤의 R2-G가 스크린샷으로 한다) 1회로 판정: ① concept 간 실질 구별성(REFINE/EXPLORE 성격이 실제로 다른가, signature가 task를 돕는가) ② `## 9` Don'ts·(있으면) counter-reference 근접도 ③ **시안 내부 조화 — *카드·토큰 수준의 선언된 짜깁기 신호만***(예: 상충하는 소스를 한 시안에 섞겠다는 카드). *렌더 픽셀의 실제 조화*는 R2-G 스크린샷 리뷰가 확인한다(R2-1.5는 카드만 보므로 여기서 픽셀 조화를 단정하지 않는다). designer 자기 비평 금지(생성/감사 분리).
@@ -219,7 +220,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - concept/preview 시안 상태: 삭제됨(승인 후 — 기본) / 유지(보존 요청 시) / 미생성(`--fast`). 재생성: `/bootstrap-design` R2/R6
 - 채워진 섹션 요약
 - 남은 열린 질문
-- 다음 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-milestone`(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
+- 후속 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-milestone`(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

@@ -88,7 +88,7 @@ R0 — 운영 환경 가정 확인:
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
 - validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
 - validate:e2e smoke test 결과 (UI/web 한정 — PASS (no specs yet) / PASS / WIRING FAIL / SKIPPED)
-- 다음 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 `/implement-workitem` 또는 다음 M)
+- 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 `/implement-workitem` 또는 다음 M)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
 - **옵션: Claude PostToolUse async adapter 예시** (사용자가 채택 시 `.claude/settings.local.json` 에 복사). GUARDRAILS_STRATEGY.md 의 PostToolUse 동기 hook 예시와 동일하게 *Unix / Windows 2 OS 예시* 모두 제공 — 동일 schema 에 `async: true` + `asyncRewake: true` 만 추가:
 

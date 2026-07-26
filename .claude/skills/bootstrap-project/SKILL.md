@@ -56,7 +56,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 - 갱신한 파일 목록
 - 핵심 가정
 - 남은 미결정 사항
-- 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-milestone → /plan-workitem` 순서가 SSOT):
+- 후속 단계 ([WORKFLOW.md "스킬 종료 시 후속 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-milestone → /plan-workitem` 순서가 SSOT):
   - 기본 권장: `/bootstrap-stack <스택 요약>` (스택 미정이면 **무입력**으로 실행 → 리서치+라운드 추천) — 스택 확정이 후속 lifecycle 의 전제 (스택 미정 상태에서 plan 은 가짜 작업).
   - 분기 옵션 (해당 시 ≤3):
     - 스택이 이미 brief/charter 에 명시됐고 `/bootstrap-stack` + `/stack-guard` 도 끝났다면: `/plan-milestone` — 첫 마일스톤(M1)과 feature 문서를 라운드 협상으로 생성 (ADR-057)

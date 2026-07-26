@@ -213,7 +213,7 @@ Telemetry — M1
    - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
    - **다음 단계** ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
      - **졸업 가능 = YES + P0 후속 0건**:
-       - 기본 권장: `/plan-milestone` — 다음 milestone(M-(N+1)) + feature 문서 생성 (이후 `/plan-workitem M-(N+1)` 전체 계획 스냅샷(1회) — ADR-057#amend-3)
+       - 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성. 확정 뒤 `/plan-workitem M-(N+1)`로 전체 계획 스냅샷 1회 수행(ADR-057#amend-3)
        - 프롬프트 동봉 권장: 본 라운드 Telemetry 의 신뢰도 분포 + Cross-stabilize 회귀 신호 (다음 milestone 의 우선순위 조정 입력)
      - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
        - **milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: `/repair-milestone M-N` 권장** (ADR-052) — 단일 task로 격리되지 않는 회귀·교차 결함과 실제 e2e 수정은 milestone 단위 repair로 라우팅. stabilize가 read-only로 남기 위한 코드 수정 경로다.

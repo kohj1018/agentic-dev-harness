@@ -53,17 +53,51 @@ try {
           const vis = (el) => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'; };
           const sel = (el) => el.tagName.toLowerCase() + (typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/)[0] : '');
           // 정상 UI 오탐 제외(실브라우저 검증분):
-          // (1) sr-only/visually-hidden — 1px 클립 또는 clip/clip-path (2) aria-hidden/inert/hidden 조상(닫힌 drawer·off-canvas) (3) overflow scroll/auto 조상 안(contained 가로스크롤=의도적, 예: 넓은 표)
+          // (1) sr-only/visually-hidden — 1px 클립 또는 clip/clip-path (2) aria-hidden/inert/hidden 조상(닫힌 drawer·off-canvas) (3) 접근 가능한 contained 가로스크롤(예: 넓은 표)
           const srOnly = (el) => { const s = getComputedStyle(el); return (el.clientWidth <= 1 && el.clientHeight <= 1) || (s.clip && s.clip !== 'auto') || (s.clipPath && s.clipPath !== 'none'); };
+          const inSrOnly = (el) => { let p = el; while (p && p !== document.documentElement) { if (srOnly(p)) return true; p = p.parentElement; } return false; };
           const inaccessible = (el) => el.closest('[aria-hidden="true"],[inert],[hidden]') != null;
-          const inScrollable = (el) => { let p = el.parentElement; while (p && p !== document.body) { const s = getComputedStyle(p); if (/(auto|scroll)/.test(s.overflowX)) return true; p = p.parentElement; } return false; }; // 가로 escape 판정용 — *가로* 스크롤 조상만 제외(세로 전용 스크롤 조상은 가로 넘침을 담지 못하므로 escape 유효). 조상 overflow:hidden clipping 검출은 미구현 — §5.3 smoke fixture로 검증 후 추가(테스트 없이 미검증 로직 투입 금지).
-          const skip = (el) => !vis(el) || srOnly(el) || inaccessible(el);
+          const hasName = (el) => {
+            if ((el.getAttribute('aria-label') || '').trim() || (el.getAttribute('title') || '').trim()) return true;
+            return (el.getAttribute('aria-labelledby') || '').split(/\s+/).filter(Boolean).some((id) => (document.getElementById(id)?.textContent || '').trim());
+          };
+          const inScrollable = (el) => {
+            let p = el.parentElement;
+            while (p && p !== document.body) {
+              const s = getComputedStyle(p);
+              const contained = /(auto|scroll)/.test(s.overflowX) && p.scrollWidth > p.clientWidth + 1 && p.tabIndex >= 0 && hasName(p);
+              if (contained) return true;
+              p = p.parentElement;
+            }
+            return false;
+          };
+          const clipped = (el) => {
+            const s = getComputedStyle(el);
+            const selfClipped = (['hidden', 'clip'].includes(s.overflowX) && el.scrollWidth > el.clientWidth + 1)
+              || (['hidden', 'clip'].includes(s.overflowY) && el.scrollHeight > el.clientHeight + 1);
+            if (selfClipped) return true;
+            const r = el.getBoundingClientRect();
+            let p = el.parentElement;
+            while (p && p !== document.documentElement) {
+              const ps = getComputedStyle(p);
+              const pr = p.getBoundingClientRect();
+              const left = pr.left + p.clientLeft;
+              const top = pr.top + p.clientTop;
+              const right = left + p.clientWidth;
+              const bottom = top + p.clientHeight;
+              if ((['hidden', 'clip'].includes(ps.overflowX) && (r.left < left - 1 || r.right > right + 1))
+                || (['hidden', 'clip'].includes(ps.overflowY) && (r.top < top - 1 || r.bottom > bottom + 1))) return true;
+              p = p.parentElement;
+            }
+            return false;
+          };
+          const skip = (el) => !vis(el) || inSrOnly(el) || inaccessible(el);
           const overflow = document.documentElement.scrollWidth > innerWidth + 1;
           let escapes = [], clips = [];
           if (!wide) {
             escapes = [...document.querySelectorAll('body *')].filter((el) => { if (skip(el) || inScrollable(el)) return false; const r = el.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).slice(0, 5).map(sel);
             // clip = overflow hidden/clip으로 *잘린* 텍스트. 의도적 text-overflow:ellipsis(정상 truncation)는 제외
-            clips = [...document.querySelectorAll('h1,h2,h3,p,span,button,a,label,[data-check-text]')].filter((el) => { if (skip(el)) return false; const s = getComputedStyle(el); if (s.textOverflow === 'ellipsis') return false; const clipping = ['hidden', 'clip'].includes(s.overflowX) || ['hidden', 'clip'].includes(s.overflowY); return clipping && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1); }).slice(0, 5).map(sel);
+            clips = [...document.querySelectorAll('h1,h2,h3,p,span,button,a,label,[data-check-text]')].filter((el) => { if (skip(el)) return false; const s = getComputedStyle(el); return s.textOverflow !== 'ellipsis' && clipped(el); }).slice(0, 5).map(sel);
           }
           return { overflow, escapes, clips };
         }, vp.w > 375);
@@ -78,7 +112,10 @@ try {
         }
         // 결정적 차단 #2: populated axe (파일이 실카피·실데이터 렌더 전제). WCAG 태그 명시(stack-guard 선언 wcag2aa + 2.2 AA 정합), serious/critical만 block
         if (vp.w === 1280 || vp.w === 320) {
-          const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+          const res = await new AxeBuilder({ page }).options({
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] },
+            rules: { 'label-content-name-mismatch': { enabled: true } }, // wcag21a의 유일한 axe 규칙은 experimental이라 태그만으로는 실행되지 않는다.
+          }).analyze();
           for (const v of res.violations) {
             const block = v.impact === 'serious' || v.impact === 'critical';
             findings.push({ file: f, viewport: vp.w, block, kind: 'axe:' + v.id, impact: v.impact, selector: v.nodes.map((n) => n.target).flat().slice(0, 5) });

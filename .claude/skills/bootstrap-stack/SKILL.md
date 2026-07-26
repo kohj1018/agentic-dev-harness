@@ -73,7 +73,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 ## 스택 결정 tier (T1/T2/T3 — ADR-055) — 판정 기준
 - **T1 기초 스택**(프로젝트 birth): 본 skill의 BASE/DEEP 흐름 → ADR-101 + ARCH §7 + charter §7 제약.
 - **T2 물질적 변경/마이그레이션**: ADR-053 S1~S4 중 1+ 해당(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존을 건드림 **또는** ARCH §7 결정·charter §7 제약을 뒤엎음; 개별로 사소해도 *cluster*로 이 선을 넘으면 포함) → 본 skill `--migrate`.
-- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리(ADR-040#amend-1) — 다음 plan-milestone/plan-workitem 범위에 포함, 즉시 generic 호출 아님(ADR-057#amend-3 결정 6). ADR-101 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
+- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리(ADR-040#amend-1) — 해당 마일스톤 계획 범위에 포함하며 즉시 generic 호출하지 않음(ADR-057#amend-3 결정 6). ADR-101 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
 
 반드시 지켜야 할 원칙:
 - shared 기본값에 OS/셸 종속 hook를 강제로 넣지 않는다. 대신 필요한 scripts/hooks/CI를 문서로 정리한다.

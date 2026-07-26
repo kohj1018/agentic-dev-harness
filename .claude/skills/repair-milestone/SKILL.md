@@ -77,7 +77,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 - status: open → resolved 토글한 finding 수
 - architect 호출 권장 (architecture debt가 구조 변경을 요할 때)
 - 미해결 항목 (있으면)
-- 다음 권장 액션: `/stabilize-milestone <M-N>` 재실행 (수정 반영 후 재검증 → 졸업 가능 = YES면 `/plan-milestone`로 다음 마일스톤(M-(N+1))+feature 생성·확정 후 `/plan-workitem M-(N+1)`로 전체 계획)
+- 후속 권장 액션: `/stabilize-milestone <M-N>` 재실행 (수정 반영 후 재검증 → 졸업 가능 = YES면 `/plan-milestone`로 새 마일스톤(M-(N+1))+feature 생성·확정 후 `/plan-workitem M-(N+1)`로 전체 계획)
 
 정책 근거: 비판적 재점검·전 severity 완결은 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-workitem·repair-plan 대칭. milestone 졸업 contract는 [ADR-014](../../../docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md). 결정 이력 영속·commit owner 분리는 [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7. 단순성·범위 추적은 [ADR-006](../../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md). repair-milestone 신규 skill 거버넌스: [ADR-052](../../../docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) D4.
 
