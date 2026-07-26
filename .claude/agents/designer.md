@@ -14,7 +14,7 @@ color: purple
 - 디자인 원칙(R1): actionable verb 원칙 3~5개. 모호어("modern/clean/sleek") 금지.
 - concept 시안(R2): REFINE/EXPLORE 카드에 따라 authoring한다 — REFINE(익숙한 convention + restrained signature) / EXPLORE(signature-led + 같은 익숙한 control/flow 보존). signature가 primary task를 더 빨리 이해시키지 못하면 장식이므로 넣지 않는다(ADR-058). 카드 필드(task hypothesis|preserved convention|visible signature|failure sign)를 지킨다.
 - **수용 게이트 repair(R2-G/R6)**: reviewer/게이트가 되먹인 실패 selector + 요약을 받아 그 지점만 재생성한다(retry ≤2 — 그 안에서 못 고치면 brief 재검토로 에스컬레이션). identity·layout 전면 재설계가 아니라 지목된 결함(대비·overflow·clipping 등)만 고친다.
-- 마일스톤 화면 프로토타입(plan-milestone R5): 확정된 DESIGN.md 토큰(`:root` CSS 변수만 참조 — 정의 블록 밖 raw hex 금지) 위에서 화면 구성·인터랙션 주석·실카피·못생긴 상태(긴 제목/빈 목록/로딩/에러/항목 과다)를 채운 프로토타입을 authoring한다.
+- 마일스톤 화면 프로토타입(plan-milestone R5): 확정된 DESIGN.md 토큰(`:root` CSS 변수만 참조 — 정의 블록 밖 raw hex 금지) 위에서 화면 구성·인터랙션 주석·실카피·못생긴 상태(긴 제목/빈 목록/로딩/에러/항목 과다)를 채운 프로토타입을 authoring한다. 각 경험 결정에 `<!-- PX-M<N>-<screen>-NN: <한 줄 결정> -->` 마커를 **의무로** 단다(ADR-056#amend-1 — 이 마커가 PX의 단일 source, R5-5가 그대로 복사; 재추출 drift 방지).
 - DESIGN.md/DESIGN_RESEARCH.md authoring 보조(R3~R5).
 
 규칙:

@@ -1,29 +1,37 @@
 ---
 name: plan-workitem
-description: 기존 feature 문서를 task 단위로 분해하고, 그 task의 AC를 feature `## 7-1` FAC↔AC 매핑표에 채운다 (milestone·feature 문서 *생성*은 plan-milestone 담당 — ADR-050/ADR-051). Claude Code plan 모드와 다름 — task 분해기. M<N> 입력 시 마일스톤 배치 분해(2-tier — ADR-057).
-argument-hint: "[feature id | milestone id] [--refresh]"
+description: 입력 마일스톤의 전 feature를 task로 분해하고 전 AC·매핑을 1회 완성 (milestone·feature 문서 *생성*은 plan-milestone 담당 — ADR-050/ADR-051). Claude Code plan 모드와 다름 — task 분해기. `M<N>` 입력 시 마일스톤 전체 계획 스냅샷(ADR-057#amend-3).
+argument-hint: "<milestone-id>"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
 ---
 
-너의 역할은 입력으로 받은 feature ID를 task 단위로 분해하고, 그 task들의 AC를 feature `## 7-1` 매핑표에 채우는 것이다. milestone·feature 문서 *생성*은 `/plan-milestone` 담당이며, 본 skill은 *이미 존재하는* feature 문서를 입력으로 받는다.
+너의 역할은 입력 마일스톤 `M<N>`의 *전 feature*를 task로 분해하고 그 AC를 각 feature `## 7-1`에 채우는 것이다. milestone·feature 문서 *생성*은 `/plan-milestone` 담당이며, 본 skill은 *이미 존재하는* feature 문서를 입력으로 받는다.
 
 입력:
-- `$ARGUMENTS`에는 분해 대상 feature ID(예: `F-001`) **또는 milestone ID(`M<N>` — 배치 모드)**가 들어온다. **feature ID 입력 시** feature 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다). **`M<N>` 입력이면 milestone 문서와 그 `## 3. 포함되는 기능`이 가리키는 feature들을 읽어 처리한다(종료 조건은 milestone 문서 부재 시 — 아래 배치 모드 단락).**
-- **경험 계약 입구 점검 (ADR-056 결정 3 / ADR-007#amend-5)**: 입력 feature가 **UI 확정**(ADR-027#amend-3)인데 (a) feature 문서 `## 7`에 `프로토타입:` 참조도 없고 (b) `프로토타입 면제: <사유>` 기록도 없으면 — **분해를 시작하지 않고 `Needs Experience Contract`로 종료**한다. 안내: "`/plan-milestone M<N> --prototype F-NNN`으로 승인 프로토타입을 먼저 만들거나, feature 문서에 `프로토타입 면제: <사유>`를 기록 후 재실행". **UI 의심**(status=draft+신호)은 차단하지 않고 경고 1줄만 출력하고 진행(false positive 완충).
-- **`M<N>` 입력 — 마일스톤 배치 분해 모드 (ADR-057 결정 2)**: 본 마일스톤 `## 3. 포함되는 기능`의 모든 feature를 한 세션에서 분해한다.
-  - *안정 tier (전 feature 완성)*: 각 task의 범위/비범위·`## 6` AC·`## 9` 의존성·feature `## 7-1` FAC↔AC 매핑·cross-task seam self-check(ADR-057 결정 9 — **마일스톤 전체 task 집합 대상 1회**, cross-feature seam 포함).
-  - *가이드 tier*: `## 3` 단계별 가이드는 **첫 구현 대상 feature(의존성상 최선두)만** 3-G full JIT로 작성. 나머지 feature의 task는 의도 수준 초안만 적고 `## 3` 본문 첫 줄에 HTML 주석 마커 `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->`를 박는다(heading 아님 — 스키마 보존, ADR-026#amend-3). AC 해석 확정(9-1)·경험 계약 입구 점검(ADR-056)은 배치 시점에 전 feature 수행.
-  - **멱등**: 분해 완결 feature(전 task에 `## 6` AC 존재 + `## 7-1` 매핑 완성)는 skip, 부분 생성 feature는 이어서 완성 — 배치 재실행 안전. **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
-  - 경험 계약 입구 점검은 마일스톤 내 *모든 UI 확정 feature*에 대해 1회 일괄 수행 — 하나라도 미충족이면 그 feature만 보류 목록으로 출력하고 나머지는 진행(전체 차단 X — ADR-056 결정 3의 배치 단서).
-- **`F-NNN --refresh` — 가이드 재접지 모드 (ADR-057 결정 3)**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 3-G 재작성하고 draft 마커를 제거한다. AC·범위·매핑은 손대지 않는다(변경이 필요해 보이면 "남은 미결정 사항"에 surface — 자동 수정 X). `## 8. 메모`의 repair 이력과 승인 프로토타입 갱신(`--prototype` 재승인)을 반영 입력으로 읽는다.
-  - **seam 재점검 (경량 — ADR-057 결정 9)**: `## 3` 재접지 결과 실제 write 대상·2차-write·상태 전이가 배치 시점 추정과 달라지면, 그 feature 관련 `## 7-2` invariant가 여전히 유효한지 확인하고 무효 의심 시 "남은 미결정 사항"에 surface한다(자동 수정 X). *배치 분해 시점엔 `## 3`가 draft라 구현 세부에서만 드러나는 cross-task seam을 못 볼 수 있으므로, --refresh가 그 seam의 마지막 재점검 지점이다.*
+- `$ARGUMENTS`에는 마일스톤 ID `M<N>`만 받는다 — **`F-NNN` 단독 입력은 거부**(`'M<N>' 단위로 실행` 안내 후 종료). 내부 feature별 순차 처리는 `M<N>` 실행 *안*에서만. milestone 문서가 부재하면 `/plan-milestone`를 먼저 안내하고 종료한다(milestone·feature 문서를 본 skill이 새로 만들지 않는다).
+  - **입구 상태 확인 (결정 5b·5d)**: (i) **M과 산하 feature가 모두 `## 0. Status: ready`**인지 — `draft`(plan-milestone 미확정)면 "plan-milestone으로 확정 먼저" 안내 후 종료; (ii) 그 M의 task 상태가 하나라도 `draft|ready` 밖(`in-progress`·`blocked`·`done`·`deprecated`)이면 계획 변경 거부("이미 구현 시작/종료 상태 — 현재 M 계획 잠금; 근본 문제면 사용자 중단·보고 또는 다음 M"). 모든 기존 task가 `draft|ready`일 때만 상태별 분기: **(A) task 0건(최초 실행) → 전 feature task를 `draft`로 생성하며 `## 3`·AC·`## 9`·FAC↔AC·(UI)PX↔AC를 작성 → 전체 self-check+`[Plan-dep]` → `ready` 순차 승격**; **(B) `draft`가 1개 이상(전부 draft 또는 ready/draft 혼합) → 전체 계획 재검증 후 남은 `draft`를 `ready`로 승격**(미완 작성·승격 재개 — 혼합은 dead state 아님); **(C) 전 task `ready`+완결 → read-only no-op**; **(D) `ready`인데 문서 불완전(완결 판정 미충족) → 자동 하향·수정하지 않고 `Needs Plan Repair`로 중단**, 첫 구현 전 `/validate-plan M<N>`→`/repair-plan M<N>`으로 고친 뒤 전체 self-check를 다시 통과시킨다(`ready → draft` 역전이 없음). task `ready` 승격은 **전체 self-check + `[Plan-dep]` 성공 후·마지막 출력 前** 단계에서 수행한다.
+- **경험 계약 입구 점검 (ADR-056 결정 3 / ADR-007#amend-5)**: 입력 feature가 **UI 확정**(ADR-027#amend-3)인데 (a) feature 문서 `## 7`에 `프로토타입:` 참조도 없고 (b) `프로토타입 면제: <사유>` 기록도 없으면 — **이 M은 확정 계약이 불완전하므로 task 0건 상태로 중단한다. 같은 draft `/plan-milestone M<N>`에서 프로토타입/면제를 완성한 뒤 다시 `/plan-workitem M<N>`**으로 안내한다. 이미 `ready`인 M에서 발견되면 plan-milestone을 자동 재호출하지 말고 상위 P0로 사용자에게 보고한다. **UI 의심**(status=draft+신호)은 차단하지 않고 경고 1줄만 출력하고 진행(false positive 완충).
+- **`M<N>` 입력 — 마일스톤 전체 계획 스냅샷 (ADR-057#amend-3)**: 본 마일스톤 `## 3. 포함되는 기능`의 모든 feature를 **한 번의 실행으로** 완성한다(2-tier/draft/`F-NNN --refresh` 없음 — 내부적으로 feature별 순차 authoring은 허용하되 사용자에게 재호출을 요구하지 않는다).
+  - 각 task의 범위/비범위·`## 6` AC·`## 9` 의존성(`T-NNN:AC-M` 참조 — ADR-026#amend-4)·feature `## 7-1` FAC↔AC 매핑·(UI) `## 7-3` PX↔AC·cross-task seam self-check(ADR-057 결정 9 — **마일스톤 전체 task 집합 대상 1회**, cross-feature seam 포함)를 전 feature에 대해 완성한다.
+  - `## 3` 단계별 가이드는 **모든 feature**에 대해 3-G로 완성한다(draft 마커·`첫 feature만` tier 폐기 — `## 3 상태: draft` 주석 박지 않음). AC 해석 확정(9-1)·경험 계약 입구 점검(ADR-056)은 전 feature 수행.
+  - **후행 task는 선행 task의 계획된 완료 결과·AC를 전제로 작성**(ADR-057#amend-3): 전 task를 한 번에 만들므로 후행 task `## 3`·AC는 선행 task가 보장할 인터페이스·완료 결과를 전제로 적는다(refresh 없이 후행 계획이 성립하도록).
+  - **멱등**: 완결 feature = 전 task 필수 섹션(`## 3` 구현항목·`## 6` AC·`## 9` 의존성) + feature `## 7-1` FAC↔AC 매핑 + (UI) `## 7-3` PX↔AC + (seam 신호 시) `## 7-2` INV + "남은 미결정 사항" 0건이 *모두* 충족된 것만 skip한다. 하나라도 빠지면 *미완결* — 재개 시 **기존 task ID를 유지한 채 이어서 채운다**(부분 문서 재작성·중복 생성 금지). 컨텍스트가 끊기면 *같은 `/plan-workitem M<N>`* 재실행으로 재개(다른 명령·`F-NNN` 아님). feature 5+로 한 번에 못 끝내면 같은 `M<N>` 재실행으로 이어서(‘2회 분할 실행’ = 재개일 뿐 별도 모드 아님). **사이즈 가드**: feature 5+면 2회 분할 실행 권장.
+  - **입구 preflight 실패 정책**: 한 feature라도 경험 계약(프로토타입/면제)·상위 계약이 빠지면 *task를 하나도 쓰기 전에* 일괄 중단하고 어떤 feature가 왜 막혔는지 보고한다 — 부분 계획 금지(plan-milestone에서 계약 확정 후 같은 `M<N>` 재실행). *단, 이미 완결된 feature의 멱등 skip은 부분 계획이 아니라 재개다(위).*
+- **근거**: 사용자 요구 = 최종 합성 화면 + 마일스톤 단위 전체 계획·잠금(ADR-057#amend-3). 2-tier/draft/`F-NNN --refresh`·`M<N> --refresh`를 모두 폐기하고 전 feature task를 한 번에 완성한다. 코드-stale 방지 근거(base 결정 3)는 draft 지연-계획이 아니라 **task 실행 직전 implement-workitem 경량 접지 확인**으로 옮긴다(§4.12b; 근본 충돌은 사용자 보고).
+- **열린 질문 영속 (결정 5)**: "남은 미결정 사항"을 *대화 출력으로만* 두지 않는다 — 질문 발생 시 **소유 milestone `## 7 열린 질문` 또는 feature `## 12 열린 질문`에 1줄로 영속**(대화가 아니라 문서), 해결되면 **그 줄을 제거**(섹션엔 미해결만 — `resolved` 표시 문법 없음; 이력 필요 시 메모/결정 이력으로). **미해결 열린 질문이 하나라도 남으면 그 M의 task `ready` 승격을 막는다**(전 계획 성공이어도 미승격 — 별도 blocking 문법 없이 미해결=차단; 비차단 메모는 가정/메모에; 결정 5b·5). 재실행 시 *출력 기억이 아니라 그 섹션을 읽어* 판정한다(컨텍스트가 끊겨도 유지). plan-milestone의 `ready` 전환도 동일 섹션의 "미해결 열린 질문 0건"을 요구(§4.11).
+
+**추가 — 의존성 계약(`## 9`) 정밀화 (ADR-057#amend-3 후행-task 전제 배선)**: 전체 스냅샷이라 후행 task는 선행 task의 *계획된* 완료 결과를 전제로 쓴다. plan-workitem이 `## 9. 의존성`을 채울 때 **선행을 `T-NNN:AC-M` 단위로 참조**한다(그 task가 보장할 AC/산출 명시 — 후행 `## 3`가 이 결과를 전제로 참조). 배치 시점 self-check에서 **(i) 누락 참조(존재하지 않는 선행 task), (ii) 의존성 그래프 순환, (iii) 후행 `## 3`가 전제한 산출이 선행 task의 참조 AC에 없음** 중 하나라도 있으면 plan-workitem을 성공 종료시키거나 task를 `ready`로 승격하지 않는다. 그 M을 미완으로 두고 원인을 보고하며, 수정 후 같은 M 실행으로 재검증한다. 독립 재확인은 validate-plan/reviewer **[Plan-dep]**(존재성·비순환·AC-보장 모두 P0). *구현 시점 재확인은 §4.12b preflight (c).*
+
+**잔여 문구 정리 — 의존성 설치 line item**: `STACK_SETUP_PLAN.md ## Dependency Tools`는 전체 스냅샷에서 설치 line item을 작성할 때 읽는다.
+
+**refresh·retire 배선 없음 (ADR-057#amend-3 / ADR-056#amend-1)**: plan-workitem에 `--refresh` 모드·화면 폐기 재동기·PX revision 재동기 배선을 **두지 않는다**. 프로토타입은 `/plan-milestone M<N>` 확정 시점에 잠기므로 계획 후 재동기가 필요 없고(옛 revision·stale·retire 정리 개념 자체가 없음), 프로토타입·기획 변경은 다음 마일스톤(M<N+1>)에서 새 M<N>로 처리한다. 구현 중 계획과 *근본* 충돌이 드러나면 자동 재계획이 아니라 **사용자에게 중단·보고**(§4.5b amend-3 결정 3); 일반 오류(테스트·타입·프로토타입 불일치)는 repair. **plan-milestone 별도 `--prototype` 재진입 모드는 제거됐다** — 미완 R5는 같은 `/plan-milestone M<N>` 재실행으로 이어가고, `ready` 확정 후의 프로토타입·기획 변경은 다음 마일스톤(M<N+1>)에서 처리한다.
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
 - `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. UI 판정은 **ADR-027#amend-3 "UI 판정 다중신호 절차"** 적용(부재→비-UI / status≠draft→UI / status=draft→추가신호). UI 확정 시 본문 회수 + cross-check 활성, 비-UI/skip 시 사유 echo.
-- 입력 feature ID에 해당하는 feature 문서(필수 — 부재 시 `/plan-milestone` 안내 후 종료) 및 그 상위 milestone 문서 (**`M<N>` 배치 입력이면 대신 milestone 문서 + 그 `## 3. 포함되는 기능`이 가리키는 각 feature 문서를 읽는다**)
+- 입력 `M<N>` 마일스톤 문서 + 그 `## 3. 포함되는 기능`이 가리키는 각 feature 문서(milestone 문서 부재 시 `/plan-milestone` 안내 후 종료)
 - `docs/30-workitems/_templates/TASK_TEMPLATE.md` (task 생성 양식 SSOT)
 
 반드시 수행할 일:
@@ -38,8 +46,10 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - "X를 적절히 처리한다" 같은 모호 지시 금지 — *어디를, 무엇으로, 어떻게* 바꾸는지 명시.
    - AC(`## 6`)는 여전히 RGR 사이클의 측정 단위다. `## 3` 가이드는 그 AC를 충족시키는 *집행 절차*이고, 각 단계는 가능하면 `(AC-N)` 태그로 대응 AC를 가리킨다.
    - 단계가 5개 파일을 넘으면 기존 sizing self-check(아래)대로 분해 권장 텍스트를 함께 출력.
-3-P. **승인 프로토타입 참조 authoring (ADR-056 결정 3 — 이중 잠금 2/2)**:
-   입력 feature가 UI 확정·비면제이면, feature `## 7`의 `프로토타입:` 참조 줄에서 화면 파일 경로를 회수해 읽고(UI 확정·비면제 한정 JIT — ADR-019 minimal 정합), 그 화면을 구현하는 *모든* UI task `## 3`에 프로토타입 참조 line item을 authoring한다(신규 요소 유무와 무관 — builder는 기계 실행). 형식: `- 구현 시 승인 프로토타입 참조 — <경로>의 <상태/섹션>과 동일 상태·문구로 구현 (AC-N)`.
+3-P. **승인 프로토타입 참조 + PX↔AC 매핑 + 전환 흐름 authoring (ADR-056 결정 3·#amend-1·#amend-3 — 이중 잠금 2/2)**:
+   입력 feature가 UI 확정·비면제이면, feature `## 7`의 `프로토타입:` 참조 줄에서 화면 파일 경로를 회수해 읽고(UI 확정·비면제 화면만 — ADR-019 minimal-context: 계획 시점 1회 읽기, draft 지연 아님), 그 화면을 구현하는 *모든* UI task `## 3`에 프로토타입 참조 line item을 authoring한다(신규 요소 유무와 무관 — builder는 기계 실행). 형식: `- 구현 시 승인 프로토타입 참조 — <경로>의 <상태/섹션>과 동일 상태·문구로 구현 (AC-N)`.
+   - **PX↔AC 매핑 (ADR-056#amend-1)**: feature `## 7`의 `경험 결정(PX):` 인벤토리 각 PX를 그것을 구현하는 AC로 매핑해 feature `## 7-3. 프로토타입 경험(PX) ↔ AC 매핑`에 `PX-M<N>-<screen>-NN → T-NNN:AC-M`으로 기입한다(해당 AC 본문에 `(PX-M<N>-<screen>-NN)` 태그 가능). 어떤 AC도 참조하지 않는 PX(unmapped PX)는 "남은 미결정 사항"에 `- unmapped PX: <PX-M<N>-<screen>-NN> — 커버 task/AC 없음`으로 surface(unmapped FAC 패턴과 동형 — [Plan-FAC-coverage]가 재점검).
+   - **전환 흐름 소비 (ADR-056#amend-3 — `## 9` 전환 표 존재 시)**: 마일스톤 `## 9. 화면 전환`에서 이 feature가 owner인 행을 회수해, 그 **존재하는 각 path type 행(primary·failure·recovery)**이 task AC로 커버되는지 확인한다(FEATURE §8-1 복구 흐름과 정합). 미커버 path는 "남은 미결정 사항"에 surface. `## 9`가 "(해당 없음)"이면 skip.
 4. 관련 문서 링크를 함께 기록한다.
 5. 검증 포인트와 완료 기준을 포함한다.
 6. **task 단위 분해 시**: TASK_TEMPLATE의 `## 6. Acceptance Criteria`에 측정 가능한 AC를 최소 1개 이상 채운다. Given-When-Then 형식을 *강력 권장*하며 자세한 점검은 아래 9번 항목과 TASK_TEMPLATE 주석을 참조한다. AC가 비면 `/implement-workitem`이 RGR 사이클을 시작할 수 없다(정책: [ADR-009](../../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md), [ADR-026](../../../docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md)).
@@ -117,8 +127,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   | M1        | F-001   | T-002 | 3     | T-001  |
   ```
 - task 분해 시: AC 매핑은 입력 feature 문서 `## 7-1`에 직접 기록(SSOT). plan 출력에는 **전체 표를 echo하지 않고** `unmapped N건`만 요약한다(ADR-037#amend-2 owning — ADR-005·ADR-046#d5 정합). 사람은 feature `## 7-1`을 연다.
-- (단일 feature 모드) 같은 milestone의 미분해 feature 목록 — 다음 `/plan-workitem` 대상 (ADR-057 결정 7)
-- (배치 모드) feature별 ## 3 상태 요약: full N개 / draft M개 (draft는 구현 직전 --refresh)
+- (배치 모드) feature별 task·`## 3` 완성 요약: 전 feature full N개 (draft tier·refresh 폐기 — ADR-057#amend-3 전체 스냅샷; 계획 후 재접지 없음, 프로토타입·기획 변경은 다음 마일스톤)
 - seam: INV N건 / unmapped K건 (또는 "신호 미발화 — skip")
 - 핵심 가정
 - 남은 미결정 사항
@@ -150,7 +159,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 - **발화 시**: architect 단발 sub-call로 cross-task invariant 표를 도출해 feature `## 7-2`에 영속(양식 SSOT는 FEATURE_TEMPLATE 주석). **ARCH `## 4-1. 상태 모델`이 채워져 있으면 sub-call 입력에 포함해 문서화된 상태·전이·2차-write와 대조한다(ADR-057 결정 13 — §4-1 참조 배선).** task `## 3` 관련 단계에 `(INV-N)` 태그, task `## 7`에 `Feature-invariants:` 링크. unmapped INV는 "남은 미결정 사항"에 surface. 출력엔 `seam: INV N건 / unmapped K건` 요약만(전체 표 echo 금지 — ADR-046).
 - **미발화 시**: feature `## 7-2`에 "(해당 없음 — seam 신호 미발화)" 기입 + skip 사유 echo.
 - 신호 ①(2+ task 동일 엔티티/저장소 write)은 단독 발화, **②~④는 복수 task에 걸쳐 등장할 때만 발화**(ADR-057 결정 8 과발동 보정).
-- **배치 모드(M<N>)에서는 마일스톤 전체 task 집합 대상 1회 수행** — cross-feature invariant는 **낮은 번호 feature `## 7-2`에 canonical 기재 + 상대 feature `## 7-2`엔 참조 링크 1줄**(ADR-005 SSOT — 양쪽 본문 중복 금지).
+- **배치 모드(M<N>)에서는 마일스톤 전체 task 집합 대상 1회 수행** — cross-feature invariant는 **① 데이터를 실제 소유(write-through)하는 feature → ② 애매하면 최초 사용 feature → ③ 그래도 불명확하면 낮은 번호 feature(결정적 fallback)** 순으로 canonical feature를 정해 그 `## 7-2`에 기재 + 상대 feature `## 7-2`엔 참조 링크 1줄(ADR-005 SSOT — 양쪽 본문 중복 금지; ADR-057#amend-2 소유 우선).
 - Codex: architect sub-call은 순차 단일 실행 degrade(기존 규약).
 
 ### Task type prefilter (context bloat 회피 — 본 prefilter 결과로 아래 cross-check sub-항목 적용 여부 결정)
@@ -171,7 +180,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
   - (b) 실제 `src/components/` · `app/components/` · `components/` 디렉터리의 기존 컴포넌트 파일명 (코드 실측 — DESIGN.md 미등록 컴포넌트도 포착)
   - 둘 중 *어느 쪽이라도* 기능 유사 컴포넌트 발견 시 "남은 미결정 사항" 에 `- 컴포넌트 중복 의심: T-NNN 의 X ↔ <DESIGN.md ## 7 의 Y / src/components/Z.tsx>. 재사용 검토 권장` 명시. (b) 에만 있고 (a) 에 없으면 *인벤토리 stale* → `+ DESIGN.md ## 7 등록 보강` 도 권장.
 - AC 본문 또는 task `## 3. 구현 항목` 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}` 패턴) 가 직접 박혀 있는가? 발견 시 "남은 미결정 사항" 에 `- raw hex 검출: T-NNN AC-N — DESIGN.md ## 2 의 token 으로 교체 권장` 명시.
-- **8 상태 매트릭스 점검은 *task 의 use-case 해당 상태* 한정** (DESIGN.md `## 7` 의 *전체* 8 상태 설계는 별도 — reviewer Design Consistency `[Design-state]` 책임). 본 self-check 는 *task 본문이 명시한 상호작용* (예: hover/disabled 가 use-case 에 등장하는데 AC 에서 언급 누락) 만 점검. 누락 상태가 있으면 "남은 미결정 사항" 에 `- use-case 상태 누락: T-NNN — <상태> 가 task 본문에 등장하지만 AC 미언급` 명시. 자동 차단 X.
+- **상태 점검은 *task 의 use-case 해당 상태* 한정** (DESIGN.md `## 7` 의 *전체* category expected 상태 설계(ADR-027#amend-7 — interactive/data/static)는 별도 — reviewer Design Consistency `[Design-state]` 책임). 본 self-check 는 *task 본문이 명시한 상호작용* (예: hover/disabled 가 use-case 에 등장하는데 AC 에서 언급 누락) 만 점검. 누락 상태가 있으면 "남은 미결정 사항" 에 `- use-case 상태 누락: T-NNN — <상태> 가 task 본문에 등장하지만 AC 미언급` 명시. 자동 차단 X.
 - task 본문·AC에 박힌 사용자 표면 문구가 DESIGN.md `## 10` Voice & Writing(어조·용어 번역표)과 정합하는가? placeholder 카피·내부용어 노출 발견 시 "남은 미결정 사항"에 `- voice 위반 의심: T-NNN — <문구>. DESIGN.md ## 10 정합 권장` 명시 (ADR-056).
 
 ### API/CLI/백엔드/프론트 스택 + 해당 type task 한정 — ARCH 7-x cross-check
@@ -184,7 +193,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 ### 신규 인터페이스 요소 → task `## 3. 구현 항목` 에 *등록 line item* authoring (builder 가 독립 판단 없이 실행하도록)
 
 위 cross-check 에서 *정당한 신규 요소* (중복 아닌 새 컴포넌트 / 신규 endpoint / 신규 error code / 신규 출력 모드) 가 필요하다고 판단되면, 해당 task `## 3. 구현 항목` 에 **등록 step 을 명시적 line item 으로 박는다**:
-- 예: `- 신규 IconButton 컴포넌트 생성 + DESIGN.md ## 7. Components 에 한 줄 등록 (8 상태 매트릭스 설계 포함)`
+- 예: `- 신규 IconButton 컴포넌트 생성 + DESIGN.md ## 7. Components 에 한 줄 등록 (그 category의 expected 상태 설계 포함 — ADR-027#amend-7)`
 - 예: `- 신규 error code USER_LOCKED 도입 + ARCH ## 7-1 error 레지스트리 등록`
 - 예: `- 신규 CLI 출력 모드 --json 추가 + ARCH ## 7-2 출력 포맷 등록`
 

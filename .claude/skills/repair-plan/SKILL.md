@@ -1,6 +1,6 @@
 ---
 name: repair-plan
-description: 원본 plan 세션에서 실행. docs/40-validation/plan-reviews/<workitem-id>.*.md의 모든 리뷰를 회수해 수용·기각을 판단하고 workitem 문서를 수정한 뒤 리뷰 파일을 삭제한다 (ADR-038).
+description: 원본 plan 세션에서 실행. docs/40-validation/plan-reviews/<workitem-id>.*.md의 모든 리뷰를 회수해 수용·기각을 판단하고 workitem 문서를 수정한 뒤, 아래 성공 조건을 모두 통과한 뒤에만 리뷰 파일을 삭제한다 (ADR-038 / ADR-057#amend-3).
 argument-hint: "[milestone or feature or task id]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews/*.md)
@@ -20,6 +20,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
    - 결과 0건: 사용자에게 *"리뷰 파일이 없음 — 다른 세션에서 `/validate-plan <workitem-id>`를 먼저 실행하세요."* 안내 후 종료. workitem 문서 수정 금지.
    - 결과 1건 이상: 모두 읽는다.
 2. 입력 ID에 해당하는 workitem 문서 + 모든 하위 문서를 읽는다 (`/validate-plan`과 동일 범위). milestone-plan mode 리뷰(ADR-038#amend-4 — 하위 task 0건의 M/F id)도 동일하게 회수·적용한다(M/F id는 sanitization step에서 이미 처리).
+2-L. **부모 M 잠금 확인 (ADR-057#amend-3)**: 입력이 M/F/T 어느 것이든 먼저 부모 `M<N>`을 해석하고 **부모 M 문서 + 산하 전 feature/task**를 읽는다. 부모 M의 task 상태가 하나라도 `draft|ready` 밖(`in-progress`·`blocked`·`done`·`deprecated`)이면 `/repair-plan`은 계획 변경을 거부하고 "구현 시작/종료 상태 — 현재 M 계획 잠금; 새 요구는 다음 M, 현재 계획으로 진행 불가한 근본 문제는 사용자 중단·보고"로 종료한다(F/T 입력으로 M 잠금을 우회 금지). 모든 기존 task가 `draft|ready`일 때만 아래 수행 단계로 진행한다.
 3. `docs/10-charter/PROJECT_CHARTER.md` `## 5. 비목표` / `## 7. 제약 조건`을 읽는다 (수용 판단 근거).
 4. `docs/20-system/ARCHITECTURE_OVERVIEW.md`를 읽는다.
 
@@ -33,7 +34,8 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
    - **Reject-conflict** — 다른 리뷰어와 반대 의견 + 본 plan이 더 정합 (한 줄 사유 — 어느 리뷰어의 어떤 주장이 본 plan과 정합 안 되는지 명시).
 3. 결정 우선순위: P0 > P1 > P2. **한 라운드에 P0 + P1 + P2 모두 판정 + 처리한다** — P2 deferred 자리 신설 X (ADR-038 비결정 정합 — "다음 stabilize 라운드 instruction improvement 후보" 같은 *defer-식 reject 사유는 표면 정합/실질 모순*이므로 금지). P2도 동일하게 4결정 중 하나로 판정: trivially 수용 가능 시 Adopt / Adopt-modified, 리뷰어가 잘못 본 경우(예: 이미 있는 link를 누락이라고 보고) Reject-false-positive, 본 plan이 더 정합한 경우 Reject-conflict. 4결정 카테고리 *외의 deferred drop은 허용 X* — 정직하게 *수용* 또는 *기각*만.
 4. **다중 리뷰어 충돌 처리**: 같은 항목에 대해 리뷰어 A는 Adopt 권장, 리뷰어 B는 다른 수정 권장한 경우, 본 skill이 charter / architecture 정합 기준으로 어느 쪽을 더 받아들였는지 결정 + 결정 근거 1줄. 자동 합의 / 다수결 X — *본 skill(메인 세션) 판단 책임* (ADR-007 책임 경계 정합).
-5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정. 수정 후에도 양식 정합을 점검 (TEMPLATE의 섹션 번호 유지, FAC↔AC `## 7-1` 매핑 갱신, AC Given-When-Then 형식 유지, feature `## 7-2` invariant 표 갱신(task 재분해로 INV의 관련 task:AC가 바뀌면 동기 — ADR-057 결정 14)).
+4-M. **M/F/prototype 계약 자체 P0 (ADR-057#amend-3 결정 6)**: finding이 task·매핑·의존성 결함이 아니라 milestone/feature/prototype *계약 자체*의 근본 결함(예: 확정된 상위 결정과 정면 충돌)이면, 본 skill이 자동 수정·재개방하지 않고 사실·영향만 사용자에게 보고한다 — **기본 경로는 다음 마일스톤**이며, 본 계약에는 현재 M 재개방 명령·상태 전이를 두지 않는다(사용자 판단이 필요한 예외를 에이전트가 lifecycle로 발명하지 않음).
+5. Adopt / Adopt-modified로 결정된 항목에 대해 workitem 문서를 수정. 수정 후에도 양식 정합을 점검 (TEMPLATE의 섹션 번호 유지, FAC↔AC `## 7-1` 매핑 갱신, AC Given-When-Then 형식 유지, feature `## 7-2` invariant 표 갱신(task 재분해로 INV의 관련 task:AC가 바뀌면 동기 — ADR-057 결정 14)). **구현 전에는 review의 task·매핑·의존성 결함을 현재 `ready` 문서에서 직접 수정**하고, 입력 ID의 하위 범위만이 아니라 **부모 M 전체** self-check + `[Plan-dep]`를 다시 통과시킨다(`ready → draft` 역전이 없음).
 5-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 durable correction history + D1 inspectability 정합). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
 
 **영속 위치 — workitem 타입별로 다름** (open items와 closed decision의 의미 분리):
@@ -59,7 +61,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 ```
 
 ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) — workitem ID 그대로 prefix + `-repair-` + 본 라운드 시퀀스. `linked workitem` 필드로 원본 workitem 역참조. **evidence label은 기본 `[관측됨]`** — finding 자체가 리뷰어의 *로컬 문서 관측*에서 나왔으므로. cross-LLM peer review *방식* 자체의 외부실증은 ADR-038 본문에 박혀 있고, 본 finding의 label과는 별개.
-6. **삭제 전 사전 조건 점검** — 모든 P0/P1/P2 항목이 4결정 중 하나로 판정됐는가. 정합이면 삭제 진행.
+6. **삭제 전 사전 조건 점검 (ADR-057#amend-3)** — 처음 회수한 review 파일은 **(i) 모든 finding 4-판정·반영 완료, (ii) 부모 M 전체 self-check + `[Plan-dep]` 성공, (iii) 미해결 열린 질문 0건**일 때만 삭제한다. 하나라도 실패하거나 실행이 중단되면 review 파일을 그대로 보존해 미해결 상태를 영속하며, `/implement-workitem`은 해당 M 또는 산하 F/T의 미해결 plan-review가 있으면 착수하지 않는다.
    **삭제 전 echo 강제**: 메인 세션 출력에 *삭제 대상 경로 목록 전체를 echo* (예: `삭제 예정: M1.claude-b.md, M1.codex.md`). 사용자가 *눈으로* 검증 가능하게 함 — frontmatter `allowed-tools`의 `Bash(rm ...*.md)`가 기술적으로는 모든 plan-review md 삭제를 허용하므로, 본 echo가 *prompt-level safety* 마지막 가드.
    삭제는 *반드시 먼저 할 일 step 1*에서 회수한 파일 경로 목록을 *한 개씩 정확히* 수행 — `rm <path>` 반복 (glob 재실행 금지). 다른 workitem ID의 파일은 *건드리지 않는다*. 마지막 점검 — 회수한 모든 경로가 `docs/40-validation/plan-reviews/<workitem-id>.` 접두 + `.md` 접미 정합.
 

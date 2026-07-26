@@ -69,6 +69,7 @@ accepted
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - .claude/skills/bootstrap-design/SKILL.md
+- .claude/skills/plan-milestone/SKILL.md    — R5-5 프로토타입 수용 게이트 caller(allowed-tools + R5-5; R2-G/R6는 bootstrap-design 소관)
 - .claude/skills/stack-guard/SKILL.md
 - docs/20-system/DESIGN.md                  — 현재 디자인 흐름 근거
 - docs/00-meta/STRUCTURE.md

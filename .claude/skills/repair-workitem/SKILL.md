@@ -21,6 +21,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
    - 파일이 없거나 stale(파일 mtime이 task 문서/구현 파일보다 오래됨)하면 `/validate-workitem` 선행을 안내하고 종료한다.
    - 파일이 `Pass`이면 `/finalize-workitem`을 안내하고 종료한다(repair 대상 없음).
    - **단, 인자에 finding 요약(repair-milestone이 QA_FINDINGS 발견을 위임할 때 넘기는 "<finding>")이 있으면 report가 Pass·부재여도 종료하지 않고 그 finding을 대상으로 진행한다(finding-mode).** 아래 "비판적 재점검"을 그 finding에 적용해 코드를 수정하고 task `## 8. 메모`에 결정 이력을 남긴다. finding-mode에서는 (a) Pass report를 삭제하지 않고(실패 report가 아님), (b) QA_FINDINGS는 건드리지 않으며(status 종료는 위임한 repair-milestone 책임 — 본 skill의 "다른 산출물 미접근" 계약 유지), (c) 마지막 출력에 "/validate-workitem <task-id> 재실행으로 수정 확인" 안내를 포함한다.
+2-G. **상태별 입구 게이트 (`done` 재개방 — 유일한 역전이·writer 고정, ADR-057#amend-3 결정 5)**: task `## 0. Status`를 확인한다. `draft`/`ready`(아직 구현 전)면 repair를 거부하고 "먼저 `/implement-workitem`으로 착수" 안내 후 종료. `in-progress`면 상태를 쓰지 않는 일반 repair로 계속한다. `done`이면 **report(또는 위 finding-mode 근거)가 검증된 결함을 가리킬 때만** 아래 "수행"의 done 재개방 절차를 따른다 — `/repair-workitem`만이 `done` task를 재개방하는 유일한 writer다. `/repair-milestone`은 ADR-052 D4대로 status를 직접 쓰지 않고 per-task 결함을 본 skill로 위임한다.
 3. 사용자가 인자로 부분 지정을 줬으면 그 부분만 대상으로 한다.
 4. 실패 항목을 우선순위(P0 > P1 > P2)로 정렬한다.
 
@@ -33,7 +34,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 > 자기 판단을 신뢰하되, 애매하면 Adopt 쪽으로 보수적으로. Reject는 *근거가 코드/문서로 확인될 때만*.
 
 수행:
-1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 수정한다.
+1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 수정한다. **대상 task가 `done`이었던 경우**: Adopt/Adopt-modified가 하나 이상이면 **첫 코드 수정 직전에** task `## 0. Status`를 `done → in-progress`로 갱신·기록한다(전부 Reject면 코드·status 무변경). 재개방 뒤 이 라운드가 중단되거나 실패하면 `in-progress`로 유지한다(임의로 `done`으로 되돌리지 않음) — 수정 완료 후 fresh `/validate-workitem` Pass를 거쳐 `/finalize-workitem`이 다시 `done`으로 커밋한다.
 2. **한 라운드에 P0/P1/P2를 *모두* 4-판정으로 완결**한다(repair-plan과 동형). report를 삭제하므로 defer 금지 — 미처리 항목을 남기면 삭제 시 정보가 사라진다. 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다(`T-001 "P0 #1, P1 #3만"`).
 3. **결정 이력 영속화 (ADR-047 D7)** — 본 라운드의 P0/P1 항목 전부에 대해 task 문서 `## 8. 메모`에 한 줄씩 append(P2는 cap 보호로 미영속):
    `- repair-workitem <YYYY-MM-DD> <severity> <category>: <Adopt|Adopt-modified|Reject-FP|Reject-context> — <근거 ≤80자>`

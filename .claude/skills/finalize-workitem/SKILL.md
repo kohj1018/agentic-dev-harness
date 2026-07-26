@@ -16,6 +16,7 @@ agent: builder
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다.
+1-G. **착수 상태 게이트 (ADR-057#amend-3 결정 5 — `in-progress → done` 입구)**: 읽은 task 문서의 `## 0. Status`를 확인한다 — **`in-progress`일 때만** 아래 단계로 진행한다. `draft`/`ready`(아직 구현 안 함)면 "`/implement-workitem` 먼저 실행" 안내 후 종료(**`ready → done` 건너뛰기 차단** — 구현 없이 validate·finalize만으로 done 방지), `done`이면 read-only no-op("이미 완료" 안내, 파일·git 무변경). **다중 task 입력이면 하나라도 상태가 틀리면 파일·git index·status를 전혀 건드리지 않고 일괄 중단**한다(부분 커밋·부분 staging 방지).
 2. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate`)이 있으면 실행한다.
    - `--changed` 옵션 지원 시 `validate --changed`로 변경 파일만 빠르게 검증 권장 (ADR-020). full validate는 `/stabilize-milestone`에서 실행.
    - 실패 → `Needs Fix`로 종료. 커밋하지 않음. `/repair-workitem <task-id>`를 텍스트로 제안.
@@ -50,7 +51,7 @@ agent: builder
    - **금지**: `--no-verify`, `--amend`, `git push`.
 9. **feature-완료 감지 (ADR-057 결정 5)**: 직전 단계에서 status를 `done`으로 갱신한 각 task(⚠ 0C-6이 status=done을 커밋 안전검사 뒤로 옮겼으므로 옛 "step 4" 번호에 의존하지 말 것)의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아니다) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
    - FAC closure 요약: feature `## 7-1` 매핑표의 각 `T-NNN:AC-N`이 `docs/40-validation/reports/<task-id>.md`에서 ✅인지 (report 부재 task는 "확인 불가 — report checkout-local" degrade).
-   - 다음 단계 제안(텍스트만): 미-refresh feature 있으면 `/plan-workitem F-next --refresh`, FAC 시나리오 통합 확인 원하면 `/stabilize-milestone M-N --feature F-NNN`, 마일스톤 마지막 feature면 `/stabilize-milestone M-N`.
+   - 다음 단계 제안(텍스트만): 다음 의존성 task가 있으면 그 task를 `/implement-workitem`, 마일스톤 전 task가 done이면 `/stabilize-milestone M-N` (refresh·F-NNN 재계획 경로 없음 — ADR-057#amend-3).
    - Feature 링크 부재 시 "feature 소속 불명 — task `## 7` 링크 보강 권장" 1줄만.
 
 마지막 출력:

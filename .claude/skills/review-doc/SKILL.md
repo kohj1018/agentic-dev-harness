@@ -39,7 +39,7 @@ agent: reviewer
 Write 범위 제한 (수정 대상 파일 제한 — frontmatter `allowed-tools` 와 직교):
 - frontmatter `allowed-tools` 의 Write/Edit 는 *도구 호출 가능성* 만 정한다 (그래야 IMPROVEMENT_GUIDE 에 기록 가능).
 - 본문은 *수정 대상 파일* 을 `docs/40-validation/IMPROVEMENT_GUIDE.md` **단일 파일** 로 제한한다 — 그 외 어떤 파일도 Write/Edit 금지.
-- 본문 외 변경이 필요해 보이면 출력에 "후속 task 권장" 텍스트만 남긴다 — `/plan-workitem` 또는 사용자가 후속 발화.
+- 본문 외 변경이 필요해 보이면 출력에 "후속 task 권장" 텍스트만 남긴다 — workitem finding은 **구현 전 task·매핑·의존성 결함이면 `/validate-plan M<N>`→`/repair-plan M<N>`, M/F/prototype 계약 결함이면 사용자 보고, 구현 시작 뒤 기존 약속 결함이면 소유 task repair, 담당 task 없음·새 범위면 사용자 보고+다음 M 후보**로 분기한다(ADR-057#amend-3 결정 6). review-doc은 계속 report-only다.
 - 위반 발견 시 IMPROVEMENT_GUIDE.md 에 *self-report* (예: `P1 [Self-violation] review-doc edited <file>`) + 다음 라운드 stabilize 가 회수.
 
 마지막 출력:
@@ -51,7 +51,7 @@ Write 범위 제한 (수정 대상 파일 제한 — frontmatter `allowed-tools`
 - 다음 단계 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
   - 기본 권장: P0 finding 이 0건이면 후속 skill 없이 종료. P0/P1 이 있으면 검토 대상 문서 종류별 분기.
   - 분기 옵션 (해당 시 ≤3):
-    - workitem 문서 (milestone/feature/task) 면: 메인 세션이 `planner` 위임 또는 `/plan-workitem <id>` 로 회수 + 후속 task 박기
+    - workitem 문서 (milestone/feature/task) 면: 구현 전이면 `/validate-plan M<N>`→`/repair-plan M<N>`, 계약(M/F/prototype) 결함이면 사용자 보고, 구현 시작 뒤면 소유 task repair 또는 사용자 보고+다음 M 후보
     - charter / architecture / ADR 이면: 메인이 `architect` 단발 위임으로 갱신
     - AGENTS.md / 운영 문서이면: 사용자 직접 수정 (Living Doc 갱신)
   - 프롬프트 동봉 권장:

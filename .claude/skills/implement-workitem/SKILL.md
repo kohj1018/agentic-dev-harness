@@ -18,7 +18,8 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 2. 필요하면 상위 feature/milestone/architecture 문서를 읽는다.
 3. task 문서의 `## 6. Acceptance Criteria`(AC-1, AC-2 ...)와 `## 3. 구현 항목`을 회수한다.
 3-DT. **의존성 도구 확인 (scope별, ADR-051#amend-4)**: slice별로 쓸 의존성 도구(npm/pnpm/yarn/bun · pip/poetry/uv · cargo · go 등)를 회수한다 — ① `docs/00-meta/STACK_SETUP_PLAN.md`의 `## Dependency Tools`(scope→tool)를 *우선* 조회 + 인접 lockfile 등 실제 신호와 모순 없는지 교차 확인, ② 매핑이 없을 때만 각 slice 경로에 *인접한 고신뢰 신호*(`pnpm-lock.yaml`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod` 등 tool-specific)로 추론(일반 manifest만으로 단정 금지), ③ slice 경로와 가장 구체적으로 일치하는 scope의 도구를 그 slice dispatch(step 5)에 전달(한 slice가 여러 scope면 각 도구 함께). **충돌·불일치·slice→scope 불명확이면 그 slice만 `Needs Dependency Tool Decision`으로 중단**(출력에 scope·관측 신호·충돌 사유·해결 포함; 명확한 slice는 계속). 도구 명령이 불필요한 slice는 lockfile 변경 없이 진행.
-3-R. **draft 가이드 하드스탑 (ADR-057 결정 4 / ADR-026#amend-3)**: task `## 3`에 `## 3 상태: draft` 문자열(HTML 주석 마커 내)이 있으면 **분할·dispatch를 시작하지 않고 `Needs Plan Refresh`로 즉시 종료**한다 — `/plan-workitem F-NNN --refresh` 실행을 안내(배치 분해된 가이드는 앞 feature 구현으로 낡았을 수 있다 — 낡은 before/after는 기계 실행 builder에 파괴적).
+3-R. **접지 경량 preflight (ADR-057#amend-3 / ADR-026#amend-4 — base 결정 4·구 draft 하드스탑 대체)**: 계획은 `/plan-workitem M<N>` 전체 스냅샷이라 `## 3`는 이미 완성돼 있다(draft tier 없음). 분할·dispatch 전, 그 task의 접지가 여전히 유효한지만 *가볍게* 확인한다 — `## 3`가 참조하는 (a) 상위 계약(feature `## 7` FAC·`## 7-2` INV/seam·상위 ADR)과 (b) UI면 승인 프로토타입 경로가 **실제로 바뀌었거나 사라졌는지**, (c) 이 task `## 9. 의존성`의 **선행 task가 모두 done인지 + 선행이 약속한 산출(파일·인터페이스·AC)이 실제 존재하는지**(후행 `## 3`가 선행의 *계획된* 완료 결과를 전제로 쓰였으므로 — ADR-057#amend-3). 선행 task가 아직 done이 아니면 이 task는 의존순상 아직 dispatch 대상이 아니다(순서 대기 — 오류 아님). 어긋남이 **없으면 그대로 진행**(기본 경로 — 재계획 아님). 어긋남이 있으면 **원인별로 라우팅**한다 — (1) **선행 task가 done인데 약속한 산출(파일·인터페이스)이 없음**: 대개 그 *선행 task의 구현·검증 누락*이므로 **현재 M에서 그 선행 task를 repair→validate→finalize한 뒤 이 task 재시도**(current-M repair 라우팅 — 사용자 중단 아님). (2) **상위 기획·계약 자체가 틀림**(참조 프로토타입 경로 삭제·상위 `## 7`/INV 변경 등 계획 전제 붕괴): 그 task만 **중단하고 사용자에게 보고**(근본 충돌 — 자동 재계획·refresh 아님; §4.5b amend-3 결정 3, 변경은 다음 마일스톤). 일반 오류(테스트·타입·구현 누락·프로토타입 세부 불일치)는 중단 없이 repair. *`## 3 상태: draft` 문자열 검사·`Needs Plan Refresh`·refresh 안내는 하지 않는다*(draft 마커·refresh 개념이 없다).
+3-G. **착수 게이트 — `ready → in-progress` (ADR-057#amend-3 결정 5)**: 분할(step 4) 진입 전, 아래 ①~⑧을 모두 확인한다 — ① 같은 M에 `draft` task 없음(전체 계획 스냅샷 승격 완료), ② 대상 task 상태 = `ready`(신규 착수) 또는 `in-progress`(재개) — `done`은 거부, ③ 대상 task `## 9`의 선행 task가 모두 `done`(3-R이 산출물 실재까지 검사), ④ 부모 milestone·feature 문서 상태 모두 `ready`, ⑤ `docs/40-validation/plan-reviews/`에 해당 M 또는 산하 F/T의 미해결 review 파일 없음, ⑥ milestone `## 7`·산하 feature `## 12`의 미해결 열린 질문 0건, ⑦ 대상 AC의 구현을 실질적으로 갈라놓는 미확정 해석 0건(아래 "AC 해석 모호성 경로"에서 이미 판정 — task `## 8`의 기존 `해석 확정`을 먼저 읽는다), ⑧ `## 6-2. TDD opt-out` **형식 정합**(사유·follow-up이 둘 다 있거나 둘 다 없음 — 둘 중 하나만 있는 형식 위반은 step 6이 아니라 여기서 막는다. 상태를 쓴 뒤 형식 위반으로 종료하면 구현하지 않은 task가 `in-progress`로 남는다). 하나라도 불충족이면 분할·dispatch하지 않고 신규 대상은 `ready`를 유지한 채 어느 항목이 막았는지 사용자에게 보고한다(이미 `in-progress`인 재개 호출은 상태를 다시 쓰지 않는다). **모든 게이트 통과 후, partition/dispatch 직전에만** 신규 대상 task `## 0. Status`를 `ready → in-progress`로 갱신한다 — 이 기록이 다른 세션의 계획 잠금 판정 근거다.
 4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition; *partition 직전 `docs/00-meta/STACK_SETUP_PLAN.md`(있으면)의 "테스트 격리 미설정" 표식을 회수* — 공유 런타임 리소스 순차화 입력):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
@@ -35,7 +36,9 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - **이 slice의 의존성 도구**(3-DT에서 scope별 회수 — 예: `apps/web`→npm, `apps/api`→uv). builder는 지정된 scope의 그 도구만 쓴다 — 새 도구 도입·전환·다른 scope 도구 실행 금지(stray lock·오도구 방지 — ADR-051#amend-4).
    - 병렬 builder 는 *file-disjoint* slice 에만 띄운다. 같은 파일에 실제 write-conflict 가능성이 있으면 *그 slice 들은 순차로* 돌린다(또는 사용자가 별도 worktree 로 격리) — disjoint 인 일반 경우엔 불필요.
    - **same-checkout 제약(WORKFLOW.md 정합)**: worktree 를 쓴 builder 의 변경은 *최종 minimal validate 전에 메인 checkout 으로 병합*한다. validate/finalize 는 같은 checkout 에서 실행해야 하고, validation report(`docs/40-validation/reports/<task-id>.md`)는 gitignored·checkout-local 이라 worktree 에 흩어지면 후속 finalize 가 `Needs Validation` 으로 못 찾는다. 일반 disjoint 병렬(worktree 미사용)은 본 제약과 무관.
-6. **`## 6-2. TDD opt-out` 점검 (메인이 먼저)** — 사유와 follow-up이 모두 있으면 opt-out 모드를 해당 slice builder 에 지시, 둘 중 하나만 비어 있으면 형식 위반으로 표시하고 *분할/dispatch 전에 종료*(사용자에게 보강 요청).
+6. **`## 6-2. TDD opt-out` 점검 (메인이 먼저)** — 사유와 follow-up이 모두 있으면 opt-out 모드를 해당 slice builder 에 지시한다. *형식 위반(둘 중 하나만 있음) 차단은 3-G ⑧이 담당*하므로 여기까지 왔으면 형식은 정합이다(상태를 쓴 뒤 종료하지 않기 위한 순서 — ADR-057#amend-3 결정 5c).
+
+**AC 해석 모호성 경로 (foreman, dispatch 전 preflight — ADR-006#amend-2 하드스탑 위치 이동)**: AC 해석 점검을 builder 내부(Red 직전)가 아니라 **메인 foreman의 dispatch 전**에 수행한다(신규 task가 아직 `ready`인 동안 판정되고, 모호한 task를 `in-progress`로 먼저 쓰지 않도록). 먼저 task `## 8. 메모`의 `해석 확정: AC-N = <선택>` 기록을 찾는다 — 있으면 그 해석을 기계적으로 따르고 분할·dispatch를 계속한다. 기록이 없고 *2+ 해석이 구현을 실질적으로 다르게* 만들면(사소한 표현 차이는 제외): (a) 그 M의 모든 task 상태가 아직 `draft|ready`이면 `/validate-plan M<N>` → `/repair-plan M<N>`으로 M 전체 task 계획을 검증·수정하도록 안내한다. (b) 하나라도 `draft|ready` 밖 상태면 계획 skill을 우회 호출하지 않는다. 두 경우 모두 **신규 대상은 `ready`를 유지한 채** 분할·dispatch를 시작하지 않고, 해석안 1~3개와 영향을 사용자에게 보고해 결정을 기다린다. 사용자가 명시적으로 선택한 경우에만 task `## 8. 메모`에 `해석 확정: AC-N = <선택>`을 기록하고 같은 `/implement-workitem T-NNN`을 재실행한다. 이미 `in-progress`인 중단 작업을 재개하다 새 모호성이 드러난 예외는 상태를 되돌리지 않고 `in-progress`를 유지한다. 이는 새 scope·자동 재계획이 아니라 잠긴 AC의 사용자 해석 확정이며, 에이전트가 임의 선택하지 않는다.
 
 아래 흐름은 **각 builder 가 자기 slice 에 대해** 수행한다 (메인 foreman 은 dispatch 후 결과를 수합한다).
 
@@ -55,12 +58,7 @@ Red phase 진입 직전, builder 출력의 첫 단락으로 plan 을 다음 형�
 자유 텍스트 1~3 문장도 허용 — Step → verify 형식은 *권장이지 강제 X*. RGR 사이클이 이미 verify 를 강제하므로 형식 자체는 보조 규율.
 *AC-N과 Step의 대응*은 plan 단계에서 명시.
 
-AC 해석 처리 (각 builder 가 자기 AC subset 에 대해 수행 — ADR-006#amend-2 하드스탑):
-1. 먼저 task `## 8. 메모`의 `해석 확정: AC-N = <선택>` 기록을 찾는다.
-   - 기록 있음 → 그 해석을 *기계적으로 따른다*. 자체 재해석 금지.
-2. 기록 없음 + 2+ 해석이 *구현을 실질적으로 다르게* 만듦(사소한 표현 차이는 제외) → **그 slice 구현을 시작하지 않고 `Needs Plan Decision`으로 즉시 종료**한다(메인 foreman 에 그대로 보고 — 메인은 해당 slice 만 보류하고 다른 slice 는 계속).
-   - 출력에 해석안 1~3개를 나열하고, `/plan-workitem <id>` 재실행(또는 cross-review 했으면 `/repair-plan <id>`)으로 해석을 확정하도록 안내한다.
-   - builder는 *자기 해석을 골라 진행하지 않는다* (자아 차단 — plan이 사고, implement는 집행). 단 해석 차이가 사소(동일 구현 수렴)하면 멈추지 말고 진행.
+AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 foreman이 이미 판정했으므로(ADR-006#amend-2), builder는 그 결과(진행 또는 `해석 확정` 기록)를 그대로 전제하고 자체 재해석하지 않는다.
 
 **1. Red**
 - task의 `## 6. Acceptance Criteria` 항목을 1개 골라 그것을 위반하는 실패 테스트를 작성한다.

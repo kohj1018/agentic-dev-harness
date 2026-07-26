@@ -130,7 +130,7 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 
 <a id="adr-051-amend-3"></a>
 ## Amendment 3 (2026-07-16) — D4 범위 갱신 (plan-milestone이 M1 포함 전 마일스톤 생성)
-D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되, 그 범위가 [ADR-057](ADR-057-planning-v2-batch-and-seam.md) 결정 1로 확장된다 — plan-milestone은 M2+가 아니라 **M1 포함 전 마일스톤**을 생성하고, bootstrap-project의 M1/F-001 seed는 제거된다. plan-workitem의 feature→task 집중(D4 후단)은 ADR-057 결정 2의 배치 모드(M<N> 입력)로 보완된다(단일 feature 모드 유지).
+D4의 "milestone 단위 분해를 분리한 신규 skill" 정의는 유지하되, 그 범위가 [ADR-057](ADR-057-planning-v2-batch-and-seam.md) 결정 1로 확장된다 — plan-milestone은 M2+가 아니라 **M1 포함 전 마일스톤**을 생성하고, bootstrap-project의 M1/F-001 seed는 제거된다. plan-workitem의 feature→task 집중(D4 후단)은 ADR-057#amend-3의 `/plan-workitem M<N>` 전체 계획 스냅샷으로 대체된다(단일 feature 모드·refresh 폐기 — `M<N>` 1회만).
 
 <a id="adr-051-amend-4"></a>
 ## Amendment 4 (2026-07-25) — fan-out 크기 판정 기계화 + 하청 정지 회수 + 패키지 매니저 고정

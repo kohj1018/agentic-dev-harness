@@ -2,6 +2,7 @@
 
 ## 0. Status
 draft
+<!-- 값은 헤딩 바로 다음 줄(위)에 둔다 — 주석은 값 *뒤*(finalize 등 "헤딩+1=상태값" 파서 보호). draft(계획 중) → ready(plan-milestone 확정 재대조 통과·잠금). M·feature는 이 단방향만 쓴다 — 완료 판정은 graduation(`## 8` 회고)이 담당하고 stabilize는 M `## 0. Status`를 바꾸지 않는다. ready 뒤 상위 계약 변경은 다음 마일스톤이 기본이고, 현재 M 진행 불가 P0는 자동 역전이 없이 사용자 보고. plan-workitem은 M·산하 feature가 모두 ready일 때만 동작. ADR-057#amend-3 결정 5. -->
 
 ## 0-1. Type
 <!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
@@ -33,12 +34,16 @@ feature
      구 `## 8 검증 방법`을 흡수.
      UI feature는 승인 프로토타입 참조 줄을 둔다(ADR-056 — 화면 단위 파일, 그 feature가 등장하는 화면마다 1줄):
      `프로토타입: [M<N>/<screen>.html](../../20-system/prototypes/M<N>/<screen>.html) (진입: <라우트/상태 진입 메모>)`.
-     프로토타입이 무의미한 UI feature는 `프로토타입 면제: <사유>` 한 줄로 대체(plan-workitem 입구 계약의 통과 조건 — 둘 다 없으면 Needs Experience Contract). -->
+     프로토타입이 무의미한 UI feature는 `프로토타입 면제: <사유>` 한 줄로 대체(plan-workitem 입구 계약의 통과 조건 — 둘 다 없으면 Needs Experience Contract).
+     경험 결정(PX) 인벤토리(ADR-056#amend-1 — plan-milestone R5-5가 승인 프로토타입 HTML의 `<!-- PX-M<N>-<screen>-NN: <한 줄 결정> -->` 마커를 *그대로 복사*, **이 feature가 *구현하는* PX만**; 한 화면이 여러 feature에 걸치면 PX별로 구현 feature에 분산 기록(화면 통째로 몰지 않음 — INST-1 사각 방지); 화면-공통은 shell/layout feature 또는 DESIGN.md §4, cross-feature 정합은 `## 7-2` INV/seam):
+     `경험 결정(PX):`
+     `- PX-M<N>-<screen>-01: <한 줄 결정 (예: 입력창을 화면 상단에 sticky 고정)>`
+     `- PX-M<N>-<screen>-02: <...>` -->
 
 ## 7-1. FAC ↔ AC 매핑표 (subsection of ## 7)
 <!-- /plan-workitem이 task 분해 시 본 subsection을 채운다 (영속 SSOT — plan 출력은 echo).
      형식: FAC-N → T-NNN:AC-N, T-MMM:AC-M (다대다 허용)
-     unmapped 항목은 미커버 task 추가 권장 — validator(ADR-037) 및 stabilize preflight가 재점검.
+     unmapped 0건이 plan-workitem task ready 승격 조건 — 발견 시 성공 종료 금지(ADR-037#amend-3). 구현 시작 후 발견되면 validator(ADR-037) 및 stabilize preflight가 P0 [Spec-gap]로 보고 + 사용자 결정.
      본 subsection은 ## 7 FAC와 한 묶음 — ADR-036 12-섹션 구조에 *추가 main section 신설 X*. -->
 - FAC-1 →
 - FAC-2 →
@@ -50,6 +55,14 @@ feature
      형식: INV-N | 보장 (상태 전이 / 멱등 / 2차-write 재검증 / task 간 계약) | 관련 task:AC | 검증 방법
      예: INV-1 | 주문 상태는 draft→paid→shipped 단방향 — 어떤 task도 역방향 write 금지 | T-003:AC-2, T-005:AC-1 | 상태 전이 가드 단위 테스트
      unmapped INV는 plan 출력 "남은 미결정 사항"에 surface. validator가 task 검증 시 위반·테스트 커버를 점검. -->
+
+## 7-3. 프로토타입 경험(PX) ↔ AC 매핑 (subsection of ## 7)
+<!-- UI feature 한정(ADR-056#amend-1). /plan-workitem 3-P가 채운다(영속 SSOT — plan 출력은 echo).
+     형식: PX-M<N>-<screen>-NN → T-NNN:AC-M, T-MMM:AC-K (다대다 허용)
+     `## 7` PX 인벤토리의 어떤 PX도 참조하지 않는 AC/미매핑 PX(unmapped PX)는 [Plan-FAC-coverage]가 unmapped FAC와 동일 기준으로 잡는다(P0 권장).
+     본 subsection은 ## 7과 한 묶음 — ADR-036 12-섹션 구조에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)". -->
+- PX-M<N>-<screen>-01 →
+- PX-M<N>-<screen>-02 →
 
 ## 8. Non-functional Requirements
 <!-- 성능·접근성·보안·i18n. 해당 없으면 "(해당 없음)" 명시. -->

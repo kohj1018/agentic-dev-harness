@@ -44,7 +44,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - **cross-cutting 결함** (단일 task에 귀속되지 않는 milestone-level 결함): 본 skill이 **직접 수정**한다. 대표 3종:
      - **doc-consistency P0** (예: deterministic preflight가 올린 `[Doc-link]`/`[ADR-ref]`/`[Spec-gap]`/`[Arch-iface-violation]`): 해당 문서·매핑표를 직접 수정.
      - **e2e wiring scaffold/install** (E2E 미정의 스택에 재현 케이스를 영속 테스트로 묶는 scaffold, `validate:e2e` 배선, 의존성 install): 직접 scaffold·install.
-     - **architecture debt** (layer 경계·의존성 규칙 위반 등 ARCH 정합 결함): 직접 수정하거나, 구조 변경이 크면 architect 호출을 텍스트로 제안하고 본 라운드에선 Reject-context 대신 *후속 task 제안*으로 남긴다(과대 수정 금지).
+     - **architecture debt** (layer 경계·의존성 규칙 위반 등 ARCH 정합 결함): **현재 M 약속(기존 task·AC) 위반이면 본 라운드 cross-cutting repair로 직접 수정**하고, 구조 변경이 커서 *새 범위*가 되면 architect 호출을 텍스트로 제안하며 **사용자에게 보고 + 다음 M 후보**로 남긴다(현재 M에 새 task를 제안하지 않는다 — 과대 수정 금지, ADR-057#amend-3 결정 6).
 3. **한 라운드에 P0/P1/P2를 *모두* 4-판정으로 완결**한다(repair-plan/repair-workitem과 동형). defer 금지 — 4결정 카테고리 외의 deferred drop은 허용 X. 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다(`M1 "P0만"`).
 4. **결정 이력 영속화 (ADR-047 D7 durable correction history + D1 inspectability)** — 본 라운드의 P0/P1 항목 전부를 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` 안 `### M-N` 그룹(없으면 신설)에 IMPROVEMENT_GUIDE 스키마로 append. P2는 영속화 X (cap 보호 — 재출현해도 milestone 졸업 게이트를 막지 않아 무해).
 
@@ -77,7 +77,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 - status: open → resolved 토글한 finding 수
 - architect 호출 권장 (architecture debt가 구조 변경을 요할 때)
 - 미해결 항목 (있으면)
-- 다음 권장 액션: `/stabilize-milestone <M-N>` 재실행 (수정 반영 후 재검증 → 졸업 가능 = YES면 `/plan-milestone`로 다음 마일스톤(M-(N+1))+feature 생성 후 `/plan-workitem F-NNN`로 task 분해)
+- 다음 권장 액션: `/stabilize-milestone <M-N>` 재실행 (수정 반영 후 재검증 → 졸업 가능 = YES면 `/plan-milestone`로 다음 마일스톤(M-(N+1))+feature 생성·확정 후 `/plan-workitem M-(N+1)`로 전체 계획)
 
 정책 근거: 비판적 재점검·전 severity 완결은 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-workitem·repair-plan 대칭. milestone 졸업 contract는 [ADR-014](../../../docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md). 결정 이력 영속·commit owner 분리는 [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7. 단순성·범위 추적은 [ADR-006](../../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md). repair-milestone 신규 skill 거버넌스: [ADR-052](../../../docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) D4.
 

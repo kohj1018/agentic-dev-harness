@@ -2,6 +2,7 @@
 
 ## 0. Status
 draft
+<!-- 값은 헤딩 바로 다음 줄(위)에 둔다 — 주석은 값 *뒤*("헤딩+1=상태값" 파서 보호). draft(계획 작성 중) → ready(전 M 계획+[Plan-dep] 성공 시 plan-workitem이 승격) → in-progress(모든 preflight 통과 뒤 implement dispatch 직전) → done(finalize). 유일한 역전이: 검증된 완료 결함을 repair-workitem이 Adopt/Adopt-modified한 경우의 `done → in-progress`. implement는 ready 신규 착수/in-progress 재개만, finalize는 in-progress만 done. ADR-057#amend-3 결정 5. -->
 
 ## 0-1. Type
 <!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
@@ -21,7 +22,7 @@ feature
 <!-- plan-workitem이 *단계별 구현 가이드*로 채운다 (ADR-026#amend-2). 그 문서만 보고 따라 하면 구현이 끝날 만큼 구체적으로.
      각 단계 형식: `N. <파일경로[:라인/식별자]> — 현재: <상태> → 변경: <정확한 수정(필요 시 before/after)> → 확인: <검증 방법>` (가능하면 끝에 `(AC-N)` 태그).
      모호 지시("적절히 처리") 금지. 새 외부 의존이 필요하면 설치 단계도 명시 (ADR-040#amend-1) — 예: N. 의존성 설치 — `pnpm add <pkg>@<ver>` 실행 (용도: ...) (AC-N).
-     배치 분해(ADR-057)된 뒤 feature의 task는 본 섹션이 의도 수준 초안 + 본문 첫 줄 draft 마커 HTML 주석일 수 있다(정확한 마커 문자열은 plan-workitem SKILL 배치 모드 단락이 SSOT) — implement는 draft 마커에서 Needs Plan Refresh로 정지한다(ADR-026#amend-3).
+     `/plan-workitem M<N>`이 전 feature의 `## 3`를 한 번에 완성한다(ADR-026#amend-4 — `## 3` SSOT; ADR-057#amend-3 — draft tier 폐기; 의도-수준 draft 마커 없음). implement 진입 preflight는 draft 검사가 아니라 접지 유효성만 가볍게 본다(ADR-057#amend-3).
      단계가 feature ## 7-2의 invariant를 집행하면 끝에 (INV-N) 태그를 붙일 수 있다 (ADR-057). -->
 
 ## 3-T. 트러블슈팅 (Type=bugfix 일 때만 — 아니면 본 섹션 삭제)
@@ -51,7 +52,8 @@ feature
      강력 금지(절대 비측정): works, looks good, is correct, is fine
      문맥상 허용: handles, supports — 단 *무엇을 / 어떻게*까지 명시되면 허용
      AC 3개 이하 권장(4개 이상이면 task 분해 *권장 텍스트*).
-     위반 시 planner는 *재분해 권장 텍스트*를 출력, builder는 *재분해 요청 텍스트*를 Red phase 직전 출력 — 자동 차단은 하지 않는다(사용자 결정). 정책: ADR-026. -->
+     위반 시 planner는 *재분해 권장 텍스트*를 출력, builder는 *재분해 요청 텍스트*를 Red phase 직전 출력 — 자동 차단은 하지 않는다(사용자 결정). 정책: ADR-026.
+     UI task로 프로토타입 경험 결정을 구현하는 AC는 끝에 `(PX-M<N>-<screen>-NN)` 태그를 붙일 수 있다(ADR-056#amend-1 — (AC-N)·(INV-N) 태그와 동형). feature `## 7-3` PX↔AC 매핑의 근거. -->
 - AC-1 [Given] ... [When] ... [Then] ...
 - AC-2 [Given] ... [When] ... [Then] ...
 
@@ -88,5 +90,5 @@ feature
 <!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유. -->
 
 ## 9. 의존성
-<!-- 자연어 1줄로 선행 task를 선언한다: `- T-002: T-001의 X 정의 후 시작 가능`. 비어 있으면 선행 의존 없음.
-     plan-workitem이 본 선언을 읽어 분해 결과 매트릭스의 의존성 컬럼을 채운다. 단순 순차 진행 기준이며 별도 형식을 강제하지 않는다. -->
+<!-- 선행 task를 그 task가 보장할 AC 단위로 참조: `- T-002 ← T-001:AC-2 (인증 인터페이스 정의)`. 비어 있으면 선행 의존 없음.
+     후행 `## 3`는 이 선행 결과를 전제로 작성한다(ADR-057#amend-3 후행-task 전제). plan-workitem이 본 선언을 읽어 의존성 컬럼을 채우고, **누락 참조·순환은 성공 종료를 막는다**(실행 순서 부재). -->

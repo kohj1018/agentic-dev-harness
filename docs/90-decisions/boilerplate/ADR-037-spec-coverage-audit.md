@@ -5,6 +5,11 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- feature `## 7` FAC와 `## 7-1` FAC↔AC 매핑이 coverage SSOT다(#amend-1); 대화 출력은 요약만 둔다(#amend-2).
+- `/plan-workitem M<N>`은 FAC↔AC 100%와 unmapped 0건을 task ready 승격 조건으로 삼는다. 첫 구현 전 validate/reviewer는 누락을 P0로 보고하고 repair-plan이 task·AC·매핑을 수정한다(#amend-3).
+- 구현 시작 뒤 unmapped FAC는 `P0 [Spec-gap]`+`Needs Fix`, stabilize graduation `NO`로 사용자에게 보고한다. 현재 M task 자동 추가·FAC 자동 취소·plan-workitem 재호출은 없다(#amend-3, ADR-057#amend-3 결정 6).
+
 ## 배경
 - [외부실증] Osmani self-audit — feature FAC(Feature-level Acceptance Criteria)와 task AC 매핑 누락이 *spec gap*의 핵심 원인.
 - ADR-036으로 FEATURE_TEMPLATE에 `## 7 FAC`가 생겼지만 FAC→AC 매핑을 추적하는 메커니즘 부재.
@@ -78,8 +83,29 @@ plan-workitem의 FAC↔AC *전체 매핑표 echo*를 폐지한다. plan 출력�
 - .claude/skills/validate-workitem/SKILL.md            — #d1 Spec coverage audit
 - .claude/agents/validator.md                           — #d1 FAC→AC 매핑 점검
 - .claude/skills/stabilize-milestone/SKILL.md          — #amend-1 §1.0 FAC unmapped 점검
+- .claude/skills/validate-plan/SKILL.md                — #amend-3 [Plan-FAC-coverage] 구현-후 사용자 결정 라우팅
+- .claude/agents/reviewer.md                            — #amend-3 [Plan-FAC-coverage] 미러
 
 ## 참고
 - ADR-036 (FEATURE_TEMPLATE 12섹션)
 - ADR-026 (TASK_TEMPLATE schema)
 - ADR-007 (validator 책임 경계 — 판정+권장만)
+
+<a id="adr-037-amend-3"></a>
+## Amendment 3 (2026-07-26) — unmapped FAC의 계획-시점 차단 + 구현-후 사용자 결정
+
+### 결정
+1. `/plan-workitem M<N>` 전체 스냅샷에서는 FAC↔AC 100%가 task `ready` 승격의 필수 조건이다. unmapped FAC가 하나라도 있으면 self-check 실패로 전 task를 `draft`에 두고 성공 종료하지 않는다.
+2. 첫 구현 전 `validate-plan`/reviewer의 `[Plan-FAC-coverage]`는 unmapped FAC를 P0로 보고하며, `/repair-plan M<N>`이 부모 M 전체의 **task·AC·FAC↔AC 매핑**을 고친 뒤 재검증한다(M/F의 FAC 자체를 바꾸는 경로 아님).
+3. 구현이 시작된 뒤 validator/validate-workitem이 unmapped FAC를 발견하면 report에 `P0 [Spec-gap] FAC-N → unmapped`를 기록하고 combined verdict를 `Needs Fix`로 둔다. **미커버 task 자동 추가·`/plan-workitem` 재호출·`/repair-workitem` 자동 진입은 하지 않는다**. 다음 액션은 사용자 중단·보고다. 사용자가 현재 M 약속을 어떻게 처리할지 명시적으로 결정해야 하며, 새 요구·기획 변경은 다음 마일스톤이 기본이다.
+4. stabilize preflight에서도 같은 finding은 graduation `NO`를 유지하고 사용자에게 보고한다. 자동 corrective task·자동 FAC 취소 문법은 두지 않는다.
+
+### 적용 surface
+- .claude/skills/plan-workitem/SKILL.md (FAC↔AC 100% ready gate)
+- .claude/skills/validate-plan/SKILL.md · .claude/agents/reviewer.md (`[Plan-FAC-coverage]` P0)
+- .claude/skills/validate-workitem/SKILL.md · .claude/agents/validator.md (P0 report + 사용자 결정 라우팅)
+- .claude/skills/stabilize-milestone/SKILL.md (graduation NO)
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md (`## 7-1` 주석)
+
+### 강도 (ADR-022)
+- constraint(강) — 계획 완료 조건과 구현 후 계획 잠금을 동시에 보존. validator는 report-only이고 문서·코드를 직접 수정하지 않는다.

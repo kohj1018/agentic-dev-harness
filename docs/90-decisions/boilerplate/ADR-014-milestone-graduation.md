@@ -105,3 +105,16 @@ graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`의 *soft-pas
 - .claude/skills/stack-guard/SKILL.md                 — E2E-applicable 판정 + provision/smoke (ADR-052 D2 정합)
 - docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — `## 5. 완료 기준` item 3 MUST 문구
 - docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md — D3 owning ADR
+
+<a id="adr-014-amend-3"></a>
+## Amendment 3 (2026-07-26) — 회고에 graduation 판정 줄 (로드맵 파생 입력)
+
+### 결정
+`## 8. 회고`에 4 항목 위로 `graduation:` 줄을 추가한다: `YES | NO | BLOCKED (<날짜>)`. **판정 기록 시점은 stabilize 단계 8(회고 자동 채움)** — 단계 4~6 중 **qa 팬아웃이 `QA_FINDINGS.md`에 기록한 P0만** 반영한 *최종* 판정을 1회 기록한다(reviewer 팬아웃은 `IMPROVEMENT_GUIDE.md` report-only — graduation predicate에 미반영, stabilize §6-S 라우팅과 정합)(§1.5 사전점검이 아님 — §1.5에서 기록하면 이후 P0를 못 잡아 '잘못된 YES'가 박힌다). 회고는 stabilize의 정상 write 대상 — read-only 계약 불변. BLOCKED = e2e blocked-on-env. 이 줄은 `docs/30-workitems/ROADMAP.md` Done/Now 파생 입력(다음 plan-milestone R0가 읽어 재조정 — ADR-057#amend-1). 로드맵 파일 자체는 stabilize가 건드리지 않는다.
+
+### 적용 surface
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md (§8 회고)
+- .claude/skills/stabilize-milestone/SKILL.md (단계 8 판정 영속 + 회고 항목)
+
+### 강도 (ADR-022)
+- enabling(약) — 회고 항목 1줄 확장.

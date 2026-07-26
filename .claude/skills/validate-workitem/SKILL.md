@@ -62,12 +62,12 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
   - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D6 contract formation + D1 inspectability 정합).
   - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
 - 테스트 선행 휴리스틱 — git log에서 동일 task 범위의 테스트 파일 추가/수정이 구현 파일보다 먼저(또는 동일 커밋) 들어왔는지. 단순 경고로만 보고하고 강제 종료하지 않는다(소규모 작업이 한 커밋에 묶이는 경우 정상).
-- FAC → AC spec coverage audit ([ADR-037](../../../docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)):
+- FAC → AC spec coverage audit ([ADR-037](../../../docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-3):
   feature `## 7 FAC`의 각 항목이 본 task의 `## 6 AC` 또는 *연관 task의 AC*에
   매핑되는가? 매핑 안 된 FAC가 있으면 report의 "Spec coverage" 섹션에
-  `Spec Gap: FAC-N → unmapped` 명시 + 미커버 task 추가 권장.
-  자동 차단 X — ADR-007 책임 경계 정합. legacy fallback은 plan-workitem SKILL.md의 "task 분해 + ## 7-1 AC 측 채움" 섹션 **Legacy fallback** 단락 참조.
-- **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` (plan 보강 권장). repair-workitem 또는 다음 plan 라운드로 회수.
+  `P0 [Spec-gap] FAC-N → unmapped — 계획 누락, 사용자 결정 필요`로 기록한다.
+  **task 자동 추가 금지** — P0라 combined verdict는 Needs Fix, 집계자는 이 라벨이 있으면 일반 `/repair-workitem` 안내보다 우선해 자동 후속 호출 없이 사용자 보고로 라우팅한다. legacy fallback은 plan-workitem SKILL.md의 "task 분해 + ## 7-1 AC 측 채움" 섹션 **Legacy fallback** 단락 참조.
+- **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` 기록하고 분기: 기존 task AC에 필요한 컴포넌트면 repair-workitem이 구현 또는 DESIGN 등록 누락을 고치고, 불필요하면 제거, 새 디자인 범위면 사용자 보고 + 다음 M 후보(ADR-057#amend-3 결정 6).
 - **MCP 사용 audit** (ADR-048#d5): task `## 3. 구현 항목`에 `<capability> 작업 시 <mcp-name> MCP 사용` line item(plan authoring)이 있었는데 실행 흔적(diff / test / 출력)이 없으면 report에 `P2 [MCP-unused] <mcp-name> — plan이 박은 MCP 사용 line item 미실행` 기록. implement가 `Needs MCP Access`로 멈춘 경우(권한 미부여)는 `P2 [MCP-access] <mcp-name> — agent access 미부여(연결 절차 (e))`로 구분 기록. 자동 차단 X(report 신뢰 등급만 영향).
 - **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
 - **Cross-task seam audit** (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 — ADR-057 결정 12): 본 task 구현이 관련 INV-N을 위반하는가(상태 역방향 write / 멱등 미보장 / 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>`. §7-2가 참조 링크형이면 canonical feature 의 표를 따라 읽는다. (inline·fan-out 축 8 동일 기준 — small-diff inline 경로에서도 누락 없이 점검.)
@@ -122,7 +122,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 ## Spec coverage (FAC ↔ AC, ADR-037)
 - FAC-1: ✅ T-001:AC-1
 - FAC-2: ✅ T-001:AC-2
-- FAC-3: ❌ unmapped — 미커버 task 추가 권장 (예: T-XXX [Given]...[When]...[Then]...)
+- FAC-3: ❌ `P0 [Spec-gap]` unmapped — 계획 누락, 사용자 결정 필요(task 자동 추가 금지)
 
 ## Evidence Bundle (ADR-047 D8 oracle adequacy 정합)
 <!-- 본 검증 라운드가 *무엇을 봤고 무엇을 못 봤는지* 명시. green test가 곧 충분한 검증이라는 착각을 줄인다. -->

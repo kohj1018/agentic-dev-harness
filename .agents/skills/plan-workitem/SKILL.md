@@ -1,6 +1,6 @@
 ---
 name: plan-workitem
-description: Use ONLY when the user explicitly types `$plan-workitem <milestone-or-feature-id>`. Do not trigger implicitly from generic phrasing.
+description: Use ONLY when the user explicitly types `$plan-workitem <milestone-id>`. Do not trigger implicitly from generic phrasing.
 ---
 
 Source of truth: `.claude/skills/plan-workitem/SKILL.md`. Read it and follow the workflow.

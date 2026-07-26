@@ -33,10 +33,11 @@
 | design research note (UI only) | `docs/20-system/DESIGN_RESEARCH.md` | `/bootstrap-design` (R0 레퍼런스 + R2 선택 근거) | Reference | conditional |
 | design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
 | design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
-| milestone 승인 프로토타입 (UI only — 경험 계약, 화면 단위) | `docs/20-system/prototypes/M<N>/<screen>.html` | `/plan-milestone` R5 (`--prototype` 재진입 포함) | Record | conditional |
+| milestone 승인 프로토타입 (UI only — 경험 계약, 화면 단위) | `docs/20-system/prototypes/M<N>/<screen>.html` | `/plan-milestone` R5 (draft M<N> 재실행으로 미완 라운드 재개) | Record | conditional |
 | 경험 게이트 스크린샷 갤러리 (UI only, 검토용 임시) | `docs/40-validation/visual/M-N/` | `/stabilize-milestone` §3-V | ephemeral | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (21종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (8종: architect/builder/validator/planner/reviewer/qa/researcher/designer) | 수동 (boilerplate 제공) | Reference | baseline |
+| milestone roadmap | `docs/30-workitems/ROADMAP.md` | `/plan-milestone` (R3 생성/갱신, R0 재조정 — 단일 작성자) | Living | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-milestone` (M1 포함 — ADR-057) | Living | generated |
 | feature | `docs/30-workitems/features/F-*-*.md` | `/plan-milestone` (생성), `/plan-workitem`(`## 7-1` AC측·`## 7-2` seam 표 채움) | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
@@ -116,6 +117,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack 결정 taxonomy (T1 기초 / T2 마이그레이션 / T3 라이브러리 추가) + 입력 적응형 bootstrap-stack 흐름 | [ADR-055](../90-decisions/boilerplate/ADR-055-input-adaptive-stack-flow.md) (정책 SSOT). → ADR-055 `## Surfaces` 참조 (fan-out SSOT). |
 | 마일스톤 경험 계약 (프로토타입 라운드·입구 계약·스크린샷 게이트·Voice 규칙서) | [ADR-056](../90-decisions/boilerplate/ADR-056-milestone-experience-contract.md) (정책 SSOT). → ADR-056 `## Surfaces` 참조 (fan-out SSOT). |
+| 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md` (단일 작성자 = plan-milestone). |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 JIT 로딩)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

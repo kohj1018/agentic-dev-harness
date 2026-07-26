@@ -17,7 +17,7 @@
 | 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화, +#amend-4: cross-LLM wrapper 필수 축, +#amend-5: 도구별 memory 비캐노니컬) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
 | 011 | AGENTS.md 100줄 hard cap | accepted | — | AGENTS.md 최대 100줄, 신규 정책은 ADR + 1줄 링크 |
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
-| 014 | Milestone graduation contract | accepted | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3) | graduation checklist 5+1 + 회고 + pre-check + --dry-run |
+| 014 | Milestone graduation contract | accepted | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3, +#amend-3: 회고 graduation 판정 줄 — 로드맵 파생 입력) | graduation checklist 5+1 + 회고 + pre-check + --dry-run |
 | 017 | Dogfood 시뮬레이션 의무 + 재실행 트리거 | accepted | (+#amend-1: 위치 경로 .boilerplate/) | todo CLI baseline 시뮬레이션 + 성공 기준 3개 + 재실행 트리거 3종 |
 | 019 | JIT 컨텍스트 로딩 정책 | accepted | (+#amend-1: 조건부 re-read — ADR-051 D8) | 본문 JIT 로딩(`## Context 정책`) + 사전 fork-load 금지 — context-pack frontmatter는 no-op으로 제거 |
 | 020 | `validate --changed` incremental | accepted | — | finalize는 --changed만, stabilize는 full validate |
@@ -25,12 +25,12 @@
 | 022 | Ratchet Principle | accepted | — | 정책의 제약 강도를 *제약(강)/enabling(약)*으로 차등 적용 |
 | 024 | Claude Code plan 모드 lifecycle 비범위 | accepted | — | plan 모드 비의무화, plansDirectory 제거, think-before-edit 규율 확보 |
 | 025 | 외부 의존 권장 + CI workflow 권장 | accepted | — | bootstrap-stack 외부 의존 출력 + stack-guard CI 권장, 강제 X |
-| 026 | plan-workitem 강화 (TASK_TEMPLATE schema) | accepted | (+#amend-1: planner self-check + architect 호출 신호, +#amend-2: task 단계별 구현 가이드, +#amend-3: 배치 draft 예외 + refresh) | AC GWT 형식 + sizing 3한계 + 의존성 섹션 + planner self-check |
+| 026 | plan-workitem 강화 (TASK_TEMPLATE schema) | accepted | (+#amend-1: planner self-check + architect 호출 신호, +#amend-2: task 단계별 구현 가이드, +#amend-3: 배치 draft 예외 + refresh — #amend-4가 supersede, +#amend-4: `## 3` 전체 계획 스냅샷 — draft/refresh 예외 폐기) | AC GWT 형식 + sizing 3한계 + 의존성 섹션 + planner self-check |
 | 027 | 인터페이스 결정 책임 분배 | accepted | (+#amend-1: cross-surface enforcement 보강 — plan/validate-plan/stabilize/templates, +#amend-2: 디자인 워크플로우 실효 강화 — 시안/anti-slop/lint/Motion, +#amend-3: UI 판정 절차 단일 SSOT, +#amend-4: bootstrap-design --update, +#amend-5: §10 Voice 확장, +#amend-6: 렌더 증거 주입, +#amend-7: DESIGN 내용 계약 확장(정체성·a11y·semantic motion·category state·responsive·tabular)) | DESIGN.md(UI) + ARCHITECTURE 7-1~7-4(API/CLI/백엔드/프론트) + /bootstrap-design 신설 |
 | 031 | Non-web stacks out of direct support scope | accepted | — | 비웹 스택은 기본 자동화 직접 지원 범위 밖, override 경로 제공 |
 | 035 | DISCOVERY.md Living Doc + Assumption Tracker | accepted | (+#amend-1: Charter staleness 보고, +#amend-2: Evidence Log + Insight Backlog) | 15섹션 + --update 모드 + DISCOVERY=SSOT/Charter=snapshot |
 | 036 | FEATURE_TEMPLATE 12섹션 PRD 강화 | accepted | — | User Story + Feature 시나리오 + FAC + NFR 신설, boundaries 3-tier 라벨 |
-| 037 | Spec coverage self-audit | accepted | (+#amend-1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`, +#amend-2: plan 출력 echo 축소 — ADR-046 정합) | FAC→AC 매핑 추적, Spec Gap report, 자동 차단 X |
+| 037 | Spec coverage self-audit | accepted | (+#amend-1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`, +#amend-2: plan 출력 echo 축소 — ADR-046 정합, +#amend-3: unmapped FAC 계획-시점 차단 + 구현-후 사용자 결정) | plan ready gate(FAC↔AC 100%) + 구현-후 Spec Gap 사용자 결정 라우팅 |
 | 038 | Cross-LLM Plan Validation + Parallel Waves | accepted (#d3·#d6·#amend-3 superseded by 051) | (+#amend-1: Plan Quality 8 → 10 차원 — ADR-027#amend-1 양립, +#amend-2: 리뷰 파일 충돌 정정 — 덮어쓰기→자동 suffix, +#amend-3: file overlap 정책 정정 — 명시적 write_set 결정적 wave 분리 — *ADR-051이 write_set 5필드와 함께 폐지*, +#amend-4: milestone-plan mode — FAC 가짜P0 수정 + milestone 4차원) | opt-in peer review (다른 세션·다른 LLM) — /validate-plan + /repair-plan 신설. ~~wave 그룹 echo + worktree 권장~~(ADR-051 제거) |
 | 039 | Workitem Type 분류 | accepted | — | task/feature에 Type 필드(feature/technical-enabler/bugfix/refactor/migration/research-spike) |
 | 040 | 외부 리서치 capability | accepted | (+#amend-1: 의존성 설치 authoring/실행, +#amend-2: builder Needs-Research soft 게이트 + 오케스트레이터 자동 위임 + install-ownership 3분할 boundary, +#amend-3: 소스 품질 규율 + Agent-보유 stale note 정정, +#amend-4: researcher 디자인 레퍼런스 모드) | researcher agent + /research-pack skill, report-only 웹 접근 |
@@ -49,8 +49,8 @@
 | 053 | 고-stakes 설계 패널 (stakes-gated design protocol) | accepted | +#amend-1: ④ ADR 판정 기준 | stakes 게이트(S1~S5) + 3단 강도(리서치·다각도·적대) + ARCHITECTURE §7 결정 블록 + stabilize backstop |
 | 054 | Cross-LLM Stabilize Review | accepted | +#amend-1: 결정5 supersede | /validate-milestone 신설(read-only peer review) + repair-milestone 종합·dedup·echo-rm + stabilize single-origin + .gitignore |
 | 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
-| 056 | Milestone experience contract | accepted | — | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
-| 057 | Planning v2 (unification + batch + seam) | accepted | — | M1 포함 생성 통일 + 배치 분해(2-tier/refresh) + feature 체크포인트 + seam 계약 |
+| 056 | Milestone experience contract | accepted | (+#amend-1: 프로토타입 경험 결정 PX 커버리지, +#amend-2: raw-hex 토큰 정의 예외, +#amend-3: 화면 전환 표 + downstream 소비자) | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
+| 057 | Planning v2 (unification + batch + seam) | accepted | (+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: cross-feature seam canonical 위치 — 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기) | M 단위 전체 계획 스냅샷 + 계획 잠금(draft→ready→in-progress→done) + seam 계약 + 마일스톤 로드맵 |
 | 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | — | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
 
 ## Reserved / Parked / Dropped 번호

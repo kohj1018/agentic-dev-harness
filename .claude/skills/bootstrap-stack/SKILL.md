@@ -67,13 +67,13 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 - **타깃 미정**(`--migrate` 단독 / "뭐로 갈지 모르겠다") → 위 DEEP R1~R2를 *마이그레이션 프레이밍*으로 실행(트레이드오프 축에 **기존 데이터·API 호환성**과 **이전 비용**을 1급 추가) → 타깃 수렴 후 계약.
 
 계약(항상, ADR-041 D2): 새 project ADR `docs/90-decisions/project/ADR-1NN-<migration>.md`에 old/new stack, 호환성(데이터·API·런타임), cutover 순서(expand-contract: 신규 추가 → dual-run → 구식 제거), rollback, validation(완료 판정), hook·verify 갱신 목록을 쓰고, 기존 ADR-101을 `superseded` + 상단 "대체: ADR-1NN". project README 인덱스에 한 줄 추가 + ADR-101 행 상태 superseded 갱신. ARCH §7 결정 블록·§3-1 디렉터리 트리 갱신, charter §7 제약 갱신.
-**진행 중 task/worktree 주의**: 마이그레이션은 진행 중 task의 §7 매핑·AC를 무효화할 수 있다. supersede 전에 진행 중 task를 freeze·재검증할 것을 출력에 명시하고, cutover는 `Type:migration` task(ADR-039)로 분해(`/plan-workitem`)한다.
+**진행 중 task/worktree 주의**: 마이그레이션은 진행 중 task의 §7 매핑·AC를 무효화할 수 있다. supersede 전에 진행 중 task를 freeze·재검증할 것을 출력에 명시하고, cutover는 `Type:migration` task(ADR-039)로 분해한다 — 즉시 generic `/plan-workitem`을 호출하지 않고 **다음 `/plan-milestone`의 범위에 포함한 뒤 그 M 전체 스냅샷에서 task화**한다(아직 계획 전인 draft M이면 그 안에서 반영, ADR-057#amend-3 결정 6).
 작성 후 안내: `/bootstrap-stack <new stack>`(문서화) → `/stack-guard` 순 재실행.
 
 ## 스택 결정 tier (T1/T2/T3 — ADR-055) — 판정 기준
 - **T1 기초 스택**(프로젝트 birth): 본 skill의 BASE/DEEP 흐름 → ADR-101 + ARCH §7 + charter §7 제약.
 - **T2 물질적 변경/마이그레이션**: ADR-053 S1~S4 중 1+ 해당(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존을 건드림 **또는** ARCH §7 결정·charter §7 제약을 뒤엎음; 개별로 사소해도 *cluster*로 이 선을 넘으면 포함) → 본 skill `--migrate`.
-- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → `/plan-workitem`이 task `## 3` install line-item으로 처리(ADR-040#amend-1). ADR-101 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
+- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리(ADR-040#amend-1) — 다음 plan-milestone/plan-workitem 범위에 포함, 즉시 generic 호출 아님(ADR-057#amend-3 결정 6). ADR-101 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
 
 반드시 지켜야 할 원칙:
 - shared 기본값에 OS/셸 종속 hook를 강제로 넣지 않는다. 대신 필요한 scripts/hooks/CI를 문서로 정리한다.

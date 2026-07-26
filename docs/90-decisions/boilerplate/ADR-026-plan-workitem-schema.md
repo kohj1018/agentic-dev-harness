@@ -5,6 +5,12 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- task 문서 스키마·필수 섹션은 base를 유지하고, `/plan-workitem M<N>`이 전 feature의 task를 한 번에 만든다.
+- 모든 task `## 3`는 계획 시점에 단계별 구현 가이드로 완성한다. draft 마커·feature별 refresh 예외는 폐기(#amend-2·#amend-4가 #amend-3을 supersede).
+- 후행 task는 선행 task의 계획된 완료 결과를 전제로 하며 `## 9`에서 `T-NNN:AC-M`으로 참조한다. 누락·순환·참조 AC의 보장 부재는 계획 성공·task ready 승격을 막는다(#amend-4).
+- planner self-check·architect 신호·task sizing 규칙은 #amend-1을 유지한다.
+
 ## 배경
 - [관측됨+외부실증] vague AC가 LLM TDD 실패의 단일 최대 원인 (Fowler SDD analysis: https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html).
 - `docs/30-workitems/_templates/TASK_TEMPLATE.md`의 `## 6. Acceptance Criteria` 주석은 "Given-When-Then 또는 명세 형태"라 "or" 옵션 → 자유도 큼. AC 개수 cap·verb whitelist·의존성 자리 없음.
@@ -53,6 +59,7 @@ plan-workitem 마지막 출력에 `Milestone | Feature | Task | AC 수 | 의존�
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - docs/30-workitems/_templates/TASK_TEMPLATE.md   — AC 구조화 (base)
 - .claude/skills/plan-workitem/SKILL.md            — #amend-1 planner self-check + architect 신호 + sizing
+- .claude/skills/implement-workitem/SKILL.md       — #amend-4 3-R 접지 경량 preflight(선행 done + 산출 존재 확인)
 
 ## 참고
 - ADR-009 (TDD default)
@@ -89,3 +96,24 @@ plan-workitem은 각 task의 `## 3. 구현 항목`을 *그 문서만 보고 따�
 - docs/30-workitems/_templates/TASK_TEMPLATE.md (`## 3` 주석)
 - .claude/skills/plan-workitem/SKILL.md
 - .claude/skills/implement-workitem/SKILL.md
+
+<a id="adr-026-amend-4"></a>
+## Amendment 4 (2026-07-26) — `## 3` 전체 계획 스냅샷 (draft/refresh 예외 폐기)
+
+### 배경
+- [관측됨] ADR-057#amend-3가 2-tier/draft/refresh를 폐기하고 `/plan-workitem M<N>` 1회 전체 계획 스냅샷으로 전환. amend-3(배치 draft 예외 + refresh 계약)의 전제(per-feature 지연 계획)가 사라졌다.
+
+### 결정
+amend-3의 "`## 3` draft 예외 + refresh 계약"을 **supersede**한다.
+1. `/plan-workitem M<N>`은 전 feature의 `## 3`를 **계획 시점에 완성**한다 — `## 3 상태: draft` 마커·구현-직전 refresh 재작성 없음. amend-2의 "현재 상태 근거" 원칙은 유지하되 *보장 시점 = 계획 스냅샷 1회*(지연 아님).
+2. 전 task를 한 번에 만들므로 **후행 task의 `## 3`·AC는 선행 task의 *계획된* 완료 결과(인터페이스·산출·AC)를 전제로 작성**한다. `## 9. 의존성`은 선행을 `T-NNN:AC-M` 단위로 참조하고, **누락 참조·순환·AC-보장 미비는 모두 plan-workitem 성공 종료와 task `ready` 승격을 막는다**(실행 가능한 순서·보장이 없는 계획 — validate/reviewer `[Plan-dep]` P0).
+3. 코드-stale 방지는 draft/refresh가 아니라 **task 실행 직전 implement-workitem 경량 접지 확인**(선행 done + 약속 산출 존재)으로 옮긴다. 근본 충돌은 자동 재계획 없이 사용자 보고(ADR-057#amend-3).
+
+### 적용 surface
+- docs/30-workitems/_templates/TASK_TEMPLATE.md (`## 3` draft 마커 제거 + **`## 9` `T-NNN:AC-M` 의존성 형식** — canonical)
+- .claude/skills/plan-workitem/SKILL.md (`## 3`·`## 9` 전체 스냅샷)
+- .claude/skills/implement-workitem/SKILL.md (3-R 접지 확인 — canonical)
+
+### 강도 (ADR-022)
+- enabling(약) — amend-3 supersede. 자동 차단 늘리지 않음.
+- **Mutation delta (ADR-047 D3)**: failure=`## 3`가 여전히 draft/refresh 전제 · 후행 task가 선행 결과를 전제 안 함 / falsifier=`## 3 상태: draft` 마커 생성·refresh 재작성 잔존 / rollback=amend-3 draft/refresh 예외 복원.

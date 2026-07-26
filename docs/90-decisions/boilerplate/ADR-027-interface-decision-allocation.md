@@ -215,7 +215,7 @@ stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **�
 - .claude/agents/reviewer.md
 
 <a id="adr-027-amend-7"></a>
-## Amendment 7 (2026-07-25) — DESIGN.md 내용 계약 확장 (정체성 · a11y · semantic motion · category state · responsive invariant · tabular)
+## Amendment 7 (2026-07-26) — DESIGN.md 내용 계약 확장 (정체성 · a11y · semantic motion · category state · responsive invariant · tabular)
 
 > **amend 근거(ADR-045 D6 grandfather 조항)**: ADR-027은 ADR-045(2026-05-27) *이전* 생성(2026-05-16)이라 **grandfather** — D6 재발행은 "우선 검토(권고)"일 뿐 즉시 강제가 아니다. 본 개선 라운드는 *최소 churn*을 택해 Amendment 7로 처리한다(사용자 결정 — 번호·참조 churn 회피). `## 현재 유효 결정`이 이미 net 규칙을 요약하므로 fold 부담은 낮다. 다음 변경 시 통합 재발행 우선 검토.
 

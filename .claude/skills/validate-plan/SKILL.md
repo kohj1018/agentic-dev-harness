@@ -44,7 +44,7 @@ allowed-tools: Read Glob Grep Write
 ## 입력 형태 판정 — milestone-plan mode (ADR-038#amend-4)
 하위 문서 회수 결과 **분해된 task가 0건**이면(plan-milestone 직후·plan-workitem 미실행) **milestone-plan mode**:
 - **비활성**: [Plan-sizing]·[Plan-AC-form]·[Plan-dep] (task 산물 부재). [Plan-seam]은 task 0건이면 비활성.
-- **[Plan-FAC-coverage] 반전**: `## 7-1` 빈 shell은 *정상* — unmapped FAC를 P0로 올리지 **않는다**. shell이 *형식적으로 깨졌을 때만* P2.
+- **[Plan-FAC-coverage] 반전**: `## 7-1`(FAC) *및 `## 7-3`(PX)* 빈 shell은 *정상* — task 0건이면 unmapped FAC·**unmapped PX**를 P0로 올리지 **않는다**(R5-5가 PX 인벤토리만 채우고 plan-workitem 전이라 PX↔AC 매핑이 비어 있는 게 정상 — ADR-056#amend-1). shell이 *형식적으로 깨졌을 때만* P2. **[Plan-design] recovery-path 유예(F9와 동형, ADR-056#amend-3)**: task 0건이면 `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(plan-workitem 후 정상 모드에서 AC 커버 재점검).
 - **활성**: milestone-plan 4차원(아래).
 - 혼합 마일스톤은 **feature 단위로** mode 적용. task가 1건+면 11차원.
 
@@ -53,11 +53,11 @@ allowed-tools: Read Glob Grep Write
 2. **[Plan-sizing]** — 1 task = 1 RGR 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). P1 권장.
 3. **[Plan-AC-form]** — Given-When-Then 형식 부재 / 강력 금지 verb ("works"/"looks good"/"is correct"/"is fine"). P0 권장.
 4. **[Plan-ambiguity]** — 1 AC에 2+ 합리적 해석 가능. P1 권장.
-5. **[Plan-FAC-coverage]** — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC. P0 권장.
-6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장. P1 권장.
+5. **[Plan-FAC-coverage]** (ADR-037) — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC + (UI feature) feature `## 7-3. PX ↔ AC 매핑`의 unmapped PX(ADR-056#amend-1 — 어떤 AC도 참조 안 한 경험 결정) + **PX 소유·문법 (구조 — `M<N>` 입력 전용, task 수 무관)**: `M<N>` 입력이면 **`docs/20-system/prototypes/M<N>/*.html` glob**(`_drafts/` 제외)로 현재 active 화면 HTML 전체를 회수해 — ① **각 active 화면에 PX ≥1개** · ② **id 문법·화면 경로 일치**(`^PX-M<N>-<screen>-\d{2,}$`; id의 `M`/`<screen>`이 파일 경로 `M<N>/<screen>.html`와 일치 — 화면 revision 없음, 마일스톤 번호가 버전) · ③ **한 화면 HTML 내 id 중복 없음** · ④ **승인 HTML active PX = 모든 feature `## 7` 인벤토리의 disjoint union**(**orphan**=HTML엔 있으나 미인벤토리 · **중복**=2+ feature · **누락**=인벤토리엔 있으나 HTML엔 없음 — 완전-orphan HTML도 glob이 잡음, R5-5 이후 drift까지 검출; 매핑 `## 7-3`과 별개) · ⑤ **각 active PX 정확히 1 feature `## 7`에** · ⑥ **HTML 마커 ↔ feature 인벤토리는 `(id, 설명)` 쌍으로 정확 일치**(같은 id인데 설명이 다르면 mirror drift = fail — 현재 HTML 미러 drift 검사) · ⑦ **task `## 6`의 `(PX-…)` 태그는 선택이지만 *존재하면* 그 `(PX, task:AC)`가 feature `## 7-3` 매핑 RHS와 일치**(태그가 매핑과 다른 task:AC를 가리키면 태그-매핑 불일치 = P1) — 를 검사한다. **`F`/`T` 단독 입력은 sibling·glob 미독이라 이 cross-feature 검사 skip(P0 금지)**. **task 0건이라도 `M<N>` 입력이면 위 소유·문법 검사는 실행**(M입력은 feature 전체·HTML을 읽으므로 가능 — task 산물 부재는 PX↔AC coverage만 유예). *귀속 feature 적합성은 LLM 판정(엉뚱한 feature면 오배정)*. P0 권장.
+6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장(P1 권장) + (`M<N>` 입력 시, ADR-057#amend-3) 의존성 그래프의 **존재성**(참조 선행 task 실재) · **비순환**(순환=실행 순서 부재) · **AC-보장**(후행 `## 3`가 전제한 선행 산출이 그 선행 task의 참조 AC에 존재) — 세 위반 모두 **P0**(실행 가능한 계획 미완 — plan-workitem 성공·task `ready` 승격 차단과 정합).
 7. **[Plan-arch]** — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. *`## 3-1` 섹션 자체가 부재한 fork*에서는 본 차원 *skip* + "핵심 관찰"에 "[Plan-arch] skipped: `## 3-1` 부재" 한 줄 명시. P1 권장.
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` / feature `## 11. 관련 문서` link 누락·깨짐. P2 권장.
-9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
+9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **마일스톤 `## 9. 화면 전환`(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
 10. **[Plan-arch-iface]** (해당 스택 한정 — 7-x sub-section 부재 시 skip) — ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 기존 결정 위반 / Don'ts 위반. P0 권장.
 11. **[Plan-seam]** (ADR-057 결정 11 — seam 신호 해당 feature 한정) — 신호 4종(2+ writer/상태 머신/2차-write/멱등) 해당인데 feature `## 7-2` 부재·형식 파손 / task 간 입출력 계약 불일치 의심 / INV가 어떤 task AC에도 안 걸림. 신호 미해당 시 skip. P1 권장.
 
