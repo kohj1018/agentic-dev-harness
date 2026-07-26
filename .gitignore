@@ -31,5 +31,5 @@ docs/40-validation/visual/
 # design-workflow eval 근거 (ADR-058): 원본 산출물(REPORT/concept HTML/metrics/스크린샷 등)은 무거워 local-only —
 # 폴더 전체를 ignore하고 핵심 판정만 .boilerplate/validation/SIMULATION_RUN.md "Design Workflow Eval" 섹션에 distill.
 .boilerplate/validation/design-workflow-eval-20260720/
-# design-gate.mjs 게이트 러너 스크린샷 (reviewer 픽셀 판정 입력, ephemeral — ADR-058 D3)
+# project-native validate:design adapter 스크린샷 (reviewer 픽셀 판정 입력, ephemeral — ADR-058#amend-1)
 design-gate-shots/

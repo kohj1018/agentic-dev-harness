@@ -11,6 +11,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 이 skill의 1단계 범위:
 - 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령).
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 가장 자연스러운 런타임 1종.
+- UI 판정 시 project-native `validate:design` adapter 생성 + 10-case browser conformance self-test + `STACK_SETUP_PLAN.md ## Design Gate Adapter` registry 기록(ADR-058#amend-1). 비-UI는 생성하지 않는다.
 - cross-platform 차이가 큰 팀이면 `.claude/settings.local.json` 예시 동봉 권장.
 - 생성된 `docs/00-meta/STACK_SETUP_PLAN.md`에 hook 절차 SSOT([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))를 link하는 1줄 안내. 절차 본문은 embed 금지 (SSOT 정합).
 
@@ -24,6 +25,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
 - `docs/00-meta/STACK_SETUP_PLAN.md` (있으면)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
+- UI 판정 시에만 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md#adr-058-amend-1`
 
 R0 — 운영 환경 가정 확인:
 - 단일 OS/셸인가, mixed env인가?
@@ -42,6 +44,7 @@ R0 — 운영 환경 가정 확인:
    - **소유 책임 분리**: STACK_SETUP_PLAN.md는 `/bootstrap-stack`이 *최초 골격*(스택 선택 사실 + 추후 추가 필요한 자동화 목록)을 만들고, 본 `/stack-guard`는 거기에 *통합 명령 사용법 + hook 등록 안내 섹션*을 **append/갱신**한다. `/bootstrap-stack`이 만든 기존 섹션을 통째로 덮어쓰지 않는다.
    - 본 skill이 채울 섹션:
      - 통합 명령 사용법
+     - `## Design Gate Adapter` — UI면 실제 command template·adapter/output 경로·capability version·conformance 결과를 기록하고, 비-UI면 `status: n/a`만 기록(ADR-058#amend-1).
      - `## Dependency Tools` — **보완만**(ADR-051#amend-4 수행-6-2-0): 표·행이 없으면 관측 신호로 채우고, `/bootstrap-stack`이 기록한 행은 덮어쓰지 않는다(불일치는 출력 보고 + 사용자 결정).
      - PostToolUse hook 자동 등록은 prototyping 후 별도 항목 — 현재 단계에서는 매뉴얼 등록 안내
      - hook 등록 절차는 [GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md) link만 박는다 (SSOT — 본 skill이 절차 본문 embed 금지).
@@ -62,8 +65,14 @@ R0 — 운영 환경 가정 확인:
    - **e2e wiring 성공 + 스펙 실행됨** → `validate:e2e smoke test: PASS (wiring OK)` (프로젝트 e2e 실패는 *프로젝트 책무* 로 분리 보고, 차단 X).
    - **e2e wiring 실패** (browser 미설치 / playwright config 누락 / `validate:e2e` 진입점 없음) → `validate:e2e smoke test: WIRING FAIL` + stderr + 제안 (browser 미설치 → `npx playwright install`; 진입점 누락 → 수행-6 재작업). **stack-guard 산출물 수정 필요** — 종료.
    - **browser 설치가 `Needs Install` 로 보류** → `validate:e2e smoke test: SKIPPED (browsers not installed — Needs Install: npx playwright install)`. 종료 X.
+   `validate:design` 판정 행 (UI 한정, ADR-058#amend-1):
+   - **adapter + 10-case conformance 전부 통과** → registry `status: ready`, `validate:design self-test: PASS (10/10, capability ADR-058#amend-1/v1)`.
+   - **module/browser 설치 실패** → registry `status: needs-install`, `Needs Install: <실제 명령>`; design artifact 승인 보류.
+   - **entry/adapter/fixture 기대 분류 불일치** → registry `status: wiring-fail`, `validate:design self-test: WIRING FAIL`; 원인을 고치고 10-case 전체 재실행 전까지 종료.
+   - **비-UI** → registry `status: n/a`; adapter·entry·fixture·browser를 design gate 목적으로 생성하지 않음.
 
-   > 핵심 구분: stack-guard 의 책무는 *wiring* (validate + validate:e2e 진입점·browser 까지). 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
+
+   > 핵심 구분: stack-guard 의 책무는 *wiring* (`validate` + `validate:e2e` + UI `validate:design` entry·browser·conformance 까지). 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
 
 6. **Toolchain 선설치 + E2E readiness** (실행 순서상 step 5 smoke test *앞*에 수행 — `allowed-tools` 의 Bash 활용, 신규 권한 불필요):
    - **6-1. UI 판정** (ADR-027#amend-3 압축 3-case): `docs/20-system/DESIGN.md` 부재 → 비-UI. DESIGN.md 존재 + `## 0. Status` ≠ `draft` → UI 확정. DESIGN.md 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4. 프론트 결정` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 web frontend 유형) ≥1 → UI 의심(UI 로 취급). 신호 0 → 비-UI. 상세: ADR-027#amend-3.
@@ -72,10 +81,13 @@ R0 — 운영 환경 가정 확인:
    - **6-2-1. 테스트 격리 권장 (ADR-051#amend-1)**: 생성하는 e2e/통합 설정에 *가능한 범위에서* 격리를 권장한다 — playwright `webServer`는 동적 포트, 통합 테스트는 트랜잭션 롤백/임시 스키마/testcontainers. stack-guard가 unit-test 격리를 직접 authoring하긴 어려우므로, 미보장 시 `STACK_SETUP_PLAN.md`에 "테스트 격리 미설정 — 병렬 builder 시 foreman 순차 권장" 1줄 부기(implement partition이 실제 보호).
    - **6-3. Playwright browser 설치 (UI/web 한정)**: 6-1 이 UI 면 `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요).
    - **6-4. `validate:e2e` scaffold (UI/web 한정, e2e 필요 시)**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고, `package.json` 의 `scripts` 에 `validate:e2e` 진입점(예: `playwright test`)을 박는다. *이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). 비-UI 프로젝트는 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다. 이 e2e provision/smoke 는 milestone graduation 의 E2E MUST-run hard-block(ADR-014#amend-2 / ADR-052 D3)이 검사할 대상을 선readiness 한다.
-   - **6-4-1. Visual-QA smoke scaffold (UI/web 한정, ADR-058)**: e2e scaffold 시 `e2e/visual-qa.spec.*`도 생성 — *렌더된 화면*의 기계적 결함을 잡는다. **scaffold 시점엔 앱이 비어 있을 수 있으므로 대상 landmark 부재 시 graceful skip(vacuous PASS — 0-spec=PASS 정합)**, 실제 UI 생성 후 의미 발동.
-     - breakpoint 루프(**320**/375/768/1440): (a) **가로 overflow** — `document.scrollingElement.scrollWidth > clientWidth` false 단언(가로 스크롤 없음). **차단**: 졸업 e2e 실패(진짜 버그, FP 드묾). 320은 375만으로 놓치는 좁은 화면 실패를 잡는다(실측 반례 존재). (b) **요소 겹침** — `getBoundingClientRect()` 교차 점검. **권고만**(sticky header·모달·툴팁 등 정당한 겹침 FP 가능 → 차단 X, P1 기록). (c) **a11y** `@axe-core/playwright` — **실데이터가 채워진 대표 화면(빈 화면 아님)**에서 실행하고, **serious/critical 위반은 차단**(졸업 e2e 실패), moderate/minor는 권고. (빈 화면만 검사해 대비 실패를 놓친 dogfood 문제 해결 — ADR-058 D3.)
-     - 이미 `e2e/visual-qa.spec.*` 있으면 덮어쓰지 않는다. **스크린샷 vision 비평은 hot-loop 제외**(토큰 트랩 — 탐색/사람 검토는 stabilize §3-P).
-     - 졸업 e2e 게이트는 ADR-052 D3 / ADR-014#amend-2가 SSOT — 본 spec은 그 위에 *가로 overflow 차단*만 추가.
+   - **6-4-1. Design acceptance adapter + Visual-QA scaffold (UI/web 한정, ADR-058#amend-1)**:
+     - **정적 승인 artifact adapter (항상 생성)**: 감지된 package manager/test runner에 자연스러운 실행 파일과 논리 entry `validate:design`을 생성한다(직접지원 Node UI 예: package script + generated `scripts/design-gate.mjs`; 다른 runner면 동등한 project-native 경로). 기존 `visual-qa.spec.*`/Playwright config가 있어도 이 adapter를 생략하지 않는다. PowerShell/cmd가 glob을 확장하지 않아도 adapter가 다중 HTML/glob 입력을 직접 확장하고, 결과는 `{ blockers, reports, screenshots }` 구조 + exit 0(pass)/1(blocker)/2(execution unavailable)로 낸다.
+     - **capability v1 구현**: ADR-058#amend-1 결정 5를 그대로 authoring한다. 1280/375/320 각각 fresh load + font readiness + screenshot, page overflow, narrow viewport escape, self/ancestor clipped text, populated axe(1280/320), serious/critical block, moderate/minor·incomplete report를 포함한다. sr-only 조상·hidden 계열·접근 가능하고 실제 overflow인 keyboard-focusable 가로 scroll·ellipsis만 제외하고, vertical-only scroll은 escape를 제외하지 않는다. `label-content-name-mismatch`는 명시 활성화한다.
+     - **10-case conformance (ready 전 필수)**: OS temp 아래 ephemeral HTML로 clean pass / page overflow / viewport escape / self clip / ancestor clip / vertical-scroll escape / accessible horizontal-scroll pass / sr-only·hidden·ellipsis pass / serious axe / `label-content-name-mismatch`를 실제 Chromium에서 실행한다. 각 case의 exit·blocker kind·report/screenshot 수를 기대값과 비교하고 temp fixture를 삭제한다. 10/10 전에는 registry `ready` 금지; 일부 case만 재실행해 통과 처리 금지.
+     - **registry 기록**: `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 `status | command template | adapter path | output path | capability version=ADR-058#amend-1/v1 | conformance`를 실제 값으로 채운다. 비-UI는 `status: n/a`만. UI에서 module/browser 부재=`needs-install`, 구현/entry/fixture 불일치=`wiring-fail`.
+     - **구현 앱 Visual-QA (별도 surface)**: e2e scaffold 시 `e2e/visual-qa.spec.*`도 생성해 렌더된 앱을 검사한다. scaffold 시 앱이 비어 있으면 대상 landmark 부재 graceful skip은 허용하지만, 이는 정적 adapter self-test를 통과시킨 것으로 간주하지 않는다. breakpoint 320/375/768/1440 page overflow는 차단, 요소 겹침은 권고, populated axe serious/critical은 차단·moderate/minor는 권고. 가능한 runner에서는 generated geometry/axe helper를 두 surface가 재사용한다.
+     - 이미 `e2e/visual-qa.spec.*` 있으면 덮어쓰지 않되 capability가 약하면 별도 adapter/helper로 보완한다. **스크린샷 vision 비평은 hot-loop 제외**(탐색/사람 검토는 stabilize §3-P). 졸업 e2e 게이트는 ADR-052 D3 / ADR-014#amend-2가 SSOT.
    - **6-5. Graceful fallback (날조·우회 금지)**: 6-2/6-3 의 설치 명령이 sandbox/네트워크/승인 차단으로 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고, 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다. 이후 step 5 smoke 는 해당 항목을 SKIPPED 로 처리한다. (implement-workitem 의 ADR-040#amend-1 `Needs Install` 패턴과 동일.)
    - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존*(biome/tsc/vitest/@playwright/test + browser)뿐이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 ADR-052(install-ownership 3분할)에 기록 — 본 step 은 toolchain+e2e 소유만 집행한다.
 
@@ -88,6 +100,7 @@ R0 — 운영 환경 가정 확인:
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
 - validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
 - validate:e2e smoke test 결과 (UI/web 한정 — PASS (no specs yet) / PASS / WIRING FAIL / SKIPPED)
+- validate:design adapter 결과 (UI 한정 — registry status + command/path + conformance 10/10 또는 Needs Install/WIRING FAIL; 비-UI는 n/a)
 - 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 `/implement-workitem` 또는 다음 M)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
 - **옵션: Claude PostToolUse async adapter 예시** (사용자가 채택 시 `.claude/settings.local.json` 에 복사). GUARDRAILS_STRATEGY.md 의 PostToolUse 동기 hook 예시와 동일하게 *Unix / Windows 2 OS 예시* 모두 제공 — 동일 schema 에 `async: true` + `asyncRewake: true` 만 추가:
@@ -196,9 +209,9 @@ R0 — 운영 환경 가정 확인:
   ```
 - 검사 항목은 버전마다 다르므로 `spec --rules`로 조회한다(현재 broken token ref / WCAG contrast / orphaned token / section ordering 등). **format·declared-token 보조일 뿐 browser a11y 게이트가 아니다** — 실화면 접근성은 위 breakpoint 루프 (c)의 populated axe·렌더가 담당. exit 1 on error.
 
-**설치 배선 — `@axe-core/playwright` devDep**: 6-2 toolchain 설치 또는 6-4-1 scaffold 시점에 `@axe-core/playwright`를 **devDep로 설치**한다(감지된 PM으로, 예: `npm i -D @axe-core/playwright`) — 설치하지 않으면 visual-qa.spec·design-gate.mjs가 exit 2(Needs Install)로 죽는다. 설치 실패는 stack-guard 6-5 `Needs Install` fallback(날조 금지). UI 프로젝트는 Playwright(재사용) + `@axe-core/playwright`(신규 devDep) 둘을 갖는다.
+**설치 배선 — `@axe-core/playwright` devDep**: 6-2 toolchain 설치 또는 6-4-1 scaffold 시점에 `@axe-core/playwright`를 **devDep로 설치**한다(감지된 PM으로, 예: `npm i -D @axe-core/playwright`) — 설치하지 않으면 generated visual-qa spec·`validate:design` adapter가 `needs-install`/exit 2로 끝난다. 설치 실패는 stack-guard 6-5 `Needs Install` fallback(날조 금지). UI 프로젝트는 Playwright(재사용) + `@axe-core/playwright`(신규 devDep) 둘을 갖는다.
 
-> **기존 fork 마이그레이션**: stack-guard는 `이미 e2e/visual-qa.spec.* 있으면 덮어쓰지 않는다`. 그래서 이 변경 *전에* scaffold된 fork는 여전히 advisory axe·375-only다 — 그 fork에서는 `e2e/visual-qa.spec.*`의 axe 단언을 blocking으로, breakpoint에 320을 수동으로 올려야 한다(신규 scaffold만 자동 반영). 신규 프로젝트는 해당 없음.
+> **기존 fork 마이그레이션**: 기존 `e2e/visual-qa.spec.*`는 덮어쓰지 않되 새 `validate:design` adapter는 별도로 생성·self-test한다. baseline `scripts/design-gate.mjs`가 이미 있으면 registry+self-test 성공 뒤 project-native adapter로 흡수하고 구 파일 삭제를 제안한다(자동 삭제 X). UI→비-UI 전환은 사용자 확인 뒤 generated adapter/entry만 제거한다(ADR-058#amend-1).
 - **Motion 확장 주의**: 본 보일러플레이트는 Motion 을 canonical 8섹션 외 확장으로 둔다(ADR-027#d24). lint 의 section-ordering 은 canonical 8섹션 상대 순서만 보므로 통과하지만, 만약 특정 버전이 비-canonical 섹션을 경고하면 그 경고는 *무시 가능*(의도된 확장).
 - 비-Node 스택·비-UI 프로젝트는 본 항목 skip. *GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합 — npm 의존이라 shared 기본값에는 넣지 않는다.*
 

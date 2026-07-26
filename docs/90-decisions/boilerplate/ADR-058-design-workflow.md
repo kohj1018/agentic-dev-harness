@@ -16,7 +16,7 @@ accepted
 ## 현재 유효 결정
 - `/bootstrap-design` 라운드 구조 SSOT는 본 ADR: R0(리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(파생 preview 확인 + 정리).
 - **R0 = evidence-on-demand**(D2): AI 자율 리서치가 디폴트, 사용자 입력은 옵션 힌트. Layer A(방향)/B(값 grounding — 핀 URL)/C(포맷 — R5 fixture만). role 3종, counter-reference 조건부, 고정 쿼터 없음(coverage 정지, 최종 3~5개), 최소 기록 schema.
-- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). *진짜 품질 지렛대*.
+- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). 실행물은 baseline에 두지 않고 UI 판정 뒤 `/stack-guard`가 생성한 project-native `validate:design` adapter를 사용한다(#amend-1). *진짜 품질 지렛대*.
 - **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
 - 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
 
@@ -73,6 +73,8 @@ accepted
 - .claude/skills/stack-guard/SKILL.md
 - docs/20-system/DESIGN.md                  — 현재 디자인 흐름 근거
 - docs/00-meta/STRUCTURE.md
+- docs/00-meta/GUARDRAILS_STRATEGY.md
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
 - docs/00-meta/WORKFLOW.md
 - docs/00-meta/DELEGATION_STRATEGY.md
 - docs/00-meta/PROJECT_START_CHECKLIST.md
@@ -85,7 +87,44 @@ accepted
 - .claude/agents/researcher.md               — 디자인 레퍼런스 모드 evidence-on-demand(Layer A/B/C)
 - .claude/agents/designer.md                 — R0 분해 + REFINE/EXPLORE 시안 + repair 되먹임
 - .claude/agents/reviewer.md                 — Design Consistency 6차원 + R2-G/R6 게이트 호출자
-- scripts/design-gate.mjs                    — D3 수용 게이트 러너(신설)
+- scripts/README.md                          — baseline 실행 코드 없음 + UI adapter 생성 경계
 
 ## 참고
 - ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
+
+<a id="adr-058-amend-1"></a>
+## Amendment 1 (2026-07-26) — baseline runner 제거 + UI project-native gate 조건부 생성
+
+### 배경
+- [관측됨] shared baseline의 `scripts/design-gate.mjs`는 Node·Playwright·axe를 전제하지만, `GUARDRAILS_STRATEGY.md`와 `scripts/README.md`는 런타임 종속 검증 코드를 스택 확정 뒤 생성하도록 규정한다. `STRUCTURE.md`가 이 파일을 `baseline`으로 둔 상태는 문서 중심·cross-stack 보일러플레이트 경계와 충돌한다.
+- [관측됨] 비-UI fork 정리 절차는 `DESIGN.md`만 삭제하므로 UI가 없는 API/CLI 프로젝트에도 실행 코드와 스크린샷 ignore가 남는다.
+- [관측됨] 게이트 자체는 제거할 수 없다. design-eval에서 serious axe 위반이 repair loop로 5/8→0/8이 되었고, 정적 concept/preview/prototype은 구현 앱용 `visual-qa.spec`보다 먼저 검증돼야 한다.
+
+### 결정
+1. **baseline 실행물 제거**: 보일러플레이트는 `scripts/design-gate.mjs`를 포함하지 않는다. ADR-058 D3의 품질 계약은 유지하되 실행 adapter는 UI 판정 후에만 물질화한다.
+2. **단일 생성자**: `/stack-guard`가 ADR-027#amend-3으로 UI 확정/의심을 판정한 경우에만 감지된 test runner·package manager에 자연스러운 project-native adapter와 논리 진입점 **`validate:design`**을 생성한다. 비-UI면 adapter·Playwright browser·axe·`validate:design`을 생성하지 않는다.
+3. **명령 registry**: `/stack-guard`는 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 `status | command template | adapter path | output path | capability version`을 기록한다. `/bootstrap-design` R2-G/R6와 `/plan-milestone` R5-5는 경로를 추측하거나 baseline 파일을 찾지 않고 이 표의 `command template`만 실행한다.
+4. **fail-closed preflight**: UI 산출물이 있는데 registry가 없거나 adapter self-test가 미통과면 `Needs Design Gate: /stack-guard`로 승인·프로토타입 승격을 보류한다. MCP·LLM 육안·`visual-qa.spec`만으로 대체하거나 silent skip하지 않는다.
+5. **capability contract v1**: adapter는 정적 HTML 다중 입력/glob, 뷰포트별 fresh render(1280/375/320), font readiness, 3뷰포트 screenshot, page overflow, narrow viewport escape, self/ancestor clipped text, populated axe(1280/320), serious/critical 차단, moderate/minor·axe incomplete 보고, 구조화된 성공/차단/실행불가 결과를 제공한다. 정상 UI 제외는 sr-only 조상·`aria-hidden`/`inert`/`hidden`·accessible-name과 keyboard focus를 가진 실제 가로 overflow container·ellipsis다. 세로-only scroll은 가로 escape 제외 사유가 아니다. `label-content-name-mismatch`는 experimental 기본 비활성에 의존하지 않고 명시 활성화한다.
+6. **생성 직후 conformance self-test**: `/stack-guard`는 adapter를 실제 browser로 검사한다. 최소 케이스는 clean pass / page overflow / viewport escape / self clip / ancestor clip / vertical-scroll escape / accessible horizontal-scroll pass / sr-only·hidden·ellipsis pass / serious axe / `label-content-name-mismatch`이며, 기대 blocker/report와 exit 분류가 모두 일치해야 `status: ready`를 기록한다. 모듈·browser 부재는 `Needs Install`, 구현/fixture 불일치는 `WIRING FAIL`; 둘 다 `ready` 금지다.
+7. **구현 앱 검사와 공유**: 기존 `visual-qa.spec`을 유지하되, 가능한 runner에서는 geometry·axe assertion을 같은 generated helper/adapter에서 재사용한다. 기존 spec을 발견했다는 이유로 design adapter 생성을 생략하지 않는다. 두 surface의 차이는 design adapter=정적 승인 artifact, visual QA=구현 앱이다.
+8. **마이그레이션**: 기존 fork에 baseline `scripts/design-gate.mjs`가 있으면 `/stack-guard`가 현재 project-native adapter로 흡수하고 registry+self-test 성공 후에만 구 파일 삭제를 제안한다. UI→비-UI 전환은 사용자 확인 뒤 generated adapter/entry만 제거하며 다른 project script는 건드리지 않는다.
+
+### 대안과 트레이드오프
+- baseline runner 유지: 검증 재현성은 가장 단순하지만 non-UI baggage와 shared Node 전제 충돌을 보존하므로 기각.
+- `.boilerplate/tools` 이동: 제품 코드 경계는 나아지지만 baseline 실행 코드·런타임 전제가 남아 근본 해결이 아니므로 기각.
+- version-pinned 외부 CLI: 중앙 패치와 bit-for-bit 재현성은 가장 강하지만 별도 패키지 배포·네트워크·공급망 운영비가 현재 보일러플레이트 규모보다 크다. 외부 다중 repo 운영이 생기면 재검토.
+- MCP/LLM/수동 검사: baseline 코드는 없어지지만 결정적 axe·geometry·exit 계약을 보장하지 못해 D3 constraint를 약화하므로 기각.
+
+### 적용 surface
+- `.claude/skills/stack-guard/SKILL.md`: UI-only adapter 생성·registry·self-test 단일 writer.
+- `.claude/skills/bootstrap-design/SKILL.md`, `.claude/skills/plan-milestone/SKILL.md`: registry command 소비 + missing/not-ready hard stop.
+- `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`: adapter registry schema.
+- `docs/00-meta/STRUCTURE.md`, `docs/00-meta/GUARDRAILS_STRATEGY.md`, `scripts/README.md`: baseline→conditional/generated 경계.
+- `docs/20-system/DESIGN.md`, `.claude/agents/reviewer.md`, `ADR-027#amend-7`: 특정 파일명 대신 project-native gate capability를 인용.
+- `.gitignore`: screenshot 산출물 설명을 project-native adapter로 일반화.
+
+### 강도 및 Mutation delta
+- **ADR-045 D6 판단**: 새로 추가되는 surface는 GUARDRAILS_STRATEGY.md와 STACK_SETUP_PLAN_TEMPLATE.md 2개이며, D3의 차단 등급·라운드 구조·repair loop는 바꾸지 않는다. baseline 파일 배치는 design workflow 정책의 reversal이 아니라 실행물 소유 위치 정합화이므로 supersede 대신 amendment로 기록한다. 이후 게이트 강도나 라운드 구조를 바꾸면 신규 superseding ADR을 사용한다.
+- D3의 serious/critical axe·320/375 geometry 차단 강도는 **constraint 그대로**다. 바뀌는 것은 실행물의 물질화 시점과 소유자뿐이며, 게이트 미준비 시 fail-closed라 품질 완화가 아니다.
+- **Mutation delta (ADR-047 D3)**: failure=baseline runner 삭제 뒤 UI adapter 미생성·미기록·미실행 또는 생성 구현이 v1 capability 일부를 누락 / predicted improvement=비-UI fork 실행 코드 0 + stack-specific 생성 원칙 정합, D3 결함 검출력 보존 / preserved=base Mutation Contract의 DESIGN SSOT·사용자 취향 오라클·생성/감사 분리·gate repair loop·비-UI 삭제 경로 / falsifier=UI dogfood self-test 10케이스 중 하나라도 기대 분류 불일치, runtime caller의 `scripts/design-gate.mjs` hardcode 잔존, 비-UI dogfood에 gate artifact 생성 / rollback=amend-1을 supersede하는 후속 ADR로 baseline runner 복원(ADR-058 D3 자체는 유지).

@@ -31,6 +31,20 @@
 pnpm validate   # 또는 npm run validate / make validate / task validate
 ```
 
+## Design Gate Adapter
+<!-- UI 프로젝트에서만 /stack-guard가 채우는 실행 registry (ADR-058#amend-1).
+     bootstrap-design R2-G/R6와 plan-milestone R5-5는 command template을 그대로 사용하며 경로를 추측하지 않는다.
+     비-UI면 status=n/a만 기록하고 adapter/entry를 생성하지 않는다.
+     UI에서 status가 ready가 아니면 승인·프로토타입 승격을 보류한다. -->
+| field | value |
+|-------|-------|
+| status | `n/a` (`ready` / `needs-install` / `wiring-fail`) |
+| command template | (예: `pnpm validate:design -- <html...>`) |
+| adapter path | (project-native generated path) |
+| output path | (screenshots/result path) |
+| capability version | `ADR-058#amend-1/v1` |
+| conformance | (10-case self-test 결과·실행 시각) |
+
 ## CI 권장 출력 (ADR-025)
 `/stack-guard`가 다음 형식의 권장 텍스트 출력 (파일 자동 생성 X — 사용자 결정):
 

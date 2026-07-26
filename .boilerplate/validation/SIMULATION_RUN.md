@@ -453,3 +453,80 @@
 - Phase 5 planning/lifecycle acceptance와 ADR-017 baseline이 모두 통과해 Phase 1~5 rollback 조건은 발화하지 않았다.
 - design-gate의 조상 clipping과 WCAG 2.1 A 실행 누락은 Phase 5에서 수정·실측돼 declared gate와 실제 runner가 일치한다.
 - Node/Vitest 두 마찰점은 fork stack 설정에서 같은 task 범위 안에 해결됐고 boilerplate 공통 정책 변경을 정당화하지 않는다.
+
+---
+
+## Design Gate Materialization Acceptance (2026-07-26, ADR-058#amend-1)
+
+> 목표: baseline `scripts/design-gate.mjs`를 제거하면서 ADR-058 D3의 serious/critical axe·320/375 geometry 차단력을 그대로 유지한다. 검증은 정적 계약 Red→Green, 실제 Chromium conformance, UI/비-UI materialization으로 분리했다.
+
+### Contract Red → Green
+
+변경 전 다음 5개 목표 계약은 모두 실패했다: baseline runner 부재 / stack-guard UI-only 생성 계약 / STACK_SETUP_PLAN registry / runtime caller registry 소비 / ADR 결정 기록. 변경 후 동일 검사는 **5/5 통과**했다. runtime consumer(`bootstrap-design`, `plan-milestone`)의 `node scripts/design-gate.mjs` hardcode는 0건이고 baseline 파일은 삭제됐다.
+
+### 실제 browser capability conformance (10/10)
+
+| logical case | 실제 fixture 관측 | 판정 |
+|---|---|---|
+| clean pass | exit 0, blocker 0, screenshot 3 | 통과 |
+| page overflow | exit 1, `page-overflow` | 통과 |
+| viewport escape | exit 1, `viewport-escape` | 통과 |
+| self clip | exit 1, `clipped-text` | 통과 |
+| ancestor clip | exit 1, `clipped-text` | 통과 |
+| vertical-scroll escape | exit 1, `viewport-escape`; 세로 scroll을 가로 예외로 오인하지 않음 | 통과 |
+| accessible horizontal-scroll pass | exit 0, geometry blocker 0 | 통과 |
+| sr-only·hidden·ellipsis pass | exit 0, geometry blocker 0, screenshot 3 | 통과 |
+| serious axe | exit 1, `axe:color-contrast` | 통과 |
+| label/content-name mismatch | exit 1, `axe:label-content-name-mismatch` | 통과 |
+
+같은 실제 Chromium 실행에서 horizontal negative는 blocker 10, self/ancestor clip은 각 blocker 2, vertical negative는 blocker 4, clean/exclusion control은 blocker 0으로 기대 분류와 일치했다. 모듈·browser cache는 `C:\tmp\agentic-dev-harness-design-gate`의 설치된 Playwright/axe를 재사용했다.
+
+### 조건부 materialization
+
+- **UI fixture** `C:\tmp\design-gate-round6-ui`: project-native adapter + package `validate:design` entry + `STACK_SETUP_PLAN.md ## Design Gate Adapter(status=ready, capability=v1, conformance=10/10)`를 물질화했다. registry에 기록된 실제 명령으로 clean exit 0/blocker 0/screenshots 3, low-contrast exit 1/blocker 2를 재실행해 **2/2 통과**했다.
+- **비-UI fixture** `C:\tmp\design-gate-round6-nonui`: registry `status=n/a`; design adapter·entry·fixture는 **0개**였다.
+- 구현 앱용 `visual-qa.spec`은 별도 surface로 유지했다. 정적 승인 artifact gate를 대체하지 않는다.
+
+**판정: 품질 계약 유지 + baseline UI 실행 코드 제거를 동시에 충족.**
+
+---
+
+## Round 6 (2026-07-26, todo CLI / Node 24 + TypeScript + Vitest)
+
+> ADR-017 재실행 트리거(ADR-058#amend-1 + stack-guard/bootstrap-design/plan-milestone lifecycle 계약 변경) 적용. isolated fork `C:\tmp\dogfood-cli-round6-20260726`, 현재 변경 worktree를 root baseline으로 **9 commits**, 최종 working tree clean. 변경과 무관한 제품 산출물은 검증된 Round 5 snapshot을 단계별로 replay했고, 새 비-UI design adapter 분기·설치·테스트·커밋은 실제 수행했다.
+
+### 단계별 관측
+
+1. **Discovery/Bootstrap**: todo CLI 상위 계약을 먼저 수립하고 비-UI 판정 뒤 `DESIGN.md`를 제거했다. 상위 문서 없는 하위 생성 0.
+2. **Stack guard**: `npm ci`로 48 packages 실제 설치, audit 취약점 0. `STACK_SETUP_PLAN.md ## Design Gate Adapter`는 `status=n/a`; package에 `validate:design` 없음, `scripts/design-gate.mjs` 없음. 즉 비-UI zero-artifact.
+3. **Plan milestone**: M1/F-001을 `ready`로 정의하고 ROADMAP 범위를 유지했다.
+4. **Plan workitem**: T-001~003 전체 snapshot과 의존 순서를 확정했다.
+5. **Implement TDD**: T-001은 missing `src/store.js`, T-002는 missing `src/todos.js`, T-003은 missing `dist/cli.js`로 각각 의도한 Red를 먼저 관측했다. 구현 후 store 3, 전체 unit 6, E2E 3이 Green.
+6. **Validate/Finalize**: `npm run validate` exit 0 — typecheck, unit 6/6, subprocess E2E 3/3. task별 문서·구현 범위를 같은 커밋에 기록했다.
+7. **Stabilize**: 실제 `add → done → list` manual smoke가 count 1/completed true이고 disk JSON도 count 1/completed true. FAC 4/4, P0 0.
+8. **Graduation**: M1 회고 `graduation: YES (2026-07-26)`, 최종 fork clean.
+
+### 실제 커밋
+
+`221b451` baseline → `0eceb86` product contracts → `565cdd6` stack+n/a registry → `165d749` M1/F → `e3c4458` plan snapshot → `6fdd33f` store → `5196f9c` service → `fc84a8b` CLI/E2E → `52ed27f` graduation.
+
+### ADR-017 성공 기준
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---:|---|
+| 사용자 개입 | ≤1 | 0 (fork 산출물 직접 편집 요청·질문 없음) | 통과 |
+| placeholder 충원율 | ≥80% | 100% (Discovery/Charter/ARCH/Stack/ADR×2/M/F/T×3 = 11/11) | 통과 |
+| graduation pre-check 미통과 사유 | ≤2 | 0 | 통과 |
+
+**ADR-017 gate: 3/3 통과. M1 graduation: YES.**
+
+### 발견된 마찰점·한계
+
+- **[기존 경로, 비차단] stack 직후 no-source validate**: 구현 전 `npm run validate`는 TypeScript `TS18003`(입력 source 없음)으로 실패한다. 첫 task Red와 같은 시점 특성이며 최종 validation은 통과했다. 이번 design adapter 변경과 무관하므로 범위 밖 개선은 하지 않았다.
+- **[실행환경] Vitest worker sandbox EPERM**: restricted sandbox에서 child-process spawn이 막혔고 동일 명령을 승인된 실제 worker 환경에서 재실행해 논리 Red/Green을 확인했다. 프로젝트 결함이 아니다.
+- **fidelity 한계**: fresh agent auto-load·Claude persona fan-out은 미실행. 변경과 무관한 product docs/code는 Round 5의 검증된 stage snapshot을 replay했으며, 이번 delta의 UI browser conformance와 비-UI branch는 별도 실제 실행으로 보강했다.
+
+### 결정에 미친 영향
+
+- 비-UI lifecycle에는 design gate 코드·entry·browser 설치가 생기지 않았고 전체 lifecycle이 기존과 동일하게 졸업했다.
+- UI fixture에서는 registry command가 기존 runner와 같은 negative/clean 분류를 냈다. ADR-058 D3 rollback 조건은 발화하지 않았다.

@@ -3,7 +3,7 @@ name: plan-milestone
 description: Run a multi-round main-session conversation to author milestone(s) (M1 included — ADR-057) and their feature docs. Additive — never overwrites existing milestones; hand off to /plan-workitem for tasks.
 argument-hint: "[milestone idea | M<N>]"
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes/*/_drafts/*.html) Bash(node scripts/design-gate.mjs*) Bash(npx playwright*)
+allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes/*/_drafts/*.html) Bash(pnpm validate:design*) Bash(npm run validate:design*) Bash(yarn validate:design*) Bash(bun run validate:design*) Bash(make validate-design*) Bash(task validate:design*) Bash(npx playwright*)
 ---
 
 이 skill은 메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해 마일스톤(M1 포함)과 그 feature 문서를 작성하는 절차서다.
@@ -39,6 +39,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 - `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md` (마일스톤 양식 SSOT)
 - `docs/30-workitems/_templates/FEATURE_TEMPLATE.md` (feature 양식 SSOT)
 - 직전 마일스톤 문서(있으면 — `docs/30-workitems/milestones/` 최신 Mx)
+- UI R5를 수행할 때 `docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter` registry
 
 라운드 구성:
 
@@ -95,7 +96,7 @@ UI 판정은 ADR-027#amend-3 다중신호 절차. 비-UI 마일스톤은 본 라
   *확정하지 않는 것*(명시): 상태관리·fetch·컴포넌트 분리 등 엔지니어링 내부 — ARCH §7-4 영역.
 - **R5-5 승인·저장** (게이트-우선 순서 — **검사한 bytes = 저장한 bytes**): 사용자 승인 후 아래 순서로 처리한다. **게이트·승격을 feature 문서 기입보다 *먼저*** 한다(게이트 실패 시 최종 `<screen>.html`가 안 생기므로, 참조 줄·PX를 먼저 쓰면 없는 파일을 가리키는 dangling 참조가 남는다).
   1. **draft raw-hex 정합 (게이트 前)**: 승인 예정 draft(`_drafts/`)에 raw hex 정규식 1회 grep — **제외는 `--<name>: #hex` custom-property *정의 라인*만**(`:root` 안이라도 *정의 밖 사용처* hex는 검사 — ADR-056#amend-2; 파일 전체·`:root` 블록 전체 제외 금지). 발견 시 토큰으로 수정 → **수정했으면 그 수정본으로 사용자 재승인**(승인·게이트·저장 bytes 동일). PX 마커는 `PX-M<N>-<screen>-NN`(번호 `01`부터 — 화면 revision 없음, 마일스톤 번호가 버전). §4로 승격한(=PX 아님) 결정은 마커를 달지 않는다(있으면 제거). 이 draft 확정 후 재승인 → gate → 무수정 승격(2·3단계 정합).
-  2. **게이트**: **UI 프로토타입이면 항상** 승인된 draft를 `node scripts/design-gate.mjs <그 HTML 경로>`로 검사한다(ADR-058 D3 — **러너 결정적 차단**: serious/critical axe·320/375 geometry(page overflow·viewport escape·clipped text)). **픽셀 취향(위계·밀도·slop·overlap)은 R5-3 사용자 선택·수정 루프가 오라클 — R5엔 별도 reviewer[design] agent 호출이 없다**(취향 오라클=사용자; concept 단계 R2-G와 달리 프로토타입은 사용자가 직접 고른다). 러너 차단이면 designer 재생성 → **1로 되돌아가** 재검사(retry ≤2, repair 후 재승인 포함). retry 소진해도 차단이면 **승격 안 함**·그 화면 미완으로 남긴다(dangling 방지). **exit 2(Needs Install)면 사유 echo 후 승인 보류 — 설치·재실행 전까지 승격 금지**(R2-G/R6와 동일; silent skip·미검증 승격 불가 — ADR-058 constraint "여전히 fail이면 승인 불가"). 승인 프로토타입도 concept과 같은 1회성 게이트 대상.
+  2. **게이트**: **UI 프로토타입이면 항상** `STACK_SETUP_PLAN.md ## Design Gate Adapter`의 `status: ready` + capability `ADR-058#amend-1/v1`을 확인하고 command template의 `<html...>`에 승인된 draft 경로를 대입해 그대로 검사한다(경로 추측 금지). registry 누락/not-ready면 `Needs Design Gate: /stack-guard`로 승인·승격 보류(MCP·육안·visual-qa로 대체 금지). generated adapter의 **결정적 차단**은 serious/critical axe·320/375 geometry(page overflow·viewport escape·clipped text)다. **픽셀 취향(위계·밀도·slop·overlap)은 R5-3 사용자 선택·수정 루프가 오라클 — R5엔 별도 reviewer[design] agent 호출이 없다**(취향 오라클=사용자; concept 단계 R2-G와 달리 프로토타입은 사용자가 직접 고른다). 러너 차단이면 designer 재생성 → **1로 되돌아가** 재검사(retry ≤2, repair 후 재승인 포함). retry 소진해도 차단이면 **승격 안 함**·그 화면 미완으로 남긴다(dangling 방지). **exit 2(Needs Install)면 사유 echo 후 승인 보류 — 설치·재실행 전까지 승격 금지**(R2-G/R6와 동일; silent skip·미검증 승격 불가 — ADR-058 constraint "여전히 fail이면 승인 불가"). 승인 프로토타입도 concept과 같은 1회성 게이트 대상.
   3. **승격 (무수정)**: 게이트 통과 후 **통과한 그 bytes를 수정 없이** **화면 단위**로 `docs/20-system/prototypes/M<N>/<screen>.html`로 승격 저장한다(**커밋 대상** — Record; 같은 draft M의 R5 피드백 반복 중 승인 후보가 바뀌면 같은 파일을 대체하되, M `ready` 뒤 재승인은 없음. 화면-키인 이유: 한 화면은 여러 feature 표면의 합성 — ADR-056 결정 1). 승격 시점엔 내용을 더 이상 바꾸지 않는다(raw-hex 정합·재검토는 1에서 이미 끝).
   4. **feature 문서 기입**: 각 구현 feature `## 7`에 `프로토타입: [화면 파일](상대경로) (진입: <라우트/상태 진입 메모>)` 참조 줄(§3-V가 이 메모로 화면을 찾음) + **`경험 결정(PX):` 인벤토리**를 기입한다 — 승인 HTML의 `<!-- PX-M<N>-<screen>-NN: ... -->` 마커를 **그대로 복사**(재추출·재해석 금지 — drift 차단)해 `- PX-M<N>-<screen>-NN: <한 줄>`로. 화면이 여러 feature에 걸치면 **각 PX를 그것을 구현하는 feature의 `## 7`에 분산 기록**(화면 통째로 대표 feature에 몰지 않음 — INST-1 사각 방지); 화면-공통은 shell/layout feature 또는 DESIGN.md §4, cross-feature 정합은 `## 7-2` INV/seam. **완전성 확인 (화면별)**: 기입 후 **그 화면**의 HTML 마커 = 관련 feature 인벤토리 중 **`^PX-M<N>-<현재 screen>-\d{2,}$`로 정확 매칭한 부분집합**과 일치하는지 본다(다중 화면 feature는 여러 화면 PX가 섞이므로 screen 정확 필터 — prefix-only면 `user`가 `user-settings`를 오매칭; 마커 있는데 미기입=orphan 방지). *복사 시점 1차 확인일 뿐* — 이후 문서 drift는 **`M<N>` 입력 validate-plan이 프로토타입 HTML을 독립 회수해 재검증**(plan-workitem도 HTML을 읽음).
   5. **정리**: `_drafts/` 내 시안 파일을 삭제한다(빈 디렉터리 잔존 무해). 승인(=전 화면 게이트 통과·승격) 전에는 종료 출력으로 진행하지 않는다.
