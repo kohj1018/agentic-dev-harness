@@ -548,6 +548,10 @@
 | source drift negative | comment가 추가된 SHA-256 `d769b71b...92498b6` → browser 실행 전 `source-integrity` 0/1 | 통과 |
 | Windows fresh clone EOL Red | `core.autocrlf=true` + `text=auto`에서 SHA-256 `652015b2...711bfd`로 변환 | 실패 재현 |
 | Windows fresh clone EOL Green | canonical asset `.gitattributes eol=lf` 고정 뒤 expected digest 보존 | 통과 |
+| materialized adapter EOL Red | path-limited attr에서 `scripts/design-gate.mjs` fresh clone SHA-256이 `652015b2...711bfd`로 변환 | 실패 재현 |
+| materialized adapter EOL Green | `*.mjs text eol=lf` 확장 뒤 `core.autocrlf=true` clone도 canonical digest 유지 | 통과 |
+| oracle invalid input | 빈/디렉터리/없는 경로 모두 stacktrace 없이 structured JSON + exit 2 | 통과 |
+| oracle execution unavailable | adapter module/browser 부재 exit 2 → `execution-available=false` + Needs Install detail + oracle exit 2 | 통과 |
 | v1 upgrade | v1 adapter가 canonical digest와 같음 → v2 suite 17/17, 전후 digest 동일, registry v2 승격 | 통과 |
 | local modification | registry digest와 실제 digest 불일치 → `wiring-fail (local modifications)`, 전후 digest 동일 | 통과 |
 

@@ -2,13 +2,14 @@
 // Fixed conformance oracle for ADR-058#amend-2/v2.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 
 const CAPABILITY = 'ADR-058#amend-2/v2';
 const EXPECTED_SOURCE_SHA256 = '9fb9b7a2858af4d68dda5d8cefe5ccc019ee8c07a71ecbc8e6273ca76f17cda9';
-const adapter = resolve(process.argv[2] || '');
+const adapterArg = process.argv[2];
+const adapter = adapterArg ? resolve(adapterArg) : '';
 const checks = [];
 const record = (name, pass, detail) => checks.push({ name, pass, detail });
 const html = (title, style, body) => `<!doctype html>
@@ -82,12 +83,16 @@ const finish = (forcedExit) => {
   process.exit(forcedExit ?? (passed === checks.length ? 0 : 1));
 };
 
-if (!adapter || !existsSync(adapter)) {
-  record('source-integrity', false, `adapter not found: ${adapter || '<empty>'}`);
+let adapterSource;
+try {
+  if (adapter && statSync(adapter).isFile()) adapterSource = readFileSync(adapter);
+} catch { /* Invalid or inaccessible input is an execution-unavailable result. */ }
+if (!adapterSource) {
+  record('source-integrity', false, `adapter is not a readable file: ${adapter || '<empty>'}`);
   finish(2);
 }
 
-const actualDigest = createHash('sha256').update(readFileSync(adapter)).digest('hex');
+const actualDigest = createHash('sha256').update(adapterSource).digest('hex');
 record('source-integrity', actualDigest === EXPECTED_SOURCE_SHA256, `actual=${actualDigest}`);
 if (actualDigest !== EXPECTED_SOURCE_SHA256) finish(1);
 
@@ -121,6 +126,13 @@ try {
 
   const coreNames = ['clean.html', 'low-contrast.html', 'horizontal.html', 'self-clip.html', 'vertical.html', 'ancestor-clip.html', 'exclusions.html', 'label-name.html'];
   const core = run(coreNames.map(fixture));
+  if (core.result.status === 2) {
+    const detail = (core.result.stderr || core.result.stdout || 'adapter exit 2').trim();
+    record('execution-available', false, detail.slice(0, 2000));
+    // finish() terminates immediately, so remove the temp tree before emitting exit 2.
+    rmSync(root, { recursive: true, force: true });
+    finish(2);
+  }
   record('bounded-process-completion', !core.result.error, core.result.error?.message || `status=${core.result.status}`);
   record('stale-screenshot-cleanup', !existsSync(join(shots, 'stale.png')), 'stale.png removed before capture');
   record('clean-pass', fileBlockers(core.output, 'clean.html').length === 0 && (core.output?.screenshots || []).filter((shot) => basename(shot).startsWith('0-clean-')).length === 3, 'blockers=0 screenshots=3');
