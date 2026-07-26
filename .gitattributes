@@ -3,5 +3,7 @@
 *.json text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+# ADR-058#amend-2 canonical source digest must be clone-stable.
+.claude/skills/stack-guard/assets/*.mjs text eol=lf
 *.ps1 text eol=crlf
 *.bat text eol=crlf

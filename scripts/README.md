@@ -4,9 +4,10 @@
 
 기본 보일러플레이트에서는 OS/셸/런타임 종속성을 피하기 위해
 공유 스크립트를 강제로 포함하지 않는다.
-UI design gate도 baseline 실행 파일로 두지 않는다. `/stack-guard`가 UI로 판정한
-프로젝트에서만 project-native adapter를 생성하고 실제 명령·경로를
-`docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록한다(ADR-058#amend-1).
+UI design gate도 baseline **프로젝트 실행 파일**로 두지 않는다. 검증된 정본은
+`stack-guard`의 JIT asset으로 격리하고, `/stack-guard`가 UI로 판정한 프로젝트에서만
+project-native adapter로 복사·배선한다. 실제 명령·경로·source digest는
+`docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록한다(ADR-058#amend-2).
 
 권장 방식:
 - 프로젝트의 스택이 정해진 뒤

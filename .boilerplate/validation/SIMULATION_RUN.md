@@ -458,7 +458,7 @@
 
 ## Design Gate Materialization Acceptance (2026-07-26, ADR-058#amend-1)
 
-> 목표: baseline `scripts/design-gate.mjs`를 제거하면서 ADR-058 D3의 serious/critical axe·320/375 geometry 차단력을 그대로 유지한다. 검증은 정적 계약 Red→Green, 실제 Chromium conformance, UI/비-UI materialization으로 분리했다.
+> 목표: baseline `scripts/design-gate.mjs`를 제거하면서 ADR-058 D3의 serious/critical axe·320/375 geometry 차단력을 그대로 유지한다. 검증은 정적 계약 Red→Green, 실제 Chromium conformance, UI/비-UI materialization으로 분리했다. **후속 정정(ADR-058#amend-2)**: 아래 10/10 adapter는 삭제 전 runner와 byte-identical하므로 legacy 행동 보존만 증명하며, 산문으로 독립 재작성한 구현의 재현성이나 견고성 invariant 전체를 증명하지 않는다.
 
 ### Contract Red → Green
 
@@ -487,7 +487,7 @@
 - **비-UI fixture** `C:\tmp\design-gate-round6-nonui`: registry `status=n/a`; design adapter·entry·fixture는 **0개**였다.
 - 구현 앱용 `visual-qa.spec`은 별도 surface로 유지했다. 정적 승인 artifact gate를 대체하지 않는다.
 
-**판정: 품질 계약 유지 + baseline UI 실행 코드 제거를 동시에 충족.**
+**정정 판정: 검증된 legacy 구현의 v1 행동 계약 보존 + baseline UI 실행 코드 제거는 확인했다. 독립 authoring 재현성과 10-case 밖 견고성은 미검증이므로 후속 Amendment 2의 canonical source/fixed oracle로 보강한다.**
 
 ---
 
@@ -530,3 +530,66 @@
 
 - 비-UI lifecycle에는 design gate 코드·entry·browser 설치가 생기지 않았고 전체 lifecycle이 기존과 동일하게 졸업했다.
 - UI fixture에서는 registry command가 기존 runner와 같은 negative/clean 분류를 냈다. ADR-058 D3 rollback 조건은 발화하지 않았다.
+
+---
+
+## Design Gate v2 Acceptance (2026-07-26, ADR-058#amend-2)
+
+> 정본과 oracle을 `.claude/skills/stack-guard/assets/`에 분리하고, UI에서만 project adapter로 byte-copy하는 선택지를 검증했다. fixture는 local-only이며 결과만 본 Record에 남긴다.
+
+### Source와 browser conformance
+
+| 검증 | 관측 | 판정 |
+|---|---|---|
+| canonical source integrity | SHA-256 `9fb9b7a2858af4d68dda5d8cefe5ccc019ee8c07a71ecbc8e6273ca76f17cda9` | 통과 |
+| fixed conformance Red | canonical source 부재 입력 → `source-integrity` 0/1 | 통과 |
+| fresh UI materialization | canonical byte-copy 뒤 실제 Chromium fixed suite 17/17 | 통과 |
+| registry command | clean concept exit 0, blocker/report 0, screenshot 3 | 통과 |
+| source drift negative | comment가 추가된 SHA-256 `d769b71b...92498b6` → browser 실행 전 `source-integrity` 0/1 | 통과 |
+| Windows fresh clone EOL Red | `core.autocrlf=true` + `text=auto`에서 SHA-256 `652015b2...711bfd`로 변환 | 실패 재현 |
+| Windows fresh clone EOL Green | canonical asset `.gitattributes eol=lf` 고정 뒤 expected digest 보존 | 통과 |
+| v1 upgrade | v1 adapter가 canonical digest와 같음 → v2 suite 17/17, 전후 digest 동일, registry v2 승격 | 통과 |
+| local modification | registry digest와 실제 digest 불일치 → `wiring-fail (local modifications)`, 전후 digest 동일 | 통과 |
+
+고정 suite 17개는 기존 행동 10종에 source integrity, bounded completion, stale screenshot cleanup, 동일 basename 2파일/6 screenshot uniqueness, 파일별 render-error 격리, -1px 허용, -2px 차단을 더한다. HTML fixture bytes와 기대 분류는 conformance asset이 소유하고 OS temp에는 실행 시 그 고정 bytes만 쓴다.
+
+### UI 재분류와 caller fail-closed
+
+- `C:\tmp\design-gate-v2-reclass-20260726`: DESIGN draft + backend-only ARCH는 `non-ui`; 이후 Next.js + ARCH `## 7-4` 신호를 추가하고 `/stack-guard` 판정을 재실행하면 `ui-suspected`, adapter 생성, fixed suite **17/17**. 따라서 정상 frontend 흐름이 항상 비-UI라는 주장은 기각하고, 후발 신호 복구 필요성만 채택했다.
+- `C:\tmp\design-gate-caller-v2-20260726`: missing / n/a / needs-install / wiring-fail은 command 실행 0·final artifact bytes 불변·`Needs Design Gate`; current-ready만 registry command 실행. **5/5 통과**.
+- caller fixture는 current skill 문구를 같은 메인 세션이 역할 실행하고 deterministic evaluator가 결과를 확인한 것이다. 별도 fresh LLM을 5회 샘플링한 결과가 아니므로 모델 규율의 통계적 일반화 증거로 쓰지 않는다.
+
+### 비-UI JIT 경계
+
+`C:\tmp\design-gate-v2-nonui-20260726`에서 canonical assets 2개는 skill 내부 baseline 자산으로 존재하지만, project adapter·`validate:design` entry·DESIGN·design browser dependency/node_modules는 0이고 registry는 `n/a`다. 따라서 v1의 “baseline 파일 0” 표현은 더 이상 current가 아니며, current invariant는 **비-UI project runtime artifact 0 + JIT asset 미복사/미실행**이다.
+
+**판정: canonical source 재현성, 외부 fixed oracle, v1 upgrade, local-modification 보존, n/a→UI 복구, caller fail-closed가 모두 관측됐다.**
+
+---
+
+## Round 7 (2026-07-26, todo CLI / canonical design-gate asset regression)
+
+> isolated fork `C:\tmp\dogfood-cli-round7-20260726`. 현재 Amendment 2 worktree를 baseline으로 시작해 Round 6 제품 계약을 단계별 replay하고, 변경 delta와 TDD/validate/smoke는 실제 실행했다. 총 9 commits, 최종 working tree clean.
+
+### 단계별 관측
+
+1. **Bootstrap**: 제품 상위 계약을 먼저 재현하고 CLI 판정 뒤 DESIGN.md 제거. canonical asset digest는 baseline/fork 모두 동일.
+2. **Stack guard**: `npm ci` 48 packages·audit 0. registry `status=n/a`; project adapter·`validate:design` entry·Playwright/axe dependency는 0. dormant skill asset은 project runtime으로 복사되지 않았다.
+3. **Plan**: M1/F-001과 T-001~003 전체 snapshot을 각각 별도 단계로 확정.
+4. **TDD**: missing store Red→unit 3 Green, missing service Red→unit 6 Green, missing dist CLI Red→unit 6 + subprocess E2E 3 Green.
+5. **Stabilize**: `npm run validate` exit 0; manual add→done→list와 disk JSON 모두 count 1/completed true.
+6. **Graduation**: M1 graduation 문서 반영, 최종 clean.
+
+### 실제 커밋
+
+`0a10156` baseline → `088679f` product contracts → `5cf0e6c` stack+n/a → `b527f20` M1/F → `b0b4c6d` plan snapshot → `1887326` store → `fa83acc` service → `0710445` CLI/E2E → `e0d0e71` graduation.
+
+### ADR-017 성공 기준
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---:|---|
+| 사용자 개입 | ≤1 | 0 | 통과 |
+| placeholder 충원율 | ≥80% | 100% (11/11) | 통과 |
+| graduation pre-check 미통과 사유 | ≤2 | 0 | 통과 |
+
+**ADR-017 gate: 3/3 통과. Amendment 2가 비-UI lifecycle에 project runtime/dependency 회귀를 만들지 않았다.**

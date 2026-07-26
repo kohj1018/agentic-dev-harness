@@ -51,7 +51,7 @@
 | 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
 | 056 | Milestone experience contract | accepted | (+#amend-1: 프로토타입 경험 결정 PX 커버리지, +#amend-2: raw-hex 토큰 정의 예외, +#amend-3: 화면 전환 표 + downstream 소비자) | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
 | 057 | Planning v2 (unification + batch + seam) | accepted | (+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: cross-feature seam canonical 위치 — 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기) | M 단위 전체 계획 스냅샷 + 계획 잠금(draft→ready→in-progress→done) + seam 계약 + 마일스톤 로드맵 |
-| 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | +#amend-1: baseline runner 제거 + UI project-native gate 조건부 생성 | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
+| 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | +#amend-1: baseline runner 제거 + UI project-native gate 조건부 생성, +#amend-2: JIT canonical asset + fixed conformance + upgrade/recovery | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
 
 ## Reserved / Parked / Dropped 번호
 

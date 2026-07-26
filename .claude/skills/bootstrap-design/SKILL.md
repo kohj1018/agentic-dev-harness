@@ -17,7 +17,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 비-UI 프로젝트는 호출되지 않음 (ADR-031 직접 지원 범위 밖).
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
-**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4). 본문의 `Agent` 위임(R0 researcher 디자인 레퍼런스 조사 · R0~R2 designer authoring · R2-1.5 reviewer 구별성 비평 · **R2-G/R6 reviewer 픽셀 판정 · 게이트 repair designer 재생성**)은 Codex에 persona 매핑이 없어 메인 세션이 각 persona 파일(researcher.md/designer.md/reviewer.md)을 읽고 순차 인라인 수행하며 생략하지 않는다(ADR-010). **동일 세션 degrade 계약 (ADR-058 D5)**: (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 그 라운드 산출물과 최종 출력에 `under-verified: 동일 세션 감사`를 명시하며, (c) 완전 독립 감사가 요구되면 승인 보류한다. **결정적 렌더 게이트(`STACK_SETUP_PLAN.md ## Design Gate Adapter`의 ready command)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 차단된다.
+**Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4). 본문의 `Agent` 위임(R0 researcher 디자인 레퍼런스 조사 · R0~R2 designer authoring · R2-1.5 reviewer 구별성 비평 · **R2-G/R6 reviewer 픽셀 판정 · 게이트 repair designer 재생성**)은 Codex에 persona 매핑이 없어 메인 세션이 각 persona 파일(researcher.md/designer.md/reviewer.md)을 읽고 순차 인라인 수행하며 생략하지 않는다(ADR-010). **동일 세션 degrade 계약 (ADR-058 D5)**: (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 그 라운드 산출물과 최종 출력에 `under-verified: 동일 세션 감사`를 명시하며, (c) 완전 독립 감사가 요구되면 승인 보류한다. **결정적 렌더 게이트(`STACK_SETUP_PLAN.md ## Design Gate Adapter`의 current-ready v2 command)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 차단된다.
 
 ## 모드
 - `--fast`: R0(Layer A/B minimal — 있으면 사용자 힌트 우선, 없으면 자율 조사 1~2개로 최소 grounding + minimal 노트) + R1(원칙 1줄 + voice 기본값 확인 1회) + R3(토큰) + R5(저장 — 축약 섹션, §10 포함). **R2(concept 시안)·R4(컴포넌트 인벤토리)·R6(preview)는 생략** — R5 저장은 *생략하지 않는다*. R1은 *완전 생략 금지*(minimal 1줄). 게이트는 산출물 기준 — `--fast`는 R2·R6(concept/preview) 미생성이라 게이트 적용 대상 없음(N/A, ADR-058 D3). `--fast`에서 concept·preview가 필요하면 종료 후 명시 발화로 R2/R6 단독 수행.
@@ -38,7 +38,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - `docs/10-charter/PROJECT_CHARTER.md` (페르소나·시나리오 — concept 대표 화면 입력)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` (스택)
 - `docs/20-system/DESIGN.md` (현재 placeholder)
-- `docs/00-meta/STACK_SETUP_PLAN.md` (R2/R6 산출물을 만드는 경우 `## Design Gate Adapter` registry; `--fast`로 둘 다 생략하면 N/A)
+- `docs/00-meta/STACK_SETUP_PLAN.md` (R2/R6 산출물을 만드는 경우 `## Design Gate Adapter` current version·source digest·conformance registry; `--fast`로 둘 다 생략하면 N/A)
 
 ## 반드시 수행할 일
 - 본 skill은 baseline placeholder `docs/20-system/DESIGN.md`를 *채운다* (생성 X). 파일이 없으면 fork 사용자가 비-UI 프로젝트로 판단해 삭제한 경우 — 작업 중단 + 사용자에게 *"본 프로젝트는 비-UI라 판단됨. /bootstrap-design 실행 의도 확인 필요"* 보고.
@@ -124,11 +124,11 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 
 ### R2-G. 수용 게이트 (ADR-058 D3 — full 모드)
 `--fast`는 R2 자체를 생성하지 않으므로 본 게이트 N/A(ADR-058 D3 — 산출물 기준). full 모드는:
-- **실행 preflight**: `STACK_SETUP_PLAN.md ## Design Gate Adapter`가 `status: ready`이고 capability가 `ADR-058#amend-1/v1`, command template이 현재 저장소에서 실행 가능한지 확인한다. 누락/not-ready면 `Needs Design Gate: /stack-guard`로 승인 보류(MCP·육안·visual-qa로 대체 금지). ready면 command template의 `<html...>`에 `docs/20-system/design-concepts/concept-*.html`을 대입해 그대로 실행한다 — **exit 0** 통과 / **exit 1** JSON `blockers`(serious·critical axe·320/375 geometry) 차단(실패 selector를 designer에 되먹여 재생성) / **exit 2**(Needs Install/실행 불가) 사유 echo 후 승인 보류(silent skip 금지).
+- **실행 preflight**: `STACK_SETUP_PLAN.md ## Design Gate Adapter`가 `status: ready`, capability `ADR-058#amend-2/v2`, 기록된 `source digest`(direct-support Node UI는 canonical), fixed conformance PASS인지 모두 확인한다. missing/n/a/needs-install/wiring-fail/lower-version/digest·conformance 누락이면 command를 실행하지 않고 concept 선택·DESIGN 저장으로 진행하지 않으며 정확히 `Needs Design Gate: /stack-guard` + 현재 status/version을 출력한다(MCP·육안·visual-qa로 대체 금지). 이 preflight가 frontend 신호를 뒤늦게 발견한 경우 `/stack-guard` 재실행이 n/a→UI를 복구한다. current-ready면 command template의 `<html...>`에 `docs/20-system/design-concepts/concept-*.html`을 대입해 그대로 실행한다 — **exit 0** 통과 / **exit 1** JSON `blockers` 차단(실패 selector를 designer에 되먹여 재생성) / **exit 2** 사유 echo 후 승인 보류(silent skip 금지).
 - **렌더**: 각 concept HTML을 Playwright로 **1280 + 375** 캡처(desktop 폭은 프로젝트 target 명시 시 그 값). stack-guard가 깐 Playwright 재사용.
 - **상시 결정적 검사**: **320 CSS px reflow**(page overflow / viewport escape / clipped text) + **populated DOM axe**(빈 화면 아님 — 대표 화면에 실데이터 채운 상태).
 - **독립 픽셀 판정**: reviewer(design surface)가 1280/375 스크린샷을 Read로 열람해 위계·밀도·domain fit·장식 slop 판정(생성자 designer와 분리). LLM reviewer 1명.
-- **차단(block) — generated `validate:design` adapter가 결정적 계산**: serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry — check-reflow-320.cjs 이식). **차단(block) — reviewer 픽셀 판정**(스크린샷 열람, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding.
+- **차단(block) — source-verified current-v2 `validate:design` adapter가 결정적 계산**: serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry — check-reflow-320.cjs 이식). **차단(block) — reviewer 픽셀 판정**(스크린샷 열람, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding.
 - **수동 smoke**(사람 몫): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
 - **repair loop**: 차단 finding이 있으면 실패 selector + 요약을 **designer에 되먹여 재생성** → 재검사. **retry ≤2**, 초과 시 승인 보류 + brief(R0/R1) 재검토. 여전히 fail이면 그 concept은 선택지에서 제외(사용자에게 사유 echo).
 - **정리**: 게이트용 임시 렌더/스크린샷은 통과 판정 후 정리(concept HTML은 R2-2 선택까지 유지 — R6-3에서 최종 삭제).
@@ -197,7 +197,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
   3. **대표 화면 2~3개** — charter `## 2.1 페르소나` / `## 3.1 핵심 시나리오` 기반 실사용 맥락. (R2 선택 concept과 일관되어야 — 불일치 시 DESIGN.md를 먼저 점검.)
   - 대표 화면 preview는 실카피(`## 10` 준수)로 렌더한다 (ADR-056 결정 9 / ADR-058).
 - 생성 직후 DESIGN.md `## 9 Do's and Don'ts` 위반을 self-check해 위반 의심 항목을 출력에 보고(자동 차단 X).
-- **수용 게이트 (ADR-058 D3 — full 모드)**: R2-G와 같은 registry preflight를 거쳐 ready command template의 `<html...>`에 `docs/20-system/design-preview.html`을 대입해 검사한다(경로 추측 금지; missing/not-ready=`Needs Design Gate: /stack-guard`로 승인 보류). R2-G와 동일 분리 — **러너 결정적 차단**: serious/critical axe·320/375 geometry(page overflow·viewport escape·clipped text); **reviewer 픽셀 차단**(스크린샷): 위계 붕괴·밀도·장식 slop·critical overlap; moderate/minor+취향 = 보고. **픽셀 판정은 R2-G와 동일하게 reviewer(design surface)를 단발 호출해 1280/375 스크린샷을 Read로 열람·판정한다**(생성자 designer와 분리, LLM reviewer 1명 — R6에도 이 호출이 명시적으로 있어야 선언한 픽셀 차단이 실제로 집행된다). 차단 발견 시 **DESIGN.md(SSOT)를 먼저 고치고** preview 재생성(retry ≤2, 초과 시 승인 보류 + brief 재검토). exit 2(Needs Install)면 사유 echo 후 승인 보류. `--fast`는 preview(R6) 미생성이라 본 게이트 N/A(산출물 기준).
+- **수용 게이트 (ADR-058 D3 — full 모드)**: R2-G와 같은 current v2 + source digest + fixed conformance preflight를 거쳐 command template의 `<html...>`에 `docs/20-system/design-preview.html`을 대입해 검사한다(경로 추측 금지; missing/n/a/lower/not-ready면 command 미실행 + preview 승인·정리 보류 + `Needs Design Gate: /stack-guard`). R2-G와 동일 분리 — **러너 결정적 차단**: serious/critical axe·320/375 geometry(page overflow·viewport escape·clipped text); **reviewer 픽셀 차단**(스크린샷): 위계 붕괴·밀도·장식 slop·critical overlap; moderate/minor+취향 = 보고. **픽셀 판정은 R2-G와 동일하게 reviewer(design surface)를 단발 호출해 1280/375 스크린샷을 Read로 열람·판정한다**(생성자 designer와 분리, LLM reviewer 1명 — R6에도 이 호출이 명시적으로 있어야 선언한 픽셀 차단이 실제로 집행된다). 차단 발견 시 **DESIGN.md(SSOT)를 먼저 고치고** preview 재생성(retry ≤2, 초과 시 승인 보류 + brief 재검토). exit 2(Needs Install)면 사유 echo 후 승인 보류. `--fast`는 preview(R6) 미생성이라 본 게이트 N/A(산출물 기준).
 
 ### R6-2. 검토 루프
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html`를 열어 확인하고 피드백 주세요."*

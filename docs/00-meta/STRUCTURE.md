@@ -53,6 +53,7 @@
 | stack setup plan template | `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | stack setup plan | `docs/00-meta/STACK_SETUP_PLAN.md` | `/bootstrap-stack`, `/stack-guard` | Reference | generated |
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
+| design gate canonical assets | `.claude/skills/stack-guard/assets/design-gate*.mjs` | 수동 (harness 제공, UI 판정 때만 JIT read/copy/run) | Reference | baseline |
 | design gate adapter (UI) | `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록된 project-native 경로 | `/stack-guard` (UI 판정 뒤 생성·self-test) | Reference | conditional |
 | AGENTS.md | `./AGENTS.md` | (수동 또는 ADR-010 fork 시) | Living | baseline |
 | Codex 프로젝트 설정 | `.codex/config.toml` | 수동 | Living | baseline |

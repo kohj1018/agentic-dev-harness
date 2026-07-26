@@ -72,7 +72,7 @@ draft
      - 대비: 정상 텍스트 4.5:1 / 큰 텍스트(굵은 18.66px+ 또는 24px+) 3:1 / 비텍스트 UI·아이콘·상태 경계 3:1
      - 포커스 링 제거(`outline:none`만) 금지 — 대체 visible focus 필수
      - 키보드: 모든 인터랙션은 키보드로 도달·조작 가능
-     - 아이콘 버튼: accessible name 확보 — 브라우저 computed name(aria-label·aria-labelledby·감싼 visible text·alt·title 등 *어느 출처든*; aria-label 강제 아님). 정밀 판정은 실화면 axe(stack-guard generated `validate:design` adapter·visual QA, ADR-058#amend-1)
+     - 아이콘 버튼: accessible name 확보 — 브라우저 computed name(aria-label·aria-labelledby·감싼 visible text·alt·title 등 *어느 출처든*; aria-label 강제 아님). 정밀 판정은 실화면 axe(stack-guard source-verified current-v2 `validate:design` adapter·visual QA, ADR-058#amend-2)
      - 색-단독 금지: 상태·의미를 색으로만 표시 금지(아이콘·텍스트·패턴 병행)
      - 한 화면 primary CTA 2개 이상 금지
      - 모든 motion에 `prefers-reduced-motion` 분기

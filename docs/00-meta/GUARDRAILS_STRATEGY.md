@@ -80,7 +80,7 @@
 **1단계 산출물 (자동 생성)**:
 - 통합 진입점 — 이름은 `validate`로 고정 (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 1종).
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 자연스러운 런타임 1종.
-- UI 판정 시에만 project-native `validate:design` adapter + conformance self-test를 생성하고 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 실제 명령·경로·capability version을 기록한다(ADR-058#amend-1). 비-UI shared baseline에는 design 실행 코드를 두지 않는다.
+- UI 판정 시에만 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고 fixed conformance를 실행한 뒤 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 실제 명령·경로·capability version·source digest를 기록한다(ADR-058#amend-2). 비-UI에서는 asset을 읽거나 복사하거나 design toolchain을 설치하지 않는다.
 - `.gitattributes` (line ending 통일).
 - 생성된 `docs/00-meta/STACK_SETUP_PLAN.md`에 본 파일 하단 *"## PostToolUse hook 매뉴얼 등록 절차"* 섹션을 link하는 1줄 안내 (hook 절차 SSOT는 본 파일).
 

@@ -16,7 +16,7 @@ accepted
 ## 현재 유효 결정
 - `/bootstrap-design` 라운드 구조 SSOT는 본 ADR: R0(리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(파생 preview 확인 + 정리).
 - **R0 = evidence-on-demand**(D2): AI 자율 리서치가 디폴트, 사용자 입력은 옵션 힌트. Layer A(방향)/B(값 grounding — 핀 URL)/C(포맷 — R5 fixture만). role 3종, counter-reference 조건부, 고정 쿼터 없음(coverage 정지, 최종 3~5개), 최소 기록 schema.
-- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). 실행물은 baseline에 두지 않고 UI 판정 뒤 `/stack-guard`가 생성한 project-native `validate:design` adapter를 사용한다(#amend-1). *진짜 품질 지렛대*.
+- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). UI 판정 뒤 `/stack-guard`가 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고, 고정 fixture conformance와 source digest를 통과한 v2만 사용한다(#amend-1·#amend-2). *진짜 품질 지렛대*.
 - **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
 - 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
 
@@ -39,12 +39,12 @@ accepted
 3. **R2/R6 수용 게이트**:
    - **항상(값싼·결정적 — 러너가 계산)**: **320px 브라우저 geometry** — page overflow + **element viewport escape + clipped/truncated text**(narrow ≤375 — design-workflow eval(SIMULATION_RUN.md design-eval; 원본 local-only)의 `check-reflow-320.cjs` `getBoundingClientRect`·overflow-clip 로직 이식) + **populated-state axe**(실데이터 채운 화면 *전제* — 입력 계약; 러너는 axe를 돌리고 "실제로 채워졌는지"는 reviewer 스크린샷이 backstop으로 확인). **overflow·escape·clip은 러너가 결정적으로 잡는다**(design-eval 실측 검증분 — geometry는 픽셀 취향이 아니라 좌표 계산이라 결정 가능). **단 정상 UI 오탐 제외**: sr-only/visually-hidden(1px·clip/clip-path)·aria-hidden/inert/닫힌 drawer·overflow scroll/auto 조상 안(contained 가로스크롤=의도적, 예: 넓은 표)·의도적 `text-overflow:ellipsis`는 escape/clip에서 뺀다(실브라우저 검증분 — 러너 코드에 반영). reviewer 픽셀은 *주관적* 판정(위계·밀도·slop·overlap)만 담당한다.
    - **full 모드**: 각 concept을 1280 + 375로 항상 렌더 → **독립 reviewer(design surface)가 픽셀로** 위계·밀도·domain fit·장식 slop 판정(HTML-read source 감사와 별개 — 세 검사가 서로 다른 결함을 잡아 대체 불가). LLM reviewer는 1명이면 충분.
-   - **차단(block) — 러너 결정적**(design-gate.mjs가 계산): serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry). **차단(block) — reviewer 픽셀 판정**(스크린샷으로 판단, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding. **수동 smoke**(자동 불가분): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
+   - **차단(block) — 러너 결정적**(당시 `design-gate.mjs`, 현재 #amend-2 canonical `validate:design` adapter가 계산): serious/critical axe · page overflow · **viewport escape · clipped text**(320/375 geometry). **차단(block) — reviewer 픽셀 판정**(스크린샷으로 판단, 러너가 못 잡는 *주관적* 영역): 위계 붕괴(nested card·장식 rail) · 밀도 · 장식 slop · critical overlap이 primary task를 저해할 때. **보고(report)**: moderate/minor axe + 취향·밀도 finding. **수동 smoke**(자동 불가분): Tab 순서 · visible focus · trap 없음 · Escape close · 색 외 상태표식.
    - **repair loop**(핵심): 실패 selector + 요약을 designer에 되먹여 재실행. **retry ≤2, 초과 시 승인 보류 + brief/source 재검토**(무한 루프 방지), 여전히 fail이면 승인 불가. 통과본 외 임시 렌더/스크린샷은 정리.
    - 게이트는 concept/preview·선택 프로토타입 **1회성에서만**(per-task hot-loop 금지). Playwright/axe는 stack-guard 선설치분 재사용(추가 의존 0).
    - `--fast`/`--update`: research·독립 reviewer 생략은 명시 사유 echo(silent skip 금지). **게이트 적용은 모드가 아니라 산출물 기준** — `--fast`는 R2·R6를 생성하지 않으므로 게이트 적용 대상 없음(N/A), `--update`가 concept/preview를 생성·재생성하면 그 산출물엔 게이트 필수.
 4. **R2 시안 카드 REFINE / EXPLORE**: 두 기본안을 **REFINE**(익숙한 task convention 우선 + restrained signature) / **EXPLORE**(signature-led이되 *같은* 익숙한 control/flow 보존)로 정의(안전/과감 아님 — novelty가 목표라는 오해 차단). 3번째 안은 *풀리지 않은 명시적 tension이 있을 때만*. 카드 필드: `task hypothesis | preserved convention | visible signature | failure sign`. **signature가 primary task를 더 빨리 이해시키지 못하면 장식 → 제거**(실험에서 rail·route 장식이 coherence를 해침).
-5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계)**: 취향 오라클=사용자(선호 추천·순위 금지, 물으면 예외). concept authoring=designer, 구별성·픽셀 감사=reviewer[design](자기 비평 금지). parallel-merge 금지(순차 생성→비평→선택). **harness degradation (Codex 등 독립 subagent 미지원 경로)**: 독립 subagent 격리가 없는 harness에서는 gen/audit가 동일 세션 *순차 페르소나*로 degrade한다 — 이때 (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 감사 독립성 저하를 산출물에 `under-verified: 동일 세션 감사`로 명시하며, (c) 완전 독립 감사가 요구되면 사용자 승인 보류. **단 결정적 렌더 게이트(`design-gate.mjs`)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 결정적으로 차단된다(감사 *독립성*이 degrade해도 *안전 게이트*는 유지).
+5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계)**: 취향 오라클=사용자(선호 추천·순위 금지, 물으면 예외). concept authoring=designer, 구별성·픽셀 감사=reviewer[design](자기 비평 금지). parallel-merge 금지(순차 생성→비평→선택). **harness degradation (Codex 등 독립 subagent 미지원 경로)**: 독립 subagent 격리가 없는 harness에서는 gen/audit가 동일 세션 *순차 페르소나*로 degrade한다 — 이때 (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 감사 독립성 저하를 산출물에 `under-verified: 동일 세션 감사`로 명시하며, (c) 완전 독립 감사가 요구되면 사용자 승인 보류. **단 결정적 렌더 게이트(`STACK_SETUP_PLAN.md ## Design Gate Adapter`의 current-ready command)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 결정적으로 차단된다(감사 *독립성*이 degrade해도 *안전 게이트*는 유지).
 
 ## 근거
 - 대안 A(현행 유지 B0): raw 시각/비용은 최선이나, acceptance gate 없이는 배포불가 결함(serious axe)이 승인까지 통과 — 유지 불가.
@@ -54,7 +54,7 @@ accepted
 - 재검토 트리거(SIMULATION_RUN.md design-eval = 원 REPORT §13) 7기준(동일 brief 2회 비교 / archetype별 serious·320·clipping 0안 매 반복 제공 / blind 평균 5% 이내 / quota 없음 확인 / --fast·--update silent skip 없음 / Claude·Codex 축소 경로 실행 / 키보드·focus·escape·SR name·동적 상태 실화면 검사)은 **신뢰도(Medium→High)·외부 일반화 승격 조건**이다(accepted 채택 자체를 막는 조건이 아님 — accepted는 이미 성립, D3 constraint는 [관측됨]으로 충족). 미충족 신호가 누적되면 해당 부분(리서치·카드 등 directional)을 후퇴시킨다. archetype 확대·cross-project 다양성 측정 시 재검토.
 
 ## Mutation Contract (ADR-047 D3)
-1. **Target** — bootstrap-design SKILL R0~R6·`--fast`·`--update` + `allowed-tools`(렌더·axe 실행) / `scripts/design-gate.mjs` 러너 / plan-milestone R5 게이트(allowed-tools + R5-5) / researcher.md 디자인 레퍼런스 모드 / designer.md(카드·signature·PX 마커) / reviewer.md(design surface 렌더 증거·픽셀 판정·bootstrap-design 호출자 등재) / DESIGN_RESEARCH.md 스키마 / stack-guard(populated axe·320 reflow) / DESIGN.md §0 주석 R0~R6 / STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point.
+1. **Target** — bootstrap-design SKILL R0~R6·`--fast`·`--update` + `allowed-tools`(렌더·axe 실행) / stack-guard JIT canonical design-gate asset + generated `validate:design` adapter / plan-milestone R5 게이트(allowed-tools + R5-5) / researcher.md 디자인 레퍼런스 모드 / designer.md(카드·signature·PX 마커) / reviewer.md(design surface 렌더 증거·픽셀 판정·bootstrap-design 호출자 등재) / DESIGN_RESEARCH.md 스키마 / stack-guard(populated axe·320 reflow) / DESIGN.md §0 주석 R0~R6 / STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point.
 2. **Failure mode** — R0 grounding이 median으로 조용히 후퇴 + 독립 감사가 렌더·DOM을 안 봐 배포불가 결함(serious axe·320 overflow) 통과 + 시안이 "다르기만" 하고 안전·평범(전부 관측됨/실측).
 3. **Predicted improvement** — serious axe 제거(실측 5/8→0/8) + 320 geometry 결함 차단(별도 결정적 축 — 같은 수치로 뭉뚱그리지 않음), 레퍼런스 값 확보 안정화, REFINE/EXPLORE로 의도된 개성.
 4. **Preserved invariants** — DESIGN.md 시각 SSOT / preview·concept ephemeral(ADR-005) / 취향 오라클=사용자 / 생성·감사 분리 / RGR inner-loop 스크린샷 hot-loop 금지(게이트는 1회성 carve-out) / 비-UI DESIGN.md 삭제 경로 / skill auto-invocation 금지 / ADR-027 DESIGN 내용·인터페이스 SSOT 지위.
@@ -84,10 +84,13 @@ accepted
 - README.md
 - README_ko.md
 - .gitignore
+- .gitattributes                            — canonical asset LF bytes 보존
 - .claude/agents/researcher.md               — 디자인 레퍼런스 모드 evidence-on-demand(Layer A/B/C)
 - .claude/agents/designer.md                 — R0 분해 + REFINE/EXPLORE 시안 + repair 되먹임
 - .claude/agents/reviewer.md                 — Design Consistency 6차원 + R2-G/R6 게이트 호출자
-- scripts/README.md                          — baseline 실행 코드 없음 + UI adapter 생성 경계
+- scripts/README.md                          — baseline 프로젝트 실행 코드 없음 + UI adapter 생성 경계
+- .claude/skills/stack-guard/assets/design-gate.mjs — direct-support Node UI canonical adapter
+- .claude/skills/stack-guard/assets/design-gate-conformance.mjs — 고정 fixture·기대값·source digest conformance
 
 ## 참고
 - ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
@@ -122,9 +125,40 @@ accepted
 - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`: adapter registry schema.
 - `docs/00-meta/STRUCTURE.md`, `docs/00-meta/GUARDRAILS_STRATEGY.md`, `scripts/README.md`: baseline→conditional/generated 경계.
 - `docs/20-system/DESIGN.md`, `.claude/agents/reviewer.md`, `ADR-027#amend-7`: 특정 파일명 대신 project-native gate capability를 인용.
-- `.gitignore`: screenshot 산출물 설명을 project-native adapter로 일반화.
+- `.gitignore`: canonical output 선제 ignore + 비-canonical output의 first-run-before append 계약.
 
 ### 강도 및 Mutation delta
 - **ADR-045 D6 판단**: 새로 추가되는 surface는 GUARDRAILS_STRATEGY.md와 STACK_SETUP_PLAN_TEMPLATE.md 2개이며, D3의 차단 등급·라운드 구조·repair loop는 바꾸지 않는다. baseline 파일 배치는 design workflow 정책의 reversal이 아니라 실행물 소유 위치 정합화이므로 supersede 대신 amendment로 기록한다. 이후 게이트 강도나 라운드 구조를 바꾸면 신규 superseding ADR을 사용한다.
 - D3의 serious/critical axe·320/375 geometry 차단 강도는 **constraint 그대로**다. 바뀌는 것은 실행물의 물질화 시점과 소유자뿐이며, 게이트 미준비 시 fail-closed라 품질 완화가 아니다.
 - **Mutation delta (ADR-047 D3)**: failure=baseline runner 삭제 뒤 UI adapter 미생성·미기록·미실행 또는 생성 구현이 v1 capability 일부를 누락 / predicted improvement=비-UI fork 실행 코드 0 + stack-specific 생성 원칙 정합, D3 결함 검출력 보존 / preserved=base Mutation Contract의 DESIGN SSOT·사용자 취향 오라클·생성/감사 분리·gate repair loop·비-UI 삭제 경로 / falsifier=UI dogfood self-test 10케이스 중 하나라도 기대 분류 불일치, runtime caller의 `scripts/design-gate.mjs` hardcode 잔존, 비-UI dogfood에 gate artifact 생성 / rollback=amend-1을 supersede하는 후속 ADR로 baseline runner 복원(ADR-058 D3 자체는 유지).
+<a id="adr-058-amend-2"></a>
+## Amendment 2 (2026-07-26) — canonical asset + fixed conformance + upgrade/recovery
+
+### 배경과 v1 증거 정정
+- [관측됨] v1 UI fixture의 generated adapter는 삭제 전 baseline runner와 138줄·SHA-256이 byte-identical했다. 따라서 기존 `10/10`은 **검증된 legacy 구현의 행동 보존**은 증명했지만, 산문 capability만으로 독립 authoring한 구현의 재현성은 증명하지 않았다. `SIMULATION_RUN.md`의 v1 판정 범위를 이 한계에 맞게 정정한다.
+- [관측됨] v1 conformance fixture·기대값도 실행 시 생성돼 구현과 oracle이 같은 산문에서 파생되는 자기참조 위험이 있었다. stale screenshot 정리, 동일 basename 배치, 파일별 render-error 격리, ±1px 허용오차, 예외 경로 browser 종료는 10 logical behavior case가 직접 고정하지 않았다.
+- [관측됨] caller의 missing/not-ready preflight 문구는 존재하지만 실제 `Needs Design Gate` 행동 fixture 기록이 없었다.
+- **UI 순서 재판정**: 정상 순서가 `/bootstrap-stack → /stack-guard → /bootstrap-design`이라 DESIGN status가 draft인 것은 맞다. 그러나 `/bootstrap-stack`은 frontend면 ARCH 7-4를 채우므로 정상 흐름은 ADR-027#amend-3의 **UI 의심** 분기로 adapter를 만든다. "항상 비-UI 오판"은 사실이 아니다. 다만 초기 신호 부족으로 `n/a`가 된 뒤 frontend가 확인되는 재실행 복구는 명시가 필요하다.
+
+### 결정
+1. **JIT canonical asset**: direct-support Node UI의 정본은 `.claude/skills/stack-guard/assets/design-gate.mjs`다. `/stack-guard`는 UI 확정/의심 때만 이 asset을 읽어 project-native 경로로 byte-copy하고 entry를 배선한다. 비-UI에서는 asset을 읽거나 복사하거나 design 의존/browser를 설치하지 않는다. `.boilerplate/`는 검증 Record 전용이므로 executable 정본을 두지 않으며, Git history 회수는 squash/template-copy에서 깨져 정본 경로로 쓰지 않는다.
+2. **외부 oracle + source integrity**: `.claude/skills/stack-guard/assets/design-gate-conformance.mjs`가 source digest, 고정 HTML fixture, 기대 exit/blocker/report/screenshot을 소유한다. 현재 suite는 기존 10 behavior case에 same-basename batch, stale screenshot cleanup, per-file render-error isolation, 1px tolerance pass, 2px escape block, bounded process completion을 더한다. 생성 agent가 fixture·기대값을 authoring하지 않는다. `.gitattributes`가 canonical asset을 `eol=lf`로 고정해 `core.autocrlf=true`인 Windows fresh clone에서도 digest bytes를 보존한다.
+3. **capability v2 registry**: current version은 `ADR-058#amend-2/v2`. registry에 `source digest`를 추가하고 direct-support Node UI는 generated bytes가 canonical digest와 같고 fixed conformance가 전부 통과할 때만 `ready`다. v1/누락/낮은 version은 current-ready가 아니다.
+4. **재실행·업그레이드**: `/stack-guard`는 매 실행 UI 신호와 registry를 다시 계산한다. 낮은 version의 adapter는 기록된 source digest와 실제 bytes가 같을 때 미수정으로 본다. digest 필드가 없던 legacy v1은 실제 bytes가 canonical digest와 같을 때만 미수정으로 인정한다. 이 경우 canonical v2로 자동 교체 후 전체 conformance를 재실행한다. 어느 기준도 충족하지 않으면 사용자 수정으로 보고 덮어쓰지 않으며 `wiring-fail (local modifications)`로 보류하고 diff/채택 결정을 요청한다. current digest가 같아도 conformance는 다시 실행한다.
+5. **UI 재분류 복구**: 기존 `status=n/a`라도 이후 ARCH 7-4/frontend stack 신호가 생기면 같은 `/stack-guard` 재실행이 UI로 재분류해 adapter를 생성한다. caller는 missing/n/a/lower-version/not-ready에서 최종 artifact를 쓰거나 승격하지 않고 `Needs Design Gate: /stack-guard`를 출력한다.
+6. **behavior fixture**: caller fail-closed는 ADR-047#amend-1 방식으로 missing / n/a / needs-install / wiring-fail / ready-current 5입력을 대조한다. 앞 4개는 command 미실행 + concept/preview/prototype 최종 경로 bytes 불변, 마지막만 registry command 실행이 기대값이다. 단일 성공 실행을 일반화 증거로 쓰지 않는다.
+7. **output ignore 정합**: canonical Node asset의 output은 `design-gate-shots/`로 고정하므로 baseline `.gitignore`를 유지한다. 다른 project-native adapter가 다른 output path를 쓰면 `/stack-guard`가 **첫 실행 전** 그 정확한 경로를 `.gitignore`에 추가한다. Amendment 1의 `.gitignore` surface 설명은 단순 주석 일반화가 아니라 이 producer/output 계약으로 정정한다.
+
+### 대안·거버넌스
+- SKILL fenced source: 비-UI 실행도 138줄+를 매번 읽어 ADR-019 JIT에 역행하므로 기각.
+- `.boilerplate/tools`: 현재 STRUCTURE상 self-validation Record 영역을 executable template 저장소로 확장하므로 기각.
+- `git show <old-commit>`: full-history clone에서는 싸지만 squash/template-copy/새 저장소에서 깨지므로 기각.
+- ADR-045 D6: 신규 surface는 canonical asset 2개 + clone-stable bytes용 `.gitattributes` 1개이며 D3의 차단 강도·라운드 구조는 그대로다. v1 materialization의 oracle/recovery를 충돌 없이 강화하므로 amendment로 기록한다.
+
+### Mutation Contract delta (ADR-047 D3)
+1. **Target** — stack-guard canonical adapter/conformance assets, 6-1/6-4-1/version migration, bootstrap-design R2-G/R6와 plan-milestone R5-5 current-ready preflight.
+2. **Failure mode** — 산문에서 구현·fixture·기대값을 함께 재생성해 같은 오류를 공유하거나, lower/local-modified adapter를 조용히 덮어쓰거나, missing/not-ready caller가 artifact를 승격.
+3. **Predicted improvement** — direct-support Node UI generated source digest 100% 일치, fixed conformance 전부 통과, caller negative 4상태 command 실행 0·final bytes 변경 0.
+4. **Preserved invariants** — D3 axe/geometry block 등급, 비-UI project runtime artifact 0, 사용자 취향 오라클, visual-QA 별도 surface, project-native registry entry.
+5. **Falsifying evaluation** — canonical digest 불일치인데 ready, fixed conformance case 하나라도 오분류, negative caller가 command/final write 수행, n/a→UI 재분류 재실행이 adapter를 생성하지 못하면 rollback/rework.
+6. **Rollback path** — Amendment 2를 supersede하는 후속 ADR로 prose-authoring v1 또는 version-pinned external package를 선택한다. D3 품질 게이트 자체는 유지한다.
