@@ -33,3 +33,18 @@ docs/40-validation/visual/
 .boilerplate/validation/design-workflow-eval-20260720/
 # canonical validate:design output (다른 output path는 stack-guard가 첫 실행 전에 추가 — ADR-058#amend-2)
 design-gate-shots/
+# Flutter/Dart 빌드 산출물 (경로 앞에 **/ 를 붙여 monorepo 하위 패키지까지 매칭 — 앞에 / 가 있는 패턴은 루트에만 걸린다)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/ios/Pods/
+**/ios/Flutter/ephemeral/
+**/android/.gradle/
+**/android/local.properties
+*.iml
+# golden 정답 사진 — 머신마다 로컬 생성, 커밋하지 않음 (ADR-059 D3)
+# test/ 하위 *어느 깊이*든 걸어야 한다: Flutter 의 golden key 는 그 테스트 파일이 있는
+# 디렉터리 기준 상대경로라(LocalFileComparator.basedir), test/widgets/foo_test.dart 의
+# 'goldens/foo.png' 는 test/widgets/goldens/ 에 생성된다. 실패 이미지도 같은 자리의 failures/ 다.
+**/test/**/goldens/
+**/test/**/failures/
