@@ -55,6 +55,8 @@
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
 | design gate canonical assets | `.claude/skills/stack-guard/assets/design-gate*.mjs` | 수동 (harness 제공, UI 판정 때만 JIT read/copy/run) | Reference | baseline |
 | design gate adapter (UI) | `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록된 project-native 경로 | `/stack-guard` (UI 판정 뒤 생성·self-test) | Reference | conditional |
+| golden 정답 사진 (모바일 앱, 로컬 전용 — 커밋 X) | 프로젝트의 `test/**/goldens/` (golden key가 *테스트 파일이 있는 디렉터리* 기준 상대경로라 `test/` 하위 어느 깊이든 생긴다) | 개발자가 **머신·체크아웃마다 1회** 생성(`flutter test --update-goldens` — 커밋하지 않으므로 새 머신·새 체크아웃엔 없다. ADR-059 D3) | Reference | conditional |
+| E2E smoke registry | `STACK_SETUP_PLAN.md ## E2E Smoke Registry` | `/stack-guard` (ADR-052#amend-1) | Reference | conditional |
 | AGENTS.md | `./AGENTS.md` | (수동 또는 ADR-010 fork 시) | Living | baseline |
 | Codex 프로젝트 설정 | `.codex/config.toml` | 수동 | Living | baseline |
 | Codex skill wrapper | `.agents/skills/<name>/{SKILL.md, agents/openai.yaml}` (자연어 호출 skill 목록 SSOT는 README.md / README_ko.md — ADR-010#amend-3; lifecycle/메인 호출 skill은 wrapper 미보유 가능) | 수동 | Reference | baseline |
@@ -98,7 +100,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | 도구 어댑터 매핑 (Claude ↔ Codex) | `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` |
 | AGENTS.md 진입 페이지 정책 (왜 이 파일을 진입점으로 삼는가) | `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` |
 | 공통 진입 지침 본문 (도구 중립 entry instructions) | `AGENTS.md` |
-| 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` |
+| 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` + [ADR-059](../90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md)(Flutter는 직접 지원 — ADR-031#amend-1) |
 | UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT). 검토용 파생 뷰 `design-preview.html`(R6) 와 방향 선택용 `design-concepts/concept-*.html`(R2) 는 `/bootstrap-design` 이 생성하고 검토·선택 완료 후 삭제 — 직접 편집·영속 금지 (ADR-005). |
 | UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |

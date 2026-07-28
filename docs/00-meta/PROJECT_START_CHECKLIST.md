@@ -34,6 +34,7 @@
   ```
   /bootstrap-stack Next.js 16 + TypeScript + pnpm + Supabase + Playwright + Vercel
   ```
+  모바일 앱이면 예: `/bootstrap-stack Flutter + Android/iOS + Firebase`
 - [ ] `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행해 통합 `validate` 진입점·verify 스크립트를 생성했다. UI 판정이면 `## Design Gate Adapter`가 current `ADR-058#amend-2/v2` + source digest(direct-support Node UI는 canonical)의 `ready`이고 fixed conformance를 통과했는지 확인했다
 - [ ] (프론트엔드 스택이면) `/bootstrap-design`을 실행해 레퍼런스 조사(`DESIGN_RESEARCH.md`) + concept 시안 방향 선택을 거쳐 `docs/20-system/DESIGN.md`를 채웠다 (ADR-058)
 - [ ] 필요하면 `.claude/settings.local.json`에 개인 자동화를 추가했다
@@ -59,6 +60,9 @@
 - [ ] 불필요한 템플릿 placeholder가 과하게 남아 있지 않다
 - [ ] 새 프로젝트의 핵심 범위와 비범위가 명확하다
 - [ ] (비-UI 프로젝트) `docs/20-system/DESIGN.md`를 삭제하고 `AGENTS.md`의 DESIGN 링크 줄도 제거했다
+- [ ] (모바일 앱) `ARCHITECTURE_OVERVIEW.md`의 `## 7-5. 모바일 클라이언트 결정`을 채웠고, 웹 화면이 없는 프로젝트면 `## 7-4. 프론트 결정`을 삭제했다 (웹 화면이 함께 있으면 둘 다 보존 — ADR-027#amend-8)
+- [ ] (모바일 앱) 서명·인증 자산이 **저장소 밖**에 있다 — Android 서명키(`*.jks`·`*.keystore`)·`key.properties`·iOS 인증서/프로비저닝(`*.p12`·`*.mobileprovision`)·Apple 인증 키(`*.p8`)·서버 service account 키. 저장소에 둬야 하는 credential 은 `secrets/` 하위에 둔다 — **위치가 1차 통제**이고 파일명 열거는 완결되지 않는다 (ADR-059 D9)
+- [ ] (모바일 앱) 위 자산이 `.gitignore`로 제외되고 **이미 추적 중인 것이 없는지** `git ls-files`로 확인했다 — ignore는 이미 추적 중인 파일을 보호하지 않는다. Firebase 클라이언트 설정(`google-services.json`·`GoogleService-Info.plist`)은 **비밀이 아니므로 제외 대상이 아니다** — 앱 바이너리에 담겨 배포되고 빌드가 읽어야 하므로, 숨기는 대신 콘솔에서 키 사용 범위를 제한한다
 
 ## 권장 원칙
 - charter 신뢰도가 중요한 프로젝트는 `/discover-product`로 발굴 단계를 먼저 거친다. 그 외에는 `/bootstrap-project`로 바로 시작해도 된다.
