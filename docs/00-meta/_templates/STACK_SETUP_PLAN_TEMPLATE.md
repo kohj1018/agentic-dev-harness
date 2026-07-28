@@ -73,3 +73,65 @@ GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 권장만.
 | name | purpose | official docs | scope | read-only | secret | lifecycle usage | agent access | smoke check | last-verified |
 |------|---------|---------------|-------|-----------|--------|-----------------|--------------|-------------|---------------|
 | (예: jetbrains) | IDE 연동 | (URL) | project | - | - | (예: implement — 코드 심볼 조회) | (예: implement-workitem / main-session) | - | - |
+
+> Flutter/Dart 프로젝트는 공식 Dart & Flutter MCP 서버를 이 표에 등재할 수 있다(Dart 3.9 이상 필요). 앱 조작 기능을 쓰려면 앱 코드에 개발 빌드에서만 켜지는 진입점을 두고 배포 빌드에서 제외한다. 공식 Agent Skills·plugin은 기본 의존이 아니라 opt-in이며, 도입 전 포함된 rules 본문·자동 등록되는 MCP capability·기존 lifecycle skill과의 역할 중복을 감사한다. 충돌 시 본 저장소의 lifecycle skill이 우선한다.
+
+## Dart Source Roots
+<!-- **Dart/Flutter 스택이 아니면 이 절을 통째 삭제한다** (순수 Dart CLI·패키지는 남긴다 —
+     `dart format` 대상이 있으면 필요하다). ARCH `## 7-1`~`## 7-5`의 비해당 sub-section
+     삭제 규칙과 동형이며, /bootstrap-stack이 이 template을 복사할 때 수행한다.
+     **아래 `## Golden 초기 절차`의 조건은 이 절보다 좁다** — 화면이 있는 native 스택에서만
+     남긴다(자세한 조건은 그 절의 주석). (`## E2E Smoke Registry`는 스택 무관이라 남긴다 —
+     비대상이면 `status: n/a`만 적는다. `## Design Gate Adapter`와 같은 방식.)
+     Flutter/Dart 코드에서 `dart format` 대상이 되는 경로 목록.
+     `.`을 쓰지 않는다 — 생성 디렉터리 순회 실패와 긴 경로 문제를 피하고,
+     존재하는 소스 루트를 빠짐없이 포함하기 위해 명시 열거한다.
+     `pubspec.yaml`이 여러 개인 저장소(monorepo)는 pubspec 하나당 한 묶음을 적고
+     경로는 그 pubspec 디렉터리 기준 상대경로로 쓴다.
+     존재하지 않는 경로는 실행 wrapper가 제외한다. -->
+
+| pubspec 위치 | 경로 | 비고 |
+|---|---|---|
+| (예: . 또는 apps/mobile) | (예: lib) | |
+
+**루트 누락 점검 (매 검증 실행 시)**: 실제 소스 트리가 이 표보다 넓어지면 새 코드가 형식 검사에서 조용히 빠진다. 표를 신뢰하기 전에 아래로 대조하고, 표에 없는 디렉터리가 나오면 표를 먼저 갱신한다.
+
+```bash
+# pubspec 디렉터리에서 실행 — 최상위 Dart 소스 디렉터리 실제 목록
+find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
+  | cut -d/ -f2 | sort -u
+```
+
+## E2E Smoke Registry
+<!-- 졸업 판정이 "실제로 e2e가 돌았는가"를 확인할 때 쓰는 등록부.
+     선언한 runtime target마다 한 행을 적는다(`native/android`와 `native/ios`를 함께 내면 두 행).
+     canonical 값은 web / native/android / native/ios / desktop / none이며 `native` 단독은 적지 않는다(ADR-059 D8).
+     판정도 행마다 따로 난다 — 한 target의 통과를 다른 target 근거로 쓰지 않는다.
+     이 표는 판정을 *좁히는* 수단이다 — 등록이 있으면 그 이름의 테스트가 성공했는지까지
+     확인하고, 없으면 "선언된 e2e 디렉터리 하위에서 1개 이상 성공"만 확인한 뒤
+     P1 [E2E-registry] 를 기록한다. 미등록 자체로 졸업을 막지 않는다.
+     실행 대상 칸에는 재부팅하면 달라지는 임시 id(`emulator-5554` 등)를 적지 않고
+     "무엇을 고를지"의 규칙을 적는다. 이 칸은 사람이 읽는 기록이며
+     실행 명령에 그대로 들어가지 않는다(진입점은 -d 를 생략한다).
+     마지막 PASS 칸은 host 제약으로 지금 실행할 수 없는 target의 증거를 보존한다.
+     **유효 조건은 하나 — 기록된 커밋이 지금 판정하려는 커밋과 정확히 같을 때만 인정한다.**
+     다르면 다시 BLOCKED_ENV다. "코드가 바뀌었는지"를 사람이 판단하게 두지 않는다
+     (판단 여지를 주면 증거가 슬며시 늘어난다 — ADR-059 D4). -->
+
+| runtime target | status | smoke 파일 경로 | 테스트 이름 | 실행 대상 선택 규칙 | 마지막 PASS (host·날짜·커밋) | 등록일 |
+|---|---|---|---|---|---|---|
+| (예: native/android) | ready / n/a | (예: integration_test/boot_smoke_test.dart) | (예: BOOT_SMOKE) | (예: 연결된 Android device 1대) | | |
+| (예: native/ios) | ready / n/a | | | (예: 부팅된 iOS 시뮬레이터 1대, host가 macOS일 때만) | (예: macos · 2026-07-28 · abc1234) | |
+| (예: web) | ready / n/a | (예: e2e/smoke.spec.ts) | | (예: chromium) | | |
+
+## Golden 초기 절차 (해당 시)
+<!-- **화면이 있는 native 스택에서만 남긴다** — runtime target에 `native/*`가 포함되고
+     design surface가 있을 때. golden은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는
+     `flutter test --update-goldens` 자체가 성립하지 않으므로 그 경우 이 절을 통째 삭제한다
+     (`## Dart Source Roots`는 그런 프로젝트에도 남는다 — 조건이 다르다. ADR-059 D3).
+     golden 정답 사진은 커밋하지 않으며 머신마다 로컬 생성한다.
+     새 체크아웃 직후 첫 validate는 정답 사진 부재로 실패한다.
+     `flutter test --update-goldens`를 1회 실행하고
+     생성된 이미지를 육안 확인한 뒤 진행한다.
+     재생성은 (a) 정답 사진이 아직 없을 때, (b) UI를 의도적으로 바꾸고
+     새 모습을 육안 확인했을 때만. 실패를 통과시키려고 덮어쓰지 않는다. -->
