@@ -110,7 +110,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). → ADR-022 `## Surfaces` 참조 (fan-out SSOT). |
 | Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). → ADR-038 `## Surfaces` 참조 (fan-out SSOT). |
 | Cross-LLM discovery validation (opt-in peer review) | [ADR-044](../90-decisions/boilerplate/ADR-044-cross-llm-discovery-validation.md) (정책 SSOT). → ADR-044 `## Surfaces` 참조 (fan-out SSOT). |
-| DESIGN.md + ARCH 7-1~7-4 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
+| DESIGN.md + ARCH 7-1~7-5 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
 | Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). → ADR-039 `## Surfaces` 참조 (fan-out SSOT). |
 | 출력 스타일 (signal-first 대화/반환 계약) | [ADR-046](../90-decisions/boilerplate/ADR-046-signal-first-output.md) (정책 SSOT). → ADR-046 `## Surfaces` 참조 (fan-out SSOT). |
 | Code-as-Agent-Harness 패러다임 + Harness Mutation Contract | [ADR-047](../90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) (정책 SSOT). → ADR-047 `## Surfaces` 참조 (fan-out SSOT). |

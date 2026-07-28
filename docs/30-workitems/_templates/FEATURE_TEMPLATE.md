@@ -84,7 +84,7 @@ feature
 - Milestone: <!-- 예: [M1-foundation](../milestones/M1-foundation.md) -->
 - Charter: <!-- 예: [PROJECT_CHARTER](../../10-charter/PROJECT_CHARTER.md) -->
 - Architecture: <!-- 예: [ARCHITECTURE_OVERVIEW](../../20-system/ARCHITECTURE_OVERVIEW.md) -->
-- Architecture-Iface: <!-- 해당 스택 한정. 예: [## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1). 비해당 스택은 줄 삭제. 정책: ADR-027. -->
+- Architecture-Iface: <!-- 해당 스택 한정. 예: [## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1) / [## 7-5 모바일](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-5). 비해당 스택은 줄 삭제. 정책: ADR-027. -->
 - Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components). 비-UI 프로젝트는 줄 삭제. -->
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 

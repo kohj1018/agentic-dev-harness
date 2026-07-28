@@ -9,7 +9,7 @@
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`에서 시스템 구조를 정리한다.
 - `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다. **삭제 시 `AGENTS.md`의 `[시각 디자인](docs/20-system/DESIGN.md)` 링크 줄도 함께 제거한다**(dangling 방지).
 - UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-058(design workflow): R0(evidence-on-demand 리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 REFINE/EXPLORE — 실카피 렌더 + 수용 게이트(320·populated axe·repair loop), 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 게이트). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장한다(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
-- ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
+- ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
 
 ## 3. 작업 단위 분해
 - 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).

@@ -24,7 +24,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
        1. AC ↔ 테스트 매핑 (+ 테스트 선행 휴리스틱 + `[verify-placeholder]` / `[test-id-missing]`)
        2. 범위 밖 변경 + diff trace audit (ADR-006#amend-1)
        3. FAC → AC spec coverage audit (ADR-037)
-       4. Arch-iface 7-1/7-2/7-3/7-4 audit (API/CLI/백엔드/프론트)
+       4. Arch-iface 7-1/7-2/7-3/7-4/7-5 audit (API/CLI/백엔드/프론트/모바일)
        5. UI Design inventory audit (ADR-027#amend-1) — UI 프로젝트에 한해 spawn
        6. MCP 사용 audit (ADR-048#d5)
        7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검)
@@ -69,7 +69,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
   **task 자동 추가 금지** — P0라 combined verdict는 Needs Fix, 집계자는 이 라벨이 있으면 일반 `/repair-workitem` 안내보다 우선해 자동 후속 호출 없이 사용자 보고로 라우팅한다. legacy fallback은 plan-workitem SKILL.md의 "task 분해 + ## 7-1 AC 측 채움" 섹션 **Legacy fallback** 단락 참조.
 - **UI 프로젝트 — Design inventory audit** (ADR-027#amend-1): 본 task 가 새 컴포넌트를 추가했는데 task `## 3. 구현 항목` 의 *등록 line item* (plan authoring) 이 실행 누락이면 `P1 [Design-inventory]`. 등록 line item 자체가 부재한데 신규 컴포넌트 출현이면 `P1 [Design-inventory-planless]` 기록하고 분기: 기존 task AC에 필요한 컴포넌트면 repair-workitem이 구현 또는 DESIGN 등록 누락을 고치고, 불필요하면 제거, 새 디자인 범위면 사용자 보고 + 다음 M 후보(ADR-057#amend-3 결정 6).
 - **MCP 사용 audit** (ADR-048#d5): task `## 3. 구현 항목`에 `<capability> 작업 시 <mcp-name> MCP 사용` line item(plan authoring)이 있었는데 실행 흔적(diff / test / 출력)이 없으면 report에 `P2 [MCP-unused] <mcp-name> — plan이 박은 MCP 사용 line item 미실행` 기록. implement가 `Needs MCP Access`로 멈춘 경우(권한 미부여)는 `P2 [MCP-access] <mcp-name> — agent access 미부여(연결 절차 (e))`로 구분 기록. 자동 차단 X(report 신뢰 등급만 영향).
-- **API/CLI/백엔드/프론트 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
+- **API/CLI/백엔드/프론트/모바일 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `P1 [Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시.
 - **Cross-task seam audit** (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 — ADR-057 결정 12): 본 task 구현이 관련 INV-N을 위반하는가(상태 역방향 write / 멱등 미보장 / 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>`. §7-2가 참조 링크형이면 canonical feature 의 표를 따라 읽는다. (inline·fan-out 축 8 동일 기준 — small-diff inline 경로에서도 누락 없이 점검.)
 - **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 

@@ -108,19 +108,24 @@ accepted
 - #amend-1 적용 후 `.boilerplate/validation/SIMULATION_RUN.md` 에 실측 라운드 추가.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- .claude/skills/plan-workitem/SKILL.md            — #amend-1 read-list+self-check, #amend-3 UI 판정
-- .claude/skills/validate-plan/SKILL.md             — #amend-1 [Plan-design]+[Plan-arch-iface]
+- .claude/skills/plan-workitem/SKILL.md            — #amend-1 read-list+self-check, #amend-3 UI 판정, #amend-8 7-5
+- .claude/skills/validate-plan/SKILL.md             — #amend-1 [Plan-design]+[Plan-arch-iface], #amend-8 7-5
 - .claude/skills/stabilize-milestone/SKILL.md       — #amend-1 §1.0 #5, #amend-3 §5-1
-- .claude/agents/reviewer.md                         — #amend-1 Plan Quality 10 + Design Consistency + design surface, #amend-2 [Design-donts]
+- .claude/agents/reviewer.md                         — #amend-1 Plan Quality 10 + Design Consistency + design surface, #amend-2 [Design-donts], #amend-8 7-5
 - .claude/skills/implement-workitem/SKILL.md         — task-linked 등록 line item 실행
-- .claude/skills/validate-workitem/SKILL.md          — 인터페이스 CHECK
-- .claude/agents/validator.md                        — 인터페이스 CHECK 규칙(UI/API/CLI/7-x)
-- docs/30-workitems/_templates/TASK_TEMPLATE.md#7    — #amend-1 Design:/Architecture-Iface: 자리
-- docs/30-workitems/_templates/FEATURE_TEMPLATE.md#11 — #amend-1 Design:/Architecture-Iface: 자리
+- .claude/skills/validate-workitem/SKILL.md          — 인터페이스 CHECK, #amend-8 7-5
+- .claude/agents/validator.md                        — 인터페이스 CHECK 규칙(UI/API/CLI/7-x), #amend-8 7-5
+- docs/30-workitems/_templates/TASK_TEMPLATE.md#7    — #amend-1 Design:/Architecture-Iface: 자리, #amend-8 7-5
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md#11 — #amend-1 Design:/Architecture-Iface: 자리, #amend-8 7-5
 - .claude/skills/bootstrap-design/SKILL.md           — #amend-2 §9 Don'ts self-check(R2 생성·R6 점검) + canonical 8섹션 순서(R5 저장), #amend-4 --update; 라운드 구조·시안 시점은 ADR-058
 - docs/20-system/DESIGN.md                            — #amend-2 §9 Don'ts, §8 Motion
 - .claude/skills/stack-guard/SKILL.md                — #amend-2 design.md lint 권장
 - docs/00-meta/WORKFLOW.md                            — #amend-2 §2 승인 게이트
+- docs/20-system/ARCHITECTURE_OVERVIEW.md              — #amend-8 `## 7-5` 모바일 결정 자리
+- .claude/skills/bootstrap-stack/SKILL.md              — #amend-8 7-1~7-5 채움/삭제 규칙
+- .claude/skills/bootstrap-stack/output-checklist.md    — #amend-8 7-4/7-5 생략 안내
+- .claude/skills/plan-milestone/SKILL.md                — #amend-8 엔지니어링 내부 범위 경계(§7-4/§7-5)
+- .claude/agents/builder.md                             — #amend-8 인터페이스 SSOT 열거(7-1~7-5)
 
 ## 참고
 - ADR-006 (단순성 1순위)
@@ -243,3 +248,41 @@ stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **�
 
 ### 강도 (ADR-022)
 - §9 a11y의 grep 가능분(포커스 제거·색-단독)·§4 320 reflow는 constraint(강). 나머지 enabling(약).
+
+<a id="adr-027-amend-8"></a>
+## Amendment 8 (2026-07-28) — ARCH `## 7-5` 모바일 클라이언트 결정 신설
+
+> **amend 근거 (ADR-045#d6)**: `## Amendment 7`이 grandfather 조항을 근거로 amend를 택하면서 *"다음 변경 시 통합 재발행 우선 검토"* 를 남겼고, 본 amendment가 그 다음 변경이다. 검토 결과 **다시 amend를 택한다** — 근거 셋: ① 본 변경은 기존 결정을 뒤집지 않고 *결정 자리 하나를 추가*하며 #amend-3의 신호 목록만 정정한다(D6 표의 "충돌 없는 확장 + 문구 정정" 칸). `## Surfaces` **신규 추가는 2개**(`ARCHITECTURE_OVERVIEW.md`·`bootstrap-stack`)이고 나머지는 기존 항목에 주석을 더한 것이라 "surface 5+ 추가" 트리거에 닿지 않는다 ② 통합 재발행은 결정 15개 + 개정 7개를 재작성하고 Surfaces 14개 파일의 인용을 재지정해야 해 이번 변경 규모에 비해 churn이 압도적이다 ③ `## 현재 유효 결정`이 net 규칙을 이미 요약하므로 fold 부담이 낮다. **다만 개정이 8개에 도달했으므로 다음 변경에서는 amend를 기본값으로 두지 않고 통합 재발행을 먼저 설계한다.**
+>
+> **재발행 트리거 도달 (본 amendment 적용 시 확인)**: 위 ①의 "신규 surface 2개" 판단은 등재 누락을 전제한 것이었다. 실제로 본 amendment가 고친 파일 중 `builder.md`(인터페이스 SSOT 열거)·`plan-milestone`(범위 경계)·`output-checklist`(7-4/7-5 생략 안내) 세 개가 D3 기준 surface이므로 등재했고, 그 결과 **신규 surface는 5개**가 되어 D6의 `surface 5+ 추가` 트리거에도 닿는다. 등재를 줄여 트리거를 피하지 않고 사실대로 적었다. 그럼에도 즉시 재발행하지 않는 이유는 하나다 — **본 ADR은 지금 진행 중인 개선 라운드가 앞으로 두 번 더 편집하는 문서**이고(`## 현재 유효 결정` 범위·신호 갱신, Amendment 8 `### 배경`의 상호인용), 살아 있는 편집 대상을 얼리면 그 지시들이 죽은 문서를 가리킨다. 따라서 **그 라운드 종료 직후 전용 라운드로 통합 재발행을 수행한다** — 누적 8개와 surface 5+ 두 트리거가 함께 도달했으므로 이것이 마지막 유예다. 재발행 시 앵커 인용 98개(`#amend-1`~`#amend-8` 8종 + `#dK` 11종)의 매핑과, 인용 184개 중 역사 기록(superseded ADR 본문·시뮬레이션 기록·ADR-045 D6의 grandfather 예시)의 분리가 선행 작업이다.
+
+### 배경
+- [관측됨] `## 7-4. 프론트 결정`의 소항목이 웹 전용이다(SSR-CSR·SEO·쿠키/스토리지 토큰 저장·폼 validation 라이브러리). 모바일 앱에 존재하지 않는 개념이다.
+- [관측됨] 모바일에 필요한 결정(대상 플랫폼·최소 OS·권한 흐름·딥링크·오프라인 동기화·빌드 flavor·서명·스토어)이 앉을 자리가 저장소 어디에도 없다.
+
+### 결정
+1. `ARCHITECTURE_OVERVIEW.md`에 **`## 7-5. 모바일 클라이언트 결정`**을 신설한다. 채움 주체는 `/bootstrap-stack`이며, 비해당 프로젝트는 **통째 삭제**한다(`## 7-1`~`## 7-4`와 동일 규칙).
+2. `## 7-4`는 **웹 전용으로 유지**한다. 모바일 프로젝트는 `## 7-4`를 삭제하고 `## 7-5`를 채운다. 두 섹션에 같은 결정을 중복 기재하지 않는다.
+3. 인터페이스 CHECK 대상에 `## 7-5`를 추가한다 — **본 ADR `## Surfaces`가 열거하는 소비자 전부**가 대상이다: validator의 인터페이스 CHECK 규칙, `validate-workitem`의 Arch-iface audit, reviewer의 `[Plan-arch-iface]`, `validate-plan`의 읽기 목록과 같은 차원, plan-workitem의 task 유형 prefilter, stabilize의 `### Don'ts` 키워드 grep, TASK/FEATURE 템플릿의 `Architecture-Iface:` 예시, builder의 인터페이스 SSOT 열거. **agent 정의(validator.md·reviewer.md)만 고치고 skill 사본을 빼면 실제 감사는 여전히 `## 7-5`를 보지 않는다.**
+4. **#amend-3 canonical 절차 3항을 정정한다** — 추가 신호 (a)를 *"ARCH `## 7-4. 프론트 결정` **또는** `## 7-5. 모바일 클라이언트 결정` 활성"* 으로, (b)의 UI 키워드 목록에 **`widget` / `위젯`** 을 더한 것으로 읽는다. #amend-3 본문은 기록이므로 고치지 않고 본 항이 유효 판정을 대체한다(#amend-2 결정 24·#amend-5와 동일 방식).
+
+### 강도 (ADR-022)
+- enabling(약) — 결정 자리 신설 + 기존 검사 대상 확장.
+
+### 적용 surface
+- docs/20-system/ARCHITECTURE_OVERVIEW.md
+- docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md (`## 현재 유효 결정` + `## Surfaces`)
+- .claude/skills/bootstrap-stack/SKILL.md
+- .claude/skills/plan-workitem/SKILL.md
+- .claude/skills/plan-milestone/SKILL.md
+- .claude/skills/validate-workitem/SKILL.md
+- .claude/skills/validate-plan/SKILL.md
+- .claude/skills/stabilize-milestone/SKILL.md
+- .claude/skills/stack-guard/SKILL.md
+- .claude/agents/validator.md
+- .claude/agents/reviewer.md
+- .claude/agents/builder.md
+- docs/30-workitems/_templates/TASK_TEMPLATE.md
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md
+- docs/00-meta/WORKFLOW.md
+- docs/00-meta/STRUCTURE.md

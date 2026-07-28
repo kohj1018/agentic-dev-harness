@@ -166,7 +166,8 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 각 분해된 task 본문 (`## 2. 작업 범위` + `## 3. 구현 항목`) 에서 다음 키워드 매칭으로 task type 자동 분류 — 일치 시만 해당 cross-check 활성. 매칭 안 되면 본 task 의 UI/ARCH cross-check 모두 skip.
 
-- **UI task 신호**: `component`, `컴포넌트`, `page`, `페이지`, `screen`, `view`, `route` (라우팅 결정 시 7-4 도 함께), `UI`, `frontend`, `프론트`, `style`, `theme`, JSX/TSX 파일 path
+- **UI task 신호**: `component`, `컴포넌트`, `widget`, `위젯`, `page`, `페이지`, `screen`, `view`, `route` (라우팅 결정 시 7-4/7-5 도 함께), `UI`, `frontend`, `프론트`, `style`, `theme`, JSX/TSX/`.dart` 파일 path
+- **모바일 task 신호**: `권한`, `permission`, `deep link`, `딥링크`, `푸시`, `push`, `flavor`, `platform channel`, `네이티브`, `background`, `백그라운드`, `서명`, `signing`, `store`, `스토어`, `WebView` — 매칭 시 ARCH `## 7-5` cross-check 활성
 - **API task 신호**: `endpoint`, `API`, `route`, `handler`, `controller`, `OpenAPI`, `REST`, `GraphQL`, `7-1`
 - **CLI task 신호**: `command`, `CLI`, `argv`, `subcommand`, `flag`, `7-2`
 - **백엔드 task 신호**: `migration`, `schema`, `auth`, `인증`, `transaction`, `트랜잭션`, `cache`, `queue`, `worker`, `7-3`

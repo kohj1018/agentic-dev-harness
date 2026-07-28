@@ -49,6 +49,7 @@ color: magenta
 - MCP: task `## 3. 구현 항목` 에 *MCP 사용 line item* (`<capability> 작업 시 <mcp> MCP 사용`, plan authoring) 이 있었는가? 있었으면 그 MCP 사용 흔적(diff/test/출력)이 있는지 점검. 미실행 시 `P2 [MCP-unused] <mcp> — plan line item 미실행`, 권한 미부여로 멈춘 경우 `P2 [MCP-access] <mcp>`. (ADR-048#d5)
 - API: 7-1 envelope·error 컨벤션 준수? 신규 error code 도입 시 7-1 *error 레지스트리* 에 추가됐는가? 누락 시 `P1 [Arch-iface-API] 7-1 error 레지스트리 누락`. (ADR-027)
 - CLI: 7-2 출력 포맷 컨벤션 준수? 신규 출력 모드 도입 시 7-2 *출력 포맷* 에 추가됐는가?
+- 모바일: 본 task 가 ARCH `## 7-5. 모바일 클라이언트 결정` 의 항목(대상 플랫폼·권한 흐름·화면 이동·로컬 저장·빌드 flavor·네이티브 연동 등 **`## 7-5`의 어느 항목이든**)을 건드렸는가? 건드렸다면 그 결정과 어긋나지 않는가. `## 7-5` 의 `### Don'ts` 위반이 보이면 `P0 [Arch-iface-violation] <file:line> — ARCH ## 7-5 Don'ts 위반 의심: <키워드>` 기록. `## 7-5` 부재 시 본 항목 skip + 사유 명시. (ADR-059 D7)
 - 백엔드: 7-3 DB migration·인증·트랜잭션 결정 정합? 본 task 가 7-3 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합? 본 task 가 7-4 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - seam (feature `## 7-2` 존재 시 — 참조 링크형이면 canonical feature의 표를 따라 읽어 대조): 본 task 구현이 관련 INV-N을 위반하는가(예: 상태 역방향 write, 멱등 미보장, 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>` (ADR-057 결정 12).

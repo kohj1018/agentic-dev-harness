@@ -52,14 +52,14 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 ## BASE 문서화 흐름 (구체적 스택/brownfield, 또는 DEEP R4)
 1. 스택 정보를 구조화한다(`stack-brief-template.md` 참조). brownfield면 manifest에서 감지.
 2. 아래 문서를 갱신한다.
-   - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — **`## 7. 기술 선택`**(고-stakes는 §7 결정 블록: 옵션≥2/신뢰도/재검토) + 해당 **`## 7-1`~`## 7-4`** 컨벤션 + **`## 3-1` 레이어 경계·의존성 규칙에 스택별 디폴트 디렉터리 트리**(아래 표) + `## 7. 기술 선택` 하위 운영 사실(실행 명령/포트/환경변수 이름/핵심 디렉터리 역할/gotcha — `output-checklist.md`).
+   - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — **`## 7. 기술 선택`**(고-stakes는 §7 결정 블록: 옵션≥2/신뢰도/재검토) + 해당 **`## 7-1`~`## 7-5`** 컨벤션 + **`## 3-1` 레이어 경계·의존성 규칙에 스택별 디폴트 디렉터리 트리**(아래 표) + `## 7. 기술 선택` 하위 운영 사실(실행 명령/포트/환경변수 이름/핵심 디렉터리 역할/gotcha — `output-checklist.md`).
    - `docs/10-charter/PROJECT_CHARTER.md` **`## 7. 제약 조건`** — 허용 의존 정책 envelope(스택 핵심 라이브러리). T3 dep 판정의 기준선.
-   - `docs/90-decisions/project/ADR-101-stack-selection.md` — _ADR_GUIDE 권장 섹션 + 옵션·신뢰도·재검토 칸. **`## 7-1`~`## 7-4` 인터페이스 컨벤션 채움은 architect 단발 sub-call(라운드 아님 — ADR-027#31)**. API 감지 → 7-1+7-3, CLI → 7-2, 프론트 → 7-4.
+   - `docs/90-decisions/project/ADR-101-stack-selection.md` — _ADR_GUIDE 권장 섹션 + 옵션·신뢰도·재검토 칸. **`## 7-1`~`## 7-5` 인터페이스 컨벤션 채움은 architect 단발 sub-call(라운드 아님 — ADR-027#31)**. API 감지 → 7-1+7-3, CLI → 7-2, 웹 프론트 → 7-4, 모바일 앱(Flutter) → 7-5.
    - `docs/90-decisions/project/README.md` 인덱스 표에 ADR-101 한 줄 추가.
-3. **비해당 `## 7-1`~`## 7-4` 처리 — 단일 스택은 통째 삭제, 다중 스택(monorepo)은 KEEP-list**: 프로젝트가 스택 1종이면 비해당 sub-section을 통째 삭제한다(예: API 미포함 → `## 7-1` 삭제). **FE+API+CLI 등 다중 스택이면 해당하는 sub-section을 *모두 보존*하고 각 스택의 디렉터리 트리를 `## 3-1`에 함께 박는다(삭제 금지).**
+3. **비해당 `## 7-1`~`## 7-5` 처리 — 단일 스택은 통째 삭제, 다중 스택(monorepo)은 KEEP-list**: 프로젝트가 스택 1종이면 비해당 sub-section을 통째 삭제한다(예: API 미포함 → `## 7-1` 삭제). **FE+API+CLI 등 다중 스택이면 해당하는 sub-section을 *모두 보존*하고 각 스택의 디렉터리 트리를 `## 3-1`에 함께 박는다(삭제 금지).** **모바일 앱 스택이면 `## 7-5`를 채우고 `## 7-4`를 삭제한다**(웹 화면이 함께 있는 경우에만 둘 다 보존 — ADR-027#amend-8).
 4. 필요하면 `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md` 생성(이미 있으면 갱신 제안). **Optional MCP Connectors 백필(ADR-048#d1)**: `.codex/config.toml`에 `[mcp_servers.*]`가 있으면 STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 backfill 권장(자동 연결 X — 사용자 직접).
    - **Dependency Tools 기록 (ADR-051#amend-4)**: 확정한 **scope별 의존성 도구**(npm/pnpm/yarn/bun · pip/poetry/uv · cargo · go 등)를 STACK_SETUP_PLAN `## Dependency Tools` 표에 기록한다 — 단일 패키지는 `.` 1행, 모노레포·polyglot은 scope별 1행(경로 prefix), 비-JS 스택도 같은 표. 근거 컬럼엔 그 판정을 뒷받침한 *tool-specific* 신호(lockfile·tool-manifest)를 적고, lockfile이 아직 없는 green-field는 `(신규 — lockfile 미생성)`으로 표기한다. **이 표가 downstream scope→tool SSOT**다(stack-guard 교차확인 → plan-workitem 설치 line item → implement 3-DT → builder). 도구 *선택 근거*는 ARCHITECTURE `## 7`에, 설치 소유 경계는 ADR-052.
-5. 프론트 스택 감지 시 마지막 출력에 "frontend 감지됨. `/bootstrap-design` 권장" 1줄.
+5. 화면이 있는 스택(웹 프론트 또는 모바일 앱) 감지 시 마지막 출력에 "UI 스택 감지됨. `/bootstrap-design` 권장" 1줄.
 
 ## --migrate (T2) 흐름 — 입력 적응형
 스택 *변경*. R0에서 `--migrate`로 진입. contract 규약 소유는 ADR-041 D2, 적응형 진입은 ADR-055. **입력 적응형**:
@@ -100,7 +100,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 2. **shared 패키지 위치 + 버전 정책**: `packages/shared`, semver vs fixed.
 3. **publish 정책**: 외부 publish vs internal-only.
 4. **scope vocabulary**: 패키지명 목록을 ADR-008 amend의 scope 컨벤션과 정합화.
-> monorepo는 위 `## BASE 문서화 흐름` 3의 다중 스택 KEEP-list를 적용한다(§7-1~7-4 삭제 금지, 패키지별 디렉터리 트리 모두 §3-1에 박음).
+> monorepo는 위 `## BASE 문서화 흐름` 3의 다중 스택 KEEP-list를 적용한다(§7-1~7-5 삭제 금지, 패키지별 디렉터리 트리 모두 §3-1에 박음).
 
 ## 스택별 디폴트 디렉터리 구조 (권장 출력)
 
@@ -112,6 +112,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 | Rust CLI | `src/{cli,core,...}/`, `tests/` |
 | Go CLI | `cmd/`, `internal/{cli,core,...}/`, `tests/` |
 | Python CLI | `src/<pkg>/{cli,core,...}/`, `tests/` |
+| Flutter (Android·iOS) | `lib/{app,features,shared}/`, `test/`, `integration_test/` |
 
 ARCHITECTURE_OVERVIEW.md `## 3-1` 채움 시 함께 박음. 사용자 즉흥 결정 → 스파게티 차단.
 
