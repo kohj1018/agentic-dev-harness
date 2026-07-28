@@ -1743,8 +1743,11 @@ design-gate-shots/
 **/android/local.properties
 *.iml
 # golden 정답 사진 — 머신마다 로컬 생성, 커밋하지 않음 (ADR-059 D3)
-**/test/goldens/
-**/test/failures/
+# test/ 하위 *어느 깊이*든 걸어야 한다: Flutter 의 golden key 는 그 테스트 파일이 있는
+# 디렉터리 기준 상대경로라(LocalFileComparator.basedir), test/widgets/foo_test.dart 의
+# 'goldens/foo.png' 는 test/widgets/goldens/ 에 생성된다. 실패 이미지도 같은 자리의 failures/ 다.
+**/test/**/goldens/
+**/test/**/failures/
 ```
 
 > `ios/Pods/`처럼 슬래시가 중간에 있는 패턴은 git이 **저장소 루트 기준**으로만 해석한다. 같은 가이드가 `## Dart Source Roots`에서 `pubspec.yaml`이 여러 개인 저장소를 명시 지원하므로, `apps/mobile/ios/Pods/`가 걸리도록 `**/`를 붙인다. `.dart_tool/`·`*.iml`처럼 슬래시가 끝에만 있거나 없는 패턴은 이미 모든 깊이에 매칭되므로 그대로 둔다.
@@ -1756,15 +1759,22 @@ design-gate-shots/
 **수정**: 수행-6의 6-4-a 다음에 아래 항목을 추가한다.
 
 ```
-   - **6-4-b. golden 초기 절차 안내 (runtime target 이 `native` 이고 화면이 있을 때)**: golden(픽셀 비교) 정답 사진은 **커밋하지 않으며 머신마다 로컬 생성**한다(ADR-059 D3). `.gitignore` 에 `**/test/goldens/` 가 있는지 확인하고 없으면 추가한다. 그리고 `STACK_SETUP_PLAN.md` 에 아래 절차를 1회성 안내로 기록한다 — *"새 체크아웃 직후 첫 `validate` 는 정답 사진 부재로 실패한다. `flutter test --update-goldens` 를 1회 실행하고 생성된 이미지를 육안 확인한 뒤 진행한다."* golden 테스트 위젯에는 `debugShowCheckedModeBanner: false` 를 준다. **재생성 규율도 함께 적는다** — *"`--update-goldens` 는 (a) 정답 사진이 아직 없을 때, (b) UI 를 의도적으로 바꾸고 새 모습을 육안 확인했을 때만 쓴다. golden 실패를 통과시키려고 덮어쓰지 않는다 — 그러면 회귀가 정답으로 굳는다."*
+   - **6-4-b. golden 초기 절차 안내 (runtime target 에 `native/*` 가 포함되고 화면이 있을 때)**: golden(픽셀 비교) 정답 사진은 **커밋하지 않으며 머신마다 로컬 생성**한다(ADR-059 D3). `.gitignore` 에 `**/test/**/goldens/` 와 `**/test/**/failures/` 가 있는지 확인하고 없으면 추가한다 — **`**/test/goldens/` 처럼 한 단계만 쓰면 안 된다**: golden key 는 그 테스트 파일이 있는 디렉터리 기준 상대경로라(`LocalFileComparator.basedir`) `test/widgets/foo_test.dart` 의 `goldens/foo.png` 는 `test/widgets/goldens/` 에 생성되고 한 단계 패턴에는 걸리지 않는다. 그리고 `STACK_SETUP_PLAN.md` 에 아래 절차를 1회성 안내로 기록한다 — *"새 체크아웃 직후 첫 `validate` 는 정답 사진 부재로 실패한다. `flutter test --update-goldens` 를 1회 실행하고 생성된 이미지를 육안 확인한 뒤 진행한다."* golden 테스트 위젯에는 `debugShowCheckedModeBanner: false` 를 준다. **재생성 규율도 함께 적는다** — *"`--update-goldens` 는 (a) 정답 사진이 아직 없을 때, (b) UI 를 의도적으로 바꾸고 새 모습을 육안 확인했을 때만 쓴다. golden 실패를 통과시키려고 덮어쓰지 않는다 — 그러면 회귀가 정답으로 굳는다."*
 ```
 
 ## 6-3. 확인
 
 ```bash
-grep -n "test/goldens" .gitignore
+# 중첩 경로까지 걸리는 형태여야 한다 — `**/test/goldens/` 한 단계 패턴이면 실패다
+grep -nE '^\*\*/test/\*\*/(goldens|failures)/$' .gitignore
 grep -n "update-goldens" .claude/skills/stack-guard/SKILL.md
+# 실제 매칭 확인 (직계·중첩·monorepo 는 True, test 트리 밖은 False)
+for p in test/goldens/a.png test/widgets/goldens/a.png apps/mobile/test/widgets/failures/a.png src/goldens/a.png; do
+  printf '%-42s ignored=%s\n' "$p" "$(git check-ignore -q "$p" && echo True || echo False)"
+done
 ```
+
+**합격 기준**: 첫 명령이 **두 줄**(goldens·failures), 두 번째가 1건 이상, 마지막이 앞 세 경로 `True` + `src/goldens/a.png` `False`.
 
 ```
 git add .gitignore .claude/skills/stack-guard/SKILL.md
@@ -2286,6 +2296,30 @@ done
 ```
 
 **합격 기준**: 여섯 줄 모두 `OK`. `날짜 누락`이면 제목을 `## Amendment N (<적용일>) — <제목>` 으로 고친다 — **날짜만 넣고 제목 문구·번호·`<a id>` 앵커는 건드리지 않는다**(다른 문서가 `#amend-N`으로 이 절을 가리킨다). `amendment 자체가 없음`이면 그 단계를 건너뛴 것이므로 해당 단계로 돌아간다(007#6·021#2는 5-10, 나머지 넷은 단계 1~3 소관).
+
+## 11-7. `native` 단독 표기 잔존 확인
+
+`runtime target`의 canonical 값은 `native/android`·`native/ios`이고 **`native` 단독은 값이 아니라 클래스 표기**(`native/*`)다(ADR-059 D8). 그런데 **이 표기가 적용 중 두 번 새어 들어왔다** — 단계 4의 `runtime target 이 native(Android·iOS) 면`, 단계 6의 `runtime target 이 \`native\` 이고`(둘 다 리뷰에서 사후 수정). 조사(`이고`/`면`)와 백틱 유무 조합이 많아 눈으로는 놓친다. 기계로 확인한다.
+
+```bash
+python - <<'PY'
+import re
+files=['.claude/skills/stack-guard/SKILL.md','.claude/skills/stabilize-milestone/SKILL.md',
+       'docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md','IMPROVE-GUIDE.md']
+pat=re.compile(r'(target\s*(이|에|은|는)\s*`?native`?(?!/)|`native`(?!/)\s*(이고|면|든|포함)|web·native·)')
+# 규칙을 *선언*하거나 *과거 위반을 인용*하는 문장은 native 를 언급해야 하므로 제외.
+# '(?!/)' 는 이 검사기 자신의 정규식 줄을 걸러내는 마커다(산문엔 나오지 않는다).
+EXEMPT=('합쳐 적지 않는다','단독 표기 금지','클래스 표기','(?!/)','새어 들어왔다')
+bad=0
+for f in files:
+    for n,l in enumerate(open(f,encoding='utf-8').read().split('\n'),1):
+        if pat.search(l) and not any(k in l for k in EXEMPT):
+            print(f'*** 사용-위반 *** {f}:{n}  {l.strip()[:110]}'); bad+=1
+print('위반', bad, '건')
+PY
+```
+
+**합격 기준**: `위반 0 건`. 규칙을 *선언하는* 문장(`native` 하나로 합쳐 적지 않는다 / `native` 단독 표기 금지 / 클래스 표기)은 `native`를 언급해야 하므로 위 스크립트가 제외한다. 위반이 나오면 그 자리를 **`native/*` 포함 여부** 형태로 고친다 — 값 열거 자리라면 `native/android`·`native/ios`로 나눈다.
 
 11-4에서 인용을 넣느라 손댄 파일만 명시해 담는다(`git add -A`는 검증하며 생긴 임시 파일까지 함께 담을 수 있다).
 
