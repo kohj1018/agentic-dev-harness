@@ -505,10 +505,10 @@ accepted
 ### D8. 프로젝트 유형 판정의 축 분리
 - 기존의 "UI 프로젝트인가" 단일 축을 다음 세 축으로 분리한다. 세 축은 상호배타가 아니며 동시에 참일 수 있다.
   - **design surface**: 시각 설계 산출물을 갖는 프로젝트인가. **판정 절차는 기존 그대로 ADR-027#amend-3**(DESIGN.md 존재 → status → 추가 신호)이며 본 ADR이 새 판정 규칙을 만들지 않는다. 이 축이 참이면 design gate(정적 HTML 대상) 대상이다.
-  - **runtime target**: 앱이 실제로 도는 곳(web / android / ios / desktop). e2e 도구 선택의 근거.
+  - **runtime target**: 앱이 실제로 도는 곳. canonical 값은 `web` / `native/android` / `native/ios` / `desktop` / `none`이며 한 프로젝트가 여러 개를 선언할 수 있다. `native/*`는 값이 아니라 그 둘을 묶는 **클래스 표기**다 — toolchain 분기는 `native/*` 포함 여부로 하되 **e2e 판정과 registry 행은 개별 값 단위**로 낸다(위 플랫폼별 판정이 성립하는 지점). e2e 도구 선택의 근거.
   - **host environment**: 작업 머신(windows / macos). 실행 가능 범위의 근거.
-- design gate(Playwright + axe)는 **정적 HTML만** 대상으로 한다. runtime target이 native면 앱 e2e를 Playwright에 배선하지 않는다.
-- **두 축을 헷갈리면 게이트가 영구히 막힌다**: design surface가 있으면 runtime target이 native든 web이든 **Chromium 바이너리가 필요하다**. canonical adapter는 모듈만 있고 브라우저가 없으면 `exit 2`(실행 불가)를 내고, 그 상태는 registry `status: needs-install`로 굳어 디자인 산출물 승인이 보류되며, 그 보류가 프로토타입 승격과 task 분해까지 연쇄로 막는다. 따라서 native 프로젝트에서 "브라우저를 설치하지 않는다"는 **앱 e2e 목적에 한한 말**이고, design gate 목적의 `npx playwright install chromium`은 target과 무관하게 수행한다.
+- design gate(Playwright + axe)는 **정적 HTML만** 대상으로 한다. runtime target이 `native/*`면 앱 e2e를 Playwright에 배선하지 않는다.
+- **두 축을 헷갈리면 게이트가 영구히 막힌다**: design surface가 있으면 runtime target이 `native/*`든 `web`이든 **Chromium 바이너리가 필요하다**. canonical adapter는 모듈만 있고 브라우저가 없으면 `exit 2`(실행 불가)를 내고, 그 상태는 registry `status: needs-install`로 굳어 디자인 산출물 승인이 보류되며, 그 보류가 프로토타입 승격과 task 분해까지 연쇄로 막는다. 따라서 native 프로젝트에서 "브라우저를 설치하지 않는다"는 **앱 e2e 목적에 한한 말**이고, design gate 목적의 `npx playwright install chromium`은 target과 무관하게 수행한다.
 
 ### D9. 시크릿 취급 2단 분류
 - **읽기 차단**(도구가 열지 못하게): Android 서명키(`*.jks`·`*.keystore`), 그 비밀번호(`key.properties`), iOS 배포 인증서·프로비저닝(`*.p12`·`*.mobileprovision`), 서버용 service account 키(`*-firebase-adminsdk-*.json`).
@@ -1152,7 +1152,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 ```
    - **6-1. 판정 (3축, 상호배타 아님 — ADR-059 D8 / ADR-027#amend-3 / ADR-058#amend-2)**: 매 실행 현재 파일로 다시 판정한다. 세 축을 **각각** 결정하며 동시에 참일 수 있다.
      - **design surface**: `docs/20-system/DESIGN.md` 부재 → 없음. 존재 + `## 0. Status` ≠ `draft` → 있음. 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4` 또는 `## 7-5` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 화면 있는 유형) ≥1 → 있음(의심 포함). 신호 0 → 없음. **design gate(6-4-1)는 이 축만 본다.**
-     - **runtime target**: ARCH `## 7. 기술 선택`과 프로젝트 manifest로 판정. `web`(브라우저에서 도는 앱) / `native`(Android·iOS) / `desktop` / `none`(라이브러리·CLI). **e2e 도구 선택(6-3·6-4)은 이 축만 본다.** 여러 값이 동시에 참일 수 있다.
+     - **runtime target**: ARCH `## 7. 기술 선택`과 프로젝트 manifest로 판정. canonical 값은 `web`(브라우저에서 도는 앱) / `native/android` / `native/ios` / `desktop` / `none`(라이브러리·CLI)이다 — **Android 와 iOS 는 개별 값이며 `native` 하나로 합쳐 적지 않는다**(합치면 ADR-059 D4 플랫폼별 판정이 성립하지 않는다). `native/*`는 값이 아니라 그 둘을 묶는 클래스 표기이며 toolchain 분기에만 쓴다. **e2e 도구 선택(6-3·6-4)은 이 축만 본다.** 여러 값이 동시에 참일 수 있다.
      - **host environment**: 현재 OS(`windows` / `macos`). 실행 가능 범위 판단에만 쓴다. iOS 관련 항목은 `macos` 에서만 수행하고, 그 외에서는 `[미수행 — host 제약]` 으로 기록한다.
      정상 `/bootstrap-stack → /stack-guard → /bootstrap-design` 순서에서는 DESIGN status 가 draft 이고 `/bootstrap-stack` 이 ARCH `## 7-4` 또는 `## 7-5` 를 채우므로 design surface 가 "있음(의심)" 으로 발화한다. 기존 registry 가 `n/a` 여도 이후 신호가 생기면 이번 실행에서 재분류한다.
 ```
@@ -1184,7 +1184,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 ```
    - **6-3. e2e 실행 환경 준비 (runtime target 기준)**:
      - **target 에 `web` 포함**: `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요). **웹 경로는 개선 전과 동일하다.**
-     - **target 에 `native` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 `flutter doctor` 로 device 준비 상태를 확인하고, 연결된 device 가 없으면 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
+     - **target 에 `native/*` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 `flutter doctor` 로 device 준비 상태를 확인하고, 연결된 device 가 없으면 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
      - **design surface 가 있음**: target 과 무관하게 `@playwright/test` 와 `@axe-core/playwright` 를 **devDep 으로 설치**하고 **`npx playwright install chromium` 까지 수행한다.** 모듈만 있고 브라우저 바이너리가 없으면 design gate adapter 가 `exit 2`(실행 불가)를 내고 registry 가 `status: needs-install` 로 굳어 **디자인 산출물 승인·프로토타입 승격·task 분해가 연쇄로 막힌다.** 즉 native 프로젝트에서도 design gate 용 chromium 은 필수다(ADR-059 D8). 이때 설치하는 Playwright 버전은 같은 저장소의 다른 웹 패키지와 맞추면 브라우저 캐시를 공유한다 — 버전이 다르면 브라우저 세트를 새로 내려받는다.
 ```
 
@@ -1199,7 +1199,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 ```
    - **6-4. `validate:e2e` scaffold (runtime target 기준, e2e 필요 시)**:
      - **target 에 `web` 포함**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고 `validate:e2e` 진입점(`playwright test`)을 박는다.
-     - **target 에 `native` 포함**: 아래 셋을 모두 한다. **Playwright 에 배선하지 않는다** — `package.json` 이 design gate 때문에 존재하더라도 그것을 앱 e2e 의 근거로 삼지 않는다(ADR-059 D8).
+     - **target 에 `native/*` 포함**: 아래 셋을 모두 한다. **Playwright 에 배선하지 않는다** — `package.json` 이 design gate 때문에 존재하더라도 그것을 앱 e2e 의 근거로 삼지 않는다(ADR-059 D8).
        1. `flutter pub add "dev:integration_test:{sdk: flutter}"` 로 dev 의존성을 명시하고 `flutter pub get` 을 수행한다. `integration_test` 는 SDK 동봉이지만 `pubspec.yaml` 에 적히지 않으면 `import 'package:integration_test/...'` 가 해석되지 않아 e2e 파일이 컴파일조차 안 된다.
        2. `integration_test/` 디렉터리를 만든다.
        3. `validate:e2e` 진입점을 **`flutter test integration_test` 로 박는다 — `-d` 를 넣지 않는다.** 이유: `-d` 는 device id 또는 이름 접두사만 받으므로 `emulator-5554` 처럼 재부팅하면 달라지는 값이나 `연결된 Android device 1대` 같은 자연어를 넣으면 명령 자체가 성립하지 않는다. `-d` 를 생략하면 러너가 **`integration_test` 지원 device 로 후보를 좁힌 뒤** 하나만 남으면 자동 선택한다(실측: android emulator + windows + chrome + edge 4개가 붙은 상태에서 emulator 자동 선택, 오류 없음). 후보가 둘 이상 남을 때만 호출 측이 `npm run validate:e2e -- -d <id>` 로 지정한다. 어떤 device 를 골라야 하는지의 *규칙*은 registry 에 적는다.
@@ -1208,7 +1208,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
      - **6-4-a. canonical boot smoke (조건부 생성)**: e2e 대상이고 등록된 smoke 가 없을 때 —
        - **새 프로젝트이고 앱 진입점이 결정적이면**: 프레임워크 수준 boot smoke 를 1개 생성한다. 내용은 *"앱이 기동하고 첫 프레임이 예외 없이 렌더된다"* 까지이며 **어떤 화면을 볼지 고르지 않는다**(화면 선택은 제품 결정이라 계획 단계 소관).
        - **기존 코드가 있거나 로그인·외부 의존이 필요해 부팅만으로 성립하지 않으면**: 생성하지 않고 `Needs E2E Smoke — /plan-workitem 이 작성 line item 을 authoring 해야 함` 을 출력한다.
-       - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. `web` 과 `native` 를 함께 선언한 프로젝트는 두 행이 되고, 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
+       - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. **`native/*` 는 클래스 표기이므로 행으로 쓰지 않는다** — `native/android` 와 `native/ios` 를 함께 선언했으면 **두 행**이고 `web` 까지 선언했으면 세 행이다(ADR-059 D8). 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
      - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
 ```
 
@@ -1277,7 +1277,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 **수정**:
 
 ```
-- 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-027#amend-3 근거 신호 / runtime target: web·native·desktop·none / host: windows·macos) — ADR-059 D8
+- 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-027#amend-3 근거 신호 / runtime target: web·native/android·native/ios·desktop·none — 복수 선언 가능, `native` 단독 표기 금지 / host: windows·macos) — ADR-059 D8
 ```
 
 **기존**:
@@ -1894,7 +1894,8 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
 
 ## E2E Smoke Registry
 <!-- 졸업 판정이 "실제로 e2e가 돌았는가"를 확인할 때 쓰는 등록부.
-     선언한 runtime target마다 한 행을 적는다(web과 native를 함께 내면 두 행).
+     선언한 runtime target마다 한 행을 적는다(`native/android`와 `native/ios`를 함께 내면 두 행).
+     canonical 값은 web / native/android / native/ios / desktop / none이며 `native` 단독은 적지 않는다(ADR-059 D8).
      판정도 행마다 따로 난다 — 한 target의 통과를 다른 target 근거로 쓰지 않는다.
      이 표는 판정을 *좁히는* 수단이다 — 등록이 있으면 그 이름의 테스트가 성공했는지까지
      확인하고, 없으면 "선언된 e2e 디렉터리 하위에서 1개 이상 성공"만 확인한 뒤
