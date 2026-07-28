@@ -65,7 +65,7 @@ feature
      - AC-2 → tests/auth/me.spec.ts > test_AC_2_authenticated_returns_user
      - 선택 — machine-checkable path 형식 (ADR-047 D6 contract formation 정합):
        기존 `- AC-N → <file> > <test-name>` 자연어 양식 *대신* `- AC-N → <runner>::<file>::<test-id>` 형식을 박을 수 있다.
-       runner는 jest|vitest|pytest|go|cargo|flutter 등 — 실제 실행 가능한 명령으로 채울 것.
+       runner는 jest|vitest|pytest|go|cargo|flutter 등 — 실제 실행 가능한 명령으로 채울 것. (Flutter는 ADR-059)
        예: `- AC-1 → jest::tests/auth/me.spec.ts::test_AC_1_unauthenticated_returns_401`
        채워져 있고 *placeholder가 아니면* /validate-workitem이 path 우선 resolve.
        채워지지 않으면 기존 자연어 양식(`→ <file> > <test-name>`) 그대로 — 강제 X.
