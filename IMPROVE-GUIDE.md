@@ -453,6 +453,10 @@ accepted
 
 ### D2. 통합 검증 명령
 - 실행 껍데기는 **npm**으로 고정한다. 근거 둘: ① design gate가 exit 0/1/2를 구분해야 하는데 task·make는 이를 각각 201·2로 뭉갠다(Windows·macOS 동일 관측) ② design gate 때문에 Node가 이미 필수 의존이므로, 여기에 다른 러너를 하나 더 얹는 것보다 하나로 두는 편이 단순하다(ADR-006). `validate:design`만 npm으로 하고 나머지를 다른 러너로 두는 혼합안도 가능하나, 도구 두 개를 관리하는 비용을 지불할 이득이 없다.
+- **이 npm은 `## Dependency Tools` 표의 대상이 아니다.** 그 표(ADR-051 결정 3)는 *"builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM"* 을 scope별 1행으로 적는 자리이고, **검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록한다**(design gate → `## Design Gate Adapter`, 통합 명령 → `## 통합 명령 사용법`). 그래서 Flutter 루트는 `pubspec.lock`·`package-lock.json` 두 신호가 함께 있어도 표에는 **`pub` 1행**이고, `package-lock.json`은 ADR-051의 *"동일 scope 신호 충돌"* 로 취급하지 않는다.
+  - 이것은 Flutter 예외가 아니라 **원래부터 적용돼 온 경계를 명문화한 것**이다 — 웹 프로젝트의 `@playwright/test`도 이 표에 별도 행으로 적지 않는다. Flutter가 두 PM이 한 scope에 공존하는 첫 스택이라 처음 문제가 됐을 뿐이다.
+  - **경계가 성립하는 근거**: Flutter 루트에서 `pub`은 builder가 task마다 반복 실행하는 도구이고, npm은 stack-guard 6-3이 스택 확정 시 1회 설치하는 검증 의존이다. 성격이 달라 같은 칸에 들어갈 수 없다.
+  - **B안(scope당 복수 도구 허용)을 지금 택하지 않은 이유**: 값을 둘 허용하는 것만으로는 *"Dart 패키지에 npm을 골라도 표를 위반하지 않는"* 새 모호성이 생긴다. 정확해지려면 "도구 → 그 도구가 소유하는 패키지 집합"까지 스키마에 넣어야 하는데, 그것을 요구하는 실사용 관측이 아직 없다(전환 조건은 재검토 트리거 9).
 - `validate` 구성(순서 고정):
   1. `dart format --output=none --set-exit-if-changed <등록된 Dart source root 전부>`
   2. `flutter analyze` — **플래그 없이 기본값**을 쓴다
@@ -554,6 +558,7 @@ accepted
   6. Flutter 메이저 버전 상승으로 `--machine` 스트림의 `protocolVersion` major가 바뀜 → D4 판정 계약
   7. native 마일스톤에서 시각 회귀를 사람도 못 잡고 넘어간 사례 발생 → D12(device 스크린샷 배선)
   8. `--machine` 스트림을 매 실행 사람이 해석하는 부담이 관측될 만큼 커짐 → D4 판정 계약을 코드(파서)로 물질화. **지금 코드로 만들지 않는 이유**: design gate는 exit 0/1/2 계약과 다중 입력 처리가 필요해 canonical asset이 정당했지만, e2e 판정은 web 스택도 현재 지시문 기반이며 스택 하나를 추가하면서 새 실행 코드를 들이는 것은 ADR-006에 어긋난다. 판정 계약을 글로 고정해 두고 필요가 관측되면 물질화한다.
+  9. **Flutter 프로젝트의 task가 npm devDep 추가를 실제로 필요로 하는 사례가 관측됨 → D2의 `## Dependency Tools` 경계 재검토**(scope당 복수 도구 허용 + "도구 → 소유 패키지 집합" 스키마로 전환할지). 그전까지는 표에 `pub` 1행이고, npm devDep이 필요해지면 `Needs Dependency Tool Decision`으로 멈춰 사용자에게 묻는다 — 조용한 오답보다 안전한 실패를 택한다.
 
 ## Mutation Contract (ADR-047 D3)
 1. **Target** — `.claude/skills/stack-guard/SKILL.md`(verify 표·정적분석 표·toolchain·target 분기·boot smoke·registry·출력 계약) / `.claude/skills/stabilize-milestone/SKILL.md`(§3-b·§3-V·§5-2·§5-2b·§5-3·§5-4·dependency hygiene) / `.claude/skills/plan-workitem/SKILL.md`(task 유형 prefilter·컴포넌트 경로·의존성 신호) / `.claude/skills/validate-workitem/SKILL.md`(Arch-iface audit) / `.claude/skills/validate-plan/SKILL.md`(읽기 목록·`[Plan-arch-iface]`) / `.claude/skills/finalize-workitem/SKILL.md`(lockfile whitelist·민감 경로) / `.claude/skills/implement-workitem/SKILL.md`(의존성 도구) / `.claude/skills/bootstrap-stack/SKILL.md`(디렉터리 트리·Dependency Tools·§7-5 채움) / `.claude/skills/bootstrap-design/SKILL.md`(직접 지원 스택 표기) / `.claude/skills/plan-milestone/SKILL.md`(엔지니어링 내부 경계) / `.claude/agents/validator.md`(모바일 인터페이스 CHECK) / `.claude/agents/reviewer.md`(`[Plan-arch-iface]` 열거) / `.claude/agents/builder.md`(인터페이스 SSOT 열거) / `docs/20-system/ARCHITECTURE_OVERVIEW.md`(`## 7-5`) / `docs/30-workitems/_templates/TASK_TEMPLATE.md`(runner 예시·Architecture-Iface 예시) / `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`(Architecture-Iface 예시) / `docs/00-meta/STRUCTURE.md`(산출물 표·Canonical Owner) / `docs/00-meta/PROJECT_START_CHECKLIST.md` / `docs/00-meta/GUARDRAILS_STRATEGY.md`(진입점 단서) / `docs/00-meta/WORKFLOW.md`(7-x 정책 포인터) / `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`(source root·smoke registry·golden 절차) / `AGENTS.md` / `README.md` / `README_ko.md` / `.gitignore` / `.claude/settings.json` / `docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md`(Amendment 8) / `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md`(Amendment 1) / `docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md`(lockfile 목록) / `docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md`(스택별 표) / `docs/90-decisions/boilerplate/README.md`(인덱스)
@@ -1357,7 +1362,7 @@ git add .claude/skills/stack-guard/SKILL.md docs/00-meta/GUARDRAILS_STRATEGY.md
 ```
    5-2. **UI 프로젝트 — raw color grep** (정규식 deterministic, **기록 등급 — 진행 차단 안 함**): 5-0 에서 회수한 변경 파일 중 아래 두 갈래로 검사한다.
    - **웹 계열** — 확장자 `.tsx`/`.jsx`/`.ts`/`.js`/`.vue`/`.svelte`/`.astro`/`.css`/`.scss`/`.html`: `#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})\b` 패턴 grep(ERE — 3·4·6·8자리 hex 전부; `\b`로 더 긴 hex 런의 부분매치 방지). 일치 시 `P1 [Design-rawhex] <file:line> — DESIGN.md ## 2 token 으로 교체 권장`.
-   - **Dart 계열** — 확장자 `.dart`: ① `Color\(0x[0-9A-Fa-f]{6,8}\)` 및 `Color\.fromARGB\(` → `P1 [Design-rawhex] <file:line>` ② `\bColors\.[a-zA-Z]+` (프레임워크 기본 팔레트 사용 — 값을 박은 것은 아니나 프로젝트 토큰을 우회함) → `P1 [Design-token-grep] <file:line> — 테마에서 가져오도록 교체 권장`. 두 라벨은 원인과 수정 방법이 달라 분리한다. **`[Design-token]`(접미 없음)은 reviewer 의 LLM 판정 차원이 이미 쓰는 라벨이므로 grep 결정분에는 `-grep` 접미를 붙인다** — `[Design-voice-grep]`/`[Design-voice]` 분리와 같은 규칙이며, 회귀 신호 집계가 라벨 정확 일치로 동작하므로 겹치면 오집계된다.
+   - **Dart 계열** — 확장자 `.dart`: ① `Color\(0x[0-9A-Fa-f]{6,8}\)` 및 `Color\.from(ARGB|RGBO)\(` → `P1 [Design-rawhex] <file:line>` ② `\b(Colors|CupertinoColors)\.[a-zA-Z]+` (프레임워크 기본 팔레트 사용 — 값을 박은 것은 아니나 프로젝트 토큰을 우회함) → `P1 [Design-token-grep] <file:line> — 테마에서 가져오도록 교체 권장`. 두 라벨은 원인과 수정 방법이 달라 분리한다. **`[Design-token]`(접미 없음)은 reviewer 의 LLM 판정 차원이 이미 쓰는 라벨이므로 grep 결정분에는 `-grep` 접미를 붙인다** — `[Design-voice-grep]`/`[Design-voice]` 분리와 같은 규칙이며, 회귀 신호 집계가 라벨 정확 일치로 동작하므로 겹치면 오집계된다.
    - **Dart 정의 라인 예외**: `static +const +Color +[A-Za-z_]+ *=` 형태의 줄은 토큰 *정의*이므로 제외한다(웹의 CSS custom property 정의 라인 예외와 동형).
    - **한계(사실 기록)**: 본 검사는 문자열 검색이라 문법을 이해하지 못한다. **주석 안·문자열 리터럴 안의 색값도 함께 잡는다**(실측 확인). 그래서 본 항목은 기록 등급이며 진행을 차단하지 않는다. 문법을 이해하는 검사가 필요하면 Dart 의 공식 analyzer plugin 방식과 별도 패키지인 `custom_lint` 중 하나를 고른다(둘은 같은 것이 아니다 — ADR-059 D6).
 ```
@@ -1539,13 +1544,26 @@ grep -rln "amend-3" .claude/skills/                  # 인용만 있는지 눈�
 저장소의 실제 *tool-specific* 신호(`package-lock.json`·`pnpm-lock.yaml`·`yarn.lock`·`bun.lockb`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod`·`pubspec.yaml`+`pubspec.lock` 등)를 **scope별로 대조**한다
 ```
 
+**추가 수정 — `## Dependency Tools` 표의 경계를 명문화한다(빠지면 순수 Flutter 프로젝트에서 stack-guard 가 멈춘다).**
+
+`pub` 을 신호 목록에 넣는 순간, **순수 Flutter 루트에는 `pubspec.lock`(pub)과 `package-lock.json`(D2 의 npm broker) 두 신호가 같은 scope `.` 에 함께 존재**한다. 그런데 표는 *"단일 패키지는 `.` 1행"* 이고 [ADR-051](docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) 결정 3은 *"동일 scope 신호 충돌 → `Needs Dependency Tool Decision` 으로 중단"* 이다. 그대로 두면 Flutter 프로젝트가 스택 확정 단계에서 멈춘다.
+
+해소는 **경계를 적는 것**이다 — 이 표는 *builder 가 프로젝트·기능 의존성을 설치할 때 쓰는 PM* 만 적고, **검증 도구 자체를 설치하는 PM**(design gate·통합 명령용 npm)은 그 도구의 registry가 기록한다. Flutter 예외가 아니라 원래 적용돼 온 경계이며(웹 프로젝트의 `@playwright/test` 도 이 표에 없다), ADR-059 D2 가 SSOT다. 아래 **세 곳**은 모두 위에서 인용한 조각 *뒤에 이어지는* 문장이므로 **줄을 갈아끼우지 말고 이어 붙인다**.
+
+| 파일 | 이어 붙일 지점 | 붙일 문장 |
+|---|---|---|
+| `.claude/skills/bootstrap-stack/SKILL.md` | `비-JS 스택도 같은 표.` 뒤 | **적는 대상은 *builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM*뿐이다** — 검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록하므로 이 표에 넣지 않는다(ADR-059 D2). 예: Flutter 루트는 `pubspec.lock`·`package-lock.json`이 함께 있어도 **`pub` 1행**이고(npm은 design gate·통합 명령용), 웹 프로젝트의 `@playwright/test`도 별도 행으로 적지 않는다. |
+| `.claude/skills/stack-guard/SKILL.md` (6-2-0) | `사용자 결정 요청(… 4와 동일 정책).` 뒤 | **검증 도구 자체를 설치하는 PM 의 신호는 이 대조에서 제외한다** — 이 표는 *builder 가 프로젝트·기능 의존성을 설치할 때 쓰는 PM* 만 적는다(ADR-059 D2). 그래서 Flutter scope 의 `package-lock.json`(design gate·통합 명령용 npm)은 `pubspec.lock` 과의 *동일 scope 신호 충돌* 로 보지 않고, 표에는 `pub` 1행만 둔다. 웹 프로젝트의 `@playwright/test` 를 이 표에 적지 않는 것과 같은 경계다. |
+| `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` | 주석의 `비-JS 스택도 같은 표에 적는다.` 줄 **다음 줄**부터 (주석 안이므로 3줄로 나눠 적는다) | `적는 대상은 *builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM*뿐 — 검증 도구 자체를 설치하는 PM은` / `그 도구의 registry(\`## Design Gate Adapter\` 등)가 기록하므로 이 표에 넣지 않는다(ADR-059 D2).` / `예: Flutter 루트는 pubspec.lock·package-lock.json이 함께 있어도 \`pub\` 1행이다.` |
+
 **확인**:
 
 ```bash
 grep -rc "pubspec.lock" .claude/skills/implement-workitem/SKILL.md .claude/skills/plan-workitem/SKILL.md .claude/skills/stack-guard/SKILL.md .claude/skills/finalize-workitem/SKILL.md
+grep -rlc "프로젝트·기능 의존성을 설치할 때 쓰는 PM" .claude/skills/bootstrap-stack/SKILL.md .claude/skills/stack-guard/SKILL.md docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
 ```
 
-네 파일 모두 1 이상이어야 한다.
+앞 명령은 네 파일 모두 1 이상, 뒤 명령은 세 파일 모두 나와야 한다.
 
 ## 5-8. dependency hygiene에 Dart 대응 추가
 
@@ -1560,7 +1578,10 @@ grep -rc "pubspec.lock" .claude/skills/implement-workitem/SKILL.md .claude/skill
 **수정**:
 
 ```
-- `npm audit` / `pip-audit` (스택별 대응) 1회 실행. **Dart/Flutter 는 audit 에 정확히 대응하는 명령이 없다** — `flutter pub outdated`(갱신 가능 여부)와 `dependency_validator`(미선언·미사용 의존)를 돌리고, 취약점 점검은 `dart pub get` 이 표시하는 advisory 와 `pubspec.lock` 을 대상으로 한 OSV 스캐너로 대체한다. 세 가지는 목적이 서로 달라 하나로 묶어 보고하지 않는다.
+- `npm audit` / `pip-audit` (스택별 대응) 1회 실행. **Dart/Flutter 는 audit 에 정확히 대응하는 명령이 없어 아래 셋으로 나뉜다** — 목적이 서로 달라 하나로 묶어 보고하지 않는다. **셋 다 읽기 전용 경로만 쓰고, 도구를 설치하지 않는다**(본 skill 은 파일을 고치지 않는다). 미설치 도구는 그 항목만 skip 하고 사유를 출력에 명시한다(`Doc-link check skipped` 와 동형).
+  - **갱신 가능 여부**: `flutter pub outdated` — 내장이고 `pubspec.lock` 을 바꾸지 않는다.
+  - **미선언·미사용 의존**: `dart pub global run dependency_validator`. 미활성이면 skip + `dep hygiene skipped: dependency_validator not activated (dart pub global activate dependency_validator — 사용자/stack-guard 소관)`.
+  - **취약점**: `pubspec.lock` 을 대상으로 `osv-scanner` 실행. 미설치면 skip + 사유 명시. **`dart pub get` 의 advisory 출력을 쓰려면 반드시 `--enforce-lockfile` 을 붙인다** — 플래그 없는 `pub get` 은 해결 결과를 `pubspec.lock` 에 **쓰므로** read-only 계약을 깨뜨린다. 플래그를 못 쓰는 환경이면 이 경로를 생략하고 `osv-scanner` 결과만 쓴다.
 ```
 
 ## 5-9. task 문서 템플릿의 runner 예시 확장
@@ -1673,18 +1694,22 @@ class Palette extends StatelessWidget {
   @override
   Widget build(BuildContext c) => const ColoredBox(color: Colors.blue);
 }
+final rgbo = Color.fromRGBO(10, 20, 30, 1.0);
+final cupertino = CupertinoColors.systemBlue;
 EOF
 echo "--- rawhex (정의 라인 제외 후):"
-grep -nE 'Color\(0x[0-9A-Fa-f]{6,8}\)|Color\.fromARGB\(' sample.dart | grep -vE 'static +const +Color +[A-Za-z_]+ *='
+grep -nE 'Color\(0x[0-9A-Fa-f]{6,8}\)|Color\.from(ARGB|RGBO)\(' sample.dart | grep -vE 'static +const +Color +[A-Za-z_]+ *='
 echo "--- token bypass:"
-grep -nE '\bColors\.[a-zA-Z]+' sample.dart
+grep -nE '\b(Colors|CupertinoColors)\.[a-zA-Z]+' sample.dart
 cd / && rm -rf /tmp/colorcheck
 ```
 
-기대 결과: rawhex 검사가 **주석 1줄 + 실제 위반 1줄**을 잡고 **정의 라인은 제외**되며, token bypass가 `Colors.blue` 1줄을 잡는다. 주석이 잡히는 것이 5-1에 기록한 알려진 한계다.
+기대 결과: rawhex 검사가 **주석 1줄 + `Color(0x…)` 위반 1줄 + `Color.fromRGBO` 1줄 = 3줄**을 잡고 **정의 라인은 제외**되며, token bypass가 `Colors.blue`·`CupertinoColors.systemBlue` **2줄**을 잡는다. 주석이 잡히는 것이 5-1에 기록한 알려진 한계다.
+
+> **`fromRGBO`·`CupertinoColors` 를 fixture 에 넣은 이유**: 이 둘은 Flutter 에서 흔한 하드코딩·토큰 우회 경로인데 초기 정규식(`fromARGB` 만, `Colors\.` 만)이 **0건으로 놓쳤다**(실측 확인). fixture 가 새 규칙을 실제로 시험하도록 두 줄을 함께 둔다.
 
 ```
-git add .claude/skills/stabilize-milestone/SKILL.md .claude/skills/plan-workitem/SKILL.md .claude/skills/finalize-workitem/SKILL.md .claude/skills/implement-workitem/SKILL.md .claude/skills/bootstrap-stack/SKILL.md .claude/skills/stack-guard/SKILL.md docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md docs/90-decisions/boilerplate/README.md docs/30-workitems/_templates/TASK_TEMPLATE.md
+git add .claude/skills/stabilize-milestone/SKILL.md .claude/skills/plan-workitem/SKILL.md .claude/skills/finalize-workitem/SKILL.md .claude/skills/implement-workitem/SKILL.md .claude/skills/bootstrap-stack/SKILL.md .claude/skills/stack-guard/SKILL.md docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md docs/90-decisions/boilerplate/README.md docs/30-workitems/_templates/TASK_TEMPLATE.md docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md
 ```
 
 > **커밋 메시지**
