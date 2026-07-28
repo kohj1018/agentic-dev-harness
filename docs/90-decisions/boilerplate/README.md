@@ -27,7 +27,7 @@
 | 025 | 외부 의존 권장 + CI workflow 권장 | accepted | — | bootstrap-stack 외부 의존 출력 + stack-guard CI 권장, 강제 X |
 | 026 | plan-workitem 강화 (TASK_TEMPLATE schema) | accepted | (+#amend-1: planner self-check + architect 호출 신호, +#amend-2: task 단계별 구현 가이드, +#amend-3: 배치 draft 예외 + refresh — #amend-4가 supersede, +#amend-4: `## 3` 전체 계획 스냅샷 — draft/refresh 예외 폐기) | AC GWT 형식 + sizing 3한계 + 의존성 섹션 + planner self-check |
 | 027 | 인터페이스 결정 책임 분배 | accepted | (+#amend-1: cross-surface enforcement 보강 — plan/validate-plan/stabilize/templates, +#amend-2: 디자인 워크플로우 실효 강화 — 시안/anti-slop/lint/Motion, +#amend-3: UI 판정 절차 단일 SSOT, +#amend-4: bootstrap-design --update, +#amend-5: §10 Voice 확장, +#amend-6: 렌더 증거 주입, +#amend-7: DESIGN 내용 계약 확장(정체성·a11y·semantic motion·category state·responsive·tabular)) | DESIGN.md(UI) + ARCHITECTURE 7-1~7-4(API/CLI/백엔드/프론트) + /bootstrap-design 신설 |
-| 031 | Non-web stacks out of direct support scope | accepted | — | 비웹 스택은 기본 자동화 직접 지원 범위 밖, override 경로 제공 |
+| 031 | Non-web stacks out of direct support scope | accepted | (+#amend-1: Flutter를 직접 지원 범위로 이관 — ADR-059, --override 미구현 명시) | 비웹 스택은 기본 자동화 직접 지원 범위 밖, override 경로 제공 |
 | 035 | DISCOVERY.md Living Doc + Assumption Tracker | accepted | (+#amend-1: Charter staleness 보고, +#amend-2: Evidence Log + Insight Backlog) | 15섹션 + --update 모드 + DISCOVERY=SSOT/Charter=snapshot |
 | 036 | FEATURE_TEMPLATE 12섹션 PRD 강화 | accepted | — | User Story + Feature 시나리오 + FAC + NFR 신설, boundaries 3-tier 라벨 |
 | 037 | Spec coverage self-audit | accepted | (+#amend-1: FAC↔AC 매핑표 영속 SSOT 위치 `## 7-1`, +#amend-2: plan 출력 echo 축소 — ADR-046 정합, +#amend-3: unmapped FAC 계획-시점 차단 + 구현-후 사용자 결정) | plan ready gate(FAC↔AC 100%) + 구현-후 Spec Gap 사용자 결정 라우팅 |
@@ -52,6 +52,7 @@
 | 056 | Milestone experience contract | accepted | (+#amend-1: 프로토타입 경험 결정 PX 커버리지, +#amend-2: raw-hex 토큰 정의 예외, +#amend-3: 화면 전환 표 + downstream 소비자) | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
 | 057 | Planning v2 (unification + batch + seam) | accepted | (+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: cross-feature seam canonical 위치 — 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기) | M 단위 전체 계획 스냅샷 + 계획 잠금(draft→ready→in-progress→done) + seam 계약 + 마일스톤 로드맵 |
 | 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | +#amend-1: baseline runner 제거 + UI project-native gate 조건부 생성, +#amend-2: JIT canonical asset + fixed conformance + upgrade/recovery | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
+| 059 | Flutter/모바일 프로파일 (Android·iOS 직접 지원) | accepted | — | ADR-031을 Flutter에 한해 해제 — npm broker + 등록 source root format + analyze 심각도 분리 + 로컬 golden + e2e 5상태·suite 경로 판정 + ARCH 7-5 + 시크릿 2단 분류 |
 
 ## Reserved / Parked / Dropped 번호
 

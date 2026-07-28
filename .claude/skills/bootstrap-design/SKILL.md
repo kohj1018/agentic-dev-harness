@@ -163,10 +163,10 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
   | Svelte | shadcn-svelte |
   | Astro | shadcn 패턴 + Astro 어댑터 |
   | RN/Expo *(ADR-031 override 시)* | Tamagui |
-  | Flutter *(ADR-031 override 시)* | ShadCN-Flutter 또는 Material 3 |
+  | Flutter (Android·iOS — 직접 지원) | ShadCN-Flutter 또는 Material 3 |
   | SwiftUI *(ADR-031 override 시)* | Apple HIG 토큰 직접 정의 |
 
-  기본 자동화 직접 지원 스택: React/Vue/Svelte/Astro. RN·Flutter·SwiftUI는 ADR-031 override 경로.
+  기본 자동화 직접 지원 스택: React/Vue/Svelte/Astro + Flutter(Android·iOS — ADR-059). RN·SwiftUI는 ADR-031 override 경로.
 
 ## R5 — `docs/20-system/DESIGN.md` 저장 (선택 concept에서 authoring, ADR-058)
 - 섹션 순서를 Stitch DESIGN.md canonical에 정렬(ADR-027#d5): Overview / Colors / Typography / Layout / Elevation & Depth / Shapes / Components / Motion / Do's and Don'ts.
