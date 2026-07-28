@@ -9,7 +9,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 너의 역할은 스택이 확정된 직후 통합 검증 명령(`validate`)과 검증 스크립트를 생성하는 것이다.
 
 이 skill의 1단계 범위:
-- 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령).
+- 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2) — **이때 `package.json` 이 없으면**(순수 Dart/Flutter 프로젝트엔 기본적으로 없다) **최소 형태로 생성하고 `scripts` 에 진입점을 박는다.** 생성하지 않으면 `npm run validate` 자체가 성립하지 않는다. **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 가장 자연스러운 런타임 1종.
 - UI 판정 시 canonical asset byte-copy + project-native `validate:design` entry + fixed browser conformance + `STACK_SETUP_PLAN.md ## Design Gate Adapter` registry 기록(ADR-058#amend-2). 비-UI는 asset을 읽거나 복사하지 않는다.
 - cross-platform 차이가 큰 팀이면 `.claude/settings.local.json` 예시 동봉 권장.
@@ -51,7 +51,7 @@ R0 — 운영 환경 가정 확인:
      - hook 등록 절차는 [GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md) link만 박는다 (SSOT — 본 skill이 절차 본문 embed 금지).
    - 파일이 아예 없으면(`/bootstrap-stack` 산출물이 빠진 경우) `/stack-guard`가 새로 생성하되, 출력에 "`/bootstrap-stack`이 STACK_SETUP_PLAN.md를 만들지 않았음 — 사후 검토 권장"을 명시.
 4. `.gitattributes`가 없으면 생성, 있으면 line ending 규칙 추가.
-5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 1회 실행한다 (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요). UI/web 프로젝트(수행-6 의 UI 판정 ≥1 신호)면 `validate:e2e` 도 1회 실행한다.
+5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 1회 실행한다 (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요). e2e 대상 프로젝트(수행-6 의 runtime target 이 e2e 대상)면 `validate:e2e` 도 실행한다 — **선언된 e2e 대상 target 이 하나면 1회**(러너가 후보를 좁혀 자동 선택), **둘 이상이면 target 마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩** 실행한다. `<device id>` 는 6-3 이 `flutter devices --machine` 으로 회수한 target 별 후보에서 고른다(ADR-059 D4).
    본 smoke test 는 *wiring 검증* 이 목적 (명령이 올바르게 연결됐는지) — *프로젝트 자체의 lint/test 통과 여부* 와 분리해 보고한다.
    설치가 `Needs Install` 로 보류된 경우(수행-6) smoke test 를 실행하지 못하므로 `validate smoke test: SKIPPED (deps not installed — Needs Install)` 로 보고하고 종료하지 않는다(사용자 설치 후 재실행 안내).
 
@@ -79,15 +79,34 @@ R0 — 운영 환경 가정 확인:
    > 핵심 구분: stack-guard 의 책무는 *wiring* (`validate` + `validate:e2e` + UI `validate:design` entry·browser·conformance 까지). 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
 
 6. **Toolchain 선설치 + E2E readiness** (실행 순서상 step 5 smoke test *앞*에 수행 — `allowed-tools` 의 Bash 활용, 신규 권한 불필요):
-   - **6-1. UI 판정 + 재분류** (ADR-027#amend-3, ADR-058#amend-2): 매 실행 현재 파일로 다시 판정한다. `docs/20-system/DESIGN.md` 부재 → 비-UI. DESIGN.md 존재 + `## 0. Status` ≠ `draft` → UI 확정. DESIGN.md 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4. 프론트 결정` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 web frontend 유형) ≥1 → UI 의심(UI 로 취급). 신호 0 → 비-UI. 정상 `/bootstrap-stack → /stack-guard → /bootstrap-design` 순서에서는 DESIGN draft가 정상이고 `/bootstrap-stack`이 frontend의 ARCH 7-4를 채워 UI 의심이 발화한다. 기존 registry가 `n/a`여도 이후 frontend 신호가 생기면 이번 실행에서 UI로 재분류해 6-3~6-4-1을 수행한다. 상세: ADR-027#amend-3.
+   - **6-1. 판정 (3축, 상호배타 아님 — ADR-059 D8 / ADR-027#amend-3 / ADR-058#amend-2)**: 매 실행 현재 파일로 다시 판정한다. 세 축을 **각각** 결정하며 동시에 참일 수 있다.
+     - **design surface**: `docs/20-system/DESIGN.md` 부재 → 없음. 존재 + `## 0. Status` ≠ `draft` → 있음. 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4` 또는 `## 7-5` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 화면 있는 유형) ≥1 → 있음(의심 포함). 신호 0 → 없음. **design gate(6-4-1)는 이 축만 본다.**
+     - **runtime target**: ARCH `## 7. 기술 선택`과 프로젝트 manifest로 판정. canonical 값은 `web`(브라우저에서 도는 앱) / `native/android` / `native/ios` / `desktop` / `none`(라이브러리·CLI)이다 — **Android 와 iOS 는 개별 값이며 `native` 하나로 합쳐 적지 않는다**(합치면 ADR-059 D4 플랫폼별 판정이 성립하지 않는다). `native/*`는 값이 아니라 그 둘을 묶는 클래스 표기이며 toolchain 분기에만 쓴다. **e2e 도구 선택(6-3·6-4)은 이 축만 본다.** 여러 값이 동시에 참일 수 있다.
+     - **host environment**: 현재 OS(`windows` / `macos`). 실행 가능 범위 판단에만 쓴다. iOS 관련 항목은 `macos` 에서만 수행하고, 그 외에서는 `[미수행 — host 제약]` 으로 기록한다.
+     정상 `/bootstrap-stack → /stack-guard → /bootstrap-design` 순서에서는 DESIGN status 가 draft 이고 `/bootstrap-stack` 이 ARCH `## 7-4` 또는 `## 7-5` 를 채우므로 design surface 가 "있음(의심)" 으로 발화한다. 기존 registry 가 `n/a` 여도 이후 신호가 생기면 이번 실행에서 재분류한다.
    - **6-2-0. Dependency Tools 교차 확인 (ADR-051#amend-4)**: `docs/00-meta/STACK_SETUP_PLAN.md` `## Dependency Tools` 표(있으면)와 저장소의 실제 *tool-specific* 신호(`package-lock.json`·`pnpm-lock.yaml`·`yarn.lock`·`bun.lockb`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod` 등)를 **scope별로 대조**한다. **표·행 부재 → 관측 신호로 보완 기록**(green-field면 이번 6-2 설치로 생성될 도구를 적는다). **표↔저장소 불일치 → 자동 수정하지 않고** 출력에 `Dependency Tool 불일치: <scope> 표=<A> 저장소=<B>`로 보고 + 사용자 결정 요청(아래 "도구 감지 우선 순서" 4와 동일 정책). 아래 6-2 설치는 이 확인을 통과한 scope 도구로 실행한다.
-   - **6-2. Toolchain 설치 (전 스택 공통, 기계적 — 기본은 진행)**: 감지된 패키지 매니저로 authored devDeps 를 설치한다 — `pnpm install` / `npm install` / `pip install -e .` (또는 `uv sync`) / `go mod download` / `cargo fetch` 중 스택에 자연스러운 1종. lockfile 존재 시 frozen 설치(`pnpm install --frozen-lockfile` / `npm ci`) 우선. 설치 후 lock 파일 변경은 그대로 둔다(finalize 자동 화이트리스트, ADR-007#amend-1). **주의 — *validate 가 부르는 도구 자체*가 깔리는지 확인**: 패키지 deps 만 받는 명령은 lint/type/test 도구를 빠뜨릴 수 있다(예: `pip install -e .` 는 dev 도구 미설치 → `pip install -e '.[dev]'` 또는 `uv sync --all-extras`; Go `golangci-lint`·Rust `clippy` 는 별도 설치). step 5 smoke 가 command-not-found 면 도구 설치 명령을 보강한다.
+   - **6-2. Toolchain 설치 (전 스택 공통, 기계적 — 기본은 진행)**: 감지된 패키지 매니저로 authored devDeps 를 설치한다 — `pnpm install` / `npm install` / `pip install -e .` (또는 `uv sync`) / `go mod download` / `cargo fetch` / `flutter pub get` 중 스택에 자연스러운 1종. lockfile 존재 시 frozen 설치(`pnpm install --frozen-lockfile` / `npm ci`) 우선. 설치 후 lock 파일 변경은 그대로 둔다(finalize 자동 화이트리스트, ADR-007#amend-1). **주의 — *validate 가 부르는 도구 자체*가 깔리는지 확인**: 패키지 deps 만 받는 명령은 lint/type/test 도구를 빠뜨릴 수 있다(예: `pip install -e .` 는 dev 도구 미설치 → `pip install -e '.[dev]'` 또는 `uv sync --all-extras`; Go `golangci-lint`·Rust `clippy` 는 별도 설치). step 5 smoke 가 command-not-found 면 도구 설치 명령을 보강한다.
    - **6-2-1. 테스트 격리 권장 (ADR-051#amend-1)**: 생성하는 e2e/통합 설정에 *가능한 범위에서* 격리를 권장한다 — playwright `webServer`는 동적 포트, 통합 테스트는 트랜잭션 롤백/임시 스키마/testcontainers. stack-guard가 unit-test 격리를 직접 authoring하긴 어려우므로, 미보장 시 `STACK_SETUP_PLAN.md`에 "테스트 격리 미설정 — 병렬 builder 시 foreman 순차 권장" 1줄 부기(implement partition이 실제 보호).
-   - **6-3. Playwright browser 설치 (UI/web 한정)**: 6-1 이 UI 면 `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요).
-   - **6-4. `validate:e2e` scaffold (UI/web 한정, e2e 필요 시)**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고, `package.json` 의 `scripts` 에 `validate:e2e` 진입점(예: `playwright test`)을 박는다. *이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). 비-UI 프로젝트는 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다. 이 e2e provision/smoke 는 milestone graduation 의 E2E MUST-run hard-block(ADR-014#amend-2 / ADR-052 D3)이 검사할 대상을 선readiness 한다.
+   - **6-3. e2e 실행 환경 준비 (runtime target 기준)**:
+     - **target 에 `web` 포함**: `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요). **웹 경로는 개선 전과 동일하다.**
+     - **target 에 `native/*` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 **`flutter devices --machine` 으로 연결된 device 를 조회**해 선언된 target 별 후보(android / ios)와 각 device id 를 회수한다 — `flutter doctor` 는 toolchain 점검이 본업이고 device 는 개수만 요약해 *어느 것이 android/ios 인지* 와 *후보가 몇 개인지* 를 알 수 없다(ADR-059 D4). 어떤 target 의 후보가 0개면 그 target 에 대해 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
+     - **design surface 가 있음**: target 과 무관하게 `@playwright/test` 와 `@axe-core/playwright` 를 **devDep 으로 설치**하고 **`npx playwright install chromium` 까지 수행한다.** 모듈만 있고 브라우저 바이너리가 없으면 design gate adapter 가 `exit 2`(실행 불가)를 내고 registry 가 `status: needs-install` 로 굳어 **디자인 산출물 승인·프로토타입 승격·task 분해가 연쇄로 막힌다.** 즉 native 프로젝트에서도 design gate 용 chromium 은 필수다(ADR-059 D8). 이때 설치하는 Playwright 버전은 같은 저장소의 다른 웹 패키지와 맞추면 브라우저 캐시를 공유한다 — 버전이 다르면 브라우저 세트를 새로 내려받는다.
+   - **6-4. `validate:e2e` scaffold (runtime target 기준, e2e 필요 시)**:
+     - **target 에 `web` 포함**: `playwright.config.*` 가 *부재* 하면 최소 config(`testDir: 'e2e'`, 단일 chromium project, `webServer` 는 주석 placeholder)를 생성하고 `validate:e2e` 진입점(`playwright test`)을 박는다.
+     - **target 에 `native/*` 포함**: 아래 셋을 모두 한다. **Playwright 에 배선하지 않는다** — `package.json` 이 design gate 때문에 존재하더라도 그것을 앱 e2e 의 근거로 삼지 않는다(ADR-059 D8).
+       1. `flutter pub add "dev:integration_test:{sdk: flutter}"` 로 dev 의존성을 명시하고 `flutter pub get` 을 수행한다. `integration_test` 는 SDK 동봉이지만 `pubspec.yaml` 에 적히지 않으면 `import 'package:integration_test/...'` 가 해석되지 않아 e2e 파일이 컴파일조차 안 된다.
+       2. `integration_test/` 디렉터리를 만든다.
+       3. `validate:e2e` 진입점을 **`flutter test integration_test` 로 박는다 — `-d` 를 넣지 않는다.** 이유: `-d` 는 device id 또는 이름 접두사만 받으므로 `emulator-5554` 처럼 재부팅하면 달라지는 값이나 `연결된 Android device 1대` 같은 자연어를 넣으면 명령 자체가 성립하지 않는다. `-d` 를 생략하면 러너가 **`integration_test` 지원 device 로 후보를 좁힌 뒤** 하나만 남으면 자동 선택한다(실측: android emulator + windows + chrome + edge 4개가 붙은 상태에서 emulator 자동 선택, 오류 없음). 후보가 둘 이상 남을 때만 호출 측이 `npm run validate:e2e -- -d <id>` 로 지정한다. 어떤 device 를 골라야 하는지의 *규칙*은 registry 에 적는다.
+       4. **`--machine` 을 진입점에 박지 않는다** — 사람이 읽을 때는 기본 리포터가 낫고, 판정하는 쪽이 `npm run validate:e2e -- --machine` 으로 덧붙여 다시 호출한다(ADR-059 D4).
+     - **공통**: *같은 계열로 이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록한다(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). **단 `validate:e2e` 가 *다른 계열* 로 물려 있으면**(예: `web` 이 `playwright test` 로 잡고 있는데 `native/*` 도 선언됨, 또는 그 반대) **덮어쓰지 않고 `FAIL(wiring)` 으로 보고하고 종료한다** — 진입점은 하나이므로 두 도구가 나눠 가질 수 없고, 조용히 놔두면 나중 target 이 영구 `EMPTY` 가 되어 *"테스트를 쓰라"* 는 틀린 처방이 나가고 실제 원인(배선 부재)이 드러나지 않는다(ADR-059 D4). 이 e2e provision/smoke 는 milestone graduation 의 E2E hard-block(ADR-052#amend-1 / ADR-014#amend-4)이 검사할 대상을 선readiness 한다.
+     - **6-4-a. canonical boot smoke (조건부 생성)**: e2e 대상이고 등록된 smoke 가 없을 때 —
+       - **새 프로젝트이고 앱 진입점이 결정적이면**: 프레임워크 수준 boot smoke 를 1개 생성한다. 내용은 *"앱이 기동하고 첫 프레임이 예외 없이 렌더된다"* 까지이며 **어떤 화면을 볼지 고르지 않는다**(화면 선택은 제품 결정이라 계획 단계 소관).
+       - **기존 코드가 있거나 로그인·외부 의존이 필요해 부팅만으로 성립하지 않으면**: 생성하지 않고 `Needs E2E Smoke — /plan-workitem 이 작성 line item 을 authoring 해야 함` 을 출력한다.
+       - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. **`native/*` 는 클래스 표기이므로 행으로 쓰지 않는다** — `native/android` 와 `native/ios` 를 함께 선언했으면 **두 행**이고 `web` 까지 선언했으면 세 행이다(ADR-059 D8). 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
+     - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
    - **6-4-1. Canonical design acceptance adapter + Visual-QA scaffold (UI/web 한정, ADR-058#amend-2)**:
      - **JIT read 경계**: 6-1이 UI 확정/의심일 때만 `.claude/skills/stack-guard/assets/design-gate.mjs`와 `design-gate-conformance.mjs`를 읽고 실행한다. 비-UI는 두 asset을 컨텍스트에 로드하거나 project로 복사하지 않는다(ADR-019).
-     - **direct-support Node UI 물질화**: canonical `design-gate.mjs`를 project-native 경로(기본 `scripts/design-gate.mjs`)에 **byte-copy**하고 감지된 package manager에 논리 entry `validate:design`을 배선한다. 산문을 보고 재작성하지 않는다. adapter는 다중 HTML/glob 입력을 직접 확장하고 `{ blockers, reports, screenshots }` + exit 0(pass)/1(blocker)/2(execution unavailable)를 낸다.
+     - **direct-support Node UI 물질화**: canonical `design-gate.mjs`를 project-native 경로(기본 `scripts/design-gate.mjs`)에 **byte-copy**하고 감지된 package manager에 논리 entry `validate:design`을 배선한다. **이 진입점은 npm 계열(`npm run` / `pnpm` / `yarn` / `bun run`)로 박는다** — `task` 와 `make` 는 하위 명령의 종료코드를 자기 코드로 바꿔(각각 201, 2) adapter 의 `exit 1`(차단)과 `exit 2`(실행 불가) 구분을 없앤다(ADR-059 D2). Flutter 등 비-Node 스택에서도 design gate 진입점만은 npm 으로 둔다. 산문을 보고 재작성하지 않는다. adapter는 다중 HTML/glob 입력을 직접 확장하고 `{ blockers, reports, screenshots }` + exit 0(pass)/1(blocker)/2(execution unavailable)를 낸다.
      - **source integrity + fixed conformance (direct-support Node UI)**: generated adapter SHA-256이 conformance asset의 canonical digest와 같은지 먼저 확인한 뒤 `node .claude/skills/stack-guard/assets/design-gate-conformance.mjs <generated-adapter-path>`를 실제 Chromium으로 실행한다. oracle exit 2는 `needs-install`/실행불가로 그대로 승계하고, exit 1은 source/conformance `wiring-fail`로 기록한다. fixture·기대값은 conformance asset이 소유하며 생성하지 않는다. 기존 10 behavior case + same-basename batch + stale cleanup + per-file render-error isolation + 1px tolerance pass/2px escape block + bounded completion을 전부 통과하기 전 `ready` 금지.
      - **version/re-run policy**: current capability는 `ADR-058#amend-2/v2`. registry가 v1/누락/lower-version이면 (a) 기록된 `source digest`가 있는 경우 실제 bytes와 같거나, (b) digest 필드가 없던 legacy v1의 실제 bytes가 canonical digest와 같을 때만 미수정으로 인정해 canonical v2로 교체하고 fixed suite 전체를 재실행한다. 어느 기준도 충족하지 않으면 local modification으로 판정해 **덮어쓰지 않고** `wiring-fail (local modifications)` + diff/채택 사용자 결정을 요청한다. current version/digest도 conformance는 재실행한다.
      - **output ignore**: canonical output `design-gate-shots/`는 baseline `.gitignore`가 선제 보호한다. override adapter가 다른 output path를 쓰면 **첫 adapter 실행 전에** 그 정확한 project-relative 경로를 `.gitignore`에 추가한다.
@@ -102,11 +121,11 @@ R0 — 운영 환경 가정 확인:
 - 생성/갱신한 파일 목록
 - 운영 환경 가정 (R0 결과)
 - 통합 명령 호출 방법 (예: `pnpm validate`; UI/web 이면 `pnpm validate:e2e` 도)
-- UI 판정 결과 (UI 확정 / UI 의심 / 비-UI — ADR-027#amend-3 근거 신호)
+- 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-027#amend-3 근거 신호 / runtime target: web·native/android·native/ios·desktop·none — 복수 선언 가능, `native` 단독 표기 금지 / host: windows·macos) — ADR-059 D8
 - Toolchain 설치 결과 (`deps install: DONE (<pkg-manager>)` / `Needs Install: <명령>`); UI/web 이면 browser 설치 결과 (`playwright install: DONE` / `Needs Install: npx playwright install`)
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
 - validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
-- validate:e2e smoke test 결과 (UI/web 한정 — PASS (no specs yet) / PASS / WIRING FAIL / SKIPPED)
+- validate:e2e 상태 (e2e 대상 한정, runtime target별 — NOT_APPLICABLE / EMPTY / PASS / FAIL(wiring) / FAIL(project) / BLOCKED_ENV — ADR-052#amend-1)
 - validate:design adapter 결과 (UI 한정 — current capability/source digest + registry status + command/path + fixed conformance 또는 Needs Install/WIRING FAIL; 비-UI는 n/a)
 - 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 `/implement-workitem` 또는 다음 M)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
@@ -162,6 +181,7 @@ R0 — 운영 환경 가정 확인:
 | Python | `import-linter` | 동일 layer 룰 패턴 |
 | Go | `go vet` (built-in) | 후속 보강 가능 |
 | Rust | `cargo deny` + `cargo udeps` | unused deps + license/advisory 동시 점검 |
+| Dart / Flutter | `flutter analyze`(내장) + `dependency_validator` | layer 위반 룰은 `custom_lint` 로 확장 가능. 보안 취약점은 `dart pub get` 이 표시하는 advisory + `pubspec.lock` 대상 OSV 스캐너 |
 
 ## 스택별 verify 풀세트 (default template)
 
@@ -177,8 +197,9 @@ R0 — 운영 환경 가정 확인:
 | Python | `ruff format` | `ruff` | `mypy --strict` (또는 pyright) | pytest | (선택, 스택별) |
 | Go | `gofmt -l` | `golangci-lint` | `go vet` (built-in) | `go test` | (선택) |
 | Rust | `cargo fmt --check` | `clippy` | `cargo check` | `cargo test` | (선택) |
+| Flutter/Dart (유형: 모바일 앱 — Android·iOS) | `dart format --output=none --set-exit-if-changed <등록 source root>` | `flutter analyze` (플래그 없이 — 완화하면 info 진단이 전부 빠진다, ADR-059 D2) | (lint 단계에 포함 — `flutter analyze`가 타입 검사를 겸한다) | `flutter test` | `flutter test integration_test` |
 
-생성된 `validate` 명령은 위 표의 **format / lint / typecheck / unit test 4단계**를 *순서대로* 묶고, **e2e는 `validate:e2e` 별도 명령으로 분리**한다 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행). 4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시. **UI/web 프로젝트(ADR-027#amend-3 UI 판정)면 stack-guard 가 `validate:e2e` 진입점 + 최소 playwright config 를 scaffold 하고 browser 를 설치한 뒤(`npx playwright install`) `validate:e2e` 까지 smoke 한다**(수행-6 + Step 5). 비-UI 는 e2e scaffold 를 skip 하되 toolchain 설치는 수행한다.
+생성된 `validate` 명령은 위 표의 **format / lint / typecheck / unit test 4단계**를 *순서대로* 묶고(**Flutter/Dart는 `flutter analyze`가 lint와 typecheck를 겸하므로 3단계이며, 이때 "missing: typecheck"로 보고하지 않는다** — ADR-059 D2), **e2e는 `validate:e2e` 별도 명령으로 분리**한다 (task 단위 finalize는 e2e 제외, milestone 단위 stabilize만 실행). 4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시. **runtime target 이 web 이면** stack-guard 가 `validate:e2e` 진입점 + 최소 playwright config 를 scaffold 하고 browser 를 설치한 뒤(`npx playwright install`) `validate:e2e` 까지 smoke 한다(수행-6 + Step 5). **runtime target 에 `native/*`(Android·iOS) 가 포함되면** `validate:e2e` 를 `flutter test integration_test` 로 배선하고 **앱 e2e 를 Playwright 에 배선하지 않는다**(ADR-059 D8 — 단 design surface 가 있으면 design gate 용 chromium 은 설치한다). e2e 대상이 아니면 scaffold 를 skip 하되 toolchain 설치는 수행한다.
 
 도구 선택은 **첫 fork에서 결정 + ARCHITECTURE_OVERVIEW.md `## 7-X`에 박힌다** — 이후 변경 시 [/bootstrap-stack](../bootstrap-stack/SKILL.md) 재실행 또는 수동 갱신.
 

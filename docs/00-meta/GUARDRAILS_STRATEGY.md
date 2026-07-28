@@ -78,7 +78,7 @@
 스택이 확정된 후 사용자가 `/stack-guard`를 발화하면 다음을 생성한다.
 
 **1단계 산출물 (자동 생성)**:
-- 통합 진입점 — 이름은 `validate`로 고정 (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 1종).
+- 통합 진입점 — 이름은 `validate`로 고정 (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 1종). **단 design gate(`validate:design`)를 쓰는 프로젝트는 그 진입점을 npm 계열로 둔다** — `task`·`make`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단/실행불가 구분을 없앤다 (ADR-059 D2).
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 자연스러운 런타임 1종.
 - UI 판정 시에만 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고 fixed conformance를 실행한 뒤 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 실제 명령·경로·capability version·source digest를 기록한다(ADR-058#amend-2). 비-UI에서는 asset을 읽거나 복사하거나 design toolchain을 설치하지 않는다.
 - `.gitattributes` (line ending 통일).
