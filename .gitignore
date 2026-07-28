@@ -48,3 +48,20 @@ design-gate-shots/
 # 'goldens/foo.png' 는 test/widgets/goldens/ 에 생성된다. 실패 이미지도 같은 자리의 failures/ 다.
 **/test/**/goldens/
 **/test/**/failures/
+# 모바일 서명·인증서 (유출 시 사칭 배포 가능 — 절대 커밋 금지)
+*.jks
+*.keystore
+key.properties
+*.p12
+*.mobileprovision
+# Apple 인증 키 (App Store Connect API · APNs) — PKCS#8 개인 키, 1회만 다운로드 가능
+*.p8
+# 서버용 service account 키 (관리자 권한 — 유출 시 백엔드 전체 접근)
+# 아래 열거는 완결될 수 없다 — 다운로드 기본명을 바꾸면 빠진다.
+# 경계 있는 통제는 *위치*다: credential 파일은 secrets/ 하위에 둔다(위에서 이미 ignore).
+# 주의: serviceAccount*.json 은 serviceAccount.example.json 같은 *템플릿*도 잡는다.
+# 템플릿을 커밋해야 하면 이 아래에 `!serviceAccount.example.json` 처럼 명시 예외를 둔다
+# (실제 키를 흘리는 쪽이 훨씬 비싸므로 기본값은 넓게 잡는다).
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+service-account*.json

@@ -34,7 +34,7 @@ agent: builder
    - **(1) task 문서의 `## 4-1. 변경 예정 파일/경로`** — 있으면 우선 참조. 본 섹션은 task 문서 자체를 다시 적지 않는다(자동 포함됨).
    - **(2) git 실제 변경 파일** — task 문서를 제외한 나머지.
    - **(3) 제외 규칙** — 다음을 add 대상에서 제외:
-     - 민감 경로(`.env*`, `secrets/**`)
+     - 민감 경로(`.env*`, `secrets/**`, `*.jks`, `*.keystore`, `key.properties`, `*.p12`, `*.mobileprovision`, `*.p8`, `*-firebase-adminsdk-*.json`, `serviceAccount*.json`, `service-account*.json` — 파일명 열거는 완결될 수 없으므로 credential 은 `secrets/` 하위에 두는 것이 경계 있는 통제다)
      - 빌드 산출물(`node_modules/`, `dist/`, `build/`, `.next/`, `coverage/`)
      - task 범위와 명백히 무관한 파일
    - **(3-lock) lock file 자동 화이트리스트** — TASK_TEMPLATE `## 4-1`에 명시되지 않아도 자동 add 허용 (ADR-007 amend):

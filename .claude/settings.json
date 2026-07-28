@@ -6,7 +6,16 @@
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
-      "Read(./secrets/**)"
+      "Read(./secrets/**)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(**/key.properties)",
+      "Read(**/*.p12)",
+      "Read(**/*.mobileprovision)",
+      "Read(**/*.p8)",
+      "Read(**/*-firebase-adminsdk-*.json)",
+      "Read(**/serviceAccount*.json)",
+      "Read(**/service-account*.json)"
     ]
   }
 }

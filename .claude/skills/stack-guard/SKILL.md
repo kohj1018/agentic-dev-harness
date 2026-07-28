@@ -226,6 +226,16 @@ R0 — 운영 환경 가정 확인:
 - finalize 직전 staged 파일에 secret 패턴 검출 시 보고 → 프로젝트가 `validate`/CI fail 처리 선택.
 - *강제 X, 권장만* (ADR-010 multi-tool 호환).
 
+**이미 추적 중인 서명·인증 자산 점검 (전 스택, 필수 보고 — ADR-059 D9)**: 위 scanner 는 *staged 내용*을 보는 권장 도구이고, 이 항목은 **이미 커밋돼 추적 중인 파일**을 찾는 별개 점검이다. `.gitignore` 는 이미 추적 중인 파일을 보호하지 않으므로 brownfield 저장소에서는 규칙 추가만으로 해결되지 않는다. 매 실행 1회 확인한다.
+
+```bash
+git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.properties|-firebase-adminsdk-.*\.json|service-?account.*\.json'
+```
+
+- **출력 없음** → `tracked secrets: none` 1줄 보고.
+- **출력 있음** → `Needs Secret Rotation: <경로 목록>` 을 출력하고 순서대로 안내한다 — ① 파일을 저장소 밖으로 옮긴다 ② `git rm --cached <path>` 로 추적을 끊는다 ③ **원격에 올라간 이력이 있으면 키 자체를 재발급한다**(히스토리에 남은 키는 ignore 로 되돌릴 수 없다). **stack-guard 가 직접 옮기거나 `rm` 하지 않는다** — 키 취급은 사용자 결정이고 잘못 지우면 복구가 불가능하다. 종료하지 않고 보고만 한다.
+- 파일명 열거의 한계는 ADR-059 D9와 같다 — 경계 있는 통제는 credential 을 `secrets/` 하위에 두는 것이다.
+
 `validate` 명령에 lint 단계로 통합 권장 — CI fail 처리는 프로젝트 결정.
 
 ## DESIGN.md lint 권장 (UI + Node 계열 한정, ADR-027#d25)
