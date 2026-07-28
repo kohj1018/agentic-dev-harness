@@ -96,12 +96,12 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 
 - `모든 task status: done` → 본 milestone에 속한 모든 task 파일(`docs/30-workitems/tasks/T-*.md`)의 `## 0. Status` 값이 모두 `done`.
 - `통합 validate Pass` → `validate` 명령 exit code 0. **normal 모드**: 단계 3에서 실행되므로 본 항목 판정은 단계 3 실행 후 확정된다 (1.5 가 단계 3 보다 먼저 와도 졸업 판정은 단계 3 결과를 반영). **`--dry-run` 모드**: 단계 3을 돌지 않으므로 본 1.5 단계 안에서 `validate` 를 1회 실행한다.
-- `E2E Pass (needed → must pass)` → 단계 3의 e2e 판정 결과를 그대로 반영(ADR-052). **`--dry-run` 모드**: 단계 3 미실행이라 e2e 판정 입력이 없으므로 `E2E: dry-run skipped (졸업 판정 보류)` 로 표기(heavy e2e 는 normal 모드 재실행에서 확정):
-  - **e2e 불필요** (UI 아님 ∧ graduation item 6에 e2e 미선언) → *해당 없음*(통과).
-  - **e2e 필요** (UI 프로젝트 — ADR-027#amend-3 다중신호 UI 판정 ∨ graduation item 6이 e2e를 명시 선언) ∧ `validate:e2e` exit code 0 → 통과.
-  - **e2e 필요 ∧ exit ≠ 0 이지만 "No tests found"(0 spec — scaffold 직후)** → real failure 아님 → `졸업 가능: YES` + `E2E: 0 spec (coverage 권장)` PASS-with-warning (stack-guard 0-spec=PASS 정합).
-  - **e2e 필요 ∧ `validate:e2e` exit code ≠ 0 (스펙 실행 후 real failure)** → **`졸업 가능: NO` (hard)**. 조기 종료 옵션이 아니라 *졸업 차단*이다. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.
-  - **e2e 필요 ∧ `validate:e2e` 실행 불가 (ENVIRONMENT failure — 브라우저 미설치 / 대상 앱 미기동 / E2E MCP 미등재)** → **`졸업 가능: NO` (hard, blocked-on-env)**. 단 이것은 *실제 e2e 실패가 아니다* — 사용자에게 환경 복구를 안내(`E2E 환경 미충족: <원인> — 브라우저 설치 / 앱 기동 후 재실행 권장`)하고, real failure와 라벨을 구분해 출력한다.
+- `E2E Pass (needed → must pass)` → 단계 3의 e2e 상태 판정을 그대로 반영(ADR-052#amend-1 5상태). **`--dry-run` 모드**: 단계 3 미실행이라 입력이 없으므로 `E2E: dry-run skipped (졸업 판정 보류)` 로 표기:
+  - **`NOT_APPLICABLE`** (비-UI ∧ graduation item 6에 e2e 미선언) → *해당 없음*(통과).
+  - **`PASS`** (선언된 e2e 디렉터리 하위에서 1개 이상이 실제 실행·성공 ∧ 러너 전체 성공. registry 등록이 있으면 그 이름 일치까지) → 통과.
+  - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개 — 디렉터리가 비어 있거나 다른 디렉터리 테스트가 대신 실행됨. 실행됐는데 실패한 것은 `EMPTY`가 아니라 `FAIL`이다) → **`졸업 가능: NO` (hard)** + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-014#amend-4). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
+  - **`FAIL`** (실행된 테스트 실패) → **`졸업 가능: NO` (hard)**. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.
+  - **`BLOCKED_ENV`** (device/브라우저/toolchain 미설치·미기동) → **`졸업 가능: NO` (hard, blocked-on-env)**. real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다.
 - `AC 매핑 100%` → 본 milestone의 모든 task의 최신 `docs/40-validation/reports/<task-id>.md` `## AC ↔ 테스트 매핑` 섹션 항목이 모두 `✅`. report 부재 task는 미충족 처리.
 - `P0 severity finding 0건` → `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌(미해소) 항목 수 0**(`/repair-milestone`이 해소한 P0는 항목을 제거하지 않고 `status: resolved`만 표기하므로 이를 카운트에서 제외한다). 미해소 항목이 1+면 `졸업 가능: NO`.
 - `(선택) 본 마일스톤 한정 추가 기준` → 본문 텍스트 그대로 평가(사용자가 자유 기재한 영역 — 해당 항목만 LLM 해석 허용).
@@ -119,11 +119,11 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
      (i) **UI 프로젝트** (ADR-027#amend-3 다중신호 UI 판정: DESIGN.md status≠draft, 또는 status=draft+신호≥1) → 필요,
      (ii) graduation item 6 `(선택) 본 마일스톤 한정 추가 기준`이 e2e를 명시 선언 → 필요.
      둘 다 아니면 *불필요* → `E2E: 불필요 (비-UI ∧ item 6 미선언)` 한 줄 echo 후 통과 처리(이 경우만 skip 허용 — 사유 명시).
-   - **3-b. 필요 시 `validate:e2e` 실행 (silent-skip 금지)**: e2e가 필요하면 반드시 `validate:e2e`(또는 스택의 e2e 명령)를 실행하고 exit code를 기록한다.
-     - exit code 0 → 통과.
-     - exit code ≠ 0 인데 출력이 환경 원인(브라우저/드라이버 미설치, 대상 앱 미기동, E2E MCP 미등재·access 미부여)으로 판명 → **ENVIRONMENT failure**로 분류(real failure 아님). 단계 8과 §1.5에 `blocked-on-env`로 전달하고 사용자에게 환경 복구 안내.
-     - exit code ≠ 0 이지만 출력이 **"No tests found" / 0 spec**(scaffold 직후 e2e 미작성)이면 → real failure 아님. `E2E: 0 spec (wiring OK, coverage 권장)` PASS-with-warning 으로 처리(stack-guard 0-spec=PASS 정합 — 졸업 차단 X, IMPROVEMENT_GUIDE 에 'e2e coverage 미작성' P1 권장만).
-     - exit code ≠ 0 이고 환경 원인도 0-spec 도 아님(스펙이 실행돼 실패) → **real e2e failure**로 분류. §1.5 item 3을 `졸업 가능: NO (hard)`로 만든다.
+   - **3-b. 필요 시 `validate:e2e` 실행 (silent-skip 금지)**: e2e가 필요하면 반드시 실행하고 **구조화된 러너 출력**을 수집해 ADR-052#amend-1의 5상태로 분류한다. exit code만으로 판정하지 않는다.
+     - **선행 확인**: `STACK_SETUP_PLAN.md ## E2E Smoke Registry`를 읽어 **선언된 runtime target 목록**과 각 target의 등록 여부를 회수한다. target이 둘 이상이면 아래 판정을 **target마다 따로** 내고, 하나라도 `PASS`가 아니면 졸업은 차단된다. **등록이 없는 target도 명령은 실행한다** — 판정은 아래 경로 기준으로 하고 `P1 [E2E-registry] <target> — canonical smoke 미등록`만 기록한다(ADR-052#amend-1 결정 4).
+     - **판정 규칙은 여기서 재서술하지 않는다** — `PASS` 필요조건 넷과 **판정 순서**(`FAIL(wiring)`·`BLOCKED_ENV` → `EMPTY` → `FAIL(project)` → `PASS`, 먼저 성립하는 상태로 확정)는 **ADR-052#amend-1 결정 3이 SSOT**다. 그 절을 읽고 그대로 적용한다. 순서를 뒤집으면 기동 불가나 테스트 실패를 `EMPTY`로 오분류해 "테스트를 쓰라"는 틀린 처방이 나간다. 종료코드가 0이어도 e2e 경로 밖 suite만 돌았으면 `EMPTY`다.
+     - `FAIL`은 **`FAIL(wiring)`/`FAIL(project)` 하위 라벨을 구분해 기록**하고, `BLOCKED_ENV`는 real failure와 라벨을 구분한다 — 후속 처리 주체가 다르다(stack-guard 산출물 / 프로젝트 코드 / 환경 복구).
+     - 출력 문자열 매칭은 위 판정을 보조하는 용도로만 쓴다.
    - **stabilize는 read-only다 — 여기서 e2e/코드를 고치지 않는다.** 실패(real/env 무관)는 단계 8의 `/repair-milestone` 분기로 텍스트 라우팅만 한다.
 3-P. **(옵션) 탐색적 QA via browser/E2E MCP** (ADR-048#d6 registry-driven / ADR-043 보안 — STACK_SETUP_PLAN `## Optional MCP Connectors`에 browser/E2E capability MCP가 *등재 + `agent access` 부여* + UI 프로젝트일 때만; 미등재·access 미부여·비-UI는 silent skip + 사유 echo): 실제 앱을 구동해 본 마일스톤 feature의 시나리오(happy/alt/fail) + qa 엣지케이스를 *탐색*한다(accessibility 트리·클릭/입력·스크린샷·네트워크). 발견한 결함을 `docs/40-validation/QA_FINDINGS.md`에 기록하고, **재현 케이스를 영속 E2E 테스트(`validate:e2e`에 묶이는 커밋 가능한 파일)로 남길 것을 권장**(자동 커밋 X — stabilize는 코드·커밋 금지, 후속 task 제안). 실패는 `Type: bugfix` task(ADR-039)로 라우팅. **보안: `browser_run_code_unsafe`류 RCE급 도구는 사용하지 않는다** — accessibility snapshot·표준 브라우저 조작만.
 3-V. **경험 게이트 — 구현 화면 vs 승인 프로토타입 대조 (ADR-056 결정 5, UI 확정 마일스톤 한정)**: 3-P(옵션·MCP-gated *탐색* QA)와 별개의 **MCP 불요 체계 감사**다. **UI 확정 마일스톤에서 실행 자체는 의무 — silent skip 금지**(미실행 시 사유를 단계 8 출력에 echo; 판정은 report-only). `--dry-run`에는 포함하지 않는다.

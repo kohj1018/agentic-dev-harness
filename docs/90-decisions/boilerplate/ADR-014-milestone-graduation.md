@@ -5,6 +5,11 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- graduation checklist는 5+1 구조 + 회고 + pre-check + `--dry-run`(본문 결정). 평가는 `졸업 가능: YES/NO`로만 낸다.
+- item 3 `E2E Pass`는 **E2E-applicable 스택 한정 hard-block**(#amend-2)이며, #amend-2가 남긴 **0-spec 예외는 #amend-4로 철회**됐다 — 실제 실행된 e2e 1개 이상 성공이 조건이고 판정 상태 5종의 SSOT는 [ADR-052](ADR-052-stack-provisioning-and-e2e-readiness.md)#amend-1이다.
+- 회고에 graduation 판정 줄을 남긴다(#amend-3). evaluator-optimizer 명명은 #amend-1.
+
 ## 배경
 - [관측됨] `MILESTONE_TEMPLATE.md`의 `## 5. 완료 기준`이 빈 placeholder → milestone 졸업 판정 모호. stabilize 실행 시 "완료인가"를 매번 사람이 주관적으로 판단.
 - [외부실증] Atlassian multi-level DoD (story/sprint/release) — sprint 단위의 외부 검증 가능한 완료 기준이 "릴리즈 품질"과 "구현 완료"를 분리한다.
@@ -49,9 +54,9 @@ accepted
 graduation pre-check 미통과 사유 패턴 — 3회 이상 반복 시 lifecycle 단계 결함 신호 → ADR 후보.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
-- .claude/skills/stabilize-milestone/SKILL.md         — #d3 graduation pre-check §1.5, #amend-1 evaluator-optimizer 1줄, #amend-2 E2E MUST-run hard-block
-- .claude/skills/stack-guard/SKILL.md                 — #amend-2 E2E-applicable 판정(provision/smoke) — ADR-052 D2 정합
-- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — #d1 §5 완료기준 5+1, #d2 §8 회고, #amend-2 item 3 MUST 문구
+- .claude/skills/stabilize-milestone/SKILL.md         — #d3 graduation pre-check §1.5, #amend-1 evaluator-optimizer 1줄, #amend-2 E2E MUST-run hard-block, #amend-4 0-spec 예외 철회
+- .claude/skills/stack-guard/SKILL.md                 — #amend-2 E2E-applicable 판정(provision/smoke) — ADR-052 D2 정합, #amend-4 0-spec 예외 철회
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md  — #d1 §5 완료기준 5+1, #d2 §8 회고, #amend-2 item 3 MUST 문구, #amend-4 0-spec 예외 철회
 - docs/00-meta/DELEGATION_STRATEGY.md                 — #amend-1 evaluator-optimizer 1줄
 
 ## 참고
@@ -118,3 +123,26 @@ graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`의 *soft-pas
 
 ### 강도 (ADR-022)
 - enabling(약) — 회고 항목 1줄 확장.
+
+<a id="adr-014-amend-4"></a>
+## Amendment 4 (2026-07-28) — graduation item 3의 0-spec 예외 철회
+
+### 결정
+`## Amendment 2`가 남겨 둔 **0-spec 예외**("`No tests found`면 PASS-with-warning")를 **졸업 판정에서 철회**한다. E2E-applicable 마일스톤은 **실제 실행된 e2e 테스트 1개 이상 성공**이 졸업 조건이다. 실행된 e2e가 0개면 `졸업 가능: NO`이며 상태 라벨은 `EMPTY`다.
+
+프로비저닝(스택 확정) 단계에서 e2e가 0개인 것은 여전히 정상이며 차단하지 않는다. 차단은 **졸업 시점에만** 적용한다.
+
+### 근거
+- [관측됨] 0-spec 예외로 인해 UI 마일스톤이 e2e 0건으로 졸업 가능했다.
+- [관측됨] e2e 대상 디렉터리가 비어 있을 때 러너가 다른 디렉터리의 유닛 테스트를 실행하고 exit 0을 내는 사례가 확인됐다. 종료코드 기반 판정으로는 구분되지 않는다.
+
+### 강도 (ADR-022)
+- constraint(강) — Amendment 2의 강도를 유지하며 예외만 제거.
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md — §1.5 item 3
+- .claude/skills/stack-guard/SKILL.md — 프로비저닝 판정
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md — `## 5` item 3
+- docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md — Amendment 1
+
+> **amend 근거 (ADR-045#d6)**: 본 amendment는 `## Amendment 2`가 남긴 예외를 철회하므로 D6 표상 *"기존 결정 뒤집기"* 다. 다만 ① 본 ADR은 ADR-045(2026-05-27)보다 먼저 만들어져 누적 임계는 **grandfather**이고 ② 뒤집는 대상이 예외 단서 하나이며 판정 SSOT는 ADR-052#amend-1이 소유하므로, 본 ADR은 그 결과를 graduation item 3에 반영하는 역할만 한다. **최소 churn을 택해 amendment로 처리**하고 상단 `## 현재 유효 결정`으로 net 규칙을 노출한다. graduation contract 자체(5+1 구조)를 다시 손대야 할 다음 변경에서는 통합 재발행을 우선 검토한다.
