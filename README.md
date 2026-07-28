@@ -146,7 +146,7 @@ For a full inventory of all artifacts (location, owner, lifecycle), see [STRUCTU
 
 This harness prioritizes cross-platform reusability — shared base settings do not include OS/shell/runtime-dependent hooks. See [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md) for details.
 
-Default automation directly covers web frontend, API server, CLI, monorepo, and Supabase integration. Non-web stacks (mobile, ML, embedded, game, native desktop) follow fork-user override paths — see [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md).
+Default automation directly covers web frontend, API server, CLI, monorepo, Supabase integration, and Flutter (Android/iOS). Other stacks (iOS Swift, Android Kotlin, React Native, ML, embedded, game, native desktop) require a project ADR that supersedes ADR-031's default-scope decision — see [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md) and [ADR-059](docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md).
 
 ## Where to Start
 

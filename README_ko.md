@@ -145,7 +145,7 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 이 harness는 cross-platform 재사용성을 우선한다 — shared 기본값에 OS/셸/런타임 종속적인 hook를 포함하지 않는다. 자세한 내용은 [GUARDRAILS_STRATEGY.md](docs/00-meta/GUARDRAILS_STRATEGY.md)를 참고한다.
 
-기본 자동화가 직접 다루는 스택은 web frontend / API server / CLI / monorepo / Supabase 통합 5종이다. 비웹 스택(mobile / ML / embedded / game / desktop)은 fork 사용자 override 경로를 따른다 — 자세한 내용은 [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md) 참조.
+기본 자동화가 직접 다루는 스택은 web frontend / API server / CLI / monorepo / Supabase 통합 / Flutter(Android·iOS) 6종이다. 그 외(iOS Swift / Android Kotlin / RN / ML / embedded / game / desktop)는 project ADR로 supersede하는 경로를 쓴다 — 자세한 내용은 [ADR-031](docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md), [ADR-059](docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md) 참조.
 
 ## 처음 시작할 때 먼저 볼 문서
 

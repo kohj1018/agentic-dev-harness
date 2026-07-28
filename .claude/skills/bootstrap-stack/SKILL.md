@@ -41,7 +41,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 
 **R1 — 요구 grounding + 리서치.** `PROJECT_CHARTER ## 4 목표/## 5 비목표/## 6 성공 기준/## 7 제약` + `ARCH ## 8 품질 속성`(규모·성능·확장 기대)을 읽는다. 최신 프레임워크/버전 지형이 필요하면 `Agent`로 researcher에 직접 위임(ADR-040#amend-3 — bootstrap-stack은 Agent 보유). 결과는 출처·날짜·신뢰도 라벨(ADR-040 §3). **오프라인/미발견이면 날조 금지** — 조합을 `Needs Research`·저신뢰도로 표시하거나 BASE 문서화로 폴백한다.
 
-**R2 — 옵션 + 트레이드오프 + 추천(수렴 루프).** architect 단발 sub-call로 **2~3개 스택 조합**을 서로 다른 각도(MVP/risk/scale-first)로 생성. 각 조합에 (a) 현재 복잡도 (b) 확장·마이그레이션 비용 (c) ADR-031 직접지원 5유형(web frontend/API/CLI/monorepo/Supabase) 정합 (d) 성장 경로("X로 시작 → Y로 성장") + **본 skill의 추천안 + 근거**를 함께 제시(ADR-006 단순성 가중 — 과한 스택 경고). 사용자가 `skip/good/refine`로 응답 → 피드백 시 재생성. **2사이클 미수렴 시 재생성 대신 brief를 고친다**(charter 재독·요구 명확화 — bootstrap-design R2 규칙). 선택 확정 전에는 R3로 진행하지 않는다.
+**R2 — 옵션 + 트레이드오프 + 추천(수렴 루프).** architect 단발 sub-call로 **2~3개 스택 조합**을 서로 다른 각도(MVP/risk/scale-first)로 생성. 각 조합에 (a) 현재 복잡도 (b) 확장·마이그레이션 비용 (c) **현재 직접 지원 범위** 정합 — web frontend/API/CLI/monorepo/Supabase + **Flutter(Android·iOS)**. **유형 수를 이 줄에 박지 않는다**(범위 SSOT는 ADR-031#amend-1·ADR-059 D1이며, 범위가 바뀌면 이 줄이 아니라 그 ADR을 본다 — 숫자를 박으면 낡는다) (d) 성장 경로("X로 시작 → Y로 성장") + **본 skill의 추천안 + 근거**를 함께 제시(ADR-006 단순성 가중 — 과한 스택 경고). 사용자가 `skip/good/refine`로 응답 → 피드백 시 재생성. **2사이클 미수렴 시 재생성 대신 brief를 고친다**(charter 재독·요구 명확화 — bootstrap-design R2 규칙). 선택 확정 전에는 R3로 진행하지 않는다.
 
 **R3 — 고-stakes 심화(해당 시).** 되돌리기 비싼 §7-3 백엔드 결정(인증·DB·트랜잭션)이 ADR-053 게이트(S1~S4 중 1+)에 걸리면 아래 `## 고-stakes 설계 게이트`의 full 패널을 실행. 저-stakes는 R2 단발 결론. 스택 선택 자체는 R2에서 다뤘으므로 여기선 *별개의* 미해결 reversible 결정에만 발동(중복 발동 회피 — ADR-053 falsifying-eval의 과발동 방지).
 

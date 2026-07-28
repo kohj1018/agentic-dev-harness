@@ -16,7 +16,7 @@ accepted
    - (S2) 합리적 대안 2개 이상 실재.
    - (S3) 영향이 3+ 모듈 또는 여러 surface(API+FE+DB 등) 가로지름.
    - (S4) charter 제약·비목표 / 보안 경계 / 개인정보·데이터 모델 / 마이그레이션.
-   - (S5) ADR-031 직접지원 5종 밖 라이브러리거나, 모델이 그 lib의 *현재 버전/API*에 확신 없음.
+   - (S5) **현재 직접 지원 범위 밖** 라이브러리거나(범위 SSOT는 ADR-031#amend-1·ADR-059 D1 — 유형 수를 여기 박지 않는다), 모델이 그 lib의 *현재 버전/API*에 확신 없음.
    - **판정**: S1~S4 중 1+ YES → **full 패널**. **S5만 YES**(설계 트레이드오프 자명) → **리서치-only**(다각도·적대 불요 — 버전 확인이면 충분). 전부 NO → **fast path**(architect 단발, 현행).
 2. **3단 강도** (full 패널):
    - ① **웹 리서치 (must-or-flag)**: 외부 lib/version 걸리면 researcher에 Agent 위임(ADR-040 — 최신 공식문서·버전, 품질 규율 ADR-040#amend-3). 오프라인/미발견이면 *날조 말고* `Needs Research` emit + 나머지 작성 계속(hard-block 아님).

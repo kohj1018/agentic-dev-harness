@@ -113,7 +113,7 @@ R0 — 운영 환경 가정 확인:
      - **version/re-run policy**: current capability는 `ADR-058#amend-2/v2`. registry가 v1/누락/lower-version이면 (a) 기록된 `source digest`가 있는 경우 실제 bytes와 같거나, (b) digest 필드가 없던 legacy v1의 실제 bytes가 canonical digest와 같을 때만 미수정으로 인정해 canonical v2로 교체하고 fixed suite 전체를 재실행한다. 어느 기준도 충족하지 않으면 local modification으로 판정해 **덮어쓰지 않고** `wiring-fail (local modifications)` + diff/채택 사용자 결정을 요청한다. current version/digest도 conformance는 재실행한다.
      - **output ignore**: canonical output `design-gate-shots/`는 baseline `.gitignore`가 선제 보호한다. override adapter가 다른 output path를 쓰면 **첫 adapter 실행 전에** 그 정확한 project-relative 경로를 `.gitignore`에 추가한다.
      - **registry 기록**: `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 `status | command template | adapter path | output path | capability version=ADR-058#amend-2/v2 | source digest | conformance`를 실제 값으로 채운다. 비-UI는 `status: n/a`만. module/browser 부재=`needs-install`, source/entry/conformance/local-modification 불일치=`wiring-fail`.
-     - **비-Node/override**: ADR-031 fork override가 canonical Node asset을 쓸 수 없으면 동등한 project-native adapter와 별도 source 근거를 기록하되, v2 behavior/fixed fixture 기대값을 실제 browser로 만족하기 전 `ready`로 표시하지 않는다.
+     - **비-Node/범위밖-스택**: ADR-031 범위 밖 스택(project ADR supersede 경로 — `--override` 플래그는 미구현)이 canonical Node asset을 쓸 수 없으면 동등한 project-native adapter와 별도 source 근거를 기록하되, v2 behavior/fixed fixture 기대값을 실제 browser로 만족하기 전 `ready`로 표시하지 않는다.
      - **구현 앱 Visual-QA (별도 surface)**: e2e scaffold 시 `e2e/visual-qa.spec.*`도 생성해 렌더된 앱을 검사한다. 앱이 비어 있으면 대상 landmark 부재 graceful skip은 허용하지만 정적 adapter conformance를 통과시킨 것으로 간주하지 않는다. breakpoint 320/375/768/1440 page overflow는 차단, 요소 겹침은 권고, populated axe serious/critical은 차단·moderate/minor는 권고. 가능한 runner에서는 generated geometry/axe helper를 두 surface가 재사용한다.
      - 기존 `e2e/visual-qa.spec.*`는 덮어쓰지 않되 capability가 약하면 별도 adapter/helper로 보완한다. **스크린샷 vision 비평은 hot-loop 제외**(탐색/사람 검토는 stabilize §3-P). 졸업 e2e 게이트는 ADR-052 D3 / ADR-014#amend-2가 SSOT.
    - **6-5. Graceful fallback (날조·우회 금지)**: 6-2/6-3 의 설치 명령이 sandbox/네트워크/승인 차단으로 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고, 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다. 이후 step 5 smoke 는 해당 항목을 SKIPPED 로 처리한다. (implement-workitem 의 ADR-040#amend-1 `Needs Install` 패턴과 동일.)
@@ -187,7 +187,7 @@ R0 — 운영 환경 가정 확인:
 
 ## 스택별 verify 풀세트 (default template)
 
-본 표는 *runtime / 언어* 축으로 verify 도구 default 를 박는다. [ADR-031](../../../docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md) 의 *프로젝트 유형 축* (web frontend / API server / CLI / monorepo / Supabase) 과는 *직교 차원* — 한 프로젝트는 *유형 1 + runtime 1* 의 조합으로 자기 verify 명령을 박는다 (예: *TS web frontend* = 유형 "web frontend" × runtime "TS" → TS web 행 적용). 본 표 자체는 ADR-031 의 직접 지원 5 유형을 *축소하거나 대체하지 않는다*.
+본 표는 *runtime / 언어* 축으로 verify 도구 default 를 박는다. [ADR-031](../../../docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md) 의 *프로젝트 유형 축* (web frontend / API server / CLI / monorepo / Supabase / Flutter(Android·iOS) — 범위 SSOT는 ADR-031#amend-1·ADR-059 D1) 과는 *직교 차원* — 한 프로젝트는 *유형 1 + runtime 1* 의 조합으로 자기 verify 명령을 박는다 (예: *TS web frontend* = 유형 "web frontend" × runtime "TS" → TS web 행 적용). 본 표 자체는 ADR-031 의 직접 지원 유형 집합을 *축소하거나 대체하지 않는다*.
 
 | runtime / 언어 (예시 프로젝트 유형) | format | lint | typecheck | unit test | e2e test |
 |------|--------|------|-----------|-----------|----------|
