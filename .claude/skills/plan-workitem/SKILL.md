@@ -178,7 +178,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 (DESIGN.md 부재 또는 본 task 가 UI 신호 미매칭 시 본 단락 skip + skip 사유 echo):
 - 분해된 task 가 *새 컴포넌트* 를 신설하는가? 중복/재사용 검사는 **두 출처 모두** 대조 (인벤토리 stale 대비 — planner 는 Grep 권한 보유):
   - (a) DESIGN.md `## 7. Components` 인벤토리 (설계 레지스트리)
-  - (b) 실제 `src/components/` · `app/components/` · `components/` 디렉터리의 기존 컴포넌트 파일명 (코드 실측 — DESIGN.md 미등록 컴포넌트도 포착)
+  - (b) 실제 `src/components/` · `app/components/` · `components/` · `lib/widgets/` · `lib/**/widgets/` 디렉터리의 기존 컴포넌트 파일명 (코드 실측 — DESIGN.md 미등록 컴포넌트도 포착)
   - 둘 중 *어느 쪽이라도* 기능 유사 컴포넌트 발견 시 "남은 미결정 사항" 에 `- 컴포넌트 중복 의심: T-NNN 의 X ↔ <DESIGN.md ## 7 의 Y / src/components/Z.tsx>. 재사용 검토 권장` 명시. (b) 에만 있고 (a) 에 없으면 *인벤토리 stale* → `+ DESIGN.md ## 7 등록 보강` 도 권장.
 - AC 본문 또는 task `## 3. 구현 항목` 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}` 패턴) 가 직접 박혀 있는가? 발견 시 "남은 미결정 사항" 에 `- raw hex 검출: T-NNN AC-N — DESIGN.md ## 2 의 token 으로 교체 권장` 명시.
 - **상태 점검은 *task 의 use-case 해당 상태* 한정** (DESIGN.md `## 7` 의 *전체* category expected 상태 설계(ADR-027#amend-7 — interactive/data/static)는 별도 — reviewer Design Consistency `[Design-state]` 책임). 본 self-check 는 *task 본문이 명시한 상호작용* (예: hover/disabled 가 use-case 에 등장하는데 AC 에서 언급 누락) 만 점검. 누락 상태가 있으면 "남은 미결정 사항" 에 `- use-case 상태 누락: T-NNN — <상태> 가 task 본문에 등장하지만 AC 미언급` 명시. 자동 차단 X.
@@ -206,7 +206,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 **의존성 설치 line item (ADR-040#amend-1)**: 분해된 task가 *새 외부 패키지*(charter `## 7. 제약 조건`에 없는 npm/pip/cargo/go 등)를 요구하면, 해당 task `## 3. 구현 항목`에 설치 단계를 명시적 line item으로 박는다:
 - 형식 — 한 줄 line item으로, *설치 명령만* inline code로 감싼다(백틱 중첩 금지). 예: `- 의존성 설치 — pnpm add zod@^3 실행 (용도: 입력 스키마 검증) (AC-2)`.
-- **의존성 도구는 표에서 가져온다 (ADR-051#amend-4)**: 설치 line item을 작성할 때 `docs/00-meta/STACK_SETUP_PLAN.md` `## Dependency Tools` 표에서 **그 task 경로에 가장 구체적으로 일치하는 scope의 도구**를 그대로 쓴다(모노레포·polyglot에서 scope별로 다를 수 있다 — 전역 단일 PM 가정 금지). 표·행이 없을 때만 그 경로에 *인접한 tool-specific* 신호(`pnpm-lock.yaml`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod` 등)로 추론한다(일반 manifest만으론 단정 금지). **새 도구 도입·전환은 line item으로 쓰지 않는다** — 필요해 보이면 "남은 미결정 사항"에 surface(도구 변경은 스택 결정 — ADR-055 T2/`/bootstrap-stack`).
+- **의존성 도구는 표에서 가져온다 (ADR-051#amend-4)**: 설치 line item을 작성할 때 `docs/00-meta/STACK_SETUP_PLAN.md` `## Dependency Tools` 표에서 **그 task 경로에 가장 구체적으로 일치하는 scope의 도구**를 그대로 쓴다(모노레포·polyglot에서 scope별로 다를 수 있다 — 전역 단일 PM 가정 금지). 표·행이 없을 때만 그 경로에 *인접한 tool-specific* 신호(`pnpm-lock.yaml`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod`·`pubspec.lock` 등)로 추론한다(일반 manifest만으론 단정 금지). **새 도구 도입·전환은 line item으로 쓰지 않는다** — 필요해 보이면 "남은 미결정 사항"에 surface(도구 변경은 스택 결정 — ADR-055 T2/`/bootstrap-stack`).
 - **버전·사용법 불확실 시**: 모델 지식 컷오프 보완을 위해 `최신 버전·사용법 확인: /research-pack <pkg> 선행 권장 (또는 메인 세션이 researcher 위임)` 한 줄을 같은 task에 부기한다. 확인 후 정확한 버전으로 line item을 갱신한다. (plan-workitem은 웹 접근이 없어 직접 조사 불가 — research-pack/researcher 경로를 *권장*만; ADR-040#5 패턴.)
 - 이 의존이 charter 제약 밖이면 기존 `architect 호출 권장 신호 #2`도 함께 발화(새 외부 의존 = 검토 대상).
 

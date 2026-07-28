@@ -8,7 +8,7 @@ accepted
 ## 현재 유효 결정
 - 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT. bootstrap은 charter/ARCH/ADR-100까지 — M1/F-001 seed는 ADR-057로 plan 단계(plan-milestone)로 이동.
 - skill 간 흐름은 텍스트 제안 원칙 + 예외 3종: inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable(#amend-4), `Needs Stack Guard`(#amend-3), `Needs Experience Contract`(#amend-5).
-- lock file 자동 화이트리스트 11종은 #amend-1.
+- lock file 자동 화이트리스트 12종은 #amend-1(+#amend-6: `pubspec.lock`).
 - agent 단위 판정 범위 경계 SSOT는 `DELEGATION_STRATEGY.md`(#amend-2) — 본 ADR은 skill 단위만 정의.
 
 ## 배경
@@ -117,3 +117,15 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 - [관측됨] 스킬 내부 권장 문구는 우회된다 — 입력 계약만이 집행력을 가진다(스펙=오라클 문제의 앞단 잠금).
 ### 강도 (ADR-022)
 - constraint(강, [관측됨]) — 단 opt-out(문서 면제 필드) 상시 보유.
+
+<a id="adr-007-amend-6"></a>
+## Amendment 6 (2026-07-28) — lock file 화이트리스트에 `pubspec.lock` 추가
+
+### 결정
+`## Amendment 1`의 11종에 **`pubspec.lock`(Dart/Flutter)** 을 더해 12종으로 한다. 근거는 Flutter가 직접 지원 범위에 들어왔기 때문이며(ADR-059 D1), 다른 매니저의 lock 파일과 성격이 같다(도구가 생성하고 커밋 대상이며 task 문서에 명시되지 않아도 finalize가 자동 add).
+
+### 강도 (ADR-022)
+- enabling(약) — 목록 1종 추가.
+
+### 적용 surface
+- .claude/skills/finalize-workitem/SKILL.md

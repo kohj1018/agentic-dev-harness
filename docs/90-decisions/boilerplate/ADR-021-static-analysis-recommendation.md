@@ -49,3 +49,18 @@ paralysis 방지 원칙: 대안 나열 X, 스택별 1종 권장.
 ### 근거
 - secret hardcode 검출 부재 빈자리 보강.
 - `/stack-guard` 출력에 secret scanner 권장 단락 추가.
+
+<a id="adr-021-amend-2"></a>
+## Amendment 2 (2026-07-28) — Dart/Flutter 정적 분석 도구
+
+### 결정
+- Dart/Flutter 스택의 권장 도구는 **`flutter analyze`(내장) + `dependency_validator`** 1조합이다. 본문 `### 1` 표에는 Dart 행이 없으므로 본 항이 그 행을 정의한다.
+- 내장 `flutter analyze`가 정적 분석과 타입 검사를 겸하므로 추가 도구는 **의존성 위생**만 담당한다.
+- layer 위반 룰이 필요하면 Dart의 공식 analyzer plugin 방식 또는 별도 패키지 `custom_lint`로 확장한다(둘은 다른 것 — ADR-059 D6).
+- *강제 X, 권장만* — 본문 `### 2. 적용 원칙`을 그대로 따른다.
+
+### 강도 (ADR-022)
+- enabling(약) — 스택 1종의 권장 도구 추가.
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md (정적 분석 표 Dart 행)

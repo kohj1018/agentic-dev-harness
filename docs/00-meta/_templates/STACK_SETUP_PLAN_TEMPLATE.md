@@ -9,6 +9,9 @@
      `/stack-guard`가 실제 lockfile과 교차 확인·보완 → `/plan-workitem`이 설치 line item의 도구를 이 표에 맞춤 →
      `/implement-workitem` 3-DT가 slice별로 회수해 builder에 전달 → builder는 지정 scope 도구만 실행.
      모노레포는 scope별 1행(경로 prefix), 단일 패키지는 `.` 1행. 비-JS 스택도 같은 표에 적는다.
+     적는 대상은 *builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM*뿐 — 검증 도구 자체를 설치하는 PM은
+     그 도구의 registry(`## Design Gate Adapter` 등)가 기록하므로 이 표에 넣지 않는다(ADR-059 D2).
+     예: Flutter 루트는 pubspec.lock·package-lock.json이 함께 있어도 `pub` 1행이다.
      근거 컬럼엔 그 판정을 뒷받침한 *tool-specific* 신호(lockfile·tool-manifest)를 적는다 — 일반 manifest만으론 단정 금지.
      lockfile이 아직 없는 green-field는 `(신규 — lockfile 미생성)`. 표↔저장소 불일치는 자동 수정하지 않고 사용자 결정.
      도구 *선택 근거*는 ARCHITECTURE `## 7. 기술 선택`, 설치 소유 경계는 ADR-052. -->
