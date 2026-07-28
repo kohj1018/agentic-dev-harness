@@ -83,6 +83,7 @@ cat docs/00-meta/*.md | wc -l
 > 1. **`ADR-052#amend-1` 결정 3에 `판정 순서` 4단을 추가**했다(아래 1-1 블록에 반영). 이것이 **5상태 정의·순서의 유일한 SSOT**이며 단계 2의 `ADR-059 D4`가 여기에 종속된다.
 > 2. **`EMPTY`의 판별자를 "성공한 테스트 0개" → "실행된 테스트 0개"** 로 교정했다(skip·러너 내부 항목 제외, 성공·실패 무관). 1-3(stack-guard)·1-5(stabilize §1.5) 블록의 해당 문구가 저장소에서는 이렇게 되어 있다.
 > 3. **1-6(stabilize §3-b)은 정의를 재서술하지 않고 SSOT 포인터**로 대체했다(상태 이름·순서는 인라인 유지 — 순수 포인터는 강제성이 약해진다). 결과적으로 불릿 5개 → 3개.
+> 4-1. **1-6에 `마지막 PASS` 증거 소비 규칙을 덧붙였다**(단계 8 리뷰에서 추가). registry를 *읽기만* 하고 저장된 PASS를 **쓰는** 규칙이 없어(`마지막 PASS` 언급 0건) host 제약 target의 증거가 유효해도 채택되지 않았다. **기록된 커밋이 지금 판정하려는 커밋과 정확히 같을 때만** `PASS`로 보고, 다르면 `BLOCKED_ENV` 유지 — *"코드가 바뀌었는지"* 를 판단하지 않는다(ADR-059 D4가 명시 금지).
 > 4. **1-6의 `선행 확인` 불릿에 target별 *실행* 방법을 덧붙였다**(단계 4 리뷰에서 추가). 원문은 *"target이 둘 이상이면 판정을 target마다 따로 낸다"* 까지만 말하고 **어떻게 target마다 실행하는지**가 없어, 진입점이 하나인 상태에서 판정이 성립하지 않았다. `npm run validate:e2e -- -d <device id>` 반복 호출 + `<device id>`를 러너의 device 조회로 얻는 경로를 명기했다(ADR-059 D4).
 >
 > 1-3·1-5·1-6 블록 본문은 기록으로 남겨 두었다(저장소가 SSOT). 1-1 블록만 갱신한 이유는 그 블록이 **이후 단계가 인용하는 대상**이기 때문이다.
@@ -1975,9 +1976,11 @@ git add .gitignore .claude/settings.json .claude/skills/finalize-workitem/SKILL.
 ~~~~markdown
 
 ## Dart Source Roots
-<!-- **Dart/Flutter 스택이 아니면 이 절과 아래 `## Golden 초기 절차`를 통째 삭제한다.**
-     ARCH `## 7-1`~`## 7-5`의 비해당 sub-section 삭제 규칙과 동형이며, /bootstrap-stack이
-     이 template을 복사할 때 수행한다. (`## E2E Smoke Registry`는 스택 무관이라 남긴다 —
+<!-- **Dart/Flutter 스택이 아니면 이 절을 통째 삭제한다** (순수 Dart CLI·패키지는 남긴다 —
+     `dart format` 대상이 있으면 필요하다). ARCH `## 7-1`~`## 7-5`의 비해당 sub-section
+     삭제 규칙과 동형이며, /bootstrap-stack이 이 template을 복사할 때 수행한다.
+     **아래 `## Golden 초기 절차`의 조건은 이 절보다 좁다** — 화면이 있는 native 스택에서만
+     남긴다(자세한 조건은 그 절의 주석). (`## E2E Smoke Registry`는 스택 무관이라 남긴다 —
      비대상이면 `status: n/a`만 적는다. `## Design Gate Adapter`와 같은 방식.)
      Flutter/Dart 코드에서 `dart format` 대상이 되는 경로 목록.
      `.`을 쓰지 않는다 — 생성 디렉터리 순회 실패와 긴 경로 문제를 피하고,
@@ -2009,8 +2012,10 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
      실행 대상 칸에는 재부팅하면 달라지는 임시 id(`emulator-5554` 등)를 적지 않고
      "무엇을 고를지"의 규칙을 적는다. 이 칸은 사람이 읽는 기록이며
      실행 명령에 그대로 들어가지 않는다(진입점은 -d 를 생략한다).
-     마지막 PASS 칸은 host 제약으로 지금 실행할 수 없는 target의 증거를 보존한다 —
-     기록된 커밋 이후 앱 코드가 바뀌면 증거는 무효다. -->
+     마지막 PASS 칸은 host 제약으로 지금 실행할 수 없는 target의 증거를 보존한다.
+     **유효 조건은 하나 — 기록된 커밋이 지금 판정하려는 커밋과 정확히 같을 때만 인정한다.**
+     다르면 다시 BLOCKED_ENV다. "코드가 바뀌었는지"를 사람이 판단하게 두지 않는다
+     (판단 여지를 주면 증거가 슬며시 늘어난다 — ADR-059 D4). -->
 
 | runtime target | status | smoke 파일 경로 | 테스트 이름 | 실행 대상 선택 규칙 | 마지막 PASS (host·날짜·커밋) | 등록일 |
 |---|---|---|---|---|---|---|
@@ -2019,7 +2024,11 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
 | (예: web) | ready / n/a | (예: e2e/smoke.spec.ts) | | (예: chromium) | | |
 
 ## Golden 초기 절차 (해당 시)
-<!-- golden 정답 사진은 커밋하지 않으며 머신마다 로컬 생성한다.
+<!-- **화면이 있는 native 스택에서만 남긴다** — runtime target에 `native/*`가 포함되고
+     design surface가 있을 때. golden은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는
+     `flutter test --update-goldens` 자체가 성립하지 않으므로 그 경우 이 절을 통째 삭제한다
+     (`## Dart Source Roots`는 그런 프로젝트에도 남는다 — 조건이 다르다. ADR-059 D3).
+     golden 정답 사진은 커밋하지 않으며 머신마다 로컬 생성한다.
      새 체크아웃 직후 첫 validate는 정답 사진 부재로 실패한다.
      `flutter test --update-goldens`를 1회 실행하고
      생성된 이미지를 육안 확인한 뒤 진행한다.
@@ -2040,7 +2049,7 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
 **수정** (문장 뒤에 이어 붙임 — 나머지는 그대로):
 
 ```
- **복사 시 Dart/Flutter 스택이 아니면 `## Dart Source Roots`·`## Golden 초기 절차` 두 절을 통째 삭제한다**(ARCH `## 7-1`~`## 7-5` 비해당 삭제 규칙과 동형 — ADR-059 D2/D3). `## E2E Smoke Registry`는 스택 무관이라 남기고 비대상이면 `status: n/a`만 적는다.
+ **복사 시 비해당 절을 통째 삭제한다**(ARCH `## 7-1`~`## 7-5` 비해당 삭제 규칙과 동형). **두 절의 조건은 다르다** — `## Dart Source Roots`는 `dart format` 대상이 있는 **모든 Dart/Flutter 스택**에서 남기고(순수 Dart CLI·패키지 포함, ADR-059 D2), `## Golden 초기 절차`는 **화면이 있는 native 스택에서만** 남긴다(runtime target에 `native/*` 포함 ∧ design surface 있음 — ADR-059 D3). golden 은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는 `flutter test --update-goldens` 자체가 성립하지 않으므로, 그 프로젝트에 남기면 쓸모없는 안내가 영구히 붙는다. `## E2E Smoke Registry`는 스택 무관이라 남기고 비대상이면 `status: n/a`만 적는다.
 ```
 
 **추가 수정**: 같은 파일의 `## Optional MCP Connectors` 표 아래에 아래 안내를 추가한다.
@@ -2049,15 +2058,44 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
 > Flutter/Dart 프로젝트는 공식 Dart & Flutter MCP 서버를 이 표에 등재할 수 있다(Dart 3.9 이상 필요). 앱 조작 기능을 쓰려면 앱 코드에 개발 빌드에서만 켜지는 진입점을 두고 배포 빌드에서 제외한다. 공식 Agent Skills·plugin은 기본 의존이 아니라 opt-in이며, 도입 전 포함된 rules 본문·자동 등록되는 MCP capability·기존 lifecycle skill과의 역할 중복을 감사한다. 충돌 시 본 저장소의 lifecycle skill이 우선한다.
 ```
 
+**추가 수정 — `## Dart Source Roots` 를 실제 검증에 배선한다(빠지면 형식 검사가 조용히 통과한다).**
+
+위 템플릿은 *"루트 누락 점검 (매 검증 실행 시)"* 를 선언하고 ADR-059 D2도 *"검증을 돌릴 때마다 실제 Dart 파일의 최상위 디렉터리 집합과 표를 대조한다"* 고 규정한다. 그런데 **표를 채우는 주체도, 대조를 수행하는 주체도 없다** — `stack-guard` 의 `본 skill이 채울 섹션` 목록에 이 절이 없고, verify 표 Flutter 행은 `<등록 source root>` placeholder 만 참조한다. 표가 예시 행(`(예: lib)`)으로 남으면 `dart format` 이 예시 경로를 대상으로 돌아 **위반이 있어도 통과한다.**
+
+**파일**: `.claude/skills/stack-guard/SKILL.md`
+
+**(a) 채울 섹션 목록에 추가** — `- 통합 명령 사용법` 바로 다음 줄(1-4가 넣은 `## E2E Smoke Registry` **앞**)에 삽입한다.
+
+```
+     - `## Dart Source Roots` — Dart/Flutter 스택이면 **실제 소스 트리를 조회해 채운다**(`pubspec.yaml` 하나당 한 묶음, 경로는 그 pubspec 디렉터리 기준 상대경로). **예시 행을 그대로 두면 안 된다** — `dart format` 이 예시 경로를 대상으로 돌아 형식 검사가 조용히 통과한다. 조회는 pubspec 디렉터리에서 `find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' | cut -d/ -f2 | sort -u` 로 한다. 비-Dart 프로젝트는 `/bootstrap-stack` 이 이 절을 이미 삭제했으므로 대상이 아니다(ADR-059 D2).
+```
+
+**(b) verify 문단에 대조 동작 추가** — 4-1이 고친 `생성된 \`validate\` 명령은 …` 줄의 `4단계 중 어느 하나라도 빠지면 출력에 *"missing: <단계>"* 명시.` **뒤에 이어 붙인다**(줄을 갈아끼우지 않는다).
+
+```
+ **Dart/Flutter 의 `<등록 source root>` 는 placeholder 가 아니다** — verify 스크립트가 `STACK_SETUP_PLAN.md ## Dart Source Roots` 의 경로 목록을 읽어 인자로 넘기고, 존재하지 않는 경로는 제외한다. 그리고 **매 실행마다 표 ↔ 실제 소스 트리를 대조**해(위 `find … | cut -d/ -f2 | sort -u`) 표에 없는 최상위 Dart 디렉터리가 있으면 `Dart source root drift: <디렉터리> — STACK_SETUP_PLAN ## Dart Source Roots 갱신 필요` 를 출력한다(ADR-059 D2). **이 대조는 경고이며 종료코드를 바꾸지 않는다** — 문서 drift 로 무관한 작업을 막지 않되, 새 디렉터리가 형식 검사에서 조용히 빠지는 것은 알린다.
+```
+
+> **차단이 아니라 경고인 이유**: ADR-059 D2는 *"표에 없는 것이 나오면 표를 먼저 갱신한다"* 로 **갱신**을 요구할 뿐 차단을 말하지 않는다. 문서 drift 로 `validate` 를 실패시키면 무관한 작업이 막히므로, 5-1의 색상 grep과 같은 **기록 등급**으로 둔다.
+
 **확인**
 
 ```bash
 grep -n "Dart Source Roots\|E2E Smoke Registry\|Golden 초기 절차" docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
 grep -n "Dart Source Roots" .claude/skills/bootstrap-stack/SKILL.md   # 삭제 규칙 배선 확인
+# 배선 확인 — 셋 다 1 이상이어야 한다
+grep -c '`## Dart Source Roots` — Dart/Flutter 스택이면' .claude/skills/stack-guard/SKILL.md
+grep -c 'Dart source root drift' .claude/skills/stack-guard/SKILL.md
+grep -c '경고이며 종료코드를 바꾸지 않는다' .claude/skills/stack-guard/SKILL.md
+# 두 절의 삭제 조건이 분리됐는지
+grep -c '두 절의 조건은 다르다' .claude/skills/bootstrap-stack/SKILL.md
+# 마지막 PASS 가 exact commit 규칙인지 (템플릿 · stabilize 양쪽)
+grep -c '정확히 같을 때만 인정한다' docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
+grep -c 'registry의 `마지막 PASS' .claude/skills/stabilize-milestone/SKILL.md
 ```
 
 ```
-git add docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md .claude/skills/bootstrap-stack/SKILL.md
+git add docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md .claude/skills/bootstrap-stack/SKILL.md .claude/skills/stack-guard/SKILL.md .claude/skills/stabilize-milestone/SKILL.md
 ```
 
 > **커밋 메시지**
@@ -2354,11 +2392,12 @@ done
 python - <<'PY'
 import re
 files=['.claude/skills/stack-guard/SKILL.md','.claude/skills/stabilize-milestone/SKILL.md',
+       '.claude/skills/bootstrap-stack/SKILL.md','docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md',
        'docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md','IMPROVE-GUIDE.md']
 pat=re.compile(r'(target\s*(이|에|은|는)\s*`?native`?(?!/)|`native`(?!/)\s*(이고|면|든|포함)|web·native·)')
 # 규칙을 *선언*하거나 *과거 위반을 인용*하는 문장은 native 를 언급해야 하므로 제외.
 # '(?!/)' 는 이 검사기 자신의 정규식 줄을 걸러내는 마커다(산문엔 나오지 않는다).
-EXEMPT=('합쳐 적지 않는다','단독 표기 금지','클래스 표기','(?!/)','새어 들어왔다')
+EXEMPT=('합쳐 적지 않는다','단독 표기 금지','클래스 표기','(?!/)','새어 들어왔다','단독은 적지 않는다')
 bad=0
 for f in files:
     for n,l in enumerate(open(f,encoding='utf-8').read().split('\n'),1):
