@@ -521,9 +521,10 @@ accepted
 - **두 축을 헷갈리면 게이트가 영구히 막힌다**: design surface가 있으면 runtime target이 `native/*`든 `web`이든 **Chromium 바이너리가 필요하다**. canonical adapter는 모듈만 있고 브라우저가 없으면 `exit 2`(실행 불가)를 내고, 그 상태는 registry `status: needs-install`로 굳어 디자인 산출물 승인이 보류되며, 그 보류가 프로토타입 승격과 task 분해까지 연쇄로 막는다. 따라서 native 프로젝트에서 "브라우저를 설치하지 않는다"는 **앱 e2e 목적에 한한 말**이고, design gate 목적의 `npx playwright install chromium`은 target과 무관하게 수행한다.
 
 ### D9. 시크릿 취급 2단 분류
-- **읽기 차단**(도구가 열지 못하게): Android 서명키(`*.jks`·`*.keystore`), 그 비밀번호(`key.properties`), iOS 배포 인증서·프로비저닝(`*.p12`·`*.mobileprovision`), 서버용 service account 키(`*-firebase-adminsdk-*.json`).
+- **읽기 차단**(도구가 열지 못하게): Android 서명키(`*.jks`·`*.keystore`), 그 비밀번호(`key.properties`), iOS 배포 인증서·프로비저닝(`*.p12`·`*.mobileprovision`), **Apple 인증 키(`*.p8` — App Store Connect API·APNs 용 PKCS#8 개인 키. 1회만 다운로드되고 유출되면 사칭 업로드·푸시가 가능하다)**, 서버용 service account 키(`*-firebase-adminsdk-*.json`·`serviceAccount*.json`·`service-account*.json`).
 - **비밀로 취급하지 않음(단, 무해하다는 뜻은 아님)**: Firebase 클라이언트 설정(`google-services.json`·`GoogleService-Info.plist`). 이 키는 앱 바이너리에 담겨 배포되므로 숨기는 것이 방어가 되지 않는다. **대신 반드시 해야 하는 것은 키 사용 범위 제한이다** — Firebase/Google Cloud 콘솔에서 그 키가 호출할 수 있는 API를 제한하고, 데이터 접근은 Firebase 보안 규칙과 App Check로 막는다. 제한하지 않은 키는 공개돼도 되는 키가 아니다. 기본으로 git에서 빼면 **새 체크아웃에서 빌드가 깨지므로** 제외 대상에 넣지 않되, 커밋 여부와 키 제한 상태는 flavor·환경 분리 방식에 달린 **프로젝트 결정**이므로 ARCH `## 7-5`의 `### 빌드 flavor·환경변수`에 적는다.
 - **차단 수단의 한계(사실)**: 도구 설정의 읽기 차단 목록은 에이전트의 파일 읽기 도구에 적용되며, 셸 하위 프로세스(`cat` 등)까지 막지는 못한다. **1차 통제는 "서명 자산을 저장소 밖에 두는 것"**이고 읽기 차단·git 제외는 보조 통제다.
+- **파일명 열거는 완결될 수 없다(사실)**: 위 목록은 각 도구의 *다운로드 기본명*을 잡는다. service account 키는 이름을 바꿔 쓰는 것이 공식 문서의 통상 사용법이라(`serviceAccountKey.json` 등) 임의 이름은 원리적으로 빠진다. **그래서 경계 있는 통제는 이름이 아니라 위치다** — service account·private key 파일은 `secrets/` 하위에 둔다(이미 `.gitignore`·읽기 차단 대상이라 이름과 무관하게 보호된다). 이 위치 규약을 ARCH `## 7-5`의 `### 서명·배포`에 적는다. 내용 기반 검출이 추가로 필요하면 ADR-021#amend-1의 secret scanner(`gitleaks`/`trufflehog`)를 쓰되, 그것은 현재 *권장* 등급이며 본 ADR이 강제로 올리지 않는다.
 - **도구별 비대칭을 메운다**: `.claude/settings.json`의 읽기 차단은 Claude Code에만 적용된다. Codex 쪽은 OS 강제가 불가해 `AGENTS.md`의 금지 한 줄에 의존하므로(ADR-010 D5·D8), 같은 목록을 그 줄에도 반영해야 두 도구가 동등해진다.
 - **`.gitignore`는 이미 추적 중인 파일을 보호하지 않는다.** 기존 저장소에 서명 자산이 커밋돼 있으면 ignore 규칙을 추가해도 계속 추적된다. 그래서 규칙 추가와 함께 **`git ls-files`로 실제 추적 여부를 확인**하고, 발견 시 ① 저장소 밖으로 옮기고 ② `git rm --cached`로 추적 해제하며 ③ 이미 원격에 올라갔다면 **키 자체를 재발급**한다(히스토리에 남은 키는 ignore로 되돌릴 수 없다).
 
@@ -1800,8 +1801,17 @@ git add .gitignore .claude/skills/stack-guard/SKILL.md
 key.properties
 *.p12
 *.mobileprovision
+# Apple 인증 키 (App Store Connect API · APNs) — PKCS#8 개인 키, 1회만 다운로드 가능
+*.p8
 # 서버용 service account 키 (관리자 권한 — 유출 시 백엔드 전체 접근)
+# 아래 열거는 완결될 수 없다 — 다운로드 기본명을 바꾸면 빠진다.
+# 경계 있는 통제는 *위치*다: credential 파일은 secrets/ 하위에 둔다(위에서 이미 ignore).
+# 주의: serviceAccount*.json 은 serviceAccount.example.json 같은 *템플릿*도 잡는다.
+# 템플릿을 커밋해야 하면 이 아래에 `!serviceAccount.example.json` 처럼 명시 예외를 둔다
+# (실제 키를 흘리는 쪽이 훨씬 비싸므로 기본값은 넓게 잡는다).
 *-firebase-adminsdk-*.json
+serviceAccount*.json
+service-account*.json
 ```
 
 **여기 없는 것 — 의도적이다.** `google-services.json` 과 `GoogleService-Info.plist` 는 넣지 않는다. 이 두 파일은 Firebase **클라이언트** 설정이며 앱 바이너리에 담겨 배포되므로 숨기는 것이 방어가 되지 않는다. 반면 빌드에는 반드시 필요해서, 기본으로 git 에서 빼면 **새 체크아웃에서 빌드가 깨지고** 팀원마다 파일을 따로 주고받는 상태가 된다. **대신 반드시 해야 하는 것은 콘솔에서 그 키의 사용 가능 API 를 제한하고 데이터 접근은 보안 규칙·App Check 로 막는 것이다** — 제한하지 않은 키는 공개돼도 되는 키가 아니다. 여러 환경(dev/prod)을 쓰는 프로젝트가 flavor 별로 분리하기로 정했다면 그건 그 프로젝트의 결정이므로 ARCH `## 7-5` 의 `### 빌드 flavor·환경변수` 에 적고 그 프로젝트의 `.gitignore` 에서 처리한다. 보일러플레이트 기본값으로 강제하지 않는다.
@@ -1853,7 +1863,10 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision)$|key\.properties|-
       "Read(**/key.properties)",
       "Read(**/*.p12)",
       "Read(**/*.mobileprovision)",
-      "Read(**/*-firebase-adminsdk-*.json)"
+      "Read(**/*.p8)",
+      "Read(**/*-firebase-adminsdk-*.json)",
+      "Read(**/serviceAccount*.json)",
+      "Read(**/service-account*.json)"
     ]
   }
 }
@@ -1896,20 +1909,56 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision)$|key\.properties|-
 **수정**:
 
 ```
-     - 민감 경로(`.env*`, `secrets/**`, `*.jks`, `*.keystore`, `key.properties`, `*.p12`, `*.mobileprovision`, `*-firebase-adminsdk-*.json`)
+     - 민감 경로(`.env*`, `secrets/**`, `*.jks`, `*.keystore`, `key.properties`, `*.p12`, `*.mobileprovision`, `*.p8`, `*-firebase-adminsdk-*.json`, `serviceAccount*.json`, `service-account*.json` — 파일명 열거는 완결될 수 없으므로 credential 은 `secrets/` 하위에 두는 것이 경계 있는 통제다)
 ```
 
-## 7-5. 확인 (시크릿 보호)
+## 7-5. 이미 추적 중인 서명 자산 점검을 stack-guard에 배선
+
+**파일**: `.claude/skills/stack-guard/SKILL.md`
+
+7-1의 `git ls-files` 점검은 **이 개선을 적용하는 1회성 절차**다. 그런데 ADR-059 D9는 *"규칙 추가와 함께 `git ls-files`로 실제 추적 여부를 확인"* 을 규정하고, 그 대상은 **fork 한 brownfield 저장소**다 — 기존 Flutter 프로젝트가 이 보일러플레이트를 채택하면 `.gitignore` 규칙은 들어오지만 **이미 커밋된 키는 그대로 추적된다.** 지금은 그 점검을 수행하는 skill이 없어 D9에 **구현 surface가 없는 상태**이며, 이는 본 ADR의 `## 배경`이 ADR-031을 비판한 바로 그 패턴이다.
+
+**수정**: `## Secret scanner 권장` 절의 `*강제 X, 권장만*` 줄 **뒤에** 아래를 추가한다. 그 절의 기존 세 줄은 *staged 내용*을 보는 권장 도구이고, 이 항목은 *이미 추적 중인 파일*을 찾는 별개 점검이라 섞지 않는다. (바깥 울타리는 **물결표 4개**다 — 안에 백틱 코드블록이 들어 있기 때문이며, 물결표 줄 자체는 붙여 넣지 않는다.)
+
+~~~~markdown
+
+**이미 추적 중인 서명·인증 자산 점검 (전 스택, 필수 보고 — ADR-059 D9)**: 위 scanner 는 *staged 내용*을 보는 권장 도구이고, 이 항목은 **이미 커밋돼 추적 중인 파일**을 찾는 별개 점검이다. `.gitignore` 는 이미 추적 중인 파일을 보호하지 않으므로 brownfield 저장소에서는 규칙 추가만으로 해결되지 않는다. 매 실행 1회 확인한다.
+
+```bash
+git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.properties|-firebase-adminsdk-.*\.json|service-?account.*\.json'
+```
+
+- **출력 없음** → `tracked secrets: none` 1줄 보고.
+- **출력 있음** → `Needs Secret Rotation: <경로 목록>` 을 출력하고 순서대로 안내한다 — ① 파일을 저장소 밖으로 옮긴다 ② `git rm --cached <path>` 로 추적을 끊는다 ③ **원격에 올라간 이력이 있으면 키 자체를 재발급한다**(히스토리에 남은 키는 ignore 로 되돌릴 수 없다). **stack-guard 가 직접 옮기거나 `rm` 하지 않는다** — 키 취급은 사용자 결정이고 잘못 지우면 복구가 불가능하다. 종료하지 않고 보고만 한다.
+- 파일명 열거의 한계는 ADR-059 D9와 같다 — 경계 있는 통제는 credential 을 `secrets/` 하위에 두는 것이다.
+~~~~
+
+> **secret scanner 를 "필수"로 올리지 않는다**(사용자 결정). ADR-021 결정은 *"강제 X, 권장만"* 이고 근거는 ADR-010 multi-tool 호환이다. 위에서 추가한 **위치 계약(`secrets/` 하위)이 이름 기반 구멍을 이미 닫으므로** 도구 강제 없이도 경계가 선다. 실사용에서 유출 사례가 관측되면 그때 ADR-021 개정으로 올린다.
+
+## 7-6. 확인 (시크릿 보호)
 
 ```bash
 grep -c "jks" .gitignore .claude/settings.json .claude/skills/finalize-workitem/SKILL.md
 grep -n "서명키" AGENTS.md      # AGENTS.md는 확장자 열거 없이 원칙 한 줄만
 wc -l AGENTS.md                  # 55줄 그대로여야 함
 node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8')); console.log('settings.json 파싱 OK')"
+# .p8 · service-account 별칭이 세 곳 모두에 들어갔는지
+for f in .gitignore .claude/settings.json .claude/skills/finalize-workitem/SKILL.md; do
+  printf '%-46s p8=%s svcAcct=%s\n' "$f" \
+    "$(grep -c 'p8' "$f")" "$(grep -Eic 'serviceAccount\*|service-account\*' "$f")"
+done
+# 실제 매칭 (앞 5개 True, 뒤 2개는 의도적 제외라 False)
+for p in ios/AuthKey_A.p8 server/serviceAccount.json server/service-account.json config/serviceAccountKey.json android/key.jks google-services.json ios/GoogleService-Info.plist; do
+  printf '%-34s ignored=%s\n' "$p" "$(git check-ignore -q "$p" && echo True || echo False)"
+done
+# 7-5 배선 확인
+grep -c "tracked secrets: none" .claude/skills/stack-guard/SKILL.md
 ```
 
+**합격 기준**: 세 파일 모두 `p8`·`svcAcct` 1 이상 / 앞 5개 경로 `True` + `google-services.json`·`GoogleService-Info.plist` **`False`**(클라이언트 설정은 숨기는 것이 방어가 아니고 빌드가 읽어야 한다) / 마지막 명령 1 이상.
+
 ```
-git add .gitignore .claude/settings.json .claude/skills/finalize-workitem/SKILL.md AGENTS.md
+git add .gitignore .claude/settings.json .claude/skills/finalize-workitem/SKILL.md AGENTS.md .claude/skills/stack-guard/SKILL.md docs/90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md
 ```
 
 > **커밋 메시지**
