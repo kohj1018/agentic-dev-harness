@@ -83,6 +83,7 @@ cat docs/00-meta/*.md | wc -l
 > 1. **`ADR-052#amend-1` 결정 3에 `판정 순서` 4단을 추가**했다(아래 1-1 블록에 반영). 이것이 **5상태 정의·순서의 유일한 SSOT**이며 단계 2의 `ADR-059 D4`가 여기에 종속된다.
 > 2. **`EMPTY`의 판별자를 "성공한 테스트 0개" → "실행된 테스트 0개"** 로 교정했다(skip·러너 내부 항목 제외, 성공·실패 무관). 1-3(stack-guard)·1-5(stabilize §1.5) 블록의 해당 문구가 저장소에서는 이렇게 되어 있다.
 > 3. **1-6(stabilize §3-b)은 정의를 재서술하지 않고 SSOT 포인터**로 대체했다(상태 이름·순서는 인라인 유지 — 순수 포인터는 강제성이 약해진다). 결과적으로 불릿 5개 → 3개.
+> 4. **1-6의 `선행 확인` 불릿에 target별 *실행* 방법을 덧붙였다**(단계 4 리뷰에서 추가). 원문은 *"target이 둘 이상이면 판정을 target마다 따로 낸다"* 까지만 말하고 **어떻게 target마다 실행하는지**가 없어, 진입점이 하나인 상태에서 판정이 성립하지 않았다. `npm run validate:e2e -- -d <device id>` 반복 호출 + `<device id>`를 러너의 device 조회로 얻는 경로를 명기했다(ADR-059 D4).
 >
 > 1-3·1-5·1-6 블록 본문은 기록으로 남겨 두었다(저장소가 SSOT). 1-1 블록만 갱신한 이유는 그 블록이 **이후 단계가 인용하는 대상**이기 때문이다.
 
@@ -486,9 +487,12 @@ accepted
   - **[관측됨] 이 순서를 안 지키면 실제로 오분류한다**: 빈 `integration_test/`는 `protocolVersion=0.1.1` + suite `test/widget_test.dart` + `done.success=true` → 2항에서 `EMPTY`. smoke를 넣고 device를 연결하지 않으면 스트림이 아예 비어 `protocolVersion`이 없고 exit 1 → 1항에서 `BLOCKED_ENV`. 순서 없이 suite 개수만 세면 후자도 `EMPTY`가 되어 "테스트를 쓰라"는 잘못된 처방이 나간다.
 - **registry는 필요조건이 아니라 강화 수단이다.** `STACK_SETUP_PLAN.md ## E2E Smoke Registry`에 canonical smoke가 등록돼 있으면 위 3항을 *"등록된 smoke 이름과 일치하는 테스트가 성공"* 으로 좁혀 판정한다. 등록이 없으면 **3항을 이름 제약 없이 적용하고**(= 선언된 e2e 디렉터리 안의 아무 테스트든 1개 이상 성공) `P1 [E2E-registry] <target> — canonical smoke 미등록, /stack-guard로 등록 권장`을 기록한다. **등록 부재만으로 졸업을 차단하지 않는다** — 실제로 e2e를 갖고 통과하던 기존 프로젝트를 서류 미비로 막는 것은 ADR-022 ratchet 위반이고, 위 2항만으로 실측 결함은 이미 막힌다.
 - **플랫폼별 판정**: 선언된 runtime target마다 각각 `PASS`여야 한다. Android만 통과하고 iOS가 미실행이면 iOS는 `EMPTY` 또는 `BLOCKED_ENV`이며 졸업은 차단된다.
+  - **판정은 target마다 나므로 실행도 target마다 한다.** `validate:e2e` 진입점은 **하나로 유지**하고(이름을 target별로 쪼개지 않는다 — 웹 단독 프로젝트의 진입점 구성을 바꾸지 않기 위해서다), **선언된 e2e 대상 target이 둘 이상이면 판정하는 쪽이 target마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩 호출**한다. `<device id>`는 registry의 선택 규칙을 `flutter devices --machine` 출력에 대입해 얻는다. target이 하나면 `-d` 없이 1회 호출로 충분하다(러너가 후보를 좁혀 자동 선택한다).
+  - **한 진입점을 두 도구가 다툴 수는 없다**: `web`과 `native/*`를 함께 선언한 저장소에서 `validate:e2e`가 이미 다른 계열(Playwright ↔ Flutter)로 물려 있으면 **덮어쓰지 않고 `FAIL(wiring)`으로 보고하고 멈춘다**. 조용히 놔두면 나중 target이 영구 `EMPTY`가 되어 *"테스트를 쓰라"* 는 틀린 처방이 나가고, 실제 원인(배선 부재)은 드러나지 않는다.
   - **기본 전제는 "한 마일스톤을 한 머신에서 끝낸다"** 다. iOS는 빌드 자체가 macOS + Xcode 전용이므로, **iOS를 target으로 선언한 마일스톤은 macOS에서 작업한다** — 그러면 host 이동도, 증거 이관도 필요 없다.
   - 그럼에도 Windows에서 진행하다 iOS 판정만 남는 상황이 생기면 iOS는 `BLOCKED_ENV`로 남는다. 이때만 예외로, macOS에서 1회 수행한 결과를 registry의 `마지막 PASS(host·날짜·커밋)` 칸에 적어 증거로 쓴다. **유효 조건은 하나 — 기록된 커밋이 지금 판정하려는 커밋과 같을 때만** 인정한다. 다르면 다시 `BLOCKED_ENV`다(코드가 바뀌었는지 사람이 판단하게 두지 않는다).
-- registry의 실행 대상 칸에는 `emulator-5554` 같은 **임시 id를 적지 않고** 선택 규칙(예: `연결된 android device 1대`)을 적는다. **단 이 칸은 사람이 읽는 기록이며 실행 명령에 그대로 들어가지 않는다.**
+- registry의 실행 대상 칸에는 `emulator-5554` 같은 **임시 id를 적지 않고** 선택 규칙(예: `연결된 android device 1대`)을 적는다. **이 칸의 문자열이 실행 명령에 그대로 들어가지는 않는다** — 대신 판정하는 쪽이 **`flutter devices --machine` 출력에 이 규칙을 대입해 그때의 실제 id를 얻어** `-d` 에 넣는다. 즉 규칙은 *id를 고르는 방법*을 적는 자리이고, id 자체는 매 실행 시점에 조회로 결정된다(그래서 재부팅으로 id가 바뀌어도 문서가 상하지 않는다).
+- **device 조회는 `flutter devices --machine` 으로 한다.** `flutter doctor` 는 toolchain 점검이 본업이고 연결 device는 개수만 요약하므로, *어느 device가 android이고 어느 것이 ios인지* 와 *후보가 몇 개인지* 를 알 수 없다 — `-d` 값 결정과 플랫폼별 판정에는 구조화된 device 목록이 필요하다.
   - **진입점은 `-d`를 아예 생략한다.** 러너가 *`integration_test`를 지원하는 device로 후보를 좁힌 뒤* 하나만 남으면 자동 선택한다. **[관측됨]** `emulator-5554`(android) + `windows` + `chrome` + `edge` 네 device가 붙은 상태에서 `-d` 없이 실행했고 오류 없이 android emulator가 선택돼 통과했다 — 데스크톱·웹 device는 후보에서 걸러진다.
   - 후보가 둘 이상 남으면(예: android emulator 2대) 모호해지므로 그때 호출 측이 `-- -d <id>`로 지정한다. `-d`의 값은 **device id 또는 이름 접두사**만 허용되며 자연어 규칙은 명령으로 성립하지 않는다(`-d emulator-5554` 명시 호출도 동일하게 통과 — 실측).
 
@@ -1122,7 +1126,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 **수정**:
 
 ```
-**runtime target 이 web 이면** stack-guard 가 `validate:e2e` 진입점 + 최소 playwright config 를 scaffold 하고 browser 를 설치한 뒤(`npx playwright install`) `validate:e2e` 까지 smoke 한다(수행-6 + Step 5). **runtime target 이 native(Android·iOS) 면** `validate:e2e` 를 `flutter test integration_test` 로 배선하고 **앱 e2e 를 Playwright 에 배선하지 않는다**(ADR-059 D8 — 단 design surface 가 있으면 design gate 용 chromium 은 설치한다). e2e 대상이 아니면 scaffold 를 skip 하되 toolchain 설치는 수행한다.
+**runtime target 이 web 이면** stack-guard 가 `validate:e2e` 진입점 + 최소 playwright config 를 scaffold 하고 browser 를 설치한 뒤(`npx playwright install`) `validate:e2e` 까지 smoke 한다(수행-6 + Step 5). **runtime target 에 `native/*`(Android·iOS) 가 포함되면** `validate:e2e` 를 `flutter test integration_test` 로 배선하고 **앱 e2e 를 Playwright 에 배선하지 않는다**(ADR-059 D8 — 단 design surface 가 있으면 design gate 용 chromium 은 설치한다). e2e 대상이 아니면 scaffold 를 skip 하되 toolchain 설치는 수행한다.
 ```
 
 ## 4-2. 정적 분석 표에 Dart 행 추가
@@ -1186,7 +1190,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 ```
    - **6-3. e2e 실행 환경 준비 (runtime target 기준)**:
      - **target 에 `web` 포함**: `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요). **웹 경로는 개선 전과 동일하다.**
-     - **target 에 `native/*` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 `flutter doctor` 로 device 준비 상태를 확인하고, 연결된 device 가 없으면 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
+     - **target 에 `native/*` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 **`flutter devices --machine` 으로 연결된 device 를 조회**해 선언된 target 별 후보(android / ios)와 각 device id 를 회수한다 — `flutter doctor` 는 toolchain 점검이 본업이고 device 는 개수만 요약해 *어느 것이 android/ios 인지* 와 *후보가 몇 개인지* 를 알 수 없다(ADR-059 D4). 어떤 target 의 후보가 0개면 그 target 에 대해 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
      - **design surface 가 있음**: target 과 무관하게 `@playwright/test` 와 `@axe-core/playwright` 를 **devDep 으로 설치**하고 **`npx playwright install chromium` 까지 수행한다.** 모듈만 있고 브라우저 바이너리가 없으면 design gate adapter 가 `exit 2`(실행 불가)를 내고 registry 가 `status: needs-install` 로 굳어 **디자인 산출물 승인·프로토타입 승격·task 분해가 연쇄로 막힌다.** 즉 native 프로젝트에서도 design gate 용 chromium 은 필수다(ADR-059 D8). 이때 설치하는 Playwright 버전은 같은 저장소의 다른 웹 패키지와 맞추면 브라우저 캐시를 공유한다 — 버전이 다르면 브라우저 세트를 새로 내려받는다.
 ```
 
@@ -1206,12 +1210,26 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
        2. `integration_test/` 디렉터리를 만든다.
        3. `validate:e2e` 진입점을 **`flutter test integration_test` 로 박는다 — `-d` 를 넣지 않는다.** 이유: `-d` 는 device id 또는 이름 접두사만 받으므로 `emulator-5554` 처럼 재부팅하면 달라지는 값이나 `연결된 Android device 1대` 같은 자연어를 넣으면 명령 자체가 성립하지 않는다. `-d` 를 생략하면 러너가 **`integration_test` 지원 device 로 후보를 좁힌 뒤** 하나만 남으면 자동 선택한다(실측: android emulator + windows + chrome + edge 4개가 붙은 상태에서 emulator 자동 선택, 오류 없음). 후보가 둘 이상 남을 때만 호출 측이 `npm run validate:e2e -- -d <id>` 로 지정한다. 어떤 device 를 골라야 하는지의 *규칙*은 registry 에 적는다.
        4. **`--machine` 을 진입점에 박지 않는다** — 사람이 읽을 때는 기본 리포터가 낫고, 판정하는 쪽이 `npm run validate:e2e -- --machine` 으로 덧붙여 다시 호출한다(ADR-059 D4).
-     - **공통**: *이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록한다(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). 이 e2e provision/smoke 는 milestone graduation 의 E2E hard-block(ADR-052#amend-1 / ADR-014#amend-4)이 검사할 대상을 선readiness 한다.
+     - **공통**: *같은 계열로 이미 존재* 하면 덮어쓰지 않고 발견 사실만 출력에 기록한다(도구 감지 우선순위 정합 — 기존 도구 미덮어씀). **단 `validate:e2e` 가 *다른 계열* 로 물려 있으면**(예: `web` 이 `playwright test` 로 잡고 있는데 `native/*` 도 선언됨, 또는 그 반대) **덮어쓰지 않고 `FAIL(wiring)` 으로 보고하고 종료한다** — 진입점은 하나이므로 두 도구가 나눠 가질 수 없고, 조용히 놔두면 나중 target 이 영구 `EMPTY` 가 되어 *"테스트를 쓰라"* 는 틀린 처방이 나가고 실제 원인(배선 부재)이 드러나지 않는다(ADR-059 D4). 이 e2e provision/smoke 는 milestone graduation 의 E2E hard-block(ADR-052#amend-1 / ADR-014#amend-4)이 검사할 대상을 선readiness 한다.
      - **6-4-a. canonical boot smoke (조건부 생성)**: e2e 대상이고 등록된 smoke 가 없을 때 —
        - **새 프로젝트이고 앱 진입점이 결정적이면**: 프레임워크 수준 boot smoke 를 1개 생성한다. 내용은 *"앱이 기동하고 첫 프레임이 예외 없이 렌더된다"* 까지이며 **어떤 화면을 볼지 고르지 않는다**(화면 선택은 제품 결정이라 계획 단계 소관).
        - **기존 코드가 있거나 로그인·외부 의존이 필요해 부팅만으로 성립하지 않으면**: 생성하지 않고 `Needs E2E Smoke — /plan-workitem 이 작성 line item 을 authoring 해야 함` 을 출력한다.
        - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. **`native/*` 는 클래스 표기이므로 행으로 쓰지 않는다** — `native/android` 와 `native/ios` 를 함께 선언했으면 **두 행**이고 `web` 까지 선언했으면 세 행이다(ADR-059 D8). 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
      - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
+```
+
+**추가 수정 — 수행-5 smoke 를 target 별 실행으로 바꾼다.** 위 6-4 는 진입점을 *하나*로 두므로 선언된 e2e 대상 target 이 둘 이상이면 **한 번의 실행으로는 한 target 만 증명된다**(러너가 후보 하나를 자동 선택). 판정은 target 마다 나야 하므로(ADR-059 D4 / ADR-052#amend-1 결정 4) 실행도 target 마다 해야 한다.
+
+**기존** (수행-5 의 마지막 문장):
+
+```
+e2e 대상 프로젝트(수행-6 의 runtime target 이 e2e 대상)면 `validate:e2e` 도 1회 실행한다.
+```
+
+**수정**:
+
+```
+e2e 대상 프로젝트(수행-6 의 runtime target 이 e2e 대상)면 `validate:e2e` 도 실행한다 — **선언된 e2e 대상 target 이 하나면 1회**(러너가 후보를 좁혀 자동 선택), **둘 이상이면 target 마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩** 실행한다. `<device id>` 는 6-3 이 `flutter devices --machine` 으로 회수한 target 별 후보에서 고른다(ADR-059 D4).
 ```
 
 ## 4-6. design gate 실행 껍데기를 npm으로 고정
@@ -1259,7 +1277,7 @@ git add docs/20-system/ARCHITECTURE_OVERVIEW.md docs/90-decisions/boilerplate/AD
 **수정**:
 
 ```
-- 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2). **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
+- 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2) — **이때 `package.json` 이 없으면**(순수 Dart/Flutter 프로젝트엔 기본적으로 없다) **최소 형태로 생성하고 `scripts` 에 진입점을 박는다.** 생성하지 않으면 `npm run validate` 자체가 성립하지 않는다. **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
 ```
 
 **범위를 좁게 둔 이유**: 종료코드 보존이 필요한 것은 **design gate adapter를 호출하는 진입점 하나**다. 통합 `validate` 전체까지 npm으로 강제하면 `make`로 잘 돌던 기존 웹·API 프로젝트를 이유 없이 바꾸게 된다. Flutter만 `validate` 전체가 npm인 것은 그 스택의 결정(D2)이며 다른 스택에 전파하지 않는다.
