@@ -597,3 +597,105 @@
 | graduation pre-check 미통과 사유 | ≤2 | 0 | 통과 |
 
 **ADR-017 gate: 3/3 통과. Amendment 2가 비-UI lifecycle에 project runtime/dependency 회귀를 만들지 않았다.**
+
+---
+
+## Round 8 (2026-07-29, Flutter 습관 메모 앱 / ADR-059 모바일 프로파일 적용 검증)
+
+> isolated fork `C:\tmp\dogfood-flutter-round2-20260729` (baseline `bd6cb64`). ADR-059 신설 + amendment 6건 + skill 다수 개편으로 ADR-017 재실행 트리거 3종이 **모두** 발화한 라운드다. 실제 Flutter 3.44.8 / Dart 3.12.2 / Android 에뮬레이터(`Pixel_3a_API_33_x86_64`)로 수행했다.
+> **선행 시도 1건이 반려됐다** — 같은 날 첫 fork(`dogfood-flutter-round-20260729`)는 `/bootstrap-project` 미실행(charter가 baseline과 byte 동일), workitem 0건, `.git` 부재, **design gate 전체 누락**, 색상 fixture 2/3, registry `status: pending`(허용값 밖), ARCH `## 7-1`~`## 7-3` 미삭제로 반려됐고 본 Round 8이 그 재수행이다. 첫 fork에서 유효한 것은 EMPTY 함정 실증 스트림뿐이다.
+
+### 수행 방법의 한계 (먼저 밝힌다)
+
+lifecycle skill 9종 중 6종(`bootstrap-project`·`bootstrap-stack`·`stack-guard`·`plan-milestone`·`plan-workitem`·`stabilize-milestone`)은 `disable-model-invocation: true`이므로(ADR-050 D2 — **의도된 설계**) 에이전트가 Skill 도구로 호출할 수 없다. 따라서 단계 1~4는 각 SKILL.md가 문서화한 동작을 에이전트가 **수작업으로, 그러나 실제 명령 실행(git/npm/flutter/dart)과 실제 커밋을 동반해** 재현했다. `/validate-workitem T-001` → `/finalize-workitem T-001` → `/stabilize-milestone M1`은 **사용자가 직접 호출**했고 이 셋만 진짜 skill 실행이다.
+
+**1차 관측**: ADR-017의 "사용자 개입 ≤1회(산출물 직접 편집 기준)" 지표는 본 구성으로 **측정할 수 없다** — 6종을 수작업 대체한 행위 자체가 산출물 직접 편집이다. **에이전트 단독으로는 dogfood를 완주할 수 없고, 메인 세션 skill 구간은 사람이 운전해야 한다.** ADR-017 결정 1은 실행 주체를 명시하지 않아 이 제약이 문서에 없다.
+
+### 단계별 관측
+
+1. **Bootstrap project** (수작업 재현): charter 13/13 섹션 실서술 + `ADR-100` 신설 + project README 인덱스 갱신. 첫 시도가 건너뛴 단계이며, `ADR-100`(bootstrap-project 소유) / `ADR-101`(bootstrap-stack 소유) 번호 분리는 `STRUCTURE.md:52`가 규정한 **의도된 설계**임을 확인했다(첫 시도는 이를 문서 drift로 오등재했다).
+2. **Bootstrap stack** (수작업 재현): ARCH `## 7-5` 채움 + `## 7-1`~`## 7-4` **통째 삭제** + `ADR-101` 신설 + Flutter 앱 scaffold. 비해당 sub-section 삭제 규칙이 모바일 경로에서도 성립함을 확인.
+3. **Stack guard** (수작업 재현): npm broker `validate`(dart format → analyze → test) + `validate:e2e`(`flutter test integration_test`, `-d` 없음) + **design gate 물질화** — `@playwright/test`·`@axe-core/playwright` devDep, `npx playwright install chromium`, canonical asset byte-copy(digest `9fb9b7a2…6f17cda9` 일치), fixed conformance 17/17 PASS. **design surface가 있는 native 프로젝트에서 design gate는 target과 무관하게 배선된다**(stack-guard §6-3 세 번째 항목)는 것이 첫 시도에서 누락됐던 지점이다.
+4. **Plan + TDD** (수작업 재현): M1 / F-001 / T-001 / T-002 + ROADMAP `## Now`. T-001(추가·삭제·영속) Red→Green, T-002(오늘 토글) Red→Green, 각각 실제 커밋.
+5. **Validate** (실제 skill): `/validate-workitem T-001` → `reports/T-001.md` 판정 **Pass**, AC 3/3 ✅, FAC 3/3, diff trace audit이 P2 2건을 잡고 `test/widget_test.dart` 삭제를 "(c) pre-existing dead code 아님"으로 판정해 Pass 유지.
+6. **Finalize** (실제 skill): `/finalize-workitem T-001` → **새 커밋 없음**. T-001이 이미 `done`이라 §1-G 착수 상태 게이트의 "`done`이면 read-only no-op" 경로로 정상 종료. **게이트가 실제로 작동한 첫 관측**이다.
+7. **Stabilize** (실제 skill): `/stabilize-milestone M1` → **graduation: NO**. QA_FINDINGS `F-M1-001`~`014`(P0 2 / P1 7 / P2 5), 개선 항목 23건, harness 발견 7건 산출. §5-2 Dart 색상 grep이 `ColorScheme.fromSeed(seedColor: Colors.deepPurple)`를 잡은 뒤 `[Design-token-grep]` **"재판정 — 위반 아님으로 정정"** 처리까지 실동작 — ADR-059 D6의 검출력과 문서화된 한계 처리를 동시에 실증했다.
+
+### 졸업 판정 (실측)
+
+| # | 기준 | 판정 | 근거 |
+|---|---|---|---|
+| ① | 모든 task status done | ✔ | T-001·T-002 |
+| ② | 통합 validate Pass | ✔ | exit 0, 7/7 |
+| ③ | E2E Pass | ✔ | android — HEAD(`3a14d8e`)에서 BOOT_SMOKE **실제 재실행** PASS, registry 테스트명 일치. iOS는 stabilize가 `NOT_APPLICABLE`로 기록(아래 결함 1 참조 — **오분류**) |
+| ④ | AC 매핑 100% | ✗ | T-002 validation report 부재 |
+| ⑤ | P0 finding 0건 | ✗ | `F-M1-001`(손상 데이터 → 영구 스피너), `F-M1-002`(레거시 스키마 → 크래시) |
+| ⑥ | 추가 기준 | ✔ | 해당 없음 |
+
+**게이트가 실제로 차단했다.** 통합 validate 7/7 + 실기 BOOT_SMOKE PASS 상태에서 P0 2건이 나왔고 둘 다 테스트가 아니라 정적 리뷰에서 잡혔다 — 위젯 테스트가 `setMockInitialValues({})`만 써서 **실패 경로 오라클이 0개**였던 것이 원인이다. "테스트 통과"가 견고성의 증거가 아니라는 실증.
+
+### 실제 커밋
+
+`b40cf56` 초기 fork → `9cc61cb` charter+ADR-100 → `ef098e8` ARCH 7-5+ADR-101+scaffold → `ff5dd4f` stack-guard(broker·design gate 17/17·e2e) → `77e5693` registry 최초 PASS → `4511e87` M1/F-001/T-001/T-002 → `095f9e8` T-001 → `e87b7ac` T-002 → `bd118f5` registry 갱신 → `3276086` 불일치 검증용 주석 → `89cc3e5` 주석 되돌림 → `3a14d8e` registry 최종 갱신. stabilize 산출물(M1 `## 8` / QA_FINDINGS / IMPROVEMENT_GUIDE)은 미커밋 상태로 보존.
+
+### ADR-017 성공 기준
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---:|---|
+| 사용자 개입 (산출물 직접 편집) | ≤1 | 측정 불가 | **판정 불가** — 위 "수행 방법의 한계" |
+| placeholder 충원율 | ≥80% | 90.8% (108/119) | 통과 |
+| graduation pre-check 미통과 사유 | ≤2 | 2 (④⑤) | 통과 (경계) |
+
+**ADR-017 gate: 2/3 통과 + 1 판정 불가.** 미충원 11건은 ARCH `## 8`~`## 10` 5건(품질속성·리스크·열린질문 — 축소판 범위), DESIGN.md 4건(`/bootstrap-design` 미실행), ROADMAP `## Next`/`## Later` 2건(얇음 규율상 정상)이다.
+
+### harness 발견 — 검증 후 확정
+
+stabilize가 `M1-instr-1`~`7`로 산출한 7건을 보일러플레이트 본문과 대조해 재판정했다.
+
+**확정 결함 1 — iOS target 교착 (P1, 복합).** `stabilize §3-b:129`는 "target이 둘 이상이면 판정을 target마다 내고 **하나라도 `PASS`가 아니면 졸업은 차단**"이라 하고, `§1.5`의 `NOT_APPLICABLE` 정의는 **"비-UI ∧ graduation item 6에 e2e 미선언"**이다. Flutter 프로젝트는 UI이고 e2e를 선언하므로 **iOS-on-Windows는 정의상 `NOT_APPLICABLE`이 아니라 `BLOCKED_ENV`(hard block)** 다 — 본 라운드에서 stabilize가 `NOT_APPLICABLE`로 기록한 것은 오분류이며, 규칙에 상태가 없을 때 에이전트가 관대한 답을 발명한다는 증거다. 유일한 우회로는 `§3-b:132`의 "host 제약 target은 registry `마지막 PASS` 칸을 증거로 쓸 수 있다 — **기록된 커밋이 판정 커밋과 정확히 같을 때만**"인데, **이 조건은 구성상 충족 불가능하다**: registry 갱신 주체는 `/stack-guard`(stabilize는 read-only, `§3-b:134`)이고, 커밋 X에서 증거를 기록하면 그 기록 자체가 커밋 X+1이 되어 `기록=X ≠ HEAD=X+1`이 된다. 실측 확인 — 본 fork의 registry 기록 `89cc3e5`, HEAD `3a14d8e`, 사이 변경은 `docs/00-meta/STACK_SETUP_PLAN.md` 단 하나(registry를 적은 그 커밋). 무한 후퇴다. **결론: Windows 호스트에서 iOS를 선언한 Flutter 마일스톤은 현재 규약으로 졸업할 수 없다.** 본 라운드는 ④⑤가 이미 미충족이라 결과가 바뀌지 않았을 뿐이다.
+
+**확정 결함 2 — `P0` 라벨과 차단력 불일치 (P2).** `§1.5`의 ⑤ predicate는 `QA_FINDINGS.md`의 `## M-N` → `### P0`만 센다. `§5-4`(7-x Don'ts grep, best-effort heuristic)는 `P0 [Arch-iface-violation]`을 발급하지만 QA_FINDINGS에 쓰지 않으므로 **졸업을 차단할 수 없다.** `MILESTONE_TEMPLATE.md:32`가 "qa 팬아웃 P0(QA_FINDINGS)만 반영, reviewer report-only 미반영"으로 이 동작을 이미 규정하므로 **게이트가 깨진 것은 아니다** — 문제는 라벨 어휘다. stabilize §5-x 블록의 라벨 분포를 실측하면 P1 9건 / P2 4건 / **P0 1건**으로, `§5-4`의 P0이 유일한 이탈이다. 실제로 본 라운드의 stabilize가 이 불일치를 결함으로 오인해 등재했다.
+
+**결함 아님 1 — validation report의 gitignore (기각).** `M1-instr-7`은 "졸업 기준이 gitignore된 산출물에 의존한다"를 구조적 결함으로 등재했으나, `MILESTONE_TEMPLATE.md:32`가 이미 "이 판정은 stabilize 시점 report(ADR-014상 checkout-local ephemeral) 기준이며, ROADMAP Done은 *영속된 판정*의 파생이지 **fresh clone에서 재도출된 증거가 아니다**"로 명시하고, `WORKFLOW.md:27`이 "validate와 finalize는 **같은 checkout**에서 연속 실행해야 한다"를 못 박으며, `STRUCTURE.md:45`가 lifecycle을 `ephemeral`로 등재한다. **의도된 설계다.** 잔여 사항은 문구뿐 — 재검증 안내가 "stabilize 재실행"만 말하고 **각 task의 `/validate-workitem` 재실행이 선행돼야 report가 생긴다**는 점을 적지 않아, 새 체크아웃에서 ④ 미충족을 만난 사용자가 결함으로 오인한다(본 라운드가 그 실례).
+
+**결함 아님 2 — finalize의 report 게이트 (진단 오류).** `M1-instr-4`는 "lifecycle에 report 없이 finalize를 막는 게이트가 없다"고 했으나 `finalize-workitem/SKILL.md:25`에 실재한다("report 파일이 없거나 stale하면 `/validate-workitem` 선행 안내 + `Needs Validation` 종료, 커밋하지 않음"). T-002가 통과한 이유는 게이트 부재가 아니라 **finalize를 skill로 돌리지 않고 손으로 커밋했기 때문**이다. 유효한 잔여 관측은 "task status를 손으로 `done`으로 쓰는 것을 막을 수단이 없다"이며, 이는 수작업 우회 일반의 한계지 특정 게이트의 결함이 아니다.
+
+**기존 결정 중복 — 경험 게이트 native degrade.** `M1-instr-5`(§3-V가 웹 전제라 Flutter에 적용 불가)는 **ADR-059 D12가 이미 degrade로 명시 기록**하고 재검토 트리거 7로 이관한 사안이다. 새 발견이 아니다.
+
+**메타 관측.** `M1-instr-6` — 본 라운드 교훈 6건 중 5건이 검증·게이트 정교화 방향이고 제품을 써 본 경험축 교훈은 `F-M1-006`(“오늘”이 하루 지나도 완료로 남는다) 1건뿐이다. dogfood가 harness 자기검증에 치우치고 제품 경험을 덜 자극한다는 신호로 남긴다.
+
+### ADR-059 재검토 트리거 판정
+
+1 미발화(색상 3/3 — `Color(0x…)`·`Color.fromARGB|fromRGBO`·`Colors|CupertinoColors`, 정의 라인 예외 정상) · 2 미발화(빈 e2e가 `EMPTY`로 분류, exit 0 오판 없음) · 3 **부분 판정**(웹 무회귀는 결과축만 확인, `validate` median 시간축은 두 라운드 모두 미측정 — falsifier (c) 미충족) · 4 미발화(golden 미도입) · 5 미발화(CI·2인 작업 없음) · 6 미발화(`protocolVersion` `0.1.1` 불변) · 7 판정 불가(시각 회귀 관측 기회 없음) · 8 판정 불가(수동 해석 부담의 임계값은 단일 라운드로 판정 불가) · 9 미발화(`shared_preferences`는 `flutter pub add`로 pub scope, npm devDep 필요 task 없음 → `## Dependency Tools` `pub` 1행 유지).
+
+**발화 0건 → ADR-059 `## 정책 강도` 재조정 불필요.** 단 트리거 3은 "미발화"가 아니라 부분 판정이다.
+
+### 결정에 미친 영향
+
+- ADR-059 D2(npm broker)·D3(golden 로컬)·D4(5상태 per-target 판정)·D6(색상 grep)·D8(3축 판정)은 **실사용에서 의도대로 작동**했다. D6은 `[Design-token-grep]` 재판정까지 포함해 실동작을 확인했다.
+- D4는 **host 제약 target의 evidence 소비 경로가 구성상 성립 불가**함이 드러났다(위 확정 결함 1). ADR-059 D4 / `STACK_SETUP_PLAN_TEMPLATE.md ## E2E Smoke Registry` / `stabilize §3-b:132`가 함께 개정 대상이다.
+- D12(경험 게이트 native degrade)는 예측대로 degrade했고 새 정보가 없다.
+- ADR-017은 **실행 주체 규정이 없다**는 공백이 드러났다(위 1차 관측). 에이전트 단독 완주 불가를 문서화할 대상이다.
+
+### 채택된 해결 방향 (2026-07-29 사용자 확정 — **본 라운드 미적용**, 후속 개선 라운드에서 처리)
+
+**확정 결함 1 → `S2` + host 범위 degrade.** 두 부분이다.
+
+1. **증거 유효 조건 교체** — "기록된 커밋 == 판정 커밋"을 **"기록 커밋과 판정 커밋 사이에 `docs/`와 `*.md` 밖의 변경이 하나도 없으면 유효"**로 바꾼다. 판정식은 `git diff --name-only <기록> <판정> -- . ':(exclude)docs/' ':(exclude)*.md'` 가 비었는지 하나로, 사람 판단은 여전히 0이다. 격리 저장소에서 4개 경계 사례로 3안을 비교 측정한 결과다.
+
+   | 사이에 있는 변경 | S1 (source root 한정) | **S2 (문서 제외)** | S4 (트리 해시) | 정답 |
+   |---|---|---|---|---|
+   | 문서만 (= 교착 원인) | 유효 ✓ | **유효 ✓** | 유효 ✓ | 유효 |
+   | `android/` 네이티브 설정 | 유효 ✗ | **무효 ✓** | 유효 ✗ | 무효 |
+   | `.gitignore`만 | 유효 ✓ | **무효 ✗** | 유효 ✓ | 유효 |
+   | `assets/`만 | 유효 ✗ | **무효 ✓** | 유효 ✗ | 무효 |
+
+   S1·S4는 *앱이 실제로 바뀐 뒤에도 옛 증거를 유효로 인정*하는 오답을 각 2건 냈다 — 미검증 빌드를 통과시키는 방향이라 채택 불가. S2의 유일한 오답은 앱 무관 변경에 재실행을 요구하는 **과차단**이고 비용은 재실행 1회다. "조용한 오답보다 안전한 실패"(D2 재검토 트리거 9)와 같은 선택이다.
+
+2. **host 제약 target은 차단하지 않고 명시 기록** — macOS 증거가 아예 없으면 `졸업 가능: NO`로 막지 않고, 판정문에 `graduation: YES (host 제약 target 미검증: native/ios)` 형태로 미검증 사실을 남긴다. **D12가 경험 게이트에서 이미 채택한 "숨기지 않고 degrade 기록" 패턴과 같은 형태**이며, 그 선례가 근거다. 이로써 `NOT_APPLICABLE`을 발명해 통과시키는 경로가 불필요해진다.
+
+   개정 대상: ADR-059 D4 / `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md ## E2E Smoke Registry` 주석 / `.claude/skills/stabilize-milestone/SKILL.md` §3-b·§1.5.
+
+**확정 결함 2 → 라벨 `P1`로 하향.** `§5-4`의 `P0 [Arch-iface-violation]`을 `P1 [Arch-iface-violation]`으로 바꿔 같은 블록의 나머지 13건(P1 9 / P2 4)과 정렬한다. `MILESTONE_TEMPLATE.md:32`가 이미 규정한 report-only 동작과 라벨이 일치하게 된다. best-effort heuristic(스스로 "false negative 多"로 명시)에 차단력을 주는 대안은 오탐 차단 위험과 ADR-053 backstop 설계와 어긋나 기각했다.
+
+**기각·중복 항목은 재등재하지 않는다** — `M1-instr-7`(report gitignore)은 `MILESTONE_TEMPLATE.md:32`·`WORKFLOW.md:27`·`STRUCTURE.md:45`가 규정한 의도된 설계이고, `M1-instr-4`는 `finalize-workitem/SKILL.md:25`에 게이트가 실재하므로 진단 오류이며, `M1-instr-5`는 D12가 이미 결정한 사안이다. 잔여로 남는 문구 개선 후보 2건: (a) 새 체크아웃 재검증 시 **각 task의 `/validate-workitem` 재실행이 선행돼야 report가 생긴다**는 한 줄(`MILESTONE_TEMPLATE.md:32` 또는 `WORKFLOW.md:27`), (b) ADR-017에 **에이전트 단독 완주 불가**(메인 세션 skill 구간은 사람이 운전) 명시.
