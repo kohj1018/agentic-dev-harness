@@ -41,7 +41,8 @@ draft
 <!-- 외부 API, 서드파티 서비스, 외부 데이터 소스. -->
 
 ## 7. 기술 선택
-<!-- 언어, 프레임워크, DB, 인프라 등 주요 기술 선택과 이유. 스택이 미정이면 미정으로 적는다. -->
+<!-- 언어, 프레임워크, DB, 인프라 등 주요 기술 선택과 이유.
+     스택이 아직 안 정해졌으면 여기에 "미정"으로 적지 말고 DECISION_REGISTER에 open 항목으로 등재한다 (ADR-060 D1) — 정본에 미정을 적으면 아무도 회수하지 않는다. -->
 
 <!-- 고-stakes 결정(되돌리기 비쌈 / 대안 2+ / 3+ 모듈·cross-surface / 보안·데이터·마이그레이션 — ADR-053 게이트)은 아래 *결정 블록*으로 기록한다. 저-stakes 선택은 한 줄로 족하다(과기록 금지 — ADR-006).
 
@@ -57,7 +58,7 @@ draft
 
 <a id="arch-7-1"></a>
 ## 7-1. API 컨벤션
-<!-- API 스택일 때만 채운다. /bootstrap-stack이 architect 단발 호출로 채운다.
+<!-- API 스택일 때만 채운다. /bootstrap-stack이 소항목별 authority에 따라 채운다 — 되돌리기 비싼 소항목은 사용자 승인, 나머지는 architect 단발 호출 + 라운드 끝 일괄 확인 (ADR-060 D9).
      **비-API 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->
 
 ### 응답 envelope
@@ -84,7 +85,7 @@ draft
 
 <a id="arch-7-2"></a>
 ## 7-2. CLI 컨벤션
-<!-- CLI 라이브러리 사용 시만 채운다. /bootstrap-stack이 architect 단발 호출로 채운다.
+<!-- CLI 라이브러리 사용 시만 채운다. /bootstrap-stack이 소항목별 authority에 따라 채운다 (ADR-060 D9).
      **비-CLI 프로젝트는 스택 확정 시 /bootstrap-stack이 본 sub-section을 통째 삭제.** -->
 
 ### 출력 포맷
@@ -221,4 +222,5 @@ draft
 
 ## 9. 리스크
 
-## 10. 열린 질문
+<!-- ## 10. 열린 질문 — 폐지(결번). 기술 미결정은 docs/10-charter/DECISION_REGISTER.md가 소유한다 (ADR-060 D1).
+     섹션 번호는 재사용하지 않는다. -->

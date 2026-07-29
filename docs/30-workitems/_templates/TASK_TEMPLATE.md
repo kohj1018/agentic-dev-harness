@@ -2,7 +2,7 @@
 
 ## 0. Status
 draft
-<!-- 값은 헤딩+1 줄(위)에 둔다 — 주석은 값 *뒤*("헤딩+1=상태값" 파서 보호). draft(계획 작성 중) → ready(전 M 계획+[Plan-dep] 성공 시 plan-workitem이 승격) → in-progress(모든 preflight 통과 뒤 implement dispatch 직전) → done(finalize). 유일한 역전이: 검증된 완료 결함을 repair-workitem이 Adopt/Adopt-modified한 경우의 `done → in-progress`. implement는 ready 신규 착수/in-progress 재개만, finalize는 in-progress만 done. ADR-057#amend-3 결정 5. -->
+<!-- 값은 헤딩+1 줄(위)에 둔다 — 주석은 값 *뒤*("헤딩+1=상태값" 파서 보호). draft(계획 작성 중) → ready(**/seal-milestone이 봉인 시 일괄 승격** — plan-workitem은 승격하지 않는다. ADR-060 D7) → in-progress(모든 preflight 통과 뒤 implement dispatch 직전) → done(finalize). 유일한 역전이: 검증된 완료 결함을 repair-workitem이 Adopt/Adopt-modified한 경우의 `done → in-progress`. implement는 ready 신규 착수/in-progress 재개만, finalize는 in-progress만 done. ADR-057#amend-3 결정 5. -->
 
 ## 0-1. Type
 <!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.

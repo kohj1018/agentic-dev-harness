@@ -2,7 +2,11 @@
 
 ## 0. Status
 draft
-<!-- 값은 헤딩+1 줄(위)에 둔다 — 주석은 값 *뒤*(finalize 등 "헤딩+1=상태값" 파서 보호). draft(계획 중) → ready(plan-milestone 확정 재대조 통과·잠금). M·feature는 이 단방향만 쓴다 — 완료 판정은 graduation(`## 8` 회고)이 담당하고 stabilize는 M `## 0. Status`를 바꾸지 않는다. ready 뒤 상위 계약 변경은 새 마일스톤이 기본이고, 현재 M 진행 불가 P0는 자동 역전이 없이 사용자 보고. plan-workitem은 M·산하 feature가 모두 ready일 때만 동작. ADR-057#amend-3 결정 5. -->
+<!-- 값은 헤딩+1 줄(위)에 둔다 — 주석은 값 *뒤*("헤딩+1=상태값" 파서 보호).
+     draft(계획 중) → contract-ready(plan-milestone 라운드 완료·사용자 승인 — task 분해 진입 자격, **잠금 아님**) → ready(/seal-milestone이 봉인).
+     M·feature는 이 단방향만 쓴다. 완료 판정은 graduation(`## 8` 회고)이 담당하고 stabilize는 M `## 0. Status`를 바꾸지 않는다.
+     contract-ready 구간에서는 상위 계약 수정이 정상 경로다(repair-plan이 그 자리에서 고친다). ready 뒤 상위 계약 변경은 새 마일스톤이 기본이고, 현재 M 진행 불가 P0는 자동 역전이 없이 사용자 보고.
+     plan-workitem은 M·산하 feature가 모두 contract-ready일 때 동작하고 task를 ready로 승격하지 않는다. ADR-060 D6/D7 (ADR-057#amend-3 결정 5 부분 supersede). -->
 
 ## 0-1. Type
 <!-- feature | technical-enabler | bugfix | refactor | migration | research-spike. 미기재 시 feature.
@@ -43,8 +47,8 @@ feature
 ## 7-1. FAC ↔ AC 매핑표 (subsection of ## 7)
 <!-- /plan-workitem이 task 분해 시 본 subsection을 채운다 (영속 SSOT — plan 출력은 echo).
      형식: FAC-N → T-NNN:AC-N, T-MMM:AC-M (다대다 허용)
-     unmapped 0건이 plan-workitem task ready 승격 조건 — 발견 시 성공 종료 금지(ADR-037#amend-3). 구현 시작 후 발견되면 validator(ADR-037) 및 stabilize preflight가 P0 [Spec-gap]로 보고 + 사용자 결정.
-     본 subsection은 ## 7 FAC와 한 묶음 — ADR-036 12-섹션 구조에 *추가 main section 신설 X*. -->
+     unmapped 0건이 /seal-milestone 봉인 조건 — plan-workitem은 발견 시 성공 종료 금지, 승격은 하지 않는다(ADR-037#amend-3 / ADR-060 D7). 구현 시작 후 발견되면 validator(ADR-037) 및 stabilize preflight가 P0 [Spec-gap]로 보고 + 사용자 결정.
+     본 subsection은 ## 7 FAC와 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X*. -->
 - FAC-1 →
 - FAC-2 →
 - FAC-3 →
@@ -60,7 +64,7 @@ feature
 <!-- UI feature 한정(ADR-056#amend-1). /plan-workitem 3-P가 채운다(영속 SSOT — plan 출력은 echo).
      형식: PX-M<N>-<screen>-NN → T-NNN:AC-M, T-MMM:AC-K (다대다 허용)
      `## 7` PX 인벤토리의 어떤 PX도 참조하지 않는 AC/미매핑 PX(unmapped PX)는 [Plan-FAC-coverage]가 unmapped FAC와 동일 기준으로 잡는다(P0 권장).
-     본 subsection은 ## 7과 한 묶음 — ADR-036 12-섹션 구조에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)". -->
+     본 subsection은 ## 7과 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)". -->
 - PX-M<N>-<screen>-01 →
 - PX-M<N>-<screen>-02 →
 
@@ -88,4 +92,4 @@ feature
 - Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components). 비-UI 프로젝트는 줄 삭제. -->
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 
-## 12. 열린 질문
+<!-- ## 12. 열린 질문 — 폐지(결번). 이 feature의 미결정은 docs/10-charter/DECISION_REGISTER.md가 소유한다(항목의 `영향:` 칸에 M ID와 이 F ID를 함께 적는다 — ADR-060 D1). -->

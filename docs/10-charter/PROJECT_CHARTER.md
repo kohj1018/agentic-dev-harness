@@ -36,8 +36,8 @@ draft
 ## 9. 핵심 가정
 <!-- DISCOVERY.md의 핵심 가정을 그대로 박는다. 가장 위험한 가정에는 검증 방법을 함께 적는다. -->
 
-## 10. 열린 질문
-<!-- 아직 답이 없는 중요한 질문들. -->
+<!-- ## 10. 열린 질문 — 폐지(결번). 기획 미결정은 docs/10-charter/DECISION_REGISTER.md가 소유한다 (ADR-060 D1).
+     섹션 번호는 재사용하지 않는다. -->
 
 <!-- DISCOVERY.md 가 SSOT, 본 Charter는 snapshot view (ADR-035).
      DISCOVERY 갱신 시 본 Charter는 자동 sync 안 됨 — `/bootstrap-project --apply` 또는 수동 갱신. -->
