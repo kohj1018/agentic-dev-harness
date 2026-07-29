@@ -5,6 +5,8 @@
 ## Status
 accepted
 
+> **정합 표기 (2026-07-29)**: [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D1이 FEATURE_TEMPLATE `## 12. 열린 질문`을 폐지(결번)하므로 본 ADR의 "12섹션"은 **`## 1`~`## 11` 11섹션 + 결번 12**가 된다. 섹션 번호는 재사용하지 않으며, "추가 main section 신설 X" 규율은 불변이다.
+
 ## 배경
 - [관측됨+외부실증] Osmani 6 core (User Story / Scenario / AC / NFR / Edge Cases / Dependencies) + ChatPRD 6 sections — feature 단위 user story+AC를 spec 단계에서 박는 게 LLM 구현 품질의 핵심.
 - [관측됨] 본 보일러플레이트의 FEATURE_TEMPLATE은 10섹션이지만 User Story 형식·시나리오·Feature-level AC·NFR 자리 부재 → AI agent가 implement 시 *who·why·시나리오 측정 기준* 부족.

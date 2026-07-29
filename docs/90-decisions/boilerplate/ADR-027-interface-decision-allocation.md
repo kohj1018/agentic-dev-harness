@@ -12,6 +12,8 @@ accepted
 - cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3 + 신호 정정 #amend-8 결정 4. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입). #amend-7(DESIGN 내용 계약 확장 — §1 정체성·§9 a11y·§8 semantic motion·§7 category state·§4 responsive invariant·§3 tabular; reviewer a11y 차원·category state 미러).
 - 적용 파일 전체는 아래 `## Surfaces` 참조.
 
+> **부분 supersede (2026-07-29)**: 본 ADR이 정한 "`## 7-1`~`## 7-5` 인터페이스 컨벤션 채움 = architect 단발 sub-call(라운드 아님)" 규정은 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D9가 부분 supersede한다 — 되돌리기 비싼 소항목은 사용자 확정 라운드로 승격한다. 본 ADR의 나머지 결정은 유효하며, 본 표기는 개정(amend)이 아니라 참조 갱신이므로 통합 재발행 서약은 그대로 유효하다.
+
 ## 배경
 - [외부실증] [prg.sh — Why Your AI Keeps Building the Same Purple Gradient](https://prg.sh/ramblings/Why-Your-AI-Keeps-Building-the-Same-Purple-Gradient-Website) — LLM이 시각 결정 입력 없이 생성하면 median 미감(purple gradient generic SaaS)으로 수렴한다. 명시적 결정 자리가 없으면 매 task마다 LLM이 즉흥 결정한다.
 - [관측됨] `DESIGN_SYSTEM.md`가 UI / API·백엔드 / CLI 3 그룹 placeholder를 한 파일에 담아 "광의 SSOT" 시도 → 백엔드 개발자에게 misnomer + ARCHITECTURE 운영성 섹션과 책임 중복.

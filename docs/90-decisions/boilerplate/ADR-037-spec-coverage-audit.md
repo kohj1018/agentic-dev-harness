@@ -10,6 +10,8 @@ accepted
 - `/plan-workitem M<N>`은 FAC↔AC 100%와 unmapped 0건을 task ready 승격 조건으로 삼는다. 첫 구현 전 validate/reviewer는 누락을 P0로 보고하고 repair-plan이 task·AC·매핑을 수정한다(#amend-3).
 - 구현 시작 뒤 unmapped FAC는 `P0 [Spec-gap]`+`Needs Fix`, stabilize graduation `NO`로 사용자에게 보고한다. 현재 M task 자동 추가·FAC 자동 취소·plan-workitem 재호출은 없다(#amend-3, ADR-057#amend-3 결정 6).
 
+> **부분 supersede (2026-07-29)**: #amend-3의 "FAC↔AC 100%가 task `ready` 승격의 필수 조건"에서 **승격 주체는 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7의 `/seal-milestone`**이다(봉인 조건 4). plan-workitem은 unmapped 발견 시 성공 종료를 막고 task를 `draft`에 둔다. 커버리지 요구 자체는 불변.
+
 ## 배경
 - [외부실증] Osmani self-audit — feature FAC(Feature-level Acceptance Criteria)와 task AC 매핑 누락이 *spec gap*의 핵심 원인.
 - ADR-036으로 FEATURE_TEMPLATE에 `## 7 FAC`가 생겼지만 FAC→AC 매핑을 추적하는 메커니즘 부재.

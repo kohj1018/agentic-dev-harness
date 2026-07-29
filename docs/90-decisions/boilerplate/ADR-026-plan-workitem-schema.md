@@ -11,6 +11,8 @@ accepted
 - 후행 task는 선행 task의 계획된 완료 결과를 전제로 하며 `## 9`에서 `T-NNN:AC-M`으로 참조한다. 누락·순환·참조 AC의 보장 부재는 계획 성공·task ready 승격을 막는다(#amend-4).
 - planner self-check·architect 신호·task sizing 규칙은 #amend-1을 유지한다.
 
+> **부분 supersede (2026-07-29)**: `## 현재 유효 결정`과 #amend-4의 "누락 참조·순환·AC-보장 미비는 … task `ready` 승격을 막는다"에서 **승격 주체는 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7의 `/seal-milestone`**이다. plan-workitem은 승격하지 않고 성공 종료만 막는다. 검사 항목·P0 강도는 불변.
+
 ## 배경
 - [관측됨+외부실증] vague AC가 LLM TDD 실패의 단일 최대 원인 (Fowler SDD analysis: https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html).
 - `docs/30-workitems/_templates/TASK_TEMPLATE.md`의 `## 6. Acceptance Criteria` 주석은 "Given-When-Then 또는 명세 형태"라 "or" 옵션 → 자유도 큼. AC 개수 cap·verb whitelist·의존성 자리 없음.

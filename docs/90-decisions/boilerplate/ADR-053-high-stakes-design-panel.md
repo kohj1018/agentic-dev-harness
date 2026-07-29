@@ -6,6 +6,13 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- stakes 게이트 S1~S5와 판정(S1~S4 중 1+ → full 패널 / S5만 → 리서치-only / 전부 NO → fast path)은 결정 1 그대로다. **S1~S4는 *분석 깊이* 축 전용**이며 *누가 결정하는가*는 ADR-060 D2의 `authority` 축이 소유한다(#amend-2).
+- full 패널 절차는 **①~⑤**다(#amend-2) — ① 리서치 → ② 다각도 2~3안 → ③ 적대 재검토 → **④ 사용자 선택(ADR-060 D3 Decision Brief)** → ⑤ 기록(ARCHITECTURE `## 7` 결정 블록 + 해당 시 ADR). 결정 2의 "④ 기록"은 ⑤로 밀렸다.
+- ⑤의 "(해당 시) ADR" 판정 기준·작성 주체는 ADR-000#amend-2 결정 3과 그 트리거 표가 SSOT다(#amend-1 — 번호만 ④→⑤로 밀림).
+- `authority: agent-delegated`로 배정된 결정은 게이트가 발동해도 ④를 건너뛰고 라운드 종료 시 **일괄 확인 1회**에 포함한다(#amend-2).
+- parallel-merge 금지 · `/review-doc` 미사용 · stabilize의 `P2 [Design-rationale]` backstop은 결정 2③·결정 3 그대로 유효하다.
+
 ## 배경
 - [관측됨] 중요한 설계 결정(스택·구조·마일스톤 분할)이 architect *단발 호출*로 빠르게 내려지고, 웹리서치는 옵션, 다중 후보·적대 검증이 없다 → 결정 품질이 비중에 못 미친다.
 - [외부실증] arXiv 2606.01490 (2026) *LLM Consortium for Software Design Refinement* — single-shot 설계는 낮은 품질 baseline; 구조적 적대 리뷰(전면 재작성 요구)가 최상위 + cross-model review가 차순위; **parallel-merge(N개 완성안 병합)는 최악**(토큰 기아). arXiv 2604.04990 (2026) *Architecture Without Architects* — 에이전트가 프롬프트만으로 프레임워크/DB를 초 단위 결정, 근거 0.
@@ -58,3 +65,26 @@ accepted
 <a id="adr-053-amend-1"></a>
 ## Amendment 1 (2026-07-16) — ④ "(해당 시) ADR"의 판정 기준·작성 주체 구체화
 결정 2의 ④ "(해당 시) ADR"은 [ADR-000 Amendment 2](ADR-000-boilerplate-decision-policy.md#adr-000-amend-2) 결정 3의 판정 기준(비-스택 프로세스/제품 범위/보안 결정 · boilerplate supersede · cross-마일스톤 재검토 트리거 필요)을 따르고, 작성 주체·시점은 그 트리거 표(그 라운드를 운전한 skill이 결정 확정 시점에 architect sub-call로 초안)가 SSOT다.
+
+<a id="adr-053-amend-2"></a>
+## Amendment 2 (2026-07-29) — 패널의 종결자를 사용자 선택으로 이동
+
+### 배경
+- [관측됨] 결정 2의 3단 강도가 `① 리서치 → ② 다각도 2~3안 → ③ 적대 재검토 → ④ ARCHITECTURE §7 결정 블록 기록`으로 끝난다. ①~③은 *선택지를 만드는* 과정인데 ④가 곧바로 기록이라 **사용자 선택 단계가 없다**.
+
+### 결정
+1. 결정 2의 `④ 기록`을 **`④ 사용자 선택 → ⑤ 기록`**으로 정정한다. ②의 2~3안을 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D3 Decision Brief 포맷으로 제시하고, 사용자가 고른 뒤에 §7 결정 블록에 기록한다. **본 amendment로 절차가 ①~⑤가 되므로, "①~④"를 인용하는 skill 본문은 "①~⑤"로 갱신한다.**
+2. **S1~S4는 분석 깊이 축 전용임을 명시한다** — *누가 결정하는가*는 ADR-060 D2의 `authority` 축이 소유한다. S2("합리적 대안 2개 이상")는 가역적 내부 선택에도 성립하므로 결정권 트리거로 쓰면 과발동한다.
+3. `authority: agent-delegated`로 배정된 결정은 게이트가 발동해도 ④를 건너뛰고 라운드 종료 시 **일괄 확인 1회**에 포함한다(ADR-060 D3).
+4. Amendment 1이 인용한 "결정 2의 ④ (해당 시) ADR"은 본 amendment로 **⑤**가 된다(번호 밀림 — 내용 불변).
+
+### 적용 surface
+- docs/90-decisions/boilerplate/ADR-053-high-stakes-design-panel.md
+- .claude/skills/bootstrap-project/SKILL.md
+- .claude/skills/bootstrap-stack/SKILL.md
+- .claude/skills/plan-milestone/SKILL.md
+- .claude/agents/architect.md
+
+### 강도 (ADR-022)
+- enabling(약) — 게이트 발동 조건 불변, 종결 방식만 이동.
+- **Mutation delta (ADR-047 D3)**: failure=고-stakes 결정이 사용자 선택 없이 확정 / falsifier=S1~S4 발동 결정이 Decision Brief 없이 §7에 기록됨 / rollback=④ 기록으로 원복.

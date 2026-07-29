@@ -5,6 +5,13 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- `DISCOVERY_TEMPLATE`은 **14섹션 + 결번 11**(기존 11 + `## 12` Assumption Tracker·`## 13` Opportunity Backlog + #amend-2의 `## 14` Evidence Log·`## 15` Insight Backlog; `## 11. 열린 질문`은 ADR-060 D1이 폐지 — #amend-3). 번호는 재사용하지 않는다.
+- 미검증 가정의 차단 강도는 **위험도 4단계**(#amend-3 = ADR-060 D5) — 현재 마일스톤 목표를 무효화하는 핵심 가설과 검증 계획 없는 가정은 `/seal-milestone` 차단, 나머지는 검증 방법·판정일·중단 기준 3필드를 갖춘 `risk-accepted`로 `DECISION_REGISTER.md`에 등재해 통과. 결정 1의 "미검증 - 행동 차단"은 이 표로 대체됐다.
+- `/stabilize-milestone` §6.5의 staleness P1 보고(4 시그널 — #amend-1·#amend-2)는 *구현 후 회수 채널*로 그대로 유지된다(봉인 차단과 시점이 다르다).
+- Evidence(`## 14`) → Insight(`## 15`) → Assumption(`## 12`)/Opportunity(`## 13`) → feature 흐름은 #amend-2가 SSOT.
+- DISCOVERY=SSOT / Charter=snapshot, `--update` 모드, ID 매칭 idempotency는 결정 2~4 그대로 유효하다.
+
 ## 배경
 - [관측됨+외부실증] `DISCOVERY_TEMPLATE.md`는 11섹션 placeholder. STRUCTURE.md는 "Living Doc"으로 분류했지만 *어떻게 살아 있는가* 정의 부재. mid-project pivot 시 재호출 절차 부재.
 - [외부실증] Cagan dual-track Agile + Teresa Torres continuous discovery — discovery는 1회성 event가 아니라 ongoing. assumption tracker가 없으면 가설이 검증 없이 구현으로 이어진다.
@@ -85,3 +92,33 @@ mid-project pivot 시 DISCOVERY만 갱신하고 Charter는 그대로일 경우 S
 - `.claude/skills/discover-product/SKILL.md` --update 단락
 - `.claude/skills/stabilize-milestone/SKILL.md` §6.5
 - `.claude/skills/plan-workitem/SKILL.md` feature/task evidence 연결
+
+<a id="adr-035-amend-3"></a>
+## Amendment 3 (2026-07-29) — 미검증 가정의 차단 강도 정합 (위험도 4단계)
+
+### 배경
+- [관측됨] 결정 1은 `## 12. Assumption Tracker`의 빈 결과를 **"미검증 - 행동 차단"**으로 규정하는데, `DISCOVERY_TEMPLATE.md`는 같은 항목을 **"stabilize가 P1으로 보고(자동 차단 X)"**로 적는다. 정책 강도가 서로 다르다.
+
+### 결정
+둘 중 하나를 택하지 않고 **위험도로 분기**한다([ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D5와 동일 표):
+
+| 유형 | 처리 |
+|------|------|
+| 실패 시 현재 마일스톤 목표가 무효가 되는 핵심 가설 | **봉인 차단** — 검증 후 진행 |
+| 마일스톤 자체가 그 가설을 검증하는 실험 | `risk-accepted` 허용 — 검증 방법·판정일·중단 기준 3필드 필수 |
+| 낮은 위험의 가역적 가설 | 동일 3필드 갖춘 `risk-accepted` |
+| 검증 계획 없는 미검증 가설 | **봉인 차단** |
+
+차단 판정 지점은 `/seal-milestone`이고, `stabilize`의 P1 보고는 *구현 후 회수 채널*로 그대로 유지한다(시점이 다르므로 충돌하지 않는다).
+`risk-accepted`는 `docs/10-charter/DECISION_REGISTER.md`에 `authority: user-*`로 등재해야 성립한다. **`DISCOVERY.md`가 없는 프로젝트(discovery 생략 — PROJECT_START_CHECKLIST 1단계는 선택)는 본 검사를 skip하고 사유를 echo한다.**
+
+**섹션 수 정정(동반)**: #amend-2가 규정한 "총 13 → 15섹션"은 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D1이 `## 11. 열린 질문`을 폐지(결번)하므로 **14섹션 + 결번 11**이 된다. 번호는 재사용하지 않는다.
+
+### 적용 surface
+- docs/90-decisions/boilerplate/ADR-035-continuous-discovery.md
+- docs/10-charter/_templates/DISCOVERY_TEMPLATE.md
+- .claude/skills/seal-milestone/SKILL.md
+
+### 강도 (ADR-022)
+- constraint(강) — 1·4행은 봉인 차단.
+- **Mutation delta (ADR-047 D3)**: failure=핵심 가설이 검증·수용 없이 구현으로 흘러감 / falsifier=3필드 없는 가정이 봉인을 통과 / rollback=4단계 표 제거 후 P1 보고로 원복.

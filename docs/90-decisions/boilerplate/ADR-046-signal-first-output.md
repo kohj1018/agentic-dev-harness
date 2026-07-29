@@ -75,3 +75,28 @@ accepted
 - ADR-022 (Ratchet Principle)
 - ADR-037 (#amend-2가 plan FAC↔AC echo 축소를 owning — 본 ADR과 정합)
 - caveman skill — https://github.com/JuliusBrussee/caveman ([외부실증] 출처)
+
+<a id="adr-046-amend-1"></a>
+## Amendment 1 (2026-07-29) — Decision Brief 압축 예외
+
+### 배경
+- [관측됨] D3 압축 금지 리스트에 "사용자가 선택·결정해야 하는 옵션·후보 목록"과 "사용자가 혼란스러워하는 상황의 설명"은 있으나, **선제적 배경·용어 설명**은 없다. 후자는 사용자가 혼란을 표명한 *뒤에야* 발동하므로, 비전문가가 "인증: 세션 vs JWT"를 1~2줄로 받고 무엇을 고르는지 모른 채 승인하는 경로가 열린다.
+
+### 결정
+1. D3 압축 금지 리스트에 **[ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D3 Decision Brief의 6블록 전체**를 추가한다.
+2. D2 분량 목표(기본 ≤600 토큰)는 Decision Brief에 적용하지 않는다 — finding 전수 반환 예외와 동형.
+3. **적용 범위는 `authority: user-choice | user-approval` 결정에 한정**한다. `agent-delegated` 결정과 그 밖의 라운드 표면 출력은 기존 압축 포맷을 그대로 따른다 — 예외를 좁게 유지해야 전체 출력이 다시 장황해지지 않는다.
+
+### 적용 surface
+- docs/90-decisions/boilerplate/ADR-046-signal-first-output.md
+- .claude/skills/discover-product/SKILL.md
+- .claude/skills/bootstrap-project/SKILL.md
+- .claude/skills/bootstrap-stack/SKILL.md
+- .claude/skills/bootstrap-design/SKILL.md
+- .claude/skills/plan-milestone/SKILL.md
+- .claude/skills/plan-workitem/SKILL.md
+- .claude/skills/repair-plan/SKILL.md
+
+### 강도 (ADR-022)
+- constraint(강) — D3 보존 리스트 확장이므로 base D3와 동일 강도.
+- **Mutation delta (ADR-047 D3)**: failure=사용자가 이해하지 못한 채 승인 / falsifier=`user-*` 결정이 6블록 없이 1~2줄로 제시됨 / rollback=예외 항목 제거.

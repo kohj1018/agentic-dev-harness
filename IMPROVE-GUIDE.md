@@ -638,6 +638,34 @@ git add docs/10-charter/DECISION_REGISTER.md docs/90-decisions/boilerplate/ADR-0
 
 > 나머지 본문은 그대로 둔다(Record 타입 — 이력 보존). 인덱스 Amendments 칸도 건드리지 않는다(amend 아님).
 
+## 2.10 ADR-035 · ADR-053 — `## 현재 유효 결정` 요약 신설 (ADR-045 D5 필수)
+
+> 2.4·2.6이 추가하는 amendment는 **base 결정을 정정하는** amendment다(ADR-053 amend-2 = "④ 기록"을 ④⑤로 정정, ADR-035 amend-3 = 결정 1의 "미검증 - 행동 차단"을 위험도 4단계로 대체). ADR-045 D5와 `_ADR_GUIDE.md` 권장 섹션은 *정정성 amend가 있으면* `## Status` 바로 아래 `## 현재 유효 결정` 요약(≤6줄)을 **필수**로 요구한다. 두 ADR에는 그 섹션이 없어서, 이대로 두면 base 본문의 "13섹션"·"미검증 - 행동 차단"·"④ 기록"을 현재 규칙으로 오독하는 경로가 남는다(base 본문은 이력이므로 고치지 않는다 — 요약이 빠른 경로를 담당).
+
+**파일**: `docs/90-decisions/boilerplate/ADR-035-continuous-discovery.md` — `## Status`의 `accepted` 바로 아래, `## 배경` 앞에 삽입.
+
+```markdown
+## 현재 유효 결정
+- `DISCOVERY_TEMPLATE`은 **14섹션 + 결번 11**(기존 11 + `## 12` Assumption Tracker·`## 13` Opportunity Backlog + #amend-2의 `## 14` Evidence Log·`## 15` Insight Backlog; `## 11. 열린 질문`은 ADR-060 D1이 폐지 — #amend-3). 번호는 재사용하지 않는다.
+- 미검증 가정의 차단 강도는 **위험도 4단계**(#amend-3 = ADR-060 D5) — 현재 마일스톤 목표를 무효화하는 핵심 가설과 검증 계획 없는 가정은 `/seal-milestone` 차단, 나머지는 검증 방법·판정일·중단 기준 3필드를 갖춘 `risk-accepted`로 `DECISION_REGISTER.md`에 등재해 통과. 결정 1의 "미검증 - 행동 차단"은 이 표로 대체됐다.
+- `/stabilize-milestone` §6.5의 staleness P1 보고(4 시그널 — #amend-1·#amend-2)는 *구현 후 회수 채널*로 그대로 유지된다(봉인 차단과 시점이 다르다).
+- Evidence(`## 14`) → Insight(`## 15`) → Assumption(`## 12`)/Opportunity(`## 13`) → feature 흐름은 #amend-2가 SSOT.
+- DISCOVERY=SSOT / Charter=snapshot, `--update` 모드, ID 매칭 idempotency는 결정 2~4 그대로 유효하다.
+```
+
+**파일**: `docs/90-decisions/boilerplate/ADR-053-high-stakes-design-panel.md` — 같은 위치에 삽입.
+
+```markdown
+## 현재 유효 결정
+- stakes 게이트 S1~S5와 판정(S1~S4 중 1+ → full 패널 / S5만 → 리서치-only / 전부 NO → fast path)은 결정 1 그대로다. **S1~S4는 *분석 깊이* 축 전용**이며 *누가 결정하는가*는 ADR-060 D2의 `authority` 축이 소유한다(#amend-2).
+- full 패널 절차는 **①~⑤**다(#amend-2) — ① 리서치 → ② 다각도 2~3안 → ③ 적대 재검토 → **④ 사용자 선택(ADR-060 D3 Decision Brief)** → ⑤ 기록(ARCHITECTURE `## 7` 결정 블록 + 해당 시 ADR). 결정 2의 "④ 기록"은 ⑤로 밀렸다.
+- ⑤의 "(해당 시) ADR" 판정 기준·작성 주체는 ADR-000#amend-2 결정 3과 그 트리거 표가 SSOT다(#amend-1 — 번호만 ④→⑤로 밀림).
+- `authority: agent-delegated`로 배정된 결정은 게이트가 발동해도 ④를 건너뛰고 라운드 종료 시 **일괄 확인 1회**에 포함한다(#amend-2).
+- parallel-merge 금지 · `/review-doc` 미사용 · stabilize의 `P2 [Design-rationale]` backstop은 결정 2③·결정 3 그대로 유효하다.
+```
+
+> **base 본문은 손대지 않는다** — 결정 1·결정 2의 원문은 이력으로 보존한다(ADR-045 D5: "상세는 아래 본문이 SSOT — 요약은 빠른 경로"). 인덱스 Amendments 칸도 변하지 않는다(amend 신설이 아니다). ADR-046은 amend-1이 *순수 확장*(D3 보존 리스트 추가)이고 개정 1개뿐이라 D5 트리거에 걸리지 않으므로 요약을 넣지 않는다.
+
 ```
 git add docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md docs/90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md docs/90-decisions/boilerplate/ADR-036-feature-level-prd.md docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md docs/90-decisions/boilerplate/ADR-053-high-stakes-design-panel.md docs/90-decisions/boilerplate/ADR-046-signal-first-output.md docs/90-decisions/boilerplate/ADR-035-continuous-discovery.md docs/90-decisions/boilerplate/ADR-049-concept-mockup-first-design.md docs/90-decisions/boilerplate/README.md docs/10-charter/_templates/DISCOVERY_TEMPLATE.md
 ```
@@ -1836,7 +1864,7 @@ grep -rnE "^## (7|10|11|12)\. 열린 질문" --include="*.md" docs/
 grep -rnE "## 7\.? 열린 질문|## 10\.? 열린 질문|## 11\.? 열린 질문|## 12\.? 열린 질문|미해결 열린 질문|열린 질문이 남으면" \
   --include="*.md" .claude docs AGENTS.md
 ```
-**기대**: 폐지 안내 주석(`— 폐지(결번)`)과 ADR 역사 기록(ADR-014·ADR-057 본문) 외 **runtime skill·agent 본문에는 0건**. `열린 질문이 남으면` 패턴이 잡히면 5.2(h)·5.3을 안 한 것이다.
+**기대**: 폐지 안내 주석(`— 폐지(결번)`)과 ADR 본문 hit 외 **runtime skill·agent 본문에는 0건**. 허용되는 ADR 본문 hit은 역사 기록(ADR-014·ADR-057)과 **Phase 2가 스스로 넣은 폐지·정합 표기(ADR-035 2건 — 2.6·2.10 / ADR-036 1건 — 2.3-b)**다(ADR-057은 표현에 따라 안 걸릴 수도 있다 — 걸려도 정상). 이 ADR 본문 hit은 고치지 않는다. `열린 질문이 남으면` 패턴이 잡히면 5.2(h)·5.3을 안 한 것이다.
 > 참고: `architect.md`·`designer.md`·`AGENTS.md`·`output-checklist.md`의 *"사실/가정/열린 질문을 구분한다"* 류는 **인식론 규율**이지 섹션 지시가 아니므로 존치한다(위 패턴에도 안 걸린다).
 
 ## 9.3 승격 주체가 seal 하나인가

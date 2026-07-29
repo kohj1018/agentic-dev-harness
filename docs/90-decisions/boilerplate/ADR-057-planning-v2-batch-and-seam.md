@@ -8,6 +8,7 @@ accepted
 ## 현재 유효 결정
 - M1 포함 모든 마일스톤·feature 문서는 `/plan-milestone`이 최종 프로토타입·FAC·열린 질문을 재대조한 뒤 `ready`로 확정(bootstrap-project는 charter/ARCH까지). task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**(2-tier/draft/refresh·F 입력 폐기 — #amend-3), 코드-stale 방지는 task 실행-시점 경량 접지 확인(근본 충돌은 사용자 보고).
 - 상태·잠금(#amend-3): M/F=`draft→ready`; task=`draft→ready→in-progress→done`, 검증된 완료 결함만 repair-workitem이 `done→in-progress`. M/F `ready` 뒤 새 scope·프로토타입·기획 변경은 다음 M. task 계획 repair는 첫 구현 전에만, 구현 뒤 finding은 기존 task 약속 결함=repair / 담당 없음·새 범위=사용자 보고+다음 M(현재 M task 자동 추가 없음).
+> **부분 supersede (2026-07-29)**: #amend-3 결정 5의 **(a)(b)(f)** 는 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D6/D7/D11이 부분 supersede한다 — (a)(b) M/F는 `draft → contract-ready → ready`이고 `ready` 승격은 `/seal-milestone` 단독이며, (f) 열린 질문의 영속 위치는 `docs/10-charter/DECISION_REGISTER.md`다(milestone `## 7`·feature `## 12`는 폐지). 결정 5(c)(d)(e)·task 상태기계·**결정 6 finding 라우팅**·결정 8~14(seam 계약)는 유효하다. 본 표기는 개정(amend)이 아니라 참조 갱신이다.
 - cross-task seam 계약: 신호 4종 감지 시 feature `## 7-2`에 INV 표. cross-feature canonical 위치 = **① 데이터 소유(write-through) → ② 최초 사용 → ③ 낮은 번호(fallback)**(#amend-2가 결정 9의 "낮은 번호 우선"을 이 우선순위로 정정 — 낮은 번호는 최종 fallback으로 잔존).
 - **마일스톤 로드맵 SSOT**: `docs/30-workitems/ROADMAP.md`(Done/Now/Next/Later 4구간 + 얇음 규율) — plan-milestone 단독 작성(R3=Now 실체화, R0=graduation 재조정), stabilize는 회고 graduation만 영속(#amend-1).
 - 상세는 아래 `## 결정 — A/B` + Amendment 1·2·3.
