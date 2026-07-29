@@ -34,7 +34,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - 있으면 **갱신 모드** — 본 skill은 메인 세션에서 실행된다. 기존 산출물 덮어쓰기는 사고 방지를 위해 명시적 승인(`--apply` 또는 사용자 확인)을 요구한다.
      - `--apply` 인자가 있으면: 기존 산출물을 읽고 architect로 갱신본을 생성해 즉시 반영한다.
      - `--apply` 인자가 없으면: 기존 산출물을 읽고 갱신 제안 diff를 출력에만 표시하고 **종료**한다(파일 수정 없음). 사용자가 검토 후 `/bootstrap-project --apply ...`로 재실행하거나, 메인 세션에서 architect를 직접 호출해 부분 반영한다.
-3. 메인 세션이 본 절차를 직접 운전한다(discover-product·bootstrap-design 패턴). 무거운 아키텍처 추론(charter 구조화·ARCHITECTURE 결정·ADR-100 초안)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론을 본 skill이 파일에 반영한다(architect agent의 `model: opus`가 추론 품질을 보장). **단, 설계 결정이 ADR-053 게이트(S1~S4 중 1+)에 걸리면 단발 sub-call 대신 아래 `## 고-stakes 설계 게이트`의 ①~④ 절차를 따른다** — 신규 프로젝트 초기 아키텍처(DB·인증·데이터 모델)는 거의 항상 게이트 대상. 종료 후 사용자에게 `/clear` 또는 새 세션 권장.
+3. 메인 세션이 본 절차를 직접 운전한다(discover-product·bootstrap-design 패턴). 무거운 아키텍처 추론(charter 구조화·ARCHITECTURE 결정·ADR-100 초안)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론을 본 skill이 파일에 반영한다(architect agent의 `model: opus`가 추론 품질을 보장). **단, 설계 결정이 ADR-053 게이트(S1~S4 중 1+)에 걸리면 단발 sub-call 대신 아래 `## 고-stakes 설계 게이트`의 ①~⑤ 절차를 따른다** — 신규 프로젝트 초기 아키텍처(DB·인증·데이터 모델)는 거의 항상 게이트 대상. 종료 후 사용자에게 `/clear` 또는 새 세션 권장.
 4. 다음 산출물을 갱신한다.
    - `README.md`
    - `docs/10-charter/PROJECT_CHARTER.md`
@@ -55,7 +55,8 @@ allowed-tools: Read Glob Grep Write Edit Agent
 마지막 출력:
 - 갱신한 파일 목록
 - 핵심 가정
-- 남은 미결정 사항
+- 남은 미결정 사항 (결정 아닌 품질·형식 지적 — 기존 슬롯 유지)
+- **원장 요약**: `closed N건 / deferred M건 / open K건`. open이 있으면 각 항목의 `authority`·필요 시점을 1줄씩 (본문은 `docs/10-charter/DECISION_REGISTER.md`)
 - 후속 단계 ([WORKFLOW.md "스킬 종료 시 후속 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합 — PROJECT_START_CHECKLIST 의 `/bootstrap-project → /bootstrap-stack → /stack-guard → /bootstrap-design(UI) → /plan-milestone → /plan-workitem` 순서가 SSOT):
   - 기본 권장: `/bootstrap-stack <스택 요약>` (스택 미정이면 **무입력**으로 실행 → 리서치+라운드 추천) — 스택 확정이 후속 lifecycle 의 전제 (스택 미정 상태에서 plan 은 가짜 작업).
   - 분기 옵션 (해당 시 ≤3):
@@ -65,10 +66,21 @@ allowed-tools: Read Glob Grep Write Edit Agent
   - 프롬프트 동봉 권장:
     - charter `## 5. 비목표` 의 핵심 키워드 (다음 plan 라운드의 scope 가드 입력)
     - DISCOVERY.md `## 12. Assumption Tracker` 의 *미검증* 가정 중 우선 검증 대상 (있으면)
-    - 남은 미결정 사항 본문 (사용자가 다음 skill 발화 전 결정해야 할 항목)
+    - 원장의 `status: open` 항목 ID 목록 (사용자가 다음 skill 발화 전 결정해야 할 항목 — 본문은 `docs/10-charter/DECISION_REGISTER.md`)
 
 ## 고-stakes 설계 게이트 (ADR-053)
-설계 결정이 ADR-053 게이트(S1~S4 중 1+ → full 패널 / S5만 → 리서치-only / 전부 NO → 단발)면, architect 단발 대신: ① researcher 웹 패스(must-or-flag, 오프라인 `Needs Research`) → ② architect 다각도 2~3안 → ③(최상위만) 두 번째 architect 적대 검토(review-doc 미사용·parallel-merge 금지) → ④ ARCHITECTURE §7 결정 블록 기록. 저-stakes는 현행 단발. (Codex: 순차 단일 degrade — researcher 인라인/사전 노트.)
+설계 결정이 ADR-053 게이트(S1~S4 중 1+ → full 패널 / S5만 → 리서치-only / 전부 NO → 단발)면, architect 단발 대신: ① researcher 웹 패스(must-or-flag, 오프라인 `Needs Research`) → ② architect 다각도 2~3안 → ③(최상위만) 두 번째 architect 적대 검토(review-doc 미사용·parallel-merge 금지) → **④ 사용자 선택 — ②의 안을 Decision Brief 6블록으로 제시하고 사용자가 고른다(ADR-053#amend-2 / ADR-060 D3)** → ⑤ ARCHITECTURE §7 결정 블록 기록 + 원장 `closed` 등재. 저-stakes는 현행 단발. **S1~S4는 *분석 깊이* 판정이고 *누가 결정하는가*는 원장의 `authority`가 소유한다** — `agent-delegated`로 배정된 결정은 ④를 건너뛰고 라운드 종료 시 일괄 확인 1회에 포함한다. (Codex: 순차 단일 degrade — researcher 인라인/사전 노트.)
+
+## 결정 마감 (ADR-060)
+본 skill이 내리거나 발견하는 기획 결정 중 **사용자가 정하거나 승인해야 할 것**을 `docs/10-charter/DECISION_REGISTER.md`에 등재한다 — 대화 출력으로만 두지 않는다.
+
+1. **등재 시점에 `authority`를 확정한다** (ADR-060 D2): 제품 의도·범위·우선순위·사용자 체감·외부 계약·데이터/보안·비용·위험 허용도·비가역 약속 → `user-choice`. 스택·인증·데이터 경계·되돌리기 비싼 구조 → `user-approval`. 승인된 경계 안의 가역적 내부 선택 → `agent-delegated`. **`user-*`를 `agent-delegated`로 낮추려면 사용자 명시 승인 + 항목에 이력 줄이 필요하다.**
+2. **등재 범위 (원장을 얇게 유지)**: `user-*` 결정 전부 + 종류 불문 `open`/`deferred`로 남는 항목만 등재한다. **`agent-delegated`는 개별 등재하지 않고** 4의 일괄 확인으로만 처리한다. **코드 품질·형식 지적과 계획 결함은 원장 대상이 아니다** — 기존 `남은 미결정 사항` 출력 슬롯이 그대로 소유한다.
+3. **`user-*` 결정은 Decision Brief 6블록으로 제시한다** (ADR-060 D3 / ADR-046#amend-1 — 압축 예외): 배경(왜 지금) → 용어(배경 없이도 이해되게) → 선택지 2~3안(각각 한 줄 요약·이 프로젝트에서의 체감·장점·감수할 것) → 되돌리기 비용 → 추천+근거 → 답변 방법. **라운드당 3~5개 상한**, `skip` 불허(선택 / 추가 설명 / 리서치 요청 / 연기 중 택1). 답변은 평이한 문장으로 재진술해 확인한 뒤 정본에 기록한다.
+4. **라운드 종료 시 일괄 확인 1회**: 그 라운드의 `agent-delegated` 결정을 목록으로 제시하고 "바꿀 것 있으면 알려달라"를 1회 확인받는다. 사용자가 뒤집으면 그 항목은 `user-approval`로 원장에 등재한다.
+5. **닫히지 않은 항목**: 현재 M 무영향 + 이관 앵커 + 회수 시점 3개를 모두 갖추면 `deferred`, 아니면 `open`으로 남긴다(ADR-060 D4). **앵커 없는 유예는 금지**한다. 현재 M을 막는 사실 조사는 `deferred`가 아니라 `/research-pack` 선행으로 종결한다.
+6. 결정 *본문*은 **본 skill이 소유한 정본 문서**(DISCOVERY / Charter / ARCHITECTURE / DESIGN / ADR 중 해당 단계에 존재하는 것)에 쓰고, 원장에는 위치 앵커와 처분 상태만 적는다(ADR-005). 본 skill이 소유하지 않는 문서는 건드리지 않는다.
+7. **마일스톤이 아직 없는 단계**(discover/bootstrap)에서는 `영향: (미할당)`으로 등재한다. `/plan-milestone` R1이 triage한다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

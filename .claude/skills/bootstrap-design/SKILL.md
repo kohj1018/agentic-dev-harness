@@ -139,7 +139,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - **수렴 규칙 (ADR-058)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
 - **선택 전에는 R3~R6로 진행하지 않는다.** 하이브리드 선택이면 그 조합을 메모로 확정.
 - 선택 확정 시 *각 concept의 방향·근거 + 최종 선택 이유*를 `docs/20-system/DESIGN_RESEARCH.md`의 `## 시안 옵션` / `## 최종 선택`에 기록(근거 추적 — DESIGN.md는 최종 *결정*만 담는다, ADR-058).
-- **취향 오라클 (ADR-058)**: 에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자가 물으면 예외). 사용자 안내 문구에 *"원하시면 추천을 요청하실 수 있어요"*를 노출한다(예외 경로를 사용자가 놓치지 않게). 사용자가 전량 거부하면 REFINE/EXPLORE 카드부터 재설계(수렴 규칙과 결합).
+- **취향 오라클 (ADR-058)**: 에이전트는 선택지 폭 담당 — 선호 추천·순위 제시 금지(사용자가 물으면 예외). **시각 방향 선택은 `authority: user-choice`이므로 원장에 등재하고 선택 확정 시 `closed` + 정본 앵커(`DESIGN.md ## 1 Overview`)를 채운다(ADR-060). 취향 오라클 원칙상 Decision Brief의 "추천" 블록은 비워 둔다 — 사용자가 요청하면 채운다.** 사용자 안내 문구에 *"원하시면 추천을 요청하실 수 있어요"*를 노출한다(예외 경로를 사용자가 놓치지 않게). 사용자가 전량 거부하면 REFINE/EXPLORE 카드부터 재설계(수렴 규칙과 결합).
 
 ## R3 — 디자인 토큰 (선택 concept에서 추출, W3C DTCG + Stitch 정렬 — ADR-027#d6)
 - **선택된 concept(R2)의 CSS에서 토큰을 추출**해 3-tier로 정리: primitive → semantic → component.
@@ -203,7 +203,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 사용자에게 안내: *"브라우저에서 `docs/20-system/design-preview.html`를 열어 확인하고 피드백 주세요."*
 - 피드백 수령 시 **반드시 DESIGN.md(SSOT)를 먼저 수정** → 그 다음 preview 재생성. (preview를 먼저 고치지 않는다.)
 - **수렴 규칙 (ADR-058)**: 루프가 *2 사이클 내 미수렴*이면 생성 반복 말고 *brief(R0 레퍼런스 / R1 원칙)를 고친다*(soft 권장).
-- 사용자가 *승인*할 때까지 반복. 승인 전에는 R6-3(정리)과 `/plan-milestone`(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M) 권장을 수행하지 않는다.
+- 사용자가 *승인*할 때까지 반복. 승인 전에는 R6-3(정리)과 `/plan-milestone`(M/F가 아직 없으면 — ADR-057; `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); `ready`(봉인 완료) M이면 잠겨 있으므로 다음 M; 이미 구현 중이면 해당 task workflow 또는 다음 M) 권장을 수행하지 않는다.
 - `--fast`에서는 R6를 생략(위 `## 모드`). 사용자가 명시 요청 시 R6만 단독 수행.
 
 ### R6-3. 정리 (concept 시안 + preview 삭제)
@@ -220,8 +220,19 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 - 선택된 concept: <A/B/C 또는 하이브리드 메모>
 - concept/preview 시안 상태: 삭제됨(승인 후 — 기본) / 유지(보존 요청 시) / 미생성(`--fast`). 재생성: `/bootstrap-design` R2/R6
 - 채워진 섹션 요약
-- 남은 열린 질문
-- 후속 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-milestone`(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
+- **원장 요약**: `closed N건 / deferred M건 / open K건` (`docs/10-charter/DECISION_REGISTER.md` — 시각 방향·voice 확정은 `closed`로, 미확정은 `open`으로 등재)
+- 후속 권장 단계: **사용자가 시안을 승인한 뒤** `/plan-milestone`(M/F가 아직 없으면 — ADR-057; `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); `ready`(봉인 완료) M이면 잠겨 있으므로 다음 M; 이미 구현 중이면 해당 task workflow 또는 다음 M). 미승인 상태면 "concept 선택·preview 검토 먼저" 안내.
+
+## 결정 마감 (ADR-060)
+본 skill이 내리거나 발견하는 기획 결정 중 **사용자가 정하거나 승인해야 할 것**을 `docs/10-charter/DECISION_REGISTER.md`에 등재한다 — 대화 출력으로만 두지 않는다.
+
+1. **등재 시점에 `authority`를 확정한다** (ADR-060 D2): 제품 의도·범위·우선순위·사용자 체감·외부 계약·데이터/보안·비용·위험 허용도·비가역 약속 → `user-choice`. 스택·인증·데이터 경계·되돌리기 비싼 구조 → `user-approval`. 승인된 경계 안의 가역적 내부 선택 → `agent-delegated`. **`user-*`를 `agent-delegated`로 낮추려면 사용자 명시 승인 + 항목에 이력 줄이 필요하다.**
+2. **등재 범위 (원장을 얇게 유지)**: `user-*` 결정 전부 + 종류 불문 `open`/`deferred`로 남는 항목만 등재한다. **`agent-delegated`는 개별 등재하지 않고** 4의 일괄 확인으로만 처리한다. **코드 품질·형식 지적과 계획 결함은 원장 대상이 아니다** — 기존 `남은 미결정 사항` 출력 슬롯이 그대로 소유한다.
+3. **`user-*` 결정은 Decision Brief 6블록으로 제시한다** (ADR-060 D3 / ADR-046#amend-1 — 압축 예외): 배경(왜 지금) → 용어(배경 없이도 이해되게) → 선택지 2~3안(각각 한 줄 요약·이 프로젝트에서의 체감·장점·감수할 것) → 되돌리기 비용 → 추천+근거 → 답변 방법. **라운드당 3~5개 상한**, `skip` 불허(선택 / 추가 설명 / 리서치 요청 / 연기 중 택1). 답변은 평이한 문장으로 재진술해 확인한 뒤 정본에 기록한다.
+4. **라운드 종료 시 일괄 확인 1회**: 그 라운드의 `agent-delegated` 결정을 목록으로 제시하고 "바꿀 것 있으면 알려달라"를 1회 확인받는다. 사용자가 뒤집으면 그 항목은 `user-approval`로 원장에 등재한다.
+5. **닫히지 않은 항목**: 현재 M 무영향 + 이관 앵커 + 회수 시점 3개를 모두 갖추면 `deferred`, 아니면 `open`으로 남긴다(ADR-060 D4). **앵커 없는 유예는 금지**한다. 현재 M을 막는 사실 조사는 `deferred`가 아니라 `/research-pack` 선행으로 종결한다.
+6. 결정 *본문*은 **본 skill이 소유한 정본 문서**(DISCOVERY / Charter / ARCHITECTURE / DESIGN / ADR 중 해당 단계에 존재하는 것)에 쓰고, 원장에는 위치 앵커와 처분 상태만 적는다(ADR-005). 본 skill이 소유하지 않는 문서는 건드리지 않는다.
+7. **마일스톤이 아직 없는 단계**(discover/bootstrap)에서는 `영향: (미할당)`으로 등재한다. `/plan-milestone` R1이 triage한다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.
