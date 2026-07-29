@@ -9,7 +9,7 @@
 superseded
 
 ## 현재 유효 결정
-- `/bootstrap-design`의 *워크플로우 라운드 구조*는 본 ADR이 SSOT: R0(레퍼런스 추출 + `DESIGN_RESEARCH.md` 노트) → R1(원칙) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰, 선택 concept에서 추출) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 정리).
+- (**superseded — 아래는 이력이다. 현재 SSOT는 [ADR-058](ADR-058-design-workflow.md)**) `/bootstrap-design`의 *워크플로우 라운드 구조*는 본 ADR이 SSOT였다: R0(레퍼런스 추출 + `DESIGN_RESEARCH.md` 노트) → R1(원칙) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰, 선택 concept에서 추출) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 정리).
 - 시각 방향 *선택*은 R2 concept 시안(다중)이 PRIMARY, R6 preview는 SSOT 렌더 충실도 확인(사용자 생략 가능).
 - ADR-027은 *DESIGN.md 내용*(#5 Stitch 8섹션+Motion, #6 3-tier 토큰, #7/#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT를 유지. *라운드 구조·시안 시점·preview lifecycle(gitignore 포함)·R0 grounding*은 본 ADR이 ADR-027 #3/#13/#21/#d22/#d26/#27을 supersede(ADR-027 본문은 accepted 유지, 흐름만 이관). #d22의 design-preview.html *산출물 자체*는 R6이 계속 쓰지만 *삭제 시점(R5-3→R6-3)·gitignore 정책(보존 요청 시→기본 등재)*은 본 ADR이 갱신.
 - R0/R1 분해·R2 concept 시안·R5(ADR-056) 프로토타입의 authoring 주체 = **designer agent**(생성 전담 — 감사·비평은 reviewer[design], 취향 오라클=사용자·추천 금지). R0는 grounding 소스 위계 5단(사용자 URL → researcher 디자인 모드 → 디자인 MCP → 정성 소스 → 모델 지식+확인 게이트), R2는 divergence 카드 강제 (#amend-2 — #amend-1 "designer 미신설" 반전).
