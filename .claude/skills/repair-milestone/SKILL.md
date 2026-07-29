@@ -42,7 +42,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 2. **라우팅 — finding의 scope에 따라 처리 주체가 다르다**:
    - **per-task 결함** (특정 `T-NNN`에 귀속되는 코드/AC 결함): 직접 고치지 말고 `/repair-workitem <T-NNN> "<finding 요약>"`로 위임한다(repair-workitem이 finding-mode로 report Pass·부재여도 그 finding을 수정 — validate 선행 불요). 위임 반영 후 해당 finding의 QA_FINDINGS/IMPROVEMENT_GUIDE status는 수행 5(원본 finding status 갱신)에서 resolved로 닫는다. (Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 task별로 순차 단일 실행.)
    - **cross-cutting 결함** (단일 task에 귀속되지 않는 milestone-level 결함): 본 skill이 **직접 수정**한다. 대표 3종:
-     - **doc-consistency P0** (예: deterministic preflight가 올린 `[Doc-link]`/`[ADR-ref]`/`[Spec-gap]`/`[Arch-iface-violation]`): 해당 문서·매핑표를 직접 수정.
+     - **doc-consistency finding** (예: deterministic preflight가 올린 `[Doc-link]`/`[ADR-ref]`/`[Spec-gap]`/`[Arch-iface-violation]`): 해당 문서·매핑표를 직접 수정.
      - **e2e wiring scaffold/install** (E2E 미정의 스택에 재현 케이스를 영속 테스트로 묶는 scaffold, `validate:e2e` 배선, 의존성 install): 직접 scaffold·install.
      - **architecture debt** (layer 경계·의존성 규칙 위반 등 ARCH 정합 결함): **현재 M 약속(기존 task·AC) 위반이면 본 라운드 cross-cutting repair로 직접 수정**하고, 구조 변경이 커서 *새 범위*가 되면 architect 호출을 텍스트로 제안하며 **사용자에게 보고 + 다음 M 후보**로 남긴다(현재 M에 새 task를 제안하지 않는다 — 과대 수정 금지, ADR-057#amend-3 결정 6).
 3. **한 라운드에 P0/P1/P2를 *모두* 4-판정으로 완결**한다(repair-plan/repair-workitem과 동형). defer 금지 — 4결정 카테고리 외의 deferred drop은 허용 X. 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다(`M1 "P0만"`).
