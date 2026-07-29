@@ -854,8 +854,10 @@ git add docs/10-charter/PROJECT_CHARTER.md docs/20-system/ARCHITECTURE_OVERVIEW.
 
 ```markdown
 6. 결정 *본문*은 **본 skill이 소유한 문서**(milestone / feature / task)에 쓰고, 원장에는 위치 앵커와 처분 상태만 적는다(ADR-005). 정본 3종(Charter / ARCHITECTURE / DESIGN) 변경이 필요하면 고치지 말고 소유 skill(`/bootstrap-project --apply` · `/bootstrap-stack` · `/bootstrap-design --update`)을 텍스트로 권장한 뒤 원장에 항목을 남긴다.
-7. `영향:` 칸에는 이 마일스톤 ID를 적는다. (`/plan-milestone`은 여기에 더해 R1에서 `(미할당)` 항목을 전수 triage한다 — 5.1(f)가 그 라운드 본문에 박는다.)
+7. `영향:` 칸에는 이 마일스톤 ID를 적는다. (`/plan-milestone`은 여기에 더해 R1에서 `(미할당)` 항목을 전수 triage한다 — 위 R1 라운드 본문 참조.)
 ```
+
+> **7항은 skill별로 다르다**: 위 문장은 `/plan-milestone`용이다. `/plan-workitem`에는 괄호절을 **넣지 않는다**(`영향:` 칸 지시 한 문장만) — triage는 plan-milestone R1의 의무이고 plan-workitem에는 해당 행위가 없다. 또한 괄호 안에서 **본 가이드의 섹션 번호(5.1(f) 등)를 인용하지 않는다** — 본 가이드는 폐기용 문서라 산출물에 남으면 해석 불가 참조가 된다.
 
 ## 4.1 discover-product
 
@@ -1224,6 +1226,26 @@ git add .claude/skills/discover-product/SKILL.md .claude/skills/bootstrap-projec
 
 **기존** (27행): `- 열린 질문이 남으면 문서에 명시한다.`
 **변경**: `- 사용자가 정하거나 승인해야 할 미결정이 남으면 \`docs/10-charter/DECISION_REGISTER.md\`에 등재한다 (ADR-060 D1).`
+
+## 5.4 같은 파일 안의 잔존 모순 2건 정정 (5.1(b)·5.2(e)가 만든 것)
+
+> (b)와 (e)가 새 규칙을 심는 동안 **같은 파일의 다른 문장이 구 규칙을 그대로 말하고 있는** 자리가 두 곳 남는다. 둘 다 조각 치환이며, 고치지 않으면 한 파일 안에서 정면 충돌한다.
+
+### (a) plan-milestone — feature 추가 조건 (11행)
+
+5.1(b)가 `contract-ready` M의 feature 추가를 허용하는데, 같은 줄 앞부분은 여전히 `draft` M만 허용한다.
+
+**기존 조각**: `**기존 마일스톤에 *새 feature만* 추가하는 경우는 \`draft\` M<N> 재개 대화 안에서만** 처리한다(별도 \`feature idea\` 진입 제거 — draft 마일스톤이 여럿이면 대상이 모호)`
+**변경 조각**: `**기존 마일스톤에 *새 feature만* 추가하는 경우는 \`draft\`·\`contract-ready\` M<N> 재개 대화 안에서만** 처리한다(별도 \`feature idea\` 진입 제거 — 미봉인 마일스톤이 여럿이면 대상이 모호)`
+
+### (b) plan-workitem — 마지막 출력의 배치 모드 요약 (132행)
+
+5.2(e)가 "`contract-ready` 동안 현재 M에서 고친다"로 바꾼 규칙을, 출력 포맷 줄의 괄호가 구 규칙("기획 변경은 다음 마일스톤")으로 되돌린다.
+
+**기존 조각**: `계획 후 재접지 없음, 프로토타입·기획 변경은 다음 마일스톤)`
+**변경 조각**: `계획 후 재접지 없음, 봉인(\`/seal-milestone\`) 후 프로토타입·기획 변경은 다음 마일스톤)`
+
+> `계획 후 재접지 없음`은 그대로 둔다 — 코드-stale 확인은 task 실행 시점(implement §4.12b)이라는 ADR-057#amend-3 규칙이 유지된다.
 
 ```
 git add .claude/skills/plan-milestone/SKILL.md .claude/skills/plan-workitem/SKILL.md .claude/agents/planner.md
