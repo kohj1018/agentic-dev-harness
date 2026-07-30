@@ -36,7 +36,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
      - `--apply` 인자가 없으면: 기존 산출물을 읽고 갱신 제안 diff를 출력에만 표시하고 **종료**한다(파일 수정 없음). 사용자가 검토 후 `/bootstrap-project --apply ...`로 재실행하거나, 메인 세션에서 architect를 직접 호출해 부분 반영한다.
 3. 메인 세션이 본 절차를 직접 운전한다(discover-product·bootstrap-design 패턴). 무거운 아키텍처 추론(charter 구조화·ARCHITECTURE 결정·ADR-100 초안)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론을 본 skill이 파일에 반영한다(architect agent의 `model: opus`가 추론 품질을 보장). **단, 설계 결정이 ADR-053 게이트(S1~S4 중 1+)에 걸리면 단발 sub-call 대신 아래 `## 고-stakes 설계 게이트`의 ①~⑤ 절차를 따른다** — 신규 프로젝트 초기 아키텍처(DB·인증·데이터 모델)는 거의 항상 게이트 대상. 종료 후 사용자에게 `/clear` 또는 새 세션 권장.
 4. 다음 산출물을 갱신한다.
-   - `README.md`
+   - `README.md` · `README_ko.md` — **2종 동시 갱신**(한쪽만 고치면 drift. 두 README는 자연어 호출 skill 목록의 SSOT이자 fork 후에도 남는 프로젝트 표지 — ADR-010#amend-3)
    - `docs/10-charter/PROJECT_CHARTER.md`
    - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
 5. 필요하면 다음도 함께 갱신.

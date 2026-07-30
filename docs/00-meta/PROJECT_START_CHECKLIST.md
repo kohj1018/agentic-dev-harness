@@ -14,7 +14,7 @@
   ```
   /bootstrap-project 취준생 커리어 관리 서비스. JD와 이력서를 비교하고 역량 갭을 추적한다. 웹 우선, 스택 미정.
   ```
-- [ ] `README.md`가 새 프로젝트 기준으로 갱신되었다
+- [ ] `README.md`와 `README_ko.md`가 **둘 다** 새 프로젝트 기준으로 갱신되었다 (한쪽만 고치면 boilerplate 설명이 남는다)
 - [ ] `docs/10-charter/PROJECT_CHARTER.md`가 새 프로젝트 내용으로 채워졌다(DISCOVERY.md를 사용한 경우 페르소나·시나리오·핵심 가정 섹션이 함께 채워졌다)
 - [ ] `docs/20-system/ARCHITECTURE_OVERVIEW.md`가 초기 구조를 반영한다
 - (참고) 마일스톤 문서는 이 시점엔 아직 없음이 정상 — 4단계에서 /plan-milestone으로 생성한다 (ADR-057)

@@ -82,25 +82,13 @@
 ### 회수 규칙 (ADR-019 정합)
 
 본 파일을 통째로 읽지 않는다. `status:` / `영향: M<N>` **+ `영향: (미할당)`** 색인으로 먼저 걸러 해당 항목만 읽는다(`(미할당)`을 빼면 bootstrap 구간 등재분이 통째로 샌다 — 위 규약 참조).
+**색인 히트는 항목이 아니다 — `## 결정 항목` 아래에 있고 헤더의 `D-NNN`이 실제 번호인 것만 항목으로 센다.** 위 설명 섹션의 형식 예시(`D-NNN` placeholder·`open|deferred|closed` 열거)와 규칙 본문의 인용은 같은 토큰을 담지만 미결정이 아니다. 이 구분을 건너뛰면 빈 원장에서도 `open`이 잡혀 봉인이 막힌다.
 `closed`·`deferred` 행은 **삭제하지 않는다** — 승인 이력과 다음 마일스톤 회수의 근거다.
 
 ## 결정 항목
 
-<!-- 아래에 D-001부터 append. 예시는 지우고 쓴다.
+<!-- 아래에 D-001부터 append한다. 필드·표기 규약은 위 `## 항목 형식` 섹션이 SSOT다.
 
-- **D-001** | authority: user-approval | status: closed | disposition: chosen
-  - 질문: 로그인 방식을 세션 vs 토큰(JWT) 중 무엇으로 할 것인가
-  - 영향: M1 | 정본: ARCHITECTURE_OVERVIEW.md#arch-7-3 | 근거: 2026-07-29 사용자 승인 (세션)
-
-- **D-002** | authority: user-choice | status: deferred | disposition: n/a
-  - 질문: 오프라인 편집 충돌 병합 규칙
-  - 영향: M1 (현재 M 무영향 — 오프라인 기능 자체가 M2 범위) | 앵커: ROADMAP `offline-merge` | 회수: M2 plan-milestone R1
-
-- **D-003** | authority: user-choice | status: open | disposition: n/a | blocker: research
-  - 질문: 결제 대행사 선택
-  - 영향: M1 / F-003 | 필요 시점: seal 전 (/research-pack 선행)
-
-- **D-004** | authority: user-approval | status: open | disposition: n/a
-  - 질문: 이미지 저장을 로컬 vs 오브젝트 스토리지 중 무엇으로
-  - 영향: (미할당) — bootstrap 단계 등재, 다음 /plan-milestone R1이 triage
--->
+     이 주석 안에 예시 항목을 두지 않는다. 봉인·triage 검사는 본 파일을 통째로 읽지 않고
+     `status:` / `영향:` 토큰을 색인으로 회수하며(위 `### 회수 규칙`), 이 색인은 주석
+     여부를 구분하지 못한다 — 주석 안의 예시도 실제 미결정으로 잡혀 마일스톤 봉인을 막는다. -->

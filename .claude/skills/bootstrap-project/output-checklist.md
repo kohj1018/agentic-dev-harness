@@ -3,7 +3,7 @@
 실행 후 아래를 만족해야 한다.
 
 ## 필수 갱신 문서
-- `README.md`
+- `README.md` · `README_ko.md` (2종 동시 — 한쪽만 갱신하면 drift)
 - `docs/10-charter/PROJECT_CHARTER.md`
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
 
