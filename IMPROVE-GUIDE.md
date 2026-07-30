@@ -1986,8 +1986,61 @@ done → deprecated (필요 시)
 ```
 > 삽입 후 `wc -l AGENTS.md`로 **100줄 hard cap**(ADR-011)을 확인한다.
 
+## 8.5 7.7 이후 남은 재정합 5건 (리뷰에서 발견)
+
+> 7.7이 seal skill을 고치는 동안 **ADR 조건 1과 메타 문서 요약이 구 규칙을 그대로 말하고 있는** 자리가 남았다. 메타 문서는 AGENTS.md가 상태 전이 권위로 가리키는 곳이라, 여기서 어긋나면 skill 본문을 안 읽은 에이전트가 구 규칙대로 판단한다.
+
+### (a) ADR-060 봉인 조건 1 — "위 4종" 잔존
+
+7.7(a)가 seal 본문 조건 1은 5종으로 고쳤으나 **ADR 본문 조건 1은 4종**이라 같은 ADR 안에서 D7 진입 모드 열거(5종)와 모순된다.
+
+**파일**: `docs/90-decisions/boilerplate/ADR-060-…md`
+**기존**: `1. 상태 — 위 4종 중 하나로 판정될 것(\`draft\` M과 이미 봉인된 M은 각각 안내 후 종료)`
+**변경**: `1. 상태 — 위 5종 중 하나로 판정될 것(\`draft\` M과 **이미 봉인됨(구현 중)** M은 각각 안내 후 종료)`
+
+### (b) WORKFLOW 상태 전이 표 — `ready` = 전면 잠금 단정 제거
+
+8.1(g)가 넣은 행은 `이 시점부터 계획 잠금`으로 끝나 D6의 **"잠금의 실질 기준선은 첫 구현 시작"**과 어긋난다. 이 표는 AGENTS.md가 가리키는 상태 전이 권위라, 그대로 두면 구현 전 결함을 다음 M으로 보내는 원래 역설이 이 문서에서 재현된다.
+
+**기존**: `| (M/F/task) → ready | \`/seal-milestone\`이 봉인 조건 전부 통과 + 사용자 명시 승인. 이 시점부터 계획 잠금 |`
+**변경**: `| (M/F/task) → ready | \`/seal-milestone\`이 봉인 조건 전부 통과 + 사용자 명시 승인. **M/F 계약 층은 이 시점부터 잠긴다.** task 층의 실질 기준선은 *첫 구현 시작*이다 — 구현 흔적(\`in-progress\`·\`blocked\`·\`done\`·\`deprecated\`)이 0건인 동안에는 \`/repair-plan\`이 task·매핑·의존성을 고칠 수 있고, 고친 뒤 \`/seal-milestone\` 재실행(재봉인)으로 receipt를 갱신한다 (ADR-060 D6/D7) |`
+
+### (c) WORKFLOW `## 3-1` — "내용 수정 없음" 단정에 예외 명시
+
+seal은 상태값 + `## 10` receipt + (사용자가 그 자리에서 고른 경우) 조건 3-b의 `해석 확정:` 한 줄을 **쓴다**. 무조건 "내용 수정 없음"으로 적으면 조건 3-b가 계약 위반으로 읽힌다.
+
+**기존**: `- **내용 수정·커밋을 하지 않는다.** 실패 시 어떤 상태도 바꾸지 않고 소유 skill로 반환한다. 중단 시 재실행이 부분 승격 상태를 재개 진입으로 인식한다.`
+**변경**: `- **내용 수정·커밋을 하지 않는다** — 쓰는 것은 상태값 · \`## 10\` 봉인 기록 · (사용자가 그 자리에서 고른 경우) task \`## 8\`의 \`해석 확정:\` 한 줄뿐이다. 실패 시 어떤 상태도 바꾸지 않고 소유 skill로 반환한다. 중단 시 재실행이 부분 승격 상태를 재개 진입으로 인식하고, 구현 전 계획을 고친 뒤의 재실행은 재봉인 진입으로 받는다.`
+
+### (d) README 흐름도 — seal 위치를 선택 분기 **뒤**로
+
+8.3-b(a)는 seal을 `plan-workitem` 줄 끝에 붙였는데, 바로 다음 줄이 `└─ (optional) validate-plan → repair-plan`이라 **선택 리뷰가 봉인 뒤에 오는 것처럼 읽힌다.** WORKFLOW 다이어그램(8.1(e))과 README 자신의 Step 3 명령 시퀀스는 모두 `plan-workitem → (선택) 리뷰 → seal` 순서다.
+
+**변경** (README.md / README_ko.md 각 3줄):
 ```
-git add docs/00-meta/WORKFLOW.md docs/00-meta/PROJECT_START_CHECKLIST.md docs/00-meta/DELEGATION_STRATEGY.md AGENTS.md README.md README_ko.md
+  → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)
+       └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
+  → /seal-milestone M1 (plan lock gate — final check + your approval, always runs)
+```
+> 한국어판은 `→ /seal-milestone M1 (계획 잠금 게이트 — 최종 검사 + 사용자 승인, 항상 거친다)`.
+
+### (e) CHECKLIST의 task 항목 — "필요하면"은 이제 틀리다
+
+봉인 조건 2가 *"모든 feature가 task를 1개 이상"*을 요구하므로 task는 선택 사항이 아니다(기존 문구는 봉인 도입 전 기준).
+
+**기존**: `- [ ] 필요하면 \`docs/30-workitems/tasks\`에 task 문서를 만들었다`
+**변경**: `- [ ] \`docs/30-workitems/tasks\`에 **각 feature마다 task가 1개 이상** 있다 (\`/plan-workitem\`이 생성 — 봉인 조건 2가 요구하므로 선택 사항이 아니다)`
+
+### (f) STRUCTURE 산출물 표 — D11 writer 2개 누락
+
+`decision register` 행의 갱신 주체에 `/repair-workitem`·`/stabilize-milestone`(D11 봉인 후 append writer)이 빠져 원장 본문·ADR-060 D11의 writer 목록과 어긋난다.
+
+**변경**: 해당 행의 주체 칸에 `· \`/repair-workitem\`·\`/stabilize-milestone\` (봉인 후 append — ADR-060 D11)` 추가.
+
+> **함께 검토했으나 고치지 않은 것**: CHECKLIST의 원장 확인 2항목이 `## 5. 의사결정 기록`에 있어 `## 4`의 seal 실행 항목보다 뒤에 온다는 지적. 원장은 *의사결정 기록*이라 그 절에 두는 게 주제상 맞고, **봉인 조건 6이 open 0건을 기계적으로 강제**하므로 체크 순서가 실제 누출을 만들지 않는다. 8.2(b)의 지정 위치를 유지한다.
+
+```
+git add docs/00-meta/WORKFLOW.md docs/00-meta/PROJECT_START_CHECKLIST.md docs/00-meta/DELEGATION_STRATEGY.md docs/00-meta/STRUCTURE.md AGENTS.md README.md README_ko.md docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md
 ```
 
 **커밋 메시지**: `docs(meta): document decision closure and milestone seal across meta docs`

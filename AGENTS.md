@@ -38,6 +38,7 @@ Claude Code의 빌트인 plan 모드(Shift+Tab)는 사용자 자율 도구다. �
 - [시각 디자인](docs/20-system/DESIGN.md) (UI 프로젝트 한정)
 - [인터페이스 결정 책임 분배](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (DESIGN.md UI + ARCH 7-1~7-5 cross-surface enforcement, ADR-027#amend-1)
 - [워크플로우 + 문서 상태 전이](docs/00-meta/WORKFLOW.md)
+- [기획 결정 마감 + 마일스톤 봉인](docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) (결정 원장·authority·contract-ready·seal — 열린 질문을 문서에 남기지 않는다)
 - [에이전트 실행 전략 + 위임 트리거](docs/00-meta/DELEGATION_STRATEGY.md)
 - [Guardrail 운영 원칙](docs/00-meta/GUARDRAILS_STRATEGY.md)
 - [Optional MCP Connectors 기록·사용 강제](docs/90-decisions/boilerplate/ADR-048-mcp-usage-enforcement.md)

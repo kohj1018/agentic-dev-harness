@@ -22,6 +22,7 @@
   → /bootstrap-design (UI 전용 — evidence-on-demand로 레퍼런스를 DESIGN_RESEARCH.md에 조사 + DESIGN.md 작성 *전* 다중 concept 시안(REFINE/EXPLORE)으로 렌더·axe 수용 게이트를 거쳐 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-058]
   → /plan-milestone (+UI: R5 프로토타입 라운드) → /plan-workitem M1 (배치)
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
+  → /seal-milestone M1 (계획 잠금 게이트 — 최종 검사 + 사용자 승인, 항상 거친다)
   → /implement-workitem
   → /validate-workitem → /repair-workitem (Needs Fix일 때) → /finalize-workitem
   → /stabilize-milestone
@@ -87,7 +88,10 @@
 #   원본 plan 세션으로 돌아와서:
 /repair-plan [workitem id]
 
-# 구현
+# 봉인 — 최종 검사 + 사용자 승인 + 일괄 ready 승격 (ADR-060)
+/seal-milestone M1
+
+# 구현 (봉인 전에는 착수하지 않는다)
 /implement-workitem [task id]
 /validate-workitem [task id]
 

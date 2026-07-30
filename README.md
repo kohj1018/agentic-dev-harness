@@ -22,6 +22,7 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
   → /bootstrap-design (frontend only — evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-058]
   → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
+  → /seal-milestone M1 (plan lock gate — final check + your approval, always runs)
   → /implement-workitem
   → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
   → /stabilize-milestone
@@ -88,7 +89,10 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 #   Then back in the origin plan session:
 /repair-plan [workitem id]
 
-# Implement
+# Seal — final check + your approval + bulk promotion to ready (ADR-060)
+/seal-milestone M1
+
+# Implement (blocked until the milestone is sealed)
 /implement-workitem [task id]
 /validate-workitem [task id]
 

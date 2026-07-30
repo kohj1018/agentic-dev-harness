@@ -113,7 +113,7 @@ M/F 상태를 `draft → contract-ready → ready`로 확장한다.
 **진입 모드 5종**(skill 본문 0단계가 판정): **정상**(M/F `contract-ready` + task 전부 `draft`) / **재개**(부분 승격 상태) / **재봉인**(`ready`+receipt 채움+구현 0건 — 구현 전 계획 수정 후 재검사·재승인·receipt 갱신) / **마이그레이션**(D12 (가) — `ready`+receipt 미채움+구현 0건) / **grandfather**(D12 (나) — 같은 상태에서 구현 1건 이상). **`ready`+receipt 채움+구현 1건 이상**만 no-op 종료다(계획 잠김).
 
 봉인 조건(전부 충족해야 승격 — 상세 절차는 skill 본문):
-1. 상태 — 위 4종 중 하나로 판정될 것(`draft` M과 이미 봉인된 M은 각각 안내 후 종료)
+1. 상태 — 위 5종 중 하나로 판정될 것(`draft` M과 **이미 봉인됨(구현 중)** M은 각각 안내 후 종료)
 2. task 존재·상태 완결 — **grandfather 진입에서는 미적용**(D12 (나) 3)
 3. task 필수 섹션 + **AC 해석 확정** + **TDD opt-out 형식 정합** — implement 착수 게이트 ⑦⑧을 봉인 시점으로 앞당겨 "봉인 통과 후 첫 구현에서 즉시 halt"를 막는다
 4. FAC↔AC / PX↔AC / INV 커버리지

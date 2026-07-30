@@ -8,7 +8,7 @@
 ## 2. 시스템 설계
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`에서 시스템 구조를 정리한다.
 - `docs/20-system/DESIGN.md`는 baseline placeholder(presence: conditional). UI 프로젝트는 `/bootstrap-design`이 본 파일을 채우고, 비-UI 프로젝트는 fork 직후 본 파일을 삭제한다. **삭제 시 `AGENTS.md`의 `[시각 디자인](docs/20-system/DESIGN.md)` 링크 줄도 함께 제거한다**(dangling 방지).
-- UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-058(design workflow): R0(evidence-on-demand 리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 REFINE/EXPLORE — 실카피 렌더 + 수용 게이트(320·populated axe·repair loop), 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 게이트). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장한다(M/F가 아직 없으면 — ADR-057; 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 해당 task workflow 또는 다음 M). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
+- UI 프로젝트의 `/bootstrap-design` 라운드 구조는 ADR-058(design workflow): R0(evidence-on-demand 리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값 확인 — ADR-056) → **R2(DESIGN.md 작성 *전* 다중 concept 시안 REFINE/EXPLORE — 실카피 렌더 + 수용 게이트(320·populated axe·repair loop), 사용자가 시각 방향 선택)** → R3(토큰)·R4(컴포넌트) → R5(DESIGN.md 저장) → R6(DESIGN.md 파생 preview 최종 확인 + 게이트). **사용자가 R2 concept 방향을 선택하고 R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고 `/plan-milestone`으로 진행 권장한다(M/F가 아직 없으면 — ADR-057; `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); 이미 구현 중이면 해당 task workflow 또는 다음 M). DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.
 - ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
 
 ## 3. 작업 단위 분해
@@ -17,9 +17,15 @@
 - 마일스톤 단위 목표를 `docs/30-workitems/milestones`에 만든다.
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
-- task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**으로 전 feature를 함께 확정한다(ADR-057#amend-3).
+- task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**으로 전 feature를 함께 확정한다(ADR-057#amend-3). task는 전부 `draft`로 남으며, **`/seal-milestone M<N>`이 최종 검사 + 사용자 승인 후 task→feature→milestone을 일괄 `ready`로 봉인**한다(ADR-060 D7). 봉인 전에는 `/implement-workitem`이 착수하지 않는다.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
 - (UI 마일스톤) `/plan-milestone` R5 프로토타입 라운드가 화면 경험 계약(승인 프로토타입 — `docs/20-system/prototypes/M<N>/`)을 확정한 뒤 task 분해로 진행한다. UI 확정 feature는 승인 프로토타입(또는 면제 기록) 없이 `/plan-workitem` 분해가 차단된다 (ADR-056).
+
+## 3-1. 마일스톤 봉인 (seal)
+- `/seal-milestone M<N>`이 최종 검사(계획 완결성·AC 해석 확정·커버리지·의존성·결정 원장·가설·리뷰 증거)와 사용자 최종 승인을 거쳐 task→feature→milestone을 일괄 `ready`로 전환한다.
+- **내용 수정·커밋을 하지 않는다** — 쓰는 것은 상태값 · `## 10` 봉인 기록 · (사용자가 그 자리에서 고른 경우) task `## 8`의 `해석 확정:` 한 줄뿐이다. 실패 시 어떤 상태도 바꾸지 않고 소유 skill로 반환한다. 중단 시 재실행이 부분 승격 상태를 재개 진입으로 인식하고, 구현 전 계획을 고친 뒤의 재실행은 재봉인 진입으로 받는다.
+- 봉인 시점에 **현재 마일스톤에 영향을 주는 `open` 결정이 0건**이어야 한다 — 이것이 "개발 중 기획이 애매하지 않게" 만드는 지점이다.
+- 봉인 후 새로 드러난 결정은 원장에 기록하되 **착수를 막지 않고** 기존 finding 라우팅(repair / 사용자 보고 / 다음 M)을 탄다 (ADR-060 D11).
 
 ## 4. 구현 및 검증
 - 구현은 `/implement-workitem`으로 시작한다.
@@ -64,7 +70,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 ## 기본 원칙
 - 상위 문서 없이 하위 문서만 먼저 만들지 않는다.
 - 흩어진 메모보다 정해진 위치의 문서를 갱신한다.
-- 애매한 사항은 문서에 가정과 열린 질문으로 남긴다.
+- 애매한 사항은 **그 단계에서 닫는다**. 지금 닫을 수 없으면 `docs/10-charter/DECISION_REGISTER.md`에 등재하고, 현재 마일스톤 무영향 근거·이관 앵커·회수 시점 3개를 갖춘 `deferred`로 전환한다. **앵커 없는 유예는 허용하지 않는다** (ADR-060 D1/D4).
 - 작업을 완료(done)로 전환하기 전에 최소한 다음을 확인한다:
     - 구현 범위가 관련 workitem 문서와 일치한다
     - 관련 검증 항목(테스트 포인트, 검증 방법)이 통과했다
@@ -84,9 +90,12 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 ## 워크아이템 라이프사이클
 
 ```
-discover → bootstrap → plan(+UI: 프로토타입 라운드) ─┬─→ implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
-                              │                          └─Needs Fix─→ repair → (validate 재실행)
-                              └─(opt-in, ADR-038)─→ validate-plan (별 세션) → repair-plan (원본 세션) → implement
+discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M/F = contract-ready]
+   → plan-workitem (task 전부 draft)
+   → (opt-in, ADR-038) validate-plan (별 세션) → repair-plan (원본 세션)
+   → seal-milestone (검사 + 사용자 승인 + task→feature→milestone 일괄 ready)   ← 리뷰 유무와 무관하게 항상 거친다
+   → implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
+                           └─Needs Fix─→ repair → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 ```
 
@@ -114,16 +123,18 @@ discover → bootstrap → plan(+UI: 프로토타입 라운드) ─┬─→ imp
 ## 문서 상태 전이
 
 ```
-draft → ready → in-progress → done
-                     ↓↑
-                  blocked
+M / F  : draft → contract-ready → ready          (ready 부여는 /seal-milestone 단독 — ADR-060 D6/D7)
+task   : draft → ready → in-progress → done      (ready 부여는 /seal-milestone 단독)
+                              ↓↑
+                           blocked
 done → in-progress (검증된 완료 결함을 repair-workitem이 재개방할 때만 — ADR-057#amend-3 결정 5)
 done → deprecated (필요 시)
 ```
 
 | 전이 | 최소 조건 |
 |------|-----------|
-| draft → ready | 필수 섹션이 채워졌고, 자기 검증 또는 리뷰를 거쳤다 |
+| (M/F) draft → contract-ready | plan-milestone 라운드 완료 + 확정 재대조 통과 + 원장의 이 M 영향 및 `(미할당)` `open` 0건. **잠금 아님** — task 분해 중 계약 수정 가능 |
+| (M/F/task) → ready | `/seal-milestone`이 봉인 조건 전부 통과 + 사용자 명시 승인. **M/F 계약 층은 이 시점부터 잠긴다.** task 층의 실질 기준선은 *첫 구현 시작*이다 — 구현 흔적(`in-progress`·`blocked`·`done`·`deprecated`)이 0건인 동안에는 `/repair-plan`이 task·매핑·의존성을 고칠 수 있고, 고친 뒤 `/seal-milestone` 재실행(재봉인)으로 receipt를 갱신한다 (ADR-060 D6/D7) |
 | ready → in-progress | 실제 구현/작업이 시작됐다 |
 | in-progress → blocked | 외부 의존성이나 미결 질문으로 진행 불가 |
 | blocked → in-progress | 블로킹 원인이 해소됐다 |

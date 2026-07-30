@@ -25,7 +25,7 @@
 | 산출물 | 위치 | 생성 주체 | 라이프사이클 | presence |
 |--------|------|-----------|--------------|----------|
 | project charter | `docs/10-charter/PROJECT_CHARTER.md` | `/bootstrap-project` | Living | baseline |
-| decision register | `docs/10-charter/DECISION_REGISTER.md` | `/discover-product`·`/bootstrap-*`·`/plan-*`·`/repair-plan` (등재) · `/seal-milestone` (판정) — 정책 ADR-060 | Living | baseline |
+| decision register | `docs/10-charter/DECISION_REGISTER.md` | `/discover-product`·`/bootstrap-*`·`/plan-*`·`/repair-plan` (등재) · `/repair-workitem`·`/stabilize-milestone` (봉인 후 append — ADR-060 D11) · `/seal-milestone` (판정) — 정책 ADR-060 | Living | baseline |
 | discovery | `docs/10-charter/DISCOVERY.md` | `/discover-product` | Living | generated |
 | discovery template | `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | research note | `docs/10-charter/insights/<date>-<slug>.md` | `/research-pack` | Record | generated |

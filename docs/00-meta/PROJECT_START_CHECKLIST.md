@@ -46,12 +46,19 @@
   ```
   /plan-workitem M1
   ```
-- [ ] bootstrap·plan 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md / M1 / F-NNN의 `## 0. Status`를 `draft → ready`로 전환했다
+- [ ] bootstrap 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md의 `## 0. Status`를 `draft → ready`로 전환했다 (수동 — 이 두 문서에는 상태 writer skill이 없다)
+- [ ] M1 / F-NNN은 `/plan-milestone`이 `contract-ready`까지 올렸다 (`ready` 전환은 `/seal-milestone`이 한다 — 수동 전환 금지)
+- [ ] `/seal-milestone M1`으로 최종 검사 + 승인 + 일괄 `ready` 봉인을 마쳤다
+  ```
+  /seal-milestone M1
+  ```
 - [ ] `docs/30-workitems/milestones`에 첫 milestone 문서가 있다
 - [ ] `docs/30-workitems/features`에 첫 feature 문서가 있다
-- [ ] 필요하면 `docs/30-workitems/tasks`에 task 문서를 만들었다
+- [ ] `docs/30-workitems/tasks`에 **각 feature마다 task가 1개 이상** 있다 (`/plan-workitem`이 생성 — 봉인 조건 2가 요구하므로 선택 사항이 아니다)
 
 ## 5. 의사결정 기록
+- [ ] `docs/10-charter/DECISION_REGISTER.md`에 기획 결정이 등재돼 있고, 현재 마일스톤에 영향을 주는 `status: open`이 0건이다 (ADR-060)
+- [ ] `deferred` 항목은 전부 현재 M 무영향 근거 + 이관 앵커 + 회수 시점을 갖췄다
 - [ ] 중요한 선택을 `docs/90-decisions`에 ADR로 남겼다
 - [ ] 지속돼야 할 결정(범위·마일스톤 순서·연기 결정 등)이 도구 memory(Claude MEMORY.md·Codex memories)에만 있지 않고 checked-in 문서(마일스톤/feature/ADR)에도 있다 (ADR-010#amend-5 — 도구별 memory는 비캐노니컬)
 
