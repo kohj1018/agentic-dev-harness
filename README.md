@@ -3,6 +3,9 @@
 
 **Language: English | [한국어](README_ko.md)**
 
+<img width="1774" height="887" alt="agentic-dev-harness_preview-img" src="https://github.com/user-attachments/assets/4e7160e1-5918-49af-8ab3-d909c8020d3c" />
+
+
 A document-first agentic dev harness for Claude Code and Codex CLI — sets up document structure and sub-agent workflow all at once when starting a new project. Both CLIs are supported as first-class entry points.
 
 > **In short**: Fork this repo → optionally run `/discover-product` to ground your charter in real user data → run `/bootstrap-project` → get charter and architecture in one shot, then `/plan-milestone` creates milestones/features. The main session orchestrates; sub-agents do the work.
