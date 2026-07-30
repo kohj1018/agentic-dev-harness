@@ -3,6 +3,9 @@
 
 **Language: [English](README.md) | 한국어**
 
+<img width="1774" height="887" alt="agentic-dev-harness_preview-img" src="https://github.com/user-attachments/assets/4e7160e1-5918-49af-8ab3-d909c8020d3c" />
+
+
 새 프로젝트를 시작할 때 문서 구조와 서브에이전트 워크플로우를 한 번에 세팅하는 document-first agentic 개발 harness다. Claude Code와 Codex CLI 둘 다 1급 진입점으로 지원한다.
 
 > **한 줄 요약**: 이 저장소를 fork → 필요하면 `/discover-product`로 사용자 데이터 기반 발굴 → `/bootstrap-project` 실행 → charter·architecture를 한 번에 생성, 이후 `/plan-milestone`이 milestone/feature를 생성한다. 메인 세션은 오케스트레이션, 실작업은 서브에이전트가 수행한다.
