@@ -1464,8 +1464,69 @@ policy:
 | 기획 결정 마감 + 마일스톤 봉인 (원장·authority·contract-ready·seal) | [ADR-060](../90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) (정책 SSOT). → ADR-060 `## Surfaces` 참조 (fan-out SSOT). |
 ```
 
+## 6.4 6.1 본문의 실행 가능성 결함 4건 + 동반 ADR 정정 (리뷰에서 발견)
+
+> 6.1 본문은 **자기 계약을 실행할 수 없는 자리 4곳**을 갖고 있었다. 아래는 전부 같은 파일(`.claude/skills/seal-milestone/SKILL.md`) 안의 조각 치환이며, (f)만 ADR-060 본문을 함께 고친다.
+
+### (a) `allowed-tools` — 조건 8이 요구하는 삭제 권한 부여
+
+조건 8은 ALL_GOOD review 파일 **삭제**를 요구하지만 `Read Glob Grep Edit`으로는 파일을 지울 수 없다. 삭제가 안 되면 봉인 직후 `/implement-workitem`이 게이트 ⑤에서 막힌다(조건 8이 스스로 밝힌 실패 모드). `repair-plan`·`repair-discovery`가 이미 쓰는 것과 **동일한 범위 한정 패턴**을 부여한다.
+
+**기존**: `allowed-tools: Read Glob Grep Edit`
+**변경**: `allowed-tools: Read Glob Grep Edit Bash(rm docs/40-validation/plan-reviews/*.md)`
+
+### (b) 0단계 판정 — `blocked`/`deprecated` legacy 교착 제거
+
+`in-progress`/`done`만으로 갈래를 나누면 **`blocked`만 남은 legacy 마일스톤**이 마이그레이션 진입으로 분류돼 조건 2에서 차단되고, receipt가 없어 implement도 거부되는 교착이 된다(D12가 없애려던 순환과 동형).
+
+**기존** (0단계 표 2행): `… 그 M에 \`in-progress\`/\`done\` task **0건**` / `… **1건 이상**`
+**변경** (2행 모두): `… 그 M에 **구현 흔적 task 0건**` / `… **구현 흔적 task 1건 이상**`
+
+**추가** — 표 바로 아래, `**재개 진입에서는 …**` 문단 앞에 한 줄:
+```markdown
+**구현 흔적 task** = `in-progress` · `blocked` · `done` · `deprecated` 중 하나인 task. `blocked`는 `in-progress`에서만, `deprecated`는 `done`에서만 도달하므로(WORKFLOW 상태 전이 표) 이 4종은 모두 *구현이 시작된 뒤*의 상태다. **`in-progress`/`done`만으로 판정하면** `blocked`만 남은 legacy 마일스톤이 마이그레이션 진입으로 분류돼 조건 2에서 차단되고, receipt가 없어 implement도 거부되는 **교착**이 된다(D12가 없애려던 순환과 동형).
 ```
-git add .claude/skills/seal-milestone/ .agents/skills/seal-milestone/ README.md README_ko.md docs/00-meta/STRUCTURE.md
+
+**동반** — grandfather 문단 첫 문장의 `task가 이미 \`in-progress\`/\`done\`이다. 이 상태에 조건 2("\`in-progress\`·\`done\`이 있으면 중단")` → `task가 이미 구현 흔적 상태(\`in-progress\`·\`blocked\`·\`done\`·\`deprecated\`)다. 이 상태에 조건 2("구현 흔적이 있으면 중단")`
+
+### (c) 조건 3 — 빈 `## 9. 의존성`은 정상 (happy path 차단 제거)
+
+`TASK_TEMPLATE ## 9`는 *"비어 있으면 선행 의존 없음"*으로 정의하고 `plan-workitem`은 *"의존성이 없는 task는 비워둔다"*로 지시한다. 조건 3이 `## 9` 채움을 요구하면 **선행이 없는 첫 task 때문에 모든 마일스톤이 봉인 불가**가 된다.
+
+**기존**: `… \`## 6. Acceptance Criteria\`(1개 이상), \`## 9. 의존성\`이 채워졌는가. angle-bracket placeholder(\`<runner>\` 등)만 남은 칸은 미완으로 본다.`
+**변경**: `… \`## 6. Acceptance Criteria\`(1개 이상)이 채워졌는가. \`## 9. 의존성\`은 **섹션이 존재하는지만 본다 — 빈 값은 "선행 의존 없음"이라는 정상 선언이다**(TASK_TEMPLATE \`## 9\` 정의 / plan-workitem "의존성이 없는 task는 비워둔다"). 빈 값을 미완으로 보면 선행이 없는 첫 task 때문에 모든 마일스톤이 봉인 불가가 된다. 참조가 *적혀 있을 때*의 정합성은 조건 5가 본다. angle-bracket placeholder(\`<runner>\` 등)만 남은 칸은 미완으로 본다.`
+
+### (d) grandfather receipt — `Register:` 실측값 (규칙 4-b 신설)
+
+grandfather에서는 조건 6이 보고만 하므로 `open`이 0이 아닐 수 있는데, receipt 양식은 `open 0건`을 하드코딩하고 있다. 그대로 쓰면 **검증되지 않은 사실을 검증된 것처럼 주장**한다.
+
+grandfather 규칙 4 **다음**에 한 줄 추가:
+```markdown
+4-b. **receipt의 `Register:` 줄은 실측값으로 쓴다** — 이 진입에서는 조건 6이 보고만 하므로 `open`이 0이 아닐 수 있다. 정상 봉인용 `open 0건` 문구를 그대로 쓰지 말고 `- Register: closed <N>건 / deferred <M>건 / open <K>건 (보고만 — 소급 검사 없음)`으로 기록한다. 0을 적으면 receipt가 검증되지 않은 사실을 검증된 것처럼 주장한다.
+```
+
+### (e) 조건 8 — ALL_GOOD 분기의 `independence` 판정 근거
+
+review 파일 스키마에는 `리뷰어 태그`만 있고 **세션 분리 정보가 없다**. 그런데 이 분기는 사용자에게 묻지 않으면서 receipt의 `independence`를 채워야 한다 — 본 skill의 "추론하지 않는다" 원칙과 충돌한다.
+
+조건 8 ALL_GOOD 분기 문장 **끝**에 덧붙인다:
+```markdown
+ **`independence`는 파일에서 알 수 없다**(review 파일 스키마에 `리뷰어 태그`는 있어도 세션 분리 정보는 없다) — 추론하지 말고 이 분기에서도 사용자에게 1회만 묻는다: "그 리뷰는 별도 세션이었습니까? (별도 세션 / 같은 세션)". 답을 그대로 receipt에 적는다.
+```
+
+### (f) ADR-060 D12 동반 정정 (정책 SSOT 정합)
+
+(b)·(d)는 D12의 갈래 정의와 receipt 규칙을 바꾸므로 ADR 본문도 함께 고친다. **amend 신설이 아니다** — 이번 라운드가 만든 ADR의 자체 정정이다.
+
+**파일**: `docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md`
+- (가)/(나) 헤더의 `\`in-progress\`/\`done\` task 0건 / 1건 이상` → `구현 흔적 task 0건 / 1건 이상`
+- (가) 헤더 **다음**에 인용 한 줄 추가: `> **구현 흔적 task** = \`in-progress\` · \`blocked\` · \`done\` · \`deprecated\`. \`blocked\`는 \`in-progress\`에서만, \`deprecated\`는 \`done\`에서만 도달하므로 4종 모두 구현 시작 후의 상태다. \`in-progress\`/\`done\`만으로 갈래를 나누면 \`blocked\`만 남은 마일스톤이 (가)로 분류돼 조건 2에서 차단되고 receipt가 없어 implement도 거부되는 교착이 남는다.`
+- (나) 규칙 4 끝에 덧붙임: `receipt의 \`Register:\` 줄도 **실측값**으로 쓴다 — 이 갈래에서는 \`open\`이 0이 아닐 수 있으므로 정상 봉인용 \`open 0건\` 문구를 쓰지 않고 \`open <K>건 (보고만 — 소급 검사 없음)\`으로 적는다.`
+
+> D7의 진입 모드 4종 문장("마이그레이션 … 구현 0건 / grandfather … 구현 1건 이상")은 **이미 추상 표현이라 고치지 않는다.**
+
+```
+git add .claude/skills/seal-milestone/ .agents/skills/seal-milestone/ README.md README_ko.md docs/00-meta/STRUCTURE.md docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md
 ```
 
 **커밋 메시지**: `feat(skills): add seal-milestone as the milestone planning gate`
@@ -2000,7 +2061,7 @@ grep -rl "contract-ready" --include="*.md" docs .claude AGENTS.md | wc -l   # �
 > **각 fixture는 독립 상태에서 돌린다** — 앞 fixture의 변조가 뒤 검사를 오염시키지 않도록, fixture 직전 상태를 `git stash`/브랜치/디렉터리 복사 중 하나로 스냅샷하고 fixture 후 되돌린다. 연속 변조로 돌리면 관측이 무의미해진다.
 
 12. **마이그레이션 케이스 A (계획만 됨)** — M을 `ready`로 두고 `- 봉인일:`을 비운 채 task는 전부 `ready`(in-progress/done 0건)로 만든 뒤 `/seal-milestone M1` → **조건 2~8 전수 재검사**하는가. task 0건이면 **receipt를 쓰지 않고** 반환하는가(빈 마일스톤 봉인 금지)
-13. **마이그레이션 케이스 B (이미 구현 중)** — 같은 상태에서 task 1개를 `in-progress`로 바꾸고 `/seal-milestone M1` → **grandfather 진입**으로 인식해 조건 2를 적용하지 않고, 사용자 확인 후 `- 봉인일: … (마이그레이션 — 구현 중 착수, 소급 검사 없음)` 라벨로 기록하는가. **그 뒤 `/implement-workitem`이 착수되는가**(P0 교착 해소 확인)
+13. **마이그레이션 케이스 B (이미 구현 중)** — 같은 상태에서 task 1개를 `in-progress`로 바꾸고 `/seal-milestone M1` → **grandfather 진입**으로 인식해 조건 2를 적용하지 않고, 사용자 확인 후 `- 봉인일: … (마이그레이션 — 구현 중 착수, 소급 검사 없음)` 라벨로 기록하는가. **그 뒤 `/implement-workitem`이 착수되는가**(P0 교착 해소 확인). **이어서 그 task를 `in-progress` → `blocked`로 바꿔 `in-progress`/`done` 0건 + `blocked` 1건 상태로 만든 뒤 재실행** → 여전히 **grandfather로 판정**하는가(6.4(b) 교착 회귀 검사). receipt의 `Register:` 줄이 `open 0건`이 아니라 **실측값 + `(보고만 — 소급 검사 없음)`**인가(6.4(d))
 14. **승인 우회 케이스** — 재개 진입에서 **승인을 다시 요구**하는가. 그리고 **이미 `ready`인 문서도 검사에는 포함**되는가(상태 쓰기만 생략)
 15. **원장 부재 케이스** — 원장 파일을 지우고 `/seal-milestone M1` → silent skip이 아니라 **사용자 확인 1회**를 요구하고 receipt에 남기는가
 16. **`(미할당)` 누출 케이스** — bootstrap에서 등재한 `(미할당)` open을 triage하지 않고 `/seal-milestone M1` → **조건 6에서 BLOCKED**되는가
