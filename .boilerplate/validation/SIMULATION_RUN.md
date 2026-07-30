@@ -699,3 +699,99 @@ stabilize가 `M1-instr-1`~`7`로 산출한 7건을 보일러플레이트 본문�
 **확정 결함 2 → 라벨 `P1`로 하향.** `§5-4`의 `P0 [Arch-iface-violation]`을 `P1 [Arch-iface-violation]`으로 바꿔 같은 블록의 나머지 13건(P1 9 / P2 4)과 정렬한다. `MILESTONE_TEMPLATE.md:32`가 이미 규정한 report-only 동작과 라벨이 일치하게 된다. best-effort heuristic(스스로 "false negative 多"로 명시)에 차단력을 주는 대안은 오탐 차단 위험과 ADR-053 backstop 설계와 어긋나 기각했다.
 
 **기각·중복 항목은 재등재하지 않는다** — `M1-instr-7`(report gitignore)은 `MILESTONE_TEMPLATE.md:32`·`WORKFLOW.md:27`·`STRUCTURE.md:45`가 규정한 의도된 설계이고, `M1-instr-4`는 `finalize-workitem/SKILL.md:25`에 게이트가 실재하므로 진단 오류이며, `M1-instr-5`는 D12가 이미 결정한 사안이다. 잔여로 남는 문구 개선 후보 2건: (a) 새 체크아웃 재검증 시 **각 task의 `/validate-workitem` 재실행이 선행돼야 report가 생긴다**는 한 줄(`MILESTONE_TEMPLATE.md:32` 또는 `WORKFLOW.md:27`), (b) ADR-017에 **에이전트 단독 완주 불가**(메인 세션 skill 구간은 사람이 운전) 명시.
+
+## Round 9 (2026-07-30, todo CLI / ADR-060 결정 마감 + 마일스톤 봉인 적용 검증)
+
+> isolated fork `C:\tmp\dogfood-todo-cli-20260730` (baseline `de8835e`). ADR-060 신설 + amendment 3건 + `seal-milestone` 신규 skill + skill 다수 개편으로 ADR-017 재실행 트리거 2종("새 ADR 도입 — amendment 포함", "lifecycle 단계 변경")이 모두 발동한 라운드다. 실제 Node.js 24 / npm 11로 수행했다. 시나리오는 가이드가 고정한 **todo CLI (CRUD + JSON persistence)**.
+
+### 수행 방법의 한계 (Round 8과 동일 — 먼저 밝힌다)
+
+lifecycle skill 중 `discover-product`·`bootstrap-project`·`bootstrap-stack`·`plan-milestone`·`plan-workitem`·`stabilize-milestone`은 `disable-model-invocation: true`(ADR-050 D2 — 의도된 설계)이므로 에이전트가 Skill 도구로 호출할 수 없고, 다른 포크 디렉터리에 대해서는 `implement-workitem`·`validate-workitem`·`repair-workitem`·`finalize-workitem`·`seal-milestone`도 Skill 도구가 현재 세션 프로젝트에 결박돼 있어 마찬가지로 호출할 수 없다. 따라서 이번 라운드는 **전 구간을 각 SKILL.md가 문서화한 절차를 손으로 충실히 재현**했다 — 단, 실제 파일 생성·실제 `git` 커밋·실제 `node --test` 실행·실제 CLI 수동 스모크 테스트를 동반했다(Round 8과 동일 기준). **1차 관측**: Round 8이 이미 확정한 "ADR-017 사용자 개입 ≤1회 지표는 이 실행 방식으로 측정 불가"가 이번에도 동일하게 적용된다 — 새로운 gap이 아니라 기존에 확정된 gap의 재확인이다.
+
+### 단계별 관측
+
+1. **Discover** (수작업 재현): DISCOVERY.md 14/14 섹션 실서술. R3에서 위험도 판정(ADR-035#amend-3/D5) 수행 — 가정 2개(A-1 타이밍 습관, A-2 단일기기) 모두 저위험·가역으로 판정, `risk-accepted`로 원장에 `D-001`/`D-002` 등재(`영향: (미할당)`). **관측된 gap**: R3의 위험도 판정 문구가 이 risk-accepted 등재에 전체 Decision Brief 6블록을 쓰라는 것인지 명시하지 않는다 — `## 결정 마감` 공통 블록은 모든 `user-*` 결정에 Decision Brief를 요구하지만, 가정-위험도 판정은 다중 옵션 선택이 아니라 단일 수용/비수용이라 실무적으로는 경량 진술(3필드만)로 충분해 보였다. 사양 명확화 후보.
+2. **Bootstrap project** (수작업 재현): charter 9/9 섹션 + ADR-100. ADR-053 고-stakes 게이트 미발동(DB·인증·다중모듈 없음) — 저-stakes 프로젝트에서 게이트가 조용히 지나가는 것을 확인.
+3. **Bootstrap stack** (수작업 재현): Node.js CLI, ARCH `## 7-1`/`## 7-3`/`## 7-4`/`## 7-5` 통째 삭제, `## 7-2`만 채움. **ADR-060 D9 authority 분리가 정확히 설계대로 작동**: `## 7-2`의 4항목 중 "출력 포맷"(user-approval) 1건만 Decision Brief 6블록으로 제시(→ `D-003`), 나머지 3건(플래그·명령어 / TTY-ANSI / Don'ts, 전부 agent-delegated)은 한 번의 일괄 확인으로 처리 — 가이드가 지정한 "1개 Decision Brief + 3개 batch-confirm" 시험점을 정확히 재현했다.
+4. **Plan milestone + plan workitem** (수작업 재현): M1/F-001 → `contract-ready`. bootstrap 단계의 `(미할당)` open 항목(`D-004`, 실행 파일명 충돌 리스크)을 R1이 전수 triage — `영향: M1`으로 배정 후 같은 라운드에서 Decision Brief로 즉시 마감(`todo` 유지 결정). plan-workitem은 T-001/T-002를 전부 `draft`로 생성(자기 승격 없음, ADR-060 D7). FAC-1~4 전부 매핑. **의도적으로 T-001:AC-3(중복 add 처리)를 2개 합리적 해석이 가능한 채 미확정 상태로 남겨** 이후 봉인 3-b 검사의 시험 재료로 삼았다.
+5. **Seal-milestone — 핵심 시험 대상, fixture 5~18 실행** (수작업 재현, 아래 표). **주의: 13·17·18의 *후반부*(봉인 후 `/implement-workitem` 착수 계열)와 12b는 미실행이다** — 아래 "미실행" 절에 전수 명시:
+
+| Fixture | 시나리오 | 결과 |
+|---|---|---|
+| 5 | 원장 `open` 항목(M1 스코프)이 남은 채 봉인 | BLOCKED: 조건 6, 상태 불변 |
+| 6 | `deferred`인데 앵커 3필드 중 결측 | BLOCKED: 조건 6 (`open`으로 강등 처리 — D4 규정대로) |
+| 7 | AC 2+ 해석 미확정 — (a) 보류 응답 | BLOCKED: 조건 3-b, 상태 불변 |
+| 7 (계속) | (b) 즉석 응답 → 계속 진행 중 조건 6 도달 | 3-b `해석 확정:` 기록이 **이후 BLOCKED에도 유지됨**(명시 예외 1 실동작 확인) |
+| 8 | 부분 승격 상태(task 1개만 `ready`)에서 재실행 | **재개 진입** 인식, 전 문서 재검사, 승인 재요구, 나머지만 승격 |
+| 9 | 봉인+구현 완료 상태에서 `/repair-plan`에 synthetic P0 투입 | 2-S 세 번째 분기 발동 — 계획 미수정, IMPROVEMENT_GUIDE 영속, 리뷰 파일 삭제 |
+| 10 | 전부 정상 | fixture 8과 결합 실행 — **SEALED**, receipt 정상 기록 |
+| 11 | 실제 구현→검증→마감→안정화 전 구간 | 아래 별도 서술 |
+| 12 | `ready`+봉인일 미기입+구현 흔적 0건 | **마이그레이션 진입**, 조건 2~9 전수 재검사 후 SEALED(라벨 없는 평문 receipt — D12(가) 규정대로) |
+| 13 | 같은 상태에서 task 1개 `in-progress`, 이어서 `blocked`로 교체 재실행 | 두 경우 모두 **grandfather 진입** 일관 판정(4종 구현 흔적 정의의 `blocked` 회귀 방지 확인). **후반부 미실행**: 그 뒤 `/implement-workitem` 착수 여부 + receipt `Register:` 실측값 표기 |
+| 14 | 재개 진입의 승인 재요구 | fixture 8과 **결합 실행**으로 확인 — §10.2의 "각 fixture는 독립 상태에서" 규정 미준수(14는 8 시나리오의 하위 단정이라 결합했으나 규정 이탈은 이탈이다) |
+| 15 | `DECISION_REGISTER.md` 파일 삭제 | silent skip 아님 — 확인 1회 요구 후 receipt에 `파일 부재 — 사용자 확인 후 skip` 정직 기록 |
+| 16 | `(미할당)` open 미triage 항목 존재 | BLOCKED: 조건 6, `/plan-milestone` R1 triage 안내 |
+| 17 | 봉인 직후(구현 0건) 결함 발견 → repair-plan 수정 → 재봉인 | 2-S 두 번째 분기(그 자리에서 수정) → **재봉인 진입** 정상 재검증·receipt 갱신 — 이 경로가 실제로 막다른 길이 아님을 확인(가이드 §7.7(a)가 고치려던 교착의 회귀 검사). **후반부 미실행**: 같은 M을 `in-progress`로 바꾼 뒤의 report-only 재검사(fixture 9가 별 상태에서 동형 확인) |
+| 18 | `ALL_GOOD` 리뷰 파일 존재 | 삭제 + 통과, `independence` 질문 1회, receipt에 `executed: yes` 기록. **후반부 미실행**: 그 뒤 `/implement-workitem`이 게이트 ⑤를 통과하는지 |
+
+6. **Implement + validate + finalize** (실제 skill 재현 — 실제 코드/테스트/커밋): T-001(add/list)·T-002(done/remove) 모두 RED(모듈 없음 확인) → GREEN(9/9 테스트 pass) → validate report Pass(신뢰도 High) → finalize로 `done` + 실제 커밋 2건. 수동 스모크로 손상 저장 파일 fail path까지 확인(크래시 없이 에러+exit 1).
+7. **Stabilize** (수작업 재현): 실행 시점 판정은 graduation YES였으나 **본 기록 검토에서 계약 결함 4건이 확인돼 YES → NO로 정정**한다(아래 "harness 발견" — fork의 M1 `## 8` 회고에는 정정 전 `YES`가 남아 있다). QA_FINDINGS에 P2 1건(손상 파일 fail path 테스트 커버리지 gap). **탐색적 QA 중 실제로 새 결정을 발견**(완료 항목 purge 정책, `D-007`) → `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `- 발견: 봉인 후 (M1)`으로 등재(ADR-060 D11 writer 실동작).
+
+### 실제 커밋 (fork 로컬, 미push)
+
+`55840de` fork 정리 → `eefd6bf` discover+bootstrap-project+bootstrap-stack → `ea352d9` plan-milestone(contract-ready) → `276043f` plan-workitem(draft, AC-3 미확정) → `f468dc5` AC-3 해석 확정+원장 정리 → `c4c15c0` seal SEALED → `5019adf` T-001 구현 → `c1b3ec6` T-002 구현 → `1fb5440` stabilize(graduation YES, D-007 등재) → `b69ff74` repair-plan fixture9. fixture 12~18은 `fixture-migration-test` 브랜치에서 격리 실행 후 병합 없이 폐기(`main` 이력 오염 없음).
+
+### ADR-017 성공 기준
+
+**적용한 계수법** (가이드 §10.0이 고정한 규칙 — 회차 간 비교를 위해 명시): **카운트한다** = 사람이 skill 산출물(문서·코드) 파일을 **직접 편집**한 행위 1건 = 1회. **카운트하지 않는다** = ① skill 발화 자체(`disable-model-invocation: true` skill은 사용자가 부르는 것이 정상 호출 경로) ② Decision Brief 응답 ③ 일괄 확인 응답 ④ `/seal-milestone` 승인 응답 ⑤ 실패 fixture를 만들기 위한 의도적 상태 변조. 이번 라운드에서 ②~⑤는 다수 발생했으나 전부 계수 대상이 아니다. **에이전트가 skill 절차를 손으로 대행한 편집은 ①의 "skill 실행"에 해당하므로 계수 대상이 아니다** — 따라서 이 지표의 실측값은 **0회**다. 다만 그 0회는 *harness가 자동 실행됐을 때의 개입량*을 뜻하지 않는다(그 값은 이 실행 방식으로 얻을 수 없다). Round 8은 이 둘을 구분하지 않아 "측정 불가"로 적었고, 계수법이 고정된 뒤인 본 라운드부터는 위 구분으로 판정한다.
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---:|---|
+| 사용자 개입 (산출물 직접 편집) | ≤1 | **0회** | 통과 — 고정 계수법 문면 적용: *사람이* 산출물을 직접 편집한 행위 0건(에이전트의 skill 절차 대행은 ①~⑤ 어디에도 해당하지 않는 skill 실행이다). **단 이 0회는 harness 자동 실행의 개입량이 아니라 "수작업 대행 하에서 사용자 편집 0"이라는 뜻이다** — Round 8은 이 구분을 못 해 "측정 불가"로 적었고, 본 라운드가 계수법 도입 후 첫 판정이다 |
+| placeholder 충원율 | ≥80% | **15/17 ≈ 88%** | 통과(하한 근접) |
+| graduation pre-check 미통과 사유 | ≤2 | **1** (전 task done ✓ / validate Pass ✓ / E2E N/A ✓ / FAC↔AC 100% ✓ — **P0 0건 ✗**: 아래 결함 4건) | 통과 |
+
+**ADR-017 gate: 3/3 통과.** 단 "통과"는 *결함이 없었다*는 뜻이 아니다 — 아래 결함 4건 + harness 구멍 2건을 잡아낸 것이 이 라운드의 산출이다. todo CLI가 `## 7-2` 1항목뿐이라 D9의 "결정 카드 피로" 지표는 이번에도 자극되지 않았다(가이드가 예견한 대로) — 원장 최종 7행(D-001~D-007), 20행 상한 대비 여유 충분.
+
+**충원율 분모(17)와 미충원 2건**: 채움 대상 = README.md · README_ko.md · PROJECT_CHARTER · DISCOVERY · DECISION_REGISTER · ARCHITECTURE_OVERVIEW(+`## 7-2`) · STACK_SETUP_PLAN · ADR-100 · ADR-101 · ROADMAP · M1 · F-001 · T-001 · T-002 · QA_FINDINGS · IMPROVEMENT_GUIDE · M1 `## 10` receipt. **미충원 2건 = README.md·README_ko.md**(둘 다 `# agentic-dev-harness` 원문 그대로 — `/bootstrap-project`의 필수 산출물인데 프로젝트용으로 교체되지 않았다). 별건으로 **정리 누락 2건**(비-UI인데 `docs/20-system/DESIGN.md`가 `status: draft`로 잔존 + AGENTS.md의 DESIGN 링크 줄 미제거 — WORKFLOW 2절이 삭제를 규정)이 있으나 이는 placeholder 충원이 아니라 cleanup이라 분모에서 분리했다.
+
+**ADR-060 falsifying evaluation 두 지표 실측** (가이드 §10.4 요구): **결정 카드 총량 = `user-*` 7건**(`user-choice` 6 + `user-approval` 1) — 그중 **Decision Brief 6블록으로 제시한 것은 2건**(D-003 CLI 출력 포맷 / D-004 실행 파일명), 나머지 5건은 가정 위험도 판정(`risk-accepted` 2건)·라운드 내 즉답·QA 발견분이라 Brief 대상이 아니었다. **원장 행 수 = 7행**(상한 20). 마일스톤 1개 기준 카드 2건은 피로 임계와 무관한 수준이다. §10.3(2차 fixture — 웹/Flutter 스택으로 D9 부하 측정)은 **선택 사항이라 실행하지 않음**.
+
+### harness 발견
+
+**봉인 기계 자체는 설계대로 동작했다(fixture 5~18 — 후반부 3건·12b 제외).** 특히 `재봉인 진입`(fixture 17), `D11 봉인 후 마커 제외`(fixture 12), `구현 흔적 4종 정의`(fixture 13의 `blocked` 회귀 검사), `2-S 3분기`(fixture 9/17) — 이번 개선 라운드가 사후에 스스로 발견해 고친 5건의 교차 계약 결함(가이드 §7.7)이 실제로 전부 해소돼 있음을 각 fixture가 개별 확인했다.
+
+**그러나 dogfood 산출물 자체에 계약 결함 4건이 있었고 기존 게이트가 전부 놓쳤다** — 실물·실행으로 재현했다(최초 기록의 "기능 결함 0건"은 오판이며 본 절이 그것을 정정한다):
+
+| # | 결함 | 실측 근거 | 놓친 게이트 |
+|---|---|---|---|
+| 1 | **D-003 승인 결정 미구현** — ARCH `## 7-2`가 `--json` + 각 명령 `-h/--help`를 확정(이 라운드 대표 Decision Brief)했는데 구현은 `--all`만 처리 | `list --json` → 사람용 텍스트(exit 0) · `--help` → exit 1. `--json`/`--help`가 **어떤 FAC/AC에도 없음** | **구멍 B** — ARCH 7-x 결정 ↔ AC 회수 검사 부재(`[Plan-arch-iface]`는 *위반*만 보고 *회수 누락*은 안 봤다) + validate-plan 미실행(opt-in) |
+| 2 | **D-005 위반** — "삭제 id 영구 결번"으로 closed인데 `add.js`가 `max(id)+1` | #3 삭제 후 다음 add가 **다시 #3** | 위와 동일(닫힌 결정 → AC 회수 경로 없음) |
+| 3 | **정본 앵커 dangling** — D-004·D-005의 `정본: PROJECT_CHARTER.md ## 7`인데 charter `## 7`에 두 결정이 없다. D-004의 조건부(README 완화 안내)도 미이행 | charter `## 7` 4줄 전수 확인 · README `npx`/`별칭` 0건 | **구멍 A** — seal 조건 6이 `closed` 항목의 앵커 *내용*을 대조하지 않아 ADR-060 D1(원장=위치, 정본=본문) 위반이 통과 |
+| 4 | **seam 신호 ① 오판** — T-001·T-002가 같은 JSON에 write하는데 feature `## 7-2`를 "미발화(동시성 없음)"로 처리 | plan-workitem 규칙은 *"2+ task 동일 저장소 write"* **단독 발화** — 동시성 조건은 규칙에 없다 | 규칙 문면이 재량 여지를 남김. INV 표가 채워졌다면 결함 2(id 결번 불변식)가 AC로 회수됐을 가능성이 크다 — **결함 2와 인과 연결** |
+
+**pre-existing 2건(이번 라운드 계약 소관 아님)**: `/bootstrap-project`가 README 2종을 프로젝트용으로 교체하지 않음 · 비-UI인데 `DESIGN.md`(status draft) + AGENTS의 DESIGN 링크 정리 누락(WORKFLOW 2절이 삭제를 규정).
+
+**이번 라운드 계약의 구멍 2개(A·B)가 이 dogfood의 실제 산출이다** — 결정을 *닫는* 경로(D1~D9)는 만들었지만 (A) 닫힌 결정이 정본에 실제로 적혔는지, (B) 그 결정이 구현 AC로 회수됐는지를 아무도 보지 않았다.
+
+**결함 아님 1 — Phase 10 fixture 순서 표기.** 가이드 §10.1이 나열한 순서(5→6→7)는 실제 조건 검사 순서(3-b가 6보다 먼저)와 어긋난다 — `T-001:AC-3`가 plan-workitem 이후 미확정 상태라 어떤 봉인 시도도 3-b에서 먼저 걸린다. 5·6을 "이미 3-b가 통과된 상태"로 가정하고 나열한 것으로 보이나 본문에 그 전제가 적혀 있지 않다. 기능 결함은 아니고 fixture 목록의 실행 순서 주석 누락 — 실제 실행 시 순서를 3-b 우선으로 재배치했고(위 표에 반영), 다음 개선 라운드에서 §10.1에 "5·6은 3-b가 이미 해소된 상태를 전제"라는 한 줄을 추가할 후보로 남긴다.
+
+**미실행 — §10.1 item 11의 하위 관측 2개 + 7.6(a) surface 1개.** (a) *"봉인 전이면 `/implement-workitem` 착수 거부"*: 이번 실행은 SEALED 이후에만 implement를 돌렸으므로 **봉인 전 착수 시도를 하지 않았다** — 게이트 ④의 거부 경로는 미관측. (b) *"봉인 후 원장에 `open` + `- 발견: 봉인 후 (M<N>)`을 넣어도 착수가 막히지 않는가"*(D11 데드락 방지): D-007을 그 형식으로 실제 등재했으나(위 단계 7), 그 시점에 T-001·T-002가 이미 `done`이라 **착수할 task가 없어 검증하지 못했다**(synthetic T-003이 필요). ADR-060 falsifying evaluation이 감시 대상으로 지목한 항목이므로 **차기 라운드에서 반드시 실측**한다. (c) `repair-workitem`의 D11 등재 블록(가이드 7.6(a))은 validate가 Pass여서 inner-loop repair 자체가 발동하지 않아 미관측 — `stabilize` 쪽 writer만 실동작 확인됐다.
+
+**미실행(신규 아님, 명시적 스코프 초과) — fixture 12b.** "task 0건이면 receipt 미기록"은 별도 브랜치로 실행하지 않고 조건 2 문구("모든 feature가 task를 1개 이상 갖고")와 "하지 않는 것" 목록의 직접 판독으로 대체했다. 실측 실행은 아니므로 차기 라운드에서 실제로 짧게 실행해 확정하면 좋다.
+
+### 결정에 미친 영향
+
+- ADR-060의 D1·D2·D3·D4·D6·D7·D8·D9·D11·D12 — **선언한 절차는 전부 의도대로 작동**함을 개별 fixture로 확인했다. **다만 절차의 두 *끝단*이 비어 있었다**: 닫힌 결정의 정본 반영 검증(구멍 A → D7 조건 6 보강)과 승인된 ARCH 7-x 결정의 AC 회수 검증(구멍 B → `[Plan-arch-iface]` 확장). 두 건은 아래 "채택된 해결 방향"으로 **본 라운드에 반영**했다.
+- ADR-017은 "에이전트 단독 완주 불가" 공백이 Round 8에 이어 재확인됐다 — 이미 알려진 문서화 후보이며 이번 라운드가 새로 발견한 것은 아니다.
+
+### 채택된 해결 방향
+
+**본 라운드 반영 2건** (사용자 확정 — 구멍 A·B, 가이드 §11에 기록):
+
+1. **구멍 A → seal 조건 6에 정본 앵커 대조 추가.** `status: closed` + `authority: user-*` 항목의 `정본: <문서#앵커>`를 열어 **그 결정이 실제로 그 위치에 적혀 있는지** 1회 대조하고, 비어 있으면 어느 D-NNN이 dangling인지 보고하며 중단한다. 조건부 승인이면 그 조건의 이행 위치까지 본다. 반영: `.claude/skills/seal-milestone/SKILL.md` 조건 6 · ADR-060 D7 조건 6.
+2. **구멍 B → `[Plan-arch-iface]` 차원 확장.** ARCH `## 7-x`에 확정 기록된 `user-approval` 결정이 **어떤 task AC로도 회수되지 않으면 `P1`**으로 보고한다(범위 밖이 의도면 원장 `deferred` 또는 명시). 반영: `.claude/skills/validate-plan/SKILL.md` 차원 10 · `.claude/agents/reviewer.md` 차원 10(미러 동일).
+
+**잔여 한계(명시 수용)**: 구멍 B의 검출은 `validate-plan`이 opt-in(ADR-038)이라 **리뷰를 돌리지 않으면 여전히 새어 나간다.** 봉인 시점 강제(seal 조건에 ARCH 7-x↔AC 회수 검사 추가)는 결정 카드·차단 범위를 넓히는 변경이라 본 라운드 범위 밖으로 두고 차기 라운드 후보로 남긴다.
+
+**차기 라운드 필수 항목**: (a) 미실행 fixture 하위항목 6건 실측(봉인 전 착수 거부 · D11 데드락 방지 · 12b · 13/17/18 후반부) · (b) seam 신호 ① 문면에서 재량 여지 제거 · (c) `/bootstrap-project`의 README 2종 교체 + 비-UI `DESIGN.md`/AGENTS 링크 정리 누락 · (d) §10.1 fixture 순서 전제 한 줄.
