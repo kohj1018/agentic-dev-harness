@@ -163,4 +163,4 @@ Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 ## License
 
-MIT
+MIT — [LICENSE](LICENSE) 참고.

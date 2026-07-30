@@ -164,4 +164,4 @@ For improvement suggestions or bug reports, see the [issue templates](.github/IS
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
