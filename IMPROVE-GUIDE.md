@@ -2233,3 +2233,36 @@ git add .boilerplate/validation/SIMULATION_RUN.md
 ```
 
 **커밋 메시지**: `docs(validation): record decision closure walkthrough findings`
+
+---
+
+# Phase 11 — dogfood가 드러낸 계약 구멍 2건 반영 (Phase 10 산출)
+
+> Round 9 dogfood는 **봉인 절차 자체는 설계대로 동작**함을 fixture 5~18로 확인했지만, 동시에 이번 라운드 계약의 **두 끝단이 비어 있음**을 실증했다. 결정을 *닫는* 경로(D1~D9)는 만들었으나 (A) 닫힌 결정이 정본에 실제로 적혔는지, (B) 그 결정이 구현 AC로 회수됐는지를 아무도 검사하지 않는다. 실측 증거는 `SIMULATION_RUN.md ## Round 9`의 결함 표(D-003 `--json` 미구현 / D-005 결번 위반 / D-004·D-005 정본 앵커 dangling).
+
+## 11.1 구멍 A — seal 조건 6에 `closed` 정본 앵커 대조 추가
+
+**파일**: `.claude/skills/seal-milestone/SKILL.md` — 조건 6의 `authority: agent-delegated` 오분류 불릿 **다음**에 삽입:
+```markdown
+   - **`status: closed` + `authority: user-*` 항목의 정본 앵커 대조 (ADR-060 D1 — dogfood Round 9 발견)**: 각 항목의 `정본: <문서#앵커>`를 열어 **그 결정이 실제로 그 위치에 적혀 있는지** 1회 대조한다. 앵커가 가리키는 섹션에 그 결정 내용이 없으면 중단하고 어느 D-NNN이 dangling인지 보고한다(원장은 *위치만* 가리키고 본문은 정본이 SSOT이므로, 앵커가 비면 승인된 결정이 **어느 문서에도 없는 상태**로 봉인된다). 조건부 승인("…하는 조건부")이면 그 조건의 이행 위치까지 본다.
+```
+
+**동반** — `docs/90-decisions/boilerplate/ADR-060-…md` D7 봉인 조건 6 요약에 같은 검사를 한 구절로 추가: `\`deferred\` 앵커 3필드 완비` **다음**에 `, **\`closed\` + \`user-*\` 항목의 \`정본:\` 앵커가 그 결정을 실제로 담고 있는지 대조**(앵커가 비면 승인된 결정이 어느 문서에도 없는 상태다 — dogfood Round 9 실측)`.
+
+## 11.2 구멍 B — `[Plan-arch-iface]` 차원 확장 (미러 2곳)
+
+`.claude/skills/validate-plan/SKILL.md` 차원 10과 `.claude/agents/reviewer.md` 차원 10의 **각 줄 끝에 동일 문구를 덧붙인다**(미러 drift 금지 — 두 파일이 byte 동일해야 한다):
+```markdown
+ **+ ARCH 7-x의 `user-approval` 결정 ↔ AC 회수 (ADR-060 D9 — dogfood Round 9 발견)**: ARCH `## 7-x`에 *확정으로 기록된* 사용자 승인 결정(예: CLI `--json` 출력 포맷, API envelope, 인증 방식)이 **어떤 task `## 6` AC로도 회수되지 않으면 `P1 [Plan-arch-iface]`**로 보고한다 — 승인된 결정이 구현되지 않고 조용히 남는 경로다(FAC↔AC·PX↔AC 커버리지는 7-x 결정을 보지 않는다). 결정을 이번 M 범위 밖으로 두는 것이 의도면 원장에 `deferred`로 두거나 그 사실을 명시해야 한다.
+```
+
+> **명시 수용한 잔여 한계**: `validate-plan`은 opt-in(ADR-038)이라 리뷰를 돌리지 않으면 구멍 B는 여전히 샌다. 봉인 시점 강제(seal 조건에 ARCH 7-x↔AC 회수 검사 추가)는 차단 범위를 넓히는 정책 변경이라 본 라운드 범위 밖으로 두고 **차기 라운드 후보**로 남긴다.
+> **차기 라운드로 넘긴 것**: 미실행 fixture 하위항목 6건 실측 · seam 신호 ① 문면의 재량 여지 제거 · `/bootstrap-project`의 README 2종 교체 + 비-UI `DESIGN.md`/AGENTS 링크 정리 · §10.1 fixture 순서 전제 한 줄.
+
+```
+git add .claude/skills/seal-milestone/SKILL.md docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md .claude/skills/validate-plan/SKILL.md .claude/agents/reviewer.md
+```
+
+**커밋 메시지**: `fix(skills): verify closed-decision anchors at seal and ARCH 7-x decision coverage at review`
+
+---

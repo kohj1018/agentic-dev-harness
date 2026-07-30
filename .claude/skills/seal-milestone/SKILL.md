@@ -73,6 +73,7 @@ allowed-tools: Read Glob Grep Edit Bash(rm docs/40-validation/plan-reviews/*.md)
    - `status: deferred` 항목이 전부 **현재 M 무영향 근거 + 이관 앵커 + 회수 시점** 3개를 갖췄는가. 결측이면 `open`으로 간주해 중단한다.
    - `disposition: risk-accepted` 항목이 전부 `authority: user-*`이고 **검증 방법·판정일·중단 기준** 3필드를 갖췄는가.
    - `authority: agent-delegated`인데 되돌리기 비싼 결정(제품 범위·사용자 체감·외부 계약·보안 정책·비가역 약속)을 담고 있고 하향 이력 줄도 없으면 오분류로 보고 중단한다.
+   - **`status: closed` + `authority: user-*` 항목의 정본 앵커 대조 (ADR-060 D1 — dogfood Round 9 발견)**: 각 항목의 `정본: <문서#앵커>`를 열어 **그 결정이 실제로 그 위치에 적혀 있는지** 1회 대조한다. 앵커가 가리키는 섹션에 그 결정 내용이 없으면 중단하고 어느 D-NNN이 dangling인지 보고한다(원장은 *위치만* 가리키고 본문은 정본이 SSOT이므로, 앵커가 비면 승인된 결정이 **어느 문서에도 없는 상태**로 봉인된다). 조건부 승인("…하는 조건부")이면 그 조건의 이행 위치까지 본다.
    - **원장 파일이 없으면 silent skip하지 않는다** — 원장은 baseline 산출물이므로 부재는 삭제 또는 구 fork를 뜻한다. 사실을 보고하고 *사용자 명시 확인 1회*를 받은 뒤에만 이 조건을 skip한다(확인 사실은 receipt에 `Register: 파일 부재 — 사용자 확인 후 skip`으로 남긴다).
 7. **가설 (ADR-035#amend-3 / ADR-060 D5)** — `docs/10-charter/DISCOVERY.md`가 **존재하면** `## 12. Assumption Tracker`의 미검증 가정 중 **실패 시 이 마일스톤 목표가 무효가 되는 핵심 가설**이 있으면 중단한다. 검증 계획 없는 미검증 가정도 중단. 그 외는 원장에 `risk-accepted`로 등재돼 있으면 통과. **DISCOVERY.md가 없으면(discovery 생략 프로젝트 — PROJECT_START_CHECKLIST 1단계는 선택) 본 조건을 skip하고 사유를 echo한다.** **grandfather 진입에서도 중단하지 않고 보고만 한다**(그 분기의 규칙 2).
 8. **리뷰 (opt-in — 차단 조건 아님, 기록 대상)**:
