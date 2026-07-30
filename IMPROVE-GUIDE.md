@@ -2037,6 +2037,16 @@ seal은 상태값 + `## 10` receipt + (사용자가 그 자리에서 고른 경�
 
 **변경**: 해당 행의 주체 칸에 `· \`/repair-workitem\`·\`/stabilize-milestone\` (봉인 후 append — ADR-060 D11)` 추가.
 
+### (g) ADR-060 봉인 조건 9 — 재봉인 재승인 누락 (Phase 9 자기 검증에서 발견)
+
+(a)가 조건 1을 5종으로 고칠 때 **조건 9의 재승인 대상 열거를 함께 고치지 않아**, D7 진입 모드(5종)·seal 본문 승인 문단(`재개·재봉인·마이그레이션`)과 어긋났다. 실행 skill은 이미 재승인을 강제하므로 runtime 동작은 옳지만 **정책 SSOT의 조건 목록이 불완전**하다.
+
+**파일**: `docs/90-decisions/boilerplate/ADR-060-…md`
+**기존**: `9. 사용자 최종 승인 — **재개·마이그레이션·grandfather 진입에서도 반드시 다시 받는다**`
+**변경**: `9. 사용자 최종 승인 — **재개·재봉인·마이그레이션·grandfather 진입에서도 반드시 다시 받는다**`
+
+> 이 부류(진입 모드 열거가 여러 곳에 미러링됨)는 §9.9의 기계 검사로 재발을 막는다.
+
 > **함께 검토했으나 고치지 않은 것**: CHECKLIST의 원장 확인 2항목이 `## 5. 의사결정 기록`에 있어 `## 4`의 seal 실행 항목보다 뒤에 온다는 지적. 원장은 *의사결정 기록*이라 그 절에 두는 게 주제상 맞고, **봉인 조건 6이 open 0건을 기계적으로 강제**하므로 체크 순서가 실제 누출을 만들지 않는다. 8.2(b)의 지정 위치를 유지한다.
 
 ```
@@ -2132,6 +2142,21 @@ grep -nE "^1?[0-9]+\. \*\*\[" .claude/skills/validate-plan/SKILL.md
 wc -l AGENTS.md                                                        # 기대: 100 이하
 grep -rl "contract-ready" --include="*.md" docs .claude AGENTS.md | wc -l   # 기대: 8 이상 (파일 수)
 ```
+
+## 9.9 진입 모드 열거 미러 정합 (봉인 게이트 전용)
+
+> seal의 **진입 모드**는 ADR-060 D7 열거 / ADR 봉인 조건 1 / ADR 조건 9(재승인 대상) / skill 조건 1 / skill 승인 문단 **다섯 곳에 미러링**된다. 한 곳만 고치면 정책 SSOT가 조용히 불완전해진다(실제로 8.5(a) 때 조건 9가 빠졌고 이 검사가 없어 9.1~9.8을 전부 통과했다).
+
+```bash
+A=docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md
+S=.claude/skills/seal-milestone/SKILL.md
+grep -c "진입 모드 5종" $A                                          # 기대: 1
+grep -c "위 5종 중 하나로 판정될 것" $A                              # 기대: 1
+grep -c "재개·재봉인·마이그레이션·grandfather 진입에서도" $A          # 기대: 1  (조건 9)
+grep -c "정상 / 재개 / 재봉인 / 마이그레이션 / grandfather" $S        # 기대: 1  (skill 조건 1)
+grep -c "재개·재봉인·마이그레이션 진입에서도" $S                      # 기대: 1  (skill 승인 문단 — grandfather는 그 분기 규칙 3이 별도로 확인 1회를 요구)
+```
+**기대**: 전부 `1`. `0`이 하나라도 나오면 그 자리만 구 규칙(4종)에 남아 있는 것이다.
 
 > 위 검증에서 실제로 고친 파일만 **명시 add** 한다. 고친 게 없으면 커밋하지 않는다.
 
