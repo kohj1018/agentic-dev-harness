@@ -1735,8 +1735,72 @@ git add .claude/skills/seal-milestone/ .agents/skills/seal-milestone/ README.md 
 **기존** (223행 부근): `- 기본 권장: \`/plan-milestone\` — 새 milestone(M-(N+1)) + feature 문서 생성. 확정 뒤 \`/plan-workitem M-(N+1)\`로 전체 계획 스냅샷 1회 수행(ADR-057#amend-3)`
 **변경**: `- 기본 권장: \`/plan-milestone\` — 새 milestone(M-(N+1)) + feature 문서 생성 → \`contract-ready\`. 뒤이어 \`/plan-workitem M-(N+1)\`(전체 계획 스냅샷, task는 \`draft\`) → **\`/seal-milestone M-(N+1)\`**(검사·승인·일괄 \`ready\`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)`
 
+## 7.7 Phase 6·7이 만든 교차 계약 결함 5건 (리뷰에서 발견)
+
+> 7.3·7.6이 심은 새 계약이 **다른 파일 또는 같은 파일의 기존 규정과 충돌**하는 자리 5곳이다. 하나하나가 "지시는 있는데 실행 경로가 없는" 형태라 배선 누락과 같은 등급이다.
+
+### (a) `/seal-milestone` — **재봉인 진입** 신설 (재봉인 경로 복구) ← 가장 중요
+
+7.3(a) 2-S와 ADR-060 D6은 *봉인 후 구현 0건*인 M의 계획을 고친 뒤 **`/seal-milestone` 재실행으로 receipt를 갱신**하라고 안내한다. 그런데 seal 0단계는 `ready` + `- 봉인일:` 채움을 **즉시 "이미 봉인됨"으로 종료**시켜, 그 안내가 **막힌 경로**가 된다(재검사·재승인·receipt 갱신이 전혀 일어나지 않고, 고친 계획이 무검증 상태로 남는다). Phase 10 fixture 17도 이 상태로는 통과할 수 없다.
+
+**파일**: `.claude/skills/seal-milestone/SKILL.md`
+
+**기존** (0단계 표 마지막 행): `| M \`ready\` + \`- 봉인일:\` 채워짐 | **이미 봉인됨** — 아무것도 바꾸지 않고 종료 |`
+**변경** (한 행을 두 행으로):
+```markdown
+| M `ready` + `- 봉인일:` 채워짐 + 구현 흔적 task **0건** | **재봉인 진입** — 구현 전 계획 수정 후의 재봉인이다. 조건 2~9를 **전수 재검사**하고 사용자 승인을 다시 받아 **receipt를 갱신(덮어쓰기)**한다. 이미 `ready`인 문서는 *상태 쓰기만* 생략한다(재개 진입과 동일) |
+| M `ready` + `- 봉인일:` 채워짐 + 구현 흔적 task **1건 이상** | **이미 봉인됨(구현 중)** — 계획이 잠겼다. 아무것도 바꾸지 않고 종료 |
 ```
-git add .claude/skills/validate-plan/SKILL.md .claude/agents/reviewer.md .claude/skills/repair-plan/SKILL.md .claude/skills/implement-workitem/SKILL.md .claude/skills/stack-guard/SKILL.md .claude/skills/repair-workitem/SKILL.md .claude/skills/stabilize-milestone/SKILL.md
+
+**추가** — `**구현 흔적 task** = …` 정의 줄 **바로 앞**에 근거 한 줄:
+```markdown
+**재봉인 진입이 필요한 이유**: `/repair-plan` 2-S는 *봉인됐지만 구현이 0건인* M의 task·매핑·의존성 결함을 그 자리에서 고치고 **본 skill 재실행으로 receipt를 갱신하라고 안내**한다(ADR-060 D6 — 잠금의 실질 기준선은 첫 구현 시작). 재실행을 "이미 봉인됨"으로 즉시 종료하면 그 안내가 **막힌 경로**가 되고, 고친 계획이 무검증·무승인 상태로 남는다. 구현이 시작된 뒤에는 계획이 실제로 잠기므로 그때만 no-op으로 종료한다. 바뀐 게 없는 재실행은 그냥 재검사 후 같은 내용의 receipt를 다시 쓰므로 무해하다.
+```
+
+**동반 2곳**:
+- 조건 1: `**정상 / 재개 / 마이그레이션 / grandfather** 중 하나일 것(\`draft\` M과 이미 봉인된 M은 …)` → `**정상 / 재개 / 재봉인 / 마이그레이션 / grandfather** 중 하나일 것(\`draft\` M과 이미 봉인됨(구현 중) M은 …)`
+- 승인 문단: `**재개·마이그레이션 진입에서도** 사용자 승인을 반드시 다시 받는다.` → `**재개·재봉인·마이그레이션 진입에서도** …`
+
+> **대안(채택 안 함)**: repair-plan이 `## 10`에 `- 재봉인 필요:` 마커를 쓰고 seal이 그 마커로만 재봉인을 허용하는 방식. 새 상태 필드가 늘고, 마커를 지우는 주체를 또 정해야 해서 채택하지 않았다. 구현 흔적 0건이라는 *이미 존재하는 관측값*으로 충분히 갈린다.
+
+### (b) 구현 흔적 판정이 2상태로 되돌아간 자리 (Phase 6에서 확정한 정의 재적용)
+
+6.4(b)가 판정 기준을 **구현 흔적 4종**(`in-progress`·`blocked`·`done`·`deprecated`)으로 확정했는데, 7.3(a) 2-S와 ADR-060 D6 본문은 여전히 `in-progress`/`done` 2종만 센다. `blocked`만 남은 M이 "구현 0건"으로 오분류돼 2-S가 수정을 허용하고 2-L이 다시 중단시키는 **모순 + review 파일 잔존 → 착수 게이트 ⑤ 차단**이 된다.
+
+**파일**: `.claude/skills/repair-plan/SKILL.md` (2-S 두 분기)
+- `**\`ready\` + \`- 봉인일:\` 채워짐 + \`in-progress\`/\`done\` task 0건** (= 봉인은 됐으나 구현 미착수)` → `**\`ready\` + \`- 봉인일:\` 채워짐 + 구현 흔적 task 0건** (= 봉인은 됐으나 구현 미착수. **구현 흔적** = \`in-progress\`·\`blocked\`·\`done\`·\`deprecated\` — \`blocked\`/\`deprecated\`도 구현 시작 후 상태다, ADR-060 D12)`
+- `… + \`in-progress\`/\`done\` task 1건 이상** (= 구현 시작됨)` → `… + 구현 흔적 task 1건 이상** (= 구현 시작됨)`
+
+**파일**: `docs/90-decisions/boilerplate/ADR-060-…md` (D6 "잠금의 실질 기준선" 문단)
+- `그 M에 \`in-progress\`/\`done\` task가 **0건이면 …** … \`in-progress\`가 하나라도 생기면` → `그 M에 구현 흔적 task(\`in-progress\`·\`blocked\`·\`done\`·\`deprecated\` — D12 정의)가 **0건이면 …** … 구현 흔적이 하나라도 생기면`, 그리고 재실행 문구에 `(**재봉인 진입** — D7)`을 덧붙인다.
+
+### (c) repair-plan의 봉인 후 원장 쓰기가 같은 파일에서 금지되던 문제
+
+2-S 세 번째 분기는 *"결정 성격이면 원장에 `status: open` + `- 발견: 봉인 후 (M<N>)`"*를 지시하는데, 4-D 5항과 책임 경계 예외 (2)는 원장 쓰기를 **`contract-ready`에서만** 허용한다. 게다가 그 분기는 **review 파일을 삭제**하므로, 금지 규정을 그대로 두면 결정이 원장에 남지 않는다.
+
+**파일**: `.claude/skills/repair-plan/SKILL.md`
+- 4-D 5항: `**단 2-S가 \`contract-ready\`로 판정한 경우에만** 수행한다.` → `범위는 2-S 판정에 따라 갈린다 — **\`contract-ready\`**(또는 봉인 후 구현 0건): 등재·\`closed\` 전환·앵커 채움 등 **전체 갱신** 허용. **봉인 후 구현 시작됨**: 2-S 세 번째 분기의 **\`status: open\` + \`- 발견: 봉인 후 (M<N>)\` append만** 허용하고 기존 항목의 상태는 바꾸지 않는다(ADR-060 D11).`
+- 책임 경계 예외 (2): 같은 기준으로 `등재·상태 갱신 — 2-S가 contract-ready로 판정한 경우에만` → `**\`contract-ready\`(또는 봉인 후 구현 0건)면 등재·상태 갱신 전체**, **봉인 후 구현이 시작된 경우엔 append만**(ADR-060 D11 writer)`
+
+**동반** — ADR-060 D11과 `DECISION_REGISTER.md`의 **쓰기 주체 목록에 `/repair-plan`(봉인 후 append 한정) 추가**. D11 문장의 "두 skill 본문에 배선한다"도 "세 skill 본문과 **각 책임 경계**에 배선한다"로 고친다(아래 (d)의 근거).
+
+### (d) D11 writer 배선이 각 skill의 기존 금지 규정과 충돌
+
+7.6이 등재 지시만 넣고 **책임 경계에 예외를 명시하지 않아**, 같은 파일 안에서 "원장에 등재하라" ↔ "다른 산출물 수정 금지"가 충돌한다.
+
+- **`repair-workitem`** 책임 경계의 `- 본 task-id의 report만 삭제. 다른 산출물(…)은 건드리지 않는다.` 끝에 추가: `**예외 1가지**: 위 \`## 봉인 후 새 결정 등재\`의 \`docs/10-charter/DECISION_REGISTER.md\` **append**(\`status: open\` + \`- 발견: 봉인 후 (M<N>)\`) — ADR-060 D11 writer로 지정된 책임이며, 기존 항목의 상태는 바꾸지 않는다.`
+- **`stabilize-milestone`** 도입부 `다음 세 종류의 문서 갱신만 정상 책임이다:` → `다음 **네** 종류 …`이고, 3번 항목 뒤에 4번을 추가: `4. \`docs/10-charter/DECISION_REGISTER.md\` **append** — 점검에서 드러난 *기획 결정*을 \`status: open\` + \`- 발견: 봉인 후 (M<N>)\`으로 등재(ADR-060 D11 writer). 기존 항목의 상태는 바꾸지 않는다. 상세는 아래 \`봉인 후 새 결정 등재\` 절.`
+
+### (e) implement-workitem의 봉인 후 단정 문구 + fixture 9 조건
+
+7.4(b)가 넣은 `**봉인 후라면 두 skill이 계획을 고치지 않으므로**`는 7.3(a) 2-S(봉인 후 **구현 0건**이면 고친다)와 어긋난다. 이유절을 사실에 맞게 바꾼다.
+
+- **기존**: `**봉인 후(\`ready\` + receipt)라면 두 skill이 계획을 고치지 않으므로**(ADR-060 D6/D7) 해석안 1~3개와 영향만 …`
+- **변경**: `**봉인 후(\`ready\` + receipt)라면** 계획 수정 경로로 보내지 않고 해석안 1~3개와 영향만 …` + 같은 문장 끝(`… ADR-057#amend-3 결정 5 정합).`) 뒤에 `구현 흔적이 0건이라 \`/repair-plan\` 2-S가 task 층을 고칠 수 있는 상태여도(ADR-060 D6) **해석 확정이 더 값싼 경로**이므로 이쪽을 기본으로 한다 — 구현이 시작된 뒤에는 그 경로 자체가 닫힌다.` 추가
+- **Phase 10 fixture 9**에 `구현 흔적 1건 이상` 조건을 명시하고(그래야 fixture 17과 모순되지 않는다), **fixture 17**에 재봉인 재실행 판정을 추가한다(위 (a) 회귀 검사).
+
+```
+git add .claude/skills/validate-plan/SKILL.md .claude/agents/reviewer.md .claude/skills/repair-plan/SKILL.md .claude/skills/implement-workitem/SKILL.md .claude/skills/stack-guard/SKILL.md .claude/skills/repair-workitem/SKILL.md .claude/skills/stabilize-milestone/SKILL.md .claude/skills/seal-milestone/SKILL.md docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md docs/10-charter/DECISION_REGISTER.md
 ```
 
 **커밋 메시지**: `feat(skills): close review-found decisions before seal and gate implement on the seal receipt`
@@ -2052,7 +2116,7 @@ grep -rl "contract-ready" --include="*.md" docs .claude AGENTS.md | wc -l   # �
 6. **실패 케이스 B** — `deferred`인데 앵커를 비우고 `/seal-milestone M1` → BLOCKED
 7. **실패 케이스 C** — 2+ 해석이 가능한 AC에 `해석 확정` 없이 `/seal-milestone M1` → 조건 3-b에서 BLOCKED (이게 없으면 봉인 후 첫 구현이 halt한다)
 8. **재개 케이스** — task 일부만 `ready`인 상태를 인위로 만든 뒤 `/seal-milestone M1` 재실행 → **재개 진입으로 인식하고 나머지만 승격**
-9. **봉인 우회 케이스** — 봉인 후 `/repair-plan M1` 실행 → 2-S가 `ready`를 감지해 **계획을 고치지 않고 보고만** 하는가
+9. **봉인 우회 케이스** — 봉인 후 **구현 흔적 1건 이상**(task 1개를 `in-progress`로) 상태에서 `/repair-plan M1` 실행 → 2-S가 잠금을 감지해 **계획을 고치지 않고 보고만** 하는가. *구현 흔적 0건이면 fixture 17대로 그 자리에서 고치는 게 정상이므로 이 fixture는 구현 시작 상태에서만 판정한다.*
 10. 정상 케이스 — 전부 닫고 `/seal-milestone M1` → 승인 후 task→feature→milestone 순 `ready` + `## 10`의 `- 봉인일:` 채워짐
 11. `/implement-workitem T-001` → `/validate-workitem` → (필요 시 `/repair-workitem`) → `/finalize-workitem` → `/stabilize-milestone M1` **완주** — 봉인 전이면 착수 거부, 봉인 후엔 착수. **봉인 후 원장에 `open` + `- 발견: 봉인 후 (M1)`을 1건 넣어도 착수가 막히지 않는가**(D11 데드락 방지 확인)
 
@@ -2065,7 +2129,7 @@ grep -rl "contract-ready" --include="*.md" docs .claude AGENTS.md | wc -l   # �
 14. **승인 우회 케이스** — 재개 진입에서 **승인을 다시 요구**하는가. 그리고 **이미 `ready`인 문서도 검사에는 포함**되는가(상태 쓰기만 생략)
 15. **원장 부재 케이스** — 원장 파일을 지우고 `/seal-milestone M1` → silent skip이 아니라 **사용자 확인 1회**를 요구하고 receipt에 남기는가
 16. **`(미할당)` 누출 케이스** — bootstrap에서 등재한 `(미할당)` open을 triage하지 않고 `/seal-milestone M1` → **조건 6에서 BLOCKED**되는가
-17. **봉인 후 구현 전 결함 케이스** — 정상 봉인 직후(전 task `ready`, 구현 0건) `/validate-plan M1`로 task 층 P0를 만든 뒤 `/repair-plan M1` → **그 자리에서 수정하고 `/seal-milestone` 재실행을 안내**하는가(dead-end가 아닌가). 이어서 task 1개를 `in-progress`로 바꾼 뒤 같은 절차 → 이번엔 **보고만** 하는가
+17. **봉인 후 구현 전 결함 케이스** — 정상 봉인 직후(전 task `ready`, 구현 0건) `/validate-plan M1`로 task 층 P0를 만든 뒤 `/repair-plan M1` → **그 자리에서 수정하고 `/seal-milestone` 재실행을 안내**하는가(dead-end가 아닌가). **이어서 그 안내대로 `/seal-milestone M1`을 실제로 재실행 → 0단계가 `재봉인 진입`으로 판정해 조건 2~9를 전수 재검사하고 승인을 다시 받아 receipt를 갱신하는가**(7.7(a) — "이미 봉인됨"으로 종료하면 안내가 막힌 경로다). 이어서 task 1개를 `in-progress`로 바꾼 뒤 같은 절차 → 이번엔 **보고만** 하는가
 18. **ALL_GOOD 파일 케이스** — `/validate-plan M1`이 ALL_GOOD 파일을 남긴 상태로 `/seal-milestone M1` → **파일을 삭제하고 통과**하는가. 이어서 `/implement-workitem`이 게이트 ⑤에서 막히지 않는가
 
 ## 10.3 (선택) 2차 fixture — D9 부하 측정

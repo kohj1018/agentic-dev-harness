@@ -77,7 +77,7 @@
 - 담당 task가 없거나 새 범위 → 사용자 보고 + **다음 마일스톤 후보**
 - 불명확하거나 현재 M 진행을 막는 상위 P0 → 자동 선택하지 않고 사용자 결정을 기다린다
 
-쓰기 주체: `/repair-workitem`(task 결함과 함께), `/stabilize-milestone`(발견 기록), 사용자 직접 편집.
+쓰기 주체: `/repair-workitem`(task 결함과 함께), `/stabilize-milestone`(발견 기록), `/repair-plan`(봉인 후 리뷰 finding — append만), 사용자 직접 편집.
 
 ### 회수 규칙 (ADR-019 정합)
 

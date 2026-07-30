@@ -25,6 +25,7 @@ allowed-tools: Read Glob Grep Write
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md` (`## 5. 비목표`, `## 7. 제약 조건` 참조)
+- `docs/10-charter/DECISION_REGISTER.md` — 입력 workitem을 `영향:`으로 갖는 항목만 색인 회수 ([Plan-decision] 참조. 파일 부재 시 본 차원 skip + "핵심 관찰"에 명시)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` (`## 3-1. 레이어 경계` 참조 — *부재* 시 [Plan-arch] 차원 skip + 리뷰 파일 "핵심 관찰"에 그 사실 명시)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` (해당 스택 한정 — [Plan-arch-iface] 참조). *해당 sub-section 부재 시 본 차원 skip*.
 - `docs/20-system/DESIGN.md` (UI 프로젝트 한정 — [Plan-design] 참조). *파일 부재 시 본 차원 skip + "핵심 관찰" 에 명시*.
@@ -43,33 +44,35 @@ allowed-tools: Read Glob Grep Write
 
 ## 입력 형태 판정 — milestone-plan mode (ADR-038#amend-4)
 하위 문서 회수 결과 **분해된 task가 0건**이면(plan-milestone 직후·plan-workitem 미실행) **milestone-plan mode**:
-- **비활성**: [Plan-sizing]·[Plan-AC-form]·[Plan-dep] (task 산물 부재). [Plan-seam]은 task 0건이면 비활성.
+- **비활성**: [Plan-sizing]·[Plan-AC-form]·[Plan-dep] (task 산물 부재). [Plan-seam]은 task 0건이면 비활성. **[Plan-decision]은 task 0건이어도 활성**(원장은 task와 무관한 상류 산출물이다).
 - **[Plan-FAC-coverage] 반전**: `## 7-1`(FAC) *및 `## 7-3`(PX)* 빈 shell은 *정상* — task 0건이면 unmapped FAC·**unmapped PX**를 P0로 올리지 **않는다**(R5-5가 PX 인벤토리만 채우고 plan-workitem 전이라 PX↔AC 매핑이 비어 있는 게 정상 — ADR-056#amend-1). shell이 *형식적으로 깨졌을 때만* P2. **[Plan-design] recovery-path 유예(F9와 동형, ADR-056#amend-3)**: task 0건이면 `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(plan-workitem 후 정상 모드에서 AC 커버 재점검).
 - **활성**: milestone-plan 4차원(아래).
-- 혼합 마일스톤은 **feature 단위로** mode 적용. task가 1건+면 11차원.
+- 혼합 마일스톤은 **feature 단위로** mode 적용. task가 1건+면 12차원.
 
-검토 차원 (11 dimensions — reviewer.md의 *Plan Quality 11 차원* 정합 — ADR-027#amend-1):
+검토 차원 (12 dimensions — reviewer.md의 *Plan Quality 12 차원* 정합 — ADR-027#amend-1 / ADR-060 D8):
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반. P0 권장.
 2. **[Plan-sizing]** — 1 task = 1 RGR 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). P1 권장.
 3. **[Plan-AC-form]** — Given-When-Then 형식 부재 / 강력 금지 verb ("works"/"looks good"/"is correct"/"is fine"). P0 권장.
 4. **[Plan-ambiguity]** — 1 AC에 2+ 합리적 해석 가능. P1 권장.
 5. **[Plan-FAC-coverage]** (ADR-037) — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC + (UI feature) feature `## 7-3. PX ↔ AC 매핑`의 unmapped PX(ADR-056#amend-1 — 어떤 AC도 참조 안 한 경험 결정) + **PX 소유·문법 (구조 — `M<N>` 입력 전용, task 수 무관)**: `M<N>` 입력이면 **`docs/20-system/prototypes/M<N>/*.html` glob**(`_drafts/` 제외)로 현재 active 화면 HTML 전체를 회수해 — ① **각 active 화면에 PX ≥1개** · ② **id 문법·화면 경로 일치**(`^PX-M<N>-<screen>-\d{2,}$`; id의 `M`/`<screen>`이 파일 경로 `M<N>/<screen>.html`와 일치 — 화면 revision 없음, 마일스톤 번호가 버전) · ③ **한 화면 HTML 내 id 중복 없음** · ④ **승인 HTML active PX = 모든 feature `## 7` 인벤토리의 disjoint union**(**orphan**=HTML엔 있으나 미인벤토리 · **중복**=2+ feature · **누락**=인벤토리엔 있으나 HTML엔 없음 — 완전-orphan HTML도 glob이 잡음, R5-5 이후 drift까지 검출; 매핑 `## 7-3`과 별개) · ⑤ **각 active PX 정확히 1 feature `## 7`에** · ⑥ **HTML 마커 ↔ feature 인벤토리는 `(id, 설명)` 쌍으로 정확 일치**(같은 id인데 설명이 다르면 mirror drift = fail — 현재 HTML 미러 drift 검사) · ⑦ **task `## 6`의 `(PX-…)` 태그는 선택이지만 *존재하면* 그 `(PX, task:AC)`가 feature `## 7-3` 매핑 RHS와 일치**(태그가 매핑과 다른 task:AC를 가리키면 태그-매핑 불일치 = P1) — 를 검사한다. **`F`/`T` 단독 입력은 sibling·glob 미독이라 이 cross-feature 검사 skip(P0 금지)**. **task 0건이라도 `M<N>` 입력이면 위 소유·문법 검사는 실행**(M입력은 feature 전체·HTML을 읽으므로 가능 — task 산물 부재는 PX↔AC coverage만 유예). *귀속 feature 적합성은 LLM 판정(엉뚱한 feature면 오배정)*. P0 권장.
-6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장(P1 권장) + (`M<N>` 입력 시, ADR-057#amend-3) 의존성 그래프의 **존재성**(참조 선행 task 실재) · **비순환**(순환=실행 순서 부재) · **AC-보장**(후행 `## 3`가 전제한 선행 산출이 그 선행 task의 참조 AC에 존재) — 세 위반 모두 **P0**(실행 가능한 계획 미완 — plan-workitem 성공·task `ready` 승격 차단과 정합).
+6. **[Plan-dep]** — task `## 9. 의존성` 누락 / 잘못된 병렬 주장(P1 권장) + (`M<N>` 입력 시, ADR-057#amend-3) 의존성 그래프의 **존재성**(참조 선행 task 실재) · **비순환**(순환=실행 순서 부재) · **AC-보장**(후행 `## 3`가 전제한 선행 산출이 그 선행 task의 참조 AC에 존재) — 세 위반 모두 **P0**(실행 가능한 계획 미완 — plan-workitem 성공 차단 및 `/seal-milestone` 봉인 조건 5와 정합 — ADR-060 D7).
 7. **[Plan-arch]** — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. *`## 3-1` 섹션 자체가 부재한 fork*에서는 본 차원 *skip* + "핵심 관찰"에 "[Plan-arch] skipped: `## 3-1` 부재" 한 줄 명시. P1 권장.
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` / feature `## 11. 관련 문서` link 누락·깨짐. P2 권장.
 9. **[Plan-design]** (UI 한정 — DESIGN.md 부재 시 skip) — DESIGN.md `## 7` 인벤토리 외 컴포넌트 신설 / raw hex / Don'ts 위반 / task use-case 에 등장하는 category state(§7 — interactive/data/static)가 AC 에 누락 / **AC·task 본문의 색-단독·포커스 제거·아이콘 라벨 누락 = §9 a11y 위반 의심**(ADR-027#amend-7) / **마일스톤 `## 9. 화면 전환`(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056). P1 권장.
 10. **[Plan-arch-iface]** (해당 스택 한정 — 7-x sub-section 부재 시 skip) — ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 기존 결정 위반 / Don'ts 위반. P0 권장.
 11. **[Plan-seam]** (ADR-057 결정 11 — seam 신호 해당 feature 한정) — 신호 4종(2+ writer/상태 머신/2차-write/멱등) 해당인데 feature `## 7-2` 부재·형식 파손 / task 간 입출력 계약 불일치 의심 / INV가 어떤 task AC에도 안 걸림. 신호 미해당 시 skip. P1 권장.
+12. **[Plan-decision]** (ADR-060 D8 — 결정 마감) — ① 문서 본문에서 *암묵적으로 확정된* **`user-*` 급 결정**(제품 범위·사용자 체감·외부 계약·보안 정책·비가역 약속)이 `docs/10-charter/DECISION_REGISTER.md`에 미등재. **하한선: 되돌리기 비용이 "중간" 이상인 것만 잡는다** — 이 항목은 P0이고 P0는 곧 `[seal-blocking]`이라, 폭을 좁히지 않으면 리뷰어 오탐이 그대로 봉인 차단이 된다 ② **부모 M이 `contract-ready` 이상일 때만** — 이 workitem을 `영향:`으로 갖는 `status: open` 잔존(그 M을 가리키는 `- 발견: 봉인 후 (M<N>)` 항목 제외). *`draft` M을 리뷰할 때는 open이 정상이므로 발화하지 않는다* ③ `deferred`인데 무영향 근거·이관 앵커·회수 시점 중 결측 ④ `authority: agent-delegated`인데 실제로는 되돌리기 비싼 결정이고 하향 이력 줄도 없는 오분류 ⑤ `risk-accepted`인데 검증 방법·판정일·중단 기준 중 결측. **P0 권장**. **`agent-delegated` 결정 자체의 미등재는 지적하지 않는다**(등재 대상이 아님 — ADR-060 D1). 원장 파일이 없으면 skip + "핵심 관찰"에 명시.
 
 **milestone-plan 4차원 (milestone-mode 한정, ADR-038#amend-4):**
-12. **[MP-FAC-quality]** — FAC가 *시나리오 수준 + 측정 가능*('works' 류 금지), feature `## 3` 시나리오 추적. P0.
-13. **[MP-feature-scope]** — feature가 charter `## 5 비목표` / milestone `## 4 제외되는 기능` 침범 여부. P0.
-14. **[MP-graduation]** — milestone `## 5 완료 기준` graduation 5+1(ADR-014) 정합 + UI/e2e 시 e2e 선언(ADR-052). P1.
-15. **[MP-feature-dep]** — feature 간 의존(순환·잘못된 병렬). P1.
+13. **[MP-FAC-quality]** — FAC가 *시나리오 수준 + 측정 가능*('works' 류 금지), feature `## 3` 시나리오 추적. P0.
+14. **[MP-feature-scope]** — feature가 charter `## 5 비목표` / milestone `## 4 제외되는 기능` 침범 여부. P0.
+15. **[MP-graduation]** — milestone `## 5 완료 기준` graduation 5+1(ADR-014) 정합 + UI/e2e 시 e2e 선언(ADR-052). P1.
+16. **[MP-feature-dep]** — feature 간 의존(순환·잘못된 병렬). P1.
 
 판정 규칙 (review verdict — 워크플로우 차단 아님):
 - **NEEDS_CHANGES** — P0 finding 1개 이상.
 - **ALL_GOOD** — P0 finding 0개. (P1/P2는 ALL_GOOD을 막지 않음.)
+- **봉인 차단 태깅 (ADR-060 D8)**: **모든 P0 finding**과, 아래 카테고리의 **P1 finding**에 줄 끝 ` [seal-blocking]`을 덧붙인다 — `[Plan-decision]`·`[Plan-ambiguity]`·`[Plan-design]`·`[Plan-seam]`·`[MP-FAC-quality]`·`[MP-feature-scope]`·`[MP-graduation]`·`[MP-feature-dep]`. 그 외 P1(`[Plan-sizing]`·`[Plan-arch]`·`[Plan-doc-link]`)과 모든 P2에는 붙이지 않는다. 이 태그가 남아 있으면 `/seal-milestone`이 봉인을 거부한다.
 - 본 판정은 *리뷰 파일에 박는 severity 라벨*이지 자동 차단 트리거 아님 (ADR-038 enabling 약 + ADR-007 책임 경계). `/repair-plan`이 본 판정을 입력 신호로 받아 사용자 결정에 따라 적용.
 
 마지막 단계 — 리뷰 파일 작성:
@@ -116,6 +119,7 @@ allowed-tools: Read Glob Grep Write
 | Plan-design | 0 | 0 | 0 |
 | Plan-arch-iface | 0 | 0 | 0 |
 | Plan-seam | 0 | 0 | 0 |
+| Plan-decision | 0 | 0 | 0 |
 | MP-FAC-quality | 0 | 0 | 0 |
 | MP-feature-scope | 0 | 0 | 0 |
 | MP-graduation | 0 | 0 | 0 |
@@ -138,7 +142,7 @@ allowed-tools: Read Glob Grep Write
 
 가드:
 - workitem 문서(milestone / feature / task) 일체 수정 금지.
-- IMPROVEMENT_GUIDE / QA_FINDINGS / report 디렉터리 등 다른 산출물 위치 수정 금지.
+- IMPROVEMENT_GUIDE / QA_FINDINGS / report 디렉터리 / **DECISION_REGISTER.md** 등 다른 산출물 위치 수정 금지 (원장은 읽기만 — 등재·수정은 `/repair-plan` 이하 소유 skill 담당).
 - 코드 일체 수정 금지.
 - 커밋 금지.
 

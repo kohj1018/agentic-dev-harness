@@ -59,11 +59,11 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - `code`: Clean Code 6 + Scope Discipline 4.
 - `doc`: Doc Consistency 4 + (해당 시) Scope Discipline 4 (변경 diff가 있을 때만).
 - `mixed`: 3 차원 모두 (Clean Code 6 + Scope Discipline 4 + Doc Consistency 4).
-- `plan`: Plan Quality 11 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
+- `plan`: Plan Quality 12 (아래 별도 섹션). Clean Code / Scope Discipline / Doc Consistency 미적용.
 - `design`: Design Consistency 6 (아래 별도 섹션 — ADR-027#amend-1·#amend-7). UI 프로젝트에서 stabilize-milestone(구현 후 감사) 및 **bootstrap-design R2-G/R6 수용 게이트(ADR-058 — concept/preview 픽셀·구별성 판정)**가 호출.
 - `discovery`: Discovery Quality 8 (아래 별도 섹션 — ADR-044). `/validate-discovery` 가 호출. Clean Code / Scope / Doc / Plan / Design 미적용.
 
-## Plan Quality 11 차원 (plan surface 전용 — ADR-038 + ADR-027#amend-1 + ADR-057)
+## Plan Quality 12 차원 (plan surface 전용 — ADR-038 + ADR-027#amend-1 + ADR-057 + ADR-060)
 
 `/validate-plan` 호출 시 본 agent가 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
 
@@ -72,24 +72,25 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 3. **[Plan-AC-form]** (ADR-026) — Given-When-Then 형식 부재 / 강력 금지 verb 사용 ("works"/"looks good"/"is correct"/"is fine"). (P0 권장)
 4. **[Plan-ambiguity]** (ADR-006#amend-1) — AC 1개에 2+ 합리적 해석 존재. (P1 권장)
 5. **[Plan-FAC-coverage]** (ADR-037 / ADR-056#amend-1) — feature `## 7-1. FAC ↔ AC 매핑표`의 unmapped FAC / 누락 매핑 + (UI feature) feature `## 7-3. PX ↔ AC 매핑`의 unmapped PX(어떤 AC도 참조 안 한 프로토타입 경험 결정) + **PX 소유·문법 (구조 — `M<N>` 입력 전용, task 수 무관)**: `M<N>`이면 `prototypes/M<N>/*.html` glob(`_drafts` 제외)로 — 각 active 화면 PX ≥1 · 문법·경로 일치(`^PX-M<N>-<screen>-\d{2,}$` — 화면 revision 없음) · HTML 내 중복 id 없음 · **HTML active PX = 인벤토리 disjoint union**(orphan·중복·누락, 완전-orphan HTML도 glob이 잡음) · 각 active PX 1 feature · **HTML 마커 ↔ 인벤토리 `(id, 설명)` 정확 일치**(같은 id인데 설명 다르면 mirror drift=fail) · **task `## 6` `(PX-…)` 태그 존재 시 `## 7-3` 매핑 RHS와 일치**(불일치=P1) — 검사(validate-plan ①~⑦ 미러). **`F`/`T`는 skip(sibling·glob 미독). task0이라도 M입력이면 실행**(coverage만 유예). *귀속 적합성=LLM 오배정 판정*. (P0 권장)
-6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요, P1 권장) + (`M<N>` 입력 시, ADR-057#amend-3) 의존성 그래프의 **존재성**(참조 선행 task 실재) · **비순환**(순환=실행 순서 부재) · **AC-보장**(후행 `## 3`가 전제한 선행 산출이 그 선행 task의 참조 AC에 존재) — 세 위반 모두 **P0**(실행 가능한 계획 미완 — plan-workitem 성공·task `ready` 승격 차단과 정합).
+6. **[Plan-dep]** — task `## 9. 의존성`의 누락 / 잘못된 병렬 주장 (사실은 sequential 필요, P1 권장) + (`M<N>` 입력 시, ADR-057#amend-3) 의존성 그래프의 **존재성**(참조 선행 task 실재) · **비순환**(순환=실행 순서 부재) · **AC-보장**(후행 `## 3`가 전제한 선행 산출이 그 선행 task의 참조 AC에 존재) — 세 위반 모두 **P0**(실행 가능한 계획 미완 — plan-workitem 성공 차단 및 `/seal-milestone` 봉인 조건 5와 정합 — ADR-060 D7).
 7. **[Plan-arch]** (ADR-006) — ARCHITECTURE_OVERVIEW `## 3-1` 레이어 경계 위반 의심. `## 3-1` 부재 fork에서는 본 차원 skip + 그 사실을 리뷰 파일 "핵심 관찰"에 명시. (P1 권장)
 8. **[Plan-doc-link]** — task `## 7. 관련 문서` 또는 feature `## 11. 관련 문서`의 link 누락 / 깨짐. (P2 권장)
 9. **[Plan-design]** (UI 프로젝트 한정 — ADR-027#amend-1) — DESIGN.md `## 7. Components` 인벤토리 외 새 컴포넌트 즉흥 신설 / AC 본문에 raw hex 색 코드 (`#[0-9A-Fa-f]{3,6}`) / DESIGN.md `## 9. Do's and Don'ts` 위반 (anti-slop 패턴 포함 — gradient·nested cards 등) / **task 본문의 use-case 에 등장하는 상태가 AC 에 누락** (예: hover/disabled 가 본문 시나리오에 있는데 AC 미언급). *전체 category state (ADR-027#amend-7 — interactive/data/static) 의 설계 여부는 별도 차원* — DESIGN.md `## 7` 본문에 컴포넌트가 *등록될 때* 그 category의 expected 상태가 함께 설계됐는지는 [Design-state] (stabilize-milestone `design` surface) 책임. plan 단계는 *use-case 한정* 책임. **DESIGN.md 파일 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시** (비-UI 프로젝트 정상 경로). / **AC·task 본문에 색-단독 상태표시·포커스 제거·아이콘 버튼 라벨 누락이 명시적으로 드러나면** DESIGN.md §9 a11y 위반 의심(ADR-027#amend-7) / **마일스톤 `## 9. 화면 전환`(있으면) owner의 존재하는 각 path type 행(primary/failure/recovery)이 프로토타입·AC에 존재**(ADR-056#amend-3) / **UI task 카피가 DESIGN.md §10 위반·미참조** (ADR-056) (P1 권장)
 10. **[Plan-arch-iface]** (해당 스택 한정 — ADR-027#amend-1) — ARCH `## 7-1` (API envelope/error 컨벤션) / `## 7-2` (CLI 출력 포맷) / `## 7-3` (백엔드 결정 — DB migration / 인증 / 트랜잭션 / Idempotency / Rate limit / Async / Caching / API versioning) / `## 7-4` (웹 프론트 결정 — 라우팅 / 상태관리 / SSR-CSR / i18n / SEO / 인증 / 폼 validation) / `## 7-5` (모바일 클라이언트 결정 — 대상 플랫폼 / 화면 이동 / 상태관리 / 로컬 저장 / 권한 흐름 / 네이티브 연동 / 빌드 flavor / 서명·배포, ADR-059 D7) 의 기존 결정과 어긋나는 신규 결정 즉흥 도입 / 7-x Don'ts 위반 의심. **해당 sub-section 부재 시 본 차원 skip + "핵심 관찰" 에 한 줄 명시.** (P0 권장 — 인터페이스 일관성은 사후 수정 비용이 크므로)
 11. **[Plan-seam]** (ADR-057 결정 11 — seam 신호 해당 feature 한정) — 신호 4종(2+ writer/상태 머신/2차-write/멱등) 해당인데 feature `## 7-2` 부재·형식 파손 / task 간 입출력 계약 불일치 의심 / INV가 어떤 task AC에도 안 걸림. **신호 미해당 시 skip + "핵심 관찰"에 명시.** (P1 권장)
+12. **[Plan-decision]** (ADR-060 D8 — 결정 마감) — ① 문서 본문에서 *암묵적으로 확정된* **`user-*` 급 결정**(제품 범위·사용자 체감·외부 계약·보안 정책·비가역 약속)이 `docs/10-charter/DECISION_REGISTER.md`에 미등재. **하한선: 되돌리기 비용이 "중간" 이상인 것만 잡는다** — 이 항목은 P0이고 P0는 곧 `[seal-blocking]`이라, 폭을 좁히지 않으면 리뷰어 오탐이 그대로 봉인 차단이 된다 ② **부모 M이 `contract-ready` 이상일 때만** — 이 workitem을 `영향:`으로 갖는 `status: open` 잔존(그 M을 가리키는 `- 발견: 봉인 후 (M<N>)` 항목 제외). *`draft` M을 리뷰할 때는 open이 정상이므로 발화하지 않는다* ③ `deferred`인데 무영향 근거·이관 앵커·회수 시점 중 결측 ④ `authority: agent-delegated`인데 실제로는 되돌리기 비싼 결정이고 하향 이력 줄도 없는 오분류 ⑤ `risk-accepted`인데 검증 방법·판정일·중단 기준 중 결측. **P0 권장**. **`agent-delegated` 결정 자체의 미등재는 지적하지 않는다**(등재 대상이 아님 — ADR-060 D1). 원장 파일이 없으면 skip + "핵심 관찰"에 명시.
 
 라벨링 예: `P0 [Plan-AC-form] T-002:AC-1 — verb "works"는 비측정 — 재분해 권장 ([Given]..[When]..[Then] 형태 + verb "returns"/"persists" 등)`.
 라벨링 예: `P1 [Plan-design] T-005:AC-2 — raw hex #FF6B6B 사용. DESIGN.md ## 2 의 token color/semantic/error 로 교체 권장`.
 라벨링 예: `P0 [Plan-arch-iface] T-008:AC-1 — response 형식 { status: "ok", payload } 이 ARCH ## 7-1 envelope { data, error, meta } 와 불일치`.
 
 ### Milestone-Plan Quality 4 (milestone-mode — 하위 task 0건, ADR-038#amend-4)
-- **milestone-mode 게이팅**: 하위 task가 0건이면 위 11차원 중 [Plan-sizing]·[Plan-AC-form]·[Plan-dep]는 *비활성*(task 산물 부재)이고, [Plan-seam]도 비활성(task 산물 부재)이며, [Plan-FAC-coverage]는 *반전*된다 — 빈 `## 7-1`(FAC) *및 `## 7-3`(PX)* shell은 정상이므로 unmapped FAC·**unmapped PX**를 P0로 올리지 **않고**(R5-5가 PX 인벤토리만 채우고 plan-workitem 전이라 PX↔AC 매핑이 비어 있는 게 정상 — ADR-056#amend-1), shell이 형식적으로 깨졌을 때만 P2. **[Plan-design] recovery-path 유예(ADR-056#amend-3)**: task 0건이면 `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(plan-workitem 후 정상 모드에서 AC 커버 재점검). 그 위에 아래 4차원을 적용한다.
+- **milestone-mode 게이팅**: 하위 task가 0건이면 위 12차원 중 [Plan-sizing]·[Plan-AC-form]·[Plan-dep]는 *비활성*(task 산물 부재)이고, [Plan-seam]도 비활성(task 산물 부재)이며, [Plan-FAC-coverage]는 *반전*된다 — 빈 `## 7-1`(FAC) *및 `## 7-3`(PX)* shell은 정상이므로 unmapped FAC·**unmapped PX**를 P0로 올리지 **않고**(R5-5가 PX 인벤토리만 채우고 plan-workitem 전이라 PX↔AC 매핑이 비어 있는 게 정상 — ADR-056#amend-1), shell이 형식적으로 깨졌을 때만 P2. **[Plan-design] recovery-path 유예(ADR-056#amend-3)**: task 0건이면 `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(plan-workitem 후 정상 모드에서 AC 커버 재점검). **[Plan-decision]은 task 0건이어도 활성이다.** 그 위에 아래 4차원을 적용한다.
 - [MP-FAC-quality] P0 — FAC 시나리오 수준 + 측정 가능, `## 3` 추적.
 - [MP-feature-scope] P0 — charter 비목표 / milestone 제외 침범.
 - [MP-graduation] P1 — graduation 5+1(ADR-014) + e2e 선언(ADR-052).
 - [MP-feature-dep] P1 — feature 간 순환·잘못된 병렬.
-(혼합 마일스톤은 feature 단위로 mode 적용. task 1건+면 Plan Quality 11 차원.)
+(혼합 마일스톤은 feature 단위로 mode 적용. task 1건+면 Plan Quality 12 차원.)
 
 ## Discovery Quality 8 차원 (discovery surface 전용 — ADR-044)
 

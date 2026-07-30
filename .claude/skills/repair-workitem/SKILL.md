@@ -44,11 +44,14 @@ allowed-tools: Read Glob Grep Write Edit Bash
    - `rm docs/40-validation/reports/<task-id>.md` 1개를 정확히 삭제한다 (다른 task의 report는 건드리지 않는다).
    - 삭제 후, 다음 `/validate-workitem <task-id>`가 새 report를 생성한다는 안내를 출력에 포함.
 
+## 봉인 후 새 결정 등재 (ADR-060 D11)
+수정 중 *기존 task·AC가 약속하지 않은* 기획 결정이 새로 드러나면(사용자가 정하거나 승인해야 할 것), 임의로 확정하지 말고 `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `- 발견: 봉인 후 (M<N>)` 줄로 등재하고 사용자에게 보고한다. **이 등재는 착수·구현을 막지 않는다** — 라우팅은 (a) 기존 약속 결함이면 본 skill이 계속 수정, (b) 새 범위면 다음 마일스톤 후보, (c) 불명확하면 사용자 결정 대기(ADR-057#amend-3 결정 6). 원장 파일이 없으면 등재를 건너뛰고 보고만 한다.
+
 책임 경계:
 - 새 기능을 추가하지 않는다.
 - task 범위 밖 파일을 수정하지 않는다.
 - 자동 커밋하지 않는다 — 결과만 반환하고 커밋은 `/finalize-workitem` 또는 사용자가 별도로.
-- 본 task-id의 report만 삭제. 다른 산출물(QA_FINDINGS / IMPROVEMENT_GUIDE / 다른 report)은 건드리지 않는다.
+- 본 task-id의 report만 삭제. 다른 산출물(QA_FINDINGS / IMPROVEMENT_GUIDE / 다른 report)은 건드리지 않는다. **예외 1가지**: 위 `## 봉인 후 새 결정 등재`의 `docs/10-charter/DECISION_REGISTER.md` **append**(`status: open` + `- 발견: 봉인 후 (M<N>)`) — ADR-060 D11 writer로 지정된 책임이며, 기존 항목의 상태는 바꾸지 않는다.
 
 마지막 출력:
 - 4-판정 카운트: Adopted M / Adopt-modified K / Reject-FP I / Reject-context J

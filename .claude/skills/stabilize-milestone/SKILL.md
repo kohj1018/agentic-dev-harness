@@ -9,11 +9,12 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1).
 
 이 skill은 **코드 수정·커밋·workitem status 변경을 하지 않는다.**
-다음 세 종류의 문서 갱신만 정상 책임이다:
+다음 네 종류의 문서 갱신만 정상 책임이다:
 1. `docs/40-validation/QA_FINDINGS.md` 누적 기록 (qa 위임 결과).
 2. `docs/40-validation/IMPROVEMENT_GUIDE.md` 누적 기록 (reviewer 위임 결과 + deterministic preflight 결과).
 3. milestone 문서의 `## 8. 회고` 섹션 자동 채움 ([ADR-014](../../../docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md) graduation contract — status 변경 X, 본문 단락 갱신만).
    - 회고 본문: **graduation 줄(`YES|NO|BLOCKED (날짜)` — 단계 8 판정 영속, ADR-057#amend-1)** + 4 항목: 목표 달성도 / scope creep / 비목표 위반 / 핵심 학습 3개 이내.
+4. `docs/10-charter/DECISION_REGISTER.md` **append** — 점검에서 드러난 *기획 결정*을 `status: open` + `- 발견: 봉인 후 (M<N>)`으로 등재(ADR-060 D11 writer). 기존 항목의 상태는 바꾸지 않는다. 상세는 아래 `봉인 후 새 결정 등재` 절.
 
 그 외 변경은 금지한다 — milestone 문서의 `## 0. Status` / `## 1~7` 섹션 / 다른 workitem 문서 / 코드 일체.
 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 텍스트 제안만 출력한다.
@@ -93,6 +94,8 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - 발견은 IMPROVEMENT_GUIDE에 기록(보고만 — 차단 X). **한계**: WORKFLOW 산문 흐름 등재는 본 grep 범위 밖(reviewer 위임이 보조 catch).
 
 본 단계는 모두 *보고만* — 발견이 있어도 stabilize 후속 단계 차단 X (LLM 위임 단계로 계속). 후속 처리는 ADR-057#amend-3 결정 6 분기(기존 task 약속 결함=repair, cross-cutting=repair-milestone, 담당 없는 새 범위=사용자 보고+다음 M 후보)를 따른다.
+
+**봉인 후 새 결정 등재 (ADR-060 D11)**: 마일스톤 점검에서 *기획 결정*(사용자가 정하거나 승인해야 할 것)이 드러나면 `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `- 발견: 봉인 후 (M<N>)` 줄로 등재한다. QA_FINDINGS/IMPROVEMENT_GUIDE는 *결함·개선*을 담고 원장은 *결정*을 담는다(둘 다 해당하면 양쪽에 각자 형식으로). 본 skill의 read-only 계약은 불변 — 원장 등재는 기존 QA_FINDINGS 기록과 동일한 정상 책임 범위다. 원장 파일이 없으면 등재를 건너뛰고 보고만 한다.
 
 **review-doc 책임 분담**: [review-doc](../review-doc/SKILL.md)은 *단일 문서 ad-hoc 검토*에 한정. cross-doc / link / FAC↔AC는 본 deterministic preflight가 담당 — review-doc을 `--all`/`--milestone` 모드로 확장하지 않는다.
 
@@ -220,7 +223,7 @@ Telemetry — M1
    - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
    - **다음 단계** ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
      - **졸업 가능 = YES + P0 후속 0건**:
-       - 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성. 확정 뒤 `/plan-workitem M-(N+1)`로 전체 계획 스냅샷 1회 수행(ADR-057#amend-3)
+       - 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성 → `contract-ready`. 뒤이어 `/plan-workitem M-(N+1)`(전체 계획 스냅샷, task는 `draft`) → **`/seal-milestone M-(N+1)`**(검사·승인·일괄 `ready`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)
        - 프롬프트 동봉 권장: 본 라운드 Telemetry 의 신뢰도 분포 + Cross-stabilize 회귀 신호 (다음 milestone 의 우선순위 조정 입력)
      - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
        - **milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: `/repair-milestone M-N` 권장** (ADR-052) — 단일 task로 격리되지 않는 회귀·교차 결함과 실제 e2e 수정은 milestone 단위 repair로 라우팅. stabilize가 read-only로 남기 위한 코드 수정 경로다.

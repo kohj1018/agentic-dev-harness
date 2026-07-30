@@ -129,7 +129,7 @@ R0 — 운영 환경 가정 확인:
 - validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
 - validate:e2e 상태 (e2e 대상 한정, runtime target별 — NOT_APPLICABLE / EMPTY / PASS / FAIL(wiring) / FAIL(project) / BLOCKED_ENV — ADR-052#amend-1)
 - validate:design adapter 결과 (UI 한정 — current capability/source digest + registry status + command/path + fixed conformance 또는 Needs Install/WIRING FAIL; 비-UI는 n/a)
-- 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); 확정된 `ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>`; 이미 구현 중이면 `/implement-workitem` 또는 다음 M)
+- 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); 이미 봉인·구현 중이면 `/implement-workitem` 또는 다음 M)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
 - **옵션: Claude PostToolUse async adapter 예시** (사용자가 채택 시 `.claude/settings.local.json` 에 복사). GUARDRAILS_STRATEGY.md 의 PostToolUse 동기 hook 예시와 동일하게 *Unix / Windows 2 OS 예시* 모두 제공 — 동일 schema 에 `async: true` + `asyncRewake: true` 만 추가:
 

@@ -96,7 +96,7 @@ M/F 상태를 `draft → contract-ready → ready`로 확장한다.
 
 > `contract-ready`의 open-0과 D7 봉인 조건 6의 open-0은 **시점이 다른 두 게이트**다. 전자는 *상위 계약 확정 시점*, 후자는 *task까지 완성된 최종 시점*이며, task 분해 중 새로 드러난 결정은 후자가 잡는다.
 
-**잠금의 실질 기준선은 "첫 구현 시작"이다**: `ready`가 붙어도 그 M에 `in-progress`/`done` task가 **0건이면 task·매핑·의존성 결함을 `/repair-plan`이 그 자리에서 고칠 수 있고**, 고친 뒤 `/seal-milestone M<N>` 재실행으로 receipt를 갱신한다(M/F 계약 층은 여전히 다음 M). `in-progress`가 하나라도 생기면 그때부터 task 계획도 잠긴다 — ADR-057#amend-3의 "구현이 시작되면 task 계획도 변경하지 않는다"와 같은 기준선이다.
+**잠금의 실질 기준선은 "첫 구현 시작"이다**: `ready`가 붙어도 그 M에 구현 흔적 task(`in-progress`·`blocked`·`done`·`deprecated` — D12 정의)가 **0건이면 task·매핑·의존성 결함을 `/repair-plan`이 그 자리에서 고칠 수 있고**, 고친 뒤 `/seal-milestone M<N>` 재실행(**재봉인 진입** — D7)으로 재검사·재승인을 거쳐 receipt를 갱신한다(M/F 계약 층은 여전히 다음 M). 구현 흔적이 하나라도 생기면 그때부터 task 계획도 잠긴다 — ADR-057#amend-3의 "구현이 시작되면 task 계획도 변경하지 않는다"와 같은 기준선이다.
 근거: 잠금의 목적은 *구현 중 계획이 흔들리지 않는 것*이다. 구현 0건이면 그 목적이 걸리지 않으며, 막으면 "첫 구현 전 결함을 다음 M으로 보낸다"는 본 개선이 없애려던 역설이 한 칸 뒤로 옮겨 재현된다(`/repair-workitem`은 `ready` task repair를 거부하므로 다른 경로가 없다).
 
 `/plan-workitem`은 M·산하 feature가 **모두 `contract-ready`**일 때 동작하며, **task를 `ready`로 승격하지 않는다**(전부 `draft`로 남긴다). 승격 권한은 `/seal-milestone` 단독이다.
@@ -110,7 +110,7 @@ M/F 상태를 `draft → contract-ready → ready`로 확장한다.
 마일스톤 계획의 최종 검사 + 사용자 승인 + 상태 전이를 담당하는 skill을 신설한다(`disable-model-invocation: true`).
 **봉인은 task 작성의 하위 모드가 아니라 여러 소유 문서를 가로지르는 lifecycle gate**이므로 authoring skill과 분리한다.
 
-**진입 모드 4종**(skill 본문 0단계가 판정): **정상**(M/F `contract-ready` + task 전부 `draft`) / **재개**(부분 승격 상태) / **마이그레이션**(D12 (가) — `ready`+receipt 미채움+구현 0건) / **grandfather**(D12 (나) — 같은 상태에서 구현 1건 이상).
+**진입 모드 5종**(skill 본문 0단계가 판정): **정상**(M/F `contract-ready` + task 전부 `draft`) / **재개**(부분 승격 상태) / **재봉인**(`ready`+receipt 채움+구현 0건 — 구현 전 계획 수정 후 재검사·재승인·receipt 갱신) / **마이그레이션**(D12 (가) — `ready`+receipt 미채움+구현 0건) / **grandfather**(D12 (나) — 같은 상태에서 구현 1건 이상). **`ready`+receipt 채움+구현 1건 이상**만 no-op 종료다(계획 잠김).
 
 봉인 조건(전부 충족해야 승격 — 상세 절차는 skill 본문):
 1. 상태 — 위 4종 중 하나로 판정될 것(`draft` M과 이미 봉인된 M은 각각 안내 후 종료)
@@ -166,7 +166,7 @@ ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용�
 ### D11. 봉인 후 새 결정의 라우팅 (차단 아님)
 봉인 뒤 구현 중에 드러난 결정은 원장에 `status: open` + **`- 발견: 봉인 후 (M<N>)`** 줄로 기록하되 **착수를 막지 않는다.** `/implement-workitem`의 게이트는 *봉인이 있었는지*(부모 M `## 10`의 `- 봉인일:` 채움)를 확인할 뿐이며, 봉인 후 항목은 ADR-057#amend-3 결정 6의 기존 라우팅을 탄다 — (a) 기존 task 약속 결함 → `/repair-workitem`, (b) 새 범위 → 사용자 보고 + 다음 M, (c) 불명확·현재 M 차단 P0 → 사용자 결정 대기.
 **마커는 범위를 갖는다** — `(M<N>)`이 가리키는 그 마일스톤의 봉인 검사에서만 제외된다. 항목이 `영향: M2`도 가지면 M2 봉인에서는 정상 검사 대상이다(범위 없는 제외는 후속 마일스톤에서도 항목을 숨긴다).
-쓰기 주체: `/repair-workitem`(task 결함 처리와 함께), `/stabilize-milestone`(발견 기록), 사용자 직접. **두 skill 본문에 이 등재 규약을 배선한다** — 배선하지 않으면 D11이 소비자 없는 죽은 계약이 된다.
+쓰기 주체: `/repair-workitem`(task 결함 처리와 함께), `/stabilize-milestone`(발견 기록), `/repair-plan`(봉인 후 리뷰 finding 처리 — **append만**, 기존 항목 상태 변경 금지), 사용자 직접. **세 skill 본문과 각 책임 경계에 이 등재 규약을 배선한다** — 배선하지 않으면 D11이 소비자 없는 죽은 계약이 되고, 책임 경계에 예외를 명시하지 않으면 같은 파일 안에서 금지 규정과 충돌한다.
 **근거**: 모든 결정을 미리 알아내는 건 불가능하다. 봉인의 목적은 *최대한 닫는 것*이지 사후 발견을 차단하는 게 아니다. 사후 발견을 차단하면 **정직한 등재가 마일스톤 전체를 멈추는 데드락**이 된다.
 
 ### D12. 다운스트림 마이그레이션 (기존 fork)
