@@ -54,6 +54,7 @@
 | 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | +#amend-1: baseline runner 제거 + UI project-native gate 조건부 생성, +#amend-2: JIT canonical asset + fixed conformance + upgrade/recovery | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
 | 059 | Flutter/모바일 프로파일 (Android·iOS 직접 지원) | accepted | — | ADR-031을 Flutter에 한해 해제 — npm broker + 등록 source root format + analyze 심각도 분리 + 로컬 golden + e2e 5상태·suite 경로 판정 + ARCH 7-5 + 시크릿 2단 분류 |
 | 060 | 기획 결정 마감 + 마일스톤 봉인 (Decision Closure & Milestone Seal) | accepted | — | 결정 원장 + authority 축 + Decision Brief + contract-ready + /seal-milestone 봉인. 열린 질문 5섹션 폐지 |
+| 061 | 닫힌 사용자 결정 위반의 인터페이스 게이트 (Decision-Backed Interface Gate) | accepted | — | `[Arch-iface-7-N]` 등급 분기 — 원장의 `closed`+`user-*` 결정 위반 또는 7-x `Don'ts` 위반은 P0(Needs Fix), 그 외는 기존 P1. + 닫힌 결정 바인딩을 diff-trace 추적 근거로 인정 |
 
 ## Reserved / Parked / Dropped 번호
 

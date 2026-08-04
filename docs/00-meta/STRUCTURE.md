@@ -123,6 +123,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | 마일스톤 경험 계약 (프로토타입 라운드·입구 계약·스크린샷 게이트·Voice 규칙서) | [ADR-056](../90-decisions/boilerplate/ADR-056-milestone-experience-contract.md) (정책 SSOT). → ADR-056 `## Surfaces` 참조 (fan-out SSOT). |
 | 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md` (단일 작성자 = plan-milestone). |
 | 기획 결정 마감 + 마일스톤 봉인 (원장·authority·contract-ready·seal) | [ADR-060](../90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) (정책 SSOT). → ADR-060 `## Surfaces` 참조 (fan-out SSOT). |
+| Arch-iface 위반 등급 분기 (닫힌 사용자 결정·`Don'ts` → P0) + 닫힌 결정 바인딩의 diff-trace 추적 인정 | [ADR-061](../90-decisions/boilerplate/ADR-061-decision-backed-interface-gate.md) (정책 SSOT). → ADR-061 `## Surfaces` 참조 (fan-out SSOT). |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 JIT 로딩)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 
