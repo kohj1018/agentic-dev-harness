@@ -64,10 +64,10 @@ accepted
 `/stabilize-milestone` §1.0 deterministic pre-flight가 검증 장치의 노후를 마일스톤마다 점검한다.
 
 - 점검 대상 4항목:
-  - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`의 registry 행 중 **`status: n/a`가 아닌 행**의 기록 경로가 실제로 존재하는가. `n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다).
+  - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`에 기록된 **영속 산출물 경로**가 실제로 존재하는가. registry 절마다 스키마가 다르므로(절-수준 status / 행-수준 status / status 열 없음) **대상 절·검사할 경로 열·status 조건을 SKILL 본문의 표가 고정한다** — 그것이 없으면 본 항목은 deterministic 이 아니다. `status: n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다). **ephemeral 산출물 경로는 검사하지 않는다** — design gate 의 `output path`(`design-gate-shots/`)는 `.gitignore` 대상이고 매 실행 생성·초기화되므로 fresh clone 에서 부재가 정상이며, 검사하면 매 마일스톤 오탐이 되어 침묵 우선 원칙과 충돌한다.
   - **(b) design gate digest** — `## Design Gate Adapter`의 `status`가 `ready`인 경우에만, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치.
   - **(c) 등록 밖 소스 디렉터리** — **소스 루트 registry를 갖는 스택에서만** 수행한다. 현재 그 registry를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며 비-Dart 스택에서는 `/bootstrap-stack`이 그 절을 삭제하므로 **판정 기준이 없다 → 이 항목을 건너뛴다.** 기준 없이 "등록 밖"을 판정하면 TS/Python/Go의 `src/`·`tests/`가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다.
-  - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PASS` 계열이 아니면(`SKIPPED`·`PARTIAL`, 또는 줄 자체 부재) `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 SKIPPED가 조용히 잊히지 않는 유일한 경로다.
+  - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PROBE FAIL`·`PARTIAL`·`SKIPPED` 이거나 **줄 자체가 없으면** `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **`PASS (…)`와 `PROBE OK, PROJECT FAIL`은 정상이다** — 후자는 probe 전 회차가 기대대로였고 프로젝트 코드만 실패한 상태라 검증 장치의 노후가 아니고(그 실패는 졸업 item 2·stabilize 단계 3이 이미 잡는다) 재실행 처방도 무의미하다. 판정력이 검증된 상태를 재실행 권고로 채우면 D4의 침묵 우선이 무너진다. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 미검증 상태가 조용히 잊히지 않는 유일한 경로다.
 - **`STACK_SETUP_PLAN.md`가 부재하면**(`/bootstrap-stack` 미실행 또는 산출 누락) 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
 - 불일치 시 `P2 [Guard-drift] <항목> — /stack-guard 재실행 권장`을 IMPROVEMENT_GUIDE에 기록한다.
 - **전부 일치하면 출력에 한 줄도 남기지 않는다** — skip 사유 echo도 하지 않는다(위 파일 부재 skip은 예외 — 점검을 아예 못 했다는 사실은 알려야 한다). 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것도 정상이 아니다.

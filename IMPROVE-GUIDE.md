@@ -205,10 +205,10 @@ accepted
 `/stabilize-milestone` §1.0 deterministic pre-flight가 검증 장치의 노후를 마일스톤마다 점검한다.
 
 - 점검 대상 4항목:
-  - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`의 registry 행 중 **`status: n/a`가 아닌 행**의 기록 경로가 실제로 존재하는가. `n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다).
+  - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`에 기록된 **영속 산출물 경로**가 실제로 존재하는가. registry 절마다 스키마가 다르므로(절-수준 status / 행-수준 status / status 열 없음) **대상 절·검사할 경로 열·status 조건을 SKILL 본문의 표가 고정한다** — 그것이 없으면 본 항목은 deterministic 이 아니다. `status: n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다). **ephemeral 산출물 경로는 검사하지 않는다** — design gate 의 `output path`(`design-gate-shots/`)는 `.gitignore` 대상이고 매 실행 생성·초기화되므로 fresh clone 에서 부재가 정상이며, 검사하면 매 마일스톤 오탐이 되어 침묵 우선 원칙과 충돌한다.
   - **(b) design gate digest** — `## Design Gate Adapter`의 `status`가 `ready`인 경우에만, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치.
   - **(c) 등록 밖 소스 디렉터리** — **소스 루트 registry를 갖는 스택에서만** 수행한다. 현재 그 registry를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며 비-Dart 스택에서는 `/bootstrap-stack`이 그 절을 삭제하므로 **판정 기준이 없다 → 이 항목을 건너뛴다.** 기준 없이 "등록 밖"을 판정하면 TS/Python/Go의 `src/`·`tests/`가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다.
-  - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PASS` 계열이 아니면(`SKIPPED`·`PARTIAL`, 또는 줄 자체 부재) `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 SKIPPED가 조용히 잊히지 않는 유일한 경로다.
+  - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PROBE FAIL`·`PARTIAL`·`SKIPPED` 이거나 **줄 자체가 없으면** `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **`PASS (…)`와 `PROBE OK, PROJECT FAIL`은 정상이다** — 후자는 probe 전 회차가 기대대로였고 프로젝트 코드만 실패한 상태라 검증 장치의 노후가 아니고(그 실패는 졸업 item 2·stabilize 단계 3이 이미 잡는다) 재실행 처방도 무의미하다. 판정력이 검증된 상태를 재실행 권고로 채우면 D4의 침묵 우선이 무너진다. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 미검증 상태가 조용히 잊히지 않는 유일한 경로다.
 - **`STACK_SETUP_PLAN.md`가 부재하면**(`/bootstrap-stack` 미실행 또는 산출 누락) 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
 - 불일치 시 `P2 [Guard-drift] <항목> — /stack-guard 재실행 권장`을 IMPROVEMENT_GUIDE에 기록한다.
 - **전부 일치하면 출력에 한 줄도 남기지 않는다** — skip 사유 echo도 하지 않는다(위 파일 부재 skip은 예외 — 점검을 아예 못 했다는 사실은 알려야 한다). 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것도 정상이 아니다.
@@ -576,10 +576,23 @@ git commit -m "fix: treat conformance child-process spawn failure as execution u
 ```markdown
 8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)~(d) 가 전부 정상이면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
    - **선행: 파일 부재 처리** — `docs/00-meta/STACK_SETUP_PLAN.md` 는 baseline 이 아니라 `/bootstrap-stack` 생성물이다. 부재 시 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0 의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
-   - (a) **registry 경로 실재** — registry 행 중 **`status: n/a` 가 아닌 행**의 기록 경로가 실제로 존재하는가. 부재 시 `P2 [Guard-drift] <registry>:<경로> 부재 — /stack-guard 재실행 권장`. **`n/a`·미대상 행은 대상이 아니다** — e2e 비대상 프로젝트나 비-UI 프로젝트에서 경로가 없는 것은 정상이다.
+   - (a) **registry 경로 실재** — **대상 절·검사할 열·조건을 아래로 고정한다**(deterministic 이려면 같은 입력에 같은 판정이 나야 한다. 절마다 스키마가 다르므로 "registry 행"만으로는 무엇을 볼지 정해지지 않는다). 부재 시 `P2 [Guard-drift] <절>:<경로> 부재 — /stack-guard 재실행 권장`.
+
+     | 대상 절 | 검사할 열 | 조건 |
+     |---|---|---|
+     | `## E2E Smoke Registry` | `smoke 파일 경로` | 그 **행**의 `status` 가 `n/a` 가 아닐 때 |
+     | `## Design Gate Adapter` | `adapter path` **만** | **절**의 `status` 가 `ready` 일 때 |
+     | `## Dart Source Roots` | `경로` (pubspec 위치 기준 상대경로) | 그 절이 존재할 때 (비-Dart 스택은 `/bootstrap-stack` 이 절을 삭제하므로 대상 0) |
+
+     - **`output path` 는 검사하지 않는다** — `design-gate-shots/` 는 `.gitignore` 대상이고 adapter 가 매 실행 통째로 생성·초기화하는 ephemeral 산출물이라 **fresh clone·정리 직후 부재가 정상**이다. 검사하면 매 마일스톤 오탐이 나 침묵 우선 원칙과 충돌한다.
+     - `## Dependency Tools` 는 경로 열이 없어 대상이 아니다. `status: n/a`·미대상 행도 대상이 아니다 — e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다.
+     - 템플릿 예시 행(`(예: …)`)이 남아 있으면 그 경로는 실재하지 않으므로 그대로 `P2` 가 되며 처방(`/stack-guard` 재실행)이 정확하다 — 별도 예외를 두지 않는다.
    - (b) **design gate digest** — `## Design Gate Adapter` 의 `status` 가 **`ready` 인 경우에만**, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치를 확인한다. 불일치 시 `P2 [Guard-drift] design gate adapter digest 불일치 — /stack-guard 재실행 권장` (읽기 전용 — 여기서 고치지 않는다). 실행 명령은 OS 별로 — Unix/macOS `shasum -a 256 <path>` (또는 `sha256sum`), Windows PowerShell `Get-FileHash -Algorithm SHA256 <path>`. 두 도구 모두 없으면 이 항목만 skip + `digest check skipped: no sha256 tool`.
    - (c) **등록 밖 소스 디렉터리** — **소스 루트 registry 를 갖는 스택에서만 수행한다.** 현재 그 registry 를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며, **비-Dart 스택에서는 `/bootstrap-stack` 이 그 절을 삭제하므로 판정 기준이 없다 → 이 항목을 건너뛴다**(사유 echo 불요 — 침묵). 기준 없이 "등록 밖"을 판정하면 TS/Python/Go 의 `src/`·`tests/` 가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다. Dart 스택에서 발견 시 `P2 [Guard-drift] 등록 밖 Dart source root: <경로> — /stack-guard 재실행 권장`.
-   - (d) **probe 판정 기록** — `## 통합 명령 사용법` 의 `probe smoke:` 값이 `PASS` 계열이 아니면(`SKIPPED`·`PARTIAL`, 또는 **줄 자체 부재**) `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **여기서 probe 를 다시 돌리지 않는다 — 기록된 문자열만 읽는다**(read-only 계약). 이것이 `/stack-guard` 의 `SKIPPED`·`PARTIAL` 이 조용히 잊히지 않는 유일한 경로다(ADR-063 D3 기록 → D4 회수).
+   - (d) **probe 판정 기록** — `## 통합 명령 사용법` 의 `probe smoke:` 값으로 판정한다.
+     - **정상(무출력)**: `PASS (probe verified, …)` 2종 · **`PROBE OK, PROJECT FAIL`**. 후자는 probe 전 회차가 기대대로였고 **프로젝트 코드만** 실패한 상태이므로 검증 장치의 노후가 아니다 — 재실행해도 같은 결과이니 처방이 무의미하고, 그 프로젝트 실패는 졸업 item 2(`통합 validate Pass`)와 단계 3 이 이미 잡는다.
+     - **`P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`**: `PROBE FAIL(<단계>)` · `PARTIAL` · `SKIPPED (…)` · **줄 자체 부재**.
+     - **여기서 probe 를 다시 돌리지 않는다 — 기록된 문자열만 읽는다**(read-only 계약). 이것이 `/stack-guard` 의 미검증 상태가 조용히 잊히지 않는 유일한 경로다(ADR-063 D3 기록 → D4 회수).
    - `validate` 4단계 커버리지의 **재측정**은 본 항목이 아니다 — 실측은 `/stack-guard` 재실행 시 probe 가 하고, 본 항목은 (d) 로 그 **기록**만 읽는다(ADR-063 D1·D4 — 중복 회피 + read-only 유지).
    - 회수 경로는 기존과 동일하다 — IMPROVEMENT_GUIDE 에 기록하면 다음 `/plan-milestone` R0 의 open 항목 회수가 사용자에게 재실행을 안내한다(`[ADR-candidate]`·`[Stack-drift]` 와 동형, 신설 없음).
 ```
@@ -2342,10 +2355,10 @@ grep -c 'format + lint + typecheck + test' .claude/skills/stack-guard/SKILL.md #
 
 **Phase 3 — Guard-drift**
 - [ ] §1.0 8번 항목이 **침묵 우선**을 명시하고, `validate` 4단계 커버리지를 점검 대상에 넣지 **않았다**
-- [ ] (a) 가 **`status: n/a` 아닌 행**으로 좁혀졌다
+- [ ] (a) 가 **대상 절 3개 × 검사할 경로 열 × status 조건 표**로 고정됐고, **ephemeral `output path`(`design-gate-shots/`)는 검사 대상에서 제외**됐다 (fresh clone 부재가 정상이라 검사하면 매 마일스톤 오탐)
 - [ ] (b) 가 **`status: ready` 인 경우만**이고 OS 별 sha256 명령이 있다
 - [ ] (c) 가 **소스 루트 registry 보유 스택 한정**으로 좁혀졌다 (비-Dart 오탐 차단)
-- [ ] (d) 가 **`probe smoke:` 기록 문자열만 읽고** probe 를 다시 돌리지 않는다 (read-only 유지). 줄 자체 부재도 `P2` 대상이다
+- [ ] (d) 가 **`probe smoke:` 기록 문자열만 읽고** probe 를 다시 돌리지 않는다 (read-only 유지). `PROBE FAIL`·`PARTIAL`·`SKIPPED`·**줄 부재**가 `P2` 대상이고, **`PROBE OK, PROJECT FAIL` 은 정상 취급**이다 (판정력은 검증됐고 프로젝트 코드만 실패한 상태 — 재실행 처방이 무의미)
 - [ ] `STACK_SETUP_PLAN.md` **부재 시 skip + 사유 echo** 가 있다
 - [ ] `GUARDRAILS_STRATEGY.md` 유지 주기 표에서 **매 task 는 full, finalize 만 `--changed`** 로 나뉘었다
 
