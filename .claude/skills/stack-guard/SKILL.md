@@ -108,7 +108,7 @@ R0 — 운영 환경 가정 확인:
    - **전 회차 기대대로 + 프로젝트 빈 케이스**(빈 lint 룰 / **프로젝트 테스트 0건**) → `validate smoke test: PASS (probe verified, empty rules/tests warning)`. **프로비저닝 단계에서는 정상이며 차단하지 않는다.**
    - **전 회차 기대대로 + 프로젝트 실 위반** → `validate smoke test: PROBE OK, PROJECT FAIL` + stderr 요약. stack-guard 자체는 성공이라 종료 X, 사용자에게 *프로젝트 수정* 안내.
    - **일부 단계 미도달**(5-c-0 (ii) — 앞 단계의 기존 프로젝트 위반으로 멈추고 단독 실행도 불가) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / not reached: <단계 목록>)` + 프로젝트 수정 안내. **종료 X — 배선 결함이 아니다.**
-   - **일부 단계 부재**(5-c-0 (i)) → `missing: <단계>` 를 함께 출력하고 남은 회차의 판정으로 위 행 중 하나를 낸다. 단계 부재만으로 종료하지 않는다 — **이번 실행에서 방금 생성한** 파이프라인이면 4단계를 채워 다시 구성하고, **이미 존재해 보존한** `validate`/`scripts/verify.*` 는 **덮어쓰지 않고 커버리지 부족만 보고**한다(`## 재실행 계약` 정합).
+   - **일부 단계 부재**(5-c-0 (i)) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / missing: <단계 목록>)`. **`PASS` 로 기록하지 않는다** — 부재 단계는 판정력이 *측정되지 않은* 것이고, `PASS` 로 적으면 커버리지 누락이 `[Guard-drift]` (d) 에서 침묵해 영구히 잊힌다. **종료하지 않는다** — **이번 실행에서 방금 생성한** 파이프라인이면 4단계를 채워 다시 구성하고(재측정으로 `PARTIAL` 이 해소된다), **이미 존재해 보존한** `validate`/`scripts/verify.*` 는 **덮어쓰지 않고 커버리지 부족만 보고**한다(`## 재실행 계약` 정합).
    - **1회차 (a) 실패**(범위 밖) → `validate smoke test: SKIPPED (probe out of tool scope — <추정 원인>)` + 확인 권고(도구 include·ignore 설정). **종료 X.** 프로비저닝 단계에서는 정상이며, 아래 5-f 기록을 통해 다음 마일스톤의 `[Guard-drift]` 가 재실행을 권고한다(ADR-063 D4 — **졸업 차단 항목은 없다**).
    - **probe 생성 불가**(권한·sandbox·이름 충돌) → `validate smoke test: SKIPPED (probe unavailable — <사유>)`. **종료 X.**
    - **1회차 (b) 또는 2~5회 불일치**(그 단계가 실재하고 도달한 회차에서) → `validate smoke test: PROBE FAIL(<단계>)` + 생성된 명령 + 실패 stderr + 제안 대체(예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 5-d 정리 + 5-f 기록 후 종료.
