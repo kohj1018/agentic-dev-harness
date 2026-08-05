@@ -165,10 +165,15 @@ accepted
 - **probe는 등록된 소스/테스트 루트 안에, 그 스택의 include·test glob에 걸리는 이름으로 만든다.** 닷 디렉터리나 `.gitignore` 등재 경로에 두지 않는다 — 다수 formatter/linter가 `.gitignore`를 기본 존중하고, TypeScript `include`의 `**/*`는 `.`으로 시작하는 세그먼트를 매칭하지 않으며, 테스트 러너 glob은 dot 파일을 기본 제외한다. 그런 위치에 두면 위반 probe가 실패하지 않아 **판정력이 정상인 검사도 FAIL로 오분류**되고, 본 D1이 고치려던 오분류를 새 라벨로 재생산한다.
 - **판정 단위는 전체 exit code가 아니라 "probe 파일 경로가 진단에 등장하는가"다.** brownfield fork는 기존 위반으로 전체 코드가 이미 1일 수 있어, 전체 코드로 판정하면 배선 실패와 프로젝트 실패를 구분할 수 없다.
 - **위반 probe는 한 번에 하나만 둔다.** `validate`는 4단계를 순차 fail-fast로 묶으므로 여러 위반을 동시에 두면 첫 단계에서 멈춰 뒤 단계의 판정력을 측정할 수 없다.
-- **범위 확인을 먼저 한다.** 명백한 위반 probe 1개가 진단에 등장하지 않으면 `SKIPPED — probe가 검사 범위 밖`이며 이후 회차를 돌리지 않는다. 이것이 *"검사에 판정력이 없다"*와 *"probe가 범위 밖이다"*를 구분하는 유일한 방법이다.
+- **판정의 두 전제 — 단계 실재와 실행 도달.** 각 회차의 판정은 (i) 그 단계를 수행하는 명령이 `validate` 파이프라인에 **실재**하고 (ii) 이번 실행에서 그 단계까지 **실제로 도달**했을 때만 성립한다.
+  - (i)이 아니면 *probe가 범위 밖*이 아니라 **커버리지 누락**이다 — 기존 `missing: <단계>` 보고 경로로 적고 그 회차만 건너뛰고 다음 회차를 계속한다(겸업 도구가 그 단계를 겸하는 경우는 부재가 아니다). 둘을 합쳐 `SKIPPED — 범위 밖`으로 적으면 **본 ADR이 잡으려는 배선 누락이 비차단 SKIPPED로 숨는다.**
+  - (ii)이 아니면(brownfield의 기존 위반이 앞 단계에서 fail-fast를 유발) 그 단계 명령을 **단독 실행**해 같은 기준(경로 귀속)으로 판정하고, 단독 실행이 불가하면 `SKIPPED(미도달)`로 보고한다.
+  - **(i)·(ii) 어느 경우도 `PROBE FAIL`로 적지 않는다** — 배선 결함이 아닌 것을 결함으로 적으면 D1이 고치려던 오분류를 방향만 바꿔 재생산한다.
+- **범위 확인을 먼저 한다.** 파이프라인에 실재하는 **첫 단계**의 회차에서 명백한 위반 probe 1개가 진단에 등장하지 않으면 `SKIPPED — probe가 검사 범위 밖`이며 이후 회차를 돌리지 않는다(배치 문제는 뒤 회차에서도 같은 이유로 재현되므로 더 돌려서 얻을 정보가 없다). 이 확인이 *"검사에 판정력이 없다"*·*"그 단계가 아예 없다"*·*"probe가 범위 밖이다"* 셋을 구분한다.
 - 판정 후 생성 파일을 **전부 삭제**하고 **삭제 결과를 출력에 보고**한다. 실패 경로·조기 종료 경로에서도 정리한다.
-- probe 생성 자체가 차단되면(권한·sandbox·이름 충돌) `SKIPPED — probe 생성 불가: <사유>`로 보고하고 **`WIRING FAIL`로 판정하지 않으며 종료하지 않는다**. 범위 밖·생성 불가 두 SKIPPED 모두 프로비저닝 단계에서만 정상이며 졸업 시점(ADR-014)에는 차단된다.
-- **프로젝트 빈 케이스는 차단하지 않는다** — probe가 전부 기대대로인데 프로젝트 lint 룰이 비었거나 프로젝트 테스트가 0건이면 비차단 경고로 보고한다. 프로비저닝 단계에서 정상인 상태이며, 졸업 시점의 차단은 ADR-014가 소유한다.
+- probe 생성 자체가 차단되면(권한·sandbox·이름 충돌) `SKIPPED — probe 생성 불가: <사유>`로 보고하고 **`WIRING FAIL`로 판정하지 않으며 종료하지 않는다**.
+- **미검증 상태는 기록으로 남긴다 — 졸업 차단 항목은 신설하지 않는다.** 범위 밖·생성 불가·미도달 SKIPPED는 프로비저닝 단계에서 정상이고, 최종 판정을 `STACK_SETUP_PLAN.md ## 통합 명령 사용법`에 `probe smoke: <판정> (<확인일>)` 1줄로 기록해 **D4 (d)가 다음 마일스톤에 회수**한다. 졸업 게이트(ADR-014)에 새 항목을 넣지 않는 근거는 본 ADR의 D6 기준 그대로다 — 기록 문자열을 읽는 검사는 문법을 이해하지 못하므로 **기록 등급 상한**이고(1문항), *SKIPPED 상태로 졸업한 사례*는 관측된 바 없다(2문항). 기록이 없으면 재실행 권고 자체가 발화하지 않으므로 이 1줄은 필수다.
+- **프로젝트 빈 케이스는 차단하지 않는다** — probe가 전부 기대대로인데 프로젝트 lint 룰이 비었거나 프로젝트 테스트가 0건이면 비차단 경고로 보고한다. 프로비저닝 단계에서 정상인 상태이며, 졸업 시점의 판정은 **ADR-014의 기존 5+1 항목이 소유한다**(테스트 0건은 item 4 `AC 매핑 100%`에서 드러난다 — 본 ADR은 졸업 항목을 추가하지 않는다).
 - 선례: `design-gate-conformance.mjs`가 동일 패턴(fixture 생성 → 통과/위반 양쪽 판정 → `finally` 삭제)을 이미 수행한다.
 
 **같은 원리를 design gate conformance 에도 적용한다**: [관측됨] `design-gate-conformance.mjs` 는 `spawnSync` 의 `result.error`(자식 프로세스를 **띄우지 못한** 경우 — 관리 환경의 EPERM 등)를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록해, 최종 exit 1(= `wiring-fail`)로 보고한다. 그러나 프로세스 기동 실패는 **환경 문제(execution unavailable)** 이지 산출물 결함이 아니며, ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정한다. 따라서 `result.error` 는 **exit 2 로 승계**한다. 이 수정은 conformance asset 내부이며 adapter 의 canonical digest 를 바꾸지 않으므로 capability 승격이 필요 없다.
@@ -191,22 +196,24 @@ accepted
 ### D3. 재실행 계약 (idempotent)
 `/stack-guard`는 재실행 가능하며, **변경이 필요한 것만 건드린다**. 무엇이 갱신되고 무엇이 보존되는지는 SKILL 본문의 `## 재실행 계약` 표가 SSOT다.
 
-미정의였던 두 항목을 다음으로 확정한다.
+미정의였던 세 항목을 다음으로 확정한다.
 - `scripts/verify.*` 본문: **존재하면 덮어쓰지 않는다.** 4단계 커버리지 부족만 출력에 보고한다(도구 감지 우선순위의 "기존 도구 미덮어씀" 원칙 정합 — 사용자가 손으로 고친 verify를 파괴하지 않는다).
 - 임시 probe: 실행 시 생성 → 판정 → 삭제. 저장소에 잔존하지 않는다.
+- probe 판정 기록: `STACK_SETUP_PLAN.md ## 통합 명령 사용법`의 `probe smoke: <판정> (<확인일>)` 1줄을 **매 실행 실측으로 갱신**한다. probe 파일은 지우지만 판정은 남는다 — 이 줄이 D4 (d)의 유일한 입력이다.
 
 ### D4. `[Guard-drift]` — 검증 장치 노후 감지 (침묵 우선)
 `/stabilize-milestone` §1.0 deterministic pre-flight가 검증 장치의 노후를 마일스톤마다 점검한다.
 
-- 점검 대상 3항목:
+- 점검 대상 4항목:
   - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`의 registry 행 중 **`status: n/a`가 아닌 행**의 기록 경로가 실제로 존재하는가. `n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다).
   - **(b) design gate digest** — `## Design Gate Adapter`의 `status`가 `ready`인 경우에만, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치.
   - **(c) 등록 밖 소스 디렉터리** — **소스 루트 registry를 갖는 스택에서만** 수행한다. 현재 그 registry를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며 비-Dart 스택에서는 `/bootstrap-stack`이 그 절을 삭제하므로 **판정 기준이 없다 → 이 항목을 건너뛴다.** 기준 없이 "등록 밖"을 판정하면 TS/Python/Go의 `src/`·`tests/`가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다.
+  - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PASS` 계열이 아니면(`SKIPPED`·`PARTIAL`, 또는 줄 자체 부재) `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 SKIPPED가 조용히 잊히지 않는 유일한 경로다.
 - **`STACK_SETUP_PLAN.md`가 부재하면**(`/bootstrap-stack` 미실행 또는 산출 누락) 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
 - 불일치 시 `P2 [Guard-drift] <항목> — /stack-guard 재실행 권장`을 IMPROVEMENT_GUIDE에 기록한다.
 - **전부 일치하면 출력에 한 줄도 남기지 않는다** — skip 사유 echo도 하지 않는다(위 파일 부재 skip은 예외 — 점검을 아예 못 했다는 사실은 알려야 한다). 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것도 정상이 아니다.
 - 회수는 다음 `/plan-milestone` R0의 IMPROVEMENT_GUIDE open 항목 회수 경로를 그대로 탄다(신설 없음 — `[ADR-candidate]`·`[Stack-drift]`와 동형).
-- `validate` 4단계 커버리지는 본 항목이 아니라 D1의 probe가 재실행 시 실측한다(중복 회피).
+- `validate` 4단계 커버리지의 **재측정**은 본 항목이 아니다 — 실측은 `/stack-guard` 재실행 시 D1의 probe가 하고, 본 항목은 (d)로 그 **기록**만 읽는다(중복 회피 + read-only 유지).
 
 ### D5. 유지 주기 안내
 검증 장치가 어떤 주기로 유지되는지를 `docs/00-meta/GUARDRAILS_STRATEGY.md`가 표 하나로 소유한다. 사용자가 파이프라인 전체를 한눈에 볼 수 있어야 재실행 권고가 실제로 실행된다.
@@ -217,7 +224,7 @@ accepted
 1. 이 검사가 **문법·구조를 이해**하는가, 문자열만 보는가? → 문자열만 보면 **기록 등급 상한**(차단 금지).
 2. 막으려는 실패가 **실제로 관측**됐는가(ADR-022)? → 가설뿐이면 **권장 등급**까지만.
 
-둘 다 통과할 때만 차단이 가능하다. 기존 검사의 등급 분포(`validate` exit code·E2E `EMPTY` 졸업 차단·design gate digest = 차단 / raw-hex grep·Don'ts grep·인벤토리 drift = 기록)가 이 기준과 이미 정합한다 — 본 D6은 기준을 명문화해 새 검사 추가 시의 재발명을 막는다.
+둘 다 통과할 때만 차단이 가능하다. 기존 검사의 등급 분포(`validate` exit code·E2E `EMPTY` 졸업 차단·design gate digest = 차단 / raw-hex grep·Don'ts grep·인벤토리 drift = 기록)가 이 기준과 이미 정합한다 — 본 D6은 기준을 명문화해 새 검사 추가 시의 재발명을 막는다. **본 ADR이 새로 넣는 D4 (d)(`probe smoke:` 기록 읽기)도 이 기준을 적용받아 기록 등급이다** — 상태 문자열을 읽을 뿐이므로 1문항에서 차단 자격이 없다.
 
 ### D7. `validate:design` 출력의 single-origin
 canonical design gate adapter는 매 실행 `design-gate-shots/`를 통째로 초기화한다(stale 픽셀 차단). 같은 checkout에서 `validate:design`을 **동시에 2개 실행하지 않는다** — 뒤에 시작한 실행이 앞 실행의 스크린샷을 지운다. `/stabilize-milestone`의 실행 single-origin 규약(ADR-054)과 동형이다.
@@ -250,11 +257,11 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 - .gitattributes                                                — D8 전역 줄바꿈 규칙
 
 ## Mutation Contract (ADR-047 D3)
-1. **Target** — stack-guard SKILL 수행-5(smoke test 판정)·수행-1/2(도구 config 생성)·수행-4(`.gitattributes` 전역 규칙 확인)·신설 `## 재실행 계약` / `design-gate-conformance.mjs` 의 spawn 실패 분기 / stabilize SKILL §1.0 8번째 항목 / GUARDRAILS 유지 주기·배치 기준 단락 / `.gitattributes` 전문.
+1. **Target** — stack-guard SKILL 수행-5(smoke test 판정 + `probe smoke:` 기록)·수행-1/2(도구 config 생성)·수행-4(`.gitattributes` 전역 규칙 확인)·신설 `## 재실행 계약` / `design-gate-conformance.mjs` 의 spawn 실패 분기 / stabilize SKILL §1.0 8번째 항목 / GUARDRAILS 유지 주기·배치 기준 단락 / `.gitattributes` 전문.
 2. **Failure mode** — (a) 4단계 커버리지를 산문 추론으로 판정해 검사 누락이 통과됨 (b) 소스 0개 정상 상태가 `WIRING FAIL`로 오분류돼 lifecycle이 막힘 (c) harness 자산 포맷으로 design gate digest가 깨져 게이트가 `wiring-fail`로 굳음 (d) 프로젝트 성장 후 `validate`가 절반만 검사하면서 "통과"를 보고함 (e) 확장자 열거 누락으로 fresh clone이 CRLF 체크아웃돼 형식 검사가 코드 변경 없이 실패함.
-3. **Predicted improvement** — probe 회차별 판정이 실측 결과로 채워짐 / 소스 0개·brownfield 기존 위반 상태에서 stack-guard가 종료하지 않음 / design gate digest 불일치가 도구 config 단계에서 예방됨 / `[Guard-drift]`가 registry 경로 부재를 마일스톤마다 감지 / `git check-attr eol`이 전 텍스트 확장자에서 `lf`를 반환.
-4. **Preserved invariants** — 기존 도구 미덮어씀 정책 / `Needs Install` graceful fallback / e2e 5상태 판정(ADR-052#amend-1) / design gate capability version·digest 정책(ADR-058#amend-2) / stabilize read-only 계약 / adapter 코드 불변(digest 안정) / **secret scanner의 harness 경로 포함**(D2 배제는 포맷·타입·커버리지 한정) / 프로비저닝 단계 빈 케이스의 비차단 등급.
-5. **Falsifying evaluation** — 실패 유형은 *모양 실패*(규칙을 따르려 하나 출력 형태가 틀림)이므로 금지문이 아니라 긍정 레시피(실행별 판정 표 + 기대값)로 작성했다(ADR-047#amend-1). 검증: 소스 0개 green-field와 기존 위반이 있는 brownfield 두 fork에서 `/stack-guard`를 실행해 (a) 1회차의 위반 probe 경로가 진단에 등장하는지(범위 확인 통과) (b) 각 실행이 해당 단계에서 그 경로를 지적하는지 (c) 마지막 실행에서 준수 probe에 귀속된 진단이 0건인지 (d) brownfield에서 전체 exit code가 1이어도 `PROBE OK, PROJECT FAIL`로 분류되는지 (e) 생성한 probe 파일이 종료 후 전부 부재인지를 확인한다. **1회차 (a)가 범위 밖으로 나오면 probe 배치 경로를 고치고, brownfield에서 `PROBE FAIL(pass)`가 나오면 5-b 판정 단위를 되돌린다.**
+3. **Predicted improvement** — probe 회차별 판정이 실측 결과로 채워짐 / 소스 0개·brownfield 기존 위반 상태에서 stack-guard가 종료하지 않음(미도달 회차가 `PROBE FAIL` 대신 단독 실행 재측정 또는 `SKIPPED(미도달)`로 분류됨) / 단계 부재가 `SKIPPED`가 아니라 `missing: <단계>`로 드러남 / `probe smoke:`가 PASS가 아닌 채 남으면 다음 마일스톤에 `[Guard-drift]`로 회수됨 / design gate digest 불일치가 도구 config 단계에서 예방됨 / `[Guard-drift]`가 registry 경로 부재를 마일스톤마다 감지 / `git check-attr eol`이 전 텍스트 확장자에서 `lf`를 반환.
+4. **Preserved invariants** — 기존 도구 미덮어씀 정책 / `Needs Install` graceful fallback / e2e 5상태 판정(ADR-052#amend-1) / design gate capability version·digest 정책(ADR-058#amend-2) / stabilize read-only 계약 / adapter 코드 불변(digest 안정) / **secret scanner의 harness 경로 포함**(D2 배제는 포맷·타입·커버리지 한정) / 프로비저닝 단계 빈 케이스의 비차단 등급 / **졸업 게이트 무증설** — ADR-014의 5+1 항목은 그대로이며 본 ADR은 기록·권고까지만 한다.
+5. **Falsifying evaluation** — 실패 유형은 *모양 실패*(규칙을 따르려 하나 출력 형태가 틀림)이므로 금지문이 아니라 긍정 레시피(실행별 판정 표 + 기대값)로 작성했다(ADR-047#amend-1). 검증: 소스 0개 green-field와 기존 위반이 있는 brownfield 두 fork에서 `/stack-guard`를 실행해 (a) 1회차의 위반 probe 경로가 진단에 등장하는지(범위 확인 통과) (b) 각 실행이 해당 단계에서 그 경로를 지적하는지 (c) 마지막 실행에서 준수 probe에 귀속된 진단이 0건인지 (d) brownfield에서 전체 exit code가 1이어도 도달한 단계는 `PROBE OK, PROJECT FAIL`, 미도달 단계는 `PARTIAL`/`SKIPPED(미도달)`로 분류되고 **`PROBE FAIL`이 아닌지** (e) 생성한 probe 파일이 종료 후 전부 부재인지 (f) 기존 format 위반이 있는 brownfield에서 뒤 단계 회차가 **단독 실행으로 재측정**되는지 (g) 종료 후 `STACK_SETUP_PLAN.md`에 `probe smoke:` 줄이 실제로 남는지를 확인한다. **1회차 (a)가 범위 밖으로 나오면 probe 배치 경로를 고치고, brownfield에서 `PROBE FAIL(pass)`가 나오면 5-b 판정 단위를 되돌린다.**
 6. **Rollback path** — 본 ADR superseded + stack-guard 수행-5를 단일 `validate` 1회 실행 판정으로 복귀 + stabilize §1.0 8번째 항목 제거(GUARDRAILS 표·`.gitattributes` 전역 규칙은 무해 잔존).
 
 ## 정책 강도 (ADR-022)
@@ -262,7 +269,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 - **enabling(약)**: D3 재실행 계약(문서화)·D4 `[Guard-drift]`(report-only)·D5 안내·D6 배치 기준·D7 규약. 자동 차단 없음.
 
 ## 참고
-- ADR-014(졸업 게이트 — probe SKIPPED가 졸업 시점에 차단되는 근거), ADR-021(정적 분석·secret scanner 권장), ADR-022(Ratchet), ADR-047 D1·D8(Executability·Oracle Adequacy), ADR-052#amend-1(e2e 5상태 — 프로비저닝/졸업 2단 판정의 원형), ADR-054(실행 single-origin 원형), ADR-058#amend-2(design gate capability·digest), ADR-059 D2(Flutter 겸업 단계·source root drift 경고의 원형).
+- ADR-014(졸업 게이트 — **본 ADR은 여기에 새 항목을 넣지 않는다**; probe 미검증은 D4 (d)의 기록·권고 경로로 처리), ADR-021(정적 분석·secret scanner 권장), ADR-022(Ratchet), ADR-047 D1·D8(Executability·Oracle Adequacy), ADR-052#amend-1(e2e 5상태 — 프로비저닝/졸업 2단 판정의 원형), ADR-054(실행 single-origin 원형), ADR-058#amend-2(design gate capability·digest), ADR-059 D2(Flutter 겸업 단계·source root drift 경고의 원형).
 ```
 
 ## 2-2. ADR 인덱스에 1행 추가
@@ -309,7 +316,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 **수정 후**:
 ```
-5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 **아래 5-c 실행 표대로 돌린다**(probe 배치를 바꿔가며 5회 — 겸업 도구가 있으면 그만큼 줄어든다. ADR-063 D1)
+5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 **아래 5-c 실행 표대로 돌린다**(probe 배치를 바꿔가며 **최대 5회** — 겸업 도구·부재 단계가 있으면 그만큼 줄어든다. ADR-063 D1)
 ```
 
 **(2) 판정 표 블록을 교체한다** — `` `validate` 판정 표: `` 부터 `**stack-guard 산출물 수정 필요** — 종료.` 까지를 아래로 교체한다. 도입 문단의 나머지(*wiring 검증* 목적 설명, `Needs Install` SKIPPED 처리)와 뒤의 `validate:e2e` 판정 행은 그대로 둔다.
@@ -327,15 +334,22 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
    **5-c. 실행 순서 — 위반 probe 는 한 번에 하나만 둔다**: `validate` 는 4단계를 **순차 fail-fast** 로 묶으므로(본 SKILL 의 `## 스택별 verify 풀세트` 정합), 위반을 여러 개 동시에 두면 첫 단계에서 멈춰 뒤 단계의 판정력을 측정할 수 없다.
 
+   **5-c-0. 회차별 판정의 두 전제 (ADR-063 D1 — 아래 표보다 먼저 적용한다)**
+
+   - **(i) 단계 실재** — 대상 단계를 수행하는 명령이 `validate` 파이프라인에 있는가. **없으면 `missing: <단계>` 로 보고하고 그 회차만 건너뛰고 다음 회차를 계속한다.** 이것은 *probe 가 범위 밖*이 아니라 **커버리지 누락**이며, 둘을 합쳐 `SKIPPED` 로 적으면 **본 검증이 잡으려는 배선 누락이 비차단 SKIPPED 로 숨는다.** **겸업 도구가 그 단계를 겸하면 부재가 아니다** — 아래 겸업 합산 규칙을 먼저 적용한다.
+   - **(ii) 실행 도달** — 이번 실행에서 그 단계까지 실제로 도달했는가. **앞 단계가 *프로젝트 소유* 위반으로 fail-fast 를 유발해 도달하지 못했으면**(brownfield 의 기존 format 위반 등) 그 단계 명령을 **단독 실행**해 5-b 기준으로 판정하고, 단독 실행이 불가하면 `SKIPPED(미도달: <사유>)` 로 보고한다.
+   - **(i)·(ii) 어느 경우도 `PROBE FAIL` 이 아니다.** 아래 표의 `불일치 시` 열은 **그 단계가 실재하고 도달한 회차**에만 적용한다 — 배선 결함이 아닌 것을 결함으로 적으면 오분류를 방향만 바꿔 재생산한다.
+   - **1회차의 (a) 범위 확인은 파이프라인에 실재하는 *첫* 단계의 회차에서 수행한다** — format 단계가 없으면 그 역할을 lint 회차가 이어받는다.
+
    | 실행 | probe 배치 | 판정 | 불일치 시 |
    |---|---|---|---|
-   | **1회** | 명백한 **형식 위반** probe 1개만 | **(a) 범위 확인** — 그 파일 경로가 진단에 등장하는가 / **(b) format 판정력** — 그 진단이 format 단계에서 나왔는가 | **(a) 실패** → `SKIPPED — probe 가 검사 범위 밖: <추정 원인>`. **FAIL 아님, 종료 X.** 2~5회를 돌리지 않고 **5-d(정리)를 거쳐** 5-e 로 간다(정리를 건너뛰면 probe 가 저장소에 남는다) / **(b) 실패** → `PROBE FAIL(format)` |
+   | **1회** | 명백한 **형식 위반** probe 1개만 | **(a) 범위 확인** — 그 파일 경로가 진단에 등장하는가 / **(b) format 판정력** — 그 진단이 format 단계에서 나왔는가 | **(a) 실패** → `SKIPPED — probe 가 검사 범위 밖: <추정 원인>`. **FAIL 아님, 종료 X.** 2~5회를 돌리지 않고 **5-d 정리 → 5-e 판정 → 5-f 기록** 순으로 마친다(정리를 건너뛰면 probe 가 저장소에 남고, 기록을 건너뛰면 이 SKIPPED 가 잊힌다) / **(b) 실패** → `PROBE FAIL(format)` |
    | **2회** | 위반 probe 를 **lint 위반 1개로 교체** | lint 단계 진단에 그 경로 | `PROBE FAIL(lint)` |
    | **3회** | **타입 오류 1개로 교체** | typecheck 단계 진단에 그 경로 | `PROBE FAIL(typecheck)` |
    | **4회** | **실패 테스트 1개로 교체** | test 단계 진단에 그 경로 | `PROBE FAIL(test)` |
    | **5회** | 위반 probe 전부 제거 + 규칙 준수 소스 1개 + 통과 테스트 1개 | probe 파일에 귀속된 진단 **0건** (전체 exit 0 을 요구하지 않는다) | `PROBE FAIL(pass)` — 준수 파일이 지적됨 = 규칙 설정 문제 |
 
-   **`validate` 실행은 총 5회다** — 1회차의 (a)(b)는 *같은 실행의 두 판정*이다(같은 probe·같은 명령이므로 따로 돌리지 않는다).
+   **`validate` 실행은 최대 5회다** — 1회차의 (a)(b)는 *같은 실행의 두 판정*이다(같은 probe·같은 명령이므로 따로 돌리지 않는다). 겸업 합산·단계 부재로 회차는 줄어들 수 있고, 5-c-0 (ii) 의 단독 실행은 그 회차의 **재측정**이므로 새 회차로 세지 않는다.
 
    **한 도구가 두 단계를 겸하면 해당 실행을 합산한다** — Biome = format + lint 면 1회차가 lint 판정까지 겸하므로 2회를 생략(총 4회), `flutter analyze` = lint + typecheck 면 2·3회를 하나로 합산(총 4회). 이때 `missing: <단계>` 로 보고하지 않는다 — 겸업 여부는 실측으로 판정되므로 산문 예외가 필요 없다.
 
@@ -345,9 +359,13 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
    - **전 회차 기대대로 + 프로젝트 진단 0건** → `validate smoke test: PASS (probe verified, project clean)`.
    - **전 회차 기대대로 + 프로젝트 빈 케이스**(빈 lint 룰 / **프로젝트 테스트 0건**) → `validate smoke test: PASS (probe verified, empty rules/tests warning)`. **프로비저닝 단계에서는 정상이며 차단하지 않는다.**
    - **전 회차 기대대로 + 프로젝트 실 위반** → `validate smoke test: PROBE OK, PROJECT FAIL` + stderr 요약. stack-guard 자체는 성공이라 종료 X, 사용자에게 *프로젝트 수정* 안내.
-   - **1회차 (a) 실패**(범위 밖) → `validate smoke test: SKIPPED (probe out of tool scope — <추정 원인>)` + 확인 권고(도구 include·ignore 설정). **종료 X.** 이 상태는 프로비저닝 단계에서만 정상이며 졸업 시점에는 차단된다(ADR-014).
+   - **일부 단계 미도달**(5-c-0 (ii) — 앞 단계의 기존 프로젝트 위반으로 멈추고 단독 실행도 불가) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / not reached: <단계 목록>)` + 프로젝트 수정 안내. **종료 X — 배선 결함이 아니다.**
+   - **일부 단계 부재**(5-c-0 (i)) → `missing: <단계>` 를 함께 출력하고 남은 회차의 판정으로 위 행 중 하나를 낸다. 단계 부재만으로 종료하지 않는다 — **이번 실행에서 방금 생성한** 파이프라인이면 4단계를 채워 다시 구성하고, **이미 존재해 보존한** `validate`/`scripts/verify.*` 는 **덮어쓰지 않고 커버리지 부족만 보고**한다(`## 재실행 계약` 정합).
+   - **1회차 (a) 실패**(범위 밖) → `validate smoke test: SKIPPED (probe out of tool scope — <추정 원인>)` + 확인 권고(도구 include·ignore 설정). **종료 X.** 프로비저닝 단계에서는 정상이며, 아래 5-f 기록을 통해 다음 마일스톤의 `[Guard-drift]` 가 재실행을 권고한다(ADR-063 D4 — **졸업 차단 항목은 없다**).
    - **probe 생성 불가**(권한·sandbox·이름 충돌) → `validate smoke test: SKIPPED (probe unavailable — <사유>)`. **종료 X.**
-   - **1회차 (b) 또는 2~5회 불일치** → `validate smoke test: PROBE FAIL(<단계>)` + 생성된 명령 + 실패 stderr + 제안 대체(예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 5-d 정리 후 종료.
+   - **1회차 (b) 또는 2~5회 불일치**(그 단계가 실재하고 도달한 회차에서) → `validate smoke test: PROBE FAIL(<단계>)` + 생성된 명령 + 실패 stderr + 제안 대체(예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 5-d 정리 + 5-f 기록 후 종료.
+
+   **5-f. 판정 기록 (필수 — ADR-063 D3)**: 위 최종 판정을 `docs/00-meta/STACK_SETUP_PLAN.md` 의 `## 통합 명령 사용법` 절에 `probe smoke: <판정> (<YYYY-MM-DD>)` 1줄로 기록한다(이미 있으면 갱신). probe 파일은 지워도 판정은 남는다 — 이 줄이 `/stabilize-milestone` `[Guard-drift]` (d) 의 유일한 입력이며, 없으면 `SKIPPED`·`PARTIAL` 이 조용히 잊힌다. **조기 종료 경로에서도 기록한다.**
 ```
 
 ## 2-4. `stack-guard` harness 경로 배제 원칙 추가
@@ -412,6 +430,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 | `## Dependency Tools` | **보완만** — `/bootstrap-stack` 기록 행 미수정, 불일치는 보고 + 사용자 결정 |
 | `.gitattributes` | 전역 규칙 존재 확인 + 누락 규칙만 추가 (수행-4) |
 | 임시 probe (`src/__stackguard_probe__.*` 등 등록 소스·테스트 루트 안) | 실행 시 생성 → 회차별 판정 → **전부 삭제**. `.gitignore` 에 등재하지 않는다(등재하면 도구가 검사에서 제외해 판정 불가) |
+| `STACK_SETUP_PLAN ## 통합 명령 사용법` 의 `probe smoke:` 줄 | 매 실행 **최종 판정으로 갱신** (수행-5-f — `[Guard-drift]` (d) 의 유일한 입력) |
 
 **재실행 시점**: `/bootstrap-stack --migrate` 직후, `/stabilize-milestone` 이 `P2 [Guard-drift]` 를 기록한 뒤(다음 `/plan-milestone` R0 가 회수해 안내), design gate capability version 승격 시.
 ```
@@ -427,7 +446,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 **수정 후**:
 ```
-- validate smoke test 결과 (`PASS (probe verified, project clean)` / `PASS (probe verified, empty rules/tests warning)` / `PROBE OK, PROJECT FAIL` / `PROBE FAIL(<단계>)` / `SKIPPED (probe out of tool scope — …)` / `SKIPPED (probe unavailable — …)`) + **probe cleanup 결과** (`DONE (<n>개)` / `FAILED — 수동 삭제 필요: <경로 목록>`)
+- validate smoke test 결과 (`PASS (probe verified, project clean)` / `PASS (probe verified, empty rules/tests warning)` / `PROBE OK, PROJECT FAIL` / `PARTIAL (probe verified: … / not reached: …)` / `PROBE FAIL(<단계>)` / `SKIPPED (probe out of tool scope — …)` / `SKIPPED (probe unavailable — …)`) + 해당 시 `missing: <단계>` + **probe cleanup 결과** (`DONE (<n>개)` / `FAILED — 수동 삭제 필요: <경로 목록>`) + `STACK_SETUP_PLAN` 의 `probe smoke:` 기록 갱신 여부
 ```
 
 ## 2-7-a. conformance oracle — 프로세스 기동 실패를 exit 2 로 승계
@@ -524,12 +543,13 @@ git commit -m "fix: treat conformance child-process spawn failure as execution u
 
 **그 아래, 96행의 `본 단계는 모두 *보고만* —` 문단 **앞**에 추가**:
 ```markdown
-8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)(b)(c) 가 전부 일치하면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
+8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)~(d) 가 전부 정상이면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
    - **선행: 파일 부재 처리** — `docs/00-meta/STACK_SETUP_PLAN.md` 는 baseline 이 아니라 `/bootstrap-stack` 생성물이다. 부재 시 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0 의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
    - (a) **registry 경로 실재** — registry 행 중 **`status: n/a` 가 아닌 행**의 기록 경로가 실제로 존재하는가. 부재 시 `P2 [Guard-drift] <registry>:<경로> 부재 — /stack-guard 재실행 권장`. **`n/a`·미대상 행은 대상이 아니다** — e2e 비대상 프로젝트나 비-UI 프로젝트에서 경로가 없는 것은 정상이다.
    - (b) **design gate digest** — `## Design Gate Adapter` 의 `status` 가 **`ready` 인 경우에만**, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치를 확인한다. 불일치 시 `P2 [Guard-drift] design gate adapter digest 불일치 — /stack-guard 재실행 권장` (읽기 전용 — 여기서 고치지 않는다). 실행 명령은 OS 별로 — Unix/macOS `shasum -a 256 <path>` (또는 `sha256sum`), Windows PowerShell `Get-FileHash -Algorithm SHA256 <path>`. 두 도구 모두 없으면 이 항목만 skip + `digest check skipped: no sha256 tool`.
    - (c) **등록 밖 소스 디렉터리** — **소스 루트 registry 를 갖는 스택에서만 수행한다.** 현재 그 registry 를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며, **비-Dart 스택에서는 `/bootstrap-stack` 이 그 절을 삭제하므로 판정 기준이 없다 → 이 항목을 건너뛴다**(사유 echo 불요 — 침묵). 기준 없이 "등록 밖"을 판정하면 TS/Python/Go 의 `src/`·`tests/` 가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다. Dart 스택에서 발견 시 `P2 [Guard-drift] 등록 밖 Dart source root: <경로> — /stack-guard 재실행 권장`.
-   - `validate` 4단계 커버리지는 본 항목이 아니라 `/stack-guard` 재실행 시 probe 가 실측한다(ADR-063 D1 — 중복 회피).
+   - (d) **probe 판정 기록** — `## 통합 명령 사용법` 의 `probe smoke:` 값이 `PASS` 계열이 아니면(`SKIPPED`·`PARTIAL`, 또는 **줄 자체 부재**) `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **여기서 probe 를 다시 돌리지 않는다 — 기록된 문자열만 읽는다**(read-only 계약). 이것이 `/stack-guard` 의 `SKIPPED`·`PARTIAL` 이 조용히 잊히지 않는 유일한 경로다(ADR-063 D3 기록 → D4 회수).
+   - `validate` 4단계 커버리지의 **재측정**은 본 항목이 아니다 — 실측은 `/stack-guard` 재실행 시 probe 가 하고, 본 항목은 (d) 로 그 **기록**만 읽는다(ADR-063 D1·D4 — 중복 회피 + read-only 유지).
    - 회수 경로는 기존과 동일하다 — IMPROVEMENT_GUIDE 에 기록하면 다음 `/plan-milestone` R0 의 open 항목 회수가 사용자에게 재실행을 안내한다(`[ADR-candidate]`·`[Stack-drift]` 와 동형, 신설 없음).
 ```
 
@@ -553,6 +573,8 @@ git commit -m "fix: treat conformance child-process spawn failure as execution u
 | 다음 마일스톤 시작 | 노후 발견분 회수 → 재실행 권고 | `/plan-milestone` R0 |
 
 장치가 낡았다는 신호는 `P2 [Guard-drift]` 로 `IMPROVEMENT_GUIDE.md` 에 기록되고, 다음 `/plan-milestone` R0 가 회수해 `/stack-guard` 재실행을 안내한다. **아무것도 낡지 않았으면 아무 출력도 없다** — 정상 상태는 보고하지 않는다. 재실행 시 무엇이 갱신되고 무엇이 보존되는지는 `/stack-guard` 의 `## 재실행 계약` 표가 SSOT다.
+
+`validate` 의 **판정력**(probe 로 실측하는 부분)은 `/stack-guard` 재실행 때만 측정된다. 마일스톤 점검은 그 결과를 다시 재지 않고 `STACK_SETUP_PLAN.md` 에 기록된 판정(`probe smoke:`)만 읽는다 — 실측을 마일스톤 점검으로 옮기면 read-only 계약이 깨지고, 기록을 두지 않으면 프로비저닝 단계의 `SKIPPED` 가 아무도 모르게 남는다.
 
 ## 새 기계적 검사의 배치 기준 (ADR-063 D6)
 
@@ -2018,7 +2040,7 @@ ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있다(9행~). ADR
 **`- [ ] 필요하면 .claude/settings.local.json` 줄 앞에 2줄 추가**:
 ```
 - [ ] (해당 시) 아래 조건 중 하나라도 걸리면 `/consult-expert legal <관할>`을 선행했다 — **결제·PG 연동 / 개인정보 수집 / 규제 산업(의료·금융·교육·운송) / 미성년자 대상**. 규제 판단이 늦으면 되돌리기가 비싸다 (ADR-062)
-- [ ] (선택) 프레임워크 스캐폴드를 이미 돌렸다면 `/stack-guard`의 probe 검증이 실제 프로젝트 설정으로 판정한다. **스캐폴드 전이면 소스 루트나 도구 config 가 없어 `SKIPPED (probe unavailable …)` 또는 `SKIPPED (probe out of tool scope …)` 로 나오는 것이 정상**이며, 졸업 시점에는 차단된다 (ADR-063)
+- [ ] (선택) 프레임워크 스캐폴드를 이미 돌렸다면 `/stack-guard`의 probe 검증이 실제 프로젝트 설정으로 판정한다. **스캐폴드 전이면 소스 루트나 도구 config 가 없어 `SKIPPED (probe unavailable …)` 또는 `SKIPPED (probe out of tool scope …)` 로 나오는 것이 정상**이다. 그 판정은 `STACK_SETUP_PLAN.md` 의 `probe smoke:` 줄에 남고, 다음 마일스톤 `[Guard-drift]` 가 `/stack-guard` 재실행을 권고한다 — **졸업을 차단하지는 않으므로 스캐폴드 후 한 번 다시 돌리는 것이 실질 해소 경로다** (ADR-063 D3·D4)
 ```
 
 ## 6-4. 인접 사실 오류 2건 (각 1줄 — 기존 ADR 결정의 미이행 보정이라 새 ADR 불요)
@@ -2171,7 +2193,7 @@ grep -n '| 060 |' docs/90-decisions/boilerplate/README.md                       
 
 ```bash
 # (a) stabilize 에 [Guard-drift] 8번 항목이 실제로 들어갔는가
-grep -c 'Guard-drift' .claude/skills/stabilize-milestone/SKILL.md          # 기대: 4 이상 (제목 + (a)(b)(c) 라벨)
+grep -c 'Guard-drift' .claude/skills/stabilize-milestone/SKILL.md          # 기대: 5 이상 (제목 + (a)(b)(c)(d) 라벨)
 grep -c 'STACK_SETUP_PLAN.md 부재' .claude/skills/stabilize-milestone/SKILL.md  # 기대: 1 (파일 부재 skip)
 
 # (b) GUARDRAILS 에 유지 주기 표 + 배치 기준이 들어갔는가
@@ -2244,6 +2266,10 @@ grep -c 'stackguard_probe\|stack-guard-probe' .gitignore     # 기대: 0
 grep -c '__stackguard_probe__' .claude/skills/stack-guard/SKILL.md   # 기대: 2건 이상 (5-a 예시 + 재실행 계약)
 grep -c 'probe cleanup' .claude/skills/stack-guard/SKILL.md          # 기대: 2건 이상 (5-d + 최종 출력)
 grep -c '범위 확인' .claude/skills/stack-guard/SKILL.md              # 기대: 1건 이상 (회차 ①)
+# 두 전제(단계 실재·실행 도달)와 판정 기록이 들어갔는가 — 미도달을 PROBE FAIL 로 적지 않는 근거
+grep -c '미도달' .claude/skills/stack-guard/SKILL.md                 # 기대: 2건 이상 (5-c-0 (ii) + 5-e PARTIAL)
+grep -c 'probe smoke' .claude/skills/stack-guard/SKILL.md            # 기대: 2건 이상 (5-f + 재실행 계약 표)
+grep -c 'probe smoke' .claude/skills/stabilize-milestone/SKILL.md    # 기대: 1건 이상 ([Guard-drift] (d))
 ```
 
 ## 7-8. 수동 대조 체크리스트
@@ -2256,8 +2282,12 @@ grep -c '범위 확인' .claude/skills/stack-guard/SKILL.md              # 기�
 - [ ] index 에 CRLF 가 있었다면 리노멀라이즈 커밋이 별도로 존재하고 다른 변경과 섞이지 않았다 (없었으면 이 항목은 해당 없음)
 
 **Phase 2 — probe (가장 중요)**
-- [ ] `stack-guard` 수행-5 가 **실행 표(1~5회)** 로 구성됐고, 구 판정 표의 `wiring 실패 → 종료` 문구가 남아 있지 않다
-- [ ] 도입 문단의 **"1회 실행"이 "5회"로 교체**됐고, 표의 **1회차가 (a)범위확인·(b)format 두 판정을 겸한다**는 사실이 적혀 있다(같은 실행이므로 6회가 아니다)
+- [ ] `stack-guard` 수행-5 가 **실행 표(최대 5회)** 로 구성됐고, 구 판정 표의 `wiring 실패 → 종료` 문구가 남아 있지 않다
+- [ ] 도입 문단의 **"1회 실행"이 "최대 5회"로 교체**됐고, 표의 **1회차가 (a)범위확인·(b)format 두 판정을 겸한다**는 사실이 적혀 있다(같은 실행이므로 6회가 아니다)
+- [ ] **5-c-0 (i) 단계 실재**: 대상 단계가 파이프라인에 없으면 `missing: <단계>` 로 적고 **그 회차만 건너뛰고 계속**한다 — 범위 밖 `SKIPPED` 와 합치지 않았다(합치면 배선 누락이 SKIPPED 로 숨는다)
+- [ ] **5-c-0 (ii) 실행 도달**: brownfield 의 기존 위반으로 앞 단계에서 멈춘 회차는 **단독 실행으로 재측정**하고, 불가하면 `SKIPPED(미도달)`·`PARTIAL` 이다 — **`PROBE FAIL` 이 아니다**
+- [ ] **5-f 판정 기록**: 최종 판정이 `STACK_SETUP_PLAN.md ## 통합 명령 사용법` 의 `probe smoke:` 1줄로 기록되고, 조기 종료 경로에서도 기록된다
+- [ ] ADR-063 에 **졸업 차단 항목을 신설하지 않는다**는 근거(D6 2문항)가 적혀 있고, `## 참고` 의 ADR-014 설명이 "차단 근거"로 남아 있지 **않다**
 - [ ] probe 배치가 **등록된 소스·테스트 루트 안**이고, 닷 디렉터리·`.gitignore` 경로가 **아니다**
 - [ ] `.gitignore` 에 probe 경로가 **없다** (등재하면 도구가 검사에서 제외해 판정 불가)
 - [ ] 판정 단위가 **"probe 파일 경로가 진단에 등장하는가"** 이고 전체 exit code 가 아니다
@@ -2275,6 +2305,7 @@ grep -c '범위 확인' .claude/skills/stack-guard/SKILL.md              # 기�
 - [ ] (a) 가 **`status: n/a` 아닌 행**으로 좁혀졌다
 - [ ] (b) 가 **`status: ready` 인 경우만**이고 OS 별 sha256 명령이 있다
 - [ ] (c) 가 **소스 루트 registry 보유 스택 한정**으로 좁혀졌다 (비-Dart 오탐 차단)
+- [ ] (d) 가 **`probe smoke:` 기록 문자열만 읽고** probe 를 다시 돌리지 않는다 (read-only 유지). 줄 자체 부재도 `P2` 대상이다
 - [ ] `STACK_SETUP_PLAN.md` **부재 시 skip + 사유 echo** 가 있다
 - [ ] `GUARDRAILS_STRATEGY.md` 유지 주기 표에서 **매 task 는 full, finalize 만 `--changed`** 로 나뉘었다
 
@@ -2343,7 +2374,8 @@ grep -c '범위 확인' .claude/skills/stack-guard/SKILL.md              # 기�
 **(3) stack-guard probe** — *스택이 있는 임시 fork 에서*:
 
 - `/stack-guard`
-- 확인: 1회차의 위반 probe 경로가 진단에 등장하는지(범위 확인 통과) / 각 실행이 해당 단계에서 그 경로를 지적하는지 / 마지막 실행에서 준수 probe 귀속 진단 0건인지 / `probe cleanup: DONE` 이 출력됐는지
+- 확인: 1회차의 위반 probe 경로가 진단에 등장하는지(범위 확인 통과) / 각 실행이 해당 단계에서 그 경로를 지적하는지 / 마지막 실행에서 준수 probe 귀속 진단 0건인지 / `probe cleanup: DONE` 이 출력됐는지 / **`STACK_SETUP_PLAN.md ## 통합 명령 사용법` 에 `probe smoke: <판정> (<날짜>)` 1줄이 남았는지**(5-f — `[Guard-drift]` (d) 의 입력)
+- brownfield fork(기존 format 위반이 있는 상태)라면 추가 확인: 뒤 단계 회차가 `PROBE FAIL` 이 아니라 **단독 실행 재측정 또는 `PARTIAL`/`SKIPPED(미도달)`** 로 분류되는지
 - 정리 확인:
   ```bash
   git status --short | grep -i stackguard_probe && echo "FAIL: probe 잔존" || echo "OK: probe 정리됨"
