@@ -78,6 +78,7 @@ feature
      - accessibility: 키보드·스크린리더·대비 등 흐름 레벨 요구.
      - copy 톤: DESIGN.md §10 Voice & Writing(전역 규칙서 — ADR-056) 참조 + *이 feature 한정 delta만* 기록 (예: "이 화면만 축하 톤 허용"). 전역 규칙 재서술 금지.
      - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수.
+     - 계측 (ADR-042#amend-2): 위 지표를 무엇으로 어떻게 측정하나 — `<이벤트명> @ <발생 지점> / 속성: <목록> / 도구: <도구 또는 "미정">`. 예: `onboarding_completed @ 마지막 스텝 성공 시 / 속성: step_count, elapsed_ms, entry_source / 도구: 미정`. **⚠️ 여기 없는 속성은 나중에 소급 수집할 수 없다** — 측정 목표에서 역산해 필요한 속성을 전부 적는다. 도구·속성 설계가 필요하면 `/consult-expert data`. 개인정보 항목이 포함되면 `/consult-expert legal`(처리방침 기재)·`/consult-expert security`(보호 등급) 를 함께 탄다.
      - (옵션, 마케팅·랜딩 화면 한정) 포지셔닝: audience / JTBD / objection / proof / voice / key action을 *이 필드에 매핑*해 랜딩 카피 근거로 둔다(별도 마케팅 SSOT·스킬 설치 없음 — §10 Voice와 자연 연결). 마케팅 스코프 도입이 아니라 카피 근거 기록 수준. -->
 
 ## 9. 엣지 케이스

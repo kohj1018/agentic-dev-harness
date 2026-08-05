@@ -35,7 +35,7 @@
 | 039 | Workitem Type 분류 | accepted | — | task/feature에 Type 필드(feature/technical-enabler/bugfix/refactor/migration/research-spike) |
 | 040 | 외부 리서치 capability | accepted | (+#amend-1: 의존성 설치 authoring/실행, +#amend-2: builder Needs-Research soft 게이트 + 오케스트레이터 자동 위임 + install-ownership 3분할 boundary, +#amend-3: 소스 품질 규율 + Agent-보유 stale note 정정, +#amend-4: researcher 디자인 레퍼런스 모드) | researcher agent + /research-pack skill, report-only 웹 접근 |
 | 041 | 스택 추천 + 마이그레이션 contract | accepted (D1 superseded by 055) | — | --migrate(expand-contract contract ADR) 유지 / --recommend(D1)은 ADR-055 입력 적응형 DEEP 흐름으로 흡수 |
-| 042 | UX 흐름 품질 (HEART) | accepted | +#amend-1: §8-1 delta 재정의 | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 |
+| 042 | UX 흐름 품질 (HEART) | accepted | (+#amend-1: §8-1 delta 재정의, +#amend-2: 정량 소비자 자리 신설 + 계측 필드) | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 + analyst 가 quant 소비 |
 | 043 | Optional MCP Connectors | accepted | — | 기본 자동연결 X + STACK_SETUP_PLAN 연결 절차(researcher 기반, 전용 skill 없음) + 보안 가드 |
 | 044 | Cross-LLM Discovery Validation | accepted | +#amend-1: Codex 단락 supersede | /validate-discovery + /repair-discovery (기획 층 peer review, ADR-038 패턴 mirror) + reviewer discovery surface |
 | 045 | Document reference contract | accepted | +#amend-1: D6 재발행 임계 4→8 | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |

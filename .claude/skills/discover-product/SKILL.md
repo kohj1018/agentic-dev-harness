@@ -74,7 +74,8 @@ R0~R3 산출물은 메인 컨텍스트에 누적시키지 않고 `docs/10-charte
 
 ## --update 모드 (mid-project pivot, ADR-035#amend-2)
 기존 DISCOVERY.md 있으면:
-- **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 리서치 노트(/research-pack 산출)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
+- **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 노트(`/research-pack` 산출 + `/consult-expert` 도메인 노트)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
+  - **`type: quant` 행은 본 skill 이 직접 해석하지 않는다 (ADR-042#amend-2 결정 2)** — 정량 해석과 `confidence` 판정은 `analyst` 소유다. (a) 그 quant 를 해석한 `insights/<YYYY-MM-DD>-data-*.md` 노트가 있으면 **그 노트의 인사이트를 받아 적는다**, (b) 없으면 해석하지 않고 출력에 `Needs Quant Interpretation: <evidence ID> — /consult-expert data 권장` 1줄만 보고한다(**자동 위임하지 않는다** — 명시 호출만. ADR-062 D10). **정성(qual) 행은 기존대로 본 skill 이 직접 처리한다.**
 - R0 (페르소나 재확인) → R1·R2 (opportunity backlog 갱신·새 pain 추가) → R3 (assumption tracker 갱신 — §14 evidence로 §12 검증 결과 갱신) → R4 저장.
 - **`--fast --update`**: §12 Assumption Tracker + §14 Evidence Log만 빠르게 갱신 (가장 빈번한 mid-project use case).
 

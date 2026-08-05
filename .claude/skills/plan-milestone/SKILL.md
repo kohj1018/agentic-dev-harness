@@ -79,6 +79,11 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 - `## 3. 핵심 시나리오`(feature가 만족시킬 사용자 시나리오)와 `## 10. 의존성`(feature 간 선후·병렬)을 채운다 — FAC가 추적할 시나리오 + feature 의존 검토의 전제. 이 두 섹션 *신설*은 `/plan-milestone` 책임이다(plan-workitem 아님).
 - `## 7. Feature-level Acceptance Criteria`(FAC)를 시나리오 수준 측정 기준으로 채운다.
 - `## 7-1. FAC ↔ AC 매핑표`는 **빈 shell만** 둔다(`- FAC-1 →` 등 우변 미채움) — task 분해 시 `/plan-workitem`이 채운다(영속 SSOT, ADR-036/ADR-037). 이 skill은 task를 만들지 않으므로 매핑을 채우지 않는다.
+- **`## 8-1. UX 흐름 품질`을 채운다** (ADR-042 / #amend-2). UI·사용자 행동이 있는 feature 한정이며 비-UI 는 `(해당 없음)` 으로 명시한다. `success metric`(HEART signal 1개)과 **계측 필드**(이벤트명·발생 지점·속성·도구)를 함께 채운다.
+  - **`Needs Instrumentation` (ADR-062 D10 이 정의 소유)**: 계측 필드를 채울 근거가 없으면(측정 대상은 정해졌으나 어떤 이벤트·속성·도구로 잡을지 미정) `analyst` 에 **`Agent` 로 위임**해 계측 설계를 회수하고 그 결과로 필드를 채운다. **데이터는 소급 수집이 불가능하므로 이 시점을 놓치면 다음 측정 주기를 다시 기다려야 한다.**
+  - **수집 최소화**: "나중에 못 모으니 전부 수집"이 아니다. **측정 목표에서 역산해 그 목표에 필요한 속성만** 적는다(ADR-006 단순성). 개인정보 항목이 포함되면 `analyst` 가 `재자문 필요: legal`(고지)·`재자문 필요: security`(보호 등급)를 반환하며, 그 항목은 **`user-choice` 로 원장 등재를 제안**한다 — 자동 위임이 개인정보 수집 결정을 사용자 몰래 확정하지 않는다.
+  - 위임 결과는 `## 8-1` 필드 자체가 영속 기록이 된다(auto 경로는 `insights/` 노트를 만들지 않는다 — ADR-062 D10). 도구 선택 근거가 필요하면 사용자에게 `/consult-expert data` 명시 호출을 안내한다.
+  - 위임이 불가한 환경(Codex 등)에서는 `.claude/agents/analyst.md` 를 인라인 수행하거나 `/consult-expert data` 선행을 안내한다.
 - `## 11. 관련 문서`의 Milestone 링크를 R3 마일스톤으로 채운다. 비해당 스택의 Architecture-Iface/Design 줄은 삭제(placeholder 잔존 금지).
 
 **R5 — 프로토타입 라운드 (경험 계약, UI 마일스톤 한정 — ADR-056)**

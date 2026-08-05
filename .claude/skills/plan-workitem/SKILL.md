@@ -48,6 +48,9 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - "X를 적절히 처리한다" 같은 모호 지시 금지 — *어디를, 무엇으로, 어떻게* 바꾸는지 명시.
    - AC(`## 6`)는 여전히 RGR 사이클의 측정 단위다. `## 3` 가이드는 그 AC를 충족시키는 *집행 절차*이고, 각 단계는 가능하면 `(AC-N)` 태그로 대응 AC를 가리킨다.
    - 단계가 5개 파일을 넘으면 기존 sizing self-check(아래)대로 분해 권장 텍스트를 함께 출력.
+3-I. **계측 line item authoring (ADR-042#amend-2 결정 3 / ADR-062)**: 담당 feature 문서 `## 8-1` 의 **계측 필드**(`<이벤트명> @ <발생 지점> / 속성: <목록> / 도구: <도구>`)가 채워져 있으면 그 이벤트를 심는 작업을 **담당 task 의 `## 3` line item 으로 옮긴다** — 이벤트명·발생 지점·속성 목록·도구를 그대로 적고, *어느 파일의 어느 지점에* 심는지까지 위 3-G 형식으로 쓴다. **feature 문서에만 남기고 task 로 옮기지 않으면 그 이벤트는 구현되지 않으며, 데이터는 소급 수집이 불가능하다.**
+   - `## 8-1` 계측 필드가 **비어 있고** 그 feature 가 UI·사용자 행동을 가지면 임의로 채우지 말고 `Needs Instrumentation: F-NNN ## 8-1 — /plan-milestone R4 또는 /consult-expert data` 를 보고한다(정의 소유는 ADR-062 D10 — 본 skill 은 채우는 주체가 아니다).
+   - 계측 도구가 미설치면 **authoring 만** 한다 — 설치는 `/implement-workitem` 이다(ADR-040#amend-1 / ADR-052 install-ownership 3분할).
 3-P. **승인 프로토타입 참조 + PX↔AC 매핑 + 전환 흐름 authoring (ADR-056 결정 3·#amend-1·#amend-3 — 이중 잠금 2/2)**:
    입력 feature가 UI 확정·비면제이면, feature `## 7`의 `프로토타입:` 참조 줄에서 화면 파일 경로를 회수해 읽고(UI 확정·비면제 화면만 — ADR-019 minimal-context: 계획 시점 1회 읽기, draft 지연 아님), 그 화면을 구현하는 *모든* UI task `## 3`에 프로토타입 참조 line item을 authoring한다(신규 요소 유무와 무관 — builder는 기계 실행). 형식: `- 구현 시 승인 프로토타입 참조 — <경로>의 <상태/섹션>과 동일 상태·문구로 구현 (AC-N)`.
    - **PX↔AC 매핑 (ADR-056#amend-1)**: feature `## 7`의 `경험 결정(PX):` 인벤토리 각 PX를 그것을 구현하는 AC로 매핑해 feature `## 7-3. 프로토타입 경험(PX) ↔ AC 매핑`에 `PX-M<N>-<screen>-NN → T-NNN:AC-M`으로 기입한다(해당 AC 본문에 `(PX-M<N>-<screen>-NN)` 태그 가능). 어떤 AC도 참조하지 않는 PX(unmapped PX)는 "남은 미결정 사항"에 `- unmapped PX: <PX-M<N>-<screen>-NN> — 커버 task/AC 없음`으로 surface(unmapped FAC 패턴과 동형 — [Plan-FAC-coverage]가 재점검).
