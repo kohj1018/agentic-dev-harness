@@ -7,7 +7,7 @@
 accepted
 
 ## 현재 유효 결정
-- 사용자가 정하거나 승인해야 할 기획 결정은 `docs/10-charter/DECISION_REGISTER.md`에 등재하고, 결정 *본문*은 각 정본 문서가 SSOT다. 문서의 "열린 질문" 섹션 5곳은 폐지한다.
+- 사용자가 정하거나 승인해야 할 기획 결정은 `docs/10-charter/DECISION_REGISTER.md`에 등재하고, 결정 *본문*은 각 정본 문서가 SSOT다. 문서의 "열린 질문" 섹션 5곳은 폐지한다. **배포 라이선스는 `user-choice` 필수 등재 항목**이고(#amend-1), 등재 범위의 *계획 결함 제외*에는 **D8 차단 P1 의 명시 수용**(`disposition: chosen`)이 예외다(#amend-1 결정 5).
 - 각 결정은 열릴 때 `authority`(user-choice / user-approval / agent-delegated)를 부여받는다. 하향 변경은 사용자 승인 + 이력 줄이 필요하다. `agent-delegated`는 개별 등재 대상이 아니라 라운드 일괄 확인 대상이다.
 - `user-*` 결정은 **Decision Brief**(배경·용어·선택지·트레이드오프·추천·답변 방법)로 제시한다. 라운드당 3~5개 상한.
 - M/F 상태는 `draft → contract-ready → ready`. `contract-ready`는 task 분해 진입 자격이고, `ready`는 `/seal-milestone`만 부여한다.
@@ -29,7 +29,7 @@ accepted
 다음 5개 "열린 질문" 섹션을 **폐지**하고 원장으로 통합한다 — `DISCOVERY ## 11`, `PROJECT_CHARTER ## 10`, `ARCHITECTURE_OVERVIEW ## 10`, `MILESTONE_TEMPLATE ## 7`, `FEATURE_TEMPLATE ## 12`.
 섹션 번호는 **재사용하지 않는다**(결번 — ADR-002/003 legacy reserved 선례). 후속 섹션 번호를 당기면 기존 인용이 전부 깨진다.
 
-**등재 범위 (원장을 얇게 유지)**: 등재 대상은 `authority: user-*` 결정 전부 + 종류 불문 `open`/`deferred`로 남는 항목이다. **`agent-delegated`는 개별 등재하지 않고** 라운드 종료 일괄 확인 1회로만 처리한다(그 자리에서 사용자가 뒤집으면 `user-approval`로 등재). **코드 품질·형식 지적(raw hex·컴포넌트 중복·voice 위반)과 계획 결함(unmapped FAC/PX·의존성·AC 해석 후보)은 원장 대상이 아니다** — 기존 skill 출력의 `남은 미결정 사항` 슬롯과 각 소유 문서가 그대로 소유한다. 원장은 결함 추적기가 아니라 기획 결정 인덱스다.
+**등재 범위 (원장을 얇게 유지)**: 등재 대상은 `authority: user-*` 결정 전부 + 종류 불문 `open`/`deferred`로 남는 항목이다. **`agent-delegated`는 개별 등재하지 않고** 라운드 종료 일괄 확인 1회로만 처리한다(그 자리에서 사용자가 뒤집으면 `user-approval`로 등재). **코드 품질·형식 지적(raw hex·컴포넌트 중복·voice 위반)과 계획 결함(unmapped FAC/PX·의존성·AC 해석 후보)은 원장 대상이 아니다** — 기존 skill 출력의 `남은 미결정 사항` 슬롯과 각 소유 문서가 그대로 소유한다. 원장은 결함 추적기가 아니라 기획 결정 인덱스다. **단 D8 의 차단 P1 을 사용자가 명시 수용해 닫는 경우는 예외다** — 그때 원장에 올라가는 것은 *결함 자체*가 아니라 **결함을 감수한다는 선택**(`disposition: chosen`)이며, 이는 기획 결정에 해당한다(#amend-1 결정 5).
 
 **`(미할당)` 항목**: 마일스톤이 생기기 전(bootstrap 구간)에 등재되는 항목은 `영향: (미할당)`으로 둔다. `/plan-milestone` R1이 이를 전수 triage해 `영향: M<N>` 배정 또는 앵커 붙인 `deferred`로 정리하며, `/seal-milestone` 조건 6과 `/plan-milestone` Exit는 **`M<N>` 항목과 `(미할당)` 항목을 함께 회수**한다. 그러지 않으면 상류에서 정직하게 등재한 미결정이 봉인 검사에서 통째로 샌다.
 
@@ -247,3 +247,40 @@ ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용�
 
 ## 참고
 - ADR-056(결정 4 비대칭 — D2의 원형), ADR-053(#amend-2 — D10), ADR-046(#amend-1 — D3 carve-out), ADR-035(#amend-3 — D5), ADR-057(결정 5(a)(b)(f) 부분 supersede — D6/D11, 결정 6 라우팅 유지), ADR-027(§7-x "라운드 아님" 규정 부분 supersede — D9), ADR-007(lifecycle 단계 SSOT — D7이 plan과 implement 사이에 봉인 게이트 추가), ADR-026(#amend-4의 "task `ready` 승격" 주체를 D7이 seal로 이전), ADR-037(#amend-3의 "task `ready` 승격 조건"을 D7이 봉인 조건으로 이전), ADR-036(FEATURE 12섹션 → `## 12` 폐지로 11섹션), ADR-038(opt-in 유지), ADR-019, ADR-005, ADR-006, ADR-022, ADR-047 D3.
+
+<a id="adr-060-amend-1"></a>
+## Amendment 1 (2026-08-05) — 배포 라이선스를 필수 등재 항목으로
+
+### 배경
+- [관측됨] fork 직후 저장소에는 보일러플레이트의 `LICENSE`(MIT)와 두 README 의 `## License`·`## Contributing` 섹션이 그대로 남는다. `/bootstrap-project` 수행-4 는 README 2종을 갱신하지만 **이 세 지점의 처리 지침이 없어** 보일러플레이트 표지가 잔존하거나 임의로 삭제된다.
+- [관측됨] 배포 라이선스는 D2 의 `user-choice` 정의(*외부 계약 · 비가역 약속*)에 그대로 해당하지만, **등재를 유발하는 신호가 어디에도 없어** 실제로 등재되지 않는다.
+
+### 결정
+1. `/bootstrap-project` 는 **배포 라이선스를 `authority: user-choice` 로 반드시 원장에 등재**하고 D3 Decision Brief 로 제시한다. **두 축을 분리한다** — (i) *이 프로젝트의 배포 조건*(사용자 선택), (ii) *포함된 보일러플레이트 MIT 고지의 보존*(선택 사항이 아니라 기본 보존 — 결정 3).
+   - **A) 비공개** → 프로젝트 배포 라이선스를 두지 않는다. README `## License` 를 *"비공개 — 배포 라이선스 미설정. 포함된 보일러플레이트는 MIT(`LICENSE`)"* 로 다시 쓴다.
+   - **B) 공개·비오픈소스** → 프로젝트 권리 보유 고지를 README `## License`(또는 별 파일)에 쓴다. `LICENSE` 의 MIT 전문은 보일러플레이트 고지로 **보존**한다.
+   - **C) 오픈소스** → *어느 라이선스인지가 별 결정이다*(MIT 고정 아님). 선택한 라이선스 전문을 프로젝트 라이선스로 두고 MIT 전문은 **보존**한다. 선택·호환성 확인은 `/consult-expert legal` 을 안내한다.
+   - 기본 추천은 **A** — 나중에 C 로 올리는 것이 그 역순보다 싸다.
+   - **닫힌 뒤의 정본은 `PROJECT_CHARTER.md ## 7. 제약 조건` 의 배포 라이선스 줄**이고 원장의 `정본:` 이 그 앵커를 가리킨다. README `## License`·`LICENSE`·`THIRD_PARTY_NOTICES` 는 그 결정의 *투영*이다 — `/seal-milestone` 조건 6 의 `정본:` 대조가 **열 자리가 있어야** 닫힌 결정이 검사된다.
+2. **본 skill 은 파일을 삭제하지 않고 삭제를 안내하지도 않는다.** `allowed-tools` 에 `Bash` 가 없어 삭제가 불가능하고, MIT 고지 보존이 기본값이므로 `LICENSE` 삭제는 **어느 선택지에서도 처방이 아니다**. 내용 교체·추가는 `Write`/`Edit` 로 한다. 사용자가 파일 배치를 바꾸려면(예: MIT 전문을 `THIRD_PARTY_NOTICES.md` 로 이전) 그 수행은 사용자 몫이다.
+3. **MIT 고지의 범위와 보존 (축 2)**: 현행 `LICENSE` 는 *"The above copyright notice **and this permission notice** shall be included in all copies or substantial portions of the Software"* 를 요구한다 — 보존 대상은 저작권 한 줄이 아니라 **허가 고지 전문**이다. fork 는 보일러플레이트의 *상당 부분*을 그대로 포함하므로 **어느 선택지에서도 MIT 전문을 지우지 않는다.** 비공개 사용에 이 조건이 어디까지 미치는지, 선택한 OSS 라이선스와 MIT 의 호환성은 **본 ADR 이 판단하지 않는다** — `/consult-expert legal` 또는 변호사 소관이다(ADR-062 D2 — 법률을 기억으로 단정하지 않는다).
+4. 수행-4 의 갱신 산출물 목록에 `LICENSE`(B·C 의 내용 교체 시)를 추가하고 `output-checklist.md` 에 라이선스 결정 검증 항목을 둔다 — 목록·체크리스트에 없으면 "그 자리에서 처리한다"가 실제로 실행되지 않는다.
+5. **D1 의 `등재 범위` 문단과 D8 의 관계를 명시한다.** [관측됨] D1 의 `**등재 범위 (원장을 얇게 유지)**` 문단은 *"계획 결함은 원장 대상이 아니다 — 원장은 결함 추적기가 아니라 기획 결정 인덱스다"* 로 단정하는데, **D8 은 차단 P1 을 닫는 세 경로 중 (c)로 "원장에 `status: closed` + `disposition: chosen` 으로 명시 수용"을 규정**한다. 차단 P1 목록(`[Plan-decision]`·`[Plan-ambiguity]`·`[Plan-design]`·`[Plan-seam]`·`[MP-*]`)이 계획 결함 카테고리이므로, 두 규정을 그대로 읽으면 실행자가 어느 쪽을 따를지 알 수 없다.
+   - 정정: 그 문단 끝에 **예외 1줄**을 붙인다 — *"단 D8 의 차단 P1 을 사용자가 명시 수용해 닫는 경우는 예외다. 그때 원장에 올라가는 것은 *결함 자체*가 아니라 **결함을 감수한다는 선택**(`disposition: chosen`)이며, 이는 기획 결정에 해당한다."*
+   - 이 정정은 두 규정의 **관계를 명시할 뿐 어느 쪽 규칙도 바꾸지 않는다** — 봉인 차단 범위(D8)와 원장의 얇음이 모두 유지된다.
+
+### 적용 surface
+- .claude/skills/bootstrap-project/SKILL.md
+- .claude/skills/bootstrap-project/output-checklist.md (라이선스 결정 검증 항목 — 결정 4)
+- docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md (D1 `등재 범위` 문단 끝의 예외 1줄 — 결정 5)
+
+### Mutation Contract (ADR-047 D3)
+1. **Target** — bootstrap-project SKILL 수행-4(산출물 목록 + README 하단 섹션 처리) · `## 결정 마감` 절(필수 등재 항목 + 멱등 분기) · `output-checklist.md` 검증 항목 · 본 ADR D1 `등재 범위` 문단의 D8 예외 1줄(결정 5) · 본 ADR `## 현재 유효 결정` 의 **기존 등재 불릿 1줄 확장**(줄을 늘리지 않는다 — ADR-045 D5 의 ≤6줄 유지).
+2. **Failure mode** — (a) 보일러플레이트 라이선스·기여 안내가 프로젝트 표지에 잔존 (b) 되돌리기 비싼 라이선스 결정이 닫히지 않은 채 첫 공개까지 감 (c) skill 이 `Bash` 없이 파일 삭제를 시도해 실패 (d) D1 `등재 범위` 와 D8 이 계획 결함의 원장 등재를 각각 금지·허용해 실행자가 어느 쪽을 따를지 알 수 없음 (e) **MIT 허가 고지를 삭제하거나 저작권 한 줄로 축소해 고지 조건을 위반** (f) 닫힌 결정의 `정본:` 앵커가 없어 봉인 검사가 열 자리가 없음 (g) 재실행이 같은 결정을 중복 등재.
+3. **Predicted improvement** — 원장에 `배포 라이선스` 항목이 `closed` 로 남고, M1 봉인 시점에 이 항목의 `open` 이 0건. README 에 보일러플레이트 이슈 템플릿 링크가 잔존하지 않음.
+4. **Preserved invariants** — 원장 writer 집합 / D2 authority 정의 / D3 Decision Brief 형식(3~5개 상한·추천 예외) / bootstrap-project 의 `allowed-tools`(Bash 미추가) / README 2종 동시 갱신 규율(ADR-010#amend-3) / **보일러플레이트 MIT 허가 고지 전문 보존**(어느 선택지에서도 삭제 금지) / `## 현재 유효 결정` ≤6줄(ADR-045 D5) / bootstrap-project 의 재실행 안전성(`Re-run safe`).
+5. **Falsifying evaluation** — *모양 실패*(지시는 있으나 처리 형태가 틀림)이므로 긍정 레시피로 작성했다. 검증: fork 직후 `/bootstrap-project` 를 실행해 (a) 라운드에 라이선스 Decision Brief 가 제시되는지 (b) 답변 후 README 2종의 `## License`·`## Contributing` 이 처리되는지 (c) **A 선택 후에도 `LICENSE` 의 MIT 전문이 그대로 남아 있는지**(삭제·축소 0) (d) 원장에 `user-choice` + `정본: PROJECT_CHARTER.md#…` 로 등재되는지 (e) **같은 skill 을 재실행했을 때 같은 결정이 중복 등재되지 않는지**를 확인한다. 삭제를 시도하거나 중복 등재가 나오면 결정 2·멱등 분기를 강화한다.
+6. **Rollback path** — 본 amendment 제거 + bootstrap-project 의 해당 3개 삽입 블록 제거(원장 항목은 무해 잔존).
+
+### 강도 (ADR-022)
+- **제약(강) — [관측됨]**: 결정 1(필수 등재)·결정 2(삭제 미수행). enabling: 결정 3·4.
