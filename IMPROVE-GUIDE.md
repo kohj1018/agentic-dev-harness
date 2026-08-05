@@ -2022,24 +2022,30 @@ git commit -m "feat: give the HEART metric loop a quantitative consumer and inst
 - [관측됨] 배포 라이선스는 D2 의 `user-choice` 정의(*외부 계약 · 비가역 약속*)에 그대로 해당하지만, **등재를 유발하는 신호가 어디에도 없어** 실제로 등재되지 않는다.
 
 ### 결정
-1. `/bootstrap-project` 는 **배포 라이선스를 `authority: user-choice` 로 반드시 원장에 등재**하고 D3 Decision Brief 로 제시한다. 선택지는 (A) 비공개 → `LICENSE` 제거, (B) 공개·비오픈소스 → 권리 보유 고지로 교체, (C) 오픈소스 → 원저작권 고지 유지 + 프로젝트 저작권 추가. 기본 추천은 **A** — 나중에 C 로 올리는 것이 그 역순보다 싸다.
-2. **파일 삭제는 skill 이 수행하지 않는다.** `/bootstrap-project` 의 `allowed-tools` 에는 `Bash` 가 없어 파일 삭제가 불가능하다. B·C 는 `Write`/`Edit` 로 내용을 교체하고, **A 는 사용자에게 삭제를 안내**한다(`git rm LICENSE`). skill 이 수행 불가한 행위를 지시하지 않는다.
-3. 원저작권 고지: MIT 는 파생물 **배포** 시 고지 유지를 요구한다. 비공개는 배포가 아니라 의무가 발생하지 않으나, 공개로 전환하면 고지를 되살려야 한다. 이 사실을 각 선택지에 1줄로 부기한다.
-4. 수행-4 의 갱신 산출물 목록에 `LICENSE`(해당 시)를 추가한다 — 목록에 없으면 "그 자리에서 처리한다"가 목록과 어긋난다.
+1. `/bootstrap-project` 는 **배포 라이선스를 `authority: user-choice` 로 반드시 원장에 등재**하고 D3 Decision Brief 로 제시한다. **두 축을 분리한다** — (i) *이 프로젝트의 배포 조건*(사용자 선택), (ii) *포함된 보일러플레이트 MIT 고지의 보존*(선택 사항이 아니라 기본 보존 — 결정 3).
+   - **A) 비공개** → 프로젝트 배포 라이선스를 두지 않는다. README `## License` 를 *"비공개 — 배포 라이선스 미설정. 포함된 보일러플레이트는 MIT(`LICENSE`)"* 로 다시 쓴다.
+   - **B) 공개·비오픈소스** → 프로젝트 권리 보유 고지를 README `## License`(또는 별 파일)에 쓴다. `LICENSE` 의 MIT 전문은 보일러플레이트 고지로 **보존**한다.
+   - **C) 오픈소스** → *어느 라이선스인지가 별 결정이다*(MIT 고정 아님). 선택한 라이선스 전문을 프로젝트 라이선스로 두고 MIT 전문은 **보존**한다. 선택·호환성 확인은 `/consult-expert legal` 을 안내한다.
+   - 기본 추천은 **A** — 나중에 C 로 올리는 것이 그 역순보다 싸다.
+   - **닫힌 뒤의 정본은 `PROJECT_CHARTER.md ## 7. 제약 조건` 의 배포 라이선스 줄**이고 원장의 `정본:` 이 그 앵커를 가리킨다. README `## License`·`LICENSE`·`THIRD_PARTY_NOTICES` 는 그 결정의 *투영*이다 — `/seal-milestone` 조건 6 의 `정본:` 대조가 **열 자리가 있어야** 닫힌 결정이 검사된다.
+2. **본 skill 은 파일을 삭제하지 않고 삭제를 안내하지도 않는다.** `allowed-tools` 에 `Bash` 가 없어 삭제가 불가능하고, MIT 고지 보존이 기본값이므로 `LICENSE` 삭제는 **어느 선택지에서도 처방이 아니다**. 내용 교체·추가는 `Write`/`Edit` 로 한다. 사용자가 파일 배치를 바꾸려면(예: MIT 전문을 `THIRD_PARTY_NOTICES.md` 로 이전) 그 수행은 사용자 몫이다.
+3. **MIT 고지의 범위와 보존 (축 2)**: 현행 `LICENSE` 는 *"The above copyright notice **and this permission notice** shall be included in all copies or substantial portions of the Software"* 를 요구한다 — 보존 대상은 저작권 한 줄이 아니라 **허가 고지 전문**이다. fork 는 보일러플레이트의 *상당 부분*을 그대로 포함하므로 **어느 선택지에서도 MIT 전문을 지우지 않는다.** 비공개 사용에 이 조건이 어디까지 미치는지, 선택한 OSS 라이선스와 MIT 의 호환성은 **본 ADR 이 판단하지 않는다** — `/consult-expert legal` 또는 변호사 소관이다(ADR-062 D2 — 법률을 기억으로 단정하지 않는다).
+4. 수행-4 의 갱신 산출물 목록에 `LICENSE`(B·C 의 내용 교체 시)를 추가하고 `output-checklist.md` 에 라이선스 결정 검증 항목을 둔다 — 목록·체크리스트에 없으면 "그 자리에서 처리한다"가 실제로 실행되지 않는다.
 5. **D1 의 `등재 범위` 문단과 D8 의 관계를 명시한다.** [관측됨] D1 의 `**등재 범위 (원장을 얇게 유지)**` 문단은 *"계획 결함은 원장 대상이 아니다 — 원장은 결함 추적기가 아니라 기획 결정 인덱스다"* 로 단정하는데, **D8 은 차단 P1 을 닫는 세 경로 중 (c)로 "원장에 `status: closed` + `disposition: chosen` 으로 명시 수용"을 규정**한다. 차단 P1 목록(`[Plan-decision]`·`[Plan-ambiguity]`·`[Plan-design]`·`[Plan-seam]`·`[MP-*]`)이 계획 결함 카테고리이므로, 두 규정을 그대로 읽으면 실행자가 어느 쪽을 따를지 알 수 없다.
    - 정정: 그 문단 끝에 **예외 1줄**을 붙인다 — *"단 D8 의 차단 P1 을 사용자가 명시 수용해 닫는 경우는 예외다. 그때 원장에 올라가는 것은 *결함 자체*가 아니라 **결함을 감수한다는 선택**(`disposition: chosen`)이며, 이는 기획 결정에 해당한다."*
    - 이 정정은 두 규정의 **관계를 명시할 뿐 어느 쪽 규칙도 바꾸지 않는다** — 봉인 차단 범위(D8)와 원장의 얇음이 모두 유지된다.
 
 ### 적용 surface
 - .claude/skills/bootstrap-project/SKILL.md
+- .claude/skills/bootstrap-project/output-checklist.md (라이선스 결정 검증 항목 — 결정 4)
 - docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md (D1 `등재 범위` 문단 끝의 예외 1줄 — 결정 5)
 
 ### Mutation Contract (ADR-047 D3)
-1. **Target** — bootstrap-project SKILL 수행-4(산출물 목록 + README 하단 섹션 처리) · `## 결정 마감` 절(필수 등재 항목) · 본 ADR D1 `등재 범위` 문단의 D8 예외 1줄(결정 5) · 본 ADR `## 현재 유효 결정` 1줄.
-2. **Failure mode** — (a) 보일러플레이트 라이선스·기여 안내가 프로젝트 표지에 잔존 (b) 되돌리기 비싼 라이선스 결정이 닫히지 않은 채 첫 공개까지 감 (c) skill 이 `Bash` 없이 파일 삭제를 시도해 실패 (d) D1 `등재 범위` 와 D8 이 계획 결함의 원장 등재를 각각 금지·허용해 실행자가 어느 쪽을 따를지 알 수 없음.
+1. **Target** — bootstrap-project SKILL 수행-4(산출물 목록 + README 하단 섹션 처리) · `## 결정 마감` 절(필수 등재 항목 + 멱등 분기) · `output-checklist.md` 검증 항목 · 본 ADR D1 `등재 범위` 문단의 D8 예외 1줄(결정 5) · 본 ADR `## 현재 유효 결정` 의 **기존 등재 불릿 1줄 확장**(줄을 늘리지 않는다 — ADR-045 D5 의 ≤6줄 유지).
+2. **Failure mode** — (a) 보일러플레이트 라이선스·기여 안내가 프로젝트 표지에 잔존 (b) 되돌리기 비싼 라이선스 결정이 닫히지 않은 채 첫 공개까지 감 (c) skill 이 `Bash` 없이 파일 삭제를 시도해 실패 (d) D1 `등재 범위` 와 D8 이 계획 결함의 원장 등재를 각각 금지·허용해 실행자가 어느 쪽을 따를지 알 수 없음 (e) **MIT 허가 고지를 삭제하거나 저작권 한 줄로 축소해 고지 조건을 위반** (f) 닫힌 결정의 `정본:` 앵커가 없어 봉인 검사가 열 자리가 없음 (g) 재실행이 같은 결정을 중복 등재.
 3. **Predicted improvement** — 원장에 `배포 라이선스` 항목이 `closed` 로 남고, M1 봉인 시점에 이 항목의 `open` 이 0건. README 에 보일러플레이트 이슈 템플릿 링크가 잔존하지 않음.
-4. **Preserved invariants** — 원장 writer 집합 / D2 authority 정의 / D3 Decision Brief 형식(3~5개 상한·추천 예외) / bootstrap-project 의 `allowed-tools`(Bash 미추가) / README 2종 동시 갱신 규율(ADR-010#amend-3).
-5. **Falsifying evaluation** — *모양 실패*(지시는 있으나 처리 형태가 틀림)이므로 긍정 레시피로 작성했다. 검증: fork 직후 `/bootstrap-project` 를 실행해 (a) 라운드에 라이선스 Decision Brief 가 제시되는지 (b) 답변 후 README 2종의 `## License`·`## Contributing` 이 처리되는지 (c) A 선택 시 **삭제를 직접 수행하지 않고 안내로 끝나는지** (d) 원장에 `user-choice` 로 등재되는지를 확인한다. skill 이 삭제를 시도하면 결정 2를 강화한다.
+4. **Preserved invariants** — 원장 writer 집합 / D2 authority 정의 / D3 Decision Brief 형식(3~5개 상한·추천 예외) / bootstrap-project 의 `allowed-tools`(Bash 미추가) / README 2종 동시 갱신 규율(ADR-010#amend-3) / **보일러플레이트 MIT 허가 고지 전문 보존**(어느 선택지에서도 삭제 금지) / `## 현재 유효 결정` ≤6줄(ADR-045 D5) / bootstrap-project 의 재실행 안전성(`Re-run safe`).
+5. **Falsifying evaluation** — *모양 실패*(지시는 있으나 처리 형태가 틀림)이므로 긍정 레시피로 작성했다. 검증: fork 직후 `/bootstrap-project` 를 실행해 (a) 라운드에 라이선스 Decision Brief 가 제시되는지 (b) 답변 후 README 2종의 `## License`·`## Contributing` 이 처리되는지 (c) **A 선택 후에도 `LICENSE` 의 MIT 전문이 그대로 남아 있는지**(삭제·축소 0) (d) 원장에 `user-choice` + `정본: PROJECT_CHARTER.md#…` 로 등재되는지 (e) **같은 skill 을 재실행했을 때 같은 결정이 중복 등재되지 않는지**를 확인한다. 삭제를 시도하거나 중복 등재가 나오면 결정 2·멱등 분기를 강화한다.
 6. **Rollback path** — 본 amendment 제거 + bootstrap-project 의 해당 3개 삽입 블록 제거(원장 항목은 무해 잔존).
 
 ### 강도 (ADR-022)
@@ -2062,13 +2068,18 @@ git commit -m "feat: give the HEART metric loop a quantitative consumer and inst
 … 원장은 결함 추적기가 아니라 기획 결정 인덱스다. **단 D8 의 차단 P1 을 사용자가 명시 수용해 닫는 경우는 예외다** — 그때 원장에 올라가는 것은 *결함 자체*가 아니라 **결함을 감수한다는 선택**(`disposition: chosen`)이며, 이는 기획 결정에 해당한다(#amend-1 결정 5).
 ```
 
-### (b) `## 현재 유효 결정` 에 1줄 추가
+### (b) `## 현재 유효 결정` — 기존 등재 불릿 1줄을 **교체**(줄 수 유지)
 
-ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있다(9행~). ADR-045 D5 상 다개정 ADR 의 요약은 최신 상태를 반영해야 하므로, 그 목록 끝에 아래를 추가한다.
+ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있고 **불릿이 6개**다. **[ADR-045](ADR-045-doc-reference-contract.md) D5 는 이 요약을 `≤6줄`로 못 박으므로 줄을 추가하면 계약 위반이다** — 두 사실을 *등재 규칙*을 다루는 1번 불릿에 접어 넣는다(둘 다 "원장에 무엇이 올라가나"의 규칙이라 그 불릿이 자연스러운 집이다).
 
+**현재** (10행 — 목록의 첫 불릿):
 ```
-- 배포 라이선스는 **`user-choice` 필수 등재 항목**이며 `/bootstrap-project` 가 D3 Decision Brief 로 제시한다. 파일 삭제는 skill 이 수행하지 않고 사용자에게 안내한다(#amend-1).
-- D1 의 등재 범위(계획 결함 제외)에는 **D8 차단 P1 의 명시 수용**이라는 예외가 있다(#amend-1 결정 5).
+- 사용자가 정하거나 승인해야 할 기획 결정은 `docs/10-charter/DECISION_REGISTER.md`에 등재하고, 결정 *본문*은 각 정본 문서가 SSOT다. 문서의 "열린 질문" 섹션 5곳은 폐지한다.
+```
+
+**수정 후** (같은 1줄):
+```
+- 사용자가 정하거나 승인해야 할 기획 결정은 `docs/10-charter/DECISION_REGISTER.md`에 등재하고, 결정 *본문*은 각 정본 문서가 SSOT다. 문서의 "열린 질문" 섹션 5곳은 폐지한다. **배포 라이선스는 `user-choice` 필수 등재 항목**이고(#amend-1), 등재 범위의 *계획 결함 제외*에는 **D8 차단 P1 의 명시 수용**(`disposition: chosen`)이 예외다(#amend-1 결정 5).
 ```
 
 ## 6-0-b. ADR 인덱스 060 행의 Amendments 칸 갱신
@@ -2097,7 +2108,7 @@ ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있다(9행~). ADR
 **그 줄 바로 뒤에 2줄 추가** — **들여쓰기가 서로 다르다.** 첫 줄은 README 항목의 *하위 설명*(5칸), 둘째 줄은 수행-4 산출물 목록의 *새 형제 항목*(3칸)이다.
 ```
      - README 하단의 `## License` / `## Contributing` 섹션은 **이 프로젝트의 배포 방식에 맞춰 다시 쓰거나 제거한다** — 아래 `## 결정 마감`의 배포 라이선스 항목 결과를 반영한다. `## Contributing`이 보일러플레이트의 이슈·PR 템플릿을 가리키고 있으면 그 프로젝트의 기여 경로로 교체하거나 섹션을 제거한다.
-   - `LICENSE` (해당 시 — `## 결정 마감`의 배포 라이선스 결정이 B·C면 내용을 교체한다. **A(제거)는 본 skill이 수행하지 않고 사용자에게 안내한다** — `allowed-tools`에 `Bash`가 없어 파일 삭제가 불가능하다. ADR-060#amend-1 결정 2)
+   - `LICENSE` (B·C 에서 **프로젝트 라이선스 부분만** 교체·추가한다. **보일러플레이트 MIT 허가 고지 전문은 어느 선택지에서도 지우지 않으며 삭제를 안내하지도 않는다** — 보존 대상은 저작권 한 줄이 아니라 *허가 고지 전문*이고 fork 는 보일러플레이트의 상당 부분을 포함한다. ADR-060#amend-1 결정 2·3)
 ```
 
 ## 6-2. `bootstrap-project` — 라이선스 결정 등재 예시 추가
@@ -2111,12 +2122,36 @@ ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있다(9행~). ADR
 
 **그 줄 바로 뒤에 1-a 항목 추가**:
 ```
-1-a. **반드시 등재하는 항목 — 배포 라이선스 (ADR-060#amend-1)**: 저장소에는 보일러플레이트의 `LICENSE`(MIT)가 그대로 들어 있다. *"외부 계약 + 비가역 약속"* 이므로 위 1의 정의상 **`authority: user-choice`** 다. 아래 Decision Brief 로 제시하고, 답이 나오면 README 2종의 `## License`·`## Contributing` 섹션을 처리한다(수행-4).
-   - **A) 비공개 프로젝트** → README `## License` 섹션 제거 + **`LICENSE` 파일 제거는 사용자에게 안내**한다(`git rm LICENSE`). *본 skill은 `Bash`가 없어 파일을 삭제하지 않는다.* / *비공개는 배포가 아니라 원저작권 고지 의무가 발생하지 않는다. 나중에 공개하려면 고지를 되살려야 한다.*
-   - **B) 공개하지만 오픈소스는 아님** → `LICENSE` 내용을 권리 보유 고지로 **교체**(`Write`/`Edit`). *라이선스 없는 공개 코드는 기본적으로 제3자가 사용할 수 없다. 보일러플레이트 부분에 대한 원저작권 고지는 별도로 유지한다.*
-   - **C) 오픈소스로 공개** → 원저작권자 줄을 유지하고 그 아래에 프로젝트 저작권을 추가(`Edit`). *MIT는 파생물 배포 시 원저작권 고지 유지를 요구한다.*
-   - 되돌리기 비용: **높음** — 한 번 공개한 커밋의 라이선스는 소급 철회되지 않는다.
-   - 기본 추천: **A** (비공개가 기본이고, 나중에 C로 올리는 것이 그 역순보다 쉽다).
+1-a. **반드시 등재하는 항목 — 배포 라이선스 (ADR-060#amend-1)**: 저장소에는 보일러플레이트의 `LICENSE`(MIT)가 들어 있다. *"외부 계약 + 비가역 약속"* 이므로 위 1의 정의상 **`authority: user-choice`** 다. **두 축을 분리해** 아래 Decision Brief 로 제시하고, 답이 나오면 README 2종의 `## License`·`## Contributing` 섹션을 처리한다(수행-4).
+   - **재실행 먼저 (멱등)**: 원장에서 이 항목을 찾고 실제 `LICENSE`·README 상태를 읽는다 — **(i) 없으면** 신규 등재, **(ii) `open` 이면** 중복 등재 없이 재제시, **(iii) `closed` 면** `정본:` 앵커와 파일 상태가 그 결정과 일치하는지만 확인하고 불일치만 보고한다. *"보일러플레이트 MIT가 그대로 있다"* 를 매 실행 전제하지 않는다(본 skill 의 `Re-run safe` 계약 정합).
+   - **축 1 — 이 프로젝트의 배포 조건 (사용자 선택)**
+     - **A) 비공개 프로젝트** → 배포 라이선스를 두지 않는다. README `## License` 를 *"비공개 — 배포 라이선스 미설정. 포함된 보일러플레이트는 MIT(`LICENSE`)"* 로 다시 쓴다.
+     - **B) 공개하지만 오픈소스는 아님** → 권리 보유 고지를 README `## License`(또는 별 파일)에 쓴다. *라이선스 없는 공개 코드는 기본적으로 제3자가 사용할 수 없다.*
+     - **C) 오픈소스로 공개** → **어느 라이선스인지가 별 결정이다**(MIT 고정 아님). 선택한 라이선스 전문을 프로젝트 라이선스로 두고, 선택·호환성 확인은 `/consult-expert legal` 을 안내한다.
+   - **축 2 — 보일러플레이트 MIT 고지 (선택 사항이 아니다)**: `LICENSE` 의 MIT 는 *저작권 고지와 **허가 고지 전문**을 사본 또는 상당 부분에 포함*하도록 요구한다. **어느 선택지에서도 그 전문을 지우지 않고 삭제를 안내하지도 않는다.** 비공개 사용에 조건이 어디까지 미치는지·선택 라이선스와 MIT 의 호환성은 **판단하지 않고** `/consult-expert legal` 또는 변호사로 넘긴다(ADR-062 D2 — 법률을 기억으로 단정하지 않는다).
+   - 되돌리기 비용은 **높다**(공개한 커밋의 라이선스는 소급 철회되지 않는다). 기본 추천은 **A** — 비공개가 기본이고 나중에 C로 올리는 것이 그 역순보다 쉽다.
+   - **정본**: 닫힌 뒤 결정 본문은 `docs/10-charter/PROJECT_CHARTER.md` `## 7. 제약 조건` 의 배포 라이선스 줄에 적고 원장 항목의 `정본:` 이 그 앵커를 가리킨다 — README·`LICENSE` 는 그 결정의 *투영*이다(`/seal-milestone` 조건 6 이 `정본:` 을 열어 대조하므로 열 자리가 있어야 한다).
+```
+
+## 6-2-a. `bootstrap-project/output-checklist.md` — 라이선스 결정 검증 항목
+
+> **왜 필요한가**: 이 파일은 skill 의 `반드시 먼저 읽을 파일`이고 *실행 후 만족해야 할 것*을 열거한다. 새로 **필수**가 된 흐름(라이선스 결정 등재 + README 하단 처리 + MIT 고지 보존)이 여기에 없으면 검증 없이 지나간다 — ADR-060#amend-1 결정 4.
+
+**파일**: `.claude/skills/bootstrap-project/output-checklist.md`
+
+**현재** (`## workitem 생성 경계` 절 앞):
+```
+## 선택 갱신 문서
+- `docs/20-system/DESIGN.md` (UI 스택 포함 시 — `/bootstrap-design`이 채운다)
+- `docs/90-decisions/project/ADR-100-initial-project-decisions.md` (project ADR은 100+ 번호 — boilerplate/ADR-002는 legacy reserved)
+```
+
+**그 블록 바로 뒤에 새 절 추가**:
+```
+## 라이선스 결정 (필수 — ADR-060#amend-1)
+- 원장에 `배포 라이선스` 항목이 `authority: user-choice` 로 있다. `closed` 면 `정본:` 이 `PROJECT_CHARTER.md ## 7. 제약 조건`의 배포 라이선스 줄을 가리킨다.
+- README 2종의 `## License`·`## Contributing` 이 그 결정에 맞게 처리됐다 — 보일러플레이트 이슈·PR 템플릿 링크 잔존 0.
+- **`LICENSE` 의 MIT 허가 고지 전문이 그대로 있다** — 어느 선택지에서도 삭제·축소하지 않는다(보존 대상은 저작권 한 줄이 아니라 허가 고지 전문).
 ```
 
 ## 6-3. `PROJECT_START_CHECKLIST` — 도메인 자문 선행 안내
@@ -2178,7 +2213,7 @@ ADR-060 은 이미 `## 현재 유효 결정` 섹션을 갖고 있다(9행~). ADR
 git add docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md docs/90-decisions/boilerplate/README.md
 git commit -m "feat: add ADR-060 amendment making distribution license a mandatory register entry"
 
-git add .claude/skills/bootstrap-project/SKILL.md docs/00-meta/PROJECT_START_CHECKLIST.md
+git add .claude/skills/bootstrap-project/SKILL.md .claude/skills/bootstrap-project/output-checklist.md docs/00-meta/PROJECT_START_CHECKLIST.md
 git commit -m "feat: close the distribution license decision at bootstrap and add advisory entry points"
 
 git add .claude/skills/plan-workitem/SKILL.md .claude/skills/bootstrap-design/SKILL.md
@@ -2301,6 +2336,9 @@ grep -c '배포 라이선스는' docs/90-decisions/boilerplate/ADR-060-decision-
 
 # (d) bootstrap-project 3곳 + FEATURE_TEMPLATE 계측 필드
 grep -c 'ADR-060#amend-1' .claude/skills/bootstrap-project/SKILL.md        # 기대: 2 (수행-4 LICENSE 줄 + 1-a 항목)
+grep -c '지우지 않' .claude/skills/bootstrap-project/SKILL.md              # 기대: 2 (수행-4 + 1-a 축 2 — MIT 전문 보존)
+grep -c 'MIT 허가 고지' .claude/skills/bootstrap-project/output-checklist.md  # 기대: 1 (검증 항목)
+sed -n '/^## 현재 유효 결정$/,/^## 배경/p' docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md | grep -c '^- '  # 기대: 6 (ADR-045 D5 ≤6줄)
 grep -c '계측 (ADR-042#amend-2)' docs/30-workitems/_templates/FEATURE_TEMPLATE.md  # 기대: 1
 grep -c '## 8-1' .claude/skills/plan-milestone/SKILL.md                    # 기대: 2 이상 (R4 작성 지시 + Needs Instrumentation)
 # (e) 계측 스펙이 task 로 내려가고, quant 해석이 analyst 를 경유하는가 (5-4-a·5-4-b)
@@ -2456,7 +2494,12 @@ grep -c 'format + lint + typecheck + test' .claude/skills/stack-guard/SKILL.md #
 - [ ] ADR-060 **D1 의 `등재 범위` 문단(32행) 끝**에 D8 예외 1줄이 추가됐다 (계획 결함 금지 ↔ D8 (c) 원장 수용의 모순 해소). **`## 등재 범위` 헤딩을 새로 만들지 않았다** — 그런 헤딩은 존재하지 않는다
 - [ ] ADR-060 `## 현재 유효 결정` 에 amend-1 내용 2줄이 반영됐다 (ADR-045 D5 — 요약은 최신 상태여야 한다)
 - [ ] `bootstrap-project` 수행-4 산출물 목록에 **`LICENSE`(해당 시)** 가 추가됐다
-- [ ] 선택지 A 가 **삭제를 수행하지 않고 사용자에게 안내**한다 (`allowed-tools` 에 `Bash` 없음)
+- [ ] 선택지 A 가 **삭제를 수행하지도, 안내하지도 않는다** — `LICENSE` 의 **MIT 허가 고지 전문이 어느 선택지에서도 보존**된다(보존 대상은 저작권 한 줄이 아니다). 프로젝트 배포 조건(축 1)과 MIT 고지(축 2)가 **분리**돼 있고, C 가 "오픈소스=MIT" 로 고정되지 않았다
+- [ ] 라이선스 결정의 **정본이 `PROJECT_CHARTER.md ## 7. 제약 조건`** 으로 지정돼 원장 `정본:` 이 열 자리가 있다 (`/seal-milestone` 조건 6 의 정본 대조)
+- [ ] 1-a 에 **멱등 분기**(원장·파일 상태를 먼저 읽어 신규/재개/검증)가 있어 재실행이 중복 등재하지 않는다
+- [ ] `output-checklist.md` 에 라이선스 결정 검증 3항목이 있다 (원장·README·MIT 전문 보존)
+- [ ] ADR-060 `## 현재 유효 결정` 이 **6줄 이하**다 (ADR-045 D5 — 새 사실은 기존 등재 불릿에 접어 넣었다)
+- [ ] 법적 결론(비공개 시 고지 의무 범위·라이선스 호환성)을 ADR·skill 이 **단정하지 않고** `/consult-expert legal`·변호사로 넘긴다 (ADR-062 D2)
 - [ ] `PROJECT_START_CHECKLIST` 3단계에 법률 선행 안내와 스캐폴드 선택 안내가 있다
 - [ ] `WORKFLOW.md` 는 **수정하지 않았다** (10행의 표기는 이미 인라인 코드이므로 깨진 링크가 아니다 — 6-4 기각 기록)
 - [ ] `plan-workitem` 34행에 **`## 7-5`** 가 추가됐다 (validate-plan 10번 축과 대칭)
