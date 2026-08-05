@@ -41,10 +41,16 @@
 | 마일스톤 stabilize 결과의 cross-LLM peer review (opt-in) | reviewer/qa (stabilize surface — qa 엣지케이스·회귀 + reviewer 부채) | 다른 세션·다른 LLM에서 `/validate-milestone`. 임시 리뷰 파일 1개, 코드·문서·실행 X (ADR-054). |
 | stabilize cross-review 결과 회수 + 종합 | 메인 세션 (repair-milestone) | 원본 세션에서 `/repair-milestone`. stabilize-reviews 회수 → 4-판정·dedup → 적용 → 삭제 (ADR-054). |
 | 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임. **Standing auto-trigger (ADR-040#amend-2)**: 메인 세션 오케스트레이터 중 `Agent` 도구 보유 skill(implement foreman / plan-milestone)는 sub-agent가 `Needs Research`를 emit하면 researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — disable-model-invocation). Codex: `Agent` 도구는 Claude 전용이고 본 저장소가 researcher 위임을 Codex subagent로 아직 매핑하지 않아 → foreman(메인 세션)이 `researcher.md` 인라인 조사 또는 사전 `$research-pack` 노트 참조로 재개(degrade). **디자인 레퍼런스 모드 (ADR-040#amend-4)**: /bootstrap-design R0가 레퍼런스별 코드 수준 토큰 추출(소스 위계 ①사용자 URL ②오픈소스 토큰 패키지 ③정성 소스)을 본 모드로 위임한다. |
+| 법률·규제 판단 (관할별 규제, 처리방침·약관 요건, 라이선스 호환성) | counsel | `/consult-expert legal <관할> <질문>`. **관할 필수** — 없으면 되묻고 종료. 1차 출처 조회 기반(기억 인용 금지), 신뢰 등급 분류(`확인됨-조문`/`확인됨-가이드`/`해석필요`/`전문가검토권장`/`전문가검토필수`), 변호사 필요 구간 명시. report-only (ADR-062) |
+| 사업 전략 판단 (수익 구조·가격·유닛 이코노믹스·시장 규모·경쟁 포지셔닝) | strategist | `/consult-expert strategy <질문>`. 수치는 인수 분해 + 출처 등급 필수, 자기반박 1개 필수. 가격 *표현*은 marketer 소유. report-only (ADR-062) |
+| 제품 표면 마케팅 (포지셔닝·랜딩/가격 카피·SEO 구조·제품 발송 이메일) | marketer | `/consult-expert marketing <표면> <질문>`. **광고·채널 운영·PR·콘텐츠 발행은 범위 밖.** DESIGN.md `## 10` voice 준수(정의는 designer 소유). report-only (ADR-062) |
+| 데이터 계측 설계 + 수집 데이터 해석 | analyst | `/consult-expert data <측정 대상>`. `/plan-milestone` **R4** 가 `## 8-1` 계측 필드를 채울 근거가 없으면 `Needs Instrumentation` 으로 **자동 위임**. n·편향·confidence 기준 필수. 도구 설치 X (ADR-062 D10 / ADR-042#amend-2) |
+| 설계층 보안 (위협 모델·보호 등급·인증/인가 경계) | security | `/consult-expert security <대상 자산>`. **코드 취약점 스캔·secret 검출은 범위 밖** — 전자는 **보일러플레이트 미소유**(도구 빌트인·프로젝트 SAST), 후자는 `/stack-guard` 의 scanner 권장(ADR-021#amend-1)·추적 시크릿 점검(ADR-059 D9). 위협 표 전 칸(**잔여 위험 + 근거 URL·확인일 포함**) 필수. 구조 결정은 architect 소유. report-only (ADR-062) |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
 
 > **실행 컨텍스트 노트 (ADR-050)**: 본 표의 agent 매핑은 *책임 경계 정의*다(ADR-007#amend-2). 일부 lifecycle skill(validate-workitem/repair-workitem 등)은 이제 메인 세션에서 실행되지만(ADR-050) **같은 책임 경계**를 따른다 — 메인 세션이 그 경계대로 직접 수행하거나, 같은 역할의 agent를 `Agent`로 직접 fork 위임할 수 있다. `.claude/agents/*.md` persona 파일은 그대로 존재한다.
 > **검증 위임 규율 (ADR-050#amend-1)**: 검증/감사(validator·reviewer·qa)를 위임할 때, 일 시키는 쪽은 검증자에게 *무엇을 지적하지 말라*고 미리 말하거나 *심각도를 미리 정해* 주지 않는다(자기검증 편향 차단). 계획·구현과 충돌하는 발견은 숨기지 말고 사람에게 올린다. 단 *지켜야 할 기준·계약*(AC·승인 프로토타입·DESIGN 토큰·seam INV 등)을 그대로 전달하는 것은 필수 맥락이지 사전판정이 아니다 — 이 선을 지킨다.
+> **도메인 자문 규율 (ADR-062)**: 위 도메인 agent 5종은 *계획 이전* 단계의 자문이다 — 구현 결과를 감사하지 않는다(감사는 validator/reviewer/qa 소유). **종속 도메인은 순차**로 부르고(입력을 만드는 쪽 먼저) **서로 독립인 도메인은 병렬 가능**하다 — agent 간 직접 통신이 금지돼 조율 오버헤드가 생길 자리가 없다. 단 한 라운드에 사용자에게 제시하는 결정은 **3~5개 상한**(ADR-060 D3)을 지킨다. 도메인 A 의 결론은 정본 문서·원장에 기록된 뒤에야 B 가 읽는다(agent 간 직접 통신 금지). 남의 소유 사실을 고쳐야 하면 `재자문 필요: <도메인>` 을 반환하고 사용자가 결정한다.
 
 ## 메인 세션에서 유지할 정보
 - 현재 milestone / feature / task
