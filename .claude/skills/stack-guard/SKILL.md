@@ -39,28 +39,81 @@ R0 — 운영 환경 가정 확인:
 
 수행:
 1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.
-2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `lint + typecheck + test` 통합.
+2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
+2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
+   - `.claude/`, `.codex/`, `.agents/`, `.boilerplate/`
+   - `STACK_SETUP_PLAN.md ## Design Gate Adapter` 에 기록된 **materialized adapter 경로**(기본 `scripts/design-gate.mjs`). 이 사본은 프로젝트 소스 트리 안에 있어 harness 디렉터리 제외만으로는 보호되지 않는다. **포맷되면 SHA-256 digest 가 바뀌어 conformance oracle 이 게이트를 차단하고 `status: wiring-fail` 로 굳는다.**
+   - **formatter 의 Markdown 대상에서 `docs/`** — 이 저장소의 기계 점검 다수가 문서 문자열에 의존한다(로스터의 종 수 표기·ADR 인덱스 행·Amendments 칸·`## Amendment N` 카운트). formatter 가 표를 재정렬하면 그 점검들이 조용히 깨진다. lint·typecheck 와는 무관한 항목이다.
+   - **⚠️ secret scanner 는 배제 대상이 아니다 — 반대로 harness 경로를 포함해야 한다.** `.claude/settings.json`·`.codex/config.toml`·agent 설정에 토큰·키가 유입될 수 있고 그것이 정확히 scanner 가 잡아야 하는 대상이다. 포맷·타입 검사의 배제와 보안 스캔의 범위를 분리한다.
+   - **정확한 exclude 설정 키는 도구·버전마다 다르므로 실행 시점에 그 도구 문서로 확인한다** — 본 SKILL 에 특정 키를 박지 않는다(도구 버전업 시 틀린 지시가 된다).
+   - 기존 config 가 있으면 배제 항목만 **추가**하고 기존 규칙을 덮어쓰지 않는다.
 3. `docs/00-meta/STACK_SETUP_PLAN.md`을 다음 규칙으로 처리한다:
    - **소유 책임 분리**: STACK_SETUP_PLAN.md는 `/bootstrap-stack`이 *최초 골격*(스택 선택 사실 + 추후 추가 필요한 자동화 목록)을 만들고, 본 `/stack-guard`는 거기에 *통합 명령 사용법 + hook 등록 안내 섹션*을 **append/갱신**한다. `/bootstrap-stack`이 만든 기존 섹션을 통째로 덮어쓰지 않는다.
    - 본 skill이 채울 섹션:
      - 통합 명령 사용법
-     - `## Dart Source Roots` — Dart/Flutter 스택이면 **실제 소스 트리를 조회해 채운다**(`pubspec.yaml` 하나당 한 묶음, 경로는 그 pubspec 디렉터리 기준 상대경로). **예시 행을 그대로 두면 안 된다** — `dart format` 이 예시 경로를 대상으로 돌아 형식 검사가 조용히 통과한다. 조회는 pubspec 디렉터리에서 `find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' | cut -d/ -f2 | sort -u` 로 한다. 비-Dart 프로젝트는 `/bootstrap-stack` 이 이 절을 이미 삭제했으므로 대상이 아니다(ADR-059 D2).
+     - `## Dart Source Roots` — Dart/Flutter 스택이면 **실제 소스 트리를 조회해 채운다**(`pubspec.yaml` 하나당 한 묶음, 경로는 그 pubspec 디렉터리 기준 상대경로). **예시 행을 그대로 두면 안 된다** — `dart format` 이 예시 경로를 대상으로 돌아 형식 검사가 조용히 통과한다. 조회는 pubspec 디렉터리에서 아래 중 host OS 에 맞는 것으로 한다(§1.0-1 의 OS 별 분기 규율과 동형). 둘 다 의도가 같다 — *"`.dart` 파일을 품은 최상위 디렉터리 목록"*.
+        - Unix/macOS: `find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' | cut -d/ -f2 | sort -u`
+        - Windows PowerShell: `Get-ChildItem -Directory | Where-Object { $_.Name -notin '.dart_tool','build' } | Where-Object { Get-ChildItem $_ -Recurse -Filter *.dart -File | Select-Object -First 1 } | Select-Object -ExpandProperty Name`
+
+     비-Dart 프로젝트는 `/bootstrap-stack` 이 이 절을 이미 삭제했으므로 대상이 아니다(ADR-059 D2).
      - `## E2E Smoke Registry` — e2e 대상 프로젝트면 **선언한 runtime target마다 한 행**으로 `status | 파일 경로 | 테스트 이름 | 실행 대상 선택 규칙 | 마지막 PASS(host·날짜·커밋) | 등록일`을 기록. 실행 대상 칸에는 재부팅하면 달라지는 임시 id 대신 선택 규칙을 적는다(이 칸은 기록용이며 실행 명령에 그대로 들어가지 않는다). 대상 아니면 `status: n/a`만 기록(ADR-052#amend-1).
      - `## Design Gate Adapter` — UI면 실제 command template·adapter/output 경로·current capability version·source digest·fixed conformance 결과를 기록하고, 비-UI면 `status: n/a`만 기록(ADR-058#amend-2).
      - `## Dependency Tools` — **보완만**(ADR-051#amend-4 수행-6-2-0): 표·행이 없으면 관측 신호로 채우고, `/bootstrap-stack`이 기록한 행은 덮어쓰지 않는다(불일치는 출력 보고 + 사용자 결정).
      - PostToolUse hook 자동 등록은 prototyping 후 별도 항목 — 현재 단계에서는 매뉴얼 등록 안내
      - hook 등록 절차는 [GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md) link만 박는다 (SSOT — 본 skill이 절차 본문 embed 금지).
    - 파일이 아예 없으면(`/bootstrap-stack` 산출물이 빠진 경우) `/stack-guard`가 새로 생성하되, 출력에 "`/bootstrap-stack`이 STACK_SETUP_PLAN.md를 만들지 않았음 — 사후 검토 권장"을 명시.
-4. `.gitattributes`가 없으면 생성, 있으면 line ending 규칙 추가.
-5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 1회 실행한다 (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요). e2e 대상 프로젝트(수행-6 의 runtime target 이 e2e 대상)면 `validate:e2e` 도 실행한다 — **선언된 e2e 대상 target 이 하나면 1회**(러너가 후보를 좁혀 자동 선택), **둘 이상이면 target 마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩** 실행한다. `<device id>` 는 6-3 이 `flutter devices --machine` 으로 회수한 target 별 후보에서 고른다(ADR-059 D4).
+4. `.gitattributes` 처리 — **전역 규칙 우선**: 파일이 없으면 `* text=auto eol=lf` + Windows 전용 스크립트(`*.ps1`/`*.bat`) `eol=crlf` 예외로 생성한다. 파일이 있으면 **전역 규칙(`* text=auto eol=lf`)이 존재하는지 먼저 확인**하고 없으면 추가한다. 확장자 열거 방식만 있는 경우 새 확장자를 조용히 놓치므로 전역 규칙으로 보강한다(열거 줄은 제거하지 않는다 — 의도 문서화로 유지 가능). 기존 fork 에 전역 규칙을 새로 넣으면 `git add --renormalize .` 1회 커밋이 필요하다는 안내를 출력에 포함한다.
+5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 **아래 5-c 실행 표대로 돌린다**(probe 배치를 바꿔가며 **최대 5회** — 부재 단계가 있으면 그만큼 줄어든다. ADR-063 D1) (`allowed-tools` 의 Bash 권한 활용 — 신규 권한 추가 불필요). e2e 대상 프로젝트(수행-6 의 runtime target 이 e2e 대상)면 `validate:e2e` 도 실행한다 — **선언된 e2e 대상 target 이 하나면 1회**(러너가 후보를 좁혀 자동 선택), **둘 이상이면 target 마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩** 실행한다. `<device id>` 는 6-3 이 `flutter devices --machine` 으로 회수한 target 별 후보에서 고른다(ADR-059 D4).
    본 smoke test 는 *wiring 검증* 이 목적 (명령이 올바르게 연결됐는지) — *프로젝트 자체의 lint/test 통과 여부* 와 분리해 보고한다.
    설치가 `Needs Install` 로 보류된 경우(수행-6) smoke test 를 실행하지 못하므로 `validate smoke test: SKIPPED (deps not installed — Needs Install)` 로 보고하고 종료하지 않는다(사용자 설치 후 재실행 안내).
 
-   `validate` 판정 표:
-   - **wiring 성공 + 프로젝트 PASS** → `validate smoke test: PASS (wiring OK, project clean)`.
-   - **wiring 성공 + 프로젝트 빈 케이스** (비어있는 lint 룰 / 테스트 0건) → `validate smoke test: PASS (wiring OK, empty rules/tests warning)`.
-   - **wiring 성공 + 프로젝트 lint/test 실 위반** → `validate smoke test: WIRING OK, PROJECT FAIL` + stderr 요약. stack-guard 자체는 성공이라 종료 X, 사용자에게 *프로젝트 수정* 안내.
-   - **wiring 실패** (명령 없음 / 패키지 매니저 비호환 / 스크립트 자체 오류) → `validate smoke test: WIRING FAIL` + 생성된 명령 + 실패 stderr + 제안 대체 (예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 종료.
+   **5-a. probe 배치 (ADR-063 D1)** — 프로젝트 도구의 **검사 범위 안**에 만든다.
+
+   > ⚠️ **닷 디렉터리(`.stack-guard-probe/` 등)나 `.gitignore` 등재 경로에 만들면 안 된다.** (i) 다수 formatter/linter 가 `.gitignore` 를 기본 존중해 대상에서 제외하고, (ii) TypeScript `include` 의 `**/*` 는 `.` 로 시작하는 세그먼트를 매칭하지 않으며, (iii) 테스트 러너의 glob 은 dot 파일을 기본 제외한다. 그러면 위반 probe 가 실패하지 않아 **판정력이 정상인 검사도 FAIL 로 오분류**된다.
+
+   - **위치**: 등록된 소스 루트 / 테스트 루트 **안**. 파일명은 그 스택의 include·test glob 에 걸리는 형태 + 명백한 표식. 예: `src/__stackguard_probe__.ts` · `src/__stackguard_probe__.test.ts` · `lib/__stackguard_probe__.dart` · `test/__stackguard_probe___test.dart` · `tests/test___stackguard_probe__.py`
+   - **`.gitignore` 에 등재하지 않는다.** 잔여물은 5-d 삭제로만 통제하고, 남았을 때 `git status` 에 보이는 것이 정상이다(조용히 무시되는 것보다 안전하다).
+   - 같은 이름의 파일이 이미 있으면 **덮어쓰지 않고** 그 항목만 건너뛰고 사유를 보고한다.
+
+   **5-b. 판정 단위 — 파일 귀속 진단** (전체 exit code 가 아니다): probe 판정은 **`validate` 출력에 그 probe 파일 경로가 진단으로 등장하는가**로 한다. brownfield fork 는 기존 위반으로 전체 exit code 가 이미 1일 수 있어, 전체 코드로 판정하면 *배선 실패*와 *프로젝트 실패*를 구분할 수 없다.
+
+   **5-c. 실행 순서 — 위반 probe 는 한 번에 하나만 둔다**: `validate` 는 4단계를 **순차 fail-fast** 로 묶으므로(본 SKILL 의 `## 스택별 verify 풀세트` 정합), 위반을 여러 개 동시에 두면 첫 단계에서 멈춰 뒤 단계의 판정력을 측정할 수 없다.
+
+   **5-c-0. 회차별 판정의 두 전제 (ADR-063 D1 — 아래 표보다 먼저 적용한다)**
+
+   - **(i) 단계 실재** — 대상 단계를 수행하는 명령이 `validate` 파이프라인에 있는가. **없으면 `missing: <단계>` 로 보고하고 그 회차만 건너뛰고 다음 회차를 계속한다.** 이것은 *probe 가 범위 밖*이 아니라 **커버리지 누락**이며, 둘을 합쳐 `SKIPPED` 로 적으면 **본 검증이 잡으려는 배선 누락이 비차단 SKIPPED 로 숨는다.** **겸업 도구가 그 단계를 겸하면 부재가 아니다** — 아래 겸업 규칙을 먼저 적용하고 `missing` 으로 보고하지 않는다.
+   - **(ii) 실행 도달** — 이번 실행에서 그 단계까지 실제로 도달했는가. **앞 단계가 *프로젝트 소유* 위반으로 fail-fast 를 유발해 도달하지 못했으면**(brownfield 의 기존 format 위반 등) 그 단계 명령을 **단독 실행**해 5-b 기준으로 판정하고, 단독 실행이 불가하면 `SKIPPED(미도달: <사유>)` 로 보고한다.
+   - **(i)·(ii) 어느 경우도 `PROBE FAIL` 이 아니다.** 아래 표의 `불일치 시` 열은 **그 단계가 실재하고 도달한 회차**에만 적용한다 — 배선 결함이 아닌 것을 결함으로 적으면 오분류를 방향만 바꿔 재생산한다.
+   - **1회차의 (a) 범위 확인은 파이프라인에 실재하는 *첫* 단계의 회차에서 수행한다** — format 단계가 없으면 그 역할을 lint 회차가 이어받는다.
+
+   | 실행 | probe 배치 | 판정 | 불일치 시 |
+   |---|---|---|---|
+   | **1회** | 명백한 **형식 위반** probe 1개만 | **(a) 범위 확인** — 그 파일 경로가 진단에 등장하는가 / **(b) format 판정력** — 그 진단이 format 단계에서 나왔는가 | **(a) 실패** → `SKIPPED — probe 가 검사 범위 밖: <추정 원인>`. **FAIL 아님, 종료 X.** 2~5회를 돌리지 않고 **5-d 정리 → 5-e 판정 → 5-f 기록** 순으로 마친다(정리를 건너뛰면 probe 가 저장소에 남고, 기록을 건너뛰면 이 SKIPPED 가 잊힌다) / **(b) 실패** → `PROBE FAIL(format)` |
+   | **2회** | 위반 probe 를 **lint 위반 1개로 교체** | lint 단계 진단에 그 경로 | `PROBE FAIL(lint)` |
+   | **3회** | **타입 오류 1개로 교체** | typecheck 단계 진단에 그 경로 | `PROBE FAIL(typecheck)` |
+   | **4회** | **실패 테스트 1개로 교체** | test 단계 진단에 그 경로 | `PROBE FAIL(test)` |
+   | **5회** | 위반 probe 전부 제거 + 규칙 준수 소스 1개 + 통과 테스트 1개 | probe 파일에 귀속된 진단 **0건** (전체 exit 0 을 요구하지 않는다) | `PROBE FAIL(pass)` — 준수 파일이 지적됨 = 규칙 설정 문제 |
+
+   **`validate` 실행은 최대 5회다** — 1회차의 (a)(b)는 *같은 실행의 두 판정*이다(같은 probe·같은 명령이므로 따로 돌리지 않는다). **단계 부재로만** 회차가 줄어든다(겸업은 줄이지 않는다 — 아래 규칙). 5-c-0 (ii) 의 단독 실행은 그 회차의 **재측정**이므로 새 회차로 세지 않는다.
+
+   **한 도구가 두 단계를 겸해도 회차는 줄이지 않는다** — Biome = format + lint, `flutter analyze` = lint + typecheck 면 **같은 명령을 두 회차에서 각각 다른 위반 probe 로 호출**한다. 겸업 도구도 linter 나 개별 규칙을 따로 끌 수 있으므로 **format 진단은 lint 규칙의 판정력을 증명하지 않는다** — 한 단계의 통과를 다른 단계 판정으로 대체하면 D1 이 막으려는 얕은 검증이 *겸업*이라는 이름으로 되돌아온다.
+   - 겸업 시 **단계 귀속은 명령이 아니라 진단의 규칙·카테고리로 판정한다** — Biome 은 formatter 진단과 lint 규칙 id 로, `flutter analyze` 는 타입 오류와 lint 규칙 이름으로 구분한다.
+   - 겸업 단계는 `missing: <단계>` 로 보고하지 않는다(단계는 실재한다 — 5-c-0 (i)). 겸업 여부를 산문으로 예외 처리할 필요도 없다.
+   - 한 명령이 두 단계를 함께 보고하므로 **그 두 회차 사이에는 fail-fast 가 없다**(5-c-0 (ii) 의 미도달이 겸업 단계끼리는 발생하지 않는다). 그래도 위반 probe 는 회차당 하나만 둔다 — 진단 귀속을 단순하게 유지한다.
+
+   **5-d. probe 정리 (필수)**: 생성한 probe 파일을 **전부 삭제**하고 결과를 보고한다 — `probe cleanup: DONE (<n>개)` 또는 `probe cleanup: FAILED — 수동 삭제 필요: <경로 목록>`. 실패 경로·조기 종료 경로에서도 정리한다. **조용히 남기지 않는다.**
+
+   **5-e. 판정 표**:
+   - **전 회차 기대대로 + 프로젝트 진단 0건** → `validate smoke test: PASS (probe verified, project clean)`.
+   - **전 회차 기대대로 + 프로젝트 빈 케이스**(빈 lint 룰 / **프로젝트 테스트 0건**) → `validate smoke test: PASS (probe verified, empty rules/tests warning)`. **프로비저닝 단계에서는 정상이며 차단하지 않는다.**
+   - **전 회차 기대대로 + 프로젝트 실 위반** → `validate smoke test: PROBE OK, PROJECT FAIL` + stderr 요약. stack-guard 자체는 성공이라 종료 X, 사용자에게 *프로젝트 수정* 안내.
+   - **일부 단계 미도달**(5-c-0 (ii) — 앞 단계의 기존 프로젝트 위반으로 멈추고 단독 실행도 불가) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / not reached: <단계 목록>)` + 프로젝트 수정 안내. **종료 X — 배선 결함이 아니다.**
+   - **일부 단계 부재**(5-c-0 (i)) → `missing: <단계>` 를 함께 출력하고 남은 회차의 판정으로 위 행 중 하나를 낸다. 단계 부재만으로 종료하지 않는다 — **이번 실행에서 방금 생성한** 파이프라인이면 4단계를 채워 다시 구성하고, **이미 존재해 보존한** `validate`/`scripts/verify.*` 는 **덮어쓰지 않고 커버리지 부족만 보고**한다(`## 재실행 계약` 정합).
+   - **1회차 (a) 실패**(범위 밖) → `validate smoke test: SKIPPED (probe out of tool scope — <추정 원인>)` + 확인 권고(도구 include·ignore 설정). **종료 X.** 프로비저닝 단계에서는 정상이며, 아래 5-f 기록을 통해 다음 마일스톤의 `[Guard-drift]` 가 재실행을 권고한다(ADR-063 D4 — **졸업 차단 항목은 없다**).
+   - **probe 생성 불가**(권한·sandbox·이름 충돌) → `validate smoke test: SKIPPED (probe unavailable — <사유>)`. **종료 X.**
+   - **1회차 (b) 또는 2~5회 불일치**(그 단계가 실재하고 도달한 회차에서) → `validate smoke test: PROBE FAIL(<단계>)` + 생성된 명령 + 실패 stderr + 제안 대체(예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 5-d 정리 + 5-f 기록 후 종료.
+
+   **5-f. 판정 기록 (필수 — ADR-063 D3)**: 위 최종 판정을 `docs/00-meta/STACK_SETUP_PLAN.md` 의 `## 통합 명령 사용법` 절에 `probe smoke: <판정> (<YYYY-MM-DD>)` 1줄로 기록한다(이미 있으면 갱신). probe 파일은 지워도 판정은 남는다 — 이 줄이 `/stabilize-milestone` `[Guard-drift]` (d) 의 유일한 입력이며, 없으면 `SKIPPED`·`PARTIAL` 이 조용히 잊힌다. **조기 종료 경로에서도 기록한다.**
 
    `validate:e2e` 판정 행 (e2e 대상 프로젝트 한정, ADR-052#amend-1 5상태):
    - **`NOT_APPLICABLE`** (e2e 대상 아님) → `validate:e2e: NOT_APPLICABLE (비-e2e 스택)`. 종료 X.
@@ -126,7 +179,7 @@ R0 — 운영 환경 가정 확인:
 - 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-027#amend-3 근거 신호 / runtime target: web·native/android·native/ios·desktop·none — 복수 선언 가능, `native` 단독 표기 금지 / host: windows·macos) — ADR-059 D8
 - Toolchain 설치 결과 (`deps install: DONE (<pkg-manager>)` / `Needs Install: <명령>`); UI/web 이면 browser 설치 결과 (`playwright install: DONE` / `Needs Install: npx playwright install`)
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
-- validate smoke test 결과 (PASS / PASS with warning / FAIL with stderr 요약 / SKIPPED)
+- validate smoke test 결과 (`PASS (probe verified, project clean)` / `PASS (probe verified, empty rules/tests warning)` / `PROBE OK, PROJECT FAIL` / `PARTIAL (probe verified: … / not reached: …)` / `PROBE FAIL(<단계>)` / `SKIPPED (probe out of tool scope — …)` / `SKIPPED (probe unavailable — …)`) + 해당 시 `missing: <단계>` + **probe cleanup 결과** (`DONE (<n>개)` / `FAILED — 수동 삭제 필요: <경로 목록>`) + `STACK_SETUP_PLAN` 의 `probe smoke:` 기록 갱신 여부
 - validate:e2e 상태 (e2e 대상 한정, runtime target별 — NOT_APPLICABLE / EMPTY / PASS / FAIL(wiring) / FAIL(project) / BLOCKED_ENV — ADR-052#amend-1)
 - validate:design adapter 결과 (UI 한정 — current capability/source digest + registry status + command/path + fixed conformance 또는 Needs Install/WIRING FAIL; 비-UI는 n/a)
 - 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); 이미 봉인·구현 중이면 `/implement-workitem` 또는 다음 M)
@@ -174,6 +227,27 @@ R0 — 운영 환경 가정 확인:
 **Schema 주의**: 위 GUARDRAILS_STRATEGY.md PostToolUse 동기 hook 예시와 동일 패턴 — `matcher` 만 사용 (도구 이름 필터). 파일 확장자 필터는 *verify 스크립트 내부* 에서 처리 — Anthropic [hooks docs](https://code.claude.com/docs/en/hooks) 의 `if` 필드 단일-rule 제약 (`|`/`&&` 미지원) 회피. `asyncRewake: true` 는 verify 가 **exit code 2** 로 종료 시 Claude 를 깨워 stderr 를 system reminder 로 주입. Windows `command`/`args` 조합은 fork 적용 시 docs 직접 확인 — **본 예시는 1 차 해석이며 schema variant 가 발견되면 SSOT 가 아님**.
 
 도입은 사용자 결정. 본 hook은 *조기 피드백 adapter* — 실패 시 Claude를 깨워 stderr를 system reminder로 주입. **차단형 게이트 아님** (완료 판정은 동기 `validate-workitem` / `finalize-workitem` / `stabilize-milestone`이 책임).
+
+## 재실행 계약 (idempotent — ADR-063 D3)
+
+본 skill 은 재실행 가능하며 **변경이 필요한 것만 건드린다**. 아래 표가 그 경계의 SSOT다.
+
+| 산출물 | 재실행 동작 |
+|---|---|
+| `validate` / `validate:e2e` / `validate:design` 진입점 | 존재하면 **교체하지 않는다** |
+| 도구 선택 (Biome / ESLint / Vitest / Jest 등) | 존재하면 **교체하지 않는다** (도구 감지 우선 순서 2) |
+| toolchain 설치 | 이미 설치돼 있으면 재설치하지 않고 `deps already present` 출력 |
+| `scripts/verify.*` 본문 | **존재하면 덮어쓰지 않는다.** 4단계 커버리지 부족만 출력에 보고한다 |
+| 도구 config 의 harness 경로 배제 | 누락된 배제 항목만 **추가** (기존 규칙 미수정 — 수행-2-1) |
+| `## Dart Source Roots` | 매 실행 **실측 갱신** (실제 소스 트리 조회) |
+| `## E2E Smoke Registry` | 매 실행 **실측 갱신** (runtime target 별 재판정) |
+| `## Design Gate Adapter` | 매 실행 **digest + conformance 재검증**, 낮은 capability version 은 승격 |
+| `## Dependency Tools` | **보완만** — `/bootstrap-stack` 기록 행 미수정, 불일치는 보고 + 사용자 결정 |
+| `.gitattributes` | 전역 규칙 존재 확인 + 누락 규칙만 추가 (수행-4) |
+| 임시 probe (`src/__stackguard_probe__.*` 등 등록 소스·테스트 루트 안) | 실행 시 생성 → 회차별 판정 → **전부 삭제**. `.gitignore` 에 등재하지 않는다(등재하면 도구가 검사에서 제외해 판정 불가) |
+| `STACK_SETUP_PLAN ## 통합 명령 사용법` 의 `probe smoke:` 줄 | 매 실행 **최종 판정으로 갱신** (수행-5-f — `[Guard-drift]` (d) 의 유일한 입력) |
+
+**재실행 시점**: `/bootstrap-stack --migrate` 직후, `/stabilize-milestone` 이 `P2 [Guard-drift]` 를 기록한 뒤(다음 `/plan-milestone` R0 가 회수해 안내), design gate capability version 승격 시.
 
 ## 정적 분석 도구 권장 (스택별 1종, ADR-021)
 
