@@ -31,7 +31,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 
 반드시 먼저 읽을 파일:
 - `docs/10-charter/PROJECT_CHARTER.md`
-- `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
+- `docs/20-system/ARCHITECTURE_OVERVIEW.md` — *해당 스택 한정 sub-section 만*: `## 7-1` (API 프로젝트), `## 7-2` (CLI), `## 7-3` (백엔드), `## 7-4` (프론트), `## 7-5` (모바일 클라이언트 — ADR-027#amend-8). 비해당 sub-section 은 회수 X (ADR-019 minimal 정합).
 - `docs/20-system/DESIGN.md` — *UI 프로젝트 한정*. UI 판정은 **ADR-027#amend-3 "UI 판정 다중신호 절차"** 적용(부재→비-UI / status≠draft→UI / status=draft→추가신호). UI 확정 시 본문 회수 + cross-check 활성, 비-UI/skip 시 사유 echo.
 - 입력 `M<N>` 마일스톤 문서 + 그 `## 3. 포함되는 기능`이 가리키는 각 feature 문서(milestone 문서 부재 시 `/plan-milestone` 안내 후 종료)
 - `docs/30-workitems/_templates/TASK_TEMPLATE.md` (task 생성 양식 SSOT)

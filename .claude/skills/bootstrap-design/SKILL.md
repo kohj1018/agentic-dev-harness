@@ -14,7 +14,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-pre
 
 ## 트리거
 - `/bootstrap-stack` 종료 출력에 "frontend 감지됨. `/bootstrap-design` 권장" 텍스트 한 줄. 사용자 발화로 시작.
-- 비-UI 프로젝트는 호출되지 않음 (ADR-031 직접 지원 범위 밖).
+- 비-UI 프로젝트(API server·CLI 등)는 호출되지 않음 — **UI surface 가 없어 design 산출물이 불필요하기 때문이며 ADR-031 직접 지원 범위와는 무관하다**(API server·CLI 도 직접 지원 6종에 포함 — ADR-031#amend-1).
 - 본 skill은 baseline placeholder DESIGN.md를 *채우는* 흐름. 비-UI 프로젝트는 fork 직후 DESIGN.md를 삭제했음을 전제. 파일 부재 시 작업 중단 + 사용자에게 보고.
 
 **Codex**: 본 skill은 wrapper 미보유(자연어 호출) — Codex에서는 "Follow `.claude/skills/bootstrap-design/SKILL.md`"로 호출한다(목록 SSOT = README, ADR-010#amend-3·#amend-4). 본문의 `Agent` 위임(R0 researcher 디자인 레퍼런스 조사 · R0~R2 designer authoring · R2-1.5 reviewer 구별성 비평 · **R2-G/R6 reviewer 픽셀 판정 · 게이트 repair designer 재생성**)은 Codex에 persona 매핑이 없어 메인 세션이 각 persona 파일(researcher.md/designer.md/reviewer.md)을 읽고 순차 인라인 수행하며 생략하지 않는다(ADR-010). **동일 세션 degrade 계약 (ADR-058 D5)**: (a) designer→reviewer 페르소나 전환을 *명시적 단계*로 끊고, (b) 그 라운드 산출물과 최종 출력에 `under-verified: 동일 세션 감사`를 명시하며, (c) 완전 독립 감사가 요구되면 승인 보류한다. **결정적 렌더 게이트(`STACK_SETUP_PLAN.md ## Design Gate Adapter`의 current-ready v2 command)는 세션 격리와 무관하게 그대로 실행**되므로 배포불가 결함(serious/critical axe·320 geometry)은 Codex 경로에서도 차단된다.
