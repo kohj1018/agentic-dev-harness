@@ -72,6 +72,7 @@ R0 — 운영 환경 가정 확인:
    > ⚠️ **닷 디렉터리(`.stack-guard-probe/` 등)나 `.gitignore` 등재 경로에 만들면 안 된다.** (i) 다수 formatter/linter 가 `.gitignore` 를 기본 존중해 대상에서 제외하고, (ii) TypeScript `include` 의 `**/*` 는 `.` 로 시작하는 세그먼트를 매칭하지 않으며, (iii) 테스트 러너의 glob 은 dot 파일을 기본 제외한다. 그러면 위반 probe 가 실패하지 않아 **판정력이 정상인 검사도 FAIL 로 오분류**된다.
 
    - **위치**: 등록된 소스 루트 / 테스트 루트 **안**. 파일명은 그 스택의 include·test glob 에 걸리는 형태 + 명백한 표식. 예: `src/__stackguard_probe__.ts` · `src/__stackguard_probe__.test.ts` · `lib/__stackguard_probe__.dart` · `test/__stackguard_probe___test.dart` · `tests/test___stackguard_probe__.py`
+   - **등록된 소스/테스트 루트가 아직 없으면**(프레임워크 스캐폴드 전 — 정상 lifecycle 에서 본 skill 이 도는 시점의 기본 상태다) probe 를 둘 자리가 없으므로 `SKIPPED (probe unavailable — 등록된 소스 루트 부재)` 로 보고한다. **디렉터리를 새로 만들지 않는다** — 소스 트리 구조는 스캐폴드·계획의 소관이고 본 skill 은 `## 재실행 계약` 대로 *변경이 필요한 것만* 건드린다. 이 SKIPPED 는 5-f 로 기록되고 스캐폴드 후 재실행 때 해소된다(`[Guard-drift]` 가 그 재실행을 권고한다).
    - **`.gitignore` 에 등재하지 않는다.** 잔여물은 5-d 삭제로만 통제하고, 남았을 때 `git status` 에 보이는 것이 정상이다(조용히 무시되는 것보다 안전하다).
    - 같은 이름의 파일이 이미 있으면 **덮어쓰지 않고** 그 항목만 건너뛰고 사유를 보고한다.
 
@@ -110,7 +111,7 @@ R0 — 운영 환경 가정 확인:
    - **일부 단계 미도달**(5-c-0 (ii) — 앞 단계의 기존 프로젝트 위반으로 멈추고 단독 실행도 불가) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / not reached: <단계 목록>)` + 프로젝트 수정 안내. **종료 X — 배선 결함이 아니다.**
    - **일부 단계 부재**(5-c-0 (i)) → `validate smoke test: PARTIAL (probe verified: <단계 목록> / missing: <단계 목록>)`. **`PASS` 로 기록하지 않는다** — 부재 단계는 판정력이 *측정되지 않은* 것이고, `PASS` 로 적으면 커버리지 누락이 `[Guard-drift]` (d) 에서 침묵해 영구히 잊힌다. **종료하지 않는다** — **이번 실행에서 방금 생성한** 파이프라인이면 4단계를 채워 다시 구성하고(재측정으로 `PARTIAL` 이 해소된다), **이미 존재해 보존한** `validate`/`scripts/verify.*` 는 **덮어쓰지 않고 커버리지 부족만 보고**한다(`## 재실행 계약` 정합).
    - **1회차 (a) 실패**(범위 밖) → `validate smoke test: SKIPPED (probe out of tool scope — <추정 원인>)` + 확인 권고(도구 include·ignore 설정). **종료 X.** 프로비저닝 단계에서는 정상이며, 아래 5-f 기록을 통해 다음 마일스톤의 `[Guard-drift]` 가 재실행을 권고한다(ADR-063 D4 — **졸업 차단 항목은 없다**).
-   - **probe 생성 불가**(권한·sandbox·이름 충돌) → `validate smoke test: SKIPPED (probe unavailable — <사유>)`. **종료 X.**
+   - **probe 생성 불가**(권한·sandbox·이름 충돌·**등록된 소스/테스트 루트 부재** — 5-a) → `validate smoke test: SKIPPED (probe unavailable — <사유>)`. **종료 X.** 소스 루트 부재는 사유를 `등록된 소스 루트 부재` 로 고정해 적는다(5-a 와 동일 문자열).
    - **1회차 (b) 또는 2~5회 불일치**(그 단계가 실재하고 도달한 회차에서) → `validate smoke test: PROBE FAIL(<단계>)` + 생성된 명령 + 실패 stderr + 제안 대체(예: pnpm 비호환 → `npm run validate`). **stack-guard 산출물 수정 필요** — 5-d 정리 + 5-f 기록 후 종료.
 
    **5-f. 판정 기록 (필수 — ADR-063 D3)**: 위 최종 판정을 `docs/00-meta/STACK_SETUP_PLAN.md` 의 `## 통합 명령 사용법` 절에 `probe smoke: <판정> (<YYYY-MM-DD>)` 1줄로 기록한다(이미 있으면 갱신). probe 파일은 지워도 판정은 남는다 — 이 줄이 `/stabilize-milestone` `[Guard-drift]` (d) 의 유일한 입력이며, 없으면 `SKIPPED`·`PARTIAL` 이 조용히 잊힌다. **조기 종료 경로에서도 기록한다.**

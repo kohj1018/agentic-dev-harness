@@ -795,3 +795,70 @@ lifecycle skill 중 `discover-product`·`bootstrap-project`·`bootstrap-stack`·
 **잔여 한계(명시 수용)**: 구멍 B의 검출은 `validate-plan`이 opt-in(ADR-038)이라 **리뷰를 돌리지 않으면 여전히 새어 나간다.** 봉인 시점 강제(seal 조건에 ARCH 7-x↔AC 회수 검사 추가)는 결정 카드·차단 범위를 넓히는 변경이라 본 라운드 범위 밖으로 두고 차기 라운드 후보로 남긴다.
 
 **차기 라운드 필수 항목**: (a) 미실행 fixture 하위항목 6건 실측(봉인 전 착수 거부 · D11 데드락 방지 · 12b · 13/17/18 후반부) · (b) seam 신호 ① 문면에서 재량 여지 제거 · (c) `/bootstrap-project`의 README 2종 교체 + 비-UI `DESIGN.md`/AGENTS 링크 정리 누락 · (d) §10.1 fixture 순서 전제 한 줄.
+
+## Probe Contract Measurement (2026-08-05~06, ADR-063 probe 계약 실측 — 임시 fork 3종)
+
+ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 별 세션에서 수행한 기록이다. 대상은 `/stack-guard` 수행-5(probe 기반 smoke test)이며, 이번 개선 라운드(ADR-062·063 신설 + ADR-042#amend-2 + ADR-060#amend-1)의 **가장 큰 실행 검증 항목**이었다.
+
+**같은 라운드의 다른 실행 검증 2건도 함께 기록한다**(둘 다 별 세션 보고 기준 = 자기보고 등급):
+
+- `/consult-expert`(인자 없음)와 `/consult-expert legal`(관할 누락) **필수 입력 누락 프로브 2건 — PASS**. 되묻고 종료했고 파일 변경 0건.
+- **정상 법률 자문 경로(임시 fork) — 미완.** 비용 상한에 도달해 종료됐다. 따라서 `counsel` 의 조회 환경 고지·요건 대조 표의 `조회 URL`+`확인일` 전수 기재·노트 1개 생성·다른 파일 무수정은 **저장소에 완료 증거가 없다**(아래 미측정 목록에 포함).
+
+### 수행 방법의 한계 (먼저 밝힌다)
+
+- **실행자는 별 세션 AI**이고, `/stack-guard`는 `disable-model-invocation: true`라 **사용자가 슬래시 커맨드를 직접 입력**해 실행했다. 실행자는 fixture 준비 + 출력·파일 상태 측정만 수행했다.
+- **근거는 각 실행의 최종 출력 전문 + 파일 상태다. 개별 `validate` subprocess의 원문 로그는 확보되지 않았다.** 따라서 아래 결과를 **CONFIRMED(파일 상태로 독립 확인)** 와 **PLAUSIBLE(대상 skill의 자기 보고)** 두 등급으로 나눠 적는다 — 검증하지 못한 것을 선언하는 것이 ADR-047 D8(Oracle Adequacy) 규율이다.
+- fixture를 **비-UI·비-e2e로 한정**했다(`DESIGN.md` 삭제 + ARCH `## 7-x` 미기입). Chromium 다운로드를 피해 실행 시간을 줄인 선택이며, 그래서 **design gate·e2e 경로는 이번 대상이 아니다.**
+- 요청서(측정 지시문)의 **fixture A 오라클이 틀렸다**(아래 D-1). 그 결과 원래 재려던 *"스캐폴드 전 = 소스 루트 자체가 없는"* 상태는 **이번에 측정되지 않았다.**
+
+### fixture 3종
+
+| fixture | 구성 | 무엇을 재려 했나 |
+|---|---|---|
+| **B** | brownfield TS 라이브러리 + **Biome(format+lint 겸업)** + tsc + Vitest, 소스 3~4개 중 1개에 **기존 서식 위반**을 의도적으로 남김 | fail-fast로 뒤 단계에 도달하지 못하는 회차의 처리 + 겸업 도구의 회차 감축 여부 |
+| **C** | B와 동일 구성에서 `validate`의 **typecheck 단계만 제거** | 단계 부재의 최종 판정(부재를 `PASS`로 적지 않는가) |
+| **A** | 도구 설정 전부 + **빈 `src/`**(소스 0개) | 소스 0개 정상 경로가 산출물 결함으로 오분류되지 않는가 |
+
+도구 버전: `@biomejs/biome` 2.5.7 / TypeScript 7.0.2 / Vitest 4.1.10 (3 fixture 모두 설치 성공).
+
+### CONFIRMED — 파일 상태로 독립 확인된 사실
+
+- **5-f 판정 기록이 3 fixture 전부에서 실제로 남았다** (D3 기록 계약 작동):
+  - B: `probe smoke: PROBE OK, PROJECT FAIL (2026-08-05)`
+  - C: `probe smoke: PARTIAL (probe verified: format, lint, test / missing: typecheck) (2026-08-06)`
+  - A: `probe smoke: PASS (probe verified, empty rules/tests warning) (2026-08-06)`
+- **단계 부재를 `PASS`로 기록하지 않는다** — C의 최종 판정이 `PARTIAL (probe verified: format, lint, test / missing: typecheck)`로 출력·기록 양쪽에 남았다. 이 항목이 `PASS`로 굳으면 커버리지 누락이 `[Guard-drift]` (d)에서 영구 침묵하므로 본 라운드 마지막에 넣은 규칙인데, 실측으로 확인됐다.
+- **재실행 계약 1행 실측** — C에서 기존 `scripts/verify.*`의 SHA-256이 실행 전후 동일(`9F5E8708AB268D00EE0D4068E5411B96B7D78692C2130BC031898C98F93E3702`). "존재하면 덮어쓰지 않고 커버리지 부족만 보고"가 실제 동작.
+- **probe 정리** — B·A 모두 `probe cleanup: DONE (2개)` + `git status`에 probe 잔여물 0.
+- **probe 배치** — `src/__stackguard_probe__.ts` · `src/__stackguard_probe__.test.ts`(등록 소스 루트 안), `.gitignore`에 probe 경로 **미등재**.
+- fork 3종 전부 삭제 확인, **실측 종료 직후·결과 반영 전 시점**의 원본 저장소는 무수정(`HEAD c9fede76`, clean)이었다. 본 기록과 5-a 보강은 그 뒤의 변경이다.
+
+### PLAUSIBLE — 대상 skill의 자기 보고가 유일한 근거 (반증은 없음)
+
+- **B4 미도달 처리**: 기존 서식 위반으로 fail-fast가 걸린 2~4회차를 **단독 명령으로 재측정**했다고 보고(`npm run lint` / `typecheck` / `test`). `PROBE FAIL`로 적지 않았다 — 5-c-0 (ii)의 핵심 규칙.
+- **B3 겸업 처리**: Biome이 format+lint를 겸하지만 **회차를 합산·생략하지 않았고** 단계 귀속을 규칙 id(`lint/suspicious/noDoubleEquals`)와 formatter 진단으로 구분했다고 보고.
+- B1 범위 확인 통과 / B2 각 단계에서 probe 경로 지적(`TS2322`, vitest가 probe 테스트 수집·실패) / B5 마지막 회차 probe 귀속 진단 0건 / B6 최종 `PROBE OK, PROJECT FAIL` / C1~C3.
+- 회차 실측(B, 총 `validate` 5회 + 2~4회차 단독 재측정): ① 형식 위반 → format 진단 / ② lint 위반 → `lint/suspicious/noDoubleEquals` / ③ 타입 오류 → `TS2322` / ④ 실패 테스트 → Vitest FAIL / ⑤ 준수 소스·통과 테스트 → probe 귀속 진단 0건.
+- **왜 PLAUSIBLE인가**: 이 서술의 출처가 *검증 대상인 skill 자신*이고 subprocess 원문 로그가 없다. 방향은 전부 기대와 일치하고 CONFIRMED 항목(기록된 판정 문자열)과 모순되지 않지만, 독립 증거는 아니다.
+
+### D-1 — 요청서 오라클 오류 1건 (보일러플레이트 결함 아님)
+
+요청서는 fixture A(소스 0개)에서 `SKIPPED`를 기대했으나, SKILL 5-e는 *"전 회차 기대대로 + 프로젝트 빈 케이스(빈 lint 룰 / 프로젝트 테스트 0건) → `PASS (probe verified, empty rules/tests warning)`"* 이고 `SKIPPED`는 **범위 밖·생성 불가 전용** 라벨이다. fixture A는 도구 설정과 `src/`가 있어 probe 생성·5회 측정이 가능했으므로 **`PASS`가 정확한 판정**이다. *"프로젝트 소스 0개"* 를 *"probe 생성 불가/범위 밖"* 과 동일시한 측정 기준 오류다.
+
+**파생 발견(실제 공백 1건)**: 이 오류를 추적하다 **SKILL 5-a에 "등록된 소스/테스트 루트 자체가 없을 때"의 처리가 없다**는 사실이 드러났다. `PROJECT_START_CHECKLIST`는 그 상태의 판정을 `SKIPPED (probe unavailable …)`로 이미 안내하고 있어 **문서 간 미이행**이었고, 정상 lifecycle에서 `/stack-guard`가 도는 시점(스캐폴드 전)이 바로 그 상태라 흔하다. **본 기록과 같은 커밋에서 보강**했다 — 5-a에 *"등록된 소스/테스트 루트가 아직 없으면 `SKIPPED (probe unavailable — 등록된 소스 루트 부재)`로 보고하고 디렉터리를 새로 만들지 않는다"* + ADR-063 D1 생성 불가 사유 괄호 정합.
+
+### 미측정 5건 (차기 후보 — 1번이 최우선)
+
+1. **⚠️ 스캐폴드 전 소스 루트 부재 → `SKIPPED (probe unavailable — 등록된 소스 루트 부재)`** — **본 기록과 같은 커밋이 새로 추가한 분기이며 실측 0이다.** 새 행동을 넣고 검증을 다음으로 넘긴 상태이므로 차기 라운드에서 **가장 먼저** 잰다. fixture 비용은 3종 중 가장 싸다(소스·테스트 루트를 아예 만들지 않은 fork 1개). 확인할 것: 디렉터리 미생성 · 정확한 SKIPPED 문자열 · `probe cleanup: DONE (0개)` · `probe smoke:` 기록 · probe 잔존 0.
+2. **`[Guard-drift]` (d) 회수** — D3 기록(확인됨) → D4 회수의 **후반부**. C fixture가 `PARTIAL` 기록까지 만들어 입력이 완성됐는데 `/stabilize-milestone`을 돌리지 않았다. 마일스톤 문서 1개가 필요하다.
+3. **재실행 멱등** — `## 재실행 계약` 13행 중 실측된 것은 `scripts/verify.*` 미덮어씀 1행뿐. 같은 fork에서 `/stack-guard` 2회 실행이면 대부분 확인된다.
+4. **UI fork의 conformance 4-run 승계** — 기동 실패/기동 후 실패/adapter exit 2 3분기를 4개 `run()` 전부에 적용한 변경은 **함수 단위 6케이스 실행**으로만 확인됐다(원본 세션). 실브라우저 실행은 미측정.
+5. **`/consult-expert` 정상 경로**(법률) — 위 서두 참조. 비용 상한으로 미완이며 노트 산출·등급·무수정 가드의 완료 증거가 없다.
+
+### 결정에 미친 영향
+
+- ADR-063 D1에 본 라운드에서 새로 넣은 세 규칙 — **미도달은 `PROBE FAIL`이 아니다 / 단계 부재는 `PARTIAL`이다 / 겸업은 회차를 줄이지 않는다** — 가 실측에서 모두 기대대로 동작했다. 등급은 두 번째가 CONFIRMED, 첫째·셋째가 PLAUSIBLE이다.
+- D3 기록 계약(`probe smoke:` 1줄)은 3 fixture 전부 CONFIRMED. `[Guard-drift]`의 입력이 실제로 생성됨을 확인했다.
+- **부수 관측**: fixture B 준비 단계에서 Vitest가 **sandbox spawn EPERM**으로 차단된 뒤 승인 실행으로 통과했다. 같은 라운드에서 conformance oracle의 *기동 실패 → exit 2 승계*를 넣은 근거(`[관측됨]`)를 보강하는 사례다.
+- 요청서 오라클 오류가 결과적으로 SKILL 공백 1건을 드러냈다 — **측정 기준을 문서에서 역산하지 않으면 오라클 자체가 결함이 된다**는 교훈이며, ADR-063 D1이 *"기대값(oracle)은 고정하고 SKILL 본문의 판정 표가 소유한다"* 고 규정한 이유와 같다.
