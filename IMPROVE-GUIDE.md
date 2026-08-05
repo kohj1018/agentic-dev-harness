@@ -176,9 +176,9 @@ accepted
 - **프로젝트 빈 케이스는 차단하지 않는다** — probe가 전부 기대대로인데 프로젝트 lint 룰이 비었거나 프로젝트 테스트가 0건이면 비차단 경고로 보고한다. 프로비저닝 단계에서 정상인 상태이며, 졸업 시점의 판정은 **ADR-014의 기존 5+1 항목이 소유한다**(테스트 0건은 item 4 `AC 매핑 100%`에서 드러난다 — 본 ADR은 졸업 항목을 추가하지 않는다).
 - 선례: `design-gate-conformance.mjs`가 동일 패턴(fixture 생성 → 통과/위반 양쪽 판정 → `finally` 삭제)을 이미 수행한다.
 
-**같은 원리를 design gate conformance 에도 적용한다**: [관측됨] `design-gate-conformance.mjs` 는 `spawnSync` 의 `result.error`(자식 프로세스를 **띄우지 못한** 경우 — 관리 환경의 EPERM 등)를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록해, 최종 exit 1(= `wiring-fail`)로 보고한다. 그러나 프로세스 기동 실패는 **환경 문제(execution unavailable)** 이지 산출물 결함이 아니며, ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정한다. 따라서 `result.error` 는 **exit 2 로 승계**한다. 이 수정은 conformance asset 내부이며 adapter 의 canonical digest 를 바꾸지 않으므로 capability 승격이 필요 없다.
+**같은 원리를 design gate conformance 에도 적용한다**: [관측됨] `design-gate-conformance.mjs` 는 `spawnSync` 의 `result.error`(자식 프로세스를 **띄우지 못한** 경우 — 관리 환경의 EPERM 등)를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록해, 최종 exit 1(= `wiring-fail`)로 보고한다. 그러나 프로세스 기동 실패는 **환경 문제(execution unavailable)** 이지 산출물 결함이 아니며, ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정한다. 따라서 **기동 실패만** exit 2 로 승계한다 — `result.error.code` 가 `EPERM`·`EACCES`·`ENOENT` 계열일 때다. **기동 후 실패**(`ETIMEDOUT` 시간 초과·`ENOBUFS` 출력 초과)는 *adapter 가 유계 시간에 끝나지 않았다*는 뜻이므로 `bounded-process-completion` 결함으로 남긴다 — 구분 없이 승계하면 그 record 에 도달하기 전에 exit 2 로 빠져 **check 가 영구히 참**이 되고 ADR-058#amend-2 가 세운 판정이 사라진다. 승계는 **conformance 의 모든 `spawnSync` 호출**(core / same-basename batch / render-error isolation / pixel tolerance — 4회)에 동일하게 적용한다. 한 곳만 걸면 뒤 회차의 기동 실패가 같은 오분류를 재생산한다. 이 수정은 conformance asset 내부이며 adapter 의 canonical digest 를 바꾸지 않으므로 capability 승격이 필요 없다.
 
-**부수 효과**: 한 도구가 두 단계를 겸하는 경우(Biome=format+lint, `flutter analyze`=lint+typecheck)의 `missing: <단계>` 오보고가 실측으로 자동 해소된다 — 겸업 여부를 산문으로 예외 처리할 필요가 없다.
+**부수 효과**: 한 도구가 두 단계를 겸하는 경우(Biome=format+lint, `flutter analyze`=lint+typecheck)의 `missing: <단계>` 오보고가 실측으로 자동 해소된다 — 겸업 여부를 산문으로 예외 처리할 필요가 없다. **단 겸업은 회차를 줄이지 않는다** — 한 단계의 probe 통과를 다른 단계의 판정으로 대체하지 않는다. format 진단은 lint 규칙의 판정력을 증명하지 않으며(겸업 도구도 linter 를 따로 끌 수 있다), 대체를 허용하면 D1이 막으려는 얕은 검증이 겸업이라는 이름으로 되돌아온다. 겸업이 바꾸는 것은 *단계 귀속을 판정하는 방법*뿐이다 — 명령을 구분할 수 없으므로 **진단의 규칙·카테고리**로 귀속을 판정한다.
 
 ### D2. harness 경로 배제 원칙
 `/stack-guard`가 생성하는 도구 config 중 **아래 `적용 대상 도구`** 의 검사 범위에서 다음을 제외한다. 이들은 프로젝트 소스가 아니라 agent harness다.
@@ -316,7 +316,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 **수정 후**:
 ```
-5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 **아래 5-c 실행 표대로 돌린다**(probe 배치를 바꿔가며 **최대 5회** — 겸업 도구·부재 단계가 있으면 그만큼 줄어든다. ADR-063 D1)
+5. **Smoke test (필수)**: 수행-6 의 toolchain 설치가 성공한 경우 생성된 `validate` 명령을 **아래 5-c 실행 표대로 돌린다**(probe 배치를 바꿔가며 **최대 5회** — 부재 단계가 있으면 그만큼 줄어든다. ADR-063 D1)
 ```
 
 **(2) 판정 표 블록을 교체한다** — `` `validate` 판정 표: `` 부터 `**stack-guard 산출물 수정 필요** — 종료.` 까지를 아래로 교체한다. 도입 문단의 나머지(*wiring 검증* 목적 설명, `Needs Install` SKIPPED 처리)와 뒤의 `validate:e2e` 판정 행은 그대로 둔다.
@@ -336,7 +336,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
    **5-c-0. 회차별 판정의 두 전제 (ADR-063 D1 — 아래 표보다 먼저 적용한다)**
 
-   - **(i) 단계 실재** — 대상 단계를 수행하는 명령이 `validate` 파이프라인에 있는가. **없으면 `missing: <단계>` 로 보고하고 그 회차만 건너뛰고 다음 회차를 계속한다.** 이것은 *probe 가 범위 밖*이 아니라 **커버리지 누락**이며, 둘을 합쳐 `SKIPPED` 로 적으면 **본 검증이 잡으려는 배선 누락이 비차단 SKIPPED 로 숨는다.** **겸업 도구가 그 단계를 겸하면 부재가 아니다** — 아래 겸업 합산 규칙을 먼저 적용한다.
+   - **(i) 단계 실재** — 대상 단계를 수행하는 명령이 `validate` 파이프라인에 있는가. **없으면 `missing: <단계>` 로 보고하고 그 회차만 건너뛰고 다음 회차를 계속한다.** 이것은 *probe 가 범위 밖*이 아니라 **커버리지 누락**이며, 둘을 합쳐 `SKIPPED` 로 적으면 **본 검증이 잡으려는 배선 누락이 비차단 SKIPPED 로 숨는다.** **겸업 도구가 그 단계를 겸하면 부재가 아니다** — 아래 겸업 규칙을 먼저 적용하고 `missing` 으로 보고하지 않는다.
    - **(ii) 실행 도달** — 이번 실행에서 그 단계까지 실제로 도달했는가. **앞 단계가 *프로젝트 소유* 위반으로 fail-fast 를 유발해 도달하지 못했으면**(brownfield 의 기존 format 위반 등) 그 단계 명령을 **단독 실행**해 5-b 기준으로 판정하고, 단독 실행이 불가하면 `SKIPPED(미도달: <사유>)` 로 보고한다.
    - **(i)·(ii) 어느 경우도 `PROBE FAIL` 이 아니다.** 아래 표의 `불일치 시` 열은 **그 단계가 실재하고 도달한 회차**에만 적용한다 — 배선 결함이 아닌 것을 결함으로 적으면 오분류를 방향만 바꿔 재생산한다.
    - **1회차의 (a) 범위 확인은 파이프라인에 실재하는 *첫* 단계의 회차에서 수행한다** — format 단계가 없으면 그 역할을 lint 회차가 이어받는다.
@@ -349,9 +349,12 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
    | **4회** | **실패 테스트 1개로 교체** | test 단계 진단에 그 경로 | `PROBE FAIL(test)` |
    | **5회** | 위반 probe 전부 제거 + 규칙 준수 소스 1개 + 통과 테스트 1개 | probe 파일에 귀속된 진단 **0건** (전체 exit 0 을 요구하지 않는다) | `PROBE FAIL(pass)` — 준수 파일이 지적됨 = 규칙 설정 문제 |
 
-   **`validate` 실행은 최대 5회다** — 1회차의 (a)(b)는 *같은 실행의 두 판정*이다(같은 probe·같은 명령이므로 따로 돌리지 않는다). 겸업 합산·단계 부재로 회차는 줄어들 수 있고, 5-c-0 (ii) 의 단독 실행은 그 회차의 **재측정**이므로 새 회차로 세지 않는다.
+   **`validate` 실행은 최대 5회다** — 1회차의 (a)(b)는 *같은 실행의 두 판정*이다(같은 probe·같은 명령이므로 따로 돌리지 않는다). **단계 부재로만** 회차가 줄어든다(겸업은 줄이지 않는다 — 아래 규칙). 5-c-0 (ii) 의 단독 실행은 그 회차의 **재측정**이므로 새 회차로 세지 않는다.
 
-   **한 도구가 두 단계를 겸하면 해당 실행을 합산한다** — Biome = format + lint 면 1회차가 lint 판정까지 겸하므로 2회를 생략(총 4회), `flutter analyze` = lint + typecheck 면 2·3회를 하나로 합산(총 4회). 이때 `missing: <단계>` 로 보고하지 않는다 — 겸업 여부는 실측으로 판정되므로 산문 예외가 필요 없다.
+   **한 도구가 두 단계를 겸해도 회차는 줄이지 않는다** — Biome = format + lint, `flutter analyze` = lint + typecheck 면 **같은 명령을 두 회차에서 각각 다른 위반 probe 로 호출**한다. 겸업 도구도 linter 나 개별 규칙을 따로 끌 수 있으므로 **format 진단은 lint 규칙의 판정력을 증명하지 않는다** — 한 단계의 통과를 다른 단계 판정으로 대체하면 D1 이 막으려는 얕은 검증이 *겸업*이라는 이름으로 되돌아온다.
+   - 겸업 시 **단계 귀속은 명령이 아니라 진단의 규칙·카테고리로 판정한다** — Biome 은 formatter 진단과 lint 규칙 id 로, `flutter analyze` 는 타입 오류와 lint 규칙 이름으로 구분한다.
+   - 겸업 단계는 `missing: <단계>` 로 보고하지 않는다(단계는 실재한다 — 5-c-0 (i)). 겸업 여부를 산문으로 예외 처리할 필요도 없다.
+   - 한 명령이 두 단계를 함께 보고하므로 **그 두 회차 사이에는 fail-fast 가 없다**(5-c-0 (ii) 의 미도달이 겸업 단계끼리는 발생하지 않는다). 그래도 위반 probe 는 회차당 하나만 둔다 — 진단 귀속을 단순하게 유지한다.
 
    **5-d. probe 정리 (필수)**: 생성한 probe 파일을 **전부 삭제**하고 결과를 보고한다 — `probe cleanup: DONE (<n>개)` 또는 `probe cleanup: FAILED — 수동 삭제 필요: <경로 목록>`. 실패 경로·조기 종료 경로에서도 정리한다. **조용히 남기지 않는다.**
 
@@ -381,7 +384,7 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 **수정 후** (수행-2 뒤에 새 항목 `2-1` 삽입):
 ```
 1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.
-2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `lint + typecheck + test` 통합. **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
+2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
 2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
    - `.claude/`, `.codex/`, `.agents/`, `.boilerplate/`
    - `STACK_SETUP_PLAN.md ## Design Gate Adapter` 에 기록된 **materialized adapter 경로**(기본 `scripts/design-gate.mjs`). 이 사본은 프로젝트 소스 트리 안에 있어 harness 디렉터리 제외만으로는 보호되지 않는다. **포맷되면 SHA-256 digest 가 바뀌어 conformance oracle 이 게이트를 차단하고 `status: wiring-fail` 로 굳는다.**
@@ -453,9 +456,36 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 **파일**: `.claude/skills/stack-guard/assets/design-gate-conformance.mjs`
 
-**문제** (실측): 관리 환경에서 Node 자식 프로세스가 EPERM 으로 차단되면 `spawnSync` 가 `result.error` 를 낸다. 현재 코드는 이 경우를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록하므로, 최종 판정이 exit 1(= `wiring-fail`)이 된다. **환경 문제가 산출물 결함으로 오분류**되고, `registry status: wiring-fail` 로 굳어 디자인 산출물 승인·프로토타입 승격·task 분해가 연쇄로 막힌다. ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정하므로 이 경로는 그 규정 미이행이다.
+**문제** (실측): 세 갈래다.
 
-**현재** (128~136행):
+1. **기동 실패가 산출물 결함으로 오분류된다.** 관리 환경에서 Node 자식 프로세스가 EPERM 으로 차단되면 `spawnSync` 가 `result.error` 를 낸다. 현재 코드는 이 경우를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록하므로 최종 판정이 exit 1(= `wiring-fail`)이 된다. `registry status: wiring-fail` 로 굳어 디자인 산출물 승인·프로토타입 승격·task 분해가 연쇄로 막힌다. ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정하므로 이 경로는 그 규정 미이행이다.
+2. **`run()` 은 4번 호출된다** — core / same-basename batch / render-error isolation / pixel tolerance. 승계를 core 에만 걸면 **뒤 3회의 기동 실패·`exit 2` 가 그대로 검사 실패로 누적**돼 같은 오분류가 재발한다(특히 `one-pixel-tolerance-pass` 는 출력이 없으면 `length === 0` 이 공허하게 참이 되어 *조용히 통과*까지 한다).
+3. **그렇다고 `result.error` 를 전부 exit 2 로 보내면 안 된다.** `spawnSync` 의 `error` 에는 기동 실패(EPERM·EACCES·ENOENT 등)와 **기동 후 실패**(`ETIMEDOUT` 시간 초과 · `ENOBUFS` 출력 초과)가 섞인다. 후자는 *adapter 가 유계 시간에 끝나지 않았다*는 신호이고 그것을 잡는 것이 `bounded-process-completion` 의 존재 이유다. 구분 없이 승계하면 그 record 에 도달하기 전에 exit 2 로 빠지므로 **check 가 영구히 참**이 되어 ADR-058#amend-2 가 세운 판정이 사라진다.
+
+**수정은 2곳이다.**
+
+**(1) 모듈 스코프에 helper 추가** — `const noGeometryBlockers = …` 줄과 `try {` 사이에 삽입한다.
+
+```js
+// spawnSync 의 error 는 두 부류다. (a) 자식을 **띄우지 못한** 경우(EPERM·EACCES·ENOENT 등)는 환경 문제이므로
+// adapter exit 2(실행 불가)와 동일하게 승계한다. (b) 띄운 뒤의 실패(ETIMEDOUT 시간 초과·ENOBUFS 출력 초과)는
+// adapter 가 유계 시간에 끝나지 않았다는 뜻이라 bounded-process-completion 결함으로 남긴다 — (b)까지 exit 2 로
+// 보내면 그 check 가 영구히 참이 된다. 모든 run() 결과에 적용한다. ADR-063 D1 / ADR-058#amend-2.
+const LAUNCH_FAILURE_CODES = ['EPERM', 'EACCES', 'ENOENT', 'EMFILE', 'ENFILE', 'ENOMEM'];
+const requireExecutable = (label, result) => {
+  const launchFailed = Boolean(result.error) && LAUNCH_FAILURE_CODES.includes(result.error.code);
+  if (!launchFailed && result.status !== 2) return;
+  const detail = launchFailed ? `spawn failed: ${result.error.message}` : (result.stderr || result.stdout || 'adapter exit 2').trim();
+  record('execution-available', false, `${label}: ${detail}`.slice(0, 2000));
+  // finish() terminates immediately, so remove the temp tree before emitting exit 2.
+  rmSync(root, { recursive: true, force: true });
+  finish(2);
+};
+```
+
+**(2) 4개 `run()` 호출 **바로 다음 줄**에 helper 호출 1줄을 넣고, core 의 기존 `status === 2` 분기는 helper 로 교체한다.**
+
+**현재** (core — 128~136행):
 ```js
   const core = run(coreNames.map(fixture));
   if (core.result.status === 2) {
@@ -468,27 +498,28 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
   record('bounded-process-completion', !core.result.error, core.result.error?.message || `status=${core.result.status}`);
 ```
 
-**수정 후** (`if (core.result.status === 2) {` 앞에 분기 1개 추가):
+**수정 후**:
 ```js
   const core = run(coreNames.map(fixture));
-  // 자식 프로세스를 띄우지 못한 것(EPERM 등)은 환경 문제이지 산출물 결함이 아니다 —
-  // adapter exit 2(실행 불가)와 동일하게 승계한다. ADR-063 D1 / ADR-058#amend-2.
-  if (core.result.error) {
-    record('execution-available', false, `spawn failed: ${core.result.error.message}`);
-    rmSync(root, { recursive: true, force: true });
-    finish(2);
-  }
-  if (core.result.status === 2) {
-    const detail = (core.result.stderr || core.result.stdout || 'adapter exit 2').trim();
-    record('execution-available', false, detail.slice(0, 2000));
-    // finish() terminates immediately, so remove the temp tree before emitting exit 2.
-    rmSync(root, { recursive: true, force: true });
-    finish(2);
-  }
+  requireExecutable('core', core.result);
   record('bounded-process-completion', !core.result.error, core.result.error?.message || `status=${core.result.status}`);
 ```
 
-> **adapter(`design-gate.mjs`)는 건드리지 않는다** — conformance 내부 수정이므로 `EXPECTED_SOURCE_SHA256` 과 adapter 의 canonical digest 는 불변이고 capability 승격이 필요 없다. `bounded-process-completion` record 도 그대로 남겨 정상 경로의 판정 개수를 유지한다.
+**나머지 3곳** — 각 `run()` 다음 줄에 1줄씩 추가(앞뒤 줄은 그대로):
+```js
+  const same = run([sameA, sameB]);
+  requireExecutable('same-basename', same.result);
+```
+```js
+  const isolated = run([missing, fixture('clean.html')]);
+  requireExecutable('render-error-isolation', isolated.result);
+```
+```js
+  const edge = run([fixture('edge-1px.html'), fixture('edge-2px.html')]);
+  requireExecutable('pixel-tolerance', edge.result);
+```
+
+> **adapter(`design-gate.mjs`)는 건드리지 않는다** — conformance 내부 수정이므로 `EXPECTED_SOURCE_SHA256` 과 adapter 의 canonical digest 는 불변이고 capability 승격이 필요 없다. `bounded-process-completion` record 도 그대로 남긴다 — 기동 후 실패(ETIMEDOUT·ENOBUFS)에서 **실제로 false 가 될 수 있어야** 그 check 가 의미를 갖는다.
 
 ## 2-7-b. `stack-guard` Dart source root 조회 — OS 별 명령 분기
 
@@ -2251,8 +2282,11 @@ grep -c 'amend-1: 배포 라이선스' docs/90-decisions/boilerplate/README.md  
 grep -c '## 7-5' .claude/skills/plan-workitem/SKILL.md       # 기대: 1 이상
 # (b) bootstrap-design 의 비-UI 사유가 정정됐는가
 grep -c 'ADR-031 직접 지원 범위 밖' .claude/skills/bootstrap-design/SKILL.md  # 기대: 0
-# (c) conformance 가 spawn 실패를 exit 2 로 승계하는가
-grep -c 'core.result.error' .claude/skills/stack-guard/assets/design-gate-conformance.mjs  # 기대: 3줄 (신규 if 분기 1 + 신규 메시지 1 + 기존 record 1)
+# (c) conformance 가 기동 실패·exit 2 를 *모든* run() 에서 승계하는가
+grep -c 'requireExecutable' .claude/skills/stack-guard/assets/design-gate-conformance.mjs  # 기대: 5 (정의 1 + 호출 4)
+grep -cE '= run\(' .claude/skills/stack-guard/assets/design-gate-conformance.mjs           # 기대: 4 (호출 수와 같아야 한다 — 하나라도 적으면 승계 누락)
+grep -c 'LAUNCH_FAILURE_CODES' .claude/skills/stack-guard/assets/design-gate-conformance.mjs # 기대: 2 (정의+사용 — 기동 실패만 승계)
+grep -c 'bounded-process-completion' .claude/skills/stack-guard/assets/design-gate-conformance.mjs # 기대: 2 (ETIMEDOUT·ENOBUFS 판정이 살아 있어야 한다)
 # (d) adapter digest 는 불변인가
 grep -c '9fb9b7a2858af4d68dda5d8cefe5ccc019ee8c07a71ecbc8e6273ca76f17cda9' .claude/skills/stack-guard/assets/design-gate-conformance.mjs  # 기대: 1
 ```
@@ -2270,6 +2304,10 @@ grep -c '범위 확인' .claude/skills/stack-guard/SKILL.md              # 기�
 grep -c '미도달' .claude/skills/stack-guard/SKILL.md                 # 기대: 2건 이상 (5-c-0 (ii) + 5-e PARTIAL)
 grep -c 'probe smoke' .claude/skills/stack-guard/SKILL.md            # 기대: 2건 이상 (5-f + 재실행 계약 표)
 grep -c 'probe smoke' .claude/skills/stabilize-milestone/SKILL.md    # 기대: 1건 이상 ([Guard-drift] (d))
+# 겸업이 회차를 대체하지 않는가 + 신규 verify 계약이 4단계인가
+grep -c '회차는 줄이지 않는다' .claude/skills/stack-guard/SKILL.md           # 기대: 1
+grep -c '해당 실행을 합산' .claude/skills/stack-guard/SKILL.md              # 기대: 0 (구 합산 규칙 잔존 금지)
+grep -c 'format + lint + typecheck + test' .claude/skills/stack-guard/SKILL.md # 기대: 1 (수행-2 신규 생성 계약)
 ```
 
 ## 7-8. 수동 대조 체크리스트
@@ -2287,6 +2325,8 @@ grep -c 'probe smoke' .claude/skills/stabilize-milestone/SKILL.md    # 기대: 1
 - [ ] **5-c-0 (i) 단계 실재**: 대상 단계가 파이프라인에 없으면 `missing: <단계>` 로 적고 **그 회차만 건너뛰고 계속**한다 — 범위 밖 `SKIPPED` 와 합치지 않았다(합치면 배선 누락이 SKIPPED 로 숨는다)
 - [ ] **5-c-0 (ii) 실행 도달**: brownfield 의 기존 위반으로 앞 단계에서 멈춘 회차는 **단독 실행으로 재측정**하고, 불가하면 `SKIPPED(미도달)`·`PARTIAL` 이다 — **`PROBE FAIL` 이 아니다**
 - [ ] **5-f 판정 기록**: 최종 판정이 `STACK_SETUP_PLAN.md ## 통합 명령 사용법` 의 `probe smoke:` 1줄로 기록되고, 조기 종료 경로에서도 기록된다
+- [ ] **겸업은 회차를 줄이지 않는다**: Biome·`flutter analyze` 도 단계별 위반 probe 회차를 각각 돌리고, 귀속은 *진단의 규칙·카테고리*로 판정한다 (한 단계 통과를 다른 단계 판정으로 대체하지 않는다). 구 문구 `해당 실행을 합산한다` 가 남아 있지 **않다**
+- [ ] **수행-2 의 신규 verify 계약이 `format + lint + typecheck + test` 4단계**다 (`## 스택별 verify 풀세트`·`## 재실행 계약`·5-c 1회차 format probe 와 정합)
 - [ ] ADR-063 에 **졸업 차단 항목을 신설하지 않는다**는 근거(D6 2문항)가 적혀 있고, `## 참고` 의 ADR-014 설명이 "차단 근거"로 남아 있지 **않다**
 - [ ] probe 배치가 **등록된 소스·테스트 루트 안**이고, 닷 디렉터리·`.gitignore` 경로가 **아니다**
 - [ ] `.gitignore` 에 probe 경로가 **없다** (등재하면 도구가 검사에서 제외해 판정 불가)
@@ -2297,7 +2337,7 @@ grep -c 'probe smoke' .claude/skills/stabilize-milestone/SKILL.md    # 기대: 1
 - [ ] `stack-guard` 수행-2-1 에 harness 경로 4개 + **materialized adapter 경로** + **formatter 의 `docs/` Markdown** 이 열거됐고, **secret scanner 는 배제 대상이 아니라는 반대 명시**가 있다
 - [ ] `stack-guard` `## 재실행 계약` 표에 `scripts/verify.*` 행과 probe 행이 있고, 수행-2 에도 "존재하면 덮어쓰지 않는다"가 부기됐다
 - [ ] ADR-063 에 D8(`.gitattributes` 전역 규칙)이 있고 Surfaces·Mutation Target 에 `.gitattributes` 가 등재됐다
-- [ ] `design-gate-conformance.mjs` 에 `if (core.result.error)` 분기가 있고 `finish(2)` 로 승계한다. `EXPECTED_SOURCE_SHA256` 과 `design-gate.mjs` 는 **불변**이다
+- [ ] `design-gate-conformance.mjs` 의 `requireExecutable` 이 **4개 `run()` 전부**에 걸리고, **기동 실패(EPERM 계열)만** exit 2 로 승계하며 `ETIMEDOUT`·`ENOBUFS` 는 `bounded-process-completion` 결함으로 남는다(전부 승계하면 그 check 가 영구히 참이 된다). `EXPECTED_SOURCE_SHA256` 과 `design-gate.mjs` 는 **불변**이다
 - [ ] `stack-guard` 47행에 Dart source root 조회의 **OS 별 명령 2종**(Unix / PowerShell)이 있다
 
 **Phase 3 — Guard-drift**
