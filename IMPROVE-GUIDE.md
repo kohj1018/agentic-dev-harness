@@ -1890,12 +1890,14 @@ FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milesto
 2. `## 14` Evidence Log 의 `quant` 행을 해석해 `## 15` Insight 로 승격 제안하는 주체는 `/discover-product --update`(정성 지향)가 아니라 **`analyst`** 다. `--update` 는 정성 증거(qual)와 `analyst` 가 반환한 인사이트를 받아 적는다.
 3. **`FEATURE_TEMPLATE ## 8-1` 에 `계측` 필드 1개를 추가한다** — 이벤트명·발생 지점·속성·도구를 한 줄에 담는다. 필드를 2개로 쪼개지 않는다(Amendment 1 이 관측한 미충족 위험을 키우지 않는다).
 4. `## 14` 의 `confidence` 판정 기준은 `analyst` 가 소유한다 — `상`=실험 설계 + n 충분 / `중`=관측 데이터 + n 충분 / `하`=n 부족 또는 편향 의심.
-5. **`Needs Instrumentation` 자동 위임** — 정의와 발화 위치는 **[ADR-062](ADR-062-domain-advisory-capability.md) D10 이 소유**하고 본 항은 인용만 한다(같은 트리거를 두 ADR 이 완결 서술하면 다음 개정에서 갈라진다 — ADR-005). 요지: `/plan-milestone` **R4**(feature 문서 authoring)가 `## 8-1` 계측 필드를 채울 근거가 없으면 `analyst` 에 위임한다.
+5. **`Needs Instrumentation` 자동 위임** — 정의·조건·발화 위치는 **[ADR-062](ADR-062-domain-advisory-capability.md) D10 이 소유**하고 본 항은 인용만 한다(같은 트리거를 두 ADR 이 완결 서술하면 다음 개정에서 갈라진다 — ADR-005). **본 ADR 이 소유하는 것은 그 위임의 *결과*가 `## 8-1` 계측 필드를 채운다는 사실뿐이며, 트리거 본문은 여기에 재서술하지 않는다.**
 6. **`## 8-1` 의 작성 주체를 `/plan-milestone` R4 로 명시한다.** 현재 R4 불릿은 `## 0-1`/`## 3`/`## 10`/`## 7`/`## 7-1`/`## 11` 만 지시하고 `## 8-1` 을 언급하지 않는다 — #amend-1 이 관측한 "죽은 필드"의 원인은 소비자 부재만이 아니라 **작성 지시 부재**이기도 하다. 소비자만 만들고 작성 주체를 두지 않으면 필드는 계속 빈다.
 
 ### 적용 surface
 - docs/30-workitems/_templates/FEATURE_TEMPLATE.md  (§8-1 계측 필드)
 - .claude/skills/plan-milestone/SKILL.md            (**R4** — `## 8-1` 작성 지시 + `Needs Instrumentation` 위임)
+- .claude/skills/plan-workitem/SKILL.md             (계측 스펙 → task `## 3` line item 전달 — 결정 3)
+- .claude/skills/discover-product/SKILL.md          (`--update` 의 quant 처리를 `analyst` 경유로 — 결정 2)
 - .claude/agents/analyst.md                          (소비자 + confidence 기준 소유)
 
 ### 강도 (ADR-022)
@@ -1954,10 +1956,47 @@ FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milesto
   - 위임이 불가한 환경(Codex 등)에서는 `.claude/agents/analyst.md` 를 인라인 수행하거나 `/consult-expert data` 선행을 안내한다.
 ```
 
+## 5-4-a. `plan-workitem` — 계측 스펙을 task line item 으로 전달
+
+> **왜 필요한가**: `analyst.md` 의 계측 설계 규율 4와 `marketer.md` 의 카피 반영 경로가 *"계측 line item 은 `/plan-workitem` 이 task `## 3` 에 authoring 한다"* 를 전제하는데, **실측하면 `plan-workitem` 본문에 `## 8-1`·계측 언급이 0건**이다. 즉 계측 스펙이 feature 문서에서 끝나고 구현으로 내려가지 않는다 — 데이터는 소급 수집이 불가능하므로 이 마지막 연결이 없으면 Phase 5 전체가 문서상 장식이 된다.
+>
+> `plan-workitem` 의 `반드시 먼저 읽을 파일`은 이미 *feature 문서 전체*를 읽으므로 회수 목록 변경은 불요하다. **Phase 6-4(a) 도 같은 파일의 34행을 고치지만 위치가 달라 충돌하지 않는다.**
+
+**파일**: `.claude/skills/plan-workitem/SKILL.md`
+
+**현재** (3-G 블록 끝 ~ `3-P` 사이):
+```
+3-P. **승인 프로토타입 참조 + PX↔AC 매핑 + 전환 흐름 authoring (ADR-056 결정
+```
+
+**그 `3-P.` 줄 바로 앞에 새 항목 삽입**:
+```
+3-I. **계측 line item authoring (ADR-042#amend-2 결정 3 / ADR-062)**: 담당 feature 문서 `## 8-1` 의 **계측 필드**(`<이벤트명> @ <발생 지점> / 속성: <목록> / 도구: <도구>`)가 채워져 있으면 그 이벤트를 심는 작업을 **담당 task 의 `## 3` line item 으로 옮긴다** — 이벤트명·발생 지점·속성 목록·도구를 그대로 적고, *어느 파일의 어느 지점에* 심는지까지 위 3-G 형식으로 쓴다. **feature 문서에만 남기고 task 로 옮기지 않으면 그 이벤트는 구현되지 않으며, 데이터는 소급 수집이 불가능하다.**
+   - `## 8-1` 계측 필드가 **비어 있고** 그 feature 가 UI·사용자 행동을 가지면 임의로 채우지 말고 `Needs Instrumentation: F-NNN ## 8-1 — /plan-milestone R4 또는 /consult-expert data` 를 보고한다(정의 소유는 ADR-062 D10 — 본 skill 은 채우는 주체가 아니다).
+   - 계측 도구가 미설치면 **authoring 만** 한다 — 설치는 `/implement-workitem` 이다(ADR-040#amend-1 / ADR-052 install-ownership 3분할).
+```
+
+## 5-4-b. `discover-product --update` — quant 해석을 `analyst` 경유로
+
+> **왜 필요한가**: ADR-042#amend-2 결정 2 는 *"`## 14` 의 `quant` 를 해석해 `## 15` 로 승격하는 주체는 `--update` 가 아니라 `analyst` 다"* 로 정했지만, 실측하면 `--update` 의 R-E 는 **신규 Evidence Log 행 전부를 직접 해석**하고 노트 출처도 `/research-pack` 만 인정한다. 결정에 실행 surface 가 없으면 그 결정은 없는 것과 같다.
+
+**파일**: `.claude/skills/discover-product/SKILL.md`
+
+**현재** (77행):
+```
+- **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 리서치 노트(/research-pack 산출)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
+```
+
+**수정 후**:
+```
+- **R-E (Evidence 회수)**: 지난 갱신 이후 추가된 §14 Evidence Log 신규 행 + `docs/10-charter/insights/`의 노트(`/research-pack` 산출 + `/consult-expert` 도메인 노트)를 읽어 §15 Insight Backlog를 갱신(새 insight는 새 I-N, evidence는 §14에 적재).
+  - **`type: quant` 행은 본 skill 이 직접 해석하지 않는다 (ADR-042#amend-2 결정 2)** — 정량 해석과 `confidence` 판정은 `analyst` 소유다. (a) 그 quant 를 해석한 `insights/<YYYY-MM-DD>-data-*.md` 노트가 있으면 **그 노트의 인사이트를 받아 적는다**, (b) 없으면 해석하지 않고 출력에 `Needs Quant Interpretation: <evidence ID> — /consult-expert data 권장` 1줄만 보고한다(**자동 위임하지 않는다** — 명시 호출만. ADR-062 D10). **정성(qual) 행은 기존대로 본 skill 이 직접 처리한다.**
+```
+
 ## 5-5. Phase 5 커밋
 
 ```bash
-git add docs/90-decisions/boilerplate/ADR-042-ux-flow-quality.md docs/90-decisions/boilerplate/README.md docs/30-workitems/_templates/FEATURE_TEMPLATE.md .claude/skills/plan-milestone/SKILL.md
+git add docs/90-decisions/boilerplate/ADR-042-ux-flow-quality.md docs/90-decisions/boilerplate/README.md docs/30-workitems/_templates/FEATURE_TEMPLATE.md .claude/skills/plan-milestone/SKILL.md .claude/skills/plan-workitem/SKILL.md .claude/skills/discover-product/SKILL.md
 git commit -m "feat: give the HEART metric loop a quantitative consumer and instrumentation field"
 ```
 
@@ -2264,6 +2303,11 @@ grep -c '배포 라이선스는' docs/90-decisions/boilerplate/ADR-060-decision-
 grep -c 'ADR-060#amend-1' .claude/skills/bootstrap-project/SKILL.md        # 기대: 2 (수행-4 LICENSE 줄 + 1-a 항목)
 grep -c '계측 (ADR-042#amend-2)' docs/30-workitems/_templates/FEATURE_TEMPLATE.md  # 기대: 1
 grep -c '## 8-1' .claude/skills/plan-milestone/SKILL.md                    # 기대: 2 이상 (R4 작성 지시 + Needs Instrumentation)
+# (e) 계측 스펙이 task 로 내려가고, quant 해석이 analyst 를 경유하는가 (5-4-a·5-4-b)
+grep -c '계측 line item authoring' .claude/skills/plan-workitem/SKILL.md   # 기대: 1
+grep -c '## 8-1' .claude/skills/plan-workitem/SKILL.md                    # 기대: 2 이상 (전달 규칙 + 빈 필드 보고)
+grep -c 'Needs Quant Interpretation' .claude/skills/discover-product/SKILL.md  # 기대: 1
+grep -c 'ADR-042#amend-2' .claude/skills/discover-product/SKILL.md        # 기대: 1 (역참조)
 ```
 
 ## 7-5-b. agent 5종의 구조 정합 (D6·D8 역참조 + 부재 처리 + 필수 칸)
@@ -2403,6 +2447,9 @@ grep -c 'format + lint + typecheck + test' .claude/skills/stack-guard/SKILL.md #
 - [ ] R4 에 **`## 8-1` 작성 지시**가 함께 들어갔다 (작성 주체 부재 해소)
 - [ ] 계측 필드에 **수집 최소화**(목표에서 역산) + **개인정보 항목은 `user-choice` 등재 제안**이 있다
 - [ ] 법률·보안 자동 트리거는 **없다** (사용자 명시 호출 + 체크리스트 안내만)
+- [ ] **계측 스펙이 task 로 내려간다** — `plan-workitem` 에 `3-I` 가 있어 feature `## 8-1` 계측 필드를 task `## 3` line item 으로 옮기고, 빈 필드는 `Needs Instrumentation` 보고로 끝낸다(임의 채움 금지). 없으면 계측이 feature 문서에서 죽는다
+- [ ] **quant 해석이 `analyst` 를 경유한다** — `discover-product --update` R-E 가 `type: quant` 를 직접 해석하지 않고 (a) data 노트 수용 / (b) `Needs Quant Interpretation` 보고로 분기하며, **자동 위임하지 않는다**. qual 은 기존대로 직접 처리
+- [ ] ADR-042#amend-2 `적용 surface` 에 **plan-workitem·discover-product 2행이 추가**됐다 (결정 2·3 의 실행 지점)
 
 **Phase 6 — 라이선스 + 인접 사실 오류**
 - [ ] ADR-060 **Amendment 1** 이 추가되고 인덱스 Amendments 칸이 갱신됐다
