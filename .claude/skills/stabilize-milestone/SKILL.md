@@ -93,6 +93,28 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - **cross-LLM 리뷰 skill wrapper 존재 (ADR-010#amend-4, deterministic)**: `validate-plan`·`validate-discovery`·`validate-milestone`과 각 repair 짝(`repair-plan`·`repair-discovery`·`repair-milestone`)에 `.agents/skills/<name>/SKILL.md`가 존재하는가. 부재 시 `P1 [Roster-drift] <skill> — Codex wrapper 부재 (ADR-010#amend-4)`.
    - 발견은 IMPROVEMENT_GUIDE에 기록(보고만 — 차단 X). **한계**: WORKFLOW 산문 흐름 등재는 본 grep 범위 밖(reviewer 위임이 보조 catch).
 
+8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)~(d) 가 전부 정상이면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
+   - **선행: 파일 부재 처리** — `docs/00-meta/STACK_SETUP_PLAN.md` 는 baseline 이 아니라 `/bootstrap-stack` 생성물이다. 부재 시 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0 의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
+   - (a) **registry 경로 실재** — **대상 절·검사할 열·조건을 아래로 고정한다**(deterministic 이려면 같은 입력에 같은 판정이 나야 한다. 절마다 스키마가 다르므로 "registry 행"만으로는 무엇을 볼지 정해지지 않는다). 부재 시 `P2 [Guard-drift] <절>:<경로> 부재 — /stack-guard 재실행 권장`.
+
+     | 대상 절 | 검사할 열 | 조건 |
+     |---|---|---|
+     | `## E2E Smoke Registry` | `smoke 파일 경로` | 그 **행**의 `status` 가 `n/a` 가 아닐 때 |
+     | `## Design Gate Adapter` | `adapter path` **만** | **절**의 `status` 가 `ready` 일 때 |
+     | `## Dart Source Roots` | `경로` (pubspec 위치 기준 상대경로) | 그 절이 존재할 때 (비-Dart 스택은 `/bootstrap-stack` 이 절을 삭제하므로 대상 0) |
+
+     - **`output path` 는 검사하지 않는다** — `design-gate-shots/` 는 `.gitignore` 대상이고 adapter 가 매 실행 통째로 생성·초기화하는 ephemeral 산출물이라 **fresh clone·정리 직후 부재가 정상**이다. 검사하면 매 마일스톤 오탐이 나 침묵 우선 원칙과 충돌한다.
+     - `## Dependency Tools` 는 경로 열이 없어 대상이 아니다. `status: n/a`·미대상 행도 대상이 아니다 — e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다.
+     - 템플릿 예시 행(`(예: …)`)이 남아 있으면 그 경로는 실재하지 않으므로 그대로 `P2` 가 되며 처방(`/stack-guard` 재실행)이 정확하다 — 별도 예외를 두지 않는다.
+   - (b) **design gate digest** — `## Design Gate Adapter` 의 `status` 가 **`ready` 인 경우에만**, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치를 확인한다. 불일치 시 `P2 [Guard-drift] design gate adapter digest 불일치 — /stack-guard 재실행 권장` (읽기 전용 — 여기서 고치지 않는다). 실행 명령은 OS 별로 — Unix/macOS `shasum -a 256 <path>` (또는 `sha256sum`), Windows PowerShell `Get-FileHash -Algorithm SHA256 <path>`. 두 도구 모두 없으면 이 항목만 skip + `digest check skipped: no sha256 tool`.
+   - (c) **등록 밖 소스 디렉터리** — **소스 루트 registry 를 갖는 스택에서만 수행한다.** 현재 그 registry 를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며, **비-Dart 스택에서는 `/bootstrap-stack` 이 그 절을 삭제하므로 판정 기준이 없다 → 이 항목을 건너뛴다**(사유 echo 불요 — 침묵). 기준 없이 "등록 밖"을 판정하면 TS/Python/Go 의 `src/`·`tests/` 가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다. Dart 스택에서 발견 시 `P2 [Guard-drift] 등록 밖 Dart source root: <경로> — /stack-guard 재실행 권장`.
+   - (d) **probe 판정 기록** — `## 통합 명령 사용법` 의 `probe smoke:` 값으로 판정한다.
+     - **정상(무출력)**: `PASS (probe verified, …)` 2종 · **`PROBE OK, PROJECT FAIL`**. 후자는 probe 전 회차가 기대대로였고 **프로젝트 코드만** 실패한 상태이므로 검증 장치의 노후가 아니다 — 재실행해도 같은 결과이니 처방이 무의미하고, 그 프로젝트 실패는 졸업 item 2(`통합 validate Pass`)와 단계 3 이 이미 잡는다.
+     - **`P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`**: `PROBE FAIL(<단계>)` · `PARTIAL` · `SKIPPED (…)` · **줄 자체 부재**.
+     - **여기서 probe 를 다시 돌리지 않는다 — 기록된 문자열만 읽는다**(read-only 계약). 이것이 `/stack-guard` 의 미검증 상태가 조용히 잊히지 않는 유일한 경로다(ADR-063 D3 기록 → D4 회수).
+   - `validate` 4단계 커버리지의 **재측정**은 본 항목이 아니다 — 실측은 `/stack-guard` 재실행 시 probe 가 하고, 본 항목은 (d) 로 그 **기록**만 읽는다(ADR-063 D1·D4 — 중복 회피 + read-only 유지).
+   - 회수 경로는 기존과 동일하다 — IMPROVEMENT_GUIDE 에 기록하면 다음 `/plan-milestone` R0 의 open 항목 회수가 사용자에게 재실행을 안내한다(`[ADR-candidate]`·`[Stack-drift]` 와 동형, 신설 없음).
+
 본 단계는 모두 *보고만* — 발견이 있어도 stabilize 후속 단계 차단 X (LLM 위임 단계로 계속). 후속 처리는 ADR-057#amend-3 결정 6 분기(기존 task 약속 결함=repair, cross-cutting=repair-milestone, 담당 없는 새 범위=사용자 보고+다음 M 후보)를 따른다.
 
 **봉인 후 새 결정 등재 (ADR-060 D11)**: 마일스톤 점검에서 *기획 결정*(사용자가 정하거나 승인해야 할 것)이 드러나면 `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `- 발견: 봉인 후 (M<N>)` 줄로 등재한다. QA_FINDINGS/IMPROVEMENT_GUIDE는 *결함·개선*을 담고 원장은 *결정*을 담는다(둘 다 해당하면 양쪽에 각자 형식으로). 본 skill의 read-only 계약은 불변 — 원장 등재는 기존 QA_FINDINGS 기록과 동일한 정상 책임 범위다. 원장 파일이 없으면 등재를 건너뛰고 보고만 한다.

@@ -89,6 +89,30 @@
 - Anthropic 2026 hooks docs의 `async: true` / `asyncRewake: true` 2 패턴이 *비용 폭증 우려*를 완화한다 (async 백그라운드 실행 + 실패 시만 깨움). `/stack-guard`는 **이 패턴 예시를 *옵션 출력*으로 박는다** (사용자가 채택 시 `.claude/settings.local.json`에 복사). 파일 확장자 필터링은 verify 스크립트 내부 처리 — `if` 필드는 단일 permission rule 제약(`|`/`&&` 미지원)으로 미사용.
 - **canonical 검증은 hook 도입 여부와 무관하게 작동** — `/validate-workitem`, `/finalize-workitem`, `/stabilize-milestone` 각각이 동기 `validate` 호출을 가짐 (ADR-007 lifecycle 정합).
 
+<a id="guardrails-verification-lifecycle"></a>
+## 검증 장치의 유지 주기 (ADR-063 D5)
+
+| 시점 | 무엇이 도나 | 누가 |
+|---|---|---|
+| 스택 확정 직후 1회 | `validate` 생성 + probe 실측 검증 | `/stack-guard` |
+| 매 task 검증 | `validate` **전체 실행** (코드 상태가 매 phase 변하므로 직전 결과를 재사용하지 않는다) | `/validate-workitem` |
+| task 마감 직전 | `validate --changed` 허용 (빠른 회전 — ADR-020) | `/finalize-workitem` |
+| 매 마일스톤 | `validate` 전체 + `validate:e2e` + 장치 노후 점검 | `/stabilize-milestone` |
+| 다음 마일스톤 시작 | 노후 발견분 회수 → 재실행 권고 | `/plan-milestone` R0 |
+
+장치가 낡았다는 신호는 `P2 [Guard-drift]` 로 `IMPROVEMENT_GUIDE.md` 에 기록되고, 다음 `/plan-milestone` R0 가 회수해 `/stack-guard` 재실행을 안내한다. **아무것도 낡지 않았으면 아무 출력도 없다** — 정상 상태는 보고하지 않는다. 재실행 시 무엇이 갱신되고 무엇이 보존되는지는 `/stack-guard` 의 `## 재실행 계약` 표가 SSOT다.
+
+`validate` 의 **판정력**(probe 로 실측하는 부분)은 `/stack-guard` 재실행 때만 측정된다. 마일스톤 점검은 그 결과를 다시 재지 않고 `STACK_SETUP_PLAN.md` 에 기록된 판정(`probe smoke:`)만 읽는다 — 실측을 마일스톤 점검으로 옮기면 read-only 계약이 깨지고, 기록을 두지 않으면 프로비저닝 단계의 `SKIPPED` 가 아무도 모르게 남는다.
+
+## 새 기계적 검사의 배치 기준 (ADR-063 D6)
+
+새 기계적 검사에 **차단(hard-block)** 등급을 줄 수 있는지 2문항으로 판정한다.
+
+1. 이 검사가 **문법·구조를 이해**하는가, 문자열만 보는가? → 문자열만 보면 **기록 등급 상한**(차단 금지).
+2. 막으려는 실패가 **실제로 관측**됐는가(ADR-022)? → 가설뿐이면 **권장 등급**까지만.
+
+둘 다 통과할 때만 차단이 가능하다. 하나라도 걸리면 report-only 로 둔다.
+
 ## 권장 예시
 - Next.js + pnpm + Playwright 프로젝트
   - `scripts/verify.ps1` 또는 `scripts/verify.mjs`
