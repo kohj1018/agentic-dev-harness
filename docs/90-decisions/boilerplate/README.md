@@ -55,6 +55,7 @@
 | 059 | Flutter/모바일 프로파일 (Android·iOS 직접 지원) | accepted | — | ADR-031을 Flutter에 한해 해제 — npm broker + 등록 source root format + analyze 심각도 분리 + 로컬 golden + e2e 5상태·suite 경로 판정 + ARCH 7-5 + 시크릿 2단 분류 |
 | 060 | 기획 결정 마감 + 마일스톤 봉인 (Decision Closure & Milestone Seal) | accepted | — | 결정 원장 + authority 축 + Decision Brief + contract-ready + /seal-milestone 봉인. 열린 질문 5섹션 폐지 |
 | 061 | 닫힌 사용자 결정 위반의 인터페이스 게이트 (Decision-Backed Interface Gate) | accepted | — | `[Arch-iface-7-N]` 등급 분기 — 원장의 `closed`+`user-*` 결정 위반 또는 7-x `Don'ts` 위반은 P0(Needs Fix), 그 외는 기존 P1. + 닫힌 결정 바인딩을 diff-trace 추적 근거로 인정 |
+| 063 | 검증 장치의 실측 검증과 유지 주기 (Verification Harness Integrity) | accepted | — | probe 기반 실측 smoke test + harness 경로 배제 + 재실행 계약 + `[Guard-drift]` 노후 감지(침묵 우선) + 기계적 검사 배치 2문항 |
 
 ## Reserved / Parked / Dropped 번호
 
