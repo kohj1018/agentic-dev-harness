@@ -120,18 +120,32 @@ const hasKind = (output, name, kind) => fileBlockers(output, name).some((item) =
 const noGeometryBlockers = (output, name) => fileBlockers(output, name).every((item) => !['page-overflow', 'viewport-escape', 'clipped-text'].includes(item.kind));
 
 // spawnSync 의 error 는 두 부류다. (a) 자식을 **띄우지 못한** 경우(EPERM·EACCES·ENOENT 등)는 환경 문제이므로
-// adapter exit 2(실행 불가)와 동일하게 승계한다. (b) 띄운 뒤의 실패(ETIMEDOUT 시간 초과·ENOBUFS 출력 초과)는
-// adapter 가 유계 시간에 끝나지 않았다는 뜻이라 bounded-process-completion 결함으로 남긴다 — (b)까지 exit 2 로
-// 보내면 그 check 가 영구히 참이 된다. 모든 run() 결과에 적용한다. ADR-063 D1 / ADR-058#amend-2.
+// adapter exit 2(실행 불가)와 동일하게 승계하고, (b) 띄운 뒤의 실패(ETIMEDOUT·ENOBUFS)는 adapter 가 유계
+// 시간에 끝나지 않은 산출물 결함이므로 bounded-process-completion 실패(exit 1)로 종료한다 — (b)까지 exit 2 로
+// 보내면 그 check 가 영구히 참이 되고, 반대로 그냥 통과시키면 빈 출력이 뒤 검사의 오분류·공허한 통과를 만든다.
+// 아래 세 분기를 **4개 run() 결과 전부**에 적용한다. ADR-063 D1 / ADR-058#amend-2.
 const LAUNCH_FAILURE_CODES = ['EPERM', 'EACCES', 'ENOENT', 'EMFILE', 'ENFILE', 'ENOMEM'];
-const requireExecutable = (label, result) => {
-  const launchFailed = Boolean(result.error) && LAUNCH_FAILURE_CODES.includes(result.error.code);
-  if (!launchFailed && result.status !== 2) return;
-  const detail = launchFailed ? `spawn failed: ${result.error.message}` : (result.stderr || result.stdout || 'adapter exit 2').trim();
-  record('execution-available', false, `${label}: ${detail}`.slice(0, 2000));
-  // finish() terminates immediately, so remove the temp tree before emitting exit 2.
+const bail = (name, detail, code) => {
+  record(name, false, detail.slice(0, 2000));
+  // finish() terminates immediately, so remove the temp tree before emitting the exit code.
   rmSync(root, { recursive: true, force: true });
-  finish(2);
+  finish(code);
+};
+const requireExecutable = (label, result) => {
+  // (a) 기동 실패(EPERM 계열) — 환경 문제이므로 adapter exit 2(실행 불가)와 동일하게 승계.
+  if (result.error && LAUNCH_FAILURE_CODES.includes(result.error.code)) {
+    bail('execution-available', `${label}: spawn failed: ${result.error.message}`, 2);
+  }
+  // (b) 기동 후 실패(ETIMEDOUT 시간 초과·ENOBUFS 출력 초과) — adapter 가 유계 시간에 끝나지 않은
+  //     산출물 결함이므로 bounded-process-completion 실패로 즉시 종료한다. 그냥 통과시키면 뒤 검사가
+  //     빈 출력으로 판정돼 원인이 묻히고, 부재 검사(1px 통과 등)는 공허하게 참이 되기까지 한다.
+  if (result.error) {
+    bail('bounded-process-completion', `${label}: ${result.error.code || 'error'}: ${result.error.message}`, 1);
+  }
+  // (c) adapter 자신의 exit 2(실행 불가)는 그대로 승계.
+  if (result.status === 2) {
+    bail('execution-available', `${label}: ${(result.stderr || result.stdout || 'adapter exit 2').trim()}`, 2);
+  }
 };
 
 try {
