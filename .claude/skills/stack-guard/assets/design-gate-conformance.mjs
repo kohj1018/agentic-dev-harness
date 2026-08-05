@@ -119,6 +119,21 @@ const fileBlockers = (output, name) => (output?.blockers || []).filter((item) =>
 const hasKind = (output, name, kind) => fileBlockers(output, name).some((item) => item.kind === kind);
 const noGeometryBlockers = (output, name) => fileBlockers(output, name).every((item) => !['page-overflow', 'viewport-escape', 'clipped-text'].includes(item.kind));
 
+// spawnSync 의 error 는 두 부류다. (a) 자식을 **띄우지 못한** 경우(EPERM·EACCES·ENOENT 등)는 환경 문제이므로
+// adapter exit 2(실행 불가)와 동일하게 승계한다. (b) 띄운 뒤의 실패(ETIMEDOUT 시간 초과·ENOBUFS 출력 초과)는
+// adapter 가 유계 시간에 끝나지 않았다는 뜻이라 bounded-process-completion 결함으로 남긴다 — (b)까지 exit 2 로
+// 보내면 그 check 가 영구히 참이 된다. 모든 run() 결과에 적용한다. ADR-063 D1 / ADR-058#amend-2.
+const LAUNCH_FAILURE_CODES = ['EPERM', 'EACCES', 'ENOENT', 'EMFILE', 'ENFILE', 'ENOMEM'];
+const requireExecutable = (label, result) => {
+  const launchFailed = Boolean(result.error) && LAUNCH_FAILURE_CODES.includes(result.error.code);
+  if (!launchFailed && result.status !== 2) return;
+  const detail = launchFailed ? `spawn failed: ${result.error.message}` : (result.stderr || result.stdout || 'adapter exit 2').trim();
+  record('execution-available', false, `${label}: ${detail}`.slice(0, 2000));
+  // finish() terminates immediately, so remove the temp tree before emitting exit 2.
+  rmSync(root, { recursive: true, force: true });
+  finish(2);
+};
+
 try {
   const shots = join(root, 'design-gate-shots');
   mkdirSync(shots, { recursive: true });
@@ -126,13 +141,7 @@ try {
 
   const coreNames = ['clean.html', 'low-contrast.html', 'horizontal.html', 'self-clip.html', 'vertical.html', 'ancestor-clip.html', 'exclusions.html', 'label-name.html'];
   const core = run(coreNames.map(fixture));
-  if (core.result.status === 2) {
-    const detail = (core.result.stderr || core.result.stdout || 'adapter exit 2').trim();
-    record('execution-available', false, detail.slice(0, 2000));
-    // finish() terminates immediately, so remove the temp tree before emitting exit 2.
-    rmSync(root, { recursive: true, force: true });
-    finish(2);
-  }
+  requireExecutable('core', core.result);
   record('bounded-process-completion', !core.result.error, core.result.error?.message || `status=${core.result.status}`);
   record('stale-screenshot-cleanup', !existsSync(join(shots, 'stale.png')), 'stale.png removed before capture');
   record('clean-pass', fileBlockers(core.output, 'clean.html').length === 0 && (core.output?.screenshots || []).filter((shot) => basename(shot).startsWith('0-clean-')).length === 3, 'blockers=0 screenshots=3');
@@ -153,14 +162,17 @@ try {
   writeFileSync(sameA, FIXTURES['clean.html'], 'utf8');
   writeFileSync(sameB, FIXTURES['clean.html'], 'utf8');
   const same = run([sameA, sameB]);
+  requireExecutable('same-basename', same.result);
   const sameShots = (same.output?.screenshots || []).map((shot) => basename(shot));
   record('same-basename-batch', same.result.status === 0 && sameShots.length === 6 && sameShots.filter((name) => name.startsWith('0-index-')).length === 3 && sameShots.filter((name) => name.startsWith('1-index-')).length === 3 && new Set(sameShots).size === 6, `screenshots=${sameShots.length} unique=${new Set(sameShots).size}`);
 
   const missing = join(root, 'missing.html');
   const isolated = run([missing, fixture('clean.html')]);
+  requireExecutable('render-error-isolation', isolated.result);
   record('per-file-render-error-isolation', isolated.result.status === 1 && hasKind(isolated.output, 'missing.html', 'render-error') && (isolated.output?.screenshots || []).filter((shot) => basename(shot).startsWith('1-clean-')).length === 3, 'missing file blocks while clean sibling still renders');
 
   const edge = run([fixture('edge-1px.html'), fixture('edge-2px.html')]);
+  requireExecutable('pixel-tolerance', edge.result);
   record('one-pixel-tolerance-pass', fileBlockers(edge.output, 'edge-1px.html').length === 0, 'left=-1px is within tolerance');
   record('two-pixel-escape-block', hasKind(edge.output, 'edge-2px.html', 'viewport-escape'), 'left=-2px is outside tolerance');
 } finally {
