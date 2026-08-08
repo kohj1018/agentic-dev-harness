@@ -17,13 +17,20 @@ feature
 ## 1. 작업 목적
 
 ## 2. 작업 범위
+<!-- 이 task가 외부 경계를 건드리면 plan-workitem이 범위 끝에 다음 한 줄을 박는다 (ADR-064 D1).
+     종류는 (a) 영속 저장소 쓰기 / (b) 외부(서드파티·타 시스템) 네트워크 호출 / (c) 실행 진입점 세 가지이고, **해당하는 것만 골라 적는다** — "(a)/(b)/(c) 중 해당" 처럼 뭉뚱그리면 구현·검증이 어느 경계에 증거가 필요한지 알 수 없다.
+     예: `- 외부 경계: (a) 영속 저장소 쓰기, (c) 실행 진입점 — 구현 시 경계 종류마다 실행 증거 필요`
+     같은 저장소·같은 배포 단위 안의 서비스 간 호출은 (b)가 아니다. 셋 다 해당 없으면 이 줄을 적지 않는다. -->
 
 ## 3. 구현 항목
 <!-- plan-workitem이 *단계별 구현 가이드*로 채운다 (ADR-026#amend-2). 그 문서만 보고 따라 하면 구현이 끝날 만큼 구체적으로.
      각 단계 형식: `N. <파일경로[:라인/식별자]> — 현재: <상태> → 변경: <정확한 수정(필요 시 before/after)> → 확인: <검증 방법>` (가능하면 끝에 `(AC-N)` 태그).
      모호 지시("적절히 처리") 금지. 새 외부 의존이 필요하면 설치 단계도 명시 (ADR-040#amend-1) — 예: N. 의존성 설치 — `pnpm add <pkg>@<ver>` 실행 (용도: ...) (AC-N).
      `/plan-workitem M<N>`이 전 feature의 `## 3`를 한 번에 완성한다(ADR-026#amend-4 — `## 3` SSOT; ADR-057#amend-3 — draft tier 폐기; 의도-수준 draft 마커 없음). implement 진입 preflight는 draft 검사가 아니라 접지 유효성만 가볍게 본다(ADR-057#amend-3).
-     단계가 feature ## 7-2의 invariant를 집행하면 끝에 (INV-N) 태그를 붙일 수 있다 (ADR-057). -->
+     단계가 feature ## 7-2의 invariant를 집행하면 끝에 (INV-N) 태그를 붙일 수 있다 (ADR-057).
+     외부 계약 사실(엔드포인트·파라미터명·응답 필드명/타입/nullable·페이지네이션·인증 헤더 형식)을 아직 실측하지 않았으면 확정으로 적지 말고 다음 형식으로 박는다 (ADR-064 D3):
+       `- [미실측] <무엇> — 잠정값: <값> / 출처: <URL 또는 문서> / 확인 방법: <어떻게 실측> / 해소: 구현 1단계`
+     번호 단계 아래 하위 불릿으로 둘 수 있고, 이후 참조 키는 단계 번호가 아니라 `<무엇>` 문자열이다(단계 재배치에 깨지지 않게). implement가 실측 후 `[실측 YYYY-MM-DD]`로 바꾸고 관측값으로 교체한다. AC(## 6)에는 이 표기를 쓰지 않는다 — AC는 행동을, ## 3는 배선 사실을 담는다. -->
 
 ## 3-T. 트러블슈팅 (Type=bugfix 일 때만 — 아니면 본 섹션 삭제)
 <!-- 증상만 있고 AC가 없는 작업의 root-cause 절차. 채운 뒤 회귀 테스트 AC를 ## 6에 박는다. -->
@@ -69,7 +76,9 @@ feature
        예: `- AC-1 → jest::tests/auth/me.spec.ts::test_AC_1_unauthenticated_returns_401`
        채워져 있고 *placeholder가 아니면* /validate-workitem이 path 우선 resolve.
        채워지지 않으면 기존 자연어 양식(`→ <file> > <test-name>`) 그대로 — 강제 X.
-       **angle-bracket placeholder(`<runner>` 등)만 남기는 것 금지** — 안 채울 거면 자연어 양식으로 작성. 잔존 placeholder는 validator가 *미설정*으로 간주하고 자연어 매칭 fallback하지만, report에 P2 라벨로 기록. -->
+       **angle-bracket placeholder(`<runner>` 등)만 남기는 것 금지** — 안 채울 거면 자연어 양식으로 작성. 잔존 placeholder는 validator가 *미설정*으로 간주하고 자연어 매칭 fallback하지만, report에 P2 라벨로 기록.
+     검증 판정력 확인용 테스트 중 **AC 행동으로 귀속되지 않는 것**(대표적으로 positive control — 검사 헬퍼 자체가 살아 있는지 확인하는 테스트)은 `- VC-N → <file> > <test-name>` 형식으로 등재한다 (ADR-064 D2). 반례 테스트("잘못된 입력을 거부한다")는 대개 AC 본연의 행동이므로 VC-N이 아니라 `AC-N`으로 매핑한다.
+     VC-N 행의 writer는 implement foreman 단독이며, **`## AC ↔ 테스트 매핑` 커버리지 % 집계에는 포함하지 않는다**(그 %가 신뢰도 등급 입력이라 섞이면 등급이 이동한다). 등재 목적은 그 테스트 줄이 diff trace audit에서 `AC-N | 명시 요청 | VC-N`으로 역추적되게 하는 것이다. -->
 
 ## 6-2. TDD opt-out
 <!-- 본문이 비어 있으면 TDD 적용 (기본). opt-out 하려면 아래 두 줄을 *모두* 채워 본문에 추가한다 — 하나라도 비면 형식 위반:
@@ -87,7 +96,11 @@ feature
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 
 ## 8. 메모
-<!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유. -->
+<!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유.
+     증거 receipt 위치이기도 하다 (ADR-064 D4 — writer: implement foreman 및 repair-workitem(외부 경계 코드를 고친 경우). 시점: 그 라운드의 파일 변경이 전부 끝난 뒤 · /validate-workitem 실행 *이전*. validate 이후 append하면 task 문서 mtime이 갱신돼 finalize가 report를 stale로 보고 Needs Validation 교착이 된다):
+       `- exec-evidence <날짜> <경계 a|b|c>: <등급 1 재실행 가능 | 등급 2 1회성 — 형태> — <무엇에 대고 실행했는가> / 결과: <관측 1줄>`
+       `- verify-power <날짜> <AC-N>: red=<observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)> / vc=<VC-N 목록 또는 없음> / mutation=<미승격(G# 미충족) | 승격(변이·관측·사본 삭제 결과)>`
+       `- fact-resolved <날짜> <무엇>: <잠정값> → <관측값> / 관측 방법: <1줄>` -->
 
 ## 9. 의존성
 <!-- 선행 task를 그 task가 보장할 AC 단위로 참조: `- T-002 ← T-001:AC-2 (인증 인터페이스 정의)`. 비어 있으면 선행 의존 없음.
