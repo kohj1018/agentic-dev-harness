@@ -36,6 +36,10 @@ allowed-tools: Read Glob Grep Write Edit Bash
 수행:
 1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 수정한다. **대상 task가 `done`이었던 경우**: Adopt/Adopt-modified가 하나 이상이면 **첫 코드 수정 직전에** task `## 0. Status`를 `done → in-progress`로 갱신·기록한다(전부 Reject면 코드·status 무변경). 재개방 뒤 이 라운드가 중단되거나 실패하면 `in-progress`로 유지한다(임의로 `done`으로 되돌리지 않음) — 수정 완료 후 fresh `/validate-workitem` Pass를 거쳐 `/finalize-workitem`이 다시 `done`으로 커밋한다.
 2. **한 라운드에 P0/P1/P2를 *모두* 4-판정으로 완결**한다(repair-plan과 동형). report를 삭제하므로 defer 금지 — 미처리 항목을 남기면 삭제 시 정보가 사라진다. 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다(`T-001 "P0 #1, P1 #3만"`).
+2-E. **실행 증거 갱신 (ADR-064 D4 — 외부 경계 코드를 고쳤을 때만)**: 본 라운드의 Adopt/Adopt-modified 수정이 (a) 영속 저장소 쓰기 · (b) 외부 네트워크 호출 · (c) 실행 진입점 코드를 건드렸으면, **그 경계의 실행 증거를 다시 확보하고 task `## 8`에 `- exec-evidence` 줄을 새로 append한다**(기존 줄은 지우지 않는다 — 이력이다). 증거 등급·안전 규정·waiver 규정은 implement 6-E와 동일하다. 확보하지 못하면 `Needs Execution Evidence: <경계 종류> — <사유>`를 출력에 남긴다. **등급 1 증거로 새 파일을 만들었으면 task `## 4-1`에도 그 경로를 추가한다**(finalize 의 add 목록 누락 방지 — 본 skill 은 단독 실행이라 `## 4-1` 단일 writer 규율과 충돌하지 않는다).
+   **이 책임이 repair에 있는 이유**: receipt writer를 implement 단독으로 두면 `validate(Needs Fix) → repair(코드 수정) → 재validate` 에서 증거가 낡은 채 남고 그것을 갱신할 주체가 없어 루프가 닫힌다. 코드를 고친 주체가 그 자리에서 증거를 갱신하는 것이 이 계약의 신선도 유지 방식이다.
+   본 skill이 `## 8`에 쓰는 시점은 `/validate-workitem` 재실행 *이전*이고 아래 4에서 report를 삭제하므로, task 문서 mtime 갱신이 report를 stale로 만드는 문제는 발생하지 않는다.
+
 3. **결정 이력 영속화 (ADR-047 D7)** — 본 라운드의 P0/P1 항목 전부에 대해 task 문서 `## 8. 메모`에 한 줄씩 append(P2는 cap 보호로 미영속):
    `- repair-workitem <YYYY-MM-DD> <severity> <category>: <Adopt|Adopt-modified|Reject-FP|Reject-context> — <근거 ≤80자>`
    (P0/P1은 Adopt·Reject 모두 기록 — 다음 validate가 같은 항목을 다시 올릴 때 사람이 판단 이력을 본다. P2는 미영속 — 재출현해도 finalize의 AC 게이트를 막지 않아 무해.)
@@ -60,6 +64,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - `## 8. 메모` append 줄 수
 - 삭제한 report 경로
 - 미해결 항목 (있으면)
+- 실행 증거 갱신 (ADR-064 D4): 갱신 N건(경계 종류) / 해당없음(외부 경계 코드 미수정) / `Needs Execution Evidence`
 - 다음 권장 액션: `/validate-workitem <task-id>` 재실행 (새 report 생성 → Pass면 `/finalize-workitem`)
 
 정책 근거: 비판적 재점검·전 severity 완결·report 삭제는 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-plan(ADR-038) 대칭. 결정 이력 영속은 ADR-047 D7.

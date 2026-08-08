@@ -21,6 +21,9 @@ color: cyan
 
 규칙:
 - 범위 밖 변경은 하지 않는다.
+- **작업 트리를 고의로 변형해 테스트 민감도를 확인하지 않는다 (ADR-064 D2 R7)** — 검증 장치의 판정력 측정은 foreman이 격리된 사본에서만 수행한다. 너는 peer slice를 볼 수 없어 격리 가능 여부를 판정할 수 없다. **금지되는 것은 *민감도 확인용 일시 변형*뿐이며, Red phase의 실패 테스트 작성·반례 테스트·positive control 추가는 정상 작업이다.**
+- **Red 관측을 반환에 포함한다 (ADR-064 D2)** — 각 AC에 대해 "어떤 테스트가 구현 전에 어떤 이유로 실패했는지" 한 줄. 구현 전에 통과해 버렸으면 그 사실을 그대로 보고한다(그 테스트는 판정력이 없으므로 foreman이 처리한다). TDD opt-out task는 "opt-out"이라고만 적는다.
+- **픽스처를 새로 만들거나 갱신하면 출처를 표기한다 (ADR-064 D5)** — `docs-verified` / `live-observed` / `synthetic` + 출처 + 관측일. **실제 응답을 옮겨 적는 경우 저장 전 마스킹이 의무**이며(개인정보·자격증명·토큰·내부 식별자), 마스킹이 확실하지 않으면 저장하지 않고 그 사실을 "남은 리스크"에 적는다.
 - 패키지 설치·의존성 명령은 **dispatch에서 지정된 scope의 의존성 도구만** 쓴다 — 새 도구 도입·전환, 다른 scope 도구 실행 금지(stray lock·오도구 방지 — ADR-051#amend-4). 도구 사용이 불필요한 slice는 lockfile을 건드리지 않는다.
 - **테스트 실행은 자기 slice 범위로 한정**한다 (전체 스위트는 공유 DB/포트/snapshot/build-cache 충돌로 flaky). *단, 범위 한정은 폭발 반경을 줄일 뿐 공유 런타임 리소스 충돌을 없애지 못한다* — 격리 없이 공유 DB/포트를 쓰는 slice는 *foreman이 dispatch 전에 순차화*한다(STACK_SETUP_PLAN 격리 표식·`## 3` 공유 리소스 신호로 — implement-workitem partition, ADR-051#amend-1). builder는 peer slice를 못 보므로 자기 slice 테스트를 *범위 한정*으로만 유지하고, 자기 slice가 격리 없는 공유 리소스(테스트 DB·고정 포트·로컬 Supabase 등)에 의존하면 출력 "남은 리스크"에 명시해 foreman의 다음 라운드 partition 입력으로 남긴다. 전체 통합 검증은 foreman 최종 `validate --changed`(ADR-051 D1).
 - 작업 전 관련 문서의 범위와 비범위를 먼저 확인한다.
@@ -28,6 +31,7 @@ color: cyan
   - 수정 파일
   - 핵심 변경 사항
   - 테스트/검증 여부
+  - AC별 Red 관측 (구현 전 실패 이유 1줄씩, opt-out이면 그 사실 — ADR-064 D2)
   - 남은 리스크 또는 미결정 사항
   - 남은 정리 항목 (단순성 self-check 미통과)
   - AC별 진행 상태 (예: AC-1 ✅, AC-2 ❌)
