@@ -27,7 +27,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
        4. Arch-iface 7-1/7-2/7-3/7-4/7-5 audit (API/CLI/백엔드/프론트/모바일)
        5. UI Design inventory audit (ADR-027#amend-1) — UI 프로젝트에 한해 spawn
        6. MCP 사용 audit (ADR-048#d5)
-       7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검)
+       7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검 + ADR-064 receipt 판정 — 실행 증거/판정력/미실측 잔존, 전부 P1 기록 등급. 별도 축을 만들지 않는다)
        8. Cross-task seam 축 (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 spawn — ADR-057 결정 12)
      - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)·8(seam — feature `## 7-2` 실재)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item, 8 = feature `## 7-2` 실재. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
@@ -58,7 +58,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - 빠진 검증 포인트가 있는가
 - obvious regression risk가 있는가
 - 통합 검증 명령(있으면) 결과는 통과인가
-- AC ↔ 테스트 매핑 — task 문서의 AC-N마다 대응하는 테스트가 존재하는가(자연어 매칭 휴리스틱 또는 테스트 이름의 `AC_N` 식별자 매칭).
+- AC ↔ 테스트 매핑 — task 문서의 AC-N마다 대응하는 테스트가 존재하는가(자연어 매칭 휴리스틱 또는 테스트 이름의 `AC_N` 식별자 매칭). **`## 6-1`의 `VC-N` 행은 AC 행동으로 귀속되지 않는 판정력 확인용(positive control 등)이므로 본 매핑의 분자·분모 어디에도 넣지 않는다 (ADR-064 D2)** — 커버리지 %가 아래 confidence ladder의 입력이라 섞이면 등급이 이동한다. 대신 `VC-N`이 가리키는 테스트 줄은 diff trace audit에서 *추적 가능*으로 분류한다(추적 근거는 `AC-N | 명시 요청 | VC-N` 셋이다 — ADR-006#amend-1 문구의 해석 확장).
   - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D6 contract formation + D1 inspectability 정합).
   - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
 - 테스트 선행 휴리스틱 — git log에서 동일 task 범위의 테스트 파일 추가/수정이 구현 파일보다 먼저(또는 동일 커밋) 들어왔는지. 단순 경고로만 보고하고 강제 종료하지 않는다(소규모 작업이 한 커밋에 묶이는 경우 정상).
@@ -72,6 +72,10 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - **API/CLI/백엔드/프론트/모바일 — Arch-iface audit**: 본 task 가 ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 의 기존 결정을 위반했거나, 신규 결정을 *7-x 본문 갱신 없이* 도입했으면 report 에 `[Arch-iface-7-N]` 기록 + 7-x 본문 갱신 권장 또는 ADR 후보 표시. **등급 분기 (ADR-061 D1)**: 위반된 7-x 항목이 [DECISION_REGISTER.md](../../../docs/10-charter/DECISION_REGISTER.md) 의 `status: closed` + `authority: user-choice|user-approval` 항목(그 항목의 `정본:` 앵커가 이 7-x 를 가리킴)으로 추적되거나, 그 7-x 의 `### Don'ts` 를 위반하면 **`P0 [Arch-iface-7-N]`** — Needs Fix 트리거다(사용자가 승인해 닫은 결정을 구현이 뒤집은 것을 보고만으로 통과시키지 않는다). **`Don'ts` 위반은 authority 와 무관하게 P0 다** — 금지 규정은 성질상 AC 로 회수될 수 없어 구현 시점 외에 검출 지점이 없다(ADR-060 D9 상 `Don'ts` 소항목 자체는 `agent-delegated` 이지만, 아래 P1 규칙보다 본 분기가 우선한다). 그 외(agent-delegated 컨벤션 불일치·7-x 본문 문구 미갱신 등)는 기존대로 **`P1`**. 원장 조회는 `## 결정 항목` 아래의 실제 `D-NNN` 항목만 대상으로 한다(설명 섹션의 형식 예시는 항목이 아니다 — ADR-019 색인 회수). 원장 파일이 없거나 해당 앵커 항목을 찾지 못하면 P1 로 두고 그 사실을 report 에 한 줄 기록한다.
 - **Cross-task seam audit** (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 — ADR-057 결정 12): 본 task 구현이 관련 INV-N을 위반하는가(상태 역방향 write / 멱등 미보장 / 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>`. §7-2가 참조 링크형이면 canonical feature 의 표를 따라 읽는다. (inline·fan-out 축 8 동일 기준 — small-diff inline 경로에서도 누락 없이 점검.)
 - **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
+- **아래 세 판정의 공통 판독 규칙 (ADR-064 D4)**: `- 외부 경계:` · `[미실측]` · `- exec-evidence`/`- verify-power` 를 찾을 때는 **HTML 주석(`<!-- ... -->`) 밖의 줄만** 센다. TASK_TEMPLATE 주석에 같은 형식의 예시가 들어 있어, 주석까지 세면 앞의 둘은 모든 task에서 오탐이 나고 `- exec-evidence`는 항상 존재로 보여 검사가 조용히 죽는다(원장 조회의 "설명 섹션의 형식 예시는 항목이 아니다"와 동형).
+- **실행 증거 판정** (ADR-064 D1/D7 — 본 skill은 실행하지 않고 *기록만 읽는다*): 본 task가 외부 경계를 건드렸는가를 diff와 task `## 2`의 `- 외부 경계:` 표시로 판정한다((a) 영속 저장소 쓰기 / (b) **외부** 네트워크 호출 — 같은 배포 단위 안의 서비스 간 호출은 제외 / (c) 실행 진입점). 해당하는 **경계 종류마다** task `## 8`에 `- exec-evidence` 줄이 있어야 한다. 없으면 `P1 [Exec-evidence-missing] <경계 종류>`. 사용자 waiver로 기록된 줄은 충족으로 보고 사유를 report에 인용한다. **줄의 존재 여부만 본다 — 신선도는 판정하지 않는다**(digest·커밋 비교는 도구가 없고, 줄 순서 기반 판정은 정상 repair 라운드에서 오탐이 난다. 근거는 ADR-064 D4). 증거 갱신은 코드를 고친 `/repair-workitem`의 책임이다. **본 항목은 기록 등급이며 Needs Fix를 트리거하지 않는다** — 실질 차단은 `/implement-workitem`의 `Needs Execution Evidence` 정지가 담당한다(ADR-064 D7).
+- **판정력 판정** (ADR-064 D2/D7): 각 AC에 대해 task `## 8`에 `- verify-power` 줄이 있고 `red=` 값이 `observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)` 중 하나인가. 없거나 값이 비면 `P1 [Verify-power-missing] AC-N`. **`opt-out`·`characterization`은 정상이며 결함이 아니다**(정당한 TDD opt-out·`Type: research-spike`·`Type: refactor`). `mutation=미승격`도 정상이다. 기록 등급 — Needs Fix를 트리거하지 않는다.
+- **미실측 잔존 판정** (ADR-064 D3): task `## 3`에 `[미실측]` 표기가 남아 있으면 `P1 [Unmeasured-fact] <무엇> — 구현 시 해소되지 않음`. 기록 등급.
 
 마지막 단계 — partial 집계 + report 파일 작성 (집계자=메인 세션 단독):
 0단계에서 팬아웃했으면 각 validator가 반환한 partial verdict(축별 findings + 그 축의 evidence)를
@@ -123,6 +127,13 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 - FAC-1: ✅ T-001:AC-1
 - FAC-2: ✅ T-001:AC-2
 - FAC-3: ❌ `P0 [Spec-gap]` unmapped — 계획 누락, 사용자 결정 필요(task 자동 추가 금지)
+
+## 실행 증거 · 판정력 (ADR-064 — 전부 기록 등급, Needs Fix 미트리거)
+- 외부 경계: 해당(a 영속 저장소 / b 외부 네트워크 / c 진입점) | 해당없음
+- exec-evidence: (a) ✅ 등급1 재실행 가능 / (b) ❌ `P1 [Exec-evidence-missing]` / waiver(<사유>) | 해당없음
+- verify-power: AC-1 ✅ observed / AC-2 ✅ opt-out(spike) / AC-3 ❌ `P1 [Verify-power-missing]`
+- VC-N: <등재 목록 또는 없음> (AC 매핑 % 집계 제외)
+- 미실측 잔존: 0건 | `P1 [Unmeasured-fact] <무엇>`
 
 ## Evidence Bundle (ADR-047 D8 oracle adequacy 정합)
 <!-- 본 검증 라운드가 *무엇을 봤고 무엇을 못 봤는지* 명시. green test가 곧 충분한 검증이라는 착각을 줄인다. -->

@@ -127,6 +127,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Arch-iface 위반 등급 분기 (닫힌 사용자 결정·`Don'ts` → P0) + 닫힌 결정 바인딩의 diff-trace 추적 인정 | [ADR-061](../90-decisions/boilerplate/ADR-061-decision-backed-interface-gate.md) (정책 SSOT). → ADR-061 `## Surfaces` 참조 (fan-out SSOT). |
 | 전문가 자문 capability (도메인 agent·조회 규율·단일 소유자·문서 경유) | [ADR-062](../90-decisions/boilerplate/ADR-062-domain-advisory-capability.md) (정책 SSOT). → ADR-062 `## Surfaces` 참조. |
 | 검증 장치의 실측 검증 + 유지 주기 (probe·harness 경로 배제·재실행 계약·`[Guard-drift]`) | [ADR-063](../90-decisions/boilerplate/ADR-063-verification-harness-integrity.md) (정책 SSOT). → ADR-063 `## Surfaces` 참조. |
+| task 층 증거 계약 (외부 경계 실행 증거·검증 판정력·`[미실측]` 외부 사실·receipt) | [ADR-064](../90-decisions/boilerplate/ADR-064-task-layer-evidence-contract.md) (정책 SSOT). → ADR-064 `## Surfaces` 참조. |
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 JIT 로딩)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

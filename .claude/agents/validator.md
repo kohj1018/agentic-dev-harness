@@ -54,6 +54,7 @@ color: magenta
 - 백엔드: 7-3 DB migration·인증·트랜잭션 결정 정합? 본 task 가 7-3 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - 프론트: 7-4 라우팅·상태관리·SSR-CSR 결정 정합? 본 task 가 7-4 결정 외 새 결정을 도입했는가? 도입 시 ADR 후보로 표시.
 - seam (feature `## 7-2` 존재 시 — 참조 링크형이면 canonical feature의 표를 따라 읽어 대조): 본 task 구현이 관련 INV-N을 위반하는가(예: 상태 역방향 write, 멱등 미보장, 2차-write 누락)? INV가 테스트로 커버되는가? 위반·미커버 시 `P1 [Seam] INV-N — <증상>` (ADR-057 결정 12).
+- **Evidence 축 (ADR-064 — 축 7을 받았을 때만)**: task `## 8`의 receipt를 *읽어서만* 판정한다(실행·해시 계산 금지). **표기를 찾을 때는 HTML 주석(`<!-- -->`) 밖의 줄만 센다** — TASK_TEMPLATE 주석의 형식 예시를 세면 `- 외부 경계:`·`[미실측]`은 상시 오탐, `- exec-evidence`는 상시 존재로 보여 검사가 죽는다(ADR-064 D4 판독 규칙). 외부 경계 종류(a 영속 저장소 쓰기 / b 외부 네트워크 호출 — 같은 배포 단위 안의 서비스 간 호출 제외 / c 실행 진입점)마다 `- exec-evidence` 줄이 있는가(없으면 `P1 [Exec-evidence-missing] <종류>`. **줄의 존재만 보고 신선도는 판정하지 않는다** — 줄 순서 기반 stale 판정은 정상 repair 라운드에서 오탐이 난다), AC마다 `- verify-power` 줄의 `red=` 값이 `observed|opt-out|characterization|unrecoverable` 중 하나인가(아니면 `P1 [Verify-power-missing] AC-N`), `## 3`에 `[미실측]` 잔존이 있는가(있으면 `P1 [Unmeasured-fact] <무엇>`). **전부 P1 기록 등급이며 Needs Fix 트리거로 반환하지 않는다** — 실질 차단은 implement의 정지가 담당한다(ADR-064 D7).
 - feature `## 7 FAC`의 각 항목이 task `## 6 AC`로 매핑됐는가? 매핑 안 된 FAC가 있으면 `P0 [Spec-gap] FAC-N → unmapped` 기록; task 자동 추가 금지; 집계자에게 Needs Fix + 사용자 결정 라우팅 반환 (ADR-037#amend-3 정합).
 
 ## 출력 계약 (ADR-046)
