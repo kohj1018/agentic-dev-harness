@@ -57,6 +57,7 @@
 | 061 | 닫힌 사용자 결정 위반의 인터페이스 게이트 (Decision-Backed Interface Gate) | accepted | — | `[Arch-iface-7-N]` 등급 분기 — 원장의 `closed`+`user-*` 결정 위반 또는 7-x `Don'ts` 위반은 P0(Needs Fix), 그 외는 기존 P1. + 닫힌 결정 바인딩을 diff-trace 추적 근거로 인정 |
 | 062 | 전문가 자문 capability (Domain Advisory Agents) | accepted | — | `/consult-expert` 1개 skill + 도메인 agent 5종(counsel/strategist/marketer/analyst/security). 지식은 1차 출처 조회, 페르소나는 규율 전용 + agent 간 문서 경유 + 재자문 반환 |
 | 063 | 검증 장치의 실측 검증과 유지 주기 (Verification Harness Integrity) | accepted | — | probe 기반 실측 smoke test + harness 경로 배제 + 재실행 계약 + `[Guard-drift]` 노후 감지(침묵 우선) + 기계적 검사 배치 2문항 |
+| 064 | task 층 증거 계약 (Task-Layer Evidence Contract) | accepted | — | 외부 경계 실행 증거(implement 정지로 차단, validate는 기록 등급) + Red 관측·VC-N 판정력 + `[미실측]` 외부 사실 해소 + 공통 receipt(`## 8`, writer=implement·repair, validate 이전) |
 
 ## Reserved / Parked / Dropped 번호
 
