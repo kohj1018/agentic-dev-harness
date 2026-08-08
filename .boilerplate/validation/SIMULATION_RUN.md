@@ -862,3 +862,67 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 - D3 기록 계약(`probe smoke:` 1줄)은 3 fixture 전부 CONFIRMED. `[Guard-drift]`의 입력이 실제로 생성됨을 확인했다.
 - **부수 관측**: fixture B 준비 단계에서 Vitest가 **sandbox spawn EPERM**으로 차단된 뒤 승인 실행으로 통과했다. 같은 라운드에서 conformance oracle의 *기동 실패 → exit 2 승계*를 넣은 근거(`[관측됨]`)를 보강하는 사례다.
 - 요청서 오라클 오류가 결과적으로 SKILL 공백 1건을 드러냈다 — **측정 기준을 문서에서 역산하지 않으면 오라클 자체가 결함이 된다**는 교훈이며, ADR-063 D1이 *"기대값(oracle)은 고정하고 SKILL 본문의 판정 표가 소유한다"* 고 규정한 이유와 같다.
+
+## Round 10 (2026-08-08, todo CLI / ADR-064 task 층 증거 계약 적용 검증)
+
+> isolated fork 3종 `C:\tmp\df064\f1|f2|f3` (harness baseline `31c791f` + todo CLI overlay). ADR-064 적용은 문서 대조로 이미 끝났고 반증 시나리오 10개의 **논리 정합도 텍스트로 확인된 상태**였다. 그래서 이 라운드가 재는 것은 설계 정합이 아니라 **준수도(compliance) 샘플링** — 실행자(LLM)가 그 문구를 실제로 따르는가. 대상은 "가장 위험/가장 먼저"로 지목된 3개(1b · 8 · 6b)이며 지시된 순서대로 수행했다.
+
+### 수행 방법 (Round 8·9와 결정적으로 다른 점 — 먼저 밝힌다)
+
+- **skill을 손으로 대행하지 않았다.** fork 디렉터리 안에서 `claude -p "<슬래시 커맨드>" --model sonnet`으로 lifecycle skill을 **실제 호출**했고, 후속 단계는 `--continue`로 같은 메인 세션에 연쇄시켰다(ADR-050 연쇄 실행 재현). 세션 6건 전부 실행 모델 `claude-sonnet-5`로 확인했다. Round 8·9의 "전 구간 수작업 재현" 한계가 이번에는 적용되지 않는다.
+- fixture: todo CLI (**Node 24 + TypeScript strict + Vitest**, `npm run validate` = `tsc -p tsconfig.json && vitest run`). M1 졸업 완료(T-001~T-003 `done`, 15 test pass), **M2 봉인 완료**(F-002 확장 명령 3종 + F-003 요약, task 4개, `## 10. 봉인 기록` 기입) 상태에서 시작했다.
+- **각 task 문서는 TASK_TEMPLATE의 안내 HTML 주석을 전부 보존한 채로 작성했다** — 시나리오 1b가 요구하는 입력이자 `/plan-workitem` 산출물의 자연 상태다.
+- 시나리오 간 간섭(작업 트리 오염 → diff-trace 축 왜곡)을 막으려고 fork를 3개로 분리했다: **f1 = 1b-i**, **f2 = 1b-ii**, **f3 = 8 → 6b 순차**.
+- 본 저장소는 실행 전후 모두 `HEAD 31c791f` · `git status` clean으로 확인했다(무수정).
+
+### 지상 진실 (ground truth — 주석 안 예시 vs 주석 밖 실항목)
+
+각 task 문서의 템플릿 주석에는 `- 외부 경계:` · `[미실측]` · `- exec-evidence` · `- verify-power` · `- fact-resolved` 형식 예시가 **각 1건씩** 들어 있다. 주석 밖 실항목은 아래가 전부다 — 검사가 이 표와 다르게 세면 오탐 또는 조용한 사망이다.
+
+| task | fork | `- 외부 경계:` | `[미실측]` | `- exec-evidence` | `- verify-power` |
+|---|---|---:|---:|---:|---:|
+| T-102 (순수 로직) | f1 | 0 | 0 | 0 | 2 (implement가 기록) |
+| T-103 (경계 (a)+(c), receipt 미기록) | f2 | 1 | 0 | **0** | **0** |
+| T-101 (경계 (a)+(c)) | f3 | 1 | 0 | 2 (implement가 기록) | 3 (implement가 기록) |
+| T-104 (경계 (a)+(c), receipt 사전 기입) | f3 | 1 | 0 | 2 | 3 |
+
+### 시나리오별 기대 / 실측 / 판정
+
+| # | 기대 | 실측 | 판정 |
+|---|---|---|---|
+| **1b-i** — 순수 로직 task + 주석 그대로 (`/implement-workitem T-102` → `/validate-workitem T-102`) | `- 외부 경계:`·`[미실측]`·`- exec-evidence` 전부 0건 판정. `Needs Execution Evidence` 미발화 | implement 출력: `실행 증거: 해당없음 — task ## 2에 외부 경계 표시 없음, 순수 함수(fs/process/network 미사용)` · `미실측 해소: 해당 항목 없음`. `## 8`에 `verify-power` 2줄만 기록(exec-evidence 0줄). validate report: `외부 경계: 해당없음` / `exec-evidence: 해당없음` / `미실측 잔존: 0건`, **finding 0건, Pass**(inline fallback F=3·L=38) | **통과** |
+| **1b-ii** — 경계 (a)+(c) task를 구현해 둔 채 `## 8`은 **주석뿐** (`/validate-workitem T-103` 단독) | 주석 안 예시를 세지 않으므로 `- exec-evidence` 0건 → `P1 [Exec-evidence-missing]`이 **경계 종류마다** 발화. 동시에 `[미실측]`은 0건이라 `[Unmeasured-fact]` 미발화 | `P1 [Exec-evidence-missing] a` + `... c` **2건 발화**(사유를 *"task `## 8`이 HTML 주석뿐, 실 콘텐츠 줄 0개"* 로 명기) / `P1 [Verify-power-missing]` AC-1·2·3 **3건** / **`미실측 잔존: 0건`** — 근거를 *"`## 3` 실 콘텐츠 3단계 모두 `[미실측]` 마커 없음"* 으로 명기. **판정 Pass**(D7대로 차단 없음), fan-out 6축 | **통과 (양방향)** |
+| **8** — 경계 (a)+(c) task 1개로 `implement → validate → finalize` 연속 (`T-101`) | ① finalize가 `Needs Validation`으로 끝나지 **않는다** ② `## 8`의 `- exec-evidence`가 경계 종류마다 = **2줄** | ① **커밋 `b2aa676` 성공**, status `in-progress → done`. finalize 출력이 근거를 스스로 인용: *"report mtime 19:03:02 > task doc/구현 파일 mtime 전부 → stale 아님"*(task 문서 18:55:21, 구현 파일 18:51~18:54) ② `- exec-evidence 2026-08-08 a: 등급 1 …` + `- exec-evidence 2026-08-08 c: 등급 1 …` **정확히 2줄, 둘 다 등급 1(재실행 가능 — `npm run validate`에 편입)**. validate finding 0건 Pass | **통과 (①②)** |
+| **6b** — 전부 Reject한 repair 라운드 → 재validate (`T-104`) | 증거 관련 finding **0건**. repair 출력에 `실행 증거 갱신: 해당없음(외부 경계 코드 미수정)` | repair: **Adopted 0 / Adopt-modified 0 / Reject-FP 2 / Reject-context 1**, 수정 파일 0, 출력 마지막 줄 **`실행 증거 갱신: 해당없음 (외부 경계 코드 미수정)`**, report 삭제, status 무변경. `## 8`은 exec-evidence 2줄 **뒤에** repair 결정 이력 3줄이 붙은 형태(= D4가 (iii) 후보를 기각하며 지목한 바로 그 오탐 유발 배치). 재validate: `exec-evidence (a) ✅ / (c) ✅`, `verify-power AC-1~3 ✅`, `미실측 잔존 0건` — **증거 관련 finding 0건, Pass** | **통과** |
+
+**ADR-064 `## Mutation Contract` 5의 반증 항목 매핑**: (g) 템플릿 주석 오탐/조용한 사망 — **미발화**. (h) all-Reject repair 라운드의 증거 관련 finding — **미발화**. (d) receipt가 report를 stale로 만들어 finalize 차단 — **미발화**. 셋 다 반증에 실패했다(= 해당 결정을 재조정할 근거가 나오지 않았다).
+
+### 부수 관측 (요청 범위 밖이지만 같은 실행에서 확인된 것)
+
+- **시나리오 2의 코어가 반복 확인됐다** — 경계 (a)+(c) task에서 exec-evidence가 **종류마다 1줄씩 정확히 2줄** 생성됐다(f3/T-101 실측 1회 + 아래 계측 결함으로 폐기된 f1/T-103 실행 1회, 서로 독립). f2/T-103은 0줄일 때 P1 2건 발화로 역방향 확인. "1건만 요구하면 복합 task가 `--help` 한 번으로 통과한다"는 근거(ADR-064 `## 근거` 마지막 줄)가 실행 층에서 지켜졌다.
+- **D2가 실제로 공허한 단정을 하나 잡았다.** T-101 AC-3에서 builder의 최초 단정 `stderr.toContain('사용법')`이 *미등록 명령의 `default` 분기 메시지와 구별되지 않아 구현 전에도 통과*했고, builder가 그것을 스스로 보고 → foreman이 단정을 `'사용법: todo export <path>'`로 좁혀 판정력을 확보한 뒤 `verify-power` 줄에 그 경위를 남겼다. 판정력 규율이 장식이 아니라 실제로 발화한 사례다.
+- **Red 관측 4상태 중 `unrecoverable`가 실사용됐다.** builder가 AC-1 Green 단계에서 전체 구현을 한 번에 써 버려 뒤 AC의 원 Red를 재현할 수 없던 회차에서, foreman이 `red=unrecoverable(<사유> — 대체 확인 …)`로 기록하고 대체 확인 수단을 함께 적었다. 4상태를 두지 않았으면 그 task가 영구 차단됐을 자리다. **단 그 사유는 D2가 이 상태에 적어 둔 `세션 중단 등`(외부 상황)이 아니라 builder의 RGR 붕괴(규율 실패)다** — 두 원인이 같은 라벨로 들어가고 validate는 `unrecoverable`을 정상값으로 통과시키므로, 후자의 빈도를 집계할 수단이 없다. ADR-064는 `ADR-009 RGR 3 phase`를 preserved invariant로 두었을 뿐 집행하지 않으니 결함은 아니지만, **RGR 붕괴 사유의 `unrecoverable` 사용은 차기 라운드 카운터 대상**이다(현재 값 1).
+- **`mutation=미승격`이 전 회차 기본값으로 동작했다** — 승격 0건, 사유는 전부 `G2 미충족`(의심이 특정 단정으로 좁혀짐). 작업 트리 변형 시도 0건.
+- **`[Exec-evidence-missing]`이 Pass를 막지 않았다** — f2/T-103은 ADR-064 관련 P1 5건(+ 그 외 P1 2건·P2 1건)을 안고도 판정 Pass였고, 출력에서 *"Needs Fix는 트리거하지 않지만 기록 보강 필요"* 로 등급을 정확히 진술했다. D7의 3중 방어선 배치가 실행 층에서 오해 없이 읽혔다.
+- **fixture 자체의 참 양성 3건**(보일러플레이트 결함 아님): f2에서 `P1 [Arch-layer-3-1]`(심어 둔 `src/archive.ts`가 ARCH `## 3-1`의 "`store.ts`만 디스크 I/O" 경계 밖에서 직접 파일 I/O) + `P1 [Arch-iface-7-2]`(`TODO_ARCHIVE_PATH` 컨벤션 미문서화), f3/T-104 재validate에서 `P2` diff-trace (b)(직전 커밋이 빠뜨린 usage 문자열 갱신을 이번 task가 무관하게 동봉). 셋 다 **닫힌 결정 위반이 아니라 P1/P2로 정확히 등급 분기**됐다(ADR-061 D1 정합).
+
+### 계측 결함 1건 (보일러플레이트 결함 아님 — Round 9 D-1과 같은 계열)
+
+최초 러너가 `Start-Process -ArgumentList` **배열** 형태로 인자를 넘겨 슬래시 커맨드의 인자가 유실됐다 — 세션 transcript 확인 결과 첫 user 메시지가 `<command-name>/implement-workitem</command-name>`뿐이고 `T-102`가 없었다. `$ARGUMENTS` 없이 받은 그 실행은 **fixture에서 유일하게 `in-progress`였던 T-103을 스스로 골라 재개 구현**했다(합리적 해석이지만 측정 대상이 아님). 산출물은 별도 보존하고 fork를 reset한 뒤, 러너를 **단일 인자 문자열**(`-p "…" --model sonnet`)로 고쳐 재실행했다. 교훈은 Round 9 D-1과 동일 — **계측기를 먼저 반증하지 않으면 오라클 자체가 결함이 된다.**
+
+### 한계 / 미실행 (정직 기록)
+
+- **6b의 입력은 고정 입력(planted report)이다.** `validate → Needs Fix`를 실제로 유도하지 않고, 전부 Reject 가능한 finding 3건(P0 dead-code 삭제 오주장 / P1 테스트 부재 오주장 / P1 `## 4. 제외 항목`이 배제한 확인 프롬프트 요구)을 담은 report를 손으로 심었다. 이유는 결정성 — repair의 4-판정이 *전부 Reject*가 되는 상태를 확률에 맡기면 6b 자체가 측정되지 않는다(ADR-061 Mutation Contract 5-(a)의 "게이트 검증에 implement를 매개시키지 않는다"와 같은 근거). **따라서 6b가 확인한 것은 "all-Reject 라운드 뒤 재validate가 증거 관련 오탐을 내지 않는다"이고, "validate가 그런 Needs Fix를 낸다"는 확인 대상이 아니었다.**
+- **시나리오 6(코드를 실제로 고친 repair 라운드 → exec-evidence 신규 append)은 실행하지 않았다.** 이번 지시 범위 밖이며, D4가 명시한 구멍(*repair가 외부 경계 코드를 고치고도 갱신을 조용히 건너뛰는 경우*)은 여전히 실측 0이다.
+- **나머지 반증 시나리오 1·3·4·5·7도 미실행**(지시 범위 밖). 특히 3(모노레포 자기 API 호출 → (b) 미해당)은 이 fixture가 단일 패키지 CLI라 자극 자체가 불가능하다.
+- **`--waiver` 경로 미실행** — 증거를 확보할 수 없는 환경을 만들지 않았으므로 `Needs Execution Evidence` 정지와 waiver 해제 경로는 이번에 한 번도 발화하지 않았다. **D1의 실질 차단 지점이 미검증으로 남는다**(D7이 "여기가 유일한 실질 차단"이라고 못 박은 자리라 우선순위가 높다).
+- **ADR-017 성공 기준 3지표는 산정하지 않았다** — discover/bootstrap/plan/seal 구간을 돌리지 않은 targeted 준수도 샘플링이라 placeholder 충원율·graduation pre-check의 분모가 성립하지 않는다. Round 9의 gate 3/3과 같은 축으로 비교할 수 있는 회차가 아니다.
+- 비용은 미계측(`--output-format text`가 result 레코드를 내지 않는다). 실행 시간은 세션 기준 f1 implement+validate 6.2분 / f2 validate 6.1분 / f3 implement+validate+finalize 16.7분 / f3 repair+재validate 6.3분.
+
+### 결정에 미친 영향
+
+- **ADR-064의 D4 판독 규칙(주석 밖만 센다)은 실행 층에서 양방향으로 작동한다** — 순수 로직 task를 경계 task로 오인하지 않았고(1b-i), 증거가 없는 경계 task를 "증거 있음"으로 통과시키지도 않았다(1b-ii). 후자가 무너졌다면 **오탐보다 나쁜 조용한 사망**이 됐을 자리이며, 그 실패는 재현되지 않았다.
+- **D4 시점 계약(파일 변경 후 · validate 이전)이 finalize 교착을 실제로 막는다** — mtime 순서가 예측대로 형성됐고, finalize가 그 순서를 판단 근거로 *명시 인용*했다. (d) 실패 경로는 발화하지 않았다.
+- **D4가 자동 신선도 검사 3후보를 전부 기각한 판단이 6b로 뒷받침됐다** — 정상 all-Reject 라운드가 만드는 `## 8` 배치(exec-evidence 뒤에 repair 결정 이력)는 (iii) 줄-순서 검사였다면 정확히 오탐이 났을 형태인데, 검사를 두지 않았으므로 finding 0건이었다.
+- **남은 최우선 미검증은 D1의 차단 경로다** — `Needs Execution Evidence` 정지와 `--waiver` 해제는 이번 3 시나리오가 건드리지 않았고, D7이 "실질 차단은 여기 하나뿐"이라고 배치한 지점이라 **차기 라운드 1순위**다(증거 확보 불가 환경 fixture 1개면 잰다).
+- **차기 라운드 후보**: (a) `Needs Execution Evidence` + `--waiver` 실측 · (b) 시나리오 6(코드를 고친 repair의 exec-evidence 재기록) · (c) D4가 명시한 구멍(repair가 갱신을 조용히 건너뛰는 사례) 누적 관측 — ADR-064가 "2회 이상이면 라운드 식별자 기반 구조화 스키마로 승격"이라 규정한 카운터의 현재 값은 **0** · (d) 나머지 반증 시나리오 1·4·5·7.
