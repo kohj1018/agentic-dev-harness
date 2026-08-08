@@ -1,7 +1,7 @@
 ---
 name: finalize-workitem
 description: Finalize a passed workitem — set status done, stage explicit files, and commit.
-argument-hint: "[task identifier(s)] [--apply --rationale \"<why>\"]"
+argument-hint: "<task-id> [--apply --rationale \"<why>\"]"
 allowed-tools: Read Glob Grep Write Edit Bash(git add *) Bash(git status *) Bash(git diff *) Bash(git commit *) Bash(pnpm validate) Bash(pnpm validate *) Bash(npm run validate) Bash(npm run validate *) Bash(make validate) Bash(make validate *) Bash(task validate) Bash(task validate *)
 context: fork
 agent: builder
@@ -10,13 +10,16 @@ agent: builder
 이 skill은 검증을 통과한 workitem을 마감한다 — status 갱신 + 명시적 파일 add + 커밋.
 
 입력:
-- `$ARGUMENTS`에는 task ID(또는 다중 ID, 예: `T-001 T-002`)가 들어온다.
+- `$ARGUMENTS`에는 **task ID 1개**가 들어온다. 여러 ID를 받던 이전 형태는 파싱 규칙이 정의되지 않아 무관 task를 처리한 사례가 관측돼 철회했다 — 여러 task를 함께 마감해야 하면 각각 순차로 호출한다.
+  - **task-id sanitization 강제**: `T-[0-9]+` 패턴 정확히 1개만 허용. ID가 0개이거나 2개 이상이면 "task ID 1개만 지정" 안내 후 종료한다(파일·git index 무변경). `/`, 공백, glob 메타문자(`*`, `?`, `[`)가 포함되면 즉시 종료 (`/repair-workitem` 가드와 대칭).
+  - **플래그·값과 ID를 분리해 파싱한다**: `--`로 시작하는 토큰과 그 값은 ID 후보에서 제외한다. `--rationale`의 값은 따옴표로 감싼 문자열 *전체*가 하나의 값이며, **그 안에 `T-NNN`이 등장해도 task ID로 해석하지 않는다**.
+  - **정의되지 않은 플래그가 있거나, 같은 플래그가 2회 이상이거나, `--rationale` 값이 빈 문자열이면** 추측하지 말고 안내 후 종료한다(파일·git index 무변경).
 - 선택 플래그 `--apply` — task 문서 `## 4-1. 변경 예정 파일/경로`와 git 실제 변경이 어긋나도 git 실제 변경을 신뢰하고 진행(아래 5-(4) 차이 처리에서 종료하지 않는다). 단 민감 경로 가드는 그대로 적용된다.
   - **사유 입력 (ADR-007#amend-3)**: `--apply`는 사용자가 **`--rationale "<왜 4-1과 다른지>"`** 를 함께 넘겨야 한다(`$ARGUMENTS` 파싱). finalize는 이 사유를 커밋 body의 `--apply rationale: <...>` 줄에 기록한다. `--apply`인데 `--rationale`이 없으면 **사유를 스스로 만들지 않고** `Needs Rationale`로 종료 + `--rationale` 동봉 재실행 안내(executor가 사유를 발명하면 다시 "자아"가 생긴다).
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다.
-1-G. **착수 상태 게이트 (ADR-057#amend-3 결정 5 — `in-progress → done` 입구)**: 읽은 task 문서의 `## 0. Status`를 확인한다 — **`in-progress`일 때만** 아래 단계로 진행한다. `draft`/`ready`(아직 구현 안 함)면 "`/implement-workitem` 먼저 실행" 안내 후 종료(**`ready → done` 건너뛰기 차단** — 구현 없이 validate·finalize만으로 done 방지), `done`이면 read-only no-op("이미 완료" 안내, 파일·git 무변경). **다중 task 입력이면 하나라도 상태가 틀리면 파일·git index·status를 전혀 건드리지 않고 일괄 중단**한다(부분 커밋·부분 staging 방지).
+1-G. **착수 상태 게이트 (ADR-057#amend-3 결정 5 — `in-progress → done` 입구)**: 읽은 task 문서의 `## 0. Status`를 확인한다 — **`in-progress`일 때만** 아래 단계로 진행한다. `draft`/`ready`(아직 구현 안 함)면 "`/implement-workitem` 먼저 실행" 안내 후 종료(**`ready → done` 건너뛰기 차단** — 구현 없이 validate·finalize만으로 done 방지), `done`이면 read-only no-op("이미 완료" 안내, 파일·git 무변경). **본 게이트에서 종료하는 경우 파일·git index·`## 0. Status`를 전혀 건드리지 않는다.**
 2. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate`)이 있으면 실행한다.
    - `--changed` 옵션 지원 시 `validate --changed`로 변경 파일만 빠르게 검증 권장 (ADR-020). full validate는 `/stabilize-milestone`에서 실행.
    - 실패 → `Needs Fix`로 종료. 커밋하지 않음. `/repair-workitem <task-id>`를 텍스트로 제안.
@@ -49,7 +52,7 @@ agent: builder
    - footer에 `Refs: T-NNN (AC-X, AC-Y)` 형식 포함 (ADR-008#amend-2). 누락 시 *footer 추가 권장 텍스트* 출력 — 자동 차단은 하지 않음 (사용자 결정).
 8. `git commit -m "..."` 실행.
    - **금지**: `--no-verify`, `--amend`, `git push`.
-9. **feature-완료 감지 (ADR-057 결정 5)**: 직전 단계에서 status를 `done`으로 갱신한 각 task(⚠ 0C-6이 status=done을 커밋 안전검사 뒤로 옮겼으므로 옛 "step 4" 번호에 의존하지 말 것)의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아니다) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
+9. **feature-완료 감지 (ADR-057 결정 5)**: 직전 단계에서 status를 `done`으로 갱신한 본 task(⚠ 0C-6이 status=done을 커밋 안전검사 뒤로 옮겼으므로 옛 "step 4" 번호에 의존하지 말 것)의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아니다) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
    - FAC closure 요약: feature `## 7-1` 매핑표의 각 `T-NNN:AC-N`이 `docs/40-validation/reports/<task-id>.md`에서 ✅인지 (report 부재 task는 "확인 불가 — report checkout-local" degrade).
    - 다음 단계 제안(텍스트만): 다음 의존성 task가 있으면 그 task를 `/implement-workitem`, 마일스톤 전 task가 done이면 `/stabilize-milestone M-N` (refresh·F-NNN 재계획 경로 없음 — ADR-057#amend-3).
    - Feature 링크 부재 시 "feature 소속 불명 — task `## 7` 링크 보강 권장" 1줄만.
@@ -67,10 +70,6 @@ agent: builder
 - `--amend` 금지(--amend는 직전 커밋 변경 — 작업 단위가 흐려진다).
 - `--no-verify` 금지(pre-commit hook은 우회하지 않는다).
 - `git push`는 사용자 명시 요청 없이 실행하지 않는다.
-
-다중 ID 처리:
-- `$ARGUMENTS`에 여러 task ID가 있으면 모든 ID의 status를 갱신하고 한 커밋에 묶는다.
-- 커밋 메시지에 모든 ID를 명시한다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

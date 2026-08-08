@@ -52,7 +52,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 - `/finalize-workitem`이 task 문서 status를 `done`으로 갱신한다.
 - 명시적 파일 add — `git add -A` / `git add .` 금지.
 - 커밋 메시지는 Conventional Commits 스타일(ADR-008).
-- 다중 task 묶음 커밋: `/finalize-workitem T-001 T-002` 형태로 다중 ID 허용.
+- `/finalize-workitem`은 **task ID 1개**만 받는다(여러 ID를 받던 이전 형태는 파싱 규칙 부재로 무관 task를 처리한 사례가 관측돼 철회). 여러 task를 함께 마감해야 하면 각각 순차로 finalize한다.
 
 ## 5. 마일스톤 안정화
 - `/stabilize-milestone [milestone-id]`으로 통합 점검을 수행한다.
