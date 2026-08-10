@@ -40,6 +40,9 @@
 | 기획 cross-review 결과 회수 + DISCOVERY 수정 | architect | 원본 세션에서 `/repair-discovery`. 리뷰 회수 → 결정 → DISCOVERY 수정 → 파일 삭제 (ADR-044). |
 | 마일스톤 stabilize 결과의 cross-LLM peer review (opt-in) | reviewer/qa (stabilize surface — qa 엣지케이스·회귀 + reviewer 부채) | 다른 세션·다른 LLM에서 `/validate-milestone`. 임시 리뷰 파일 1개, 코드·문서·실행 X (ADR-054). |
 | stabilize cross-review 결과 회수 + 종합 | 메인 세션 (repair-milestone) | 원본 세션에서 `/repair-milestone`. stabilize-reviews 회수 → 4-판정·dedup → 적용 → 삭제 (ADR-054). |
+| 마일스톤 결과의 사용자 직접 확인 (권장) | 메인 세션 (accept-milestone) | `/accept-milestone <M>`. 환경 기동 + 시나리오 안내 + 피드백 3갈래 라우팅. 코드·커밋 X. `- ac-acceptance` receipt는 사용자 응답을 옮겨 적는다(대행 발급 금지 — ADR-065 D1 / ADR-066) |
+| task AC의 사용자·플랫폼 관측 receipt 발급 | 메인 세션 (accept-milestone `--task`) | `/accept-milestone --task <task-id>`. `/validate-workitem`이 `Needs Acceptance`로 낸 그 task의 관측 AC만 확인·발급하고 `/validate-workitem` 재실행을 안내한다. 라운드 카운터·`## 11`·마일스톤 원장을 쓰지 않는다 (ADR-066 D1) |
+| 사용자 수용 finding 수리 | 메인 세션 (repair-acceptance) | `/repair-acceptance <M>`. 3+1 판정(Reject-FP 없음 — 사용자 관측은 기각 대상 아님), 회귀 테스트 선행, 기존 task 재개방 X, 커밋 X (ADR-066 D4) |
 | 외부 공식문서·1차 자료·논문 조사 (구현/기획) | researcher | report-only(코드·문서 미수정). 결과는 insights/ 노트 + DISCOVERY Evidence Log 연결. `/research-pack` 또는 메인이 Agent 위임. **Standing auto-trigger (ADR-040#amend-2)**: 메인 세션 오케스트레이터 중 `Agent` 도구 보유 skill(implement foreman / plan-milestone)는 sub-agent가 `Needs Research`를 emit하면 researcher에 **Agent로 자동 위임**→findings 주입→재개한다(`/research-pack` 호출 아님 — disable-model-invocation). Codex: `Agent` 도구는 Claude 전용이고 본 저장소가 researcher 위임을 Codex subagent로 아직 매핑하지 않아 → foreman(메인 세션)이 `researcher.md` 인라인 조사 또는 사전 `$research-pack` 노트 참조로 재개(degrade). **디자인 레퍼런스 모드 (ADR-040#amend-4)**: /bootstrap-design R0가 레퍼런스별 코드 수준 토큰 추출(소스 위계 ①사용자 URL ②오픈소스 토큰 패키지 ③정성 소스)을 본 모드로 위임한다. |
 | 법률·규제 판단 (관할별 규제, 처리방침·약관 요건, 라이선스 호환성) | counsel | `/consult-expert legal <관할> <질문>`. **관할 필수** — 없으면 되묻고 종료. 1차 출처 조회 기반(기억 인용 금지), 신뢰 등급 분류(`확인됨-조문`/`확인됨-가이드`/`해석필요`/`전문가검토권장`/`전문가검토필수`), 변호사 필요 구간 명시. report-only (ADR-062) |
 | 사업 전략 판단 (수익 구조·가격·유닛 이코노믹스·시장 규모·경쟁 포지셔닝) | strategist | `/consult-expert strategy <질문>`. 수치는 인수 분해 + 출처 등급 필수, 자기반박 1개 필수. 가격 *표현*은 marketer 소유. report-only (ADR-062) |
@@ -107,11 +110,15 @@
 3c. **`/seal-milestone M<N>`** → 최종 검사 + 사용자 승인 + task→feature→milestone 일괄 `ready` 봉인 (ADR-060 D7). 봉인 전에는 4가 착수하지 않는다.
 4. `/implement-workitem` → task 구현
 5. `/validate-workitem` → 판정 + report 기록
+5.5. (validate가 미충족 AC를 **전부 관측 receipt 대기**로 낸 때만 — report `## 다음 권장 액션`이 지시. validate 판정 자체는 `Needs Fix`이고 `Needs Acceptance`는 7의 종료값이다) `/accept-milestone --task T-NNN` — 그 task의 `[사용자 관측]`·`[플랫폼 관측]` AC receipt를 사용자가 발급 → `/validate-workitem T-NNN` 재실행 → 7(finalize). 라운드 카운터·`## 11` 미소모 (ADR-066 D1).
 6. `/repair-workitem` (Needs Fix일 때만) → report의 실패 항목 수정
 7. `/finalize-workitem` (Pass일 때) → status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 (정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md), [ADR-008](../90-decisions/boilerplate/ADR-008-commit-convention.md)) + feature 전 task done 시 FAC closure 요약(ADR-057 결정 5)
 7.5. task가 done이면 finalize가 커밋하고 다음 의존성 task(implement) 또는 마일스톤 전 task done 시 `/stabilize-milestone M-N`을 제안한다 (feature refresh 없음 — ADR-057#amend-3).
 8. 마일스톤의 모든 task가 `done`이 되면 `/stabilize-milestone` — 통합 점검(코드 수정·커밋·status 변경 금지). 정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md).
    - `/stabilize-milestone`은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-067 D5) — generator=`/implement-workitem`, optimizer=`/repair-workitem`.
+8.5. (권장) `/accept-milestone M-N` — 사람이 직접 실행·확인. 승인 시 8.7로(단 **`(수용)` 태그로 이번 M 수리를 택한 개선 제안이 있으면 8.6을 먼저** — 그 항목의 유일한 실행 경로다, ADR-066 D5), 보류 시 8.6으로, **`미완`이면 환경 복구·사용자 재개 후 8.5 재실행**(라운드 카운터 미소모 — 확인을 못 했으므로 회차로 세지 않는다) (ADR-066).
+8.6. (보류 시 · 또는 위 `(수용)` 개선 항목이 있을 때) `/repair-acceptance M-N` → 영향 task `/validate-workitem` 재실행 → `/accept-milestone M-N` 재실행. 라운드 상한 3.
+8.7. `/stabilize-milestone M-N` 재실행 — 수용 라운드의 코드·receipt 변경을 재검증하고 졸업 판정을 확정한다. **`## 8`을 갱신한 task가 있으면 그 task의 `/validate-workitem`이 선행돼야 한다**(졸업 item 4가 report를 읽고 stale을 미충족 처리 — ADR-067 D1 item 4 (d)).
 
 각 단계에서 중요한 설계 판단이 필요하면 architect를 먼저 사용한다.
 문서 품질이 걱정되면 `/review-doc` 또는 reviewer를 사이에 끼운다.

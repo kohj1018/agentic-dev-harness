@@ -114,10 +114,10 @@
 Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 1. 같은 저장소에서 `codex` 실행 — `AGENTS.md`가 자동 로드된다.
-2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
+2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert, $accept-milestone, $repair-acceptance. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
 3. 자주 쓰는 core workflow skill은 Codex skill로 호출 가능:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone 아이디어>`, `$plan-workitem M1`, `$seal-milestone M1` (계획 잠금 게이트 — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`
+   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone 아이디어>`, `$plan-workitem M1`, `$seal-milestone M1` (계획 잠금 게이트 — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`, `$accept-milestone M1`, `$repair-acceptance M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
    - 도메인 자문 (선택, ADR-062): `$consult-expert legal KR <질문>`, `$consult-expert strategy <질문>`, `$consult-expert marketing <표면>`, `$consult-expert data <측정 대상>`, `$consult-expert security <대상 자산>`
    - Discovery / stabilize 교차 리뷰 (선택, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (별 Codex 세션) + `$repair-milestone M1` (원본 세션)

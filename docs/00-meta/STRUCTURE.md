@@ -25,7 +25,7 @@
 | 산출물 | 위치 | 생성 주체 | 라이프사이클 | presence |
 |--------|------|-----------|--------------|----------|
 | project charter | `docs/10-charter/PROJECT_CHARTER.md` | `/bootstrap-project` | Living | baseline |
-| decision register | `docs/10-charter/DECISION_REGISTER.md` | `/discover-product`·`/bootstrap-*`·`/plan-*`·`/repair-plan` (등재) · `/repair-workitem`·`/stabilize-milestone` (봉인 후 append — ADR-060 D11) · `/seal-milestone` (판정) — 정책 ADR-060 | Living | baseline |
+| decision register | `docs/10-charter/DECISION_REGISTER.md` | `/discover-product`·`/bootstrap-*`·`/plan-*`·`/repair-plan` (등재) · `/repair-workitem`·`/stabilize-milestone` (봉인 후 append — ADR-060 D11) · `/seal-milestone` (판정) · `/accept-milestone`·`/repair-acceptance`(수용 라운드 `Out-of-contract` 등재 — ADR-060 D11) — 정책 ADR-060 | Living | baseline |
 | discovery | `docs/10-charter/DISCOVERY.md` | `/discover-product` | Living | generated |
 | discovery template | `docs/10-charter/_templates/DISCOVERY_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | research note | `docs/10-charter/insights/<date>-<slug>.md` | `/research-pack` | Record | generated |
@@ -37,7 +37,7 @@
 | design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
 | milestone 승인 프로토타입 (UI only — 경험 계약, 화면 단위) | `docs/20-system/prototypes/M<N>/<screen>.html` | `/plan-milestone` R5 (draft M<N> 재실행으로 미완 라운드 재개) | Record | conditional |
 | 경험 게이트 스크린샷 갤러리 (UI only, 검토용 임시) | `docs/40-validation/visual/M-N/` | `/stabilize-milestone` §3-V | ephemeral | conditional |
-| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (23종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert) | 수동 (boilerplate 제공) | Reference | baseline |
+| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (25종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert/accept-milestone/repair-acceptance) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (13종: architect/builder/validator/planner/reviewer/qa/researcher/designer + 도메인 자문 5종 counsel/strategist/marketer/analyst/security — ADR-062) | 수동 (boilerplate 제공) | Reference | baseline |
 | milestone roadmap | `docs/30-workitems/ROADMAP.md` | `/plan-milestone` (R3 생성/갱신, R0 재조정 — 단일 작성자) | Living | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-milestone` (M1 포함 — ADR-057) | Living | generated |
@@ -48,8 +48,10 @@
 | plan review | `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` | `/validate-plan` (다른 세션·다른 LLM) | ephemeral | generated |
 | discovery review | `docs/40-validation/discovery-reviews/DISCOVERY.<reviewer-tag>.md` | `/validate-discovery` (다른 세션·다른 LLM) | ephemeral | generated |
 | stabilize review | `docs/40-validation/stabilize-reviews/<M>.<reviewer-tag>.md` | `/validate-milestone` (다른 세션·다른 LLM) | ephemeral | generated |
-| qa findings | `docs/40-validation/QA_FINDINGS.md` | `/stabilize-milestone` (mile별 누적) | Record | baseline |
-| improvement guide | `docs/40-validation/IMPROVEMENT_GUIDE.md` | `/stabilize-milestone` | Living | baseline |
+| acceptance review (수용 세션 원본) | `docs/40-validation/acceptance-reviews/<M>.r<N>.md` | `/accept-milestone` (마일스톤 스코프) | ephemeral | generated |
+| 수용 기록 (acceptance receipt) | milestone 문서 `## 11. 수용 기록` | `/accept-milestone` (마일스톤 스코프 단독) | Record | generated |
+| qa findings | `docs/40-validation/QA_FINDINGS.md` | `/stabilize-milestone` (mile별 누적) · `/accept-milestone`(수용 결함 — `(수용)` 태그) · `/repair-milestone`·`/repair-acceptance`(status 토글) | Record | baseline |
+| improvement guide | `docs/40-validation/IMPROVEMENT_GUIDE.md` | `/stabilize-milestone` · `/repair-plan`·`/repair-milestone`·`/repair-acceptance`(`## 5` decision log) · `/accept-milestone`(개선 제안) | Living | baseline |
 | ADR (boilerplate) | `docs/90-decisions/boilerplate/ADR-*.md` (인덱스: `docs/90-decisions/boilerplate/README.md`) | 수동 (boilerplate 진화) | Record | baseline |
 | ADR (project) | `docs/90-decisions/project/ADR-1NN-*.md` (인덱스: `docs/90-decisions/project/README.md`) | `/bootstrap-project`(ADR-100) · `/bootstrap-stack`(ADR-101·--migrate ADR-1NN) · `/plan-milestone` R0([ADR-candidate] 회수) · architect(초안 sub-call) — 트리거 표: ADR-000#amend-2 | Record | generated |
 | stack setup plan template | `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |

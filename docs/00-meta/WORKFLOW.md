@@ -65,6 +65,16 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 
 다운스트림 마이그레이션: 이미 평면 양식의 QA 데이터를 가진 프로젝트는 (1) 기존 항목을 `## M1` 또는 `## 일반` 묶음으로 감싸고 (2) 다음 회차부터 새 마일스톤 헤더로 누적한다.
 
+## 5-1. 사용자 수용 (권장 — ADR-066)
+- `/accept-milestone <M>`으로 사람이 직접 실행·확인한다. 환경을 띄우고 확인할 시나리오를 안내하고 피드백을 3갈래(결함=QA_FINDINGS / 계약 변경=DECISION_REGISTER+다음 M / 개선=IMPROVEMENT_GUIDE)로 라우팅한다.
+- **졸업 필수 조건이 아니다.** 단 task `## 6-1`에서 AC를 `[사용자 관측]`·`[플랫폼 관측]`으로 지정했으면 그 receipt 없이 졸업 item 4를 충족하지 못한다(ADR-065 D1).
+- **task 스코프는 inner-loop 안에 있다** — `/validate-workitem`이 그 AC를 미충족으로 내면 `/accept-milestone --task <task-id>`로 receipt를 발급하고 `/validate-workitem`을 재실행한 뒤 `finalize`한다. 이 경로는 마일스톤 라운드 카운터·`## 11`을 쓰지 않는다. **이 분리가 없으면 «receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → receipt 발급 불가» 순환이 생긴다.**
+  - **판정값 소유권**: `/validate-workitem`의 report 판정은 `Pass | Needs Fix` 둘뿐이고, 이 경로는 그 report의 `## 다음 권장 액션`이 지시한다. **`Needs Acceptance`는 `/finalize-workitem`의 종료값**이다(ADR-066 Surfaces가 validate=«`--task` 안내» / finalize=«`Needs Acceptance` 종료»로 배분). 두 이름을 섞어 쓰지 않는다.
+- **수용 라운드가 코드나 receipt를 바꿨으면 영향 task의 `/validate-workitem`을 재실행한 뒤** stabilize를 돌린다 — 졸업 item 4는 report를 읽고 stale report를 미충족 처리한다(ADR-067 D1 item 4 (d)).
+- 결함이 있으면 `/repair-acceptance <M>`이 3+1 판정으로 수리한다 — **기존 task를 재개방하지 않고 코드만 고치며**, 추적성은 결정 이력의 `affected: T-NNN`으로 확보한다. 수리 후에는 위 규칙대로 «영향 task 재validate → `/accept-milestone` 재실행 → (승인 시) 다시 재validate → `/stabilize-milestone`» 순으로 진행한다. **`## 8`이 바뀔 때마다 재validate가 한 번씩 들어간다** — 각 skill의 마지막 출력이 그 목록을 준다.
+- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**(확인을 못 했으므로 회차로 세지 않는다). 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
+- 라운드 상한 3회. 초과분은 사용자 확인 후 다음 마일스톤으로 이관한다.
+
 ## 6. 의사결정 기록
 - 중요한 기술적 선택은 `docs/90-decisions`에 ADR로 남긴다. **작성 주체·시점은 [DELEGATION_STRATEGY의 ADR 작성 트리거 표](DELEGATION_STRATEGY.md)(정책 SSOT: ADR-000#amend-2)를 따른다.**
 
@@ -96,8 +106,11 @@ discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M
    → (opt-in, ADR-038) validate-plan (별 세션) → repair-plan (원본 세션)
    → seal-milestone (검사 + 사용자 승인 + task→feature→milestone 일괄 ready)   ← 리뷰 유무와 무관하게 항상 거친다
    → implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
-                           └─Needs Fix─→ repair → (validate 재실행)
+                           ├─Needs Fix─→ repair → (validate 재실행)
+                           └─(미충족이 전부 관측 receipt 대기)─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
+(권장, ADR-066)  stabilize → accept-milestone <M> (사람 직접 확인) ─┬─승인─→ (영향 task validate 재실행) → stabilize 재실행 → 졸업
+                                                                  └─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행
 ```
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.
