@@ -1441,12 +1441,15 @@ ADR-066의 Mutation Contract Target과 `## Surfaces`가 stabilize의 두 지점�
        - 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성 → `contract-ready`. 뒤이어 `/plan-workitem M-(N+1)`(전체 계획 스냅샷, task는 `draft`) → **`/seal-milestone M-(N+1)`**(검사·승인·일괄 `ready`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)
 ```
 
-**수정** — 그 블록의 `기본 권장:` 줄 **앞**에 두 줄을 삽입한다(기존 `/plan-milestone` 줄은 «수용 후» 경로로 남긴다).
+**수정** — 그 블록의 `기본 권장:` 줄 **앞**에 수용 단계 권장을 넣고, 기존 `/plan-milestone` 줄은 «수용을 건너뛴 경우 / 졸업 확정 뒤» 경로로 남긴다. **판정 3종(승인·보류·미완)의 후속을 모두 적는다** — 하나라도 빠지면 그 판정을 받은 사용자가 다음 단계를 본 출력에서 찾지 못한다.
+
+> ⚠ **`승인` 뒤에 `/plan-milestone`으로 바로 보내지 않는다.** `ADR-066` D1이 *"졸업 판정 소유권은 `/stabilize-milestone`에 유지한다 — 수용 라운드의 수리는 코드 변경이므로 그 뒤 테스트·e2e 재검증 없이 졸업시키지 않는다"* 를 규정하고, 그 `## 결과`가 흐름을 `… → accept 재확인 → stabilize 재실행 → 졸업`으로 못박는다. 수용 라운드가 `## 8`(receipt)이나 코드를 바꿨으면 **본 skill 재실행이 졸업 확정 단계**다(Phase 12-3의 8.7과 같은 순서).
+
 ```markdown
      - **졸업 가능 = YES + P0 후속 0건**:
-       - **기본 권장: `/accept-milestone <M>`** — 사람이 직접 실행·확인하는 수용 단계(ADR-066 D1). **권장이며 졸업 필수 조건은 아니다** — 건너뛰면 아래 `/plan-milestone`으로 바로 진행한다. 단 산하 task에 `[사용자 관측]`·`[플랫폼 관측]` modality AC가 있으면 그 receipt 없이는 item 4가 이미 미충족이므로 이 단계 전에 `/accept-milestone --task <task-id>`가 선행됐어야 한다(ADR-065 D1).
-       - 수용 판정이 `보류`면: `/repair-acceptance <M>` → 영향 task `/validate-workitem` 재실행 → `/accept-milestone <M>` 재실행 → 본 skill 재실행.
-       - 수용 후(또는 건너뛴 경우) 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성 → `contract-ready`. 뒤이어 `/plan-workitem M-(N+1)`(전체 계획 스냅샷, task는 `draft`) → **`/seal-milestone M-(N+1)`**(검사·승인·일괄 `ready`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)
+       - **기본 권장: `/accept-milestone <M>`** — 사람이 직접 실행·확인하는 수용 단계(ADR-066 D1). **권장이며 졸업 필수 조건은 아니다** — 건너뛰면 아래 `/plan-milestone`으로 바로 진행한다. 단 산하 task에 `[사용자 관측]`·`[플랫폼 관측]` modality AC가 있으면 그 receipt 없이는 item 4가 이미 미충족이므로 이 단계 전에 `/accept-milestone --task <task-id>`가 선행됐어야 한다(ADR-065 D1). **단 마일스톤 문서 `## 11`에 `- 판정: 승인`이 이미 기록돼 있고 그 뒤 코드·receipt 변경이 없으면 재권장하지 않는다** — 그 상태에서 다시 권장하면 라운드 상한 3이 무의미하게 소모된다.
+       - 수용 판정별 후속 (**상세는 `/accept-milestone` 출력이 SSOT** — 여기서는 요약): **`승인`** = `(수용)` 태그로 이번 M 수리를 택한 개선 항목이 있으면 먼저 `/repair-acceptance <M>`(그 항목의 유일한 실행 경로 — ADR-066 D5) → `## 8`을 갱신한 task `/validate-workitem` 재실행 → **본 skill 재실행으로 졸업 확정**(졸업 판정 소유권은 본 skill — ADR-066 D1. 변경 0건이면 재실행만). / **`보류`** = `/repair-acceptance <M>` → 영향 task `/validate-workitem` 재실행 → `/accept-milestone <M>` 재실행 → **재발급으로 `## 8`이 또 바뀌므로 한 번 더 영향 task 재validate** → 본 skill 재실행. / **`미완`** = 환경 복구(또는 사용자 재개) 후 `/accept-milestone <M>` 재실행(라운드 카운터 미소모).
+       - **수용을 건너뛴 경우(또는 위 재실행으로 졸업이 확정된 뒤)** 기본 권장: `/plan-milestone` — 새 milestone(M-(N+1)) + feature 문서 생성 → `contract-ready`. 뒤이어 `/plan-workitem M-(N+1)`(전체 계획 스냅샷, task는 `draft`) → **`/seal-milestone M-(N+1)`**(검사·승인·일괄 `ready`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)
 ```
 
 ### 10-3. 도입부 write 대상에 수용 단계 note 1줄
