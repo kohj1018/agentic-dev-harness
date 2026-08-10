@@ -3,9 +3,11 @@
 > scope: boilerplate
 
 ## Status
-accepted
+superseded
 
-## 현재 유효 결정
+> **superseded by [ADR-067](ADR-067-milestone-graduation-v2.md)** (2026-08-09) — 통합 재발행. 본 ADR의 결정 3개와 개정 4개는 ADR-067이 승계하며, item 4 판정 기준(AC 충족 modality)·`BLOCKED` 정의(감사 미완 포함)·회고 open 스냅샷 3가지가 변경됐다. 본 문서는 이력 보존용이며 새 인용은 ADR-067로 한다.
+
+## 현재 유효 결정 (이전 — ADR-067로 이전됨)
 - graduation checklist는 5+1 구조 + 회고 + pre-check + `--dry-run`(본문 결정). 평가는 `졸업 가능: YES/NO`로만 낸다.
 - item 3 `E2E Pass`는 **E2E-applicable 스택 한정 hard-block**(#amend-2)이며, #amend-2가 남긴 **0-spec 예외는 #amend-4로 철회**됐다 — 실제 실행된 e2e 1개 이상 성공이 조건이고 판정 상태 5종의 SSOT는 [ADR-052](ADR-052-stack-provisioning-and-e2e-readiness.md)#amend-1이다.
 - 회고에 graduation 판정 줄을 남긴다(#amend-3). evaluator-optimizer 명명은 #amend-1.

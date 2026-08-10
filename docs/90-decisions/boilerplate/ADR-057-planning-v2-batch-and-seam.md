@@ -93,7 +93,7 @@ accepted
 - docs/00-meta/STRUCTURE.md
 
 ## 참고
-- ADR-051(D4 부분 supersede — #amend-3 표기), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-014(graduation은 milestone 전용), ADR-006/ADR-022.
+- ADR-051(D4 부분 supersede — #amend-3 표기), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-067(graduation은 milestone 전용), ADR-006/ADR-022.
 
 <a id="adr-057-amend-1"></a>
 ## Amendment 1 (2026-07-26) — 마일스톤 로드맵 SSOT (얇은 forward 지도)
@@ -106,7 +106,7 @@ accepted
 2. **단일 작성자 = plan-milestone**: R3는 *지금 착수하는* 마일스톤만 Now 행으로 쓴다(직전 행의 Done 전환은 R3가 강제하지 않는다 — 회고 `graduation:`=YES일 때만 Done이며 그 판정 반영은 R0 재조정이 담당). R2 분할이 식별한 후속 마일스톤은 Next/Later 얇은 행.
    **R0 전이 알고리즘(reconcile — candidate-key로 정체성 유지)**: (a) 직전 Now의 회고 `graduation:`=YES면 그 행을 **Done**으로(candidate-key·id 보존). (b) 착수할 Next 후보(candidate-key로 식별)를 **Now**로 승격하며 id(M-number) 발급 — *같은 candidate-key 유지*(중복 생성 방지·전 구간 추적). (c) 직전 Now가 미졸업(YES 아님)이면 단일-Now 규율상 새 Now 승격을 **보류**(명시적 병렬 승인이 있을 때만 병렬 Now 허용). (d) 마지막 마일스톤 종료(후속 Next 없음)면 Now→Done 후 Now를 비운다. (e) 기존 프로젝트에 로드맵을 처음 도입(backfill)하면 현존 마일스톤에 candidate-key를 부여해 Done/Now로 seed한다. **progress(`task done/total`)는 plan-workitem이 task를 만든 뒤 R0가 갱신하는 *계획-시점 스냅샷*** — 실시간 현황이 아니다(실시간은 task 문서가 SSOT). 그래서 R3 신규 행은 `tasks: unplanned`다.
 3. **얇음 규율(성패 관건)**: Next/Later 행은 *`candidate-key`(안정 슬러그) + 목표 1줄 + 확신도만* — 기능·AC·졸업 칸 자체를 만들지 않는다(아직 안 정한 걸 정한 척 = 소설, 오히려 해로움). candidate-key는 R0 재조정이 중복 생성·Now 승격을 매칭하는 유일 안정 식별자(목표 문구가 바뀌어도 고정). M 번호는 Done/Now(실체화)만 발급, Next/Later는 `(M3?)`처럼 잠정. 날짜·%·story point 기본 제외. Now 기본 1개(병렬 마일스톤은 명시 결정 시만).
-4. **stabilize-milestone 읽기 전용 유지**: 로드맵 파일을 직접 건드리지 않는다. graduation 판정(`YES|NO|BLOCKED (날짜)`)만 마일스톤 `## 8. 회고`에 영속하고(ADR-014 회고 스키마 amend 동반), 다음 plan-milestone R0가 그것을 읽어 로드맵을 재조정한다.
+4. **stabilize-milestone 읽기 전용 유지**: 로드맵 파일을 직접 건드리지 않는다. graduation 판정(`YES|NO|BLOCKED (날짜)`)만 마일스톤 `## 8. 회고`에 영속하고(ADR-067 D3 회고 스키마 동반), 다음 plan-milestone R0가 그것을 읽어 로드맵을 재조정한다.
 5. **repair-plan은 로드맵을 건드리지 않는다**(단일 작성자 유지 — 다음 R0 재조정이 흡수). **validate-plan은 로드맵 drift 전용 차원을 신설하지 않는다**(요약 지도라 R0 재조정이 흡수 — 미러·카운트 비용 회피).
 6. **로드맵=요약 / 각 Mx=상세 SSOT** — 링크만, 내용 복제 금지. 지킬 수 없으면 "존재하는 것만 표시(생성 전용)"로 후퇴.
 

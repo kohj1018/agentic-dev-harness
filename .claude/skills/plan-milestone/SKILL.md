@@ -69,8 +69,8 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 **R3 — 마일스톤 문서 authoring (MILESTONE_TEMPLATE에서)**
 - **지금 착수하는 마일스톤만 실체화 (rolling-wave — ADR-057#amend-1)**: R2에서 확정한 분할 중 *이번에 착수하는* 마일스톤(기본 1개 = Now)만 `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`를 복사해 `docs/30-workitems/milestones/M<N>-<이름>.md`로 작성한다. `<N>`은 기존 마일스톤 다음 번호(첫 호출이면 M1 — additive, 기존 보존). **R2 분할이 식별한 *후속* 마일스톤은 지금 Mx 문서를 만들지 않는다 — 그 마일스톤의 feature 문서·R5 프로토타입도 만들지 않는다** (로드맵 Next/Later에 얇은 행(미번호 `(M?)`)으로만; R4 컴포넌트·R5 프로토타입은 지금 착수하는 Now 마일스톤의 화면에만 적용). 후속 마일스톤의 feature·프로토타입은 그 마일스톤이 *Now가 되는 회차*에 생성한다. (이래야 "미번호 얇은 후보 vs 실체 문서"가 어긋나지 않는다 — rolling-wave 핵심.)
 - **로드맵 갱신 (ADR-057#amend-1)**: `docs/30-workitems/ROADMAP.md`(baseline shell 존재 — 없으면 헤더 포함 생성)에 이번 마일스톤 행을 **Now**로 쓴다(id·**`candidate-key`**(안정 목표 슬러그 — Later/Next에서 승격됐으면 그 key 그대로 유지, 신규면 새로 발급)·목표·진척·주요 기능 링크·의존). **진척 칸은 `tasks: unplanned`로 둔다** — R3 시점엔 plan-workitem 미실행이라 총 task 수 N을 모른다. plan-workitem이 task를 만든 뒤 다음 plan-milestone R0 재조정이 이 칸을 실제 `done/total`로 갱신한다(`0/N`처럼 미확정 N을 지금 박지 말 것). **직전 Now 행의 Done 전환은 R3가 강제하지 않는다** — 그 마일스톤 회고 `graduation:`이 YES일 때만 Done이며, 판정 반영은 R0 재조정이 담당한다(graduation 확인 없이 Done 박기 금지). R2 분할의 후속 마일스톤은 Next/Later에 얇게만(목표 1줄 + 확신도, `(M?)` 잠정 — 기능·AC·졸업 칸 만들지 말 것). Now 기본 1개(병렬은 명시 결정 시만). 로드맵은 plan-milestone만 쓴다.
-- `## 5. 완료 기준`은 graduation checklist 5+1 default 그대로 복사(ADR-014). 사용자가 협상한 추가 기준만 "(선택)" 행에 채운다 — 정책 중복 금지(MILESTONE_TEMPLATE·ADR-014가 SSOT).
-- `## 8. 회고`는 비워둔다 — `/stabilize-milestone`이 자동 채움(ADR-014).
+- `## 5. 완료 기준`은 graduation checklist 5+1 default 그대로 복사(ADR-067). 사용자가 협상한 추가 기준만 "(선택)" 행에 채운다 — 정책 중복 금지(MILESTONE_TEMPLATE·ADR-067이 SSOT).
+- `## 8. 회고`는 비워둔다 — `/stabilize-milestone`이 자동 채움(ADR-067).
 - `## 6. 관련 문서`에 Charter / Architecture / 관련 ADR 링크를 채운다.
 
 **R4 — feature 문서 authoring (FEATURE_TEMPLATE에서)**

@@ -6,13 +6,13 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash Agent
 ---
 
-본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1).
+본 skill은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-067 D5).
 
 이 skill은 **코드 수정·커밋·workitem status 변경을 하지 않는다.**
 다음 네 종류의 문서 갱신만 정상 책임이다:
 1. `docs/40-validation/QA_FINDINGS.md` 누적 기록 (qa 위임 결과).
 2. `docs/40-validation/IMPROVEMENT_GUIDE.md` 누적 기록 (reviewer 위임 결과 + deterministic preflight 결과).
-3. milestone 문서의 `## 8. 회고` 섹션 자동 채움 ([ADR-014](../../../docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md) graduation contract — status 변경 X, 본문 단락 갱신만).
+3. milestone 문서의 `## 8. 회고` 섹션 자동 채움 ([ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) graduation contract — status 변경 X, 본문 단락 갱신만).
    - 회고 본문: **graduation 줄(`YES|NO|BLOCKED (날짜)` — 단계 8 판정 영속, ADR-057#amend-1)** + 4 항목: 목표 달성도 / scope creep / 비목표 위반 / 핵심 학습 3개 이내.
 4. `docs/10-charter/DECISION_REGISTER.md` **append** — 점검에서 드러난 *기획 결정*을 `status: open` + `- 발견: 봉인 후 (M<N>)`으로 등재(ADR-060 D11 writer). 기존 항목의 상태는 바꾸지 않는다. 상세는 아래 `봉인 후 새 결정 등재` 절.
 
@@ -121,16 +121,16 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
 
 **review-doc 책임 분담**: [review-doc](../review-doc/SKILL.md)은 *단일 문서 ad-hoc 검토*에 한정. cross-doc / link / FAC↔AC는 본 deterministic preflight가 담당 — review-doc을 `--all`/`--milestone` 모드로 확장하지 않는다.
 
-### 1.5. Graduation pre-check (ADR-014)
+### 1.5. Graduation pre-check (ADR-067)
 
-MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평가로 체크 (LLM 즉흥 판정 금지 — ADR-014 *P0 검증 도구* 정합):
+MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평가로 체크 (LLM 즉흥 판정 금지 — ADR-067 D4 *P0 검증 도구* 정합):
 
 - `모든 task status: done` → 본 milestone에 속한 모든 task 파일(`docs/30-workitems/tasks/T-*.md`)의 `## 0. Status` 값이 모두 `done`.
 - `통합 validate Pass` → `validate` 명령 exit code 0. **normal 모드**: 단계 3에서 실행되므로 본 항목 판정은 단계 3 실행 후 확정된다 (1.5 가 단계 3 보다 먼저 와도 졸업 판정은 단계 3 결과를 반영). **`--dry-run` 모드**: 단계 3을 돌지 않으므로 본 1.5 단계 안에서 `validate` 를 1회 실행한다.
 - `E2E Pass (needed → must pass)` → 단계 3의 e2e 상태 판정을 그대로 반영(ADR-052#amend-1 5상태). **`--dry-run` 모드**: 단계 3 미실행이라 입력이 없으므로 `E2E: dry-run skipped (졸업 판정 보류)` 로 표기:
   - **`NOT_APPLICABLE`** (비-UI ∧ graduation item 6에 e2e 미선언) → *해당 없음*(통과).
   - **`PASS`** (선언된 e2e 디렉터리 하위에서 1개 이상이 실제 실행·성공 ∧ 러너 전체 성공. registry 등록이 있으면 그 이름 일치까지) → 통과.
-  - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개 — 디렉터리가 비어 있거나 다른 디렉터리 테스트가 대신 실행됨. 실행됐는데 실패한 것은 `EMPTY`가 아니라 `FAIL`이다) → **`졸업 가능: NO` (hard)** + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-014#amend-4). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
+  - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개 — 디렉터리가 비어 있거나 다른 디렉터리 테스트가 대신 실행됨. 실행됐는데 실패한 것은 `EMPTY`가 아니라 `FAIL`이다) → **`졸업 가능: NO` (hard)** + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-067 D1 item 3). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
   - **`FAIL`** (실행된 테스트 실패) → **`졸업 가능: NO` (hard)**. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.
   - **`BLOCKED_ENV`** (device/브라우저/toolchain 미설치·미기동) → **`졸업 가능: NO` (hard, blocked-on-env)**. real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다.
 - `AC 매핑 100%` → 본 milestone의 모든 task의 최신 `docs/40-validation/reports/<task-id>.md` `## AC ↔ 테스트 매핑` 섹션 항목이 모두 `✅`. report 부재 task는 미충족 처리.
@@ -141,7 +141,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 판정 출력:
 - 미충족 항목 발견 시 `졸업 가능: NO` + 미충족 항목 목록을 출력하고 *조기 종료 옵션*을 사용자에게 제시한다(강제 종료 아님).
 - 모든 항목 충족 시 `졸업 가능: YES` 출력 후 다음 단계 진행.
-- **graduation은 §1.5에서 기록하지 않는다 — §1.5는 pre-check일 뿐**. 단계 4~6(qa·reviewer 팬아웃)이 *새 P0를 찾을 수 있으므로*, 최종 graduation(`YES|NO|BLOCKED (날짜)`)은 **단계 8 회고 자동 채움 시점에 최종 P0로 1회만** 기록한다(아래 회고 항목 정의 + 단계 8). 여기서 '최종 P0'는 **ADR-014 predicate 그대로 `QA_FINDINGS.md`의 본 마일스톤 `### P0` 미해소 0건**을 뜻한다 — 단계 4~6 중 **qa 팬아웃이 발견한 P0만 6-S에서 `QA_FINDINGS.md`에 기록되어** 이 predicate에 반영된다(**reviewer finding은 `IMPROVEMENT_GUIDE.md`로 가는 report-only — graduation predicate에 미반영**, stabilize §6-S 라우팅). preflight/reviewer finding을 *별도 predicate로* 세지 않는다(단일 predicate — ADR-014와 stabilize §1.5가 동일 기준). §1.5에서 조기 기록하면 이후 발견된 P0를 못 반영해 잘못된 YES가 박힌다.
+- **graduation은 §1.5에서 기록하지 않는다 — §1.5는 pre-check일 뿐**. 단계 4~6(qa·reviewer 팬아웃)이 *새 P0를 찾을 수 있으므로*, 최종 graduation(`YES|NO|BLOCKED (날짜)`)은 **단계 8 회고 자동 채움 시점에 최종 P0로 1회만** 기록한다(아래 회고 항목 정의 + 단계 8). 여기서 '최종 P0'는 **ADR-067 D3 predicate 그대로 `QA_FINDINGS.md`의 본 마일스톤 `### P0` 미해소 0건**을 뜻한다 — 단계 4~6 중 **qa 팬아웃이 발견한 P0만 6-S에서 `QA_FINDINGS.md`에 기록되어** 이 predicate에 반영된다(**reviewer finding은 `IMPROVEMENT_GUIDE.md`로 가는 report-only — graduation predicate에 미반영**, stabilize §6-S 라우팅). preflight/reviewer finding을 *별도 predicate로* 세지 않는다(단일 predicate — ADR-067 D3와 stabilize §1.5가 동일 기준). §1.5에서 조기 기록하면 이후 발견된 P0를 못 반영해 잘못된 YES가 박힌다.
 - `--dry-run` 플래그가 켜져 있으면 위 평가만 돌리고 즉시 종료(qa·reviewer 위임 단계 4~6 생략 — 회고 미기록, graduation 판정 보류).
 
 2. 각 task의 status를 점검 — `done`이 아닌 항목이 있으면 명단을 출력하고 종료(완료를 강제하지 않음).
@@ -260,7 +260,7 @@ Telemetry — M1
 
 책임 경계:
 - 코드 수정·커밋·workitem status 변경 금지.
-- 누적 문서 갱신 + milestone `## 8. 회고` 자동 채움 — **회고의 `graduation:` 줄은 단계 4~6 종료 후 graduation 5+1 기준 *전체를 최종 상태로 재판정*해 기록**(P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 — qa 팬아웃分; reviewer는 report-only로 미반영)(task status·통합 validate·e2e·AC 매핑 100% = 단계 3 결과 + P0 0건 = 단계 4~6 반영 + 추가 기준; YES|NO|BLOCKED+날짜; §1.5 사전점검이 아니라 여기서 확정 — ADR-057#amend-1·ADR-014). 로드맵 파일은 안 건드린다(다음 plan-milestone R0가 이 줄을 읽어 재조정).
+- 누적 문서 갱신 + milestone `## 8. 회고` 자동 채움 — **회고의 `graduation:` 줄은 단계 4~6 종료 후 graduation 5+1 기준 *전체를 최종 상태로 재판정*해 기록**(P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 — qa 팬아웃分; reviewer는 report-only로 미반영)(task status·통합 validate·e2e·AC 매핑 100% = 단계 3 결과 + P0 0건 = 단계 4~6 반영 + 추가 기준; YES|NO|BLOCKED+날짜; §1.5 사전점검이 아니라 여기서 확정 — ADR-057#amend-1·ADR-067 D3). 로드맵 파일은 안 건드린다(다음 plan-milestone R0가 이 줄을 읽어 재조정).
 - *상세 SSOT 는 본 skill 도입부 책임 경계 단락* — 본 단락은 단순 재확인.
 
 E2E는 단계 3-a의 *필요성 판정*으로 결정한다 — e2e 불필요(비-UI ∧ graduation item 6 미선언) 마일스톤만 통합 `validate`만 돌리고 e2e를 skip한다(사유 출력 명시). **e2e 필요 마일스톤은 silent-skip 금지** — `validate:e2e`를 반드시 실행하고, 미통과(real) 시 졸업 hard-block, 실행 불가(env) 시 사용자 환경 복구 안내(ADR-052).

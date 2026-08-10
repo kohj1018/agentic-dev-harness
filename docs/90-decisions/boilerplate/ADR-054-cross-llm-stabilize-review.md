@@ -48,7 +48,7 @@ accepted
 - .gitignore
 
 ## 참고
-- ADR-038(plan cross-LLM — mirror), ADR-044(discovery cross-LLM — mirror + Codex 자연어 비대칭 선례), ADR-052 D4(repair-milestone 소유), ADR-014(졸업), ADR-007(책임 경계), ADR-047 D3(Mutation Contract), Ning et al. 2026 (arXiv:2605.18747).
+- ADR-038(plan cross-LLM — mirror), ADR-044(discovery cross-LLM — mirror + Codex 자연어 비대칭 선례), ADR-052 D4(repair-milestone 소유), ADR-067(졸업), ADR-007(책임 경계), ADR-047 D3(Mutation Contract), Ning et al. 2026 (arXiv:2605.18747).
 
 <a id="adr-054-amend-1"></a>
 ## Amendment 1 (2026-07-16) — 결정 5 부분 supersede (ADR-010#amend-4)

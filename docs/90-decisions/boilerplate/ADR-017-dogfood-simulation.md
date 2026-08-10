@@ -72,4 +72,4 @@ gate 미통과 시:
 
 ## 참고
 - ADR-022 (Ratchet Principle — [가설→실증] 라벨)
-- ADR-014 (milestone graduation)
+- ADR-067 (milestone graduation)

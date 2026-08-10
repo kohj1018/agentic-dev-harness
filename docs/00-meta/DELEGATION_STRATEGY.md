@@ -111,7 +111,7 @@
 7. `/finalize-workitem` (Pass일 때) → status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 (정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md), [ADR-008](../90-decisions/boilerplate/ADR-008-commit-convention.md)) + feature 전 task done 시 FAC closure 요약(ADR-057 결정 5)
 7.5. task가 done이면 finalize가 커밋하고 다음 의존성 task(implement) 또는 마일스톤 전 task done 시 `/stabilize-milestone M-N`을 제안한다 (feature refresh 없음 — ADR-057#amend-3).
 8. 마일스톤의 모든 task가 `done`이 되면 `/stabilize-milestone` — 통합 점검(코드 수정·커밋·status 변경 금지). 정책: [ADR-007](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md).
-   - `/stabilize-milestone`은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-014#amend-1) — generator=`/implement-workitem`, optimizer=`/repair-workitem`.
+   - `/stabilize-milestone`은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-067 D5) — generator=`/implement-workitem`, optimizer=`/repair-workitem`.
 
 각 단계에서 중요한 설계 판단이 필요하면 architect를 먼저 사용한다.
 문서 품질이 걱정되면 `/review-doc` 또는 reviewer를 사이에 끼운다.

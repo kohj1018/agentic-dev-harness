@@ -9,7 +9,7 @@ accepted
 ## 배경
 - [관측됨] 외부 파일럿 fork(외부 사이트 18곳 수집 배치 파이프라인, task 27개)에서 P0 2건이 **task 20개를 전부 통과한 뒤** 진입점을 처음 실제 실행한 지 3분 만에 드러났다. (a) 생산 코드가 float를 내는데 DB 컬럼이 integer라 첫 write에서 배치 전체가 죽었고, (b) 외부 API가 특정 조건에 필드를 null로 주어 해당 커넥터 전체가 죽었다. 두 결함 모두 **모든 스텁이 그 값을 정수 상수로 하드코딩**하고 **픽스처가 그 필드를 항상 채웠기** 때문에 전 검증 계층을 통과했다. 직접 원인은 *현실을 대표하지 못하는 픽스처*이며, 그것을 방치한 통제 공백이 **픽스처 출처(provenance) 규정의 부재**다(저장소 전체에 관련 규정 0건).
 - [관측됨] 현행 `/validate-workitem`은 이 상태를 `## Evidence Bundle`의 *검증하지 못한 것*에 `외부 서비스 실패·timeout: <mocked / not covered>`로 **선언만** 하게 하고, 미명시 시 벌칙도 *신뢰도 Low 강등*(자동 차단 없음)뿐이다.
-- [관측됨] 실행 오라클을 강제하는 유일한 게이트는 마일스톤 졸업의 E2E(ADR-014#amend-4 / ADR-052#amend-1)인데, 그 적용 조건이 **UI 프로젝트 ∨ graduation item 6의 명시 선언**이라 UI 신호가 없는 프로젝트는 기본값이 `NOT_APPLICABLE`이다. `/plan-milestone`은 item 6에 e2e를 선언하도록 유도하지 않는다(본문에 `e2e` 문자열 0건).
+- [관측됨] 실행 오라클을 강제하는 유일한 게이트는 마일스톤 졸업의 E2E(ADR-067 D1 item 3 / ADR-052#amend-1)인데, 그 적용 조건이 **UI 프로젝트 ∨ graduation item 6의 명시 선언**이라 UI 신호가 없는 프로젝트는 기본값이 `NOT_APPLICABLE`이다. `/plan-milestone`은 item 6에 e2e를 선언하도록 유도하지 않는다(본문에 `e2e` 문자열 0건).
 - [관측됨] 그 결과 보일러플레이트 자신의 dogfood(`.boilerplate/validation/SIMULATION_RUN.md`)에서도 Round 1의 CLI 마일스톤이 *"E2E 명령 미설정으로 skip"* 상태로 완료 기준 5/5를 충족해 졸업했고, Round 5 이후 등장한 subprocess E2E는 졸업 게이트가 요구한 것이 아니라 그 프로젝트 task의 AC 선택에서 나온 **task-specific 산물**이다(Round 9 graduation 표의 item 3은 여전히 `E2E N/A`).
 - [관측됨] ADR-009는 Red phase 종료 조건을 *"원하는 이유로 실패함을 확인"*으로 규정하지만 **그 관측이 어디에도 기록되지 않는다.** 하류에서 이를 재확인하는 유일한 장치는 `/validate-workitem`의 git-log 테스트 선행 휴리스틱인데, 본문이 *"단순 경고로만 보고하고 강제 종료하지 않는다"*로 못 박고 있다. 즉 반증 불가능한 규율이다.
 - [관측됨] 같은 파일럿에서 AC를 지키는 테스트가 아무것도 보고 있지 않은 사례 3종이 확인됐다 — 검사 대상 가드를 통째로 무력화해도 그 파일 테스트 전부 통과 / 종료 코드 단정이 `expect(undefined).not.toBe(0)` 형태라 "종료 코드를 아예 설정하지 않는" 회귀를 통과 / stderr 캡처 헬퍼가 항상 빈 문자열을 반환해 "로그가 없어야 한다" 쪽 단정이 항상 참.
@@ -165,4 +165,4 @@ accepted
 - docs/00-meta/STRUCTURE.md                          — Canonical Owner 표
 
 ## 참고
-- ADR-006#amend-1(diff trace audit — `VC-N` 추적 근거 확장), ADR-009(RGR — Red 종료 조건의 기록화 + opt-out 존중), ADR-014#amend-4 / ADR-052#amend-1(졸업 e2e — D6), ADR-022(Ratchet — 강도), ADR-040#amend-2(researcher 위임 — D3 실측 주체), ADR-047 D7(durable correction history — receipt 위치) · D8(Oracle Adequacy), ADR-060 D4(봉인 전 사실 조사 종결 — D3이 부분 정정), ADR-063 D1(probe 원리) · D4(d)(문자열 기록의 등급 선례) · D6(기계적 검사 배치 2문항).
+- ADR-006#amend-1(diff trace audit — `VC-N` 추적 근거 확장), ADR-009(RGR — Red 종료 조건의 기록화 + opt-out 존중), ADR-067 D1 item 3 / ADR-052#amend-1(졸업 e2e — D6), ADR-022(Ratchet — 강도), ADR-040#amend-2(researcher 위임 — D3 실측 주체), ADR-047 D7(durable correction history — receipt 위치) · D8(Oracle Adequacy), ADR-060 D4(봉인 전 사실 조사 종결 — D3이 부분 정정), ADR-063 D1(probe 원리) · D4(d)(문자열 기록의 등급 선례) · D6(기계적 검사 배치 2문항).

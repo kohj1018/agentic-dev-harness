@@ -108,7 +108,9 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
-| Milestone graduation checklist 5+1 | [ADR-014](../90-decisions/boilerplate/ADR-014-milestone-graduation.md) (정책 SSOT). → ADR-014 `## Surfaces` 참조 (fan-out SSOT). |
+| Milestone graduation checklist 5+1 | [ADR-067](../90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) (정책 SSOT — 구 계약 통합 재발행). → ADR-067 `## Surfaces` 참조. |
+| AC 검증 modality·authority·receipt (충족률/자동화율) | [ADR-065](../90-decisions/boilerplate/ADR-065-ac-verification-contract.md) (정책 SSOT). → ADR-065 `## Surfaces` 참조. |
+| 마일스톤 수용 단계 (accept/repair-acceptance·피드백 3갈래) | [ADR-066](../90-decisions/boilerplate/ADR-066-milestone-acceptance.md) (정책 SSOT). → ADR-066 `## Surfaces` 참조. |
 | DISCOVERY=SSOT / Charter=snapshot | [ADR-035](../90-decisions/boilerplate/ADR-035-continuous-discovery.md) (정책 SSOT). → ADR-035 `## Surfaces` 참조 (fan-out SSOT). |
 | FAC↔AC 매핑표 영속 위치 | [ADR-037](../90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-1 (정책 SSOT). 영속 위치: 각 feature 문서 `## 7-1` (plan/validate/stabilize cross-round 추적). → ADR-037 `## Surfaces` 참조 (fan-out SSOT). |
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). → ADR-022 `## Surfaces` 참조 (fan-out SSOT). |
