@@ -7,6 +7,8 @@ accepted
 
 > **단계 추가 (2026-07-29)**: 본 ADR이 정의한 lifecycle의 *plan 단계와 implement 단계 사이*에 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7의 봉인 게이트 `/seal-milestone`이 들어간다 — `plan-milestone`(→ M/F `contract-ready`) → `plan-workitem`(task `draft`) → **`seal-milestone`(검사·승인·일괄 `ready`)** → `implement-workitem`. 본 ADR의 단계 정의·책임 경계는 그대로 유효하며, 본 표기는 개정(amend)이 아니라 참조 갱신이다.
 
+> **단계 추가 (2026-08-09)** — `/accept-milestone`(사용자 수용 — 권장, 비차단)과 `/repair-acceptance`(수용 finding 수리 — 기존 task 재개방 X)를 lifecycle에 추가한다. 위치는 `/stabilize-milestone` 뒤이며, `사용자 관측`·`플랫폼 관측` modality AC의 receipt 발급을 위한 **task 스코프 모드**(`--task <task-id>`)는 `/validate-workitem` 뒤·`/finalize-workitem` 앞에서 실행된다. 상세는 [ADR-066](ADR-066-milestone-acceptance.md), 증거 계약은 [ADR-065](ADR-065-ac-verification-contract.md).
+
 ## 현재 유효 결정
 - 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT. bootstrap은 charter/ARCH/ADR-100까지 — M1/F-001 seed는 ADR-057로 plan 단계(plan-milestone)로 이동.
 - skill 간 흐름은 텍스트 제안 원칙 + 예외 3종: inner-loop(implement/validate/repair/finalize-workitem)는 model-invocable(#amend-4), `Needs Stack Guard`(#amend-3), `Needs Experience Contract`(#amend-5).
