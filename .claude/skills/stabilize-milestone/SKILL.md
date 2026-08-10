@@ -204,7 +204,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 
 집계 항목:
 - Tasks: M done / N total (M/N %)
-- AC↔테스트 매핑: A ✅ / B total (A/B %)
+- AC↔검증 매핑: 충족 A / 전체 B — 충족률 <%> · 자동화율 <%>
 - FAC coverage: C ✅ / D total (C/D %)
 - Evidence Bundle 신뢰도 분포: High K / Medium L / Low J (Step 2 도입 후 채워짐 — 미도입 마일스톤은 "해당없음" 한 줄)
 - Validate exit code (가장 최근 실행): 0 / non-zero / 미설정
@@ -217,7 +217,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 ```
 Telemetry — M1
 - Tasks: 12 / 12 (100%)
-- AC↔테스트 매핑: 34 / 36 (94.4%)
+- AC↔검증 매핑: 충족 34 / 전체 36 — 충족률 94.4% · 자동화율 88.9%
 - FAC coverage: 8 / 8 (100%)
 - Evidence Bundle 신뢰도: High 9 / Medium 2 / Low 1
 - Validate exit code: 0

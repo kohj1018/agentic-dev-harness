@@ -78,7 +78,7 @@ feature
        채워지지 않으면 기존 자연어 양식(`→ <file> > <test-name>`) 그대로 — 강제 X.
        **angle-bracket placeholder(`<runner>` 등)만 남기는 것 금지** — 안 채울 거면 자연어 양식으로 작성. 잔존 placeholder는 validator가 *미설정*으로 간주하고 자연어 매칭 fallback하지만, report에 P2 라벨로 기록.
      검증 판정력 확인용 테스트 중 **AC 행동으로 귀속되지 않는 것**(대표적으로 positive control — 검사 헬퍼 자체가 살아 있는지 확인하는 테스트)은 `- VC-N → <file> > <test-name>` 형식으로 등재한다 (ADR-064 D2). 반례 테스트("잘못된 입력을 거부한다")는 대개 AC 본연의 행동이므로 VC-N이 아니라 `AC-N`으로 매핑한다.
-     VC-N 행의 writer는 implement foreman 단독이며, **`## AC ↔ 테스트 매핑` 커버리지 % 집계에는 포함하지 않는다**(그 %가 신뢰도 등급 입력이라 섞이면 등급이 이동한다). 등재 목적은 그 테스트 줄이 diff trace audit에서 `AC-N | 명시 요청 | VC-N`으로 역추적되게 하는 것이다.
+     VC-N 행의 writer는 implement foreman 단독이며, **`## AC ↔ 검증 매핑`의 충족률·자동화율 집계에는 포함하지 않는다**(그 %가 신뢰도 등급 입력이라 섞이면 등급이 이동한다). 등재 목적은 그 테스트 줄이 diff trace audit에서 `AC-N | 명시 요청 | VC-N`으로 역추적되게 하는 것이다.
      **검증 modality 표기 (ADR-065 D1 — 필수)**: 각 AC 행의 **AC 번호 바로 뒤**에 그 AC를 무엇으로 증명하는지 `[modality]`를 붙인다.
      - `[자동 테스트]` — `- AC-1 [자동 테스트] → jest::tests/auth/me.spec.ts::test_AC_1_...`
      - `[산출물 검사]` — `- AC-2 [산출물 검사] → npm run validate — insights 노트에 필수 섹션 3개(대안/권고/출처) 존재` (**검사 수단을 통합 `validate`에 묶는다** — 묶이지 않으면 충족 근거가 아니다. 내용의 *질*을 판정하는 AC는 이 modality가 아니라 `[사용자 관측]`이다)

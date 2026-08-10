@@ -30,7 +30,7 @@ opt-out 절차:
 - finalize 시점에 opt-out 사유를 사용자에게 명시적으로 보여주고 확인.
 
 검증 흐름:
-- `/validate-workitem`(validator)이 AC ↔ 테스트 매핑과 테스트 선행 휴리스틱을 점검.
+- `/validate-workitem`(validator)이 AC ↔ 검증 매핑과 테스트 선행 휴리스틱을 점검.
 - 결과는 validation report에 `AC-1 ✅ / AC-2 ❌(테스트 없음)` 형태로 기록.
 - `/finalize-workitem`은 통합 `validate` 명령 통과 외에 AC 미충족 항목이 있으면 `Needs Fix`로 종료.
 
@@ -47,13 +47,13 @@ fast 모드:
 - TASK_TEMPLATE의 `## 6. 테스트 포인트` → `## 6. Acceptance Criteria` + `## 6-1. 테스트 시나리오 (TDD Red)` + `## 6-2. TDD opt-out`으로 분리.
 - `/implement-workitem`이 RGR 3 phase 흐름.
 - builder 규칙에 RGR 사이클 강제.
-- validator 규칙에 AC ↔ 테스트 매핑 점검.
+- validator 규칙에 AC ↔ 검증 매핑 점검.
 - `/finalize-workitem` 통과 조건에 AC 미충족 0개 추가.
 - AGENTS.md에 "TDD 기본" 1단락(fork된 새 세션 자동 로드 surface; CLAUDE.md는 @AGENTS.md import).
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - docs/30-workitems/_templates/TASK_TEMPLATE.md   — ## 6-1 테스트 시나리오 path 형식 권장 (opt-in, ADR-047 D6 contract formation 정합)
-- .claude/skills/validate-workitem/SKILL.md       — AC↔테스트 매핑 path 우선 resolve + [verify-placeholder] P2 라벨
+- .claude/skills/validate-workitem/SKILL.md       — AC↔검증 매핑 path 우선 resolve + [verify-placeholder] P2 라벨
 - .claude/skills/finalize-workitem/SKILL.md       — AC 미충족 0개 게이트 + opt-out은 사유 표시까지(면제 아님)
 - .claude/skills/implement-workitem/SKILL.md      — RGR 3 phase + opt-out 모드 지시
 

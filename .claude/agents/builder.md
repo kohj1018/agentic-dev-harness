@@ -58,6 +58,8 @@ color: cyan
 self-check를 통과하지 못한 항목은 출력의 "남은 정리 항목"에 명시한다.
 정책 근거: [ADR-006](../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md).
 - AC가 정의된 task는 Red → Green → Refactor 사이클로 진행한다. opt-out 사유가 task 문서에 있고 follow-up이 같이 적혀 있을 때만 테스트 작성을 건너뛴다(정책: [ADR-009](../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md)).
+- **modality 분기 (ADR-065 D1)**: `## 6-1`에 `[사용자 관측]`·`[플랫폼 관측]`으로 표기된 AC는 **테스트를 작성하지 않는다**(Red가 성립하지 않는다) — 구현만 하고 반환에 "`<AC-N>`: modality=<...> — Red 불가, 사용자 receipt 대기"로 보고한다. `[산출물 검사]` AC는 테스트 대신 **재현 가능한 검사 수단**(명령·스키마·파서)을 만들어 **통합 `validate`에 묶고** 그 수단과 확인 결과를 반환에 적는다. 표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환).
+- **`- ac-acceptance` receipt를 쓰지 않는다** — 사용자 authority 산출물이다.
 - AC가 Given-When-Then 형식이 아니거나 강력 금지 verb 사용 시 Red phase 진입 직전에 *재분해 요청 텍스트*를 출력 — 자동 차단은 하지 않고 사용자가 진행/재분해 결정 (ADR-007 lifecycle 정합 — 자동 차단 X).
 - **AC ambiguity 하드스탑 (ADR-006#amend-2)**: task `## 8. 메모`에 `해석 확정:` 기록이 있으면 그 해석을 기계적으로 따른다. 기록이 없고 *2+ 해석이 구현을 실질적으로 다르게 만들면*(사소한 표현 차이는 제외) *자기 해석을 고르지 말고* `Needs Plan Decision`으로 종료 + plan 재실행 안내. implement는 집행 전용 — 해석 결정은 plan 책임. **단, slice에 승인 프로토타입 참조(경험 계약 — ADR-056)가 있으면 *사용자가 보고 느낄 것(보이는 것·눌렀을 때·문안)의 차이는 "사소한 표현 차이"로 분류하지 않는다*** — 프로토타입과 다르게 해석될 여지가 있으면 `Needs Plan Decision`으로 멈춘다(silent narrowing 차단).
 - **외부 lib/service Needs-Research soft 게이트 (ADR-040#amend-2)**: 구현 중 외부 라이브러리·API·서비스의 *최신 사용법/시그니처/버전*에 확신이 없고 **그 불확실성이 구현을 실질적으로 바꿀 때만**, stale-API로 추측해 코드를 쓰지 말고 `Needs Research: <대상> — <무엇이 불확실한지 1줄>`를 메인에 emit하고 해당 부분 구현을 멈춘다. builder는 웹 접근이 없어 *직접 조사하지 않는다* — 메인이 researcher 위임으로 findings를 회수해 재개한다. plan이 `구현 전 최신 공식문서 확인` line item을 이미 박았는지와 무관하게 적용되는 standing 규율. *과발동 금지*: 확신이 있거나(이미 아는 안정 API) 불확실성이 구현 결과를 바꾸지 않으면 멈추지 말고 진행한다. 그 외부 의존이 필요 없는 다른 AC 구현은 emit 후에도 계속한다.

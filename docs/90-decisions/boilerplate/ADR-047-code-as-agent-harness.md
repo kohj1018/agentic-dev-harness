@@ -15,7 +15,7 @@ accepted
 
 ### D1. 정체성 명시 (*Code as Agent Harness* §1 Harness 정의 / §3.4.4 Verification through Deterministic Sensors 정합)
 본 보일러플레이트는 **"document-driven code-as-agent-harness specialization"**이다.
-- *Executability* — `validate` 명령 + AC↔테스트 매핑 + stabilize deterministic preflight가 model 의도를 검증 (논문 §3.4.4 deterministic sensors 적용).
+- *Executability* — `validate` 명령 + AC↔검증 매핑 + stabilize deterministic preflight가 model 의도를 검증 (논문 §3.4.4 deterministic sensors 적용).
 - *Inspectability* — validation report / QA_FINDINGS / IMPROVEMENT_GUIDE / ADR이 실패 진단·역추적 가능.
 - *Statefulness* — git + 문서 6 layer가 상호작용 history 보존.
 - 본 D1은 *원칙 owning* — `[외부실증]` 논문 §1 Harness 정의 + §3.4.4 deterministic sensors 인용 single source.

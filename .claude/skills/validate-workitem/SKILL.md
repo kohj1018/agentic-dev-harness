@@ -21,7 +21,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
    - **diff가 작으면 (cost guard)**: 팬아웃하지 않고 메인 세션이 직접 단일 inline validator로 1~5단계를 그대로 수행한다(아래 fallback 기준).
    - **diff가 크면**: 메인 세션이 아래 **감사 축**을 독립 sub-task로 분할하고, [DELEGATION 병렬 패턴 #1](../../../docs/00-meta/DELEGATION_STRATEGY.md#병렬-패턴-3종)(한 turn에 `validator` sub-agent 다중 호출)로 *한 turn에* 팬아웃한다. 각 validator는 **자기 축 하나만** scoped로 받고 **partial verdict만 반환**한다(report 작성 금지).
      - 축 목록 (1축 = 1 validator sub-task):
-       1. AC ↔ 테스트 매핑 (+ 테스트 선행 휴리스틱 + `[verify-placeholder]` / `[test-id-missing]`)
+       1. AC ↔ 검증 매핑 (modality별 증거 판정 — ADR-065 D1 + 테스트 선행 휴리스틱 + `[verify-placeholder]` / `[test-id-missing]` + 충족률·자동화율 산정)
        2. 범위 밖 변경 + diff trace audit (ADR-006#amend-1)
        3. FAC → AC spec coverage audit (ADR-037)
        4. Arch-iface 7-1/7-2/7-3/7-4/7-5 audit (API/CLI/백엔드/프론트/모바일)
@@ -29,7 +29,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
        6. MCP 사용 audit (ADR-048#d5)
        7. Evidence Bundle 축(통합 명령 실행 결과 + oracle gap surface 점검 + ADR-064 receipt 판정 — 실행 증거/판정력/미실측 잔존, 전부 P1 기록 등급. 별도 축을 만들지 않는다)
        8. Cross-task seam 축 (feature `## 7-2`가 실재하고 "(해당 없음)"이 아닐 때만 spawn — ADR-057 결정 12)
-     - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)·8(seam — feature `## 7-2` 실재)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item, 8 = feature `## 7-2` 실재. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔테스트)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
+     - **신호 기반 조건부 spawn (cost guard 확장)**: 축 3(FAC spec)·4(Arch-iface)·5(UI)·6(MCP)·8(seam — feature `## 7-2` 실재)는 *해당 신호가 있을 때만* spawn한다 — 3 = task가 feature에 연결(`## 7 Feature` 링크), 4 = API/CLI/백엔드/프론트 신호(7-x 키워드·path), 5 = UI 프로젝트(ADR-027#amend-3), 6 = task `## 3`에 MCP 사용 line item, 8 = feature `## 7-2` 실재. 신호 없는 축은 spawn하지 않고 메인이 "해당없음"으로 인라인 기록한다(중간 크기 task의 과다 팬아웃 방지). 축 1(AC↔검증)·2(diff-trace)·7(Evidence Bundle)은 항상 해당.
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
      - **small-diff fallback 기준 — 계산이 먼저, 초과 시 재량 0** (cost guard, ADR-051#amend-4): dispatch 전에 크기를 *결정적 명령으로 계산한다*. **tracked 줄 변경** = `git diff HEAD --numstat` 각 행의 (added+deleted) 합(**binary 파일은 numstat이 `-\t-`로 표기 → 0으로 취급**; rename 행 `{old => new}`도 숫자 열은 그대로라 합산 정상); **untracked 신규** = `git status --porcelain --untracked-files=all`(= `-uall`)의 `??` 항목 각 *파일* 줄 수 합(`wc -l`). **`-uall`이 핵심** — 기본 `git status --porcelain`은 untracked 디렉터리를 `?? dir/` 한 줄로 접어 파일 수를 놓치고 `wc -l`을 디렉터리에 돌리면 깨진다(예: untracked 대량 디렉터리가 1로 오계산). **L = 둘의 합, F = numstat 행 수 + untracked 파일 수.** **기준은 working tree 전체(HEAD 대비)** — 정상 lifecycle은 직전 task가 finalize로 커밋돼 tree엔 본 task 변경분만 남으므로 별도 '관련 파일' 선별이 불요하다. **over-count는 안전하다**(크게 세면 fan-out으로 기울 뿐 — 검증을 *더* 하는 쪽). 그래서 무관한 dirty/untracked가 섞여도 **임의 제외하지 말고**(제외가 재량 우회 창구가 된다) 전부 센 뒤 `## Orchestration`에 "오염 tree(무관 파일 포함 가능)" 사유만 적는다. 정확한 수가 필요하면 무관분을 stash 후 재계산해도 되지만 필수 아님 — **공유 worktree에서 사용자 변경을 강제 커밋/stash하지 않는다**. inline 허용은 **(L ≤ 50) 또는 (F ≤ 2 이고 L ≤ 200)**, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음 — **셋 다 충족일 때만**. 하나라도 미충족이면 **fan-out 필수 — inline 선택 불가(재량 0)**. 조건 충족이어도 "vertical slice라 하나로 본다" 류 사유로 inline을 택하려면 `## Orchestration`의 fallback 사유에 계산한 F·L + "임계 미달"을 명시 기록한다. **임계 초과인데 inline이면 규칙 위반**(산출물로 반증 가능 — SIMULATION_RUN Round 4 T-002 우회 재발 방지). 경계값(50/200)은 실측 전 추정치라 #amend-4가 재보정 창구다. 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
      - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — 이 매핑이 없으므로(ADR-010) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
@@ -58,7 +58,9 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - 빠진 검증 포인트가 있는가
 - obvious regression risk가 있는가
 - 통합 검증 명령(있으면) 결과는 통과인가
-- AC ↔ 테스트 매핑 — task 문서의 AC-N마다 대응하는 테스트가 존재하는가(자연어 매칭 휴리스틱 또는 테스트 이름의 `AC_N` 식별자 매칭). **`## 6-1`의 `VC-N` 행은 AC 행동으로 귀속되지 않는 판정력 확인용(positive control 등)이므로 본 매핑의 분자·분모 어디에도 넣지 않는다 (ADR-064 D2)** — 커버리지 %가 아래 confidence ladder의 입력이라 섞이면 등급이 이동한다. 대신 `VC-N`이 가리키는 테스트 줄은 diff trace audit에서 *추적 가능*으로 분류한다(추적 근거는 `AC-N | 명시 요청 | VC-N` 셋이다 — ADR-006#amend-1 문구의 해석 확장).
+- AC ↔ 검증 매핑 (ADR-065 D1) — task `## 6-1`의 AC마다 `[modality]`를 읽고 그 modality가 요구하는 증거가 실재하는지 판정한다: `[자동 테스트]`=대응 테스트 실재(자연어 매칭 휴리스틱 또는 `AC_N` 식별자 매칭), `[산출물 검사]`=`## 6-1`에 기록된 검사 수단이 **통합 `validate`에 묶여 있고 그 실행이 통과**했는가(1단계에서 수집한 결과로 판정 — 검사 명령을 여기서 실행하지 않는다). 묶이지 않은 검사 수단은 충족 근거가 아니며 `P1 [Artifact-check-unbound] AC-N`으로 기록하고 그 AC는 미충족, `[사용자 관측]`·`[플랫폼 관측]`=task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`**(ADR-065 D3 판독 규칙 2 — 마지막이 `- invalidated`면 미충족. HTML 주석 밖의 줄만 센다). **modality 표기가 없으면 `[자동 테스트]`로 간주해 판정한다(legacy 호환 — 아래 둘째 불릿)**. `## 6-2. TDD opt-out`은 충족의 예외가 아니다(ADR-065 D2 — 이 예외를 두면 `## 6-2` 두 줄로 AC 게이트가 사라진다). **`## 6-1`의 `VC-N` 행은 AC 행동으로 귀속되지 않는 판정력 확인용(positive control 등)이므로 본 매핑의 분자·분모 어디에도 넣지 않는다 (ADR-064 D2)** — 자동화율이 아래 confidence ladder의 입력이라 섞이면 등급이 이동한다. 대신 `VC-N`이 가리키는 테스트 줄은 diff trace audit에서 *추적 가능*으로 분류한다(추적 근거는 `AC-N | 명시 요청 | VC-N` 셋이다 — ADR-006#amend-1 문구의 해석 확장).
+- **modality 표기 부재 (ADR-065 D1 legacy 규칙)**: 표기가 없는 AC는 **`[자동 테스트]`로 간주**한다(기존 fork 호환 — 판정이 현행과 동일해진다). 그 AC에 대응 테스트가 없으면 기존과 같이 미충족이다. 표기 부재 자체는 `P2 [Modality-missing] AC-N`으로 기록만 한다(차단 X).
+- **두 수치 (ADR-065 D4)**: `충족률`(전 modality)과 `자동화율`(`[자동 테스트]`+`[산출물 검사]`)을 따로 계산해 report에 적는다. **confidence ladder의 입력은 자동화율이다** — 사람·플랫폼 관측이 많은 task가 자동으로 High가 되지 않게 한다.
   - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D6 contract formation + D1 inspectability 정합).
   - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
 - 테스트 선행 휴리스틱 — git log에서 동일 task 범위의 테스트 파일 추가/수정이 구현 파일보다 먼저(또는 동일 커밋) 들어왔는지. 단순 경고로만 보고하고 강제 종료하지 않는다(소규모 작업이 한 커밋에 묶이는 경우 정상).
@@ -74,7 +76,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - **Evidence Bundle 양식 강제** (ADR-047 D8 oracle adequacy + D1 inspectability 정합): 위 양식의 "검증된 것 / 검증하지 못한 것 / 신뢰도" 3 sub-section을 *모두* 채운다. Pass 판정이라도 oracle gap이 명시 안 되면 *신뢰도: Low*로 강등 (자동 차단 X — report 신뢰 등급만 영향).
 - **아래 세 판정의 공통 판독 규칙 (ADR-064 D4)**: `- 외부 경계:` · `[미실측]` · `- exec-evidence`/`- verify-power` 를 찾을 때는 **HTML 주석(`<!-- ... -->`) 밖의 줄만** 센다. TASK_TEMPLATE 주석에 같은 형식의 예시가 들어 있어, 주석까지 세면 앞의 둘은 모든 task에서 오탐이 나고 `- exec-evidence`는 항상 존재로 보여 검사가 조용히 죽는다(원장 조회의 "설명 섹션의 형식 예시는 항목이 아니다"와 동형).
 - **실행 증거 판정** (ADR-064 D1/D7 — 본 skill은 실행하지 않고 *기록만 읽는다*): 본 task가 외부 경계를 건드렸는가를 diff와 task `## 2`의 `- 외부 경계:` 표시로 판정한다((a) 영속 저장소 쓰기 / (b) **외부** 네트워크 호출 — 같은 배포 단위 안의 서비스 간 호출은 제외 / (c) 실행 진입점). 해당하는 **경계 종류마다** task `## 8`에 `- exec-evidence` 줄이 있어야 한다. 없으면 `P1 [Exec-evidence-missing] <경계 종류>`. 사용자 waiver로 기록된 줄은 충족으로 보고 사유를 report에 인용한다. **줄의 존재 여부만 본다 — 신선도는 판정하지 않는다**(digest·커밋 비교는 도구가 없고, 줄 순서 기반 판정은 정상 repair 라운드에서 오탐이 난다. 근거는 ADR-064 D4). 증거 갱신은 코드를 고친 `/repair-workitem`의 책임이다. **본 항목은 기록 등급이며 Needs Fix를 트리거하지 않는다** — 실질 차단은 `/implement-workitem`의 `Needs Execution Evidence` 정지가 담당한다(ADR-064 D7).
-- **판정력 판정** (ADR-064 D2/D7): 각 AC에 대해 task `## 8`에 `- verify-power` 줄이 있고 `red=` 값이 `observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)` 중 하나인가. 없거나 값이 비면 `P1 [Verify-power-missing] AC-N`. **`opt-out`·`characterization`은 정상이며 결함이 아니다**(정당한 TDD opt-out·`Type: research-spike`·`Type: refactor`). `mutation=미승격`도 정상이다. 기록 등급 — Needs Fix를 트리거하지 않는다.
+- **판정력 판정** (ADR-064 D2/D7): **`[사용자 관측]`·`[플랫폼 관측]` modality AC는 대상에서 제외한다**(Red가 성립하지 않으므로 `- verify-power` 줄이 없는 것이 정상 — ADR-065 D1). 나머지 각 AC에 대해 task `## 8`에 `- verify-power` 줄이 있고 `red=` 값이 `observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)` 중 하나인가. 없거나 값이 비면 `P1 [Verify-power-missing] AC-N`. **`opt-out`·`characterization`은 정상이며 결함이 아니다**(정당한 TDD opt-out·`Type: research-spike`·`Type: refactor`). `mutation=미승격`도 정상이다. 기록 등급 — Needs Fix를 트리거하지 않는다.
 - **미실측 잔존 판정** (ADR-064 D3): task `## 3`에 `[미실측]` 표기가 남아 있으면 `P1 [Unmeasured-fact] <무엇> — 구현 시 해소되지 않음`. 기록 등급.
 
 마지막 단계 — partial 집계 + report 파일 작성 (집계자=메인 세션 단독):
@@ -83,9 +85,9 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이면 메인 세션이 자기 판정을 그대로 기록한다.
 
 집계 규칙 (combined verdict):
-- **Needs Fix 트리거**: 어느 한 축이라도 P0 finding이 있거나, AC↔테스트 매핑에 ❌ AC가 하나라도 있거나, 통합 검증 명령이 exit≠0이면 → **Needs Fix**(통합 명령 부재 스택은 해당 없음). 그 외 P1/P2만 있으면 Pass(라벨은 report에 전수 기록).
+- **Needs Fix 트리거**: 어느 한 축이라도 P0 finding이 있거나, AC↔검증 매핑에 미충족 AC가 하나라도 있거나(`미관측` 포함), 통합 검증 명령이 exit≠0이면 → **Needs Fix**(통합 명령 부재 스택은 해당 없음). 그 외 P1/P2만 있으면 Pass(라벨은 report에 전수 기록).
 - 각 축의 partial findings(P0/P1/P2)·`[verify-placeholder]`·`[test-id-missing]`·`Spec Gap`·`[Design-inventory*]`·`[MCP-*]`·`[Arch-iface-7-N]`를 누락 없이 해당 report 섹션에 전수 합친다(ADR-046#d3 — cap 때문에 finding 누락 금지).
-- **confidence는 메인 세션이 *집계 후* 재계산**한다(개별 validator의 신뢰도 추정을 그대로 신뢰하지 않는다). 아래 confidence ladder의 입력(통합 명령 통과 여부 / AC↔테스트 매핑 % / diff trace 통과 / oracle gap 카테고리 명시 여부)을 *집계된 전체*에서 평가해 Low→Medium→High 첫 매치로 확정한다.
+- **confidence는 메인 세션이 *집계 후* 재계산**한다(개별 validator의 신뢰도 추정을 그대로 신뢰하지 않는다). 아래 confidence ladder의 입력(통합 명령 통과 여부 / 자동화율 / diff trace 통과 / oracle gap 카테고리 명시 여부)을 *집계된 전체*에서 평가해 Low→Medium→High 첫 매치로 확정한다.
 
 ```markdown
 # Validation Report: <task-id>
@@ -97,7 +99,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 ## Orchestration (ADR-051#amend-2)
 <!-- 5줄 이내. 팬아웃/inline 여부를 산출물로 검증 가능하게 하는 관측 섹션 -->
 - 모드: fan-out N축 | inline fallback | Codex 순차 degrade
-- spawn된 축: <번호·이름 목록 (예: 1 AC↔테스트, 2 diff-trace, 7 Evidence)>
+- spawn된 축: <번호·이름 목록 (예: 1 AC↔검증, 2 diff-trace, 7 Evidence)>
 - skip된 축: <축 — 사유 (신호 없음 / 해당없음)>
 - fallback 사유 (inline 모드일 때만 기록): 파일 F개 · 변경 줄 L줄 (`git status --porcelain` 기준 — tracked=`git diff HEAD`, untracked=파일 전체) — **임계 미달 확인**(inline 정당 근거). **임계 초과면 inline 불가(fan-out 필수)** — "임계 초과 예외 inline"은 없다(재량 0). fan-out 모드에선 본 필드를 비우고 spawn 축을 적는다.
 
@@ -118,10 +120,13 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
   - (d) 스타일 변경: ... [P2]
 - 판정 영향: <Pass 유지 / Needs Fix 트리거 (오직 (c) 의도 외 발견 시)>
 
-## AC ↔ 테스트 매핑
-- AC-1: ✅ tests/foo.spec.ts > test_AC_1_xxx
-- AC-2: ❌ (테스트 없음)
-- AC-3: ✅ tests/bar.spec.ts > test_AC_3_xxx
+## AC ↔ 검증 매핑 (ADR-065)
+- AC-1: ✅ [자동 테스트] tests/foo.spec.ts > test_AC_1_xxx
+- AC-2: ✅ [산출물 검사] validate 통과 — insights 노트 필수 섹션 3개 검사(`scripts/verify` 내 docs 검사 단계)
+- AC-3: ✅ [사용자 관측] ac-acceptance 2026-08-09 / authority: 사용자 / 환경: Chrome 128·로컬
+- AC-4: ✅ [플랫폼 관측] ac-acceptance 2026-08-09 / authority: 사용자 / source: GH Actions run 12345
+- AC-5: ❌ [미관측] 표기 없음 → 자동 테스트 간주(legacy) — 대응 테스트 없음. `P2 [Modality-missing] AC-5` 병기
+- **충족률: 4/5 (80%) · 자동화율: 2/5 (40%)**
 
 ## Spec coverage (FAC ↔ AC, ADR-037)
 - FAC-1: ✅ T-001:AC-1
@@ -131,8 +136,8 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 ## 실행 증거 · 판정력 (ADR-064 — 전부 기록 등급, Needs Fix 미트리거)
 - 외부 경계: 해당(a 영속 저장소 / b 외부 네트워크 / c 진입점) | 해당없음
 - exec-evidence: (a) ✅ 등급1 재실행 가능 / (b) ❌ `P1 [Exec-evidence-missing]` / waiver(<사유>) | 해당없음
-- verify-power: AC-1 ✅ observed / AC-2 ✅ opt-out(spike) / AC-3 ❌ `P1 [Verify-power-missing]`
-- VC-N: <등재 목록 또는 없음> (AC 매핑 % 집계 제외)
+- verify-power: AC-1 ✅ observed / AC-2 ✅ opt-out(spike) / AC-3 ❌ `P1 [Verify-power-missing]` / AC-4 해당없음(사용자 관측)
+- VC-N: <등재 목록 또는 없음> (충족률·자동화율 집계 제외)
 - 미실측 잔존: 0건 | `P1 [Unmeasured-fact] <무엇>`
 
 ## Evidence Bundle (ADR-047 D8 oracle adequacy 정합)
@@ -140,7 +145,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 ### 검증된 것 (verified)
 - 통합 명령 exit code: <0 / non-zero / 미설정>
-- AC↔테스트 매핑: M개 ✅ / K개 ❌ (커버리지 %)
+- AC↔검증 매핑: 충족 M개 / 미충족 K개 — 충족률 <%> · 자동화율 <%> (modality별 내역은 `## AC ↔ 검증 매핑`)
 - diff trace audit: 추적 가능 N줄, 추적 불가 K줄(카테고리별)
 - FAC↔AC spec coverage: <% / 부재>
 - 기타 deterministic 점검: <markdown-link-check / static analysis 등 / 해당없음>
@@ -157,14 +162,17 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 ### 신뢰도 (confidence)
 <!-- 기준 (정의 — 같은 입력에 같은 판정 보장. 평가 순서: Low → Medium → High 의 *첫 매치* 등급으로 확정):
-     - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 AC↔테스트 매핑 <70%, 또는 AC↔테스트 ❌ 있음
-     - Medium: Low 조건 모두 불일치 + High 조건 중 1~2개 미달 (예: 매핑 70~89% / oracle gap 카테고리 1개 누락)
-     - High: 통합 명령 통과 + AC↔테스트 매핑 ≥90% + diff trace audit 통과 + oracle gap 카테고리 모두 명시(해당없음 포함) -->
-- 본 판정의 신뢰도: <High / Medium / Low> — <한 줄 근거 (예: "통합 명령 + AC 매핑 100% + diff trace 통과 + 외부 서비스 의존 없음" / "통합 명령만 통과, 동시성·외부 의존 미검증")>
+     - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 **자동화율 <70%**, 또는 미충족 AC 있음
+     - Medium: Low 조건 모두 불일치 + High 조건 중 1~2개 미달 (예: 자동화율 70~89% / oracle gap 카테고리 1개 누락)
+     - High: 통합 명령 통과 + **자동화율 ≥90%** + diff trace audit 통과 + oracle gap 카테고리 모두 명시(해당없음 포함)
+     자동화율(ADR-065 D4)을 쓰는 이유: 충족률로 계산하면 사람·플랫폼 관측만으로 채운 task가 High가 된다. -->
+- 본 판정의 신뢰도: <High / Medium / Low> — <한 줄 근거 (예: "통합 명령 + 자동화율 100% + diff trace 통과 + 외부 서비스 의존 없음" / "통합 명령만 통과, 동시성·외부 의존 미검증")>
 
 ## 다음 권장 액션
 - Pass: `/finalize-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
 - Needs Fix: `/repair-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
+- 미충족 AC가 전부 `[사용자 관측]`·`[플랫폼 관측]` receipt 대기: `/accept-milestone --task <task-id>` (task 스코프 — 라운드 상한·`## 11` 미소모, ADR-066 D1) 또는 사용자 직접 기재. **`/repair-workitem`으로 보내지 않는다**(고칠 코드가 없어 순환에 빠진다)
+- `감사 미완(unavailable)` 축 있음: `/validate-workitem <task-id>` 재실행 (수정 대상 아님)
 ```
 
 마지막 출력 (메인 세션에 텍스트로):

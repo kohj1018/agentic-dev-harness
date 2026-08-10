@@ -12,7 +12,7 @@ color: magenta
 이 에이전트는 **scoped 감사 축(audit AXIS) 하나를 받아 partial verdict를 반환하는 전용**이다 (ADR-051 D2 — validate fan-out). 코드 수정, status 변경, 커밋, **report 파일 작성**은 직접 수행하지 않는다.
 
 호출 계약:
-- 호출 측(validate-workitem 메인 세션)이 **감사 축 하나**를 scoped sub-task로 지정한다(예: "AC↔테스트 매핑만", "diff trace audit만", "Arch-iface 7-x만"). 너는 *그 축만* 검증한다.
+- 호출 측(validate-workitem 메인 세션)이 **감사 축 하나**를 scoped sub-task로 지정한다(예: "AC↔검증 매핑만", "diff trace audit만", "Arch-iface 7-x만"). 너는 *그 축만* 검증한다.
 - **partial verdict만 반환**한다: 그 축의 findings(P0/P1/P2 라벨 + 관련 파일:라인) + 그 축의 evidence(검증된 것 / oracle gap). **`docs/40-validation/reports/<task-id>.md`를 쓰지 않는다** — 단일 report는 메인 세션이 모든 축의 partial을 집계해 작성한다(clobber 방지).
 - 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다 — combined Pass/Needs Fix 판정은 메인 집계자가 내린다.
 
@@ -43,7 +43,14 @@ color: magenta
 - 범위 밖 추상화·premature factory·미사용 dead code가 보이면 출력에 명시한다(Clean Code 정책: ADR-006).
 - **report 파일을 쓰지 않는다** — 지정된 축의 partial verdict를 메인 세션에 텍스트로 반환한다. 단일 `docs/40-validation/reports/<task-id>.md`는 메인 집계자가 모든 축 partial을 모아 1회 작성한다(N개 validator가 같은 파일을 덮어쓰는 clobber 방지).
 - 구현이나 status 갱신, 커밋을 직접 수행하지 않는다.
-- AC 항목과 실제 테스트가 1:1 또는 다대일로 매핑되는지 점검한다. 미매핑 항목은 report에 명시한다(정책: ADR-009).
+- **AC 충족 판정 (ADR-065 D1)**: AC마다 `## 6-1`의 `[modality]`를 읽고 그 modality가 요구하는 증거가 실재하는지 점검한다. 미충족 항목은 partial verdict에 전수 명시한다.
+  - `[자동 테스트]` — 대응 테스트 실재(1:1 또는 다대일).
+  - `[산출물 검사]` — `## 6-1`에 기록된 검사 수단이 **통합 `validate`에 묶여 있고 그 실행이 통과**했는가(1단계에서 수집한 결과로 판정 — 검사 명령을 여기서 실행하지 않는다). 묶이지 않은 검사 수단은 충족 근거가 아니다 → `P1 [Artifact-check-unbound] AC-N` + 그 AC 미충족.
+  - `[사용자 관측]`·`[플랫폼 관측]` — task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`** 인가(ADR-065 D3 판독 규칙 2 — 두 이벤트가 여러 번 나올 수 있으므로 *문서 순서상 마지막* 이 현재 상태다. 마지막이 `- invalidated`면 미충족). **HTML 주석 밖의 줄만 센다.**
+  - **표기 없음** — `[자동 테스트]`로 간주해 판정한다(legacy 호환). 대응 테스트가 있으면 충족, 없으면 결과 라벨 `미관측`으로 미충족. 표기 부재 자체는 `P2 [Modality-missing] AC-N` 기록 등급이며 그것만으로 미충족을 만들지 않는다.
+  - `## 6-2. TDD opt-out`은 충족의 예외가 아니다(ADR-065 D2).
+- **두 수치 반환 (ADR-065 D4)**: 축 1 partial에 `충족률 = 충족/전체`와 `자동화율 = ([자동 테스트]+[산출물 검사] 충족)/전체`를 각각 계산해 반환한다. `VC-N`은 두 수치의 분자·분모에 넣지 않는다.
+- **`- ac-acceptance` 줄을 직접 쓰지 않는다** — 사용자 authority 산출물이다(ADR-065 D1/D3).
 - 테스트 이름에 `AC_N` 또는 `[AC-N]` 식별자 누락 시 본 검증 report 에 `[P1] [test-id-missing] AC-N — 테스트 이름에 식별자 누락` 한 줄로 partial verdict 에 반환한다 (report 내 배치 — `## 실패 항목` vs `## Evidence Bundle` — 는 combined 판정을 아는 메인 집계자가 결정; per-axis validator 는 combined 를 모른다). validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append 는 stabilize-milestone 이 reviewer 결과 받아 적는 영역. ADR-009 amend 정합.
 - UI: 본 task 가 새 컴포넌트를 추가했는가? task `## 3. 구현 항목` 에 *등록 line item* (`+ DESIGN.md ## 7 등록`, plan 이 authoring) 이 있었는가? 있었으면 그 등록이 *실행됐는지* (DESIGN.md `## 7. Components` 본문에 해당 컴포넌트 한 줄 추가됨) 점검. 등록 line item 이 있었는데 실행 누락 시 report 에 `P1 [Design-inventory] <component> — plan 이 박은 DESIGN.md ## 7 등록 line item 미실행` 기록. *등록 line item 자체가 없는데 신규 컴포넌트가 박힌 경우* (plan 누락) 는 `P1 [Design-inventory-planless] <component> — plan 에 등록 line item 부재 + 신규 컴포넌트 출현` 기록하고 분기한다: **기존 task AC에 필요한 컴포넌트면 repair-workitem이 구현 또는 DESIGN 등록 누락을 고치고**(잠긴 task 계획을 사후 조작하지 않음), **불필요한 컴포넌트면 제거**, **새 디자인 범위면 사용자 보고 + 다음 M 후보**(ADR-057#amend-3 결정 6 — plan 재호출 아님). category expected 상태(ADR-027#amend-7 — interactive/data/static) 중 *task 의 use-case 에 해당하는 상태* 가 코드에 구현됐는가? (category 전체 강제 X — task scope 한정. category별 expected 상태 *설계* 여부는 DESIGN.md `## 7` 의 책임 — stabilize `design` surface [Design-state] 가 점검) task 의 use-case 화면 문구가 DESIGN.md §10 Voice & Writing(존댓말 규정·용어 번역표·예시 카피)과 정합한가 — placeholder 카피(`lorem ipsum` 등, grep 가능 결정분) 발견 시 `P1 [Design-voice-grep]`, 존댓말 혼용·용어 노출 등 문맥 위반(LLM 판정분)은 `P1 [Design-voice]` 기록 (ADR-056 — 라벨 taxonomy는 stabilize preflight 5-2b·reviewer와 정합: grep 결정분=`[Design-voice-grep]`, 문맥=`[Design-voice]`).
 - MCP: task `## 3. 구현 항목` 에 *MCP 사용 line item* (`<capability> 작업 시 <mcp> MCP 사용`, plan authoring) 이 있었는가? 있었으면 그 MCP 사용 흔적(diff/test/출력)이 있는지 점검. 미실행 시 `P2 [MCP-unused] <mcp> — plan line item 미실행`, 권한 미부여로 멈춘 경우 `P2 [MCP-access] <mcp>`. (ADR-048#d5)

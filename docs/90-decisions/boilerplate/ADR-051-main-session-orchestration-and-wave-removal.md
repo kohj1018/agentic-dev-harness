@@ -33,7 +33,7 @@ implement-workitem에서 `context: fork`(및 `agent: builder`)를 제거하고 *
 
 ### D2. validate/stabilize 병렬 fan-out (ADR-038 병렬성 위치 재배치)
 병렬성은 plan-time wave가 아니라 *report-only 단계의 fan-out*으로 제공한다:
-- validate-workitem: 단일 workitem 검증을 **audit axis별**(AC↔테스트 / diff-trace / FAC↔AC spec / Arch-iface 7-x / UI Design-inventory / Evidence Bundle)로 **병렬 fan-out** — 각 validator는 *partial verdict만 반환*하고 **메인이 단일 report(`reports/<task-id>.md`)를 작성**(clobber 방지). 여러 task 동시 검증 시 task별 fan-out도 동형. 읽기·판정뿐이라 write 충돌 없음(작은 diff는 단일 inline validator로 fallback).
+- validate-workitem: 단일 workitem 검증을 **audit axis별**(AC↔검증 / diff-trace / FAC↔AC spec / Arch-iface 7-x / UI Design-inventory / Evidence Bundle)로 **병렬 fan-out** — 각 validator는 *partial verdict만 반환*하고 **메인이 단일 report(`reports/<task-id>.md`)를 작성**(clobber 방지). 여러 task 동시 검증 시 task별 fan-out도 동형. 읽기·판정뿐이라 write 충돌 없음(작은 diff는 단일 inline validator로 fallback).
 - stabilize-milestone: qa·reviewer(code/design surface) 위임을 **병렬 fan-out**.
 - 두 단계 모두 report/판정 산출물이라 동시 실행이 git index race·빌드캐시 충돌을 일으키지 않는다(implement 병렬과 결정적 차이).
 - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — fan-out 대상 task/verifier를 순차로 1개씩 처리(판정 결과 동일, wall-clock만 길어짐).

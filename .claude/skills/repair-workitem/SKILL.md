@@ -20,6 +20,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 2. `docs/40-validation/reports/<task-id>.md`를 읽는다 (report는 매 validate phase 새로 쓰이므로 **항상 새로 읽는다** — 캐시 대상 아님).
    - 파일이 없거나 stale(파일 mtime이 task 문서/구현 파일보다 오래됨)하면 `/validate-workitem` 선행을 안내하고 종료한다.
    - 파일이 `Pass`이면 `/finalize-workitem`을 안내하고 종료한다(repair 대상 없음).
+   - **실패 항목이 전부 «수정 대상 아님»이면 즉시 종료한다** — `## 실패 항목`의 항목이 모두 (i) `[사용자 관측]`·`[플랫폼 관측]` receipt 대기이거나 (ii) `[P0] 감사 미완(unavailable)`이면, 코드로 고칠 것이 없으므로 4-판정에 들어가지 않고 안내 후 종료한다(report를 삭제하지 않는다). 안내 문구: (i)이면 `/accept-milestone --task <task-id>` 또는 사용자 직접 receipt 기재(ADR-065 D1 — 에이전트 대행 발급 금지), (ii)이면 `/validate-workitem <task-id>` 재실행. **둘이 섞여 있고 그 외 실패 항목도 있으면** 이 가드에 걸리지 않고 정상 진행하되, 위 두 종류는 4-판정 대상에서 제외하고 그대로 남긴다.
    - **단, 인자에 finding 요약(repair-milestone이 QA_FINDINGS 발견을 위임할 때 넘기는 "<finding>")이 있으면 report가 Pass·부재여도 종료하지 않고 그 finding을 대상으로 진행한다(finding-mode).** 아래 "비판적 재점검"을 그 finding에 적용해 코드를 수정하고 task `## 8. 메모`에 결정 이력을 남긴다. finding-mode에서는 (a) Pass report를 삭제하지 않고(실패 report가 아님), (b) QA_FINDINGS는 건드리지 않으며(status 종료는 위임한 repair-milestone 책임 — 본 skill의 "다른 산출물 미접근" 계약 유지), (c) 마지막 출력에 "/validate-workitem <task-id> 재실행으로 수정 확인" 안내를 포함한다.
 2-G. **상태별 입구 게이트 (`done` 재개방 — 유일한 역전이·writer 고정, ADR-057#amend-3 결정 5)**: task `## 0. Status`를 확인한다. `draft`/`ready`(아직 구현 전)면 repair를 거부하고 "먼저 `/implement-workitem`으로 착수" 안내 후 종료. `in-progress`면 상태를 쓰지 않는 일반 repair로 계속한다. `done`이면 **report(또는 위 finding-mode 근거)가 검증된 결함을 가리킬 때만** 아래 "수행"의 done 재개방 절차를 따른다 — `/repair-workitem`만이 `done` task를 재개방하는 유일한 writer다. `/repair-milestone`은 ADR-052 D4대로 status를 직접 쓰지 않고 per-task 결함을 본 skill로 위임한다.
 3. 사용자가 인자로 부분 지정을 줬으면 그 부분만 대상으로 한다.
@@ -39,6 +40,10 @@ allowed-tools: Read Glob Grep Write Edit Bash
 2-E. **실행 증거 갱신 (ADR-064 D4 — 외부 경계 코드를 고쳤을 때만)**: 본 라운드의 Adopt/Adopt-modified 수정이 (a) 영속 저장소 쓰기 · (b) 외부 네트워크 호출 · (c) 실행 진입점 코드를 건드렸으면, **그 경계의 실행 증거를 다시 확보하고 task `## 8`에 `- exec-evidence` 줄을 새로 append한다**(기존 줄은 지우지 않는다 — 이력이다). 증거 등급·안전 규정·waiver 규정은 implement 6-E와 동일하다. 확보하지 못하면 `Needs Execution Evidence: <경계 종류> — <사유>`를 출력에 남긴다. **등급 1 증거로 새 파일을 만들었으면 task `## 4-1`에도 그 경로를 추가한다**(finalize 의 add 목록 누락 방지 — 본 skill 은 단독 실행이라 `## 4-1` 단일 writer 규율과 충돌하지 않는다).
    **이 책임이 repair에 있는 이유**: receipt writer를 implement 단독으로 두면 `validate(Needs Fix) → repair(코드 수정) → 재validate` 에서 증거가 낡은 채 남고 그것을 갱신할 주체가 없어 루프가 닫힌다. 코드를 고친 주체가 그 자리에서 증거를 갱신하는 것이 이 계약의 신선도 유지 방식이다.
    본 skill이 `## 8`에 쓰는 시점은 `/validate-workitem` 재실행 *이전*이고 아래 4에서 report를 삭제하므로, task 문서 mtime 갱신이 report를 stale로 만드는 문제는 발생하지 않는다.
+
+2-F. **AC acceptance 무효화 (ADR-065 D3)**: 본 라운드의 Adopt/Adopt-modified 수정이 어떤 AC의 동작 경로를 건드렸고 그 AC의 modality가 `[사용자 관측]`·`[플랫폼 관측]`이면, task `## 8`에 `- invalidated <날짜> <AC-N>: repair-workitem 수정으로 재확인 필요` 한 줄을 append한다(기존 `- ac-acceptance` 줄은 지우지 않는다 — 이력이다). 그 AC는 다음 validate에서 미충족이 되고 receipt 재발급이 필요하다. **에이전트가 새 receipt를 쓰지 않는다.**
+
+2-H. **동일 패턴 전수 검색 (ADR-047 D7 정합)**: Adopt/Adopt-modified한 각 결함에 대해 **같은 패턴의 다른 출현을 저장소 전체에서 읽기 전용으로 검색**한다(Grep). 결과를 task `## 8`에 `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`으로 append하고 마지막 출력에도 한 줄 남긴다. **범위 밖 출현은 고치지 않는다**(task 범위 계약 유지 — 읽기는 범위 제한 대상이 아니다). 범위 밖 항목은 `/stabilize-milestone`·`/repair-milestone`이 회수한다. 검색으로 아무것도 안 나왔으면 `범위 밖 0건`으로 적는다(검색 사실 자체가 기록이다).
 
 3. **결정 이력 영속화 (ADR-047 D7)** — 본 라운드의 P0/P1 항목 전부에 대해 task 문서 `## 8. 메모`에 한 줄씩 append(P2는 cap 보호로 미영속):
    `- repair-workitem <YYYY-MM-DD> <severity> <category>: <Adopt|Adopt-modified|Reject-FP|Reject-context> — <근거 ≤80자>`
@@ -65,6 +70,8 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - 삭제한 report 경로
 - 미해결 항목 (있으면)
 - 실행 증거 갱신 (ADR-064 D4): 갱신 N건(경계 종류) / 해당없음(외부 경계 코드 미수정) / `Needs Execution Evidence`
+- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음
+- 동일 패턴 전수 검색: 범위 내 N건 / 범위 밖 M건(경로) — 범위 밖은 미수정
 - 다음 권장 액션: `/validate-workitem <task-id>` 재실행 (새 report 생성 → Pass면 `/finalize-workitem`)
 
 정책 근거: 비판적 재점검·전 severity 완결·report 삭제는 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-plan(ADR-038) 대칭. 결정 이력 영속은 ADR-047 D7.
