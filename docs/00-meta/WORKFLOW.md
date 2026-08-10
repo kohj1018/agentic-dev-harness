@@ -110,7 +110,8 @@ discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M
                            └─(미충족이 전부 관측 receipt 대기)─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 (권장, ADR-066)  stabilize → accept-milestone <M> (사람 직접 확인) ─┬─승인─→ (영향 task validate 재실행) → stabilize 재실행 → 졸업
-                                                                  └─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행
+                                                                  ├─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행 ─→ (위 분기 재판정)
+                                                                  └─미완─→ 환경 복구·사용자 재개 → accept-milestone 재실행 ─→ (위 분기 재판정, 라운드 카운터 미소모)
 ```
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.

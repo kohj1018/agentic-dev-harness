@@ -1586,7 +1586,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 
 ```markdown
 - 삭제한 report (ADR-067 D1 item 4 (d)): <task-id 목록> — 각 task `/validate-workitem` 재실행 필요 / 해당없음
-- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음 — **무효화가 1건 이상이면 순서는 «각 task `/validate-workitem` 재실행 → 그 AC가 `Needs Acceptance`면 `/accept-milestone --task <task-id>`로 receipt 재발급 → 다시 재validate → 그 뒤 stabilize»** 다(receipt 없이 stabilize를 돌리면 item 4 (a)가 그 task를 미충족으로 내어 라운드가 한 번 헛돈다)
+- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음 — **무효화가 1건 이상이면 순서는 «각 task `/validate-workitem` 재실행 → 그 AC가 관측 receipt 대기로 남으면 `/accept-milestone --task <task-id>`로 receipt 재발급 → 다시 재validate → 그 뒤 stabilize»** 다(receipt 없이 stabilize를 돌리면 item 4 (a)가 그 task를 미충족으로 내어 라운드가 한 번 헛돈다)
 ```
 
 **커밋**: `feat(skills): standardize commit ownership output, open snapshot, pattern-scan recovery, and cross-cutting report invalidation`
@@ -1637,7 +1637,8 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
                            └─(미충족이 전부 관측 receipt 대기)─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 (권장, ADR-066)  stabilize → accept-milestone <M> (사람 직접 확인) ─┬─승인─→ (영향 task validate 재실행) → stabilize 재실행 → 졸업
-                                                                  └─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행
+                                                                  ├─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행 ─→ (위 분기 재판정)
+                                                                  └─미완─→ 환경 복구·사용자 재개 → accept-milestone 재실행 ─→ (위 분기 재판정, 라운드 카운터 미소모)
 ```
 
 **(b) 새 절 추가** — `## 5. 마일스톤 안정화` 섹션의 **본문 끝**(다운스트림 마이그레이션 단락 다음), `## 6. 의사결정 기록` **앞**에 넣는다.
@@ -1659,7 +1660,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 **(a) 위임 트리거 표** — `stabilize cross-review 결과 회수 + 종합` 행 다음에 2행 추가.
 ```
 | 마일스톤 결과의 사용자 직접 확인 (권장) | 메인 세션 (accept-milestone) | `/accept-milestone <M>`. 환경 기동 + 시나리오 안내 + 피드백 3갈래 라우팅. 코드·커밋 X. `- ac-acceptance` receipt는 사용자 응답을 옮겨 적는다(대행 발급 금지 — ADR-065 D1 / ADR-066) |
-| task AC의 사용자·플랫폼 관측 receipt 발급 | 메인 세션 (accept-milestone `--task`) | `/accept-milestone --task <task-id>`. `/validate-workitem`이 `Needs Acceptance`로 낸 그 task의 관측 AC만 확인·발급하고 `/validate-workitem` 재실행을 안내한다. 라운드 카운터·`## 11`·마일스톤 원장을 쓰지 않는다 (ADR-066 D1) |
+| task AC의 사용자·플랫폼 관측 receipt 발급 | 메인 세션 (accept-milestone `--task`) | `/accept-milestone --task <task-id>`. `/validate-workitem` report의 `## 다음 권장 액션`이 **미충족 AC가 전부 관측 receipt 대기**라고 알린 그 task의 그 AC만 확인·발급하고 `/validate-workitem` 재실행을 안내한다(validate 판정은 `Needs Fix`이고 `Needs Acceptance`는 `/finalize-workitem`의 종료값이다 — 두 이름을 섞지 않는다). 라운드 카운터·`## 11`·마일스톤 원장을 쓰지 않는다 (ADR-066 D1) |
 | 사용자 수용 finding 수리 | 메인 세션 (repair-acceptance) | `/repair-acceptance <M>`. 3+1 판정(Reject-FP 없음 — 사용자 관측은 기각 대상 아님), 회귀 테스트 선행, 기존 task 재개방 X, 커밋 X (ADR-066 D4) |
 ```
 
