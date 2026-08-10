@@ -649,7 +649,7 @@ grep -rln "ADR-014" --include="*.md" --exclude=IMPROVE-GUIDE.md docs/90-decision
 **수정** (주석 안의 `BLOCKED` 정의를 넓히고, ADR 번호를 바꾸고, 재검증 순서를 명시한다):
 ```markdown
 - graduation: <YES | NO | BLOCKED> (<날짜>)  <!-- stabilize 단계 8 최종 판정(단계 4~6 qa 팬아웃 P0(QA_FINDINGS)만 반영, reviewer report-only 미반영) 영속 — §1.5 사전점검 아님. ROADMAP.md 파생 입력 (ADR-067 D3·ADR-057#amend-1). BLOCKED = 평가 실행 불가 2종: `BLOCKED (e2e blocked-on-env: <target>)` / `BLOCKED (audit incomplete: <축>)`. BLOCKED는 기존 YES를 덮어쓴다. 주: 이 판정은 stabilize 시점 report(checkout-local ephemeral) 기준이며, ROADMAP Done은 이 *영속된 판정*의 파생이지 fresh clone에서 재도출된 증거가 아니다 — **새 체크아웃에서 재검증할 때는 각 task의 `/validate-workitem`을 먼저 재실행해 report를 만든 뒤 stabilize를 돌린다**(report가 없으면 item 4가 전 task 미충족으로 나온다). -->
-- open 항목 스냅샷: <QA_FINDINGS 미해소 N건 / IMPROVEMENT_GUIDE 미해소 M건 / 이전 M carry-over K건>  <!-- ADR-067 D2 — 두 원장을 각각 읽어야만 알 수 있는 수를 한 줄로 남긴다. stabilize 단계 8이 채움 -->
+- open 항목 스냅샷: <QA_FINDINGS 미해소 N건 / IMPROVEMENT_GUIDE 미해소 M건 / 이전 M carry-over(P0/P1) K건>  <!-- ADR-067 D2 — 두 원장을 각각 읽어야만 알 수 있는 수를 한 줄로 남긴다. stabilize 단계 8이 채움. N·M은 전 severity, carry-over는 P0/P1만(다른 마일스톤 항목은 색인 스캔 대상) -->
 ```
 
 ### 5-5. 같은 파일 — `## 11. 수용 기록` 신설
@@ -1482,7 +1482,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 
 대상:
 1. `.claude/skills/stabilize-milestone/SKILL.md` — 단계 8 최종 출력 목록의 `- QA_FINDINGS / IMPROVEMENT_GUIDE 갱신 위치` 줄 다음. **tracked 파일 목록에는 `QA_FINDINGS.md`·`IMPROVEMENT_GUIDE.md`·마일스톤 문서(`## 8` 회고)·`DECISION_REGISTER.md`(등재 시)를 나열한다.**
-2. `.claude/skills/seal-milestone/SKILL.md` — 최종 출력 목록 끝. **tracked 파일 목록에는 승격한 task·feature·milestone 문서 전부를 나열한다**(status 값과 `## 10` 봉인 기록이 커밋돼야 봉인이 영속된다).
+2. `.claude/skills/seal-milestone/SKILL.md` — 최종 출력 목록 끝. **tracked 파일 목록에는 승격한 task·feature·milestone 문서 전부 + 조건 3-b의 `해석 확정:`을 기록한 task 문서를 나열한다**(status 값과 `## 10` 봉인 기록이 커밋돼야 봉인이 영속된다). **`해석 확정:`을 반드시 포함시킨다** — 그 skill의 write 대상은 «상태값 + `## 10` receipt + `해석 확정:`» 셋이고, `해석 확정:`은 **BLOCKED이어도 유지**되므로(그 파일 책임 경계) 승격 문서만 나열하면 BLOCKED 라운드에서 실제 변경이 목록에서 사라져 사용자가 커밋하지 못하고 다음 실행이 같은 질문을 반복한다.
 3. `.claude/skills/repair-plan/SKILL.md` — 최종 출력 목록 끝.
 4. `.claude/skills/repair-discovery/SKILL.md` — **이 파일의 `마지막 출력:`은 불릿 목록이 아니라 슬래시로 이어 쓴 1줄이다.** 목록으로 바꾸지 말고 그 줄 **다음 줄**에 위 2줄을 불릿으로 추가한다.
 
@@ -1503,7 +1503,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
   - **N** = `QA_FINDINGS.md`의 **본 마일스톤 헤더(`## M-N`)** 아래 미해소 항목 수(P0 a / P1 b / P2 c)
   - **M** = `IMPROVEMENT_GUIDE.md`의 **본 마일스톤 그룹(`### M-N`)** 안 미해소 항목 수(P0 d / P1 e / P2 f). `## 5. Repair decision log`는 closed records라 제외.
   - **K** = **다른(이전) 마일스톤** 헤더·그룹의 미해소 P0/P1 수 = carry-over
-  - **합계 = N + M + K**. 형식: `Open 전체: QA_FINDINGS N + IMPROVEMENT_GUIDE M + carry-over K = (N+M+K)건`
+  - **합계 = N + M + K**. 형식: `Open 전체: QA_FINDINGS N + IMPROVEMENT_GUIDE M + carry-over(P0/P1) K = (N+M+K)건` — **carry-over에 `(P0/P1)`을 붙여 출력한다**. N·M은 전 severity인데 K는 P0/P1만 세므로(다른 마일스톤 항목은 색인 스캔 대상 — `/repair-milestone` 회수 규율과 동형), 표기하지 않으면 `## 8. 회고`에 영속되는 수치를 읽는 사람이 기준을 오독한다.
   - **두 원장을 각각 읽어야만 알 수 있는 수이므로 한 줄로 합산해 남긴다**(한쪽만 읽고 남은 항목 수를 오독한 사례가 관측됨). 같은 값을 milestone `## 8. 회고`의 `open 항목 스냅샷:` 줄에도 기록한다(ADR-067 D2).
 ```
 
@@ -1518,7 +1518,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 **수정**:
 ```
 - Findings: P0 0 / P1 3 / P2 7
-- Open 전체: QA_FINDINGS 4 + IMPROVEMENT_GUIDE 6 + carry-over 1 = 11건
+- Open 전체: QA_FINDINGS 4 + IMPROVEMENT_GUIDE 6 + carry-over(P0/P1) 1 = 11건
 - Cross-stabilize 회귀 신호: 0건
 ```
 
@@ -1568,7 +1568,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 `/repair-plan`(plan 단계 feature/milestone 결정) · `/repair-milestone`(stabilize 후 milestone-level finding 수정 결정) · `/repair-acceptance`(사용자 수용 finding 수정 결정 — ADR-066 D4, ID `<M>-uat-<N>`, `affected: T-NNN` 필수)가 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리
 ```
 
-같은 파일 아래쪽 HTML 주석의 *"`/repair-plan` 또는 `/repair-milestone`만 직접 append"* 문구에도 `/repair-acceptance`를 추가한다(그 주석이 writer 목록의 두 번째 사본이다).
+같은 파일 아래쪽 HTML 주석의 *"`/repair-plan` 또는 `/repair-milestone`만 직접 append"* 문구에도 `/repair-acceptance`를 추가한다(그 주석이 writer 목록의 두 번째 사본이다). **같은 주석의 «`### M1` 그룹 *첫 호출 시* 자동 신설» 문구에도 `/repair-acceptance`를 넣는다** — `/repair-acceptance`는 `### M-N` 그룹이 없으면 직접 신설하므로(그 skill 수행 7), 생성자 목록을 둘로 두면 같은 주석 안에서 append 권한과 생성 권한이 어긋난다.
 
 ### 11-6. `/repair-milestone` 배선 (ADR-065 D3 writer + report 무효화) — **빠뜨리면 낡은 `Pass`로 졸업한다**
 
@@ -1577,7 +1577,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 `.claude/skills/repair-milestone/SKILL.md` `수행:` 의 **`2. 라우팅 …` 항목이 끝난 뒤**(그 항목의 하위 불릿 3종 — doc-consistency / e2e wiring / architecture debt — 이 모두 끝나고 `3.` 앞) 아래 두 단계를 삽입한다. 기존 `3.` 이후 번호는 그대로 두고 `2-A`·`2-B`를 쓴다.
 
 ```markdown
-2-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: 본 라운드의 cross-cutting 직접 수정이 어떤 task의 산출물 동작을 바꿨으면, 그 task의 `docs/40-validation/reports/<task-id>.md`를 **삭제한다**(`/repair-workitem`의 report 삭제 규율과 동형 — **삭제 전 `삭제 예정: <경로>` echo 강제**, 경로를 미리 회수해 하나씩 `rm`). 수정 파일이 `## 4-1`에 없어 mtime 비교로는 잡히지 않으므로, report 부재(=졸업 item 4 미충족)로 만들어 **재validate를 강제**하는 것이 유일한 경로다. 마지막 출력에 삭제한 report 목록과 `/validate-workitem <task-id>` 재실행 안내를 남긴다.
+2-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: 본 라운드의 cross-cutting 직접 수정이 어떤 task의 **산출물 동작 또는 validate 입력 계약**(ARCH `## 7-x` 인터페이스 결정·FAC↔AC 매핑·DESIGN 계약 등 — report의 축 판정이 그 문서를 근거로 산출된다)을 바꿨으면, 그 task의 `docs/40-validation/reports/<task-id>.md`를 **삭제한다**(`/repair-workitem`의 report 삭제 규율과 동형 — **삭제 전 `삭제 예정: <경로>` echo 강제**, 경로를 미리 회수해 하나씩 `rm`). 수정 파일이 `## 4-1`에 없어 mtime 비교로는 잡히지 않으므로, report 부재(=졸업 item 4 미충족)로 만들어 **재validate를 강제**하는 것이 유일한 경로다. 마지막 출력에 삭제한 report 목록과 `/validate-workitem <task-id>` 재실행 안내를 남긴다.
 
 2-B. **AC acceptance 무효화 (ADR-065 D3 — writer 3종 중 하나)**: 그 수정이 어떤 AC의 동작 경로를 건드렸고 그 AC의 modality가 `[사용자 관측]`·`[플랫폼 관측]`이면 그 task `## 8`에 `- invalidated <날짜> <AC-N>: repair-milestone cross-cutting 수정으로 재확인 필요`를 append한다(기존 `- ac-acceptance`는 지우지 않는다 — 이력이다). **새 receipt를 대신 쓰지 않는다**(사용자 authority).
 ```
@@ -1586,7 +1586,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 
 ```markdown
 - 삭제한 report (ADR-067 D1 item 4 (d)): <task-id 목록> — 각 task `/validate-workitem` 재실행 필요 / 해당없음
-- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음
+- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음 — **무효화가 1건 이상이면 순서는 «각 task `/validate-workitem` 재실행 → 그 AC가 `Needs Acceptance`면 `/accept-milestone --task <task-id>`로 receipt 재발급 → 다시 재validate → 그 뒤 stabilize»** 다(receipt 없이 stabilize를 돌리면 item 4 (a)가 그 task를 미충족으로 내어 라운드가 한 번 헛돈다)
 ```
 
 **커밋**: `feat(skills): standardize commit ownership output, open snapshot, pattern-scan recovery, and cross-cutting report invalidation`
