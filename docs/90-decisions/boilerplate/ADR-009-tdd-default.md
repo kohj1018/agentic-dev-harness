@@ -54,6 +54,8 @@ fast 모드:
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - docs/30-workitems/_templates/TASK_TEMPLATE.md   — ## 6-1 테스트 시나리오 path 형식 권장 (opt-in, ADR-047 D6 contract formation 정합)
 - .claude/skills/validate-workitem/SKILL.md       — AC↔테스트 매핑 path 우선 resolve + [verify-placeholder] P2 라벨
+- .claude/skills/finalize-workitem/SKILL.md       — AC 미충족 0개 게이트 + opt-out은 사유 표시까지(면제 아님)
+- .claude/skills/implement-workitem/SKILL.md      — RGR 3 phase + opt-out 모드 지시
 
 ## 후속 작업
 - AC 자연어 매핑이 헐거우면 테스트 이름에 `AC_N` 식별자 컨벤션 권장 강화.
@@ -70,3 +72,24 @@ fast 모드:
 ### 근거
 - ADR-009 후속 작업의 명문화.
 - 자연어 매칭 false positive 차단.
+
+<a id="adr-009-amend-2"></a>
+## Amendment 2 (2026-08-09) — opt-out 범위 명확화 (Red-first 면제 ≠ AC 충족 면제)
+
+### 결정
+`## 결정`의 `opt-out 절차:`가 규정하는 면제 범위를 다음으로 고정한다.
+- **opt-out은 Red-first 절차(RGR 3 phase)의 면제까지다 — AC 충족의 면제가 아니다.** 본 ADR의 `## 결정` `검증 흐름:`이 이미 *"AC 미충족 항목이 있으면 `Needs Fix`로 종료"* 를, `## 결과`가 *"finalize-workitem 통과 조건에 AC 미충족 0개 추가"* 를 규정하며, opt-out에 대해 요구한 것은 *"finalize 시점에 사유를 사용자에게 명시적으로 보여주고 확인"* 뿐이다.
+- opt-out task도 AC마다 검증 modality와 증거가 필요하다(정의: [ADR-065](ADR-065-ac-verification-contract.md) D1/D2). `Type: research-spike`는 구조 사실을 `산출물 검사`로, 내용 판단을 `사용자 관측`으로 충족한다.
+- 따라서 `/finalize-workitem`·`/validate-workitem`·졸업 item 4는 `## 6-2`가 채워졌다는 사실만으로 AC 미충족을 통과시키지 않는다.
+
+### 근거
+- [관측됨] `/finalize-workitem`이 *"opt-out 사유가 있는 task는 예외"* 로 AC 미충족을 통과시켜, 본 ADR이 요구한 "사유 표시"가 "게이트 면제"로 확대 해석됐다. 그 결과 `## 6-2` 두 줄을 채우는 것만으로 AC 게이트가 사라졌다.
+- [관측됨] 반대편에서 졸업 item 4는 예외가 없어 정당한 opt-out task가 마일스톤을 영구 차단했다. 같은 규정을 두 지점이 반대로 읽었다.
+
+### 강도 (ADR-022)
+- 제약(강) — [관측됨]. 기존 규정의 *해석 고정*이며 새 요구를 추가하지 않는다.
+
+### 적용 surface
+- .claude/skills/finalize-workitem/SKILL.md
+- .claude/skills/validate-workitem/SKILL.md
+- docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md

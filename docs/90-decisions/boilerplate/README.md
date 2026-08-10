@@ -13,7 +13,7 @@
 | 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+#amend-1: Surgical Changes + ambiguity surfacing, +#amend-2: implement ambiguity 하드스탑) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
 | 007 | Workitem lifecycle | accepted | (+#amend-1: lock file whitelist 11종, +#amend-2: agent 단위 판정 경계 SSOT, +#amend-3: validate 게이트 강화 + finalize --apply 사유, +#amend-4: 일부 lifecycle skill 메인 세션 + inner-loop model-invocable, +#amend-5: Needs Experience Contract, +#amend-6: pubspec.lock 추가) | discover→bootstrap→plan→implement→validate→repair→finalize→stabilize 8단계 |
 | 008 | Commit convention | accepted | (+#amend-1: monorepo scope, +#amend-2: Refs footer) | Conventional Commits 기본 채택 |
-| 009 | TDD default + opt-out | accepted | (+#amend-1: AC ID 컨벤션) | /implement-workitem 디폴트는 Red→Green→Refactor 사이클, opt-out은 사유+follow-up 모두 필요 |
+| 009 | TDD default + opt-out | accepted | (+#amend-1: AC ID 컨벤션, +#amend-2: opt-out 범위 명확화(Red-first 면제 ≠ AC 충족 면제)) | /implement-workitem 디폴트는 Red→Green→Refactor 사이클, opt-out은 사유+follow-up 모두 필요 |
 | 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화, +#amend-4: cross-LLM wrapper 필수 축, +#amend-5: 도구별 memory 비캐노니컬) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
 | 011 | AGENTS.md 100줄 hard cap | accepted | — | AGENTS.md 최대 100줄, 신규 정책은 ADR + 1줄 링크 |
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
