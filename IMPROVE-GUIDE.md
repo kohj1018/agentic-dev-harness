@@ -1367,6 +1367,12 @@ policy:
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
 ```
 
+그리고 **같은 파일 `## Surfaces` 블록**의 `- .claude/skills/stack-guard/SKILL.md` 줄 **다음**에 아래 한 줄을 추가한다 — 결정 5가 stabilize에 `[Guard-drift]` (e) 항목을 부여하므로 fan-out SSOT에 등재해야 한다. **선례**: [ADR-063](ADR-063-verification-harness-integrity.md)의 `## Surfaces`가 같은 이유로 `- .claude/skills/stabilize-milestone/SKILL.md — D4 [Guard-drift]`를 등재한다. **등재하면 그 파일에 `ADR-058` 역참조가 필요해지므로 아래 9-2b가 (e) 줄에 근거를 함께 박는다 — 두 편집은 한 쌍이며 둘 중 하나만 하면 `P1 [Surface-backref]`가 발화한다.**
+
+```markdown
+- .claude/skills/stabilize-milestone/SKILL.md — #amend-3 결정 5 `[Guard-drift]` (e) visual-QA 전제 기록 회수
+```
+
 그리고 `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`의 `## 통합 명령 사용법` 절 **코드 블록 다음**(그 절의 끝, `## Design Gate Adapter` 앞)에 아래 placeholder 한 줄을 추가한다.
 
 > 참고: 이 절에는 현재 `probe smoke:` placeholder가 **없다**(실측) — `/stack-guard`가 생성 파일에 직접 쓴다. 그래서 placeholder는 *기록을 가능하게 하는 조건*이 아니라 **필드를 발견 가능하게 만드는 문서화**다. `[Guard-drift]` (e)가 읽을 자리를 사람이 미리 볼 수 있게 두는 것이 목적이며, 값이 없으면 (e)는 침묵한다.
@@ -1384,8 +1390,10 @@ visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. 
 §1.0 항목 8의 `(d) probe 판정 기록` 블록 **다음**에 아래를 추가한다(ADR-058#amend-3 결정 5).
 
 ```markdown
-   - (e) **visual-QA 전제 기록** — `## 통합 명령 사용법`의 `visual-qa:` 값이 `PENDING`이면 `P2 [Guard-drift] visual-QA 전제 미준비 — /plan-workitem 이 전제 line item authoring 후 /stack-guard 재실행 권장`. 값이 `READY`거나 줄이 없으면(비-UI·비대상) 침묵한다. **여기서 spec을 실행하지 않는다 — 기록된 문자열만 읽는다**((d)와 동형, read-only 계약).
+   - (e) **visual-QA 전제 기록 (ADR-058#amend-3 결정 5)** — `## 통합 명령 사용법`의 `visual-qa:` 값이 `PENDING`이면 `P2 [Guard-drift] visual-QA 전제 미준비 — /plan-workitem 이 전제 line item authoring 후 /stack-guard 재실행 권장`. 값이 `READY`거나, 줄이 없거나(비-UI·비대상), **줄은 있으나 미치환 angle-bracket placeholder면 침묵한다** — 비-UI 프로젝트에는 템플릿 복사분이 그대로 남을 수 있고(`/bootstrap-stack`은 *절* 단위로만 비해당 삭제한다) 그 placeholder 문자열 자체에 `PENDING`이 들어 있어, 명시하지 않으면 deterministic 검사가 오발화한다. **여기서 spec을 실행하지 않는다 — 기록된 문자열만 읽는다**((d)와 동형, read-only 계약).
 ```
+
+그리고 **같은 항목 8의 도입 문구를 동기화한다** — `아래 (a)~(d) 가 전부 정상이면` → `아래 (a)~(e) 가 전부 정상이면`. 침묵 우선 규칙이 새 (e)를 포함하지 않으면 (e)만 규칙 밖에 남는다.
 
 ### 9-3. `.claude/skills/stack-guard/SKILL.md` — 6-4-1 Visual-QA 항목 교체
 
