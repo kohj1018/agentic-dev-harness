@@ -21,6 +21,9 @@ docs/40-validation/discovery-reviews/*.md
 # stabilize-reviews (ephemeral) — ADR-054
 docs/40-validation/stabilize-reviews/*.md
 !docs/40-validation/stabilize-reviews/.gitkeep
+# acceptance-reviews (ephemeral) — ADR-066 D3
+docs/40-validation/acceptance-reviews/*.md
+!docs/40-validation/acceptance-reviews/.gitkeep
 # design exploration/preview (ephemeral, never committed — ADR-058 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
 docs/20-system/design-concepts/
 docs/20-system/design-preview.html
