@@ -33,6 +33,7 @@
 ```
 pnpm validate   # 또는 npm run validate / make validate / task validate
 ```
+visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. /stack-guard 가 매 실행 기록·갱신 (ADR-058#amend-3 결정 5). 비-UI 는 이 줄을 삭제한다. -->
 
 ## Design Gate Adapter
 <!-- UI 프로젝트에서만 /stack-guard가 채우는 실행 registry (ADR-058#amend-2).

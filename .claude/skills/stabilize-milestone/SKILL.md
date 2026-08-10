@@ -93,7 +93,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - **cross-LLM 리뷰 skill wrapper 존재 (ADR-010#amend-4, deterministic)**: `validate-plan`·`validate-discovery`·`validate-milestone`과 각 repair 짝(`repair-plan`·`repair-discovery`·`repair-milestone`)에 `.agents/skills/<name>/SKILL.md`가 존재하는가. 부재 시 `P1 [Roster-drift] <skill> — Codex wrapper 부재 (ADR-010#amend-4)`.
    - 발견은 IMPROVEMENT_GUIDE에 기록(보고만 — 차단 X). **한계**: WORKFLOW 산문 흐름 등재는 본 grep 범위 밖(reviewer 위임이 보조 catch).
 
-8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)~(d) 가 전부 정상이면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
+8. **검증 장치 노후 감지 `[Guard-drift]` (deterministic — ADR-063 D4)**: **침묵 우선 — 아래 (a)~(e) 가 전부 정상이면 출력에 한 줄도 남기지 않는다** (skip 사유 echo 도 하지 않는다. 정상 상태를 매번 보고하면 그것이 노이즈이고, 검증 장치가 매 마일스톤 변경되는 것은 정상이 아니다). **단 아래 "선행: 파일 부재 처리" 는 예외다** — 점검을 아예 수행하지 못했다는 사실은 침묵하면 안 된다.
    - **선행: 파일 부재 처리** — `docs/00-meta/STACK_SETUP_PLAN.md` 는 baseline 이 아니라 `/bootstrap-stack` 생성물이다. 부재 시 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0 의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
    - (a) **registry 경로 실재** — **대상 절·검사할 열·조건을 아래로 고정한다**(deterministic 이려면 같은 입력에 같은 판정이 나야 한다. 절마다 스키마가 다르므로 "registry 행"만으로는 무엇을 볼지 정해지지 않는다). 부재 시 `P2 [Guard-drift] <절>:<경로> 부재 — /stack-guard 재실행 권장`.
 
@@ -112,6 +112,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
      - **정상(무출력)**: `PASS (probe verified, …)` 2종 · **`PROBE OK, PROJECT FAIL`**. 후자는 probe 전 회차가 기대대로였고 **프로젝트 코드만** 실패한 상태이므로 검증 장치의 노후가 아니다 — 재실행해도 같은 결과이니 처방이 무의미하고, 그 프로젝트 실패는 졸업 item 2(`통합 validate Pass`)와 단계 3 이 이미 잡는다.
      - **`P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`**: `PROBE FAIL(<단계>)` · `PARTIAL` · `SKIPPED (…)` · **줄 자체 부재**.
      - **여기서 probe 를 다시 돌리지 않는다 — 기록된 문자열만 읽는다**(read-only 계약). 이것이 `/stack-guard` 의 미검증 상태가 조용히 잊히지 않는 유일한 경로다(ADR-063 D3 기록 → D4 회수).
+   - (e) **visual-QA 전제 기록 (ADR-058#amend-3 결정 5)** — `## 통합 명령 사용법`의 `visual-qa:` 값이 `PENDING`이면 `P2 [Guard-drift] visual-QA 전제 미준비 — /plan-workitem 이 전제 line item authoring 후 /stack-guard 재실행 권장`. 값이 `READY`거나, 줄이 없거나(비-UI·비대상), **줄은 있으나 미치환 angle-bracket placeholder면 침묵한다** — 비-UI 프로젝트에는 템플릿 복사분이 그대로 남을 수 있고(`/bootstrap-stack`은 *절* 단위로만 비해당 삭제한다) 그 placeholder 문자열 자체에 `PENDING`이 들어 있어, 명시하지 않으면 deterministic 검사가 오발화한다. **여기서 spec을 실행하지 않는다 — 기록된 문자열만 읽는다**((d)와 동형, read-only 계약).
    - `validate` 4단계 커버리지의 **재측정**은 본 항목이 아니다 — 실측은 `/stack-guard` 재실행 시 probe 가 하고, 본 항목은 (d) 로 그 **기록**만 읽는다(ADR-063 D1·D4 — 중복 회피 + read-only 유지).
    - 회수 경로는 기존과 동일하다 — IMPROVEMENT_GUIDE 에 기록하면 다음 `/plan-milestone` R0 의 open 항목 회수가 사용자에게 재실행을 안내한다(`[ADR-candidate]`·`[Stack-drift]` 와 동형, 신설 없음).
 

@@ -71,6 +71,7 @@ accepted
 - .claude/skills/bootstrap-design/SKILL.md
 - .claude/skills/plan-milestone/SKILL.md    — R5-5 프로토타입 수용 게이트 caller(allowed-tools + R5-5; R2-G/R6는 bootstrap-design 소관)
 - .claude/skills/stack-guard/SKILL.md
+- .claude/skills/stabilize-milestone/SKILL.md — #amend-3 결정 5 `[Guard-drift]` (e) visual-QA 전제 기록 회수
 - docs/20-system/DESIGN.md                  — 현재 디자인 흐름 근거
 - docs/00-meta/STRUCTURE.md
 - docs/00-meta/GUARDRAILS_STRATEGY.md
@@ -162,3 +163,30 @@ accepted
 4. **Preserved invariants** — D3 axe/geometry block 등급, 비-UI project runtime artifact 0, 사용자 취향 오라클, visual-QA 별도 surface, project-native registry entry.
 5. **Falsifying evaluation** — canonical digest 불일치인데 ready, fixed conformance case 하나라도 오분류, negative caller가 command/final write 수행, n/a→UI 재분류 재실행이 adapter를 생성하지 못하면 rollback/rework.
 6. **Rollback path** — Amendment 2를 supersede하는 후속 ADR로 prose-authoring v1 또는 version-pinned external package를 선택한다. D3 품질 게이트 자체는 유지한다.
+
+<a id="adr-058-amend-3"></a>
+## Amendment 3 (2026-08-09) — visual-QA 전제 미충족의 표현 고정
+
+### 배경
+- [관측됨] `#amend-2`가 규정한 visual-QA scaffold는 *"앱이 비어 있으면 대상 landmark 부재 graceful skip은 허용"* 이라고만 정하고 **그 skip을 어떻게 표현할지를 정하지 않았다.** 실제 파일럿에서 접근성 검사 spec이 `testInfo.annotations.push(...)` + `return`으로 빠져나갔고, 러너는 이를 **passed로 집계**했다 — 레지스트리에 `실행 5 / skip 0`이 기록됐지만 그중 4건은 검사를 한 번도 실행하지 않았다.
+- [관측됨] "앱이 비어 있음"을 *대상 landmark 부재* 로 판정하게 되어 있어, **selector·라우트·wiring이 깨진 경우와 구분되지 않는다.** 두 경우가 같은 신호를 내면 배선 결함이 정상 skip으로 숨는다.
+
+### 결정
+1. **판정 보류는 runner-native skip으로만 표현한다.** `test.skip()`(또는 그 스택의 동등 API)만 허용하고, **annotation만 남기고 `return`하는 형태를 금지한다.** 러너 통계의 `skipped`가 진실을 담아야 졸업 판정(ADR-052#amend-1)이 성립한다.
+2. **전제는 판정하지 말고 소유한다(1차).** spec이 스스로 seed/fixture로 populated 상태를 만든 뒤 검사한다. 그러면 *대상 요소 부재*는 **항상 실패**이며 분기가 사라진다.
+3. **소유가 불가능한 표면(로그인·외부 의존 필수)은 2분기로 한다.** (a) **독립적인 empty 신호**(라우트 응답·명시적 seed 상태 표시 등 — 대상 landmark 부재를 근거로 쓰지 않는다)로 앱이 비었다고 확인되면 `test.skip()`. (b) 앱이 populated인데 selector·fixture·라우트 준비가 안 됐으면 **실패한다.** 이 실패는 `validate:e2e`의 `FAIL(project)`로 졸업을 차단한다(ADR-052#amend-1 — 새 게이트를 만들지 않는다).
+4. **`/stack-guard`는 e2e 판정 시 조기 반환 패턴을 보고한다** — 선언된 e2e 디렉터리에서 `annotations` 기록 직후 `return`하는 형태를 grep해 발견 시 `P1 [E2E-vacuous-skip] <file:line> — runner-native skip으로 교체 필요`를 출력에 남긴다. **문자열 검사이므로 기록 등급이며 차단하지 않는다**(ADR-063 D6 1문항).
+5. **전제 미준비를 영속 기록한다.** 결정 2·3을 만족할 seed·전제 수단이 없어 spec을 만들지 못하면, 출력만 하고 끝내지 않고 `STACK_SETUP_PLAN.md ## 통합 명령 사용법`에 `visual-qa: PENDING (precondition: <무엇이 없는가>) (<YYYY-MM-DD>)` 한 줄을 기록한다(준비되면 `READY (<날짜>)`로 갱신). `/stabilize-milestone` §1.0의 `[Guard-drift]` 점검이 그 값이 `PENDING`이면 `P2 [Guard-drift] visual-QA 전제 미준비 — /plan-workitem 이 전제 line item authoring 후 /stack-guard 재실행 권장`을 기록한다. **`probe smoke:` 기록 → `[Guard-drift]` 회수 경로(ADR-063 D3→D4)와 같은 형태이며 새 게이트를 만들지 않는다** — 기록이 없으면 boot smoke 하나로 e2e가 통과하는 상태가 조용히 잊힌다.
+6. **적용 범위**: 본 amendment는 `#amend-2`가 정의한 **UI/web 표면**에 한정된다. Flutter `native/*`의 시각 검증은 golden(ADR-059 D3)·경험 게이트 degrade(ADR-059 D12)가 담당하며 본 결정으로 바뀌지 않는다.
+
+### 근거
+- 보일러플레이트가 graceful skip을 *지시* 하면서 표현을 정하지 않았고, 다른 곳에서 러너의 통과/skip 수를 졸업 증거로 소비한다. 지시와 소비가 어긋난 자기유발 결함이다.
+- `test.skip()`으로 바꾸면 전부 보류된 경우 실행 0개가 되어 `EMPTY`(졸업 차단)로 드러난다. 다만 boot smoke 하나가 통과하면 전체는 `PASS`이므로(ADR-064 D6이 의도적으로 허용) **표현 고정만으로는 부족하고 결정 2·3의 실패 전환이 필요하다.**
+
+### 강도 (ADR-022)
+- **제약(강) — [관측됨]**: 결정 1·3(b). **enabling(약)**: 결정 2 권장, 결정 4 기록 등급.
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md
+- .claude/skills/stabilize-milestone/SKILL.md
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
