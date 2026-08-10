@@ -31,6 +31,7 @@
 - 구현은 `/implement-workitem`으로 시작한다.
 - 검증은 `/validate-workitem`으로 수행한다 — 판정 + `docs/40-validation/reports/<task-id>.md` 기록.
 > Note: validation report(`docs/40-validation/reports/<task-id>.md`)는 `.gitignore`된 **checkout-local 임시 파일**이다(커밋되지 않음). 따라서 `/validate-workitem`과 `/finalize-workitem`은 **같은 worktree/checkout**에서 연속 실행해야 한다 — 다른 worktree에서 나눠 실행하면 finalize가 report를 못 찾아 `Needs Validation`으로 종료한다.
+> **새 체크아웃·다른 worktree에서 마일스톤을 재검증할 때**: 졸업 item 4(AC 충족 100%)는 report를 읽으므로 report가 없으면 전 task가 미충족으로 나온다. 이는 결함이 아니라 ephemeral 설계의 정상 귀결이다. 재검증 순서는 **① 각 task `/validate-workitem` 재실행(report 생성) → ② `/stabilize-milestone` 실행**이다. `/stabilize-milestone`만 재실행하면 item 4가 전 task 미충족을 낸다.
 - 검증 실패 시 `/repair-workitem`으로 report의 실패 항목을 수정한다.
 - 검증 통과 시 `/finalize-workitem`으로 status `done` 갱신 + 커밋.
 - 마일스톤 단위 종합 점검은 `/stabilize-milestone`에서 수행한다.

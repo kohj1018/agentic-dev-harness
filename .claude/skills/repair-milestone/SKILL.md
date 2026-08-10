@@ -23,6 +23,8 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 1. milestone 문서를 읽고 포함된 feature/task 목록을 회수한다 (`## 8. 회고`의 기존 repair 결정 이력 맥락 포함).
 2. `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` / `### P1` / `### P2` 항목을 회수한다. **다른 마일스톤 헤더의 미해소(`status`≠`resolved`) P0/P1은 색인 스캔만 하고 — 본 skill은 본 milestone만 수정(책임 경계) — 고치지 말고 `carry-over 미해결: M-X → /repair-milestone M-X 권장`으로 flag한다**(index-first recall — 본 milestone 헤더로만 자르면 carry-over 누락). *IMPROVEMENT_GUIDE 회수(step 3)도 다른 마일스톤 `### M-X` 미해소 P0/P1을 동일 기준으로 색인 스캔·flag(대칭).*
 3. `docs/40-validation/IMPROVEMENT_GUIDE.md`의 본 milestone sub-section(`### M-N` 그룹)에서 `status: open` 항목을 회수한다 — `## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링` 안의 그룹. **`## 5. Repair decision log`는 회수 대상 아님** (closed records — 이미 지나간 판단).
+3-1. `IMPROVEMENT_GUIDE.md`의 `P1 [Pattern-spread]` 항목을 회수한다 — 이는 `/repair-workitem`·`/repair-acceptance`가 task 범위 밖이라 고치지 못한 **동일 패턴의 다른 출현**이다. cross-cutting 결함으로 취급해 4-판정 후 직접 수정하거나(범위 내), 새 범위면 사용자 보고 + 다음 M 후보로 남긴다. 해소하면 그 ID의 `status`를 `resolved`로 토글한다(수행 5와 동일 경로 — 그러면 stabilize가 재등재하지 않는다).
+3-2. **`(수용)` 태그 항목은 본 skill의 수정 대상이 아니다 (ADR-066 D5)**: `QA_FINDINGS.md`·`IMPROVEMENT_GUIDE.md`에서 `(수용)` 태그가 붙은 항목은 **사용자 관측이 우선 authority**이므로 `/repair-acceptance`가 처리한다. 본 skill은 그 항목을 4-판정하지 않고, `/repair-acceptance`가 이미 해소한 항목이면 `status: resolved` 토글만 수행한다(미해소면 그대로 두고 출력에 `수용 finding 미처리 — /repair-acceptance <M> 필요` 한 줄).
 4. `docs/40-validation/stabilize-reviews/<M>.*.md` glob으로 peer 리뷰 파일 회수(경로 목록 메모리 보관 — 삭제 시 재glob 금지). (ADR-054 — cross-LLM stabilize 리뷰 종합)
    - QA_FINDINGS `## M-N`도 IMPROVEMENT_GUIDE `### M-N`도 *그리고 stabilize-reviews 파일*도 모두 비어 있으면 *"수정 대상 finding 없음 — 다른 세션에서 `/stabilize-milestone <M-N>`을 먼저 실행하세요. (다른 세션·worktree에서 `/validate-milestone`를 돌렸다면 그 리뷰 파일을 이 checkout의 `docs/40-validation/stabilize-reviews/`로 옮긴 뒤 재실행하세요.)"* 안내 후 종료. 문서 수정 금지.
 5. 사용자가 인자로 부분 지정을 줬으면 그 부분만 대상으로 한다.
@@ -45,6 +47,11 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
      - **doc-consistency finding** (예: deterministic preflight가 올린 `[Doc-link]`/`[ADR-ref]`/`[Spec-gap]`/`[Arch-iface-violation]`): 해당 문서·매핑표를 직접 수정.
      - **e2e wiring scaffold/install** (E2E 미정의 스택에 재현 케이스를 영속 테스트로 묶는 scaffold, `validate:e2e` 배선, 의존성 install): 직접 scaffold·install.
      - **architecture debt** (layer 경계·의존성 규칙 위반 등 ARCH 정합 결함): **현재 M 약속(기존 task·AC) 위반이면 본 라운드 cross-cutting repair로 직접 수정**하고, 구조 변경이 커서 *새 범위*가 되면 architect 호출을 텍스트로 제안하며 **사용자에게 보고 + 다음 M 후보**로 남긴다(현재 M에 새 task를 제안하지 않는다 — 과대 수정 금지, ADR-057#amend-3 결정 6).
+
+2-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: 본 라운드의 cross-cutting 직접 수정이 어떤 task의 **산출물 동작 또는 validate 입력 계약**(ARCH `## 7-x` 인터페이스 결정·FAC↔AC 매핑·DESIGN 계약 등 — report의 축 판정이 그 문서를 근거로 산출된다)을 바꿨으면, 그 task의 `docs/40-validation/reports/<task-id>.md`를 **삭제한다**(`/repair-workitem`의 report 삭제 규율과 동형 — **삭제 전 `삭제 예정: <경로>` echo 강제**, 경로를 미리 회수해 하나씩 `rm`). 수정 파일이 `## 4-1`에 없어 mtime 비교로는 잡히지 않으므로, report 부재(=졸업 item 4 미충족)로 만들어 **재validate를 강제**하는 것이 유일한 경로다. 마지막 출력에 삭제한 report 목록과 `/validate-workitem <task-id>` 재실행 안내를 남긴다.
+
+2-B. **AC acceptance 무효화 (ADR-065 D3 — writer 3종 중 하나)**: 그 수정이 어떤 AC의 동작 경로를 건드렸고 그 AC의 modality가 `[사용자 관측]`·`[플랫폼 관측]`이면 그 task `## 8`에 `- invalidated <날짜> <AC-N>: repair-milestone cross-cutting 수정으로 재확인 필요`를 append한다(기존 `- ac-acceptance`는 지우지 않는다 — 이력이다). **새 receipt를 대신 쓰지 않는다**(사용자 authority).
+
 3. **한 라운드에 P0/P1/P2를 *모두* 4-판정으로 완결**한다(repair-plan/repair-workitem과 동형). defer 금지 — 4결정 카테고리 외의 deferred drop은 허용 X. 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다(`M1 "P0만"`).
 4. **결정 이력 영속화 (ADR-047 D7 durable correction history + D1 inspectability)** — 본 라운드의 P0/P1 항목 전부를 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` 안 `### M-N` 그룹(없으면 신설)에 IMPROVEMENT_GUIDE 스키마로 append. P2는 영속화 X (cap 보호 — 재출현해도 milestone 졸업 게이트를 막지 않아 무해).
 
@@ -77,6 +84,8 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 - status: open → resolved 토글한 finding 수
 - architect 호출 권장 (architecture debt가 구조 변경을 요할 때)
 - 미해결 항목 (있으면)
+- 삭제한 report (ADR-067 D1 item 4 (d)): <task-id 목록> — 각 task `/validate-workitem` 재실행 필요 / 해당없음
+- AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음 — **무효화가 1건 이상이면 순서는 «각 task `/validate-workitem` 재실행 → 그 AC가 `Needs Acceptance`면 `/accept-milestone --task <task-id>`로 receipt 재발급 → 다시 재validate → 그 뒤 stabilize»** 다(receipt 없이 stabilize를 돌리면 item 4 (a)가 그 task를 미충족으로 내어 라운드가 한 번 헛돈다)
 - 후속 권장 액션: `/stabilize-milestone <M-N>` 재실행 (수정 반영 후 재검증 → 졸업 가능 = YES면 `/plan-milestone`로 새 마일스톤(M-(N+1))+feature 생성·확정 후 `/plan-workitem M-(N+1)`로 전체 계획)
 
 정책 근거: 비판적 재점검·전 severity 완결은 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-workitem·repair-plan 대칭. milestone 졸업 contract는 [ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md). 결정 이력 영속·commit owner 분리는 [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7. 단순성·범위 추적은 [ADR-006](../../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md). repair-milestone 신규 skill 거버넌스: [ADR-052](../../../docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) D4.

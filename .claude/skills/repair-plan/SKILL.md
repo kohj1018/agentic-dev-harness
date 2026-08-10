@@ -102,6 +102,8 @@ ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) 
 - 다중 리뷰어 충돌이 있었던 항목 별 결정 근거 (있으면)
 - 삭제된 리뷰 파일 목록 (*반드시 먼저 할 일 step 1*에서 회수한 경로와 1:1 정합)
 - 다음 권장 액션: **`/seal-milestone M<N>`** — 봉인 전이면 봉인이 먼저다(착수 게이트 ④가 receipt를 요구 — ADR-060 D7). 이미 봉인된 M을 구현 전 수정한 경우에도 `/seal-milestone M<N>` 재실행으로 receipt를 갱신한다. 대규모 변경이면 `/validate-plan` 재실행 권장.
+- **변경한 tracked 파일 목록**: <경로 나열>
+- **커밋 안내**: 본 skill은 커밋하지 않는다 — 위 파일을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다(commit owner는 사용자/`/finalize-workitem`). 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 task `## 4-1` 밖 변경으로 보고 `Needs Review`로 멈춘다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 task 본문에서 발화 시 인용 — 사전 fork-load 금지.

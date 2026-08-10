@@ -25,6 +25,8 @@ agent: architect
 책임 경계: charter·workitem·코드·다른 산출물 수정 금지. 자동 커밋 금지.
 
 마지막 출력: 처리 리뷰 수 + reviewer-tag 명단 / 결정별 카운트(Adopt·Adopt-modified·Reject-fp·Reject-conflict) / 수정된 DISCOVERY 섹션 / 결정 이력 영속화 (§12 Repair history append 줄 수) / 다중 리뷰어 충돌 결정 근거(있으면) / 삭제된 리뷰 파일 목록 / 다음 권장(`/bootstrap-project --apply`로 charter sync, 또는 M/F 미생성 시 `/plan-milestone`(ADR-057); 이미 draft M이 있으면 그 안에서 재검토, `ready` 잠금 M이면 다음 `/plan-milestone`(M+1) 범위로 반영).
+- **변경한 tracked 파일 목록**: <경로 나열>
+- **커밋 안내**: 본 skill은 커밋하지 않는다 — 위 파일을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다(commit owner는 사용자/`/finalize-workitem`). 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 task `## 4-1` 밖 변경으로 보고 `Needs Review`로 멈춘다.
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 자료는 발화 시 인용 — 사전 fork-load 금지.

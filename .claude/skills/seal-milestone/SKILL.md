@@ -138,6 +138,8 @@ M을 마지막에 써야 "M=`ready` ⇒ 하위 전부 `ready`" 불변식이 성�
 - 판정: `SEALED` / `BLOCKED: <조건 번호> <사유>`
 - (SEALED) 승격한 문서 수 — task <N> / feature <M> / milestone 1 + receipt 요약 1줄
 - (BLOCKED) 막은 조건 + 가야 할 skill 1개
+- **변경한 tracked 파일 목록**: 승격한 task·feature·milestone 문서 전부(status 값 + `## 10` 봉인 기록) **+ 조건 3-b의 `해석 확정:`을 기록한 task 문서**(BLOCKED이어도 유지되므로 승격이 0건인 라운드에서도 이 항목은 남는다 — 아래 책임 경계)
+- **커밋 안내**: 본 skill은 커밋하지 않는다 — 위 파일을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다(commit owner는 사용자/`/finalize-workitem`). 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 task `## 4-1` 밖 변경으로 보고 `Needs Review`로 멈춘다.
 - 다음 단계:
   ```
   다음 단계:

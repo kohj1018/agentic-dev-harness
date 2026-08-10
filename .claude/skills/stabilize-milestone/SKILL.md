@@ -54,6 +54,11 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
 3. **FAC ↔ AC unmapped 검출** ([ADR-037](../../../docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-1 영속 SSOT `## 7-1` 정합):
    - 본 마일스톤의 모든 feature 문서 `## 7-1. FAC ↔ AC 매핑표`에서 *unmapped* 또는 *비어 있음* 항목 회수.
    - 발견 시 IMPROVEMENT_GUIDE에 `P0 [Spec-gap] F-NNN:FAC-N → unmapped` 기록 + graduation NO 유지 + 사용자 보고. 구현 후에는 plan-workitem으로 task를 자동 추가하지 않으며, 담당 task가 있으면 repair, 없으면 ADR-057#amend-3 결정 6의 사용자 명시 결정 경로를 따른다.
+3-1. **pattern-scan 범위 밖 잔존 회수 (deterministic)**: 본 마일스톤 산하 task 문서 `## 8`에서 **HTML 주석 밖의** `- pattern-scan` 줄을 회수해 `범위 밖 M건`이 1 이상인 항목을 모은다. 발견 시 IMPROVEMENT_GUIDE에 아래 스키마로 기록(WORKFLOW 4-A 면제 기록을 stabilize가 회수하는 것과 동형).
+     - **ID는 안정적으로 만든다** — `<task-id>-pspread-<패턴 슬러그>` (예: `T-004-pspread-null-guard`). 항목 형식: `- **<ID>** | P1 | [관측됨] | linked: <task-id> | status: open` + 하위 줄 `- [Pattern-spread] <패턴> — 범위 밖 M건 미수정: <경로>`.
+     - **재등재 금지(dedup)**: 그 ID가 IMPROVEMENT_GUIDE에 이미 있으면(status가 `open`이든 `resolved`든) **다시 등재하지 않는다.** `- pattern-scan` 줄은 task 문서에 영속되므로 이 규칙이 없으면 매 마일스톤 같은 P1이 재생산된다.
+     - **예외 — 같은 패턴의 새 출현**: 기존 ID가 `resolved`인데 그 task `## 8`에 **경로 목록이 다른** `- pattern-scan` 줄이 새로 append됐으면(두 번째 repair 라운드가 더 찾은 경우) `-2`·`-3` suffix를 붙인 새 ID로 등재한다. 판별 기준은 *경로 목록의 차이*이며, 같으면 재등재하지 않는다.
+     - 후속은 `/repair-milestone`(cross-cutting) 또는 다음 마일스톤 후보로 라우팅한다. 잔존이 0건이거나 전부 기존 ID면 침묵한다.
 4. **모드 라벨 ↔ 본문 정합 휴리스틱** (ADR-012): 모든 `docs/00-meta/` 파일의 `> 모드: ...` 라벨이 본문과 명백히 어긋나는지 점검 (휴리스틱 한계 명시).
    - mismatch 시 P2 `[Doc-mode] <file>` 기록.
 
@@ -219,6 +224,12 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
 - Evidence Bundle 신뢰도 분포: High K / Medium L / Low J (Step 2 도입 후 채워짐 — 미도입 마일스톤은 "해당없음" 한 줄)
 - Validate exit code (가장 최근 실행): 0 / non-zero / 미설정
 - Findings 분포: P0 X / P1 Y / P2 Z (본 milestone 헤더 산하)
+- **Open 전체 스냅샷** — 세 수를 **정의대로** 센다(겹치지 않게 한다).
+  - **N** = `QA_FINDINGS.md`의 **본 마일스톤 헤더(`## M-N`)** 아래 미해소 항목 수(P0 a / P1 b / P2 c)
+  - **M** = `IMPROVEMENT_GUIDE.md`의 **본 마일스톤 그룹(`### M-N`)** 안 미해소 항목 수(P0 d / P1 e / P2 f). `## 5. Repair decision log`는 closed records라 제외.
+  - **K** = **다른(이전) 마일스톤** 헤더·그룹의 미해소 P0/P1 수 = carry-over
+  - **합계 = N + M + K**. 형식: `Open 전체: QA_FINDINGS N + IMPROVEMENT_GUIDE M + carry-over(P0/P1) K = (N+M+K)건` — **carry-over에 `(P0/P1)`을 붙여 출력한다**. N·M은 전 severity인데 K는 P0/P1만 세므로(다른 마일스톤 항목은 색인 스캔 대상 — `/repair-milestone` 회수 규율과 동형), 표기하지 않으면 `## 8. 회고`에 영속되는 수치를 읽는 사람이 기준을 오독한다.
+  - **두 원장을 각각 읽어야만 알 수 있는 수이므로 한 줄로 합산해 남긴다**(한쪽만 읽고 남은 항목 수를 오독한 사례가 관측됨). 같은 값을 milestone `## 8. 회고`의 `open 항목 스냅샷:` 줄에도 기록한다(ADR-067 D2).
 - Cross-stabilize 회귀 신호: *이전 모든 milestone들*(`## M-1` ~ `## M-(N-1)`)의 P1 라벨 finding이 본 milestone의 **QA_FINDINGS(`## M-N`)** 또는 **IMPROVEMENT_GUIDE 의 `## 2. 즉시 수정할 항목`/`## 3. 권장 리팩토링` 안 `### M-N`** 두 sub-section에 *재등장*한 항목 수 (라벨 grep, 휴리스틱 한계 echo — 동의어/오타 false-negative 가능. 본 grep은 *정확한 라벨 매칭*만 잡음. `## 5. Repair decision log`는 *closed records*라 회귀 신호 대상 아님).
 
 본 단계는 *수치 echo만* — IMPROVEMENT_GUIDE / QA_FINDINGS에 새 항목 박지 않음. Cross-stabilize 회귀 신호가 1+ 건이면 단계 8 출력의 "P1 / P2 후속 작업"에 *patterned drift 의심* 한 줄 추가.
@@ -232,6 +243,7 @@ Telemetry — M1
 - Evidence Bundle 신뢰도: High 9 / Medium 2 / Low 1
 - Validate exit code: 0
 - Findings: P0 0 / P1 3 / P2 7
+- Open 전체: QA_FINDINGS 4 + IMPROVEMENT_GUIDE 6 + carry-over(P0/P1) 1 = 11건
 - Cross-stabilize 회귀 신호: 0건
 ```
 
@@ -239,6 +251,8 @@ Telemetry — M1
    - 통합 `validate` 결과 + E2E 결과 (있으면)
    - P0 / P1 / P2 후속 작업
    - QA_FINDINGS / IMPROVEMENT_GUIDE 갱신 위치
+   - **변경한 tracked 파일 목록**: `QA_FINDINGS.md`·`IMPROVEMENT_GUIDE.md`·마일스톤 문서(`## 8` 회고)·`DECISION_REGISTER.md`(등재 시)
+   - **커밋 안내**: 본 skill은 커밋하지 않는다 — 위 파일을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다(commit owner는 사용자/`/finalize-workitem`). 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 task `## 4-1` 밖 변경으로 보고 `Needs Review`로 멈춘다.
    - 다음 마일스톤으로 넘기는 항목
    - (UI) 경험 게이트 결과: [Experience-drift] N건 + 스크린샷 갤러리 경로 (사용자 육안 확인 권장) — 미실행 시 사유 필수 echo (silent skip 금지)
    - architect 호출 권장 (있으면)

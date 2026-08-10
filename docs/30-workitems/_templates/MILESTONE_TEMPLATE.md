@@ -34,7 +34,7 @@ draft
 
 ## 8. 회고 (stabilize 자동 채움)
 - graduation: <YES | NO | BLOCKED> (<날짜>)  <!-- stabilize 단계 8 최종 판정(단계 4~6 qa 팬아웃 P0(QA_FINDINGS)만 반영, reviewer report-only 미반영) 영속 — §1.5 사전점검 아님. ROADMAP.md 파생 입력 (ADR-067 D3·ADR-057#amend-1). BLOCKED = 평가 실행 불가 2종: `BLOCKED (e2e blocked-on-env: <target>)` / `BLOCKED (audit incomplete: <축>)`. BLOCKED는 기존 YES를 덮어쓴다. 주: 이 판정은 stabilize 시점 report(checkout-local ephemeral) 기준이며, ROADMAP Done은 이 *영속된 판정*의 파생이지 fresh clone에서 재도출된 증거가 아니다 — **새 체크아웃에서 재검증할 때는 각 task의 `/validate-workitem`을 먼저 재실행해 report를 만든 뒤 stabilize를 돌린다**(report가 없으면 item 4가 전 task 미충족으로 나온다). -->
-- open 항목 스냅샷: <QA_FINDINGS 미해소 N건 / IMPROVEMENT_GUIDE 미해소 M건 / 이전 M carry-over K건>  <!-- ADR-067 D2 — 두 원장을 각각 읽어야만 알 수 있는 수를 한 줄로 남긴다. stabilize 단계 8이 채움 -->
+- open 항목 스냅샷: <QA_FINDINGS 미해소 N건 / IMPROVEMENT_GUIDE 미해소 M건 / 이전 M carry-over(P0/P1) K건>  <!-- ADR-067 D2 — 두 원장을 각각 읽어야만 알 수 있는 수를 한 줄로 남긴다. stabilize 단계 8이 채움. N·M은 전 severity, carry-over는 P0/P1만(다른 마일스톤 항목은 색인 스캔 대상) -->
 - 목표 달성도: <정량/정성 1줄>
 - scope creep 사례: <있으면 1줄, 없으면 "없음">
 - 비목표(charter ## 5) 위반 사례: <있으면 1줄>
