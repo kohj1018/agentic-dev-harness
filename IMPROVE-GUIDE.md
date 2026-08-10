@@ -1609,11 +1609,13 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 **(c) 산출물 표에 2행 추가** — `stabilize review` 행 다음에 넣는다.
 ```
 | acceptance review (수용 세션 원본) | `docs/40-validation/acceptance-reviews/<M>.r<N>.md` | `/accept-milestone` (마일스톤 스코프) | ephemeral | generated |
-| 수용 기록 (acceptance receipt) | milestone 문서 `## 11. 수용 기록` | `/accept-milestone` (마일스톤 스코프 단독) | Record | conditional |
+| 수용 기록 (acceptance receipt) | milestone 문서 `## 11. 수용 기록` | `/accept-milestone` (마일스톤 스코프 단독) | Record | generated |
 ```
 
+> **`presence`를 `conditional`로 적지 않는다.** 이 표의 legend(같은 파일 상단)가 `conditional`을 *"특정 스택에서만 존재 (예: UI 한정)"* 로 정의하고 기존 `conditional` 행 전부가 UI·모바일·스택 조건부다. 수용 기록은 **스택 조건이 아니라 선택적 skill 실행의 산출물**이므로 `conditional`로 적으면 비-UI 프로젝트가 이 단계를 «해당 없음»으로 오독한다(ADR-067 D6은 전 스택 권장이다). `generated`(skill 호출 시 최초 생성)가 현 taxonomy에서 가장 가까우며 위 세션 원본 행과도 일관된다 — 섹션 껍데기는 템플릿에 있고 *기록*이 생성되는 것이라 `baseline`도 아니다.
+
 **(d) 기존 3행의 `생성 주체` 칸 갱신** — 새 skill도 이 파일들을 쓰므로 단독 표기를 고친다.
-- `qa findings` 행: `/stabilize-milestone` → `/stabilize-milestone` · `/accept-milestone`(수용 결함 — `(수용)` 태그) · `/repair-acceptance`(status 토글)
+- `qa findings` 행: `/stabilize-milestone` → `/stabilize-milestone` · `/accept-milestone`(수용 결함 — `(수용)` 태그) · `/repair-milestone`·`/repair-acceptance`(status 토글). **`/repair-milestone`을 빠뜨리지 않는다** — 그 skill 수행 5가 *"QA_FINDINGS `## M-N`의 해소된 항목도 동일하게 `status: resolved` 표기"* 로 규정하므로, 이 셀이 writer 인벤토리가 되는 이상 두 토글러를 함께 적어야 한다.
 - `improvement guide` 행: `/stabilize-milestone` → `/stabilize-milestone` · `/repair-plan`·`/repair-milestone`·`/repair-acceptance`(`## 5` decision log) · `/accept-milestone`(개선 제안)
 - `decision register` 행: 기존 writer 목록 끝에 ` · /accept-milestone`·`/repair-acceptance`(수용 라운드 `Out-of-contract` 등재 — ADR-060 D11)를 덧붙인다
 
@@ -1632,7 +1634,7 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 ```
    → implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
                            ├─Needs Fix─→ repair → (validate 재실행)
-                           └─Needs Acceptance─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
+                           └─(미충족이 전부 관측 receipt 대기)─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 (권장, ADR-066)  stabilize → accept-milestone <M> (사람 직접 확인) ─┬─승인─→ (영향 task validate 재실행) → stabilize 재실행 → 졸업
                                                                   └─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행
@@ -1644,8 +1646,10 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 ## 5-1. 사용자 수용 (권장 — ADR-066)
 - `/accept-milestone <M>`으로 사람이 직접 실행·확인한다. 환경을 띄우고 확인할 시나리오를 안내하고 피드백을 3갈래(결함=QA_FINDINGS / 계약 변경=DECISION_REGISTER+다음 M / 개선=IMPROVEMENT_GUIDE)로 라우팅한다.
 - **졸업 필수 조건이 아니다.** 단 task `## 6-1`에서 AC를 `[사용자 관측]`·`[플랫폼 관측]`으로 지정했으면 그 receipt 없이 졸업 item 4를 충족하지 못한다(ADR-065 D1).
-- **task 스코프는 inner-loop 안에 있다** — `/validate-workitem`이 그 AC를 미충족으로 내면(`Needs Acceptance`) `/accept-milestone --task <task-id>`로 receipt를 발급하고 `/validate-workitem`을 재실행한 뒤 `finalize`한다. 이 경로는 마일스톤 라운드 카운터·`## 11`을 쓰지 않는다. **이 분리가 없으면 «receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → receipt 발급 불가» 순환이 생긴다.**
+- **task 스코프는 inner-loop 안에 있다** — `/validate-workitem`이 그 AC를 미충족으로 내면 `/accept-milestone --task <task-id>`로 receipt를 발급하고 `/validate-workitem`을 재실행한 뒤 `finalize`한다. 이 경로는 마일스톤 라운드 카운터·`## 11`을 쓰지 않는다. **이 분리가 없으면 «receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → receipt 발급 불가» 순환이 생긴다.**
+  - **판정값 소유권**: `/validate-workitem`의 report 판정은 `Pass | Needs Fix` 둘뿐이고, 이 경로는 그 report의 `## 다음 권장 액션`이 지시한다. **`Needs Acceptance`는 `/finalize-workitem`의 종료값**이다(ADR-066 Surfaces가 validate=«`--task` 안내» / finalize=«`Needs Acceptance` 종료»로 배분). 두 이름을 섞어 쓰지 않는다.
 - **수용 라운드가 코드나 receipt를 바꿨으면 영향 task의 `/validate-workitem`을 재실행한 뒤** stabilize를 돌린다 — 졸업 item 4는 report를 읽고 stale report를 미충족 처리한다(ADR-067 D1 item 4 (d)).
+- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**(확인을 못 했으므로 회차로 세지 않는다). 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
 - 결함이 있으면 `/repair-acceptance <M>`이 3+1 판정으로 수리한다 — **기존 task를 재개방하지 않고 코드만 고치며**, 추적성은 결정 이력의 `affected: T-NNN`으로 확보한다. 수리 후에는 위 규칙대로 «영향 task 재validate → `/accept-milestone` 재실행 → (승인 시) 다시 재validate → `/stabilize-milestone`» 순으로 진행한다. **`## 8`이 바뀔 때마다 재validate가 한 번씩 들어간다** — 각 skill의 마지막 출력이 그 목록을 준다.
 - 라운드 상한 3회. 초과분은 사용자 확인 후 다음 마일스톤으로 이관한다.
 ```
@@ -1663,12 +1667,12 @@ milestone 문서 `## 11. 수용 기록`은 본 skill의 write 대상이 **아니
 
 `5.`(validate) 다음:
 ```
-5.5. (`Needs Acceptance`일 때만) `/accept-milestone --task T-NNN` — 그 task의 `[사용자 관측]`·`[플랫폼 관측]` AC receipt를 사용자가 발급 → `/validate-workitem T-NNN` 재실행 → 7(finalize). 라운드 카운터·`## 11` 미소모 (ADR-066 D1).
+5.5. (validate가 미충족 AC를 **전부 관측 receipt 대기**로 낸 때만 — report `## 다음 권장 액션`이 지시. validate 판정 자체는 `Needs Fix`이고 `Needs Acceptance`는 7의 종료값이다) `/accept-milestone --task T-NNN` — 그 task의 `[사용자 관측]`·`[플랫폼 관측]` AC receipt를 사용자가 발급 → `/validate-workitem T-NNN` 재실행 → 7(finalize). 라운드 카운터·`## 11` 미소모 (ADR-066 D1).
 ```
 
 `8.`(stabilize) 다음:
 ```
-8.5. (권장) `/accept-milestone M-N` — 사람이 직접 실행·확인. 승인 시 8.7로(단 **`(수용)` 태그로 이번 M 수리를 택한 개선 제안이 있으면 8.6을 먼저** — 그 항목의 유일한 실행 경로다, ADR-066 D5), 보류 시 8.6으로 (ADR-066).
+8.5. (권장) `/accept-milestone M-N` — 사람이 직접 실행·확인. 승인 시 8.7로(단 **`(수용)` 태그로 이번 M 수리를 택한 개선 제안이 있으면 8.6을 먼저** — 그 항목의 유일한 실행 경로다, ADR-066 D5), 보류 시 8.6으로, **`미완`이면 환경 복구·사용자 재개 후 8.5 재실행**(라운드 카운터 미소모 — 확인을 못 했으므로 회차로 세지 않는다) (ADR-066).
 8.6. (보류 시 · 또는 위 `(수용)` 개선 항목이 있을 때) `/repair-acceptance M-N` → 영향 task `/validate-workitem` 재실행 → `/accept-milestone M-N` 재실행. 라운드 상한 3.
 8.7. `/stabilize-milestone M-N` 재실행 — 수용 라운드의 코드·receipt 변경을 재검증하고 졸업 판정을 확정한다. **`## 8`을 갱신한 task가 있으면 그 task의 `/validate-workitem`이 선행돼야 한다**(졸업 item 4가 report를 읽고 stale을 미충족 처리 — ADR-067 D1 item 4 (d)).
 ```
