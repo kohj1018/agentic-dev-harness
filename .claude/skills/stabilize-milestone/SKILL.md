@@ -133,7 +133,12 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
   - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개 — 디렉터리가 비어 있거나 다른 디렉터리 테스트가 대신 실행됨. 실행됐는데 실패한 것은 `EMPTY`가 아니라 `FAIL`이다) → **`졸업 가능: NO` (hard)** + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-067 D1 item 3). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
   - **`FAIL`** (실행된 테스트 실패) → **`졸업 가능: NO` (hard)**. 후속은 단계 8의 `/repair-milestone` 분기로 라우팅.
   - **`BLOCKED_ENV`** (device/브라우저/toolchain 미설치·미기동) → **`졸업 가능: NO` (hard, blocked-on-env)**. real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다.
-- `AC 매핑 100%` → 본 milestone의 모든 task의 최신 `docs/40-validation/reports/<task-id>.md` `## AC ↔ 테스트 매핑` 섹션 항목이 모두 `✅`. report 부재 task는 미충족 처리.
+- `AC 충족 100% + report 유효` → 본 milestone의 **모든 task**의 최신 `docs/40-validation/reports/<task-id>.md`가 아래 넷을 **모두** 만족(ADR-067 D1 item 4):
+  - (a) `## AC ↔ 검증 매핑` 전 항목 충족. 판정 기준은 [ADR-065](../../../docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md) D1 modality — `미관측`은 미충족, 표기 부재는 `[자동 테스트]` 간주(legacy), **`## 6-2. TDD opt-out`은 예외가 아니다**(ADR-065 D2).
+  - (b) report `- 판정:` 값이 `Pass`. (AC 행만 읽으면 다른 축의 미해소 P0가 통과한다.)
+  - (c) `## Orchestration`의 `감사 미완(unavailable)` 항목이 없음.
+  - (d) **report가 stale하지 않음** — report mtime이 그 task `## 4-1` 등재 **구현 파일**들의 최신 mtime보다 오래되지 않음(같으면 통과). **task 문서는 비교 대상이 아니다** — `/finalize-workitem`이 stale 검사 뒤에 status를 쓰므로 넣으면 정상 마감된 전 task가 미충족이 된다(ADR-067 D1 item 4 (d) 주). stale이면 미충족 + 처방은 **그 task `/validate-workitem` 재실행**. `## 4-1` 밖 cross-cutting 수정은 `/repair-milestone`의 report 삭제가 담당한다.
+  - report 부재 task는 미충족 — **새 체크아웃·다른 worktree가 이에 해당하므로, 그때는 각 task의 `/validate-workitem`을 먼저 재실행해 report를 만든 뒤 본 skill을 다시 돌리도록 안내한다**(report는 gitignore된 checkout-local ephemeral — 설계상 정상이며 결함이 아니다).
 - `P0 severity finding 0건` → `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌(미해소) 항목 수 0**(`/repair-milestone`이 해소한 P0는 항목을 제거하지 않고 `status: resolved`만 표기하므로 이를 카운트에서 제외한다). 미해소 항목이 1+면 `졸업 가능: NO`.
 - `(선택) 본 마일스톤 한정 추가 기준` → 본문 텍스트 그대로 평가(사용자가 자유 기재한 영역 — 해당 항목만 LLM 해석 허용).
 - *UI 프로젝트의 자연스러운 추가 기준 example*: `DESIGN.md 모든 컴포넌트가 코드에 1+ 회 사용 + category expected 상태 충족(ADR-027#amend-7)` — 채택은 사용자 결정.
@@ -166,9 +171,12 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 다음 deterministic 평
    - Codex: 멀티모달 편차 시 (a) 갤러리 생성까지 수행 + (b) 대조는 "사용자 수동 검토" 안내로 degrade.
 4. **병렬 qa verifier 팬아웃 — 고정 1개가 아니라 *필요한 만큼*** (feature / user-flow / surface 단위로 분할). 메인 세션이 본 마일스톤의 feature·핵심 시나리오·surface 목록을 회수해 *독립 점검 단위*로 쪼개고, 각 단위마다 qa agent를 1개씩 병렬 위임한다(회귀·엣지케이스 점검). qa는 보고만 한다(qa.md의 tools에 Write 없음).
    - **위임 시 ADR-046#d3 적용: finding은 cap 때문에 누락하지 말고 전수 반환 — cap은 서술/과정 설명에만.**
+   - **축 미반환 회수 규율 (ADR-051#amend-4 결정 2)**: qa 단위가 구조화 반환 없이 멈추면 ① 1회 재개(같은 단위·같은 형식, 이미 확립한 finding 전량 포함 명시) → ② 다른 qa에 재위임 → ③ 메인이 그 단위를 직접 감사 → ④ 그래도 불가하면 **`QA_FINDINGS.md`의 본 마일스톤 `### P0`에 `- **M<N>-audit-<K>** | P0 | [관측됨] | linked: M<N> | status: open` + 하위 줄 `- 감사 미완(unavailable): <단위> — <4단계 실패 사유>`를 등재하고**, 단계 8의 graduation을 `BLOCKED (audit incomplete: <단위>)`로 기록한다(ADR-067 D3). **qa 팬아웃은 졸업 predicate ⑤의 유일한 입력이므로, 돌지 않은 감사를 근거로 "P0 0건"을 단정하지 않는다.**
+   - 다음 라운드에서 그 단위의 감사가 성공하면 본 skill이 그 `M<N>-audit-<K>` 항목의 `status: open`을 `resolved`로 갱신한다(**본 skill이 자기가 만든 감사-미완 항목에 한해 status를 닫는 유일한 예외** — 그 밖의 finding status는 `/repair-milestone`·`/repair-acceptance` 소유).
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (동일한 분할 단위를 *순차 단일 qa 호출*로 한 단위씩 처리, 결과는 동일하게 누적).
 5. **병렬 reviewer verifier 팬아웃 — 필요한 만큼** (리팩토링 후보·아키텍처 부채). 각 reviewer 입력에 Clean Code 6항목 체크리스트(ADR-006) + `review surface: code` + **ADR-046#d3(finding 전수 반환 — report-only)** 를 명시 전달한다. **UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃** — DESIGN.md `## 9. Do's and Don'ts` 위반 의심 grep 결과를 입력으로 받아 비판적 검토. reviewer도 보고만 한다. design reviewer 입력에는 grep 결과에 더해 **렌더 증거**를 주입한다 — §3-V 갤러리 경로(`docs/40-validation/visual/M-N/`) + visual-qa.spec 최근 결과(존재 시). reviewer는 Read로 이미지를 열람한다(ADR-027#amend-6). Codex: 경로 echo + 텍스트 결과만 전달로 degrade.
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (분할 단위를 순차 reviewer 호출로 처리).
+   - **축 미반환 회수 규율**: 단계 4와 같은 4단계를 밟는다. 단 ④에 도달해도 **판정을 바꾸지 않는다** — reviewer 결과는 졸업 predicate 입력이 아니다(report-only). `IMPROVEMENT_GUIDE.md`에 `P2 [Audit-unavailable] reviewer:<단위> — 감사 미완`을 기록하고 단계 8 출력에 사유를 echo한다. 미반환을 P0로 올리면 "결과 없음"이 "결과 있음"(정상 반환한 P1 부채는 졸업을 막지 않는다)보다 강해지는 역전이 생긴다.
 6-S. **메인 세션 self-synthesis (report-only 계약 유지)**: 위 4·5의 *모든* 병렬 verifier가 반환한 보고를 메인 세션이 직접 종합한다.
    - qa 보고 → `docs/40-validation/QA_FINDINGS.md`에 누적 기록. reviewer 보고 → `docs/40-validation/IMPROVEMENT_GUIDE.md`에 정리.
    - **no-cap-drop (ADR-046#d3)**: 여러 verifier의 finding을 합칠 때도 cap 때문에 누락 금지 — finding은 전수 기록하고, cap은 *대화 출력의 서술/과정 요약*에만 적용한다.
@@ -260,7 +268,7 @@ Telemetry — M1
 
 책임 경계:
 - 코드 수정·커밋·workitem status 변경 금지.
-- 누적 문서 갱신 + milestone `## 8. 회고` 자동 채움 — **회고의 `graduation:` 줄은 단계 4~6 종료 후 graduation 5+1 기준 *전체를 최종 상태로 재판정*해 기록**(P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 — qa 팬아웃分; reviewer는 report-only로 미반영)(task status·통합 validate·e2e·AC 매핑 100% = 단계 3 결과 + P0 0건 = 단계 4~6 반영 + 추가 기준; YES|NO|BLOCKED+날짜; §1.5 사전점검이 아니라 여기서 확정 — ADR-057#amend-1·ADR-067 D3). 로드맵 파일은 안 건드린다(다음 plan-milestone R0가 이 줄을 읽어 재조정).
+- 누적 문서 갱신 + milestone `## 8. 회고` 자동 채움 — **회고의 `graduation:` 줄은 단계 4~6 종료 후 graduation 5+1 기준 *전체를 최종 상태로 재판정*해 기록**(P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 — qa 팬아웃分; reviewer는 report-only로 미반영)(task status·통합 validate·e2e·AC 충족 100% = 단계 3 결과 + P0 0건 = 단계 4~6 반영 + 추가 기준; YES|NO|BLOCKED+날짜; §1.5 사전점검이 아니라 여기서 확정 — ADR-057#amend-1·ADR-067 D3). **감사 미완이 있으면 `BLOCKED (audit incomplete: <단위>)`로 기록하며, 이 값은 이전 라운드에 기록된 `YES`를 덮어쓴다**(줄을 쓰지 않으면 낡은 `YES`가 남아 하류가 졸업으로 읽는다). host 제약 e2e target의 처리는 본 라운드에서 바꾸지 않는다 — 기존대로 ADR-052#amend-1·ADR-059 D4(같은 커밋 registry 증거 또는 `BLOCKED_ENV`)를 따른다. 회고의 `open 항목 스냅샷:` 줄도 여기서 채운다 — `QA_FINDINGS` 미해소 N / `IMPROVEMENT_GUIDE` 미해소 M / 이전 M carry-over K(ADR-067 D2). 로드맵 파일은 안 건드린다(다음 plan-milestone R0가 이 줄을 읽어 재조정).
 - *상세 SSOT 는 본 skill 도입부 책임 경계 단락* — 본 단락은 단순 재확인.
 
 E2E는 단계 3-a의 *필요성 판정*으로 결정한다 — e2e 불필요(비-UI ∧ graduation item 6 미선언) 마일스톤만 통합 `validate`만 돌리고 e2e를 skip한다(사유 출력 명시). **e2e 필요 마일스톤은 silent-skip 금지** — `validate:e2e`를 반드시 실행하고, 미통과(real) 시 졸업 hard-block, 실행 불가(env) 시 사용자 환경 복구 안내(ADR-052).
