@@ -837,10 +837,12 @@ grep -rln "ADR-014" --include="*.md" --exclude=IMPROVE-GUIDE.md docs/90-decision
 
 **(b)** `2-E. 실행 증거 갱신` 블록 **다음**에 아래 두 블록을 추가한다.
 
+> 라벨은 **`2-F`·`2-H`** 를 쓴다. `2-G`는 같은 파일 `반드시 먼저 할 일:`의 `2-G. 상태별 입구 게이트`가 이미 쓰고 있어 중복된다(6-1의 `3-V`→`3-W` 회피와 같은 이유). `2-E`→`2-F`→`2-H`로 한 글자 비는 것은 무해하다 — 그 목록은 이미 `2.`에서 `2-E`로 건너뛴다.
+
 ```markdown
 2-F. **AC acceptance 무효화 (ADR-065 D3)**: 본 라운드의 Adopt/Adopt-modified 수정이 어떤 AC의 동작 경로를 건드렸고 그 AC의 modality가 `[사용자 관측]`·`[플랫폼 관측]`이면, task `## 8`에 `- invalidated <날짜> <AC-N>: repair-workitem 수정으로 재확인 필요` 한 줄을 append한다(기존 `- ac-acceptance` 줄은 지우지 않는다 — 이력이다). 그 AC는 다음 validate에서 미충족이 되고 receipt 재발급이 필요하다. **에이전트가 새 receipt를 쓰지 않는다.**
 
-2-G. **동일 패턴 전수 검색 (ADR-047 D7 정합)**: Adopt/Adopt-modified한 각 결함에 대해 **같은 패턴의 다른 출현을 저장소 전체에서 읽기 전용으로 검색**한다(Grep). 결과를 task `## 8`에 `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`으로 append하고 마지막 출력에도 한 줄 남긴다. **범위 밖 출현은 고치지 않는다**(task 범위 계약 유지 — 읽기는 범위 제한 대상이 아니다). 범위 밖 항목은 `/stabilize-milestone`·`/repair-milestone`이 회수한다. 검색으로 아무것도 안 나왔으면 `범위 밖 0건`으로 적는다(검색 사실 자체가 기록이다).
+2-H. **동일 패턴 전수 검색 (ADR-047 D7 정합)**: Adopt/Adopt-modified한 각 결함에 대해 **같은 패턴의 다른 출현을 저장소 전체에서 읽기 전용으로 검색**한다(Grep). 결과를 task `## 8`에 `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`으로 append하고 마지막 출력에도 한 줄 남긴다. **범위 밖 출현은 고치지 않는다**(task 범위 계약 유지 — 읽기는 범위 제한 대상이 아니다). 범위 밖 항목은 `/stabilize-milestone`·`/repair-milestone`이 회수한다. 검색으로 아무것도 안 나왔으면 `범위 밖 0건`으로 적는다(검색 사실 자체가 기록이다).
 ```
 
 같은 파일 `마지막 출력:` 목록에 아래 두 줄을 추가한다.
@@ -916,8 +918,10 @@ report 섹션 이름이 `## AC ↔ 테스트 매핑` → `## AC ↔ 검증 매�
 
 먼저 대상을 확인한다.
 ```bash
-grep -rn "AC ↔ 테스트\|AC↔테스트\|AC 매핑 100%" --include="*.md" . | grep -v IMPROVE-GUIDE
+grep -rn "AC ↔ 테스트 매핑\|AC↔테스트\|AC 매핑 100%" --include="*.md" . | grep -v IMPROVE-GUIDE
 ```
+
+> 첫 대안을 `AC ↔ 테스트`가 아니라 **`AC ↔ 테스트 매핑`** 으로 좁힌 이유: 본 교체의 대상은 *report 섹션 이름*이다. 공백 있는 `AC ↔ 테스트`로 넓게 잡으면 **`ADR-047` D6의 `양식 SSOT: … ADR-009 (AC ↔ 테스트 식별자)`** 가 함께 걸리는데, 그 괄호는 ADR-009#amend-1의 *테스트 이름 `AC_N` 식별자 컨벤션*(섹션 이름이 아니다)을 가리키므로 **대상이 아니다**. 공백 없는 `AC↔테스트` 대안이 축 이름 잔존을 그대로 잡으므로 검출력 손실은 0이다(실측: 좁힌 뒤 빠지는 줄은 그 한 줄뿐).
 
 **교체 규칙**: `AC ↔ 테스트 매핑`·`AC↔테스트 매핑` → `AC ↔ 검증 매핑`·`AC↔검증 매핑` / `AC 매핑 100%` → `AC 충족 100%` / 축 이름 `AC↔테스트` → `AC↔검증`.
 
@@ -925,6 +929,7 @@ grep -rn "AC ↔ 테스트\|AC↔테스트\|AC 매핑 100%" --include="*.md" . |
 - `.boilerplate/validation/SIMULATION_RUN.md` — 과거 라운드 실측 기록. Phase 3-C에서 이미 "기록 당시 기준" 주를 달았다.
 - `docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md` — superseded. 이력 보존.
 - `docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md` — `## 배경`이 *"무엇이 바뀌었는가"* 를 설명하려고 구 섹션명을 의도적으로 인용한다. 고치면 배경이 자기 근거를 잃는다.
+- **`docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md`의 D6 `양식 SSOT` 문장** — `ADR-009 (AC ↔ 테스트 식별자)`의 괄호는 ADR-009#amend-1의 *테스트 이름 `AC_N`·`[AC-N]` 식별자 컨벤션*을 가리킨다. 그 컨벤션은 테스트 이름 전용이며 본 라운드에서 바뀌지 않았다 — `검증 식별자`라는 컨벤션은 존재하지 않으므로 고치면 없는 규약을 가리킨다. **이 파일에서 고치는 것은 D1 Executability 문장 하나뿐이다.**
 - **`.claude/skills/stabilize-milestone/SKILL.md`의 §1.5 item 4 줄과 단계 8 회고 책임 경계 줄** — 이 두 줄은 **Phase 7-4·7-5가 통째로 교체**한다. 여기서 부분 치환하면 Phase 7의 「기존」 블록이 매칭되지 않는다. **grep 결과에 나와도 건너뛴다**(단계 7-T Telemetry 줄만 여기서 고친다).
 
 **파일별 지시** (6-3~6-6에서 이미 고친 줄은 건너뛴다):
@@ -940,7 +945,7 @@ grep -rn "AC ↔ 테스트\|AC↔테스트\|AC 매핑 100%" --include="*.md" . |
 | `docs/00-meta/DELEGATION_STRATEGY.md` | 위임 트리거 표 validator 행 | `AC ↔ 테스트 매핑` → `AC ↔ 검증 매핑(modality별 증거 판정 — ADR-065)` |
 | `docs/30-workitems/_templates/TASK_TEMPLATE.md` | `## 6-1` 주석의 `VC-N` 문장 | `` `## AC ↔ 테스트 매핑` 커버리지 % `` → `` `## AC ↔ 검증 매핑`의 충족률·자동화율 `` |
 | `docs/90-decisions/boilerplate/ADR-009-tdd-default.md` | `검증 흐름:` 첫 줄 · `## 결과` validator 줄 · `## Surfaces` validate-workitem 줄 | 3곳 모두 `AC ↔ 검증 매핑`으로. (Phase 4가 이 파일을 이미 열었으므로 거기서 함께 처리했다면 건너뛴다) |
-| `docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md` | D1 Executability 문장 · D6 양식 SSOT 문장 | `AC↔테스트 매핑` → `AC↔검증 매핑` |
+| `docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md` | D1 Executability 문장 **한 곳만** (D6 `양식 SSOT` 문장은 위 예외 — 고치지 않는다) | `AC↔테스트 매핑` → `AC↔검증 매핑` |
 | `docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md` | D2 축 목록 | `AC↔테스트` → `AC↔검증` |
 | `docs/90-decisions/boilerplate/ADR-061-decision-backed-interface-gate.md` | 해당 인용(있으면) | 같은 규칙 |
 | `docs/90-decisions/boilerplate/ADR-063-verification-harness-integrity.md` | D1 "프로젝트 빈 케이스" 단락의 `item 4 AC 매핑 100%` | `item 4 AC 충족 100%` |
@@ -1715,7 +1720,9 @@ grep -c "accept-milestone" README.md README_ko.md       # 기대: 각 1 이상
 
 # 7) 구 용어 잔존 확인
 #    예외 3파일: SIMULATION_RUN(기록) · ADR-014(superseded) · ADR-065(배경이 "무엇이 바뀌었는가"를 설명하려고 구 섹션명을 인용)
-grep -rn "AC ↔ 테스트\|AC↔테스트\|AC 매핑 100%" --include="*.md" . \
+#    첫 대안은 `AC ↔ 테스트 매핑`으로 좁혀 둔다 — 넓게 잡으면 ADR-047 D6의 `ADR-009 (AC ↔ 테스트 식별자)`가
+#    오검출된다(그 괄호는 테스트 이름 식별자 컨벤션이며 대상이 아니다 — 6-9 예외 참조). 검출력 손실은 없다.
+grep -rn "AC ↔ 테스트 매핑\|AC↔테스트\|AC 매핑 100%" --include="*.md" . \
   | grep -v SIMULATION_RUN | grep -v ADR-014-milestone | grep -v ADR-065- | grep -v IMPROVE-GUIDE
 #    기대: 출력 없음 (6-9의 전수 교체가 끝났다는 뜻)
 
