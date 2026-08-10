@@ -78,7 +78,15 @@ feature
        채워지지 않으면 기존 자연어 양식(`→ <file> > <test-name>`) 그대로 — 강제 X.
        **angle-bracket placeholder(`<runner>` 등)만 남기는 것 금지** — 안 채울 거면 자연어 양식으로 작성. 잔존 placeholder는 validator가 *미설정*으로 간주하고 자연어 매칭 fallback하지만, report에 P2 라벨로 기록.
      검증 판정력 확인용 테스트 중 **AC 행동으로 귀속되지 않는 것**(대표적으로 positive control — 검사 헬퍼 자체가 살아 있는지 확인하는 테스트)은 `- VC-N → <file> > <test-name>` 형식으로 등재한다 (ADR-064 D2). 반례 테스트("잘못된 입력을 거부한다")는 대개 AC 본연의 행동이므로 VC-N이 아니라 `AC-N`으로 매핑한다.
-     VC-N 행의 writer는 implement foreman 단독이며, **`## AC ↔ 테스트 매핑` 커버리지 % 집계에는 포함하지 않는다**(그 %가 신뢰도 등급 입력이라 섞이면 등급이 이동한다). 등재 목적은 그 테스트 줄이 diff trace audit에서 `AC-N | 명시 요청 | VC-N`으로 역추적되게 하는 것이다. -->
+     VC-N 행의 writer는 implement foreman 단독이며, **`## AC ↔ 테스트 매핑` 커버리지 % 집계에는 포함하지 않는다**(그 %가 신뢰도 등급 입력이라 섞이면 등급이 이동한다). 등재 목적은 그 테스트 줄이 diff trace audit에서 `AC-N | 명시 요청 | VC-N`으로 역추적되게 하는 것이다.
+     **검증 modality 표기 (ADR-065 D1 — 필수)**: 각 AC 행의 **AC 번호 바로 뒤**에 그 AC를 무엇으로 증명하는지 `[modality]`를 붙인다.
+     - `[자동 테스트]` — `- AC-1 [자동 테스트] → jest::tests/auth/me.spec.ts::test_AC_1_...`
+     - `[산출물 검사]` — `- AC-2 [산출물 검사] → npm run validate — insights 노트에 필수 섹션 3개(대안/권고/출처) 존재` (**검사 수단을 통합 `validate`에 묶는다** — 묶이지 않으면 충족 근거가 아니다. 내용의 *질*을 판정하는 AC는 이 modality가 아니라 `[사용자 관측]`이다)
+     - `[사용자 관측]` — `- AC-3 [사용자 관측] → 삭제 확인 다이얼로그 문구·간격을 승인 프로토타입과 대조` (증거는 ## 8의 `- ac-acceptance` 줄)
+     - `[플랫폼 관측]` — `- AC-4 [플랫폼 관측] → 선행 배포(T-012) 이후 이미 발화한 03:00 스케줄의 배치 완주를 확인 (증거: 실행 로그 run id)`. **커밋·배포 이후에만 일어나는 사실은 그것을 만든 task가 아니라 후속 verification task의 AC다**(ADR-065 D1 경계) — 같은 task에 두면 finalize 전에 관측할 수 없어 영구 미충족이 된다.
+     - `[미관측]` — **계획 단계에서 쓰지 않는다**(판정 결과 라벨이지 authoring 표기가 아니다 — ADR-065 D1). 어떤 modality도 정할 수 없으면 AC를 관측 가능하게 다시 쓰거나 task를 쪼갠다.
+     - **표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환)** — 기존 fork의 task는 표기가 없으므로 이 규칙이 없으면 재검증에서 일괄 미충족이 된다. 그 AC에 대응 테스트가 없으면 기존과 같이 미충족이며, 표기 부재 자체는 `P2 [Modality-missing]` 기록 등급이다. **신규 task는 표기를 채운다.**
+     modality writer: plan-workitem(계획 시 지정) · builder/foreman(구현 시 실제 경로·테스트 id 확정). `사용자 관측`·`플랫폼 관측`의 증거는 사용자만 발급한다(에이전트 대행 금지). -->
 
 ## 6-2. TDD opt-out
 <!-- 본문이 비어 있으면 TDD 적용 (기본). opt-out 하려면 아래 두 줄을 *모두* 채워 본문에 추가한다 — 하나라도 비면 형식 위반:
@@ -100,7 +108,9 @@ feature
      증거 receipt 위치이기도 하다 (ADR-064 D4 — writer: implement foreman 및 repair-workitem(외부 경계 코드를 고친 경우). 시점: 그 라운드의 파일 변경이 전부 끝난 뒤 · /validate-workitem 실행 *이전*. validate 이후 append하면 task 문서 mtime이 갱신돼 finalize가 report를 stale로 보고 Needs Validation 교착이 된다):
        `- exec-evidence <날짜> <경계 a|b|c>: <등급 1 재실행 가능 | 등급 2 1회성 — 형태> — <무엇에 대고 실행했는가> / 결과: <관측 1줄>`
        `- verify-power <날짜> <AC-N>: red=<observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)> / vc=<VC-N 목록 또는 없음> / mutation=<미승격(G# 미충족) | 승격(변이·관측·사본 삭제 결과)>`
-       `- fact-resolved <날짜> <무엇>: <잠정값> → <관측값> / 관측 방법: <1줄>` -->
+       `- fact-resolved <날짜> <무엇>: <잠정값> → <관측값> / 관측 방법: <1줄>`
+       `- ac-acceptance <날짜> <AC-N>: modality=<사용자 관측|플랫폼 관측> / authority=사용자 / source=<출처 식별자 — 플랫폼 관측만> / 환경=<대상·버전> / 절차=<무엇을 했는가> / 결과=<관측 1줄>`  (ADR-065 D3 — writer: accept-milestone 또는 사용자. `authority`는 항상 `사용자`다. 신선도 자동검사 없음 — 고친 주체가 `- invalidated <날짜> <AC-N>: <사유>`로 무효화)
+       `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`  (동일 결함 패턴의 다른 출현 전수 검색 결과 — writer: repair-workitem·repair-acceptance. 범위 밖 항목은 stabilize·repair-milestone이 회수) -->
 
 ## 9. 의존성
 <!-- 선행 task를 그 task가 보장할 AC 단위로 참조: `- T-002 ← T-001:AC-2 (인증 인터페이스 정의)`. 비어 있으면 선행 의존 없음.
