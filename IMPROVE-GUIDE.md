@@ -525,12 +525,19 @@ grep -rn "ADR-014" --include="*.md" .claude .agents docs/00-meta docs/30-workite
 
 # (2) 존재하지 않는 앵커(ADR-067에 없는 #amend-N)를 가리키는 인용이 남았는지
 grep -rn "ADR-014#amend" --include="*.md" --exclude=IMPROVE-GUIDE.md . \
-  | grep -v SIMULATION_RUN | grep -v ADR-014-milestone | grep -v ADR-052- | grep -v "boilerplate/README.md"
-#    기대: 출력 없음 (ADR-052는 분류 2로 의도적 보존)
+  | grep -v SIMULATION_RUN | grep -v ADR-014-milestone | grep -v ADR-052- | grep -v "boilerplate/README.md" \
+  | grep -v "boilerplate/ADR-066-" | grep -v "boilerplate/ADR-067-"
+#    기대: 출력 없음
+#    제외 대상은 모두 «과거에 무엇을 했다»는 역사적 서술이라 의도적 보존이다 — ADR-052(분류 2),
+#    그리고 본 가이드가 Phase 2·3-A에서 **직접 작성하도록 지시한** 두 문장:
+#      ADR-066 `## 근거`  — "ADR-014#amend-2가 soft→hard로 올린 방식과 동형"
+#      ADR-067 `## 대체`  — "ADR-014#amend-4가 … 통합 재발행을 우선 검토를 예약했고"
+#    이 둘을 재지정하면 존재하지 않는 역사가 된다(특히 ADR-067은 자기 자신을 가리키게 된다).
+#    두 줄에 `P2 [Ref-dead]`가 발화하는 것은 3-A의 ADR-067 `## 대체` 절이 이미 «의도된 상태»로 선언했다.
 
 # (3) ADR 층에 남은 ADR-014 인용은 전부 분류 2·3이어야 한다 — 눈으로 확인
 grep -rln "ADR-014" --include="*.md" --exclude=IMPROVE-GUIDE.md docs/90-decisions .boilerplate | sort
-#    기대: ADR-014 자신 + ADR-052 + SIMULATION_RUN + (병기 처리한 역사적 서술 보유 ADR들)
+#    기대: ADR-014 자신 + ADR-052 + SIMULATION_RUN + ADR-066·ADR-067(위 (2)의 역사적 인용 각 1건) + (병기 처리한 역사적 서술 보유 ADR들)
 #    이 목록의 각 파일에서 남은 인용이 "과거에 무엇을 했다"인지 확인한다. 지시문이면 분류 1이므로 재지정한다.
 ```
 
@@ -1671,9 +1678,11 @@ grep -rn "ADR-014" --include="*.md" .claude .agents docs/00-meta docs/30-workite
 #    기대: 출력 없음
 
 # 2) 죽은 앵커(ADR-067에 없는 #amend-N)를 가리키는 지시문이 없는가
-#    ADR-052는 분류 2(역사적 서술)로 의도 보존이므로 제외한다
+#    ADR-052 · ADR-066 · ADR-067의 인용은 분류 2(역사적 서술)로 의도 보존이므로 제외한다
+#    — ADR-066 `## 근거` / ADR-067 `## 대체`는 본 가이드가 직접 쓰게 한 문장이다(상세: Phase 3-C 검증 (2))
 grep -rn "ADR-014#" --include="*.md" --exclude=IMPROVE-GUIDE.md . \
-  | grep -v SIMULATION_RUN | grep -v ADR-014-milestone | grep -v ADR-052- | grep -v "boilerplate/README.md"
+  | grep -v SIMULATION_RUN | grep -v ADR-014-milestone | grep -v ADR-052- | grep -v "boilerplate/README.md" \
+  | grep -v "boilerplate/ADR-066-" | grep -v "boilerplate/ADR-067-"
 #    기대: 출력 없음
 
 # 3) 새 ADR 3개가 인덱스에 등재됐는가
