@@ -1,34 +1,26 @@
 ---
 name: accept-milestone
 description: 마일스톤 결과를 사람이 직접 실행·확인하는 수용 단계. 환경을 띄우고 시나리오를 안내하고 피드백을 3갈래로 라우팅한다. 코드 수정·커밋 없음 (ADR-066).
-argument-hint: "<milestone-id> | --task <task-id>"
+argument-hint: "<milestone-id>"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
 ---
 
-이 skill은 **사람이 직접 확인하는 단계**다. 마일스톤 스코프는 `/stabilize-milestone`(AI 검증) 뒤에, task 스코프(`--task`)는 `/validate-workitem` 뒤·`/finalize-workitem` 앞에 실행한다.
-**코드를 수정하지 않고 커밋하지 않으며 workitem status를 바꾸지 않는다.** 정상 write 대상은 넷이며, **task 스코프는 그중 4번과 — 계약 변경을 발견한 경우에 한해 — 2번의 `DECISION_REGISTER.md`만 쓴다**(아래 task 스코프 흐름 3(b)·5).
+이 skill은 **사람이 직접 확인하는 단계**다. `/stabilize-milestone`(AI 검증) 뒤에 **마일스톤 단위로만** 실행한다 — task 단위 수용 스코프는 없다(ADR-066 D1). 관측 modality AC(`[사용자 관측]`·`[플랫폼 관측]`)의 receipt는 task를 마감할 때가 아니라 **이 라운드에서 한꺼번에** 발급된다.
+**코드를 수정하지 않고 커밋하지 않으며 workitem status를 바꾸지 않는다.** 정상 write 대상은 아래 넷이다.
 
 1. `docs/40-validation/acceptance-reviews/<M>.r<N>.md` — 본 라운드 세션 원본(gitignore ephemeral)
-2. `docs/40-validation/QA_FINDINGS.md` / `docs/10-charter/DECISION_REGISTER.md` / `docs/40-validation/IMPROVEMENT_GUIDE.md` — 피드백 3갈래 라우팅 (ADR-066 D2)
+2. `docs/40-validation/QA_FINDINGS.md` / `docs/30-workitems/ROADMAP.md` `## Backlog` / `docs/40-validation/IMPROVEMENT_GUIDE.md` — 피드백 3갈래 라우팅 (ADR-066 D2). **예외 1건**: 정본 문서(charter·ARCH·DESIGN)를 고쳐야 성립하는 계약 변경만 `docs/10-charter/DECISION_REGISTER.md`에 등재한다(아래 R5-2 예외 — ADR-005#amend-1 / ADR-060 D11)
 3. 마일스톤 문서 `## 11. 수용 기록` — 수용 판정 receipt
 4. 해당 task `## 8` — `사용자 관측`·`플랫폼 관측` AC의 `- ac-acceptance` 줄 (사용자 응답을 그대로 옮겨 적는다 — ADR-065 D3)
 
-**마일스톤 스코프 라운드는 졸업 필수 조건이 아니다**(권장 — ADR-067 D6). 졸업 판정은 `/stabilize-milestone`이 소유한다. 단 **task 스코프는 «권장»이 아니다** — `[사용자 관측]`·`[플랫폼 관측]` AC를 쓴 task는 receipt 없이 `finalize`되지 않으므로, 그 receipt를 사용자가 직접 기재하지 않는 한 이 경로를 거쳐야 한다(ADR-065 D1).
+**이 라운드는 관측 modality AC가 0건인 마일스톤에서만 «권장(선택)»이다**(ADR-067 D6). `[사용자 관측]`·`[플랫폼 관측]` AC가 **1건이라도 있으면** 그 receipt 없이는 졸업 item 4 (a')를 충족하지 못하므로(ADR-067 D1) 사실상 필수 경로가 되며, 그때까지 그 마일스톤의 graduation은 `PENDING_ACCEPTANCE`다(ADR-067 D3). 졸업 판정 자체는 `/stabilize-milestone`이 소유한다.
 
-입력 — **스코프 2종 (ADR-066 D1)**:
-- **마일스톤 스코프**: `$ARGUMENTS` = milestone id. **`M[0-9]+` 패턴만 허용**(미일치 즉시 종료).
-- **task 스코프**: `$ARGUMENTS` = `--task <task-id>`. **`T-[0-9]+` 패턴만 허용.** `/validate-workitem`이 그 task의 `[사용자 관측]`·`[플랫폼 관측]` AC를 미충족으로 냈을 때(= `finalize` 전) 호출된다.
-- **라운드 번호는 마일스톤 문서 `## 11. 수용 기록`의 `- 라운드:` 값 + 1이다.** 세션 파일 수로 세지 않는다 — 그 파일은 라운드가 끝나면 삭제되므로(승인 시 본 skill, 보류 시 `/repair-acceptance`) 상한이 무력화된다. `## 11`이 비어 있으면 1회차다. **상한 3** — 4회차 진입 시 남은 항목을 다음 마일스톤으로 이관할지 사용자에게 확인하고 종료한다. **task 스코프는 이 카운터를 읽지도 쓰지도 않는다.**
+입력 (ADR-066 D1):
+- `$ARGUMENTS` = milestone id. **`M[0-9]+` 패턴만 허용**(미일치 즉시 종료). **다른 스코프는 없다** — `--task` 같은 인자를 받으면 «마일스톤 단위로만 실행한다»를 안내하고 종료한다.
+- **라운드 번호는 마일스톤 문서 `## 11. 수용 기록`의 `- 라운드:` 값 + 1이다.** 세션 파일 수로 세지 않는다 — 그 파일은 라운드가 끝나면 삭제되므로(승인 시 본 skill, 보류 시 `/repair-acceptance`) 상한이 무력화된다. **`- 라운드:` 판독은 HTML 주석(`<!-- ... -->`) 밖의 줄만 센다** — 템플릿이 `## 11` 안에 형식 설명을 주석으로 넣어 두므로, 주석 안의 예시 줄을 세면 아직 한 번도 안 돈 마일스톤이 2회차로 시작한다. 주석 밖에 `- 라운드:`가 없으면 1회차다. **상한 3** — 4회차 진입 시 남은 항목을 다음 마일스톤으로 이관할지 사용자에게 확인하고 종료한다.
 
-## task 스코프 흐름 (`--task <task-id>` — 라운드 카운터·`## 11` 미사용)
-1. 그 task의 `## 6-1`에서 `[사용자 관측]`·`[플랫폼 관측]` AC를 회수하고, `## 8`의 기존 `- ac-acceptance`/`- invalidated` 이벤트로 **AC별 현재 상태**를 판정한다(마지막 이벤트가 현재 상태 — ADR-065 D3).
-2. 미충족인 그 AC들만 대상으로 **R1(환경 기동) → R2(안내된 확인) → R4(구조화)** 를 수행한다. **R3 자유 탐색·R5 3갈래 라우팅은 하지 않는다** — 마일스톤 경험 수용이 아니다.
-3. 사용자가 충족이라 판정한 AC는 `## 8`에 `- ac-acceptance` 줄을 append한다. **미충족이라 판정하면 receipt를 쓰지 않고**, 그 사실과 사용자 발언(마스킹 후)을 출력한 뒤 **사용자 확인을 받아 라우팅한다** — (a) 구현 결함이면 `/repair-workitem <task-id> "<finding 요약>"`(그 skill이 4-판정 이력을 task `## 8`에 영속하므로 판단 근거가 남는다), (b) 계약 변경이면 `DECISION_REGISTER.md`에 `status: open` + `- 발견: 수용 라운드 (task 스코프, <task-id>)`로 등재. **어느 쪽이든 판단을 어디에도 남기지 않은 채 종료하지 않는다.** 마일스톤 원장(`QA_FINDINGS`·`IMPROVEMENT_GUIDE`)에는 임의 등재하지 않는다.
-4. **R6의 «프로세스 종료»만** 수행한다(세션 파일·`## 11`·판정 기록은 하지 않는다 — 그것들은 마일스톤 스코프의 산출물이다). **마지막 출력의 다음 단계는 3의 라우팅에 따라 분기한다** — 3(a) 라우팅이 없으면 `/validate-workitem <task-id>` 재실행(report를 새로 만들어야 `finalize`가 충족을 본다). **3(a)로 구현 결함을 라우팅했으면 `/repair-workitem <task-id> "<finding 요약>"` → 그 뒤 `/validate-workitem <task-id>`** 순이다 — 고칠 코드가 있는데 바로 재validate하면 같은 미충족이 반복된다(ADR-065 배경이 지목한 그 순환).
-5. **`## 11`·`QA_FINDINGS`·`IMPROVEMENT_GUIDE`를 쓰지 않는다.** task 스코프가 쓰는 것은 그 task `## 8`과, **3(b)에 해당할 때의 `DECISION_REGISTER.md` 등재 한 건**뿐이다 — 그 경로가 없으면 계약 변경 발견이 어디에도 남지 않아 3의 *"판단을 어디에도 남기지 않은 채 종료하지 않는다"* 와 모순된다(등재 경로는 ADR-060 D11). 마일스톤 원장 2종은 마일스톤 스코프 전용이다.
-
-## 마일스톤 스코프 흐름 (`<M>`) — 아래 R0~R6
+## 수용 라운드 흐름 (`<M>`) — 아래 R0~R6
 
 ## R0. 맥락 회수 (ADR-019 minimal — 필요한 것만)
 1. 마일스톤 문서 `## 3`(포함 기능)·`## 5`(완료 기준)·`## 8`(회고 — graduation 값)·`## 9`(화면 전환, 있으면).
@@ -37,7 +29,10 @@ allowed-tools: Read Glob Grep Write Edit Bash
 4. 각 task `docs/40-validation/reports/<task-id>.md`의 `## Evidence Bundle → 검증하지 못한 것(oracle gap)` 섹션 — **기계가 확인하지 못한 것의 목록이며 본 단계의 1차 시나리오 재료다.**
 5. `QA_FINDINGS.md` 본 마일스톤 헤더 — AI가 이미 찾은 것(중복 보고 방지용으로만 쓴다. 사용자에게 미리 알려 주지 않는다 — 선입견 차단).
 6. `docs/40-validation/visual/M-N/`(있으면) — §3-V 갤러리 경로.
-- **graduation이 `NO`/`BLOCKED`면** 그 사유를 출력하고 "먼저 `/repair-milestone` 또는 환경 복구 후 `/stabilize-milestone` 재실행 권장"을 안내한 뒤 **사용자가 계속을 원할 때만** R1로 간다(미완 상태 확인도 유효하다).
+- **graduation 값에 따라 분기한다 (ADR-067 D3 — 4종)**:
+  - **`PENDING_ACCEPTANCE`** — 이 단계를 부르라고 나온 값이다. 그대로 R1로 간다(본 라운드의 표준 진입 상태).
+  - **`YES`** — 이미 졸업한 마일스톤이다(관측 AC가 0건이거나, 이전 라운드에서 전부 receipt를 받았다). "졸업 확정 상태 — 본 라운드는 선택입니다"를 알리고 사용자가 원하면 R1로 간다.
+  - **`NO`/`BLOCKED`** — 그 사유를 출력하고 "먼저 `/repair-milestone` 또는 환경 복구 후 `/stabilize-milestone` 재실행 권장"을 안내한 뒤 **사용자가 계속을 원할 때만** R1로 간다(미완 상태 확인도 유효하다).
 
 ## R1. 실행 환경 기동
 1. 기동 명령을 **회수**한다(발명하지 않는다): `docs/00-meta/STACK_SETUP_PLAN.md`의 기록 → `package.json` scripts(`dev`/`start`) → Flutter는 `flutter run -d <device id>`(device는 `flutter devices --machine` 실측) → CLI/라이브러리는 진입 명령.
@@ -57,7 +52,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 
 ## R2. 안내된 시나리오 확인 (핵심)
 1. 시나리오를 **필수 + 보완** 두 묶음으로 뽑는다. **필수는 개수 상한이 없다** — 상한을 걸면 receipt가 필요한 AC가 잘려 나가 그 task가 영구 미충족이 된다.
-   - **필수**: 이 마일스톤 산하 task의 `[사용자 관측]`·`[플랫폼 관측]` modality AC 중 **아직 유효한 receipt가 없는 것 전부**(task `## 8`의 그 AC 마지막 이벤트가 `- ac-acceptance`가 아닌 것 — 미발급이거나 `- invalidated`로 무효화된 것). 이미 유효 receipt가 있는 AC는 재확인하지 않는다(task 층에서 이미 발급됐을 수 있다 — ADR-065 D1). 하나라도 확인하지 못하면 R6 판정은 `승인`이 될 수 없다.
+   - **필수**: 이 마일스톤 산하 task의 `[사용자 관측]`·`[플랫폼 관측]` modality AC 중 **아직 유효한 receipt가 없는 것 전부**(task `## 8`의 그 AC 마지막 이벤트가 `- ac-acceptance`가 아닌 것 — 미발급이거나 `- invalidated`로 무효화된 것). **판독 규칙**: 그 AC의 `## 8` 마지막 이벤트가 `- ac-acceptance`가 아닌 것이 대상이며 — `- ac-pending`(finalize가 남긴 미발급 표시)·`- invalidated`·이벤트 없음이 전부 여기 해당한다 — **HTML 주석 밖의 줄만 센다**(ADR-065 D3 판독 규칙). `- ac-pending`은 receipt가 아니므로 그 AC는 여전히 미발급이다. 이미 유효 receipt가 있는 AC는 재확인하지 않는다(직전 수용 라운드에서 발급됐거나 사용자가 직접 기재한 경우다 — ADR-065 D1. **task 층 발급 경로는 없다** — 이 라운드가 유일한 발급 자리다). 하나라도 확인하지 못하면 R6 판정은 `승인`이 될 수 없다.
    - **보완(5~8개)**: ① `## 9. 화면 전환`의 존재하는 각 path type(primary/failure/recovery) → ② oracle gap 카테고리 중 이 마일스톤 표면에 해당하는 것 → ③ PX↔AC의 경험 결정 → ④ FAC의 핵심 시나리오. 이 우선순위로 채운다.
    - 필수가 이미 많으면(예: 10건) 보완을 줄인다. 필수를 줄이지 않는다.
 2. **한 번에 하나씩** 제시한다. 형식은 3줄로 고정한다.
@@ -86,7 +81,9 @@ allowed-tools: Read Glob Grep Write Edit Bash
 ## R5. 3갈래 분류 + 라우팅 (ADR-066 D2)
 각 피드백을 아래로 분류하고 **사용자에게 확인받은 뒤** 기록한다.
 1. **계약 위반(결함)** — 이번 마일스톤이 약속한 AC·승인 프로토타입·DESIGN 계약을 안 지킴 → `QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2`에 기존 스키마로 등재(항목 문두에 `(수용)` 태그). 라벨은 기존 체계를 쓴다(`[Experience-drift]`·`[Design-voice]` 등). severity 기준: 사용자가 진행 불가·데이터 손상·약속한 핵심 시나리오 실패 = P0.
-2. **계약 변경(결정)** — 계약 자체를 바꾸려는 것(방향 변경·새 기능) → `DECISION_REGISTER.md`에 `status: open` + `- 발견: 수용 라운드 (M<N>)`으로 등재(ADR-060 D11 경로) + 다음 마일스톤 후보로 surface. **현재 마일스톤에서 고치지 않는다.**
+2. **계약 변경(범위)** — 계약 자체를 바꾸려는 것(방향 변경·새 기능) → **`docs/30-workitems/ROADMAP.md`의 `## Backlog`에 한 줄 등재**한다. 형식: `- `<candidate-key>` <한 줄 요약> — 출처: 수용 라운드 M<N> r<라운드> / 확신도: <높음/중간/낮음>`. `<candidate-key>`는 목표 슬러그이며(예: `offline-merge`) 이후 `/plan-milestone` R0이 이 key로 회수·승격한다. **현재 마일스톤에서 고치지 않는다.**
+   - **`DECISION_REGISTER.md`에 쓰지 않는다.** 두 원장의 배타 범위는 «해소되면 무엇이 남는가»로 갈린다 — 정본 문서(charter·ARCH·DESIGN)의 한 절이 바뀌면 register, 다음 마일스톤 문서 하나가 생기면 Backlog다. 계약 변경 제안은 후자다.
+   - **예외 — 정본 문서를 고쳐야 성립하는 항목**(예: charter `## 5. 비목표`를 뒤집는 요구)은 `DECISION_REGISTER.md`에 `status: open` + `- 발견: 수용 라운드 (M<N>)`으로 등재한다(ADR-060 D11). **한 항목을 양쪽에 동시에 쓰지 않는다.**
 3. **개선 제안** — 계약 위반은 아니고 더 나은 방식 → `IMPROVEMENT_GUIDE.md`에 등재. **이번 마일스톤에서 고칠지 사용자에게 묻고**(3갈래 중 이 갈래만 «사용자 선택»이다 — ADR-066 D2), **고치기로 택한 항목에만 문두에 `(수용)` 태그를 단다** — 그 태그가 `/repair-acceptance`의 유일한 회수 신호이며, 없으면 그 선택이 실행되지 않는다(ADR-066 D5). 택하지 않은 항목은 태그 없이 남겨 다음 마일스톤 후보가 된다.
 - **분류가 애매하면 사용자에게 그대로 묻는다**: "이건 약속한 것을 안 지킨 걸까요(이번에 고칩니다), 아니면 계약을 바꾸는 걸까요(다음 마일스톤입니다)?"
 - `[사용자 관측]`·`[플랫폼 관측]` AC의 충족 판정은 해당 task `## 8`에 `- ac-acceptance` 줄로 기록한다(형식은 ADR-065 D3). **미충족이면 receipt를 쓰지 않고** 1번(결함)으로 라우팅한다.
@@ -95,7 +92,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 1. **R1이 기동한 프로세스를 종료한다**(보관한 PID). 이미 떠 있던 것을 재사용했으면 종료하지 않는다. 종료 결과를 출력에 보고한다.
 2. 세션 원본을 `docs/40-validation/acceptance-reviews/<M>.r<N>.md`에 기록한다 — 확인한 시나리오·사용자 발언·재현 3필드·분류 결과. **저장 전 마스킹 의무**: 자격증명·토큰·개인정보·내부 식별자는 제거하거나 대체한다. 확실하지 않으면 원문을 싣지 않고 구조 요약만 남긴다(ADR-066 D3 — ADR-064 D5 준용). task `## 8`의 `- ac-acceptance` 줄은 커밋되므로 더 엄격히 적용한다.
 3. 마일스톤 `## 11. 수용 기록`을 **덮어쓴다**(append가 아니라 최신 상태 1블록 유지 — `## 10` 봉인 기록과 동형). `- 라운드:`는 **판정이 `승인`·`보류`일 때만** 이번 회차 번호로 갱신하고, `미완`이면 **이전 값을 그대로 둔다**(확인을 못 했으므로 회차로 세지 않는다). 판정은 셋이다.
-   - **승인** — 1번(결함) 라우팅 0건 **이고** R2의 필수 시나리오(= 유효 receipt가 없던 관측 modality AC 전부)를 모두 확인했다. `- 판정: 승인`.
+   - **승인** — 1번(결함) 라우팅 0건 **이고** R2의 필수 시나리오(= 유효 receipt가 없던 관측 modality AC 전부)를 모두 확인했다. `- 판정: 승인`. **이 판정이 나면 그 마일스톤의 관측 AC는 전부 receipt를 갖는다** — 즉 `/stabilize-milestone` 재실행 시 graduation이 `PENDING_ACCEPTANCE`에서 벗어난다.
    - **보류** — 결함 1건 이상. `- 판정: 보류(백로그 N건)`.
    - **미완** — 환경 기동 실패(blocked-on-env)나 사용자 중단으로 필수 시나리오를 다 확인하지 못했다. `- 판정: 미완(<사유> — 확인 K/M건)`. **결함 0건이어도 승인으로 쓰지 않는다** — 확인하지 못한 것을 승인으로 기록하면 이 단계의 의미가 사라진다.
 3-1. **판정이 `승인`이고 `(수용)` 태그를 단 개선 항목이 0건이면 본 skill이 세션 파일을 삭제한다** — 그때는 `/repair-acceptance`가 호출되지 않으므로 삭제 주체가 없어진다. `삭제 예정: <경로>` echo 후 `rm`으로 이번 라운드 파일 하나만 지운다(판정 결과는 `## 11`과 3원장에 이미 영속). `보류`·`미완`이거나 **`승인`이지만 `(수용)` 태그 개선 항목이 1건 이상이면 보존한다**(각각 `/repair-acceptance`가 회수·삭제 / 다음 라운드가 이어받는다).
@@ -104,10 +101,10 @@ allowed-tools: Read Glob Grep Write Edit Bash
    - 확인한 시나리오 수 / 발견 3갈래 카운트
    - `[사용자 관측]`·`[플랫폼 관측]` AC의 receipt 발급 결과(AC-N 목록)
    - 종료한 프로세스 / 세션 파일 처리 결과(`승인`이면 삭제한 경로, `보류`·`미완`이면 보존한 경로)
-   - **커밋 안내**: 본 skill이 갱신한 tracked 파일 목록(`QA_FINDINGS.md`·`DECISION_REGISTER.md`·`IMPROVEMENT_GUIDE.md`·마일스톤 문서·task 문서)을 나열하고 **사용자가 직접 커밋해야 함**을 명시한다. 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 범위 밖 변경으로 보고 `Needs Review`로 멈춘다.
-   - **재validate 필요 task 목록 (의무)**: 이번 라운드에 `## 8`을 갱신한(receipt 발급 또는 무효화) 모든 task를 나열하고 **`/validate-workitem <task-id>` 재실행이 선행돼야 졸업 판정이 유효함**을 명시한다. 졸업 item 4는 report를 읽고 report의 유일한 writer는 `/validate-workitem`이며 stale report는 미충족 처리되므로(ADR-067 D1 item 4 (d)), 이 재실행 없이 stabilize를 돌리면 그 task가 미충족으로 나온다.
+   - **커밋 안내**: 본 skill이 갱신한 tracked 파일 목록(`QA_FINDINGS.md`·`docs/30-workitems/ROADMAP.md`(`## Backlog`)·`IMPROVEMENT_GUIDE.md`·마일스톤 문서·task 문서, 그리고 정본 문서 변경이 필요해 등재한 경우 `DECISION_REGISTER.md`)을 나열하고 **사용자가 직접 커밋해야 함**을 명시한다. 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 범위 밖 변경으로 보고 `Needs Review`로 멈춘다.
+   - **receipt 처리 결과**: 발급한 task·AC 목록과 무효화(`- invalidated`)한 task·AC 목록. **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4 (a')가 채점표가 아니라 task `## 8`을 직접 읽기 때문이다(ADR-067 D1). 본 skill은 코드를 고치지 않으므로 채점표를 stale하게 만들지도 않는다.
    - **다음 단계**:
-     - 판정 = 승인: **⓪ `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다 → ① `## 8`을 갱신한 task가 있으면 그 task들 `/validate-workitem <task-id>` 재실행 → ② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정. **`(수용)` 태그 항목과 `## 8` 갱신이 모두 0건이고 코드 변경도 없었다면 ②만** 수행한다(생략은 이 조건에서만 허용).
+     - 판정 = 승인: **① `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다(코드를 고치므로 그 skill이 자기 루프 안에서 재validate·재finalize를 수행한다). → **② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정.** `(수용)` 태그 항목이 0건이면 **②만** 수행한다 — receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
      - 판정 = 보류: 기본 권장 `/repair-acceptance <M>` — 수용 finding 수리 후 `/accept-milestone <M>` 재실행
      - 판정 = 미완: 환경 복구(또는 사용자 재개) 후 `/accept-milestone <M>` 재실행. **라운드 카운터를 소모하지 않는다**(확인을 못 했으므로 회차로 세지 않는다 — `## 11`의 `- 라운드:` 값을 올리지 않고 `- 판정: 미완`만 기록한다).
      - 프롬프트 동봉 권장: 미해소 결함 라벨 목록 + `재현 불확실` 항목
@@ -117,8 +114,9 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - `- ac-acceptance` 줄은 **사용자 응답을 옮겨 적는 것**이다 — 사용자가 판정하지 않은 AC에 receipt를 쓰지 않는다(ADR-065 D1).
 - 결함을 직접 수리하지 않는다 — `/repair-acceptance`로 라우팅한다.
 - 다른 마일스톤의 원장 항목을 건드리지 않는다.
+- **task를 재개방하지 않고 `/validate-workitem`·`/finalize-workitem`을 호출하지 않는다** — 본 skill은 receipt만 남기고 판정 갱신은 `/stabilize-milestone`이 한다.
 
-정책 근거: [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) (단계·라우팅·세션 파일), [ADR-065](../../../docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md) D3 (receipt), [ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) D6 (졸업과의 관계), [ADR-060](../../../docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) D11 (봉인 후 결정 등재).
+정책 근거: [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D1/D2/D3 (단일 스코프·라우팅·세션 파일), [ADR-065](../../../docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md) D1/D3 (receipt authority·형식), [ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) D1 item 4 (a')·D3 `PENDING_ACCEPTANCE`·D6 (졸업과의 관계), [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1 (원장 배타 범위 — 계약 변경은 ROADMAP `## Backlog`), [ADR-060](../../../docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) D11 (봉인 후 결정 등재).
 
 ## Context 정책 (ADR-019)
 R0의 회수 목록이 *최소 충분*이다 — 사전 fork-load 금지. R1의 기동 명령 회수(`STACK_SETUP_PLAN.md`·`package.json` 등)와 시나리오·피드백에서 발화한 문서는 그 시점에 추가로 읽는다.
