@@ -1770,8 +1770,10 @@ argument-hint: "<milestone-id>"
 
 **바꿀 내용**
 ```
-2. `docs/40-validation/QA_FINDINGS.md` / `docs/30-workitems/ROADMAP.md` `## Backlog` / `docs/40-validation/IMPROVEMENT_GUIDE.md` — 피드백 3갈래 라우팅 (ADR-066 D2)
+2. `docs/40-validation/QA_FINDINGS.md` / `docs/30-workitems/ROADMAP.md` `## Backlog` / `docs/40-validation/IMPROVEMENT_GUIDE.md` — 피드백 3갈래 라우팅 (ADR-066 D2). **예외 1건**: 정본 문서(charter·ARCH·DESIGN)를 고쳐야 성립하는 계약 변경만 `docs/10-charter/DECISION_REGISTER.md`에 등재한다(아래 R5-2 예외 — ADR-005#amend-1 / ADR-060 D11)
 ```
+
+**⚠ 예외 문구를 빼면 이 skill이 «선언한 write 목록 밖»을 쓰게 된다.** 이 목록은 바로 위 줄이 «정상 write 대상은 아래 넷이다»로 선언하는 화이트리스트인데, 4.1.10이 R5-2에 **`DECISION_REGISTER` 예외 경로**를 남긴다(정본 문서를 고쳐야 성립하는 항목). 교체 전 목록에는 그 파일이 있었으므로 목록이 완결이었고, 목적지만 바꾸면 **예외 경로가 화이트리스트 밖으로 떨어진다** — 그러면 그 항목이 조용히 어디에도 등재되지 않거나(ADR-060 D11 경로 상실) skill이 자기 선언을 위반한다. `STRUCTURE.md`의 원장 로스터는 이미 본 skill을 `DECISION_REGISTER` writer로 등재하고 있으므로(수용 라운드 `Out-of-contract`) 이 예외는 정책과도 일치한다. 4.1.13-b의 커밋 안내도 같은 조건부 표기를 쓴다.
 
 ### 4.1.4 「졸업 필수 조건」 문단에서 task 스코프 예외를 걷어낸다
 
@@ -2069,7 +2071,7 @@ argument-hint: "<milestone-id>"
 본 라운드가 코드를 고쳤으면 그 결과를 **본 skill이 자기 루프 안에서** 채점표까지 되돌린다. **단 «재개방된 task»와 «채점표만 없어진 task»의 처방이 다르다** — 앞은 다시 `done`으로 마감해야 하고, 뒤는 계속 `done`이므로 마감할 것이 없다. 근거는 `/finalize-workitem`의 두 문이다: **1-G**(`done`이면 read-only no-op)와 **수행 5-(4)**(task `## 4-1`과 git 실제 변경이 어긋나면 `Needs Review` 종료).
 
 1. **① `in-AC` 위임분 (재개방됨) — validate + finalize.** 위임한 각 `T-NNN`에 대해 `/repair-workitem` 완료 후 **`/validate-workitem <T-NNN>` → 판정이 `Pass`·`Pending Acceptance`면 `/finalize-workitem <T-NNN>`** 을 순서대로 실행한다. **이 ①은 위 「수행 3 순서 규칙」대로 `out-of-AC` 수정·원장 쓰기보다 먼저, task 한 개씩 순차로** 돈다(한 task를 finalize가 커밋해 tree가 다시 깨끗해진 뒤 다음 task로 간다).
-   - `Needs Fix`가 나오면 그 task를 `/repair-workitem <T-NNN>`으로 한 번 더 보낸다 — **task당 최대 2회**. 2회로도 `Needs Fix`면 그 task를 `미해결`로 명시하고 다음 task로 넘어간다(무한 루프 금지).
+   - `Needs Fix`가 나오면 그 task를 `/repair-workitem <T-NNN>`으로 한 번 더 보내고 **다시 `/validate-workitem <T-NNN>` → 판정이 `Pass`·`Pending Acceptance`면 `/finalize-workitem <T-NNN>`** 까지 같은 순서로 끝까지 돈다 — **`/repair-workitem` 호출은 task당 최대 2회**. **2회째 validate도 `Needs Fix`면** 그 task를 `미해결 (Needs Fix ×2)`로 명시하고 다음 task로 넘어간다(무한 루프 금지). **2회째가 통과했는데 finalize를 부르지 않으면 그 task가 `in-progress`로 남아 졸업 item 1이 미충족이 된다** — 이 절이 존재하는 이유가 그것이다.
    - **정상 마감도 `Needs Fix`도 아닌 종료값(`Needs Validation`·`Needs Review`·`Needs Rationale`·`Needs Stack Guard`)이 나오면 그 task를 `미해결 (<종료값>)`로 명시하고 사용자가 그대로 칠 복구 명령을 함께 출력한다** — 조용히 멈추지 않는다. `Needs Review`(범위 비교 불일치)의 복구 안내는 «tree의 무관 변경을 커밋하거나 그 task `## 4-1`을 보강한 뒤 `/finalize-workitem <T-NNN>` 재실행»이다.
 2. **② `out-of-AC` 직접 수정분 (재개방 안 됨) — validate만.** 4-A로 채점표를 삭제한 각 task에 대해 **`/validate-workitem <T-NNN>` 하나만** 실행한다. **이 ②는 5-V(자체 검증)를 마친 뒤에 돈다** — 5-V가 무언가를 고치면 ②가 방금 만든 채점표가 다시 stale이 된다. 즉 라운드 실행 순서는 «① → `out-of-AC` 수정(1·2) → 4·4-A·5·5-E → 5-V → 7·8·9 → ②»다. `/repair-workitem`도 `/finalize-workitem`도 부르지 않는다 — 고칠 것은 이미 고쳤고, **그 task는 계속 `done`이라** finalize를 부르면 1-G의 read-only no-op에 걸려 아무 일도 안 하면서 «마감»으로 보이는 거짓 신호만 남는다. 졸업 item 4가 요구하는 것은 **새 채점표**이며 그것은 재validate가 만든다.
    - 재validate 결과의 채점표에 `out-of-AC` 수정 줄이 `추적 불가`로 잡혀 `P1` 라벨이 붙을 수 있다. **정상이며 차단이 아니다** — diff-trace audit에서 `Needs Fix` 트리거는 (c) pre-existing dead code 삭제 하나뿐이다. 그 라벨은 출력에 한 줄 요약만 남기고, 계약 근거 부재 자체는 `## 4. 보류 항목`의 계약 부채 등재가 추적한다.
@@ -2180,6 +2182,85 @@ description: /accept-milestone이 수집한 사용자 수용 finding을 3+1 판�
 - **커밋 안내**: 본 skill은 커밋하지 않는다 — `out-of-AC` 수정 파일과 원장 갱신을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다. **「수행 후 연쇄」 ①이 마감한 `in-AC` task의 파일은 그 `/finalize-workitem`이 이미 커밋했으므로 여기 목록에 없다.** 그 잔여분을 미커밋으로 두면 이후 다른 task의 `/finalize-workitem`이 범위 밖 변경으로 보고 `Needs Review`로 멈춘다(연쇄 ①을 `out-of-AC` 수정보다 먼저 도는 이유가 그것이다).
 ```
 
+### 4.2.14 ⭐ 수행 2·4·4-A·5를 `out-of-AC` 전용으로 좁힌다
+
+**4.2.4가 «in-AC는 위임, out-of-AC만 직접 고친다»로 갈라놓지만, 그 앞뒤 단계들은 여전히 «각 항목마다»로 쓰여 있어 위임분까지 본 skill이 처리하게 된다.** 4.2.6의 5-E는 그 예외를 명시하는데(«`scope: in-AC` 항목은 여기서 하지 않는다») **수행 2·4·5에는 같은 문장이 없다** — `/repair-milestone`의 2-R(4.3.9)·2-P(4.3.4)는 둘 다 갖고 있으므로 이 skill만 빠진 것이다.
+
+**빠뜨리면 연쇄가 첫 task에서 죽는다**: 수행 2가 위임분의 테스트 파일까지 쓰면 그 변경이 그 task `## 4-1` 밖에 남아 연쇄 ①의 `/finalize-workitem`이 수행 5-(4)에서 `Needs Review`로 멈춘다 — 4.2.4의 순서 규칙이 막으려던 바로 그 상태다. 수행 4·5는 연쇄 ①이 **이미 커밋한** task 문서에 사후 append를 만들어 미커밋 변경을 남긴다.
+
+**앵커**: `   - 테스트 작성이 불가능하면(사람 관측만으로 판정되는 시각 결함 등) 그 사유를 적고`
+
+그 줄 **바로 뒤에** 아래 하위 불릿을 추가한다(같은 들여쓰기 3칸).
+
+```
+   - **`scope: in-AC` 위임분은 여기서 하지 않는다** — 위임받은 `/repair-workitem`이 자기 규율로 수정과 테스트를 처리한다(중복 금지). **`scope: out-of-AC`로 본 skill이 직접 고치는 항목만** 대상이다. 위임분의 테스트를 본 skill이 쓰면 그 파일이 그 task `## 4-1` 밖 변경으로 남아 「수행 후 연쇄」 ①의 `/finalize-workitem`이 수행 5-(4)에서 `Needs Review`로 멈춘다.
+```
+
+**앵커**: `를 append한다(기존 `- ac-acceptance`는 지우지 않는다). **새 receipt를 대신 쓰지 않는다.**`
+
+**교체 대상**: 수행 4 줄의 **끝 조각만** 바꾼다.
+
+**현재 (조각)**
+```
+를 append한다(기존 `- ac-acceptance`는 지우지 않는다). **새 receipt를 대신 쓰지 않는다.**
+```
+**바꿀 내용 (조각)**
+```
+를 append한다(기존 `- ac-acceptance`는 지우지 않는다). **새 receipt를 대신 쓰지 않는다.** **`scope: in-AC` 위임분은 여기서 하지 않는다** — `/repair-workitem`도 무효화 writer이므로(ADR-065 D3) 중복이고, 그 task는 연쇄 ①이 이미 마감·커밋했으므로 사후 append가 미커밋 변경으로 남는다.
+```
+
+**앵커**: `4-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: 코드를 고친 각 task의`
+
+**교체 대상**: 그 줄의 **머리 조각만** 바꾼다.
+
+**현재 (조각)**
+```
+4-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: 코드를 고친 각 task의 `docs/40-validation/reports/<task-id>.md`를 **삭제한다**
+```
+**바꿀 내용 (조각)**
+```
+4-A. **영향 task report 무효화 (ADR-067 D1 item 4 (d) 보완)**: **본 skill이 `out-of-AC`로 직접 고친** 각 task의 `docs/40-validation/reports/<task-id>.md`를 **삭제한다**(`scope: in-AC` 위임분은 대상이 아니다 — 연쇄 ①의 `/validate-workitem`이 이미 새 채점표를 만들었으므로 여기서 지우면 그 결과를 버리고 ②가 헛돈다)
+```
+
+**앵커**: `5. **동일 패턴 전수 검색**: 각 Adopt 결함에 대해`
+
+**현재 (줄 전체)**
+```
+5. **동일 패턴 전수 검색**: 각 Adopt 결함에 대해 같은 패턴의 다른 출현을 저장소 전체에서 **읽기 전용**으로 검색하고, 대상 task `## 8`에 `- pattern-scan <날짜> <패턴>: 범위 내 N건 수정 / 범위 밖 M건 <경로>`를 append한다. 범위 밖은 고치지 않고 `/repair-milestone` 또는 다음 마일스톤으로 라우팅한다.
+```
+**바꿀 내용**
+```
+5. **동일 패턴 전수 검색 (ADR-066 D6)**: **본 skill이 `out-of-AC`로 직접 고친** 각 Adopt 결함에 대해 같은 패턴의 다른 출현을 저장소 전체에서 **읽기 전용**으로 검색하고, 대상 task `## 8`에 `- pattern-scan <날짜> <패턴>: 범위 내 N건 수정 / 범위 밖 M건 <경로>`를 append한다. 범위 밖은 고치지 않고 `/repair-milestone` 또는 다음 마일스톤으로 라우팅한다. **`scope: in-AC` 위임분은 여기서 하지 않는다** — `/repair-workitem` 2-H가 같은 검색을 하므로 중복이고, 그 task는 연쇄 ①이 이미 마감·커밋했다.
+```
+
+> **수행 1은 건드리지 않는다** — «Adopt/Adopt-modified 항목을 우선순위 순으로 **처리**한다»는 우산 문장이고, 그 «처리»의 갈림은 수행 3이 규정한다. 여기에 또 스코프를 붙이면 같은 규칙이 두 곳에 생긴다.
+
+### 4.2.15 `Out-of-contract` 재분류 앵커와 결정 이력 예시를 새 계약에 맞춘다
+
+4.2.3이 `Out-of-contract`의 목적지를 `ROADMAP ## Backlog`(기본) + `DECISION_REGISTER`(정본 문서 예외)로 갈랐는데 **수행 8의 재분류 앵커가 옛 목적지에 고정돼 있다.** 앵커가 실제 등재처와 어긋나면 [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1의 비중복 불변식 **N-3**(«이동한 항목의 원본에 목적지 앵커를 남긴다 … 목적지가 로드맵이면 구간까지 적는다»)이 깨진다.
+
+**앵커**: `③ `Out-of-contract`로 재분류한 항목 → 원본을 `status: resolved (재분류: DECISION_REGISTER D-NNN — 다음 M)`로 닫고`
+
+**교체 대상**: 수행 8 줄의 **③ 조각만** 바꾼다.
+
+**현재 (조각)**
+```
+③ `Out-of-contract`로 재분류한 항목 → 원본을 `status: resolved (재분류: DECISION_REGISTER D-NNN — 다음 M)`로 닫고 원장 등재와 짝을 맞춘다
+```
+**바꿀 내용 (조각)**
+```
+③ `Out-of-contract`로 재분류한 항목 → 원본을 **실제 목적지로** 닫는다 — 기본은 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key> — 다음 M)`이고, 정본 문서 변경이 필요해 원장으로 보낸 예외만 `status: resolved (재분류: DECISION_REGISTER D-NNN — 다음 M)`다. **앵커가 실제 등재처와 어긋나면 [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1의 비중복 불변식 N-3이 깨진다**(목적지가 로드맵이면 구간까지 적는다)
+```
+
+이어서 **결정 이력 형식 예시에 `scope`를 넣는다.** 4.2.9가 `scope: in-AC | out-of-AC`를 **필수**로 만들었는데 바로 위 예시 줄에 그 칸이 없다 — 에이전트는 예시를 복사하므로 필수 필드가 조용히 빠진다.
+
+**앵커**: `   - **M1-uat-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | status: applied | decision: Adopt`
+
+**바꿀 내용**
+```
+   - **M1-uat-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | scope: out-of-AC | status: applied | decision: Adopt
+```
+
 ---
 
 ## 4.3 `/repair-milestone`
@@ -2219,7 +2300,7 @@ description: /accept-milestone이 수집한 사용자 수용 finding을 3+1 판�
 2-C. **위임 후 연쇄 — 재개방한 task를 본 skill이 닫는다 (사용자에게 미루지 않는다)**: 수행 2의 per-task 위임은 그 task를 `in-progress`로 재개방하고, 2-A의 채점표 삭제는 다른 task의 채점표를 없앤다. **두 상태를 남긴 채 끝내지 않는다.** 단 **두 경우의 처방이 다르다** — 재개방된 task는 다시 `done`으로 마감해야 하지만, 채점표만 없어진 task는 계속 `done`이므로 마감할 것이 없다.
 
    - **① 재개방된 task (per-task 위임분) — validate + finalize.** 수행 2에서 위임한 각 `T-NNN`에 대해, **그 `/repair-workitem` 호출이 끝난 직후** `/validate-workitem <T-NNN>` → 판정이 `Pass`·`Pending Acceptance`면 `/finalize-workitem <T-NNN>` 을 순서대로 실행한다(여기서 `/repair-workitem`을 **다시** 부르지 않는다 — 수행 2가 이미 불렀다). **이 ①은 위 「순서 규칙」대로 cross-cutting 수정·원장 쓰기보다 먼저, task 한 개씩 순차로** 돈다(한 task를 finalize가 커밋해 tree가 다시 깨끗해진 뒤 다음 task로 간다).
-     - `Needs Fix`면 `/repair-workitem <T-NNN>`을 한 번 더 보낸다 — **task당 최대 2회**. 2회로도 `Needs Fix`면 그 task를 `미해결`로 명시하고 다음 task로 넘어간다(무한 루프 금지).
+     - `Needs Fix`면 `/repair-workitem <T-NNN>`을 한 번 더 보내고 **다시 `/validate-workitem <T-NNN>` → 판정이 `Pass`·`Pending Acceptance`면 `/finalize-workitem <T-NNN>`** 까지 같은 순서로 끝까지 돈다 — **`/repair-workitem` 호출은 task당 최대 2회**. **2회째 validate도 `Needs Fix`면** 그 task를 `미해결 (Needs Fix ×2)`로 명시하고 다음 task로 넘어간다(무한 루프 금지). **2회째가 통과했는데 finalize를 부르지 않으면 그 task가 `in-progress`로 남아 졸업 item 1이 미충족이 된다** — 2-C가 존재하는 이유가 그것이다.
      - **정상 마감도 `Needs Fix`도 아닌 종료값(`Needs Validation`·`Needs Review`·`Needs Rationale`·`Needs Stack Guard`)이 나오면 그 task를 `미해결 (<종료값>)`로 명시하고, 사용자가 그대로 칠 수 있는 복구 명령을 함께 출력한다** — 조용히 멈추지 않는다. `Needs Review`(범위 비교 불일치)의 복구 안내는 «tree의 무관 변경을 커밋하거나 그 task `## 4-1`을 보강한 뒤 `/finalize-workitem <T-NNN>` 재실행»이다.
    - **② 채점표만 삭제된 task (2-A의 영향 task) — validate만. 그리고 2-V(자체 검증)를 마친 뒤에 돈다.** `/repair-workitem`도 `/finalize-workitem`도 부르지 않고 **`/validate-workitem <T-NNN>` 하나만** 실행한다. **2-V가 무언가를 고치면 ②가 방금 만든 채점표가 다시 stale이 되므로 ②는 반드시 2-V 다음이다** — 즉 이 라운드의 실행 순서는 «① → cross-cutting 수정·2-P·2-R·2-E·2-A·2-B → 2-V → ②»다. 고칠 것은 본 skill이 이미 고쳤고, **그 task는 재개방되지 않아 계속 `done`이므로 마감할 것이 없다** — finalize를 부르면 1-G의 read-only no-op에 걸려 아무 일도 안 하면서 «마감»으로 보이는 거짓 신호만 남는다. 졸업 item 4가 요구하는 것은 **새 채점표**이며 그것은 재validate가 만든다.
      - 재validate 결과의 채점표에 cross-cutting 수정 줄이 `추적 불가`로 잡혀 `P1` 라벨이 붙을 수 있다. **정상이며 차단이 아니다** — diff-trace audit에서 `Needs Fix` 트리거는 (c) pre-existing dead code 삭제 하나뿐이다. 그 라벨은 출력에 한 줄 요약만 남긴다.
@@ -2381,6 +2462,17 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 ```
 - 회귀 테스트 (2-R): 추가 N건 / 면제 M건(사유) / 작성 불가 K건(사유)
 - 실행 증거 갱신 (ADR-064 D4): 갱신 N건(경계 종류) / 해당없음(외부 경계 코드 미수정) / `Needs Execution Evidence`
+```
+
+### 4.3.11 결정 이력 형식 예시에 `affected`를 넣는다
+
+4.3.5가 cross-cutting 항목에 `affected: T-NNN`을 **필수**로 만들었는데 바로 위의 영속 형식 예시에 그 칸이 없다. 에이전트는 예시를 복사하므로 «유일한 역참조 경로»라고 선언한 필드가 조용히 빠진다(4.2.15의 `scope` 누락과 같은 클래스).
+
+**앵커**: `   - **M1-repair-1** | P0 | [관측됨] | linked: M1 | status: applied | decision: Adopt`
+
+**바꿀 내용**
+```
+   - **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | status: applied | decision: Adopt
 ```
 
 ---
