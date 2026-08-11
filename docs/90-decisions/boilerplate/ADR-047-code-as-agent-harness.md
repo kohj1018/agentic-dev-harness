@@ -91,7 +91,7 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 3. **Predicted improvement** — 새 ADR 본문에 6 필드가 정착되면 fork retrospective에서 *변경 사유 추적 시간* 단축. + 영구 파일 논문 의존이 본 ADR 한 곳으로 집중됨.
 4. **Preserved invariants** — 기존 lifecycle 8단계 / validate report 양식 / IMPROVEMENT_GUIDE 스키마 / signal-first cap.
 5. **Falsifying evaluation** — `.boilerplate/validation/SIMULATION_RUN.md` 다음 라운드에서 *fork 사용자가 mutation contract 양식이 부담스럽다*는 신호 1+ 회 누적되면 enabling → 약권장 강도 재검토.
-6. **Rollback path** — 본 ADR superseded + ADR-005·ADR-022 단편 정의로 복귀. D5~D9 분리 시 별도 ADR (예: ADR-048 Sandboxed Execution, ADR-049 Contract Formation 등) 로 분할 supersede 가능.
+6. **Rollback path** — 본 ADR superseded + ADR-005·ADR-022 단편 정의로 복귀. D5~D9 분리 시 별도 ADR(주제별 — 예: "Sandboxed Execution", "Contract Formation")로 분할 supersede 가능. **예시에 구체적 ADR 번호를 적지 않는다** — 미발급 번호가 나중에 다른 주제로 발급되면 이 줄이 틀린 참조가 되고, 이미 죽은 번호와 겹치면 `[Ref-dead]` 오탐을 만든다.
 
 ## 정책 강도 (ADR-022 정합)
 **enabling (약) — [외부실증]** (*Code as Agent Harness* survey 인용 — D1·D3·D5·D6·D7·D8·D9 모두 본 ADR이 single source). 자동 차단 0건. 6 필드 누락 시 reviewer P2 라벨로 보고만.

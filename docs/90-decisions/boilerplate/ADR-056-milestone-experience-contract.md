@@ -73,7 +73,7 @@ accepted
 - docs/00-meta/WORKFLOW.md
 
 ## 참고
-- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-067(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.
+- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede) (현재 SSOT: ADR-058), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-067(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.
 
 <a id="adr-056-amend-1"></a>
 ## Amendment 1 (2026-07-26) — 프로토타입 경험 결정 PX 커버리지 (계획 단계 coverage 대조)

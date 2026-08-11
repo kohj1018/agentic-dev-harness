@@ -1,5 +1,7 @@
 # Simulation Run
 
+> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md))
+
 > dogfood 시뮬레이션 회차별 누적. 회차 헤더 형식: `## Round N (YYYY-MM-DD, scenario)`.
 
 ## Round 1 (2026-05-15, todo CLI / Node+TS+Vitest)
@@ -50,8 +52,7 @@
 - **implement-workitem**: 강력 금지 verb 없음, Given-When-Then AC 형식(ADR-026) 정상 적용.
 - **validate-workitem**: Refs: T-001 (AC-1, AC-2) footer 컨벤션(ADR-008#amend-2) 적용. validator/reviewer 출력 중복률 ~10~15% — Step 10.7 트리거(≥30%) 미달, 분리 유지 정당화.
 - **finalize-workitem**: package-lock.json ADR-007 amend lock file whitelist 자동 처리 — Needs Review 없이 통과. Round 1 마찰점 해소 확인.
-> 주: 본 문서의 `ADR-014` 인용은 기록 당시 기준이다. 현재 유효 ADR은 ADR-067이다.
-- **stabilize-milestone**: graduation pre-check(ADR-014) 5/5 통과. `--dry-run` 없이 진행.
+- **stabilize-milestone**: graduation pre-check(ADR-014) 5/5 통과. `--dry-run` 없이 진행. (현재 SSOT: ADR-067)
 
 ### 성공 기준 충족
 
@@ -657,7 +658,7 @@ stabilize가 `M1-instr-1`~`7`로 산출한 7건을 보일러플레이트 본문�
 
 **확정 결함 2 — `P0` 라벨과 차단력 불일치 (P2).** `§1.5`의 ⑤ predicate는 `QA_FINDINGS.md`의 `## M-N` → `### P0`만 센다. `§5-4`(7-x Don'ts grep, best-effort heuristic)는 `P0 [Arch-iface-violation]`을 발급하지만 QA_FINDINGS에 쓰지 않으므로 **졸업을 차단할 수 없다.** `MILESTONE_TEMPLATE.md:32`가 "qa 팬아웃 P0(QA_FINDINGS)만 반영, reviewer report-only 미반영"으로 이 동작을 이미 규정하므로 **게이트가 깨진 것은 아니다** — 문제는 라벨 어휘다. stabilize §5-x 블록의 라벨 분포를 실측하면 P1 9건 / P2 4건 / **P0 1건**으로, `§5-4`의 P0이 유일한 이탈이다. 실제로 본 라운드의 stabilize가 이 불일치를 결함으로 오인해 등재했다.
 
-**결함 아님 1 — validation report의 gitignore (기각).** `M1-instr-7`은 "졸업 기준이 gitignore된 산출물에 의존한다"를 구조적 결함으로 등재했으나, `MILESTONE_TEMPLATE.md:32`가 이미 "이 판정은 stabilize 시점 report(ADR-014상 checkout-local ephemeral) 기준이며, ROADMAP Done은 *영속된 판정*의 파생이지 **fresh clone에서 재도출된 증거가 아니다**"로 명시하고, `WORKFLOW.md:27`이 "validate와 finalize는 **같은 checkout**에서 연속 실행해야 한다"를 못 박으며, `STRUCTURE.md:45`가 lifecycle을 `ephemeral`로 등재한다. **의도된 설계다.** 잔여 사항은 문구뿐 — 재검증 안내가 "stabilize 재실행"만 말하고 **각 task의 `/validate-workitem` 재실행이 선행돼야 report가 생긴다**는 점을 적지 않아, 새 체크아웃에서 ④ 미충족을 만난 사용자가 결함으로 오인한다(본 라운드가 그 실례).
+**결함 아님 1 — validation report의 gitignore (기각).** `M1-instr-7`은 "졸업 기준이 gitignore된 산출물에 의존한다"를 구조적 결함으로 등재했으나, `MILESTONE_TEMPLATE.md:32`가 이미 "이 판정은 stabilize 시점 report(ADR-014상 checkout-local ephemeral) 기준이며, ROADMAP Done은 *영속된 판정*의 파생이지 **fresh clone에서 재도출된 증거가 아니다**"로 명시하고, `WORKFLOW.md:27`이 "validate와 finalize는 **같은 checkout**에서 연속 실행해야 한다"를 못 박으며, `STRUCTURE.md:45`가 lifecycle을 `ephemeral`로 등재한다. **의도된 설계다.** 잔여 사항은 문구뿐 — 재검증 안내가 "stabilize 재실행"만 말하고 **각 task의 `/validate-workitem` 재실행이 선행돼야 report가 생긴다**는 점을 적지 않아, 새 체크아웃에서 ④ 미충족을 만난 사용자가 결함으로 오인한다(본 라운드가 그 실례). (현재 SSOT: ADR-067)
 
 **결함 아님 2 — finalize의 report 게이트 (진단 오류).** `M1-instr-4`는 "lifecycle에 report 없이 finalize를 막는 게이트가 없다"고 했으나 `finalize-workitem/SKILL.md:25`에 실재한다("report 파일이 없거나 stale하면 `/validate-workitem` 선행 안내 + `Needs Validation` 종료, 커밋하지 않음"). T-002가 통과한 이유는 게이트 부재가 아니라 **finalize를 skill로 돌리지 않고 손으로 커밋했기 때문**이다. 유효한 잔여 관측은 "task status를 손으로 `done`으로 쓰는 것을 막을 수단이 없다"이며, 이는 수작업 우회 일반의 한계지 특정 게이트의 결함이 아니다.
 

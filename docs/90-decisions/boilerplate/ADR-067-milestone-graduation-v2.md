@@ -7,11 +7,11 @@
 accepted
 
 ## 대체
-- [ADR-014](ADR-014-milestone-graduation.md)를 **supersede**한다. ADR-014의 결정 3개(5+1 checklist / 회고 4항목 / pre-check + `--dry-run`)와 개정 4개(evaluator-optimizer 명명 / E2E MUST-run hard-block / 회고 graduation 줄 / 0-spec 예외 철회)를 본 ADR이 통합 승계하고, 아래 3가지를 변경한다.
+- [ADR-014](ADR-014-milestone-graduation.md)를 **supersede**한다(현재 SSOT: 본 ADR). ADR-014의 결정 3개(5+1 checklist / 회고 4항목 / pre-check + `--dry-run`)와 개정 4개(evaluator-optimizer 명명 / E2E MUST-run hard-block / 회고 graduation 줄 / 0-spec 예외 철회)를 본 ADR이 통합 승계하고, 아래 3가지를 변경한다.
   1. item 4의 판정 기준을 *자동 테스트 존재* 에서 **AC 충족(전 modality — ADR-065)** 으로 바꾼다.
   2. `BLOCKED` 판정값의 정의를 *e2e blocked-on-env* 에서 **평가 실행 불가(e2e blocked-on-env | 감사 미완)** 으로 넓힌다.
   3. 회고에 `open 항목 스냅샷` 한 줄을 추가한다.
-- 통합 재발행 사유(ADR-045 D6): ADR-014#amend-4가 *"graduation contract 자체를 다시 손대야 할 다음 변경에서는 통합 재발행을 우선 검토"* 를 예약했고, 이번 라운드에 서로 다른 3개 지점을 고치므로 그 조건이 충족된다.
+- 통합 재발행 사유(ADR-045 D6): ADR-014#amend-4가 *"graduation contract 자체를 다시 손대야 할 다음 변경에서는 통합 재발행을 우선 검토"* 를 예약했고, 이번 라운드에 서로 다른 3개 지점을 고치므로 그 조건이 충족된다. (현재 SSOT: 본 ADR)
 - **ADR-014 인용의 처리는 [ADR-045](ADR-045-doc-reference-contract.md)#amend-2의 5종 분류를 따른다.** 살아있는 규칙 인용은 재지정하고, **Rollback path·Mutation Target 같은 «실행 불가가 된 지시»는 현재 유효한 내용으로 재작성하며**(그것은 역사가 아니라 죽은 절차다), 배경 서술은 링크를 제거하고 산문으로 다시 쓴다. **supersede 선언·인덱스 행·실행 기록(Record)만 원문을 보존하고 그 줄 끝에 `(현재 SSOT: ADR-NNN)`을 병기한다** — `/stabilize-milestone`의 `[Ref-dead]` 검사는 그 병기가 있는 줄을 건너뛰므로, 처리를 마치면 이 supersede로 인한 `[Ref-dead]` 발화는 0건이 된다. **과거에 한 행위를 기록한 문장 자체는 바꾸지 않는다**(바꾸면 존재하지 않는 역사가 된다) — 기록은 사실대로 두고 검사 소음은 마커로 없앤다. (현재 SSOT: 본 ADR)
 
 ## 배경
@@ -104,7 +104,7 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
 3. **Predicted improvement** — item 4 미충족 사유가 modality로 분해되어 보이고, 감사 미완이 `BLOCKED`로 관측되며, 회고에 open 합계가 남는다.
 4. **Preserved invariants** — 5+1 구조·항목 무증설(item 4의 (a)/(a') 분기는 *입력 출처* 분리이며 항목 증설이 아니다) / e2e 판정 SSOT는 ADR-052#amend-1 / `/stabilize-milestone` read-only 및 write 대상 4종 / ROADMAP `Done`·`Now`·`Next`·`Later` 구간은 `/plan-milestone` 단독 작성자(`## Backlog`는 append-only 다중 writer — [ADR-057](ADR-057-planning-v2-batch-and-seam.md)#amend-4) / 졸업 판정 소유권 = `/stabilize-milestone` / commit owner = `/finalize-workitem`·사용자 (ADR-047 D7).
 5. **Falsifying evaluation** — dogfood 재실행에서 (a) 정상 마일스톤이 `BLOCKED (audit incomplete)`로 오차단되거나, (b) item 4가 modality 표기 누락만으로 미충족을 내거나, (c) **관측 AC가 있는 정상 마일스톤이 `PENDING_ACCEPTANCE`가 아니라 `NO`로 나오면**(= item 4 (b)와 (a')가 서로를 막는 상태) D1·D3을 재조정한다.
-6. **Rollback path** — 본 ADR을 superseded로 두고 **후속 ADR이 net 규칙을 다시 정의한다**(ADR-014를 `accepted`로 되살리지 않는다 — supersede 이력은 되돌리지 않는 것이 이 저장소의 규약이다). 되돌릴 실질은 셋이다: item 4를 «자동 테스트 매핑 100%» 기준으로, `BLOCKED`를 «e2e blocked-on-env» 한정으로, 회고에서 `open 항목 스냅샷:` 줄 제거.
+6. **Rollback path** — 본 ADR을 superseded로 두고 **후속 ADR이 net 규칙을 다시 정의한다**(ADR-014를 `accepted`로 되살리지 않는다 — supersede 이력은 되돌리지 않는 것이 이 저장소의 규약이다). 되돌릴 실질은 넷이다: item 4를 «자동 테스트 매핑 100%» 기준으로, 판정값을 3종(`YES`·`NO`·`BLOCKED`)으로, `BLOCKED`를 «e2e blocked-on-env» 한정으로, 회고에서 `open 항목 스냅샷:` 줄 제거. (현재 SSOT: 본 ADR)
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. 실제 파일 경로 1행 1개)
 > 등재 기준: 본 ADR의 결정을 **실행하거나 집행하는 파일만** 등재한다. 본 ADR을 배경·역사로 언급만 하는 파일(재지정 문구·supersede 선언 등)은 등재하지 않는다.
@@ -115,7 +115,6 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
 - .claude/skills/stack-guard/SKILL.md                  — D1 item 3 E2E-applicable 판정
 - docs/30-workitems/_templates/MILESTONE_TEMPLATE.md   — D1 `## 5` / D2 `## 8`
 - docs/00-meta/DELEGATION_STRATEGY.md                  — D5 evaluator-optimizer 1줄
-- docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md — superseded note
 - .claude/skills/plan-milestone/SKILL.md               — D1 `## 5` 5+1 default 작성 주체 · D3 판정값 소비(로드맵 재조정)
 - .claude/skills/validate-plan/SKILL.md                — D1 `[MP-graduation]` 정합 검사
 - .claude/agents/reviewer.md                           — D1 `[MP-graduation]` 정합 검사

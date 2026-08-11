@@ -86,7 +86,7 @@ accepted
 3. **한계 정직 보고**: 일반 HTML 페이지는 fetch 시 markdown 변환으로 stylesheet URL·CSS가 소실된다([관측됨] 2026-07-14 실측). stylesheet URL을 발견할 수 없으면 "추출 불가 — <사유>"를 반환하고 날조하지 않는다. CSS-in-JS/Tailwind JIT 사이트는 수율 낮음을 명시.
 4. **값 복제 금지 규율**: 추출 토큰은 *구조 학습용*(스케일 짜임새·시맨틱 네이밍·대비 수치) — 특정 서비스 값의 통째 복제는 클론화라 금지. what-to-borrow/avoid 판단(bootstrap-design R0)이 계속 관문.
 ### 근거
-- [관측됨] bootstrap-design R0의 무거운 분해가 웹 도구 없는 architect에 위임돼 있어 실 웹 grounding 경로가 0 → "모델 지식 기반" fallback으로 median 회귀(ADR-049#amend-1 근거가 자인한 슬롭 근본원인). 텍스트 4축 요약은 코드 증거가 없어 R2 concept 생성 입력이 빈약.
+- [관측됨] bootstrap-design R0의 무거운 분해가 웹 도구 없는 architect에 위임돼 있어 실 웹 grounding 경로가 0 → "모델 지식 기반" fallback으로 median 회귀(당시 디자인 워크플로우 ADR이 개정 근거에서 스스로 인정한 슬롭 근본원인 — 현재 SSOT: ADR-058). 텍스트 4축 요약은 코드 증거가 없어 R2 concept 생성 입력이 빈약.
 - [외부실증] 오픈소스 디자인 토큰 패키지는 대형 실서비스의 진짜 값 + 시맨틱 이름 + 주석을 오픈 라이선스로 제공(2026-07-14 Primer·Polaris fetch 실측).
 ### 강도 (ADR-022)
 - enabling(약) — report-only 불변, 모드 추가.
