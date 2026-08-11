@@ -2832,13 +2832,18 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
                                                                   ├─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행 ─→ (위 분기 재판정)
                                                                   └─미완─→ 환경 복구·사용자 재개 → accept-milestone 재실행 ─→ (위 분기 재판정, 라운드 카운터 미소모)
 ```
-**바꿀 내용 (3줄 → 아래 4줄)**
+**바꿀 내용 (3줄 → 아래 5줄)**
 ```
 (ADR-066) stabilize ─┬─YES──────────────────→ 졸업 → plan-milestone (다음 M)
                      ├─PENDING_ACCEPTANCE──→ accept-milestone <M> ─┬─승인─→ stabilize 재실행 → 졸업
-                     │                                             ├─보류─→ repair-acceptance (validate·finalize 연쇄 포함) → accept-milestone 재실행
-                     └─NO/BLOCKED──────────→ repair-milestone (validate·finalize 연쇄 포함) → stabilize 재실행
+                     │                                             ├─보류─→ repair-acceptance (in-AC: validate+finalize / out-of-AC: validate) → accept-milestone 재실행
+                     ├─NO──────────────────→ repair-milestone (in-AC: validate+finalize / out-of-AC: validate) → stabilize 재실행
+                     └─BLOCKED─────────────→ 감사 미완: 그 축 재감사 / e2e blocked-on-env: 환경 복구 (repair 대상 아님 — ADR-067 D3) → stabilize 재실행
 ```
+
+**⚠ `NO`와 `BLOCKED`를 한 분기로 묶지 않는다.** `BLOCKED`은 «평가 실행 불가»(ADR-067 D3 — 감사 미완 / e2e blocked-on-env)이고 그 처방은 **재감사·환경 복구**다. 묶어서 `/repair-milestone`으로 보내면, 감사 미완이 등재한 `M<N>-audit-<K>` P0는 코드 결함이 아니라 4-판정할 대상이 없어 repair가 헛돈다(4.4.10이 stabilize 단계 8에 넣는 BLOCKED 분기와 같은 이유다 — lifecycle SSOT인 이 그림이 그 분기와 어긋나면 안 된다).
+
+**⚠ 연쇄를 «validate·finalize»로 뭉뚱그리지 않는다.** 실제 계약은 **`in-AC` 위임분만 validate+finalize이고 `out-of-AC` 영향분은 validate까지**다(그 task는 계속 `done`이라 마감할 것이 없다 — 4.2.7 ②·4.3.1 2-C ②). 뭉뚱그리면 7.6 체크리스트 7-1이 막으려는 «`done` task에 finalize를 부르는» 모델이 되살아난다.
 
 *(`미완` 판정은 그림에 넣지 않는다 — 라운드 카운터를 소모하지 않고 같은 자리로 돌아오는 재시도이므로 분기가 아니다. 상세는 `## 5-1`이 SSOT.)*
 
@@ -2872,6 +2877,21 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
 > **새 체크아웃·다른 worktree에서 마일스톤을 재검증할 때**: 졸업 item 4의 **(a)(b)(c)(d)** 는 report를 읽으므로 report가 없으면 전 task가 그 항들에서 미충족으로 나온다(ADR-067 D1). 이는 결함이 아니라 ephemeral 설계의 정상 귀결이다. **(a') 관측 AC receipt는 커밋된 task `## 8`을 직접 읽으므로 체크아웃과 무관하다** — 재검증 때 다시 확인받을 필요가 없다. 재검증 순서는 **① 각 task `/validate-workitem` 재실행(report 생성) → ② `/stabilize-milestone` 실행**이다. `/stabilize-milestone`만 재실행하면 item 4 (a)가 전 task 미충족을 낸다.
 ```
 
+### 5.2.6 inner-loop 일반 설명의 finalize 조건을 3값에 맞춘다
+
+`## 3`의 lifecycle 산문이 «검증 실패 시 repair / **검증 통과 시** finalize»라는 2값 틀로 남아 있다. 3값 계약에서 `Pending Acceptance`는 «실패»도 «통과»도 아니게 읽혀, 그 task의 finalize를 건너뛰는 경로가 열린다(그러면 task가 `in-progress`로 남아 졸업 item 1이 미충족이 된다). DELEGATION의 같은 자리는 5.3.5가 이미 «`Pass` 또는 `Pending Acceptance`일 때»로 고쳤으므로, 이 줄만 남으면 두 메타 문서가 어긋난다.
+
+**앵커**: `- 검증 통과 시 `/finalize-workitem`으로 status `done` 갱신 + 커밋.`
+
+**현재 (줄 전체)**
+```
+- 검증 통과 시 `/finalize-workitem`으로 status `done` 갱신 + 커밋.
+```
+**바꿀 내용**
+```
+- 판정이 `Pass` **또는 `Pending Acceptance`**면 `/finalize-workitem`으로 status `done` 갱신 + 커밋(ADR-065 D6 — 관측 AC receipt 미발급은 마감을 막지 않고 `## 8`에 `- ac-pending`을 남긴다).
+```
+
 ---
 
 ## 5.3 `docs/00-meta/DELEGATION_STRATEGY.md`
@@ -2901,8 +2921,10 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
 ```
 **바꿀 내용**
 ```
-| 사용자 수용 finding 수리 | 메인 세션 (repair-acceptance) | `/repair-acceptance <M>`. 3+1 판정(Reject-FP 없음 — 사용자 관측은 기각 대상 아님), 회귀 테스트 Red→Green 선행, **in-AC는 `/repair-workitem` 위임(재개방) / out-of-AC는 직접 수정 + 계약 부채 등재**, 수정 뒤 `/validate-workitem`·`/finalize-workitem` 연쇄를 자기 루프에서 실행, 커밋 X (ADR-066 D4) |
+| 사용자 수용 finding 수리 | 메인 세션 (repair-acceptance) | `/repair-acceptance <M>`. 3+1 판정(Reject-FP 없음 — 사용자 관측은 기각 대상 아님), 회귀 테스트 Red→Green 선행, **in-AC는 `/repair-workitem` 위임(재개방) / out-of-AC는 직접 수정 + 계약 부채 등재**, 수정 뒤 후속 연쇄를 자기 루프에서 실행(**in-AC 위임분은 `/validate-workitem`+`/finalize-workitem`, out-of-AC 영향 task는 `/validate-workitem`만** — 그 task는 계속 `done`이라 마감할 것이 없다), 커밋 X (ADR-066 D4) |
 ```
+
+**⚠ 5.2.3과 같은 이유로 연쇄를 뭉뚱그리지 않는다** — `out-of-AC` 영향 task에 finalize를 부르면 1-G의 read-only no-op에 걸려 «마감»으로 보이는 거짓 신호가 남는다(7.6 체크리스트 7-1).
 
 ### 5.3.3 `/repair-milestone` 행에 연쇄를 명시한다
 
@@ -3045,8 +3067,10 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
 **바꿀 내용**
 ```
 - **로드맵 재조정 (ADR-057#amend-1·#amend-4)**: `docs/30-workitems/ROADMAP.md`를 읽어 직전 마일스톤 `## 8. 회고`의 `graduation:` 판정 + task done/total로 Done/Now 구간을 최신화한다(graduation=YES면 Now→Done 스냅샷, 진행 중이면 진척 갱신). **미졸업 Now 가드**: 현재 Now 마일스톤의 graduation이 `YES`가 아니면(진행 중·`PENDING_ACCEPTANCE`·`NO`·`BLOCKED`) *명시적 병렬 승인이 없는 한* 새 마일스톤을 Now로 추가하지 않는다 — 안내 문구는 판정별로 갈린다: `PENDING_ACCEPTANCE`면 **"현재 Now(M<N>) 수용 대기 — `/accept-milestone M<N>` 후 진행 권장"**, 그 외면 "현재 Now(M<N>) 미졸업 — 완료 후 진행 권장". 어느 쪽이든 새 Now 생성을 보류한다(단일 Now 규율). Next 후보를 Now로 승격·중복 생성 방지를 위해 각 Next/Later 행은 안정적 candidate key(목표 슬러그)를 갖는다. **로드맵의 `Done`/`Now`/`Next`/`Later` 네 구간은 plan-milestone만 쓴다** — `## Backlog`만 append-only 다중 writer이며(ADR-057#amend-4 결정 2) 그 구간의 정리·승격도 본 skill이 한다.
-- **`## Backlog` 회수 (ADR-057#amend-4)**: 같은 파일의 `## Backlog` 절을 읽어 **수용 라운드·repair-acceptance가 쌓아 둔 범위 후보**를 전수 회수하고 R1의 목표 후보 재료로 넣는다. 각 행은 `- `<candidate-key>` <요약> — 출처: ... / 확신도: ...` 형식이다. **자동 편입하지 않는다** — 사용자가 이번 마일스톤 범위로 택한 항목만 R2 분할 협상에 올리고, 택한 항목은 `## Backlog`에서 제거해 `## Now`/`## Next`로 옮긴다(같은 candidate-key 유지 — 중복 생성 방지). 택하지 않은 항목은 그대로 둔다.
+- **`## Backlog` 회수 (ADR-057#amend-4)**: 같은 파일의 `## Backlog` 절을 읽어 **수용 라운드·repair-acceptance가 쌓아 둔 범위 후보**를 전수 회수하고 R1의 목표 후보 재료로 넣는다. 각 행은 `- `<candidate-key>` <요약> — 출처: ... / 확신도: ...` 형식이다. **자동 편입하지 않는다 — R0는 회수만 한다.** 사용자 선택은 R1, 분할 확정은 R2이므로 **R0에서 Backlog 행을 제거·이동하지 않는다**(확정 전에 지우면 R2에서 빠진 항목이 사라진다). 착수·후속 배정이 확정된 뒤 **R1이 그 항목의 `## Backlog` 행을 제거하고 candidate-key를 인계한다**(ADR-057#amend-4 결정 3 «Next로 승격하며 Backlog 행 제거» + `## 현재 유효 결정`의 «회수는 R0 → R1») — 이번에 착수하는 분은 R3의 `Now` 행이, 후속 분은 `## Next` 행이 그 key를 그대로 쓴다(#amend-1 candidate-key 매칭 — 중복 생성 방지). 택하지 않은 항목은 그대로 둔다.
 ```
+
+**⚠ 제거 시점을 R0에 두지 않는다** — R0는 «직전 마일스톤 회수» 라운드이고 사용자 선택은 R1·분할 확정은 R2다. R0에서 행을 지우면 **R2에서 범위에서 빠진 항목이 아무 원장에도 없이 사라진다.** 또 목적지를 `Now`로 적으면 R3의 «이번 마일스톤 행을 Now로 쓴다»와 같은 행을 두 라운드가 쓰게 되고, ADR-057#amend-4 결정 3의 «Next로 승격» 규정과도 어긋난다. **제거는 R1(5.5.3이 이미 R1을 `## Backlog` writer로 만든다), 실체화는 R3**로 갈라 둔다 — 그러면 5.5.4의 «R3는 `## Backlog`를 건드리지 않는다»도 그대로 유지된다.
 
 ### 5.5.2 R0의 개선·QA 회수에 `scope: out-of-AC` surface를 넣는다
 
@@ -3057,8 +3081,10 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
 그 불릿의 **끝에** 아래 문장을 이어 붙인다(새 불릿을 만들지 않는다).
 
 ```
- **`scope: out-of-AC` 항목은 별도로 surface한다 (ADR-005#amend-1 / ADR-066 D4)**: `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에서 `scope: out-of-AC` + `status: open`인 항목을 전수 회수한다 — **HTML 주석(`<!-- ... -->`) 밖의 줄만 센다**(그 섹션 주석에 같은 술어의 형식 예시가 들어 있어, 주석까지 세면 매 라운드 `<M>-uat-<N>` 유령 항목이 올라온다 — ADR-064 D4 판독 규칙과 동형). 회수한 각 항목에 대해 **«이 동작을 AC로 승격할 것인가»** 를 사용자에게 묻는다. 이것은 「코드에는 들어갔으나 어느 계약에도 근거가 없는 변경」이며, 승격을 택하면 이번 마일스톤의 feature `## 7. FAC`·task AC로 넣고 원본을 `status: resolved (승격: <feature/task id>)`로 닫는다. 택하지 않으면 그대로 열어 둔다. **자동 승격하지 않는다** — 계약을 넓히는 것은 사용자 결정이다.
+ **`scope: out-of-AC` 항목은 별도로 surface한다 (ADR-005#amend-1 / ADR-066 D4)**: `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에서 `scope: out-of-AC` + `status: open`인 항목을 전수 회수한다 — **HTML 주석(`<!-- ... -->`) 밖의 줄만 센다**(그 섹션 주석에 같은 술어의 형식 예시가 들어 있어, 주석까지 세면 매 라운드 `<M>-uat-<N>` 유령 항목이 올라온다 — ADR-064 D4 판독 규칙과 동형). 회수한 각 항목에 대해 **«이 동작을 AC로 승격할 것인가»** 를 사용자에게 묻는다. 이것은 「코드에는 들어갔으나 어느 계약에도 근거가 없는 변경」이며, 승격을 택하면 **R4에서 그 feature `## 7. FAC`에 항목으로 넣는다** — **task AC는 본 skill이 만들지 않는다**(위 「경계」: milestone + feature까지. `/plan-workitem`이 그 FAC를 받아 AC로 분해하고 `## 7-1` 매핑을 채운다 — ADR-057 결정 1). 원본은 **그 FAC가 실재한 뒤**(R4 이후) `status: resolved (승격: <feature-id>:FAC-N)`로 닫는다 — N-3 앵커는 실재하는 대상을 가리켜야 한다(ADR-005#amend-1). 택하지 않으면 그대로 열어 둔다. **자동 승격하지 않는다** — 계약을 넓히는 것은 사용자 결정이다.
 ```
+
+**⚠ «task AC로 넣는다»를 쓰지 않는다.** 이 skill은 도입부에서 **«milestone + feature까지만 만든다 — task 분해는 `/plan-workitem`이 이어 수행한다»** 를 스스로 선언하고, R4의 `## 7-1` 항목도 «빈 shell만 둔다»로 못 박혀 있다. R0 시점엔 그 feature 문서조차 없으므로(R4가 만든다) 원문 그대로 두면 **자기 경계를 위반하는 실행 불가 지시**가 된다. FAC까지만 넣고 원본은 그 FAC가 생긴 뒤 닫는다.
 
 ### 5.5.3 R1의 `(미할당)` triage 옆에 원장 재분류 규칙을 붙인다
 
@@ -3067,7 +3093,7 @@ Phase 1~4가 계약과 skill을 바꿨으니, 이제 그 계약을 요약해 두
 그 불릿의 **끝에** 아래 문장을 이어 붙인다.
 
 ```
- **원장 재분류 규칙 (ADR-005#amend-1) — 본 라운드에서 두 방향을 함께 처리한다.** ① **DECISION_REGISTER → ROADMAP**: 회수한 결정 항목이 «정본 문서의 한 절»이 아니라 «다음 마일스톤 문서 하나»로 해소되는 것이면 결정 원장이 아니라 ROADMAP `## Backlog`가 제자리다. ② **IMPROVEMENT_GUIDE → ROADMAP**: R0가 회수한 `IMPROVEMENT_GUIDE` open 항목 중 «그것을 하면 task 이하가 아니라 마일스톤 하나가 되는» 것도 Backlog가 제자리다. 어느 방향이든 **원본을 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key>)`로 닫고 Backlog에 등재한다**(N-2·N-3 불변식 — 두 곳에 동시에 열어 두지 않는다). **`## Backlog`는 `/accept-milestone`·`/repair-acceptance`도 append할 수 있는 구간이지만(ADR-057#amend-4 결정 2) «다른 원장에서 옮겨 오는» 재분류는 본 skill만 한다** — 원본을 닫는 일과 등재를 한 트랜잭션으로 묶어야 N-2가 지켜지고, 그 둘을 함께 볼 수 있는 자리가 여기뿐이다.
+ **원장 재분류 규칙 (ADR-005#amend-1) — 본 라운드에서 두 방향을 함께 처리한다.** ① **DECISION_REGISTER → ROADMAP**: 회수한 결정 항목이 «정본 문서의 한 절»이 아니라 «다음 마일스톤 문서 하나»로 해소되는 것이면 결정 원장이 아니라 ROADMAP `## Backlog`가 제자리다. ② **IMPROVEMENT_GUIDE → ROADMAP**: R0가 회수한 `IMPROVEMENT_GUIDE` open 항목 중 «그것을 하면 task 이하가 아니라 마일스톤 하나가 되는» 것도 Backlog가 제자리다. 어느 방향이든 **원본을 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key>)`로 닫고 Backlog에 등재한다**(N-2·N-3 불변식 — 두 곳에 동시에 열어 두지 않는다). **`## Backlog`는 `/accept-milestone`·`/repair-acceptance`도 append할 수 있는 구간이지만(ADR-057#amend-4 결정 2) «다른 원장에서 옮겨 오는» 재분류는 본 skill만 한다** — 원본을 닫는 일과 등재를 한 트랜잭션으로 묶어야 N-2가 지켜지고, 그 둘을 함께 볼 수 있는 자리가 여기뿐이다. **R0가 회수한 Backlog 항목 중 착수·후속 배정이 확정된 것의 `## Backlog` 행 제거도 이 라운드에서 한다** — 제거한 candidate-key는 R3의 `Now` 행(이번 착수분) 또는 `## Next` 행(후속분)이 그대로 이어받는다(ADR-057#amend-4 결정 3).
 ```
 
 ### 5.5.4 R3의 「로드맵은 plan-milestone만 쓴다」도 구간별로 정정한다
