@@ -39,7 +39,7 @@
 | 경험 게이트 스크린샷 갤러리 (UI only, 검토용 임시) | `docs/40-validation/visual/M-N/` | `/stabilize-milestone` §3-V | ephemeral | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (25종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert/accept-milestone/repair-acceptance) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (13종: architect/builder/validator/planner/reviewer/qa/researcher/designer + 도메인 자문 5종 counsel/strategist/marketer/analyst/security — ADR-062) | 수동 (boilerplate 제공) | Reference | baseline |
-| milestone roadmap | `docs/30-workitems/ROADMAP.md` | `/plan-milestone` (R3 생성/갱신, R0 재조정 — 단일 작성자) | Living | baseline |
+| milestone roadmap | `docs/30-workitems/ROADMAP.md` | `Done`/`Now`/`Next`/`Later` = `/plan-milestone` 단독 (R3 생성/갱신, R0 재조정) · `## Backlog` = append-only 다중 writer (`/accept-milestone`·`/repair-acceptance` 추가, `/plan-milestone` 정리·승격 — ADR-057#amend-4) | Living | baseline |
 | milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-milestone` (M1 포함 — ADR-057) | Living | generated |
 | feature | `docs/30-workitems/features/F-*-*.md` | `/plan-milestone` (생성), `/plan-workitem`(`## 7-1` AC측·`## 7-2` seam 표 채움) | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
@@ -126,12 +126,37 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack 결정 taxonomy (T1 기초 / T2 마이그레이션 / T3 라이브러리 추가) + 입력 적응형 bootstrap-stack 흐름 | [ADR-055](../90-decisions/boilerplate/ADR-055-input-adaptive-stack-flow.md) (정책 SSOT). → ADR-055 `## Surfaces` 참조 (fan-out SSOT). |
 | 마일스톤 경험 계약 (프로토타입 라운드·입구 계약·스크린샷 게이트·Voice 규칙서) | [ADR-056](../90-decisions/boilerplate/ADR-056-milestone-experience-contract.md) (정책 SSOT). → ADR-056 `## Surfaces` 참조 (fan-out SSOT). |
-| 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md` (단일 작성자 = plan-milestone). |
+| 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도 + `## Backlog` 범위 후보) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1·#amend-4 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md`. 구간별 writer: `Done/Now/Next/Later` = plan-milestone 단독 / `## Backlog` = append-only 다중 writer. |
 | 기획 결정 마감 + 마일스톤 봉인 (원장·authority·contract-ready·seal) | [ADR-060](../90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) (정책 SSOT). → ADR-060 `## Surfaces` 참조 (fan-out SSOT). |
 | Arch-iface 위반 등급 분기 (닫힌 사용자 결정·`Don'ts` → P0) + 닫힌 결정 바인딩의 diff-trace 추적 인정 | [ADR-061](../90-decisions/boilerplate/ADR-061-decision-backed-interface-gate.md) (정책 SSOT). → ADR-061 `## Surfaces` 참조 (fan-out SSOT). |
 | 전문가 자문 capability (도메인 agent·조회 규율·단일 소유자·문서 경유) | [ADR-062](../90-decisions/boilerplate/ADR-062-domain-advisory-capability.md) (정책 SSOT). → ADR-062 `## Surfaces` 참조. |
 | 검증 장치의 실측 검증 + 유지 주기 (probe·harness 경로 배제·재실행 계약·`[Guard-drift]`) | [ADR-063](../90-decisions/boilerplate/ADR-063-verification-harness-integrity.md) (정책 SSOT). → ADR-063 `## Surfaces` 참조. |
 | task 층 증거 계약 (외부 경계 실행 증거·검증 판정력·`[미실측]` 외부 사실·receipt) | [ADR-064](../90-decisions/boilerplate/ADR-064-task-layer-evidence-contract.md) (정책 SSOT). → ADR-064 `## Surfaces` 참조. |
+| 원장 5종 배타 범위 + 비중복 불변식 | [ADR-005](../90-decisions/boilerplate/ADR-005-ssot.md)#amend-1 (정책 SSOT). 실행 표는 본 문서 `## Canonical Owner 매핑`의 «원장 5종 배타 범위». |
+| 죽은 ADR 인용 처리 5종 분류 (`[Ref-dead]` 판정 기준) | [ADR-045](../90-decisions/boilerplate/ADR-045-doc-reference-contract.md)#amend-2 (정책 SSOT). → ADR-045 `## Surfaces` 참조. |
+
+### 원장 5종 배타 범위 (ADR-005#amend-1)
+
+같은 항목이 두 원장에 동시에 있으면 안 된다. **판별 기준은 «그 항목이 해소되면 무엇이 남는가»다.**
+
+| 원장 | 파일 | 담는 것 | 해소되면 남는 것 | writer |
+|------|------|---------|------------------|--------|
+| 결정 원장 | `docs/10-charter/DECISION_REGISTER.md` | 사용자가 정하거나 승인해야 할 **열린 결정** | **정본 문서의 한 절**(charter·ARCH·DESIGN·ADR) | 단일 writer 없음 — 발견한 skill이 등재, 닫는 것은 사용자 |
+| 로드맵 | `docs/30-workitems/ROADMAP.md` | Done/Now/Next/Later + **`## Backlog`**(범위 후보) | **다음 마일스톤 문서 하나** | **구간별로 갈린다** — `Done`/`Now`/`Next`/`Later` = `/plan-milestone` 단독 / `## Backlog` = append-only 다중 writer(`/accept-milestone`·`/repair-acceptance` 추가, `/plan-milestone` 정리·승격·재분류 등재) — [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-4 |
+| QA 원장 | `docs/40-validation/QA_FINDINGS.md` | 계약 위반 **결함** | **코드 수정 + 회귀 테스트** | 발견자 기록 / status는 repair 계열이 닫는다 |
+| 개선 원장 | `docs/40-validation/IMPROVEMENT_GUIDE.md` | 계약 위반은 아닌 **개선 제안·부채** + `## 5` 결정 이력 | **코드·문서 리팩토링** | 발견자 기록 / status는 repair 계열이 닫는다 |
+| 발견 원장 | `docs/10-charter/DISCOVERY.md` | 사용자·시장에 대한 **관측·가정** | **charter 스냅샷 갱신** | `/discover-product` (DISCOVERY=SSOT, Charter=snapshot — ADR-035. `/bootstrap-project`는 그 스냅샷을 *읽어* charter를 갱신하는 쪽이다) |
+
+**비중복 불변식 (셋 다 지킨다 — 정의 SSOT는 [ADR-005](../90-decisions/boilerplate/ADR-005-ssot.md)#amend-1 결정 4이며 번호·문구를 그대로 옮긴다)**
+- **N-1** — 한 사실은 동시에 두 원장에 «열린 채로» 존재하지 않는다. 두 성격이 섞여 보이면 «해소되면 무엇이 남는가»로 하나를 고른다.
+- **N-2** — 원장 간 이동은 «원본을 닫고 → 새 원장에 등재»로만 한다. 양쪽에 남기지 않는다.
+- **N-3** — 이동한 항목의 원본에 목적지 앵커를 남긴다 — `status: resolved (재분류: <목적지> <ID 또는 candidate-key>)`. 목적지가 로드맵이면 `재분류: ROADMAP ## Backlog <candidate-key>`로 적는다.
+- (불변식 번호가 붙지 않는 일반 규율) 다른 원장을 참조할 때는 **ID 한 줄 링크만** 둔다 — 본문을 복사하지 않는다(본 ADR 결정 1의 «정의 1곳, 다른 곳은 링크»가 원장에도 그대로 적용된다).
+
+**자주 헷갈리는 세 가지**
+- 수용 라운드의 «계약 변경» → **ROADMAP `## Backlog`**(다음 마일스톤 후보). 단 정본 문서를 고쳐야 성립하면 DECISION_REGISTER.
+- ADR은 원장이 **아니다** — 정본 문서다. 결정 원장은 «아직 안 정한 것», ADR은 «정하고 근거까지 박은 것»이다.
+- 마일스톤 `## 8. 회고`·task `## 8. 메모`는 원장이 아니라 **그 문서의 이력**이다. 원장으로 승격할 항목만 원장에 따로 등재한다.
 
 > 압축 규칙 — ADR 본문 자체가 단일 SSOT이고 다른 surface에는 인용만 되는 정책(예: ADR-011 cap / ADR-019 JIT 로딩)은 본 표에 박지 않는다. *cross-surface 적용*(여러 파일이 동일 본문을 함께 반영해야 drift가 안 나는 정책)만 행으로 박는다.
 

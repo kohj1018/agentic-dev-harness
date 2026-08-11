@@ -27,8 +27,9 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /seal-milestone M1 (plan lock gate — final check + your approval, always runs)
   → /implement-workitem
-  → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem
+  → /validate-workitem → /repair-workitem (if Needs Fix) → /finalize-workitem (Pass or Pending Acceptance)
   → /stabilize-milestone
+       └─ if PENDING_ACCEPTANCE → /accept-milestone M1 (you try it yourself) → /repair-acceptance (if defects) → /stabilize-milestone again
 ```
 
 For step-by-step details, see [WORKFLOW.md](docs/00-meta/WORKFLOW.md).

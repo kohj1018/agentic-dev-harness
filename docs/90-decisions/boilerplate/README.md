@@ -59,7 +59,7 @@
 | 063 | 검증 장치의 실측 검증과 유지 주기 (Verification Harness Integrity) | accepted | — | probe 기반 실측 smoke test + harness 경로 배제 + 재실행 계약 + `[Guard-drift]` 노후 감지(침묵 우선) + 기계적 검사 배치 2문항 |
 | 064 | task 층 증거 계약 (Task-Layer Evidence Contract) | accepted | — | 외부 경계 실행 증거(implement 정지로 차단, validate는 기록 등급) + Red 관측·VC-N 판정력 + `[미실측]` 외부 사실 해소 + 공통 receipt(`## 8`, writer=implement·repair, validate 이전) |
 | 065 | AC verification contract | accepted | — | AC 충족 증명 modality 5종(자동 테스트/산출물 검사/사용자 관측/플랫폼 관측/미관측=미충족) + authority·receipt + 충족률·자동화율 2수치 |
-| 066 | Milestone acceptance | accepted | — | /accept-milestone(사람 직접 확인·권장) + /repair-acceptance(3+1 판정·task 재개방 X) + 피드백 3갈래 라우팅 |
+| 066 | Milestone acceptance | accepted | — | /accept-milestone(사람 직접 확인 — 관측 AC 있으면 사실상 필수, 마일스톤 스코프 단독) + /repair-acceptance(3+1 판정 · in-AC는 repair-workitem 위임(재개방)/out-of-AC는 직접 수정 + 계약 부채) + 피드백 3갈래 라우팅 + D6 pattern-scan |
 | 067 | Milestone graduation contract v2 | accepted | — | ADR-014 통합 재발행. item 4=AC 충족(전 modality) / BLOCKED=평가 실행 불가(e2e env·감사 미완) / 회고 open 스냅샷 |
 
 ## Reserved / Parked / Dropped 번호

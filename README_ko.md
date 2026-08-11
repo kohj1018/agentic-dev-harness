@@ -27,8 +27,9 @@
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
   → /seal-milestone M1 (계획 잠금 게이트 — 최종 검사 + 사용자 승인, 항상 거친다)
   → /implement-workitem
-  → /validate-workitem → /repair-workitem (Needs Fix일 때) → /finalize-workitem
+  → /validate-workitem → /repair-workitem (Needs Fix일 때) → /finalize-workitem (Pass 또는 Pending Acceptance)
   → /stabilize-milestone
+       └─ PENDING_ACCEPTANCE면 → /accept-milestone M1 (사용자가 직접 확인) → /repair-acceptance (결함 있으면) → /stabilize-milestone 재실행
 ```
 
 각 단계 상세는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md), 서브에이전트 위임은 [DELEGATION_STRATEGY.md](docs/00-meta/DELEGATION_STRATEGY.md)를 참조한다.

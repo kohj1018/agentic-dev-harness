@@ -13,7 +13,7 @@
 
 ## 3. 작업 단위 분해
 - 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).
-- `/plan-milestone`은 `docs/30-workitems/ROADMAP.md`(Done/Now/Next/Later forward 지도)를 단독으로 유지한다 — **R3에서 현재(Now) 행 + 미래 후보(Next/Later) 기록(candidate-key 포함), R0에서 회고 `graduation:` 기반으로 Done/Now 재조정**(직전 Now 행의 Done 전환은 **R0가 담당** — R3는 강제하지 않음; candidate-key는 전 구간 보존) (ADR-057#amend-1). 예정(Next/Later) 행은 "목표 1줄 + 확신도"만 둔다.
+- `/plan-milestone`은 `docs/30-workitems/ROADMAP.md`의 **`Done`/`Now`/`Next`/`Later` 네 구간을 단독으로 유지한다**(`## Backlog`는 append-only 다중 writer — `/accept-milestone`·`/repair-acceptance`가 행을 추가하고 본 skill이 정리·승격·재분류 등재를 한다, ADR-057#amend-4) — **R3에서 현재(Now) 행 + 미래 후보(Next/Later) 기록(candidate-key 포함), R0에서 회고 `graduation:` 기반으로 Done/Now 재조정**(직전 Now 행의 Done 전환은 **R0가 담당** — R3는 강제하지 않음; candidate-key는 전 구간 보존) (ADR-057#amend-1). 예정(Next/Later) 행은 "목표 1줄 + 확신도"만 둔다.
 - 마일스톤 단위 목표를 `docs/30-workitems/milestones`에 만든다.
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
@@ -31,9 +31,9 @@
 - 구현은 `/implement-workitem`으로 시작한다.
 - 검증은 `/validate-workitem`으로 수행한다 — 판정 + `docs/40-validation/reports/<task-id>.md` 기록.
 > Note: validation report(`docs/40-validation/reports/<task-id>.md`)는 `.gitignore`된 **checkout-local 임시 파일**이다(커밋되지 않음). 따라서 `/validate-workitem`과 `/finalize-workitem`은 **같은 worktree/checkout**에서 연속 실행해야 한다 — 다른 worktree에서 나눠 실행하면 finalize가 report를 못 찾아 `Needs Validation`으로 종료한다.
-> **새 체크아웃·다른 worktree에서 마일스톤을 재검증할 때**: 졸업 item 4(AC 충족 100%)는 report를 읽으므로 report가 없으면 전 task가 미충족으로 나온다. 이는 결함이 아니라 ephemeral 설계의 정상 귀결이다. 재검증 순서는 **① 각 task `/validate-workitem` 재실행(report 생성) → ② `/stabilize-milestone` 실행**이다. `/stabilize-milestone`만 재실행하면 item 4가 전 task 미충족을 낸다.
+> **새 체크아웃·다른 worktree에서 마일스톤을 재검증할 때**: 졸업 item 4의 **(a)(b)(c)(d)** 는 report를 읽으므로 report가 없으면 전 task가 그 항들에서 미충족으로 나온다(ADR-067 D1). 이는 결함이 아니라 ephemeral 설계의 정상 귀결이다. **(a') 관측 AC receipt는 커밋된 task `## 8`을 직접 읽으므로 체크아웃과 무관하다** — 재검증 때 다시 확인받을 필요가 없다. 재검증 순서는 **① 각 task `/validate-workitem` 재실행(report 생성) → ② `/stabilize-milestone` 실행**이다. `/stabilize-milestone`만 재실행하면 item 4 (a)가 전 task 미충족을 낸다.
 - 검증 실패 시 `/repair-workitem`으로 report의 실패 항목을 수정한다.
-- 검증 통과 시 `/finalize-workitem`으로 status `done` 갱신 + 커밋.
+- 판정이 `Pass` **또는 `Pending Acceptance`**면 `/finalize-workitem`으로 status `done` 갱신 + 커밋(ADR-065 D6 — 관측 AC receipt 미발급은 마감을 막지 않고 `## 8`에 `- ac-pending`을 남긴다).
 - 마일스톤 단위 종합 점검은 `/stabilize-milestone`에서 수행한다.
 - 누적 QA 결과는 `docs/40-validation/QA_FINDINGS.md`에 기록한다.
 - 개선 제안은 `docs/40-validation/IMPROVEMENT_GUIDE.md`에 정리한다.
@@ -65,14 +65,14 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 
 다운스트림 마이그레이션: 이미 평면 양식의 QA 데이터를 가진 프로젝트는 (1) 기존 항목을 `## M1` 또는 `## 일반` 묶음으로 감싸고 (2) 다음 회차부터 새 마일스톤 헤더로 누적한다.
 
-## 5-1. 사용자 수용 (권장 — ADR-066)
-- `/accept-milestone <M>`으로 사람이 직접 실행·확인한다. 환경을 띄우고 확인할 시나리오를 안내하고 피드백을 3갈래(결함=QA_FINDINGS / 계약 변경=DECISION_REGISTER+다음 M / 개선=IMPROVEMENT_GUIDE)로 라우팅한다.
-- **졸업 필수 조건이 아니다.** 단 task `## 6-1`에서 AC를 `[사용자 관측]`·`[플랫폼 관측]`으로 지정했으면 그 receipt 없이 졸업 item 4를 충족하지 못한다(ADR-065 D1).
-- **task 스코프는 inner-loop 안에 있다** — `/validate-workitem`이 그 AC를 미충족으로 내면 `/accept-milestone --task <task-id>`로 receipt를 발급하고 `/validate-workitem`을 재실행한 뒤 `finalize`한다. 이 경로는 마일스톤 라운드 카운터·`## 11`을 쓰지 않는다. **이 분리가 없으면 «receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → receipt 발급 불가» 순환이 생긴다.**
-  - **판정값 소유권**: `/validate-workitem`의 report 판정은 `Pass | Needs Fix` 둘뿐이고, 이 경로는 그 report의 `## 다음 권장 액션`이 지시한다. **`Needs Acceptance`는 `/finalize-workitem`의 종료값**이다(ADR-066 Surfaces가 validate=«`--task` 안내» / finalize=«`Needs Acceptance` 종료»로 배분). 두 이름을 섞어 쓰지 않는다.
-- **수용 라운드가 코드나 receipt를 바꿨으면 영향 task의 `/validate-workitem`을 재실행한 뒤** stabilize를 돌린다 — 졸업 item 4는 report를 읽고 stale report를 미충족 처리한다(ADR-067 D1 item 4 (d)).
-- 결함이 있으면 `/repair-acceptance <M>`이 3+1 판정으로 수리한다 — **기존 task를 재개방하지 않고 코드만 고치며**, 추적성은 결정 이력의 `affected: T-NNN`으로 확보한다. 수리 후에는 위 규칙대로 «영향 task 재validate → `/accept-milestone` 재실행 → (승인 시) 다시 재validate → `/stabilize-milestone`» 순으로 진행한다. **`## 8`이 바뀔 때마다 재validate가 한 번씩 들어간다** — 각 skill의 마지막 출력이 그 목록을 준다.
-- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**(확인을 못 했으므로 회차로 세지 않는다). 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
+## 5-1. 사용자 수용 (ADR-066)
+- `/accept-milestone <M>`으로 사람이 직접 실행·확인한다. **마일스톤 단위 하나뿐이다 — task 스코프는 없다.** 환경을 띄우고 확인할 시나리오를 안내하고 피드백을 3갈래(결함=QA_FINDINGS / 계약 변경=ROADMAP `## Backlog` / 개선=IMPROVEMENT_GUIDE)로 라우팅한다.
+- **관측 modality AC가 0건인 마일스톤에서만 «권장(선택)»이다.** task `## 6-1`에서 AC를 `[사용자 관측]`·`[플랫폼 관측]`으로 지정했으면 그 receipt 없이 졸업 item 4 (a')를 충족하지 못하므로(ADR-065 D1 / ADR-067 D1) 사실상 필수 경로가 된다.
+- **관측 AC는 task 마감을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(ADR-065 D6) `/finalize-workitem`이 통과시켜 task를 `done`으로 마감하며 `## 8`에 `- ac-pending`을 남긴다. 차단은 사라지지 않고 **마일스톤 졸업**으로 옮겨간다 — 그 상태의 graduation이 `PENDING_ACCEPTANCE`다(ADR-067 D3).
+  - **판정값 소유권**: `/validate-workitem`의 report 판정은 `Pass | Pending Acceptance | Needs Fix` 셋이다(ADR-065 D6). `/finalize-workitem`은 그 값을 읽어 분기할 뿐 관측 AC 전용 종료값을 따로 두지 않는다.
+- **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4 (a')가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-067 D1). 재validate가 필요한 것은 «코드가 바뀐 task»뿐이다.
+- 결함이 있으면 `/repair-acceptance <M>`이 3+1 판정으로 수리한다. 판별 질문은 «이 변경 줄을 기존 계약(AC·`## 3` line item·FAC·INV·승인 프로토타입·DESIGN)으로 거꾸로 추적할 수 있는가»다 — **`in-AC`(추적 가능)면 `/repair-workitem`에 위임해 그 task를 재개방하고, `out-of-AC`(추적 불가)면 재개방 없이 직접 고친 뒤 계약 부채를 `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에 `status: open`으로 등재한다**(ADR-066 D4 / ADR-005#amend-1). **코드를 고친 뒤의 후속은 그 skill이 자기 루프 안에서 실행한다 — 사용자가 손으로 돌리지 않는다.** 재개방한 `in-AC` task는 `/validate-workitem` + `/finalize-workitem`까지, 재개방하지 않은 `out-of-AC` 영향 task는 `/validate-workitem`만 돈다(그 task는 계속 `done`이라 마감할 것이 없다).
+- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**. 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
 - 라운드 상한 3회. 초과분은 사용자 확인 후 다음 마일스톤으로 이관한다.
 
 ## 6. 의사결정 기록
@@ -105,13 +105,15 @@ discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M
    → plan-workitem (task 전부 draft)
    → (opt-in, ADR-038) validate-plan (별 세션) → repair-plan (원본 세션)
    → seal-milestone (검사 + 사용자 승인 + task→feature→milestone 일괄 ready)   ← 리뷰 유무와 무관하게 항상 거친다
-   → implement → validate ─┬─Pass─→ finalize → stabilize(+UI: 경험 게이트)
-                           ├─Needs Fix─→ repair → (validate 재실행)
-                           └─(미충족이 전부 관측 receipt 대기)─→ accept-milestone --task T-NNN (사용자 receipt) → (validate 재실행)
+   → implement → validate ─┬─Pass──────────────→ finalize → stabilize(+UI: 경험 게이트)
+                           ├─Pending Acceptance→ finalize (## 8에 ac-pending 기록 — 마감을 막지 않는다)
+                           └─Needs Fix─────────→ repair → (validate 재실행)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
-(권장, ADR-066)  stabilize → accept-milestone <M> (사람 직접 확인) ─┬─승인─→ (영향 task validate 재실행) → stabilize 재실행 → 졸업
-                                                                  ├─보류─→ repair-acceptance → validate 재실행 → accept-milestone 재실행 ─→ (위 분기 재판정)
-                                                                  └─미완─→ 환경 복구·사용자 재개 → accept-milestone 재실행 ─→ (위 분기 재판정, 라운드 카운터 미소모)
+(ADR-066) stabilize ─┬─YES──────────────────→ 졸업 → plan-milestone (다음 M)
+                     ├─PENDING_ACCEPTANCE──→ accept-milestone <M> ─┬─승인─→ stabilize 재실행 → 졸업
+                     │                                             ├─보류─→ repair-acceptance (in-AC: validate+finalize / out-of-AC: validate) → accept-milestone 재실행
+                     ├─NO──────────────────→ repair-milestone (in-AC: validate+finalize / out-of-AC: validate) → stabilize 재실행
+                     └─BLOCKED─────────────→ 감사 미완: 그 축 재감사 / e2e blocked-on-env: 환경 복구 (repair 대상 아님 — ADR-067 D3) → stabilize 재실행
 ```
 
 각 단계의 정의와 책임 경계는 [ADR-007-workitem-lifecycle.md](../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md)가 SSOT다.

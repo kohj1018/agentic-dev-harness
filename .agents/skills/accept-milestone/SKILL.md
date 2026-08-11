@@ -1,6 +1,6 @@
 ---
 name: accept-milestone
-description: Use ONLY when the user explicitly types `$accept-milestone <milestone-id>` or `$accept-milestone --task <task-id>`. Do not trigger implicitly from generic phrasing.
+description: Use ONLY when the user explicitly types `$accept-milestone <milestone-id>`. Do not trigger implicitly from generic phrasing.
 ---
 
 Source of truth: `.claude/skills/accept-milestone/SKILL.md` (skill 신설 근거: ADR-066). Read it and follow the workflow.

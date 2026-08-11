@@ -108,7 +108,7 @@ S1·S2·S4 중 1+ → full 경로(① 조사 → ② 선택지 2~3안 → ③ �
 
 **반드시 읽는다**: `PROJECT_CHARTER.md` `## 3~5`(목표·비목표) / `DISCOVERY.md` `## 2·3`(페르소나·JTBD) + `## 12`(기존 가정과 그 검증 상태 — 중복 가정 신설 방지) / `docs/30-workitems/ROADMAP.md`(있으면 — `/plan-milestone` 실행 전에는 비어 있다)
 
-> **ROADMAP 은 `/plan-milestone` 단독 writer다**(ADR-057#amend-1). 본 agent 는 읽고 **우선순위 제안만** 하며, 그 제안은 사용자를 거쳐 다음 `/plan-milestone` 라운드가 반영한다.
+> **ROADMAP 의 `Done`/`Now`/`Next`/`Later` 구간은 `/plan-milestone` 단독 writer다**(ADR-057#amend-1·#amend-4 — `## Backlog`만 append-only 다중 writer이며 그 역시 본 agent 의 write 대상은 아니다). 본 agent 는 읽고 **우선순위 제안만** 하며, 그 제안은 사용자를 거쳐 다음 `/plan-milestone` 라운드가 반영한다.
 >
 > **부재 처리** (`/consult-expert` 의 `## 입력 문서 부재 처리` 정합): `DISCOVERY.md` 는 선택 산출물이라 없을 수 있다 → `PROJECT_CHARTER.md` `## 2.1 페르소나`·`## 3.1 핵심 시나리오`·`## 9 핵심 가정` 으로 대체하고 그 사실을 명시한다. **대체분도 비어 있으면** 시장·과금 대상 판단의 전제가 없으므로 가격·시장 규모 판정을 내지 않고 `기반 컨텍스트 부재: 대상 사용자·JTBD 미확인 — /discover-product 선행 권장` 으로 반환한다. 경쟁사 프로파일 조사는 이 경우에도 가능하다(외부 조사라 내부 문서에 의존하지 않는다).
 
