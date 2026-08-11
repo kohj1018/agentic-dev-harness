@@ -64,7 +64,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
    - 분해한 각 task의 `## 6-1`에 **AC마다 `[modality]`를 지정한다** — `[자동 테스트]` / `[산출물 검사]` / `[사용자 관측]` / `[플랫폼 관측]`. 형식은 TASK_TEMPLATE `## 6-1` 주석이 SSOT다.
    - **기본은 `[자동 테스트]`다.** 다른 modality는 자동 테스트가 원리적으로 불가능할 때만 쓰고, 그 사유를 그 줄 끝에 괄호로 한 줄 적는다(예: `(외부 스케줄러 발화 — 로컬 재현 불가)`).
    - **`[산출물 검사]`를 지정하면 그 검사 수단을 통합 `validate`에 묶는 것까지 계획한다** — 필요하면 `## 3. 구현 항목`에 그 배선 단계를 line item으로 넣는다. 묶이지 않은 검사 수단은 충족 근거가 아니어서 `/validate-workitem`이 `P1 [Artifact-check-unbound]`로 그 AC를 미충족 처리한다(ADR-065 D1).
-   - `[사용자 관측]`·`[플랫폼 관측]`을 지정한 AC가 1개 이상이면 마지막 출력의 "남은 미결정 사항"에 `- 사용자 확인 필요 AC: <task-id>:AC-N (<modality>)`로 surface한다 — 그 AC는 **구현 후 `/validate-workitem` 뒤·`finalize` 전에 `/accept-milestone --task <task-id>`(또는 사용자 직접 기재)로 receipt가 발급돼야** 충족된다(ADR-066 D1).
+   - `[사용자 관측]`·`[플랫폼 관측]`을 지정한 AC가 1개 이상이면 마지막 출력의 "남은 미결정 사항"에 `- 수용 라운드 대상 AC: <task-id>:AC-N (<modality>)`로 surface한다 — 그 AC는 **`/finalize-workitem`을 막지 않으며**(그때 판정값은 `Pending Acceptance` — ADR-065 D6), receipt는 **`/accept-milestone <M>`(마일스톤 수용 라운드) 또는 사용자 직접 기재**로 발급된다. 미발급이면 그 마일스톤의 graduation이 `PENDING_ACCEPTANCE`에 머문다(ADR-065 D1 / ADR-066 D1 / ADR-067 D1 item 4 (a')).
    - **커밋·배포 이후에만 관측 가능한 사실은 이 task의 AC로 두지 않는다 (ADR-065 D1 경계)** — CI 실행·배포 후 동작·실제 스케줄 발화가 그 예다. finalize 전에 관측할 수 없어 어떤 modality로도 충족되지 않으므로, **후속 verification task의 AC로 분리**하고 그 task를 `## 9. 의존성`으로 선행 task에 건다.
    - `[미관측]`은 지정하지 않는다. 어떤 modality도 정할 수 없으면 그 AC는 아직 검증 가능한 형태가 아니므로 **AC 문안을 관측 가능하게 다시 쓰거나** task를 쪼갠다(측정 가능 AC 규율 — ADR-026).
    - `Type: research-spike`는 **구조 사실**(노트 파일 존재·필수 섹션 존재)을 `[산출물 검사]`로, **내용 판단**(권고가 타당한가)을 `[사용자 관측]`으로 나눠 지정한다(산출은 리서치 노트 — ADR-040 / 분리 근거 — ADR-065 D1). `## 6-2. TDD opt-out`을 채우는 것과 무관하게 modality는 지정한다(opt-out은 Red-first 면제일 뿐 — ADR-065 D2).

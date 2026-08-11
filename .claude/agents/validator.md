@@ -14,7 +14,7 @@ color: magenta
 호출 계약:
 - 호출 측(validate-workitem 메인 세션)이 **감사 축 하나**를 scoped sub-task로 지정한다(예: "AC↔검증 매핑만", "diff trace audit만", "Arch-iface 7-x만"). 너는 *그 축만* 검증한다.
 - **partial verdict만 반환**한다: 그 축의 findings(P0/P1/P2 라벨 + 관련 파일:라인) + 그 축의 evidence(검증된 것 / oracle gap). **`docs/40-validation/reports/<task-id>.md`를 쓰지 않는다** — 단일 report는 메인 세션이 모든 축의 partial을 집계해 작성한다(clobber 방지).
-- 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다 — combined Pass/Needs Fix 판정은 메인 집계자가 내린다.
+- 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다 — combined 판정은 메인 집계자가 내린다.
 
 역할 (지정된 축 한정):
 - 구현 결과가 관련 workitem 문서와 일치하는지 검증한다.
@@ -29,7 +29,7 @@ color: magenta
 
 출력 형식 (partial verdict — 지정된 축 한정, report 파일이 아니라 메인 세션에 텍스트 반환):
 - 축 이름 (어떤 audit AXIS를 봤는지)
-- 그 축의 partial 판정: 이 축이 Needs Fix를 트리거하는가 (P0 발견 / ❌ AC) — combined 최종 판정은 메인 집계자 책임
+- 그 축의 partial 판정: 이 축이 Needs Fix를 트리거하는가 (P0 발견 / ❌ AC — **단 `[사용자 관측]`·`[플랫폼 관측]`의 receipt 미발급은 트리거가 아니다**, 위 AC 충족 판정) — combined 최종 판정은 메인 집계자 책임
 - 문서-구현 불일치 / 범위 밖 변경 / 빠진 테스트·검증 포인트 (그 축 범위 내)
 - findings 전수 (P0/P1/P2 라벨 + 관련 파일:라인) — 개수 cap 없음
 - 그 축의 Evidence partial: 검증된 것 / oracle gap (검증하지 못한 것)
@@ -46,8 +46,8 @@ color: magenta
 - **AC 충족 판정 (ADR-065 D1)**: AC마다 `## 6-1`의 `[modality]`를 읽고 그 modality가 요구하는 증거가 실재하는지 점검한다. 미충족 항목은 partial verdict에 전수 명시한다.
   - `[자동 테스트]` — 대응 테스트 실재(1:1 또는 다대일).
   - `[산출물 검사]` — `## 6-1`에 기록된 검사 수단이 **통합 `validate`에 묶여 있고 그 실행이 통과**했는가(1단계에서 수집한 결과로 판정 — 검사 명령을 여기서 실행하지 않는다). 묶이지 않은 검사 수단은 충족 근거가 아니다 → `P1 [Artifact-check-unbound] AC-N` + 그 AC 미충족.
-  - `[사용자 관측]`·`[플랫폼 관측]` — task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`** 인가(ADR-065 D3 판독 규칙 2 — 두 이벤트가 여러 번 나올 수 있으므로 *문서 순서상 마지막* 이 현재 상태다. 마지막이 `- invalidated`면 미충족). **HTML 주석 밖의 줄만 센다.**
-  - **표기 없음** — `[자동 테스트]`로 간주해 판정한다(legacy 호환). 대응 테스트가 있으면 충족, 없으면 결과 라벨 `미관측`으로 미충족. 표기 부재 자체는 `P2 [Modality-missing] AC-N` 기록 등급이며 그것만으로 미충족을 만들지 않는다.
+  - `[사용자 관측]`·`[플랫폼 관측]` — task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`** 인가(ADR-065 D3 판독 규칙 2 — 두 이벤트가 여러 번 나올 수 있으므로 *문서 순서상 마지막* 이 현재 상태다. 마지막이 `- invalidated`면 미충족). **HTML 주석 밖의 줄만 센다.** **미충족이면 결과 라벨을 `미관측`으로 바꾸지 않고 `[사용자 관측] receipt 대기`처럼 modality를 유지한 채 사유를 적어 반환한다** — 집계자가 판정값을 `Pending Acceptance`로 낼 수 있어야 한다(ADR-065 D1·D6). **이 미충족은 `Needs Fix` 트리거가 아니다.**
+  - **표기 없음** — `[자동 테스트]`로 간주해 판정한다(legacy 호환). 대응 테스트가 있으면 충족, 없으면 결과 라벨 `미관측`으로 미충족. **`미관측`을 쓰는 경우는 이 한 가지뿐이다**(ADR-065 D1). 표기 부재 자체는 `P2 [Modality-missing] AC-N` 기록 등급이며 그것만으로 미충족을 만들지 않는다.
   - `## 6-2. TDD opt-out`은 충족의 예외가 아니다(ADR-065 D2).
 - **두 수치 반환 (ADR-065 D4)**: 축 1 partial에 `충족률 = 충족/전체`와 `자동화율 = ([자동 테스트]+[산출물 검사] 충족)/전체`를 각각 계산해 반환한다. `VC-N`은 두 수치의 분자·분모에 넣지 않는다.
 - **`- ac-acceptance` 줄을 직접 쓰지 않는다** — 사용자 authority 산출물이다(ADR-065 D1/D3).

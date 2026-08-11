@@ -58,7 +58,7 @@ color: cyan
 self-check를 통과하지 못한 항목은 출력의 "남은 정리 항목"에 명시한다.
 정책 근거: [ADR-006](../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md).
 - AC가 정의된 task는 Red → Green → Refactor 사이클로 진행한다. opt-out 사유가 task 문서에 있고 follow-up이 같이 적혀 있을 때만 테스트 작성을 건너뛴다(정책: [ADR-009](../../docs/90-decisions/boilerplate/ADR-009-tdd-default.md)).
-- **modality 분기 (ADR-065 D1)**: `## 6-1`에 `[사용자 관측]`·`[플랫폼 관측]`으로 표기된 AC는 **테스트를 작성하지 않는다**(Red가 성립하지 않는다) — 구현만 하고 반환에 "`<AC-N>`: modality=<...> — Red 불가, 사용자 receipt 대기"로 보고한다. `[산출물 검사]` AC는 테스트 대신 **재현 가능한 검사 수단**(명령·스키마·파서)을 만들어 **통합 `validate`에 묶고** 그 수단과 확인 결과를 반환에 적는다. 표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환).
+- **modality 분기 (ADR-065 D1)**: `## 6-1`에 `[사용자 관측]`·`[플랫폼 관측]`으로 표기된 AC는 **테스트를 작성하지 않는다**(Red가 성립하지 않는다) — 구현만 하고 반환에 "`<AC-N>`: modality=<...> — Red 불가, 수용 라운드 대상"으로 보고한다(foreman이 그 정보로 task `## 8`에 `- ac-pending`을 남긴다). `[산출물 검사]` AC는 테스트 대신 **재현 가능한 검사 수단**(명령·스키마·파서)을 만들어 **통합 `validate`에 묶고** 그 수단과 확인 결과를 반환에 적는다. 표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환).
 - **`- ac-acceptance` receipt를 쓰지 않는다** — 사용자 authority 산출물이다.
 - AC가 Given-When-Then 형식이 아니거나 강력 금지 verb 사용 시 Red phase 진입 직전에 *재분해 요청 텍스트*를 출력 — 자동 차단은 하지 않고 사용자가 진행/재분해 결정 (ADR-007 lifecycle 정합 — 자동 차단 X).
 - **AC ambiguity 하드스탑 (ADR-006#amend-2)**: task `## 8. 메모`에 `해석 확정:` 기록이 있으면 그 해석을 기계적으로 따른다. 기록이 없고 *2+ 해석이 구현을 실질적으로 다르게 만들면*(사소한 표현 차이는 제외) *자기 해석을 고르지 말고* `Needs Plan Decision`으로 종료 + plan 재실행 안내. implement는 집행 전용 — 해석 결정은 plan 책임. **단, slice에 승인 프로토타입 참조(경험 계약 — ADR-056)가 있으면 *사용자가 보고 느낄 것(보이는 것·눌렀을 때·문안)의 차이는 "사소한 표현 차이"로 분류하지 않는다*** — 프로토타입과 다르게 해석될 여지가 있으면 `Needs Plan Decision`으로 멈춘다(silent narrowing 차단).

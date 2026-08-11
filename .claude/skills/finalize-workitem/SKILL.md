@@ -26,10 +26,12 @@ agent: builder
    - **통합 명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 존재하면(스택 확정) **`Needs Stack Guard`로 종료** + `/stack-guard` 안내. STACK_SETUP_PLAN.md가 없으면(스택 미정) 이 단계 skip.
 3. AC 미충족 점검 — 직전 `/validate-workitem`의 report(`docs/40-validation/reports/<task-id>.md`)의 `## AC ↔ 검증 매핑`이 모두 충족인지 확인한다.
    - report 파일이 없거나 stale(파일 mtime이 task 문서 또는 변경된 구현 파일보다 오래됨)하면 `/validate-workitem <task-id>` 선행을 안내하고 `Needs Validation`으로 종료한다(커밋하지 않음).
-   - 미충족 AC가 하나라도 있으면 `Needs Fix`로 종료하고 `/repair-workitem <task-id>`를 안내한다. **`미관측`도 미충족이다.**
+   - 미충족 AC가 있으면 **아래 「분기 우선순위」에 따라 판정한다**(여기서 무조건 종료하지 않는다). **`미관측`도 미충족이다.**
    - **`## 6-2. TDD opt-out`은 예외가 아니다 (ADR-065 D2)** — opt-out은 Red-first 절차의 면제이지 AC 충족의 면제가 아니다(ADR-009 `opt-out 절차`). opt-out task는 `[산출물 검사]` 등 다른 modality로 충족해야 통과한다. 단 **출력에는 opt-out 사유와 follow-up task ID를 명시한다**(ADR-009가 요구하는 "finalize 시점 사용자 확인").
-   - **분기 우선순위 (반드시 이 순서로 판정한다)**: ① 미충족 AC 중 `[사용자 관측]`·`[플랫폼 관측]` receipt 대기가 **아닌** 것이 하나라도 있으면 → `Needs Fix` + `/repair-workitem <task-id>` 안내(코드로 고칠 것이 있으므로 이쪽이 우선이다). ② 미충족 AC가 **전부** receipt 대기면 → `Needs Acceptance: <AC-N 목록>`으로 종료하고 **`/accept-milestone --task <task-id>`**(task 스코프 — 라운드 상한·`## 11`을 소모하지 않는다, [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D1) 또는 사용자 직접 기재를 안내한다. **에이전트가 receipt를 대신 쓰지 않는다**(ADR-065 D1). ③ 미충족 0건이면 통과.
-   - `Needs Acceptance`는 `Needs Fix`가 아니다 — `/repair-workitem`으로 보내면 고칠 코드가 없어 순환에 빠진다.
+   - **분기 우선순위 (반드시 이 순서로 판정한다 — 근거는 report의 `- 판정:` 값이다, ADR-065 D6)**: ① 판정이 **`Needs Fix`** 면 → `Needs Fix`로 종료 + `/repair-workitem <task-id>` 안내(코드로 고칠 것이 있다). ② 판정이 **`Pending Acceptance`** 면 → **통과시킨다.** 그 AC의 receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D1)에서 발급되며(ADR-065 D1), 미발급은 졸업 item 4 (a')가 잡는다([ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) D1). ③ 판정이 **`Pass`** 면 통과.
+   - **②로 통과할 때의 의무 2가지**: (i) 미충족 관측 AC마다 task `## 8`에 `- ac-pending <날짜> <AC-N>: modality=<...> — 마일스톤 수용 라운드에서 확인 예정`을 append한다(같은 AC의 `- ac-pending`이 이미 있으면 중복 append 금지 — **중복 판정은 HTML 주석 밖의 줄만 센다.** TASK_TEMPLATE `## 8` 주석의 형식 예시를 세면 «이미 있다»로 오판해 실제 줄이 영원히 안 남는다). **`## 0. Status`를 `done`으로 쓰는 것과 같은 편집 라운드에서 쓴다**(별도 mtime 갱신을 만들지 않는다). (ii) 마지막 출력에 `수용 라운드 대상 AC: <AC-N 목록>`을 명시하고, 이 마일스톤은 그 receipt 전까지 졸업이 `PENDING_ACCEPTANCE`임을 한 줄 안내한다.
+   - **에이전트가 `- ac-acceptance` receipt를 대신 쓰지 않는다**(ADR-065 D1). `- ac-pending`은 receipt가 아니라 미발급 표시이므로 이 금지에 걸리지 않는다.
+   - **finalize의 종료값은 `Needs Fix`·`Needs Validation`·`Needs Review`·`Needs Rationale`·`Needs Stack Guard`·정상 마감이다** — 관측 AC 전용 종료값을 따로 두지 않는다(마감을 막지 않으므로 필요 없다).
 
 수행:
 4. `git status --porcelain` / `git diff --name-only`로 실제 변경 파일을 회수한다.
@@ -63,6 +65,7 @@ agent: builder
 - 커밋 해시
 - 커밋 메시지
 - 갱신된 task status
+- **수용 라운드 대상 AC**: `[사용자 관측]`·`[플랫폼 관측]`로 미충족 통과시킨 AC-N 목록 + `- ac-pending` append 건수 / 해당없음
 - 다음 권장 단계 (다음 task로 진행 또는 마일스톤이면 `/stabilize-milestone`)
 
 가드:

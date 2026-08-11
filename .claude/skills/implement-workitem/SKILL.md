@@ -86,7 +86,7 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
 각 builder 는 *자기 slice 가 건드린 파일* 을 메인 foreman 에 반환한다.
 **builder가 구조화 최종 반환 없이 멈추면** foreman은 1회 재개를 시도(SendMessage 등)하고, 그래도 미반환이면 그 slice가 건드렸을 파일을 직접 열어 결과를 회수한다(always-verify — "결과 없음"을 조용히 통과 금지, ADR-051#amend-4).
 6-V. **검증 판정력 확인 (ADR-064 D2 — 메인 foreman이 1회. `## 4-1` 갱신보다 *먼저* 수행한다 — 여기서 테스트가 추가되기 때문)**: 각 AC에 대해 그 테스트가 실제로 무언가를 보고 있는지 확인하고 기록한다. **코드를 변형하지 않는 3수단이 기본**이며 이 순서로 적용한다 — ① builder가 보고한 **Red 관측**(어떤 테스트가 구현 전에 어떤 이유로 실패했는지). 구현 전에 통과했다면 그 테스트는 판정력이 없으므로 테스트를 먼저 고친다. ② **반례 테스트** — 거부·차단돼야 할 입력을 넣고 실제로 거부되는지 단정(**이것은 대개 AC 본연의 행동이므로 `AC-N`으로 매핑한다** — VC로 빼지 않는다). ③ **positive control** — 검사 헬퍼·수집기 자체가 살아 있는지 확인(예: "로그가 없어야 한다"를 단정하기 전에 일부러 로그를 하나 심어 헬퍼가 잡는지). **부재를 단정하는 AC는 ①만으로 판정력이 증명되지 않으므로 ③이 필수다.**
-   - **modality 분기 (ADR-065 D1)**: `## 6-1`의 `[modality]`를 먼저 읽는다. **`[자동 테스트]`·`[산출물 검사]` AC만 RGR·판정력 확인(6-V) 대상**이다. `[사용자 관측]`·`[플랫폼 관측]` AC는 Red를 만들 수 없으므로 **6-V·6-R의 `verify-power` 대상에서 제외한다** — 그 AC에는 `- verify-power` 줄을 쓰지 않고, 대신 6-R 출력에 `- ac-pending <AC-N>: modality=<...> — 사용자 receipt 대기` 한 줄만 남긴다. 그 AC의 충족은 사용자 발급 `- ac-acceptance`가 담당하며 **foreman이 그 receipt를 쓰지 않는다.**
+   - **modality 분기 (ADR-065 D1)**: `## 6-1`의 `[modality]`를 먼저 읽는다. **`[자동 테스트]`·`[산출물 검사]` AC만 RGR·판정력 확인(6-V) 대상**이다. `[사용자 관측]`·`[플랫폼 관측]` AC는 Red를 만들 수 없으므로 **6-V·6-R의 `verify-power` 대상에서 제외한다** — 그 AC에는 `- verify-power` 줄을 쓰지 않고, 대신 **6-R에서 task `## 8`에** `- ac-pending <날짜> <AC-N>: modality=<...> — 마일스톤 수용 라운드에서 확인 예정` 한 줄을 append한다(형식 SSOT는 ADR-065 D3 / TASK_TEMPLATE `## 8`). 그 AC의 충족은 사용자 발급 `- ac-acceptance`가 담당하며 **foreman이 그 receipt를 쓰지 않는다.** `- ac-pending`은 receipt가 아니라 «아직 증거가 없다»는 표시이므로 이 금지에 걸리지 않는다.
    - **`red=opt-out(...)`을 modality 사유로 쓰지 않는다** — ADR-064 D2의 `opt-out`은 *task `## 6-2`가 정당하게 채워졌거나 `Type: research-spike`* 인 경우로 정의돼 있다. modality를 그 값에 태우면 그 상태의 의미가 조용히 넓어진다. 상태 집합을 늘리지도, 기존 값을 전용하지도 않고 **대상에서 빼는** 것이 두 ADR을 모두 지키는 유일한 방법이다.
    - `[산출물 검사]` AC는 테스트 대신 **재현 가능한 검사 수단**(명령·스키마·파서·grep 패턴)을 만들어 **통합 `validate`에 묶고**, 그 수단과 결과를 `## 6-1` 그 AC 줄에 적는다. 묶지 않으면 validate가 그 AC를 미충족으로 판정한다(ADR-065 D1).
    - **Red 관측의 허용 상태는 넷이다** — `observed`(정상) / `opt-out(<사유>)`(task `## 6-2. TDD opt-out`이 정당하게 채워졌거나 `Type: research-spike` — Red가 존재할 수 없으므로 결함이 아니다) / `characterization(<사유>)`(`Type: refactor` 등 기존 동작 고정 테스트가 구현 전에도 통과) / `unrecoverable(<사유>)`(세션 중단 후 재개라 원래 Red를 재현할 수 없음 — 이때는 ②·③으로 판정력을 대체 확인하고 그 결과를 함께 적는다).
@@ -108,6 +108,7 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
    - `- exec-evidence <날짜> <경계 a|b|c>: <등급 1 재실행 가능 | 등급 2 1회성 — 형태> — <무엇에 대고 실행했는가> / 결과: <관측 1줄>`
    - `- verify-power <날짜> <AC-N>: red=<observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)> / vc=<VC-N 목록 또는 없음> / mutation=<미승격(G# 미충족) | 승격(변이·관측·사본 삭제 결과)>`
    - `- fact-resolved <날짜> <무엇>: <잠정값> → <관측값> / 관측 방법: <1줄>`
+   - `- ac-pending <날짜> <AC-N>: modality=<사용자 관측|플랫폼 관측> — 마일스톤 수용 라운드에서 확인 예정`  (같은 AC에 이미 있으면 중복 append 금지 — **중복 판정은 HTML 주석 밖의 줄만 센다**, TASK_TEMPLATE `## 8` 주석의 형식 예시를 항목으로 세지 않는다)
 
    **순서가 계약의 일부다.** (i) 파일 변경이 끝난 뒤에 써야 증거가 최종 코드를 덮고 `## 4-1`에도 반영된다. (ii) `/validate-workitem`이 report를 쓴 *뒤에* `## 8`을 건드리면 task 문서 mtime이 갱신돼 `/finalize-workitem`이 report를 stale로 판정하고 `Needs Validation`으로 종료한다 — 재validate → 재append의 무한 후퇴가 된다. **digest·커밋 비교로 신선도를 판정하지 않는다**(판정자에게 그 도구가 없고, 커밋 비교는 위 무한 후퇴의 직접 원인이다) — 코드를 고친 주체가 그 자리에서 receipt를 갱신하는 것이 신선도 유지 방식이며 `/repair-workitem`도 같은 책임을 진다.
 
@@ -126,7 +127,7 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
 - 실행 증거 (ADR-064 D1): 경계 종류별 확보 현황(a/b/c) + 등급(1 재실행 가능 / 2 1회성) / 해당없음(외부 경계 아님) / `Needs Execution Evidence: <경계 종류>`
 - 판정력 (ADR-064 D2): AC별 red 상태 / VC-N 추가분 / 격리 변이 승격 여부
 - 미실측 해소 (ADR-064 D3): 해소 N건 / `Needs Fact Resolution` K건(사유)
-- 사용자 확인 대기 AC (ADR-065 D1): `[사용자 관측]`·`[플랫폼 관측]` AC-N 목록 — `/validate-workitem` 후 `/accept-milestone --task <task-id>`로 receipt 발급 필요 / 해당없음
+- 수용 라운드 대상 AC (ADR-065 D1): `[사용자 관측]`·`[플랫폼 관측]` AC-N 목록 + `- ac-pending` append 건수 — 이 AC는 `/finalize-workitem`을 막지 않으며(판정은 `Pending Acceptance`) receipt는 마일스톤 수용 라운드(`/accept-milestone <M>`)에서 발급된다 / 해당없음
 - 남은 리스크
 - 다음 추천 단계 (보통 `/validate-workitem <task-id>`)
 
