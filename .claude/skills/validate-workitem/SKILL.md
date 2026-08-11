@@ -60,11 +60,17 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - 빠진 검증 포인트가 있는가
 - obvious regression risk가 있는가
 - 통합 검증 명령(있으면) 결과는 통과인가
-- AC ↔ 검증 매핑 (ADR-065 D1) — task `## 6-1`의 AC마다 `[modality]`를 읽고 그 modality가 요구하는 증거가 실재하는지 판정한다: `[자동 테스트]`=대응 테스트 실재(자연어 매칭 휴리스틱 또는 `AC_N` 식별자 매칭), `[산출물 검사]`=`## 6-1`에 기록된 검사 수단이 **통합 `validate`에 묶여 있고 그 실행이 통과**했는가(1단계에서 수집한 결과로 판정 — 검사 명령을 여기서 실행하지 않는다). 묶이지 않은 검사 수단은 충족 근거가 아니며 `P1 [Artifact-check-unbound] AC-N`으로 기록하고 그 AC는 미충족, `[사용자 관측]`·`[플랫폼 관측]`=task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`**(ADR-065 D3 판독 규칙 2 — 마지막이 `- invalidated`면 미충족. HTML 주석 밖의 줄만 센다). **modality 표기가 없으면 `[자동 테스트]`로 간주해 판정한다(legacy 호환 — 아래 둘째 불릿)**. `## 6-2. TDD opt-out`은 충족의 예외가 아니다(ADR-065 D2 — 이 예외를 두면 `## 6-2` 두 줄로 AC 게이트가 사라진다). **`## 6-1`의 `VC-N` 행은 AC 행동으로 귀속되지 않는 판정력 확인용(positive control 등)이므로 본 매핑의 분자·분모 어디에도 넣지 않는다 (ADR-064 D2)** — 자동화율이 아래 confidence ladder의 입력이라 섞이면 등급이 이동한다. 대신 `VC-N`이 가리키는 테스트 줄은 diff trace audit에서 *추적 가능*으로 분류한다(추적 근거는 `AC-N | 명시 요청 | VC-N` 셋이다 — ADR-006#amend-1 문구의 해석 확장).
+- AC ↔ 검증 매핑 (ADR-065 D1) — task `## 6-1`의 AC마다 `[modality]`를 읽고 그 modality가 요구하는 증거가 실재하는지 판정한다: `[자동 테스트]`=대응 테스트 실재(자연어 매칭 휴리스틱 또는 `AC_N` 식별자 매칭), `[산출물 검사]`=`## 6-1`에 기록된 검사 수단이 **통합 `validate`에 묶여 있고 그 실행이 통과**했는가(1단계에서 수집한 결과로 판정 — 검사 명령을 여기서 실행하지 않는다). 묶이지 않은 검사 수단은 충족 근거가 아니며 `P1 [Artifact-check-unbound] AC-N`으로 기록하고 그 AC는 미충족, `[사용자 관측]`·`[플랫폼 관측]`=task `## 8`에서 **그 AC의 마지막 이벤트가 `- ac-acceptance`**(ADR-065 D3 판독 규칙 2 — 마지막이 `- invalidated`면 미충족. HTML 주석 밖의 줄만 센다). **modality 표기가 없으면 `[자동 테스트]`로 간주해 판정한다(legacy 호환 — 아래 둘째 불릿)**. `## 6-2. TDD opt-out`은 충족의 예외가 아니다(ADR-065 D2 — 이 예외를 두면 `## 6-2` 두 줄로 AC 게이트가 사라진다). **`## 6-1`의 `VC-N` 행은 AC 행동으로 귀속되지 않는 판정력 확인용(positive control 등)이므로 본 매핑의 분자·분모 어디에도 넣지 않는다 (ADR-064 D2)** — 자동화율이 아래 confidence ladder의 입력이라 섞이면 등급이 이동한다. 대신 `VC-N`이 가리키는 테스트 줄은 diff trace audit에서 *추적 가능*으로 분류한다(추적 근거는 `AC-N | 명시 요청 | VC-N` 셋이다 — ADR-006#amend-1 문구의 해석 확장). **미충족 표현의 정본형 (중요)**: 어떤 modality든 미충족일 때 **`[modality]` 표기를 결과 라벨로 덮어쓰지 않는다.** `[사용자 관측]`·`[플랫폼 관측]`이 미충족이면 `- AC-N: ❌ [사용자 관측] receipt 대기 — `## 8`에 유효한 `- ac-acceptance` 없음` 형태로 적는다. **`[미관측]`은 «표기 부재 + 대응 테스트 없음»(legacy) 한 경우에만 쓴다**(ADR-065 D1). modality를 지우면 판정값(D6) 산출과 `/finalize-workitem` 분기가 «코드로 고칠 것»과 «사람이 볼 것»을 구분할 수 없다. **관측 AC의 미충족은 `## 실패 항목`에 적지 않는다** — 그 섹션은 `Needs Fix`일 때만 존재하고 이 AC는 판정을 `Needs Fix`로 만들지 않는다. 대신 `## Evidence Bundle`의 «검증하지 못한 것(oracle gap)» 하단에 `- receipt 대기: AC-N [<modality>] — 마일스톤 수용 라운드에서 발급` 한 줄을 남긴다.
 - **modality 표기 부재 (ADR-065 D1 legacy 규칙)**: 표기가 없는 AC는 **`[자동 테스트]`로 간주**한다(기존 fork 호환 — 판정이 현행과 동일해진다). 그 AC에 대응 테스트가 없으면 기존과 같이 미충족이다. 표기 부재 자체는 `P2 [Modality-missing] AC-N`으로 기록만 한다(차단 X).
 - **두 수치 (ADR-065 D4)**: `충족률`(전 modality)과 `자동화율`(`[자동 테스트]`+`[산출물 검사]`)을 따로 계산해 report에 적는다. **confidence ladder의 입력은 자동화율이다** — 사람·플랫폼 관측이 많은 task가 자동으로 High가 되지 않게 한다.
+- **confidence 임계값 (본문 SSOT — 아래 report 양식의 주석은 이 값의 사본이다)**: 평가 순서는 Low → Medium → High이며 **첫 매치로 확정**한다.
+  - **Low** (하나라도 매치): 통합 명령 미통과 / oracle gap 카테고리 미명시(누락 ≥2) / **자동화율 < 70%** / **미충족 «기계 검증» AC 있음**
+  - **Medium** (잔여 등급 — Low도 High도 아닌 전부): Low 조건 모두 불일치 + High 조건을 전부 충족하지는 못함(예: 자동화율 70~89% / oracle gap 1개 누락 / diff trace audit 미통과). **미달 개수에 상한을 두지 않는다** — 상한을 두면 «Low 아님 + High 아님 + 3개 미달»이 어느 등급에도 들어가지 못해 아래 self-check ④가 만족 불가능해진다(`out-of-AC` 직접 수정분의 재validate가 diff trace 미통과 + 자동화율 하락을 동시에 만들므로 실제로 도달하는 조합이다).
+  - **High**: 통합 명령 통과 + **자동화율 ≥ 90%** + diff trace audit 통과 + oracle gap 카테고리 전부 명시
+  - **Low 조건의 «미충족 AC 있음»을 «기계 검증 AC 한정»으로 읽는 이유**: 사람·플랫폼 관측 비중은 자동화율 <70%가 이미 잡는다. 관측 AC의 receipt 미발급까지 세면 이중으로 깎여 정상 `Pending Acceptance` task가 무조건 Low가 된다(ADR-065 D6).
+- **report 저장 전 self-check (5항목 — 하나라도 어긋나면 저장하지 않고 재계산한다)**: ① 관측 AC의 receipt 판독이 `## 8`의 «마지막 이벤트» 규칙대로인가 ② 판정값이 D6 우선순위의 첫 매치인가 ③ 충족률·자동화율의 분자·분모가 AC 행과 일치하는가(`VC-N` 제외) ④ confidence가 위 임계값의 첫 매치인가 ⑤ `## 다음 권장 액션`이 판정값과 일치하는가(`Pass`·`Pending Acceptance` → finalize / 감사 미완 → 재validate / **`P0 [Spec-gap]` 있음 → 사용자 보고**(아래 spec coverage audit의 «task 자동 추가 금지»가 일반 repair 안내보다 우선한다 — 계획 누락은 코드 수리로 해소되지 않는다) / 그 외 `Needs Fix` → repair).
   - `## 6-1. 테스트 시나리오` 항목이 `→ <runner>::<file>::<test-id>` 형식이고 *값에 angle-bracket placeholder(`<...>`)가 포함되지 않으면* path 우선 resolve (deterministic, ADR-047 D6 contract formation + D1 inspectability 정합).
-  - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
+  - 값에 `<runner>` / `<file>` / `<test-id>` 같은 angle-bracket placeholder가 잔존하면 *미설정*으로 간주 + 본 report에 P2 `[verify-placeholder]` 라벨로 기록 — 기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *`Pass`·`Pending Acceptance` 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로). 자연어 매칭 fallback으로 계속 진행 (validate-workitem 책임 경계 정합 — IMPROVEMENT_GUIDE 직접 append는 stabilize-milestone이 reviewer 결과 받아 적는 영역).
 - 테스트 선행 휴리스틱 — git log에서 동일 task 범위의 테스트 파일 추가/수정이 구현 파일보다 먼저(또는 동일 커밋) 들어왔는지. 단순 경고로만 보고하고 강제 종료하지 않는다(소규모 작업이 한 커밋에 묶이는 경우 정상).
 - FAC → AC spec coverage audit ([ADR-037](../../../docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md)#amend-3):
   feature `## 7 FAC`의 각 항목이 본 task의 `## 6 AC` 또는 *연관 task의 AC*에
@@ -87,7 +93,13 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이면 메인 세션이 자기 판정을 그대로 기록한다.
 
 집계 규칙 (combined verdict):
-- **Needs Fix 트리거**: 어느 한 축이라도 P0 finding이 있거나, AC↔검증 매핑에 미충족 AC가 하나라도 있거나(`미관측` 포함), 통합 검증 명령이 exit≠0이면 → **Needs Fix**(통합 명령 부재 스택은 해당 없음). 그 외 P1/P2만 있으면 Pass(라벨은 report에 전수 기록).
+- **판정값 3종 (ADR-065 D6) — 우선순위 `Needs Fix` > `Pending Acceptance` > `Pass`, 먼저 성립하는 값으로 확정한다.**
+  - **`Needs Fix`**: 어느 한 축이라도 P0 finding이 있거나 / 통합 검증 명령이 exit≠0이거나(통합 명령 부재 스택은 해당 없음) / **`[사용자 관측]`·`[플랫폼 관측]`이 아닌 미충족 AC**가 하나라도 있으면(`미관측` 포함).
+  - **`Pending Acceptance`**: 위가 전부 아니고, **`[사용자 관측]`·`[플랫폼 관측]` AC의 receipt만 미발급**일 때. 이 AC에는 고칠 코드가 없다(receipt는 사용자만 발급한다 — ADR-065 D1).
+  - **`Pass`**: 미충족 AC 0건.
+  - P1/P2 라벨만 있는 것은 판정을 바꾸지 않는다(라벨은 report에 전수 기록).
+  - **`감사 미완(unavailable)`은 `Pending Acceptance`가 아니다** — P0이므로 `Needs Fix`다. 고칠 것은 없지만 *판정할 수 없는* 상태이므로 `Pass` 계열을 낼 수 없다(ADR-067 D3와 동일 원리).
+  - **하류가 이 값으로 갈린다**: `/finalize-workitem`은 `Pass`·`Pending Acceptance`를 통과시키고 `Needs Fix`를 차단한다. `/repair-workitem`은 `Pass`·`Pending Acceptance`면 종료한다. 졸업 item 4 (b)는 `Pass` 또는 `Pending Acceptance`를 허용한다(ADR-067 D1).
 - 각 축의 partial findings(P0/P1/P2)·`[verify-placeholder]`·`[test-id-missing]`·`Spec Gap`·`[Design-inventory*]`·`[MCP-*]`·`[Arch-iface-7-N]`를 누락 없이 해당 report 섹션에 전수 합친다(ADR-046#d3 — cap 때문에 finding 누락 금지).
 - **confidence는 메인 세션이 *집계 후* 재계산**한다(개별 validator의 신뢰도 추정을 그대로 신뢰하지 않는다). 아래 confidence ladder의 입력(통합 명령 통과 여부 / 자동화율 / diff trace 통과 / oracle gap 카테고리 명시 여부)을 *집계된 전체*에서 평가해 Low→Medium→High 첫 매치로 확정한다.
 
@@ -96,7 +108,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 - 검증 시각: <ISO 8601 타임스탬프>
 - task-id: <task-id>
-- 판정: Pass | Needs Fix
+- 판정: Pass | Pending Acceptance | Needs Fix
 
 ## Orchestration (ADR-051#amend-2)
 <!-- 5줄 이내. 팬아웃/inline 여부를 산출물로 검증 가능하게 하는 관측 섹션 -->
@@ -122,15 +134,16 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
   - (b) 무관 리팩토링: ... [P1]
   - (c) pre-existing dead code 삭제: ... [P0 — Needs Fix 트리거]
   - (d) 스타일 변경: ... [P2]
-- 판정 영향: <Pass 유지 / Needs Fix 트리거 (오직 (c) 의도 외 발견 시)>
+- 판정 영향: <판정 유지 / Needs Fix 트리거 (오직 (c) 의도 외 발견 시)>
 
 ## AC ↔ 검증 매핑 (ADR-065)
 - AC-1: ✅ [자동 테스트] tests/foo.spec.ts > test_AC_1_xxx
 - AC-2: ✅ [산출물 검사] validate 통과 — insights 노트 필수 섹션 3개 검사(`scripts/verify` 내 docs 검사 단계)
 - AC-3: ✅ [사용자 관측] ac-acceptance 2026-08-09 / authority: 사용자 / 환경: Chrome 128·로컬
 - AC-4: ✅ [플랫폼 관측] ac-acceptance 2026-08-09 / authority: 사용자 / source: GH Actions run 12345
+- AC-4b: ❌ [사용자 관측] receipt 대기 — `## 8`에 유효한 `- ac-acceptance` 없음 (수용 라운드에서 발급 — 판정은 `Pending Acceptance`)
 - AC-5: ❌ [미관측] 표기 없음 → 자동 테스트 간주(legacy) — 대응 테스트 없음. `P2 [Modality-missing] AC-5` 병기
-- **충족률: 4/5 (80%) · 자동화율: 2/5 (40%)**
+- **충족률: 4/6 (67%) · 자동화율: 2/6 (33%)**
 
 ## Spec coverage (FAC ↔ AC, ADR-037)
 - FAC-1: ✅ T-001:AC-1
@@ -166,8 +179,8 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 
 ### 신뢰도 (confidence)
 <!-- 기준 (정의 — 같은 입력에 같은 판정 보장. 평가 순서: Low → Medium → High 의 *첫 매치* 등급으로 확정):
-     - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 **자동화율 <70%**, 또는 미충족 AC 있음
-     - Medium: Low 조건 모두 불일치 + High 조건 중 1~2개 미달 (예: 자동화율 70~89% / oracle gap 카테고리 1개 누락)
+     - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 **자동화율 <70%**, 또는 **미충족 «기계 검증» AC 있음**(`[자동 테스트]`·`[산출물 검사]`·표기 부재 한정 — 관측 modality의 receipt 미발급은 세지 않는다. 사람·플랫폼 관측 비중은 자동화율 <70%가 이미 잡으므로 이중으로 깎으면 정상 `Pending Acceptance` task가 무조건 Low가 된다. 본 조건의 SSOT는 skill 본문의 confidence 임계값이며 이 주석은 그 사본이다 — ADR-065 D6)
+     - Medium (잔여 등급 — Low도 High도 아닌 전부): Low 조건 모두 불일치 + High 조건을 전부 충족하지는 못함 (예: 자동화율 70~89% / oracle gap 카테고리 1개 누락 / diff trace audit 미통과). 미달 개수에 상한을 두지 않는다 — 본 조건의 SSOT는 skill 본문의 confidence 임계값이며 이 주석은 그 사본이다
      - High: 통합 명령 통과 + **자동화율 ≥90%** + diff trace audit 통과 + oracle gap 카테고리 모두 명시(해당없음 포함)
      자동화율(ADR-065 D4)을 쓰는 이유: 충족률로 계산하면 사람·플랫폼 관측만으로 채운 task가 High가 된다. -->
 - 본 판정의 신뢰도: <High / Medium / Low> — <한 줄 근거 (예: "통합 명령 + 자동화율 100% + diff trace 통과 + 외부 서비스 의존 없음" / "통합 명령만 통과, 동시성·외부 의존 미검증")>
@@ -175,12 +188,12 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 ## 다음 권장 액션
 - Pass: `/finalize-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
 - Needs Fix: `/repair-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
-- 미충족 AC가 전부 `[사용자 관측]`·`[플랫폼 관측]` receipt 대기: `/accept-milestone --task <task-id>` (task 스코프 — 라운드 상한·`## 11` 미소모, ADR-066 D1) 또는 사용자 직접 기재. **`/repair-workitem`으로 보내지 않는다**(고칠 코드가 없어 순환에 빠진다)
+- Pending Acceptance: **`/finalize-workitem <task-id>`** — 이 modality는 마감을 막지 않는다(ADR-065 D1·D6). receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — ADR-066 D1)에서 발급되고 미발급은 졸업 item 4 (a')가 잡는다(ADR-067 D1). **`/repair-workitem`으로 보내지 않는다**(고칠 코드가 없어 순환에 빠진다)
 - `감사 미완(unavailable)` 축 있음: `/validate-workitem <task-id>` 재실행 (수정 대상 아님)
 ```
 
 마지막 출력 (메인 세션에 텍스트로):
-- Pass / Needs Fix
+- Pass / Pending Acceptance / Needs Fix
 - 핵심 문제 최대 5개
 - report 파일 경로
 - orchestration 모드 1줄 (예: "fan-out 4축" / "inline fallback — 1파일 12줄")
