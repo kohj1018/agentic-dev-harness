@@ -15,8 +15,11 @@
 | `authority: user-choice` · `user-approval` 결정 **전부** | `agent-delegated` 결정 (라운드 종료 **일괄 확인 1회**로만 처리) |
 | 종류 불문 `open` · `deferred`로 남는 항목 | 코드 품질·형식 지적(raw hex·컴포넌트 중복·voice 위반 등) — skill 출력의 `남은 미결정 사항` 슬롯이 소유 |
 | 일괄 확인에서 사용자가 뒤집은 `agent-delegated` (→ `user-approval`로 등재) | 계획 결함(unmapped FAC/PX·의존성 결함·AC 해석 후보) — 각 소유 문서와 skill 출력이 소유 |
+| — | **마일스톤 미배정 기능 후보**(방향 변경·새 기능 — 수용 라운드의 «계약 변경» 포함) — `docs/30-workitems/ROADMAP.md` `## Backlog`가 소유 |
 
-원장은 **기획 결정**의 인덱스다. 결함 추적기가 아니다.
+원장은 **기획 결정**의 인덱스다. 결함 추적기가 아니고 **기능 백로그도 아니다.**
+
+**판별자**: 「이 항목이 해소되면 무엇이 남는가」 — *정본 문서(charter/ARCH/DESIGN/ADR/feature)의 한 절이 채워진다* → 본 원장 / *마일스톤 문서 하나가 생긴다* → `ROADMAP ## Backlog`. 보조 검증으로 **닫힐 때 쓸 `정본:` 앵커가 떠오르지 않으면 본 원장 항목이 아니다**(불변식 2). 원장 5종의 배타적 기록 범위 SSOT는 `docs/00-meta/STRUCTURE.md`의 `## Canonical Owner 매핑`이다(ADR-005#amend-1).
 
 ## 항목 형식 (2줄 — 헤더 + 세부)
 

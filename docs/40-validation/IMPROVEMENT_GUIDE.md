@@ -10,6 +10,7 @@
 - 필수 4필드: `ID | severity | evidence label | linked workitem`
 - 권장 2필드: `status | decision`
 - evidence label은 [boilerplate/ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md)의 `[관측됨]` / `[외부실증]` / `[가설]` (+ 합성 표기) 중 1개.
+- **선택 태그 `(수용)`**: `/accept-milestone`이 사용자 수용 라운드에서 등재한 항목에 붙인다. **위치는 굵은 ID 바로 뒤·첫 `|` 앞으로 고정한다** — `- **M1-003** (수용) | P2 | ...`. 이 태그가 `/repair-acceptance`의 유일한 회수 신호이며 문자열 `(수용)` 정확 일치로 grep된다(ADR-066 D5). `/repair-milestone`은 이 태그가 붙은 항목을 4-판정하지 않는다.
 
 예시:
 ```
@@ -28,12 +29,31 @@
 
 ## 4. 보류 항목
 
+<!-- 담는 것 2종:
+     ① 지금 고치지 않기로 한 개선 항목 — 다음 /plan-milestone R0가 회수해 사용자에게 surface.
+     ② **계약 미반영 (`scope: out-of-AC`)** — `/repair-acceptance`가 이번 마일스톤에서 고쳐 **코드에는 들어갔으나**
+        어느 AC·FAC·프로토타입·DESIGN 계약에도 근거가 없는 변경. `affected: T-NNN`이 유일한 역참조다.
+        다음 /plan-milestone R0가 회수해 **AC 승격 여부를 사용자에게 묻는다.**
+     담지 않는 것: 마일스톤 단위 기능 후보(→ ROADMAP `## Backlog`) / 아직 정해야 할 결정(→ DECISION_REGISTER).
+     판별 기준 SSOT: docs/00-meta/STRUCTURE.md `## Canonical Owner 매핑` (ADR-005#amend-1).
+     항목이 마일스톤급이라고 판명되면 /plan-milestone R1이 ROADMAP `## Backlog`로 재분류하고
+     여기 원본은 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key>)`로 닫는다(비중복 불변식 N-2·N-3).
+
+     형식 (② 계약 미반영) — 아래는 *형식 예시*이며 항목이 아니다.
+     판독자(/plan-milestone R0)는 **HTML 주석 밖의 줄만** 항목으로 센다:
+     - **<M>-uat-<N>** | P2 | [관측됨] | linked: <M> | affected: T-NNN | scope: out-of-AC | status: open
+       - 계약 미반영: <무엇이 코드에 들어갔는지 1줄 — 파일·규모 포함>.
+       - 근거 부재: <task>의 어느 AC도 이 동작을 약속하지 않았다.
+       - 회수: 다음 /plan-milestone R0 — AC로 승격할지 사용자 결정. -->
+
 ## 5. Repair decision log
 
 `/repair-plan`(plan 단계 feature/milestone 결정) · `/repair-milestone`(stabilize 후 milestone-level finding 수정 결정) · `/repair-acceptance`(사용자 수용 finding 수정 결정 — ADR-066 D4, ID `<M>-uat-<N>`, `affected: T-NNN` 필수)가 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리 (ADR-047 D7 durable correction history + D1 inspectability). `## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링`과 의미 분리 — 이 두 섹션은 *open items*이고 본 섹션은 *closed records*(지나간 판단).
 
-- task scope (T-NNN) 결정은 해당 task `## 8. 메모`에 직접 append — 본 섹션 아님. `/repair-milestone`이 per-task 결함을 `/repair-workitem`으로 위임한 경우 그 task 결정 이력도 task `## 8`에 남고, 본 섹션에는 cross-cutting 결정 + "T-NNN으로 위임함" routing 한 줄만 둔다.
-- ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`).
+- task scope (T-NNN) 결정은 해당 task `## 8. 메모`에 직접 append — 본 섹션 아님. `/repair-milestone`·`/repair-acceptance`가 per-task 결함(`scope: in-AC`)을 `/repair-workitem`으로 위임한 경우 그 task 결정 이력도 task `## 8`에 남고, 본 섹션에는 cross-cutting 결정 + "T-NNN으로 위임함" routing 한 줄만 둔다.
+- **재개방 없이 고친 것(`scope: out-of-AC`)은 본 섹션에 적고 `affected: T-NNN`으로 역참조한다** — task 문서를 건드리지 않으므로 이 역참조가 유일한 추적 경로다(ADR-066 D4). 그 항목의 «계약 미반영» 사실은 별도로 `## 4. 보류 항목`에 `status: open`으로 등재한다(수리는 끝났지만 계약 반영은 열려 있다 — 서로 다른 사실이므로 항목도 둘이다).
+- ID 컨벤션: `<workitem-id>-repair-<N>`(`/repair-plan`·`/repair-milestone` — 예: `F-001-repair-1`, `M1-repair-2`) / `<milestone-id>-uat-<N>`(`/repair-acceptance` — 예: `M1-uat-1`).
+- **`affected: T-NNN` 필드**: `scope: out-of-AC` 항목에서 **필수**다(재개방하지 않아 task 문서에 흔적이 없으므로). `in-AC`는 task `## 8`에 이력이 남으므로 권장 수준이다. 여러 task에 걸치면 쉼표로 나열하고, 어느 task에도 귀속되지 않는 순수 cross-cutting은 `affected: —`.
 - evidence label은 기본 `[관측됨]` (finding 자체는 리뷰어/stabilize의 *로컬 문서·코드 관측*에서 나옴 — cross-review 방식의 외부실증은 ADR-038 본문이 owning).
 - 형식은 본 파일 `## 항목 스키마` SSOT 따름.
 
