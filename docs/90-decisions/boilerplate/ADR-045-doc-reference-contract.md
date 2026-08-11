@@ -128,3 +128,39 @@ D6의 "개정(amend) 4개 이상 누적 → 통합 재발행" 임계를 **8개 �
 
 ### 강도 (ADR-022)
 - enabling(약) — 임계 조정, 되돌리기 쉬움.
+
+<a id="adr-045-amend-2"></a>
+## Amendment 2 (2026-08-11) — supersede 후 인용 처리 (D10 신설)
+
+### 배경
+- [관측됨] ADR을 supersede하면 그 ADR을 인용한 줄들이 남는데, 무엇을 재지정하고 무엇을 보존할지 규정이 없다. 그래서 `/stabilize-milestone`의 `[Ref-dead]` 검사가 매 마일스톤 같은 P2를 재생산하고, 그 수가 회고의 `open 항목 스냅샷`을 부풀린다.
+- [관측됨] 인용 중에는 **실행 불가가 된 지시**(Rollback path·Mutation Target)가 섞여 있다. 그것은 역사가 아니라 죽은 절차인데 «역사 보존»으로 묶여 방치됐다.
+
+### 결정 — D10. supersede 후 인용 처리
+ADR이 `superseded`가 되면 그 ADR을 인용한 **모든 줄**을 아래 5종으로 분류해 처리한다.
+
+| 종류 | 판별 | 처리 |
+|---|---|---|
+| **A. 살아있는 규칙 인용** | 그 ADR의 규칙을 *지금 적용하라*는 지시 | **새 ADR로 재지정 (의무)** |
+| **B. 낡은 지시** | Rollback path·Mutation Contract Target·Surfaces 등 *실행 절차*인데 대상이 죽어 실행 불가 | **현재 유효한 내용으로 재작성하거나 삭제 (의무)** |
+| **C. 배경 서술** | "그 ADR의 이런 점이 문제였다" 류 산문 | **링크를 제거하고 산문으로 재작성 (의무)** |
+| **D. supersede 선언·인덱스 행** | "본 ADR은 ADR-NNN을 supersede한다" / 인덱스의 그 ADR 행 | **그대로 둔다** — 정의상 죽은 ADR을 가리켜야 한다 |
+| **E. 실행 기록 (Record)** | dogfood 회차 기록 등 *그날 실제로 적용된 규칙*의 서술 | **그대로 둔다** + 문서 상단에 시점 주석 1회 |
+
+- **D·E에는 그 줄 끝에 `(현재 SSOT: ADR-NNN)`을 병기한다.** 병기는 **절 단위가 아니라 줄 단위**다 — 검사가 줄 단위로 판정하기 때문이다. **supersede를 선언하는 ADR 자신의 본문에서는 `(현재 SSOT: 본 ADR)`로 쓴다**(자기 번호를 자기 안에 적는 것은 무의미하다).
+- **`/stabilize-milestone`의 `[Ref-dead]` 검사는 `(현재 SSOT:` 문자열이 있는 줄을 건너뛴다.** 이 병기가 검사 제외 마커다.
+- E의 시점 주석은 **문서 상단 1회**로 둔다(본문 중간의 리스트·표를 분절하지 않는다).
+- **죽은 ADR 판정 자체의 기준**: 그 ADR `## Status` 본문이 `superseded`·`deprecated`로 **시작**할 때만 죽은 것이다. `accepted (부분 superseded — ...)`는 살아 있다.
+
+### 강도 (ADR-022)
+- **제약(강) — [관측됨]**: A·B·C의 재작성 의무.
+- **enabling(약)**: D·E 병기 형식, 검사 제외 마커.
+
+### Mutation delta (ADR-047 D3)
+- failure = 죽은 ADR 인용이 매 마일스톤 P2로 재생산되어 open 스냅샷을 부풀림 / 실행 불가한 rollback 지시가 방치됨
+- falsifier = 분류 후에도 `[Ref-dead]`가 0건이 되지 않거나, 병기 마커가 살아있는 규칙 인용까지 숨기면 재조정
+- rollback = 본 amend superseded + `[Ref-dead]` 검사의 마커 예외 제거
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md (`[Ref-dead]` 검사 제외 마커)
+- docs/90-decisions/boilerplate/ (supersede된 ADR을 인용하는 전 파일)

@@ -8,10 +8,11 @@ accepted
 ## 현재 유효 결정
 - M1 포함 모든 마일스톤·feature 문서는 `/plan-milestone`이 최종 프로토타입·FAC·열린 질문을 재대조한 뒤 `ready`로 확정(bootstrap-project는 charter/ARCH까지). task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**(2-tier/draft/refresh·F 입력 폐기 — #amend-3), 코드-stale 방지는 task 실행-시점 경량 접지 확인(근본 충돌은 사용자 보고).
 - 상태·잠금(#amend-3): M/F=`draft→ready`; task=`draft→ready→in-progress→done`, 검증된 완료 결함만 repair-workitem이 `done→in-progress`. M/F `ready` 뒤 새 scope·프로토타입·기획 변경은 다음 M. task 계획 repair는 첫 구현 전에만, 구현 뒤 finding은 기존 task 약속 결함=repair / 담당 없음·새 범위=사용자 보고+다음 M(현재 M task 자동 추가 없음).
+- 로드맵(#amend-1, #amend-4): `Done/Now/Next/Later`는 `/plan-milestone` 단독 writer, **`## Backlog`만 append-only 다중 writer**(accept-milestone·repair-acceptance). 회수는 R0 → R1.
 > **부분 supersede (2026-07-29)**: #amend-3 결정 5의 **(a)(b)(f)** 는 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D6/D7/D11이 부분 supersede한다 — (a)(b) M/F는 `draft → contract-ready → ready`이고 `ready` 승격은 `/seal-milestone` 단독이며, (f) 열린 질문의 영속 위치는 `docs/10-charter/DECISION_REGISTER.md`다(milestone `## 7`·feature `## 12`는 폐지). 결정 5(c)(d)(e)·task 상태기계·**결정 6 finding 라우팅**·결정 8~14(seam 계약)는 유효하다. 본 표기는 개정(amend)이 아니라 참조 갱신이다.
 - cross-task seam 계약: 신호 4종 감지 시 feature `## 7-2`에 INV 표. cross-feature canonical 위치 = **① 데이터 소유(write-through) → ② 최초 사용 → ③ 낮은 번호(fallback)**(#amend-2가 결정 9의 "낮은 번호 우선"을 이 우선순위로 정정 — 낮은 번호는 최종 fallback으로 잔존).
 - **마일스톤 로드맵 SSOT**: `docs/30-workitems/ROADMAP.md`(Done/Now/Next/Later 4구간 + 얇음 규율) — plan-milestone 단독 작성(R3=Now 실체화, R0=graduation 재조정), stabilize는 회고 graduation만 영속(#amend-1).
-- 상세는 아래 `## 결정 — A/B` + Amendment 1·2·3.
+- 상세는 아래 `## 결정 — A/B` + Amendment 1·2·3·4.
 
 ## 배경
 - [관측됨] 사용자 실사용: plan-workitem이 feature 단위 입력으로 refocus(ADR-051 D4)된 뒤, feature마다 계획 세션(문서 로드·협상·cross-check·/clear)을 반복해 시간 비효율이 크다. 또 per-feature 분해는 구조적으로 그 feature만 보므로 cross-feature seam을 볼 수 없다.
@@ -186,3 +187,37 @@ D5상 `## 현재 유효 결정`의 plan-workitem 진입 줄도 이 M 단위 전�
 - enabling(약)이나 base 메커니즘 supersede라 실질 변경. 자동 차단은 늘리지 않는다(preflight는 안내·중단이지 자동 재계획 아님).
 - **D6 override (ADR-045)**: 본 amend는 surface 15+개(2-tier/draft/refresh 폐기 + `draft→ready→in-progress→done` 잠금 상태기계·`[Plan-dep]`가 plan-milestone·plan-workitem·implement·finalize·stabilize·repair-milestone·repair-plan·repair-workitem·validate-plan·validate-workitem·validator·reviewer·WORKFLOW·DELEGATION·CHECKLIST·MILESTONE/FEATURE/TASK_TEMPLATE·ADR-007·ADR-037·ADR-051 전반; `## 3` SSOT는 ADR-026#amend-4, unmapped FAC 실행 후 라우팅은 ADR-037#amend-3)라 D6상 통합 재발행 대상이나, 이번 라운드는 minimal-churn으로 amend 처리한다 — 근거: 이번 개선 라운드 결정, 다음 변경 시 ADR-057 통합 재발행. (ADR-057은 grandfather 아님 — 2026-07-16 생성.)
 - **Mutation delta (ADR-047 D3)**: failure=사용자가 여전히 `F-NNN`/`--refresh` 재호출 강제 · `## 3 상태: draft` task가 stale인 채 구현됨 · preflight 전 task를 `in-progress`로 기록 · `blocked`/`done` task가 있는데 계획 수정 허용 · repair-milestone이 task status를 직접 변경 · 구현 뒤 finding을 generic plan-workitem이 현재 M 새 task로 생성 · 에이전트가 근본 충돌을 사용자 보고 없이 임의 재계획 / falsifier=runtime surface에 `draft`/`F-NNN`/`--refresh`/`Needs Plan Refresh`/generic 후속 plan-workitem 잔존, 정상 경로에 `ready→draft` 자동 역전이 존재, 또는 plan-workitem/repair-plan 잠금이 `draft|ready` 밖 상태를 놓침 / rollback=2-tier/draft/refresh·draft 하드스탑 복원.
+
+<a id="adr-057-amend-4"></a>
+## Amendment 4 (2026-08-11) — ROADMAP `## Backlog` 구간 + 구간별 writer 규약
+
+### 배경
+- [관측됨] `/accept-milestone` 수용 라운드의 «계약 변경»(방향 변경·새 기능)이 `DECISION_REGISTER`에 `status: open`으로 쌓인다. 그런데 그 항목은 **아무것도 막지 않는다** — 원장의 유일한 강제력인 봉인 차단이 불필요한 종류다. 차단이 필요 없는 항목이 원장에 누적되면 `/seal-milestone` 조건 6과 `/plan-milestone` R1 triage가 매 라운드 무거워진다(원장 자신의 «얇게 유지하는 규칙» 정합).
+- [관측됨] 「다음에 무엇을 할까」가 원장·ROADMAP·IMPROVEMENT_GUIDE 세 곳에 흩어져 한 장에서 보이지 않는다.
+
+### 결정
+1. **`ROADMAP.md`에 `## Backlog` 구간을 신설한다** — 마일스톤 미배정 후보를 담는다. Done/Now/Next/Later와 같은 **얇음 규율**을 따르되 `출처` 한 칸을 더 갖는다.
+   ```
+   - `<candidate-key>` <목표 1줄> — 출처: <어디서 나왔나> / 확신도: <높음/중간/낮음>
+   ```
+2. **writer 규약은 구간별로 갈린다.** `Done`/`Now`/`Next`/`Later`는 **`/plan-milestone` 단독**(#amend-1 결정 2 불변 — candidate-key 기반 중복 생성·Now 승격 매칭이 그 규약에 의존한다). **`## Backlog`만 append-only 다중 writer**를 허용한다 — `/accept-milestone`(R5 계약 변경)·`/repair-acceptance`(`Out-of-contract`). 이들은 **행을 추가만 하고 다른 구간을 건드리지 않는다.**
+   - 근거: 앞 네 구간은 *계획 산출물*이라 단독 writer가 필수이고, Backlog는 *입력 수집함*이라 여럿이 넣어도 중복 마일스톤 생성 위험이 없다.
+3. **회수·정리는 `/plan-milestone`이 한다** — R0가 `## Backlog`를 회수해 R1의 재료로 합류시키고, 사용자가 착수를 결정하면 **Next로 승격하며 Backlog 행을 제거한다**(candidate-key로 매칭 — #amend-1 결정 2의 R0 전이 알고리즘 그대로). **다른 원장에서 재분류해 넘어오는 항목을 `## Backlog`에 등재하는 것도 이 skill이 한다**(R1 — 원본을 닫는 일과 등재를 한 트랜잭션으로 묶어야 [ADR-005](ADR-005-ssot.md)#amend-1의 N-2가 지켜진다). 즉 `## Backlog`의 writer는 결정 2의 두 append-only skill + 본 skill 셋이다.
+4. **`deferred` 이관 앵커와의 관계**: `DECISION_REGISTER`의 `deferred` 항목은 여전히 ROADMAP candidate-key를 앵커로 쓴다(원장 «이관 앵커 종류» 표 불변). 차이는 «원장에 항목이 남는가»다 — `deferred`는 한때 `open`이었던 승인 이력이라 원장에 남고 ROADMAP에는 앵커만, `## Backlog`는 애초에 미결정이었던 적이 없어 원장에 들어가지 않는다.
+5. **원장 5종의 배타적 기록 범위**는 [ADR-005](ADR-005-ssot.md)#amend-1이 소유하고 표 본문은 `docs/00-meta/STRUCTURE.md`의 `## Canonical Owner 매핑`이 갖는다. 본 amend는 ROADMAP 쪽 구조만 정한다.
+
+### 강도 (ADR-022)
+- **enabling(약)** — 구간 1개 신설 + append-only 예외. 얇음 규율은 그대로 적용된다.
+
+### Mutation delta (ADR-047 D3)
+- failure = 차단 불요 항목이 원장에 누적돼 봉인 검사·triage가 무거워짐 / 「다음에 할 것」이 세 곳에 흩어짐
+- falsifier = Backlog에 마일스톤 단위가 아닌 항목(코드 조각)이 쌓이거나, append-only 예외가 Done/Now/Next/Later 오염으로 번지면 결정 2를 재조정
+- rollback = `## Backlog` 구간 제거 + accept-milestone·repair-acceptance 라우팅을 원장으로 복귀
+
+### 적용 surface
+- docs/30-workitems/ROADMAP.md
+- .claude/skills/plan-milestone/SKILL.md (R0 회수 · R1 재료 · Next 승격 시 제거)
+- .claude/skills/accept-milestone/SKILL.md (R5 계약 변경 목적지)
+- .claude/skills/repair-acceptance/SKILL.md (`Out-of-contract` 목적지)
+- docs/10-charter/DECISION_REGISTER.md (등재 범위 제외 1행)
+- docs/00-meta/STRUCTURE.md (산출물 표 writer 갱신)

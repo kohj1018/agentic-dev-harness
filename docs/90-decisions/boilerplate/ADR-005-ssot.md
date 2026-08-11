@@ -45,3 +45,41 @@ Canonical Owner 매핑 표는 `docs/00-meta/STRUCTURE.md`의 "Canonical Owner �
 - 새 산출물이 도입될 때마다 STRUCTURE.md 인벤토리에 등록.
 - agent/skill 본문에 정책 설명이 길게 들어 있으면 ADR 링크로 줄이는 후속 정리.
 - `/stabilize-milestone`이 SSOT drift 점검을 수행하도록 후속 항목 검토.
+
+<a id="adr-005-amend-1"></a>
+## Amendment 1 (2026-08-11) — 원장 5종의 배타적 기록 범위
+
+### 배경
+- [관측됨] `DECISION_REGISTER` / `ROADMAP` / `QA_FINDINGS` / `IMPROVEMENT_GUIDE` / `DISCOVERY` 다섯 원장은 각자 등재 범위를 갖지만 **원장끼리의 경계**가 어디에도 없다. 그래서 같은 항목이 둘에 들어갈 수 있고, 실제로 «수용 라운드의 계약 변경»이 원장과 ROADMAP 어느 쪽에도 갈 수 있는 상태였다.
+- 본 ADR 결정 1(«정의 1곳, 다른 곳은 링크»)은 *정본 문서*를 대상으로 하고 원장 간 배분은 다루지 않았다.
+
+### 결정
+1. **원장 5종의 기록 범위를 «답하는 질문»으로 배타 분할한다.** 표 본문의 SSOT는 `docs/00-meta/STRUCTURE.md`의 `## Canonical Owner 매핑`이며(본 ADR 본문이 이미 그 섹션을 canonical owner 매핑의 SSOT로 지정했다), 본 amend는 정책과 판별자만 박는다.
+2. **ADR은 이 표의 대상이 아니다** — ADR은 **정본 문서 중 하나**이며(`DECISION_REGISTER`가 «위치와 처분 상태만» 가리키는 대상), 원장과 같은 층이 아니다. 원장 항목이 `closed`되며 `정본: ADR-NNN`을 가리킬 때 ADR이 작성된다(작성 주체·시점은 ADR-000#amend-2 트리거 표).
+3. **판별자 3개** — 애매할 때 아래 순서로 판정한다.
+   - **원장 vs ROADMAP Backlog**: «이 항목이 해소되면 무엇이 남는가» — *정본 문서의 한 절이 채워진다* → `DECISION_REGISTER` / *마일스톤 문서 하나가 생긴다* → `ROADMAP ## Backlog`. 보조 검증: 원장 항목은 닫힐 때 `정본:` 앵커가 필수이므로(원장 불변식 2), 앵커를 쓸 정본 문서가 떠오르지 않으면 원장 항목이 아니다.
+   - **Backlog vs IMPROVEMENT_GUIDE**: «그것을 하면 마일스톤이 되는가, task 이하가 되는가» — 마일스톤 단위 → Backlog / task 이하(코드·문서 조각) → `IMPROVEMENT_GUIDE`.
+   - **QA_FINDINGS vs IMPROVEMENT_GUIDE**: «이번 마일스톤이 그것을 약속했는가» — 예 → `QA_FINDINGS` / 아니오 → `IMPROVEMENT_GUIDE`(ADR-066 D2와 동일 기준).
+4. **비중복 불변식 3개**
+   - **N-1** 한 사실은 동시에 두 원장에 «열린 채로» 존재하지 않는다.
+   - **N-2** 원장 간 이동은 «원본을 닫고 → 새 원장에 등재»로만 한다. 양쪽에 남기지 않는다.
+   - **N-3** 이동한 항목의 원본에 목적지 앵커를 남긴다 — `status: resolved (재분류: <목적지> <ID 또는 candidate-key>)`. 목적지가 로드맵이면 `<목적지>`는 `ROADMAP ## Backlog`다(구간까지 적는다 — 로드맵은 구간별 의미가 다르다).
+   - 선례: `/repair-acceptance`가 `Out-of-contract` 재분류 시 이미 같은 형태를 쓴다.
+5. **차단력을 가진 원장은 둘뿐이다** — `DECISION_REGISTER`(`open` → `/seal-milestone` 봉인 차단)와 `QA_FINDINGS`(본 M `### P0` 미해소 → 졸업 item 5 차단). 나머지 셋은 회수 후 **사용자 결정**이며 자동 차단 로직을 두지 않는다.
+
+### 강도 (ADR-022)
+- **제약(강) — [관측됨]**: 결정 3의 판별자, 결정 4의 N-1~N-3.
+- **enabling(약)**: 결정 1의 표 위치, 결정 5의 차단력 서술(현행 재확인).
+
+### Mutation delta (ADR-047 D3)
+- failure = 같은 항목이 두 원장에 열려 회수 시 중복 처리되거나, 차단이 필요 없는 항목이 원장에 쌓여 봉인 검사·R1 triage가 무거워짐
+- falsifier = dogfood에서 한 finding이 두 원장에 동시에 `open`으로 관측되거나, 판별자가 같은 항목을 두 목적지로 보냄
+- rollback = 본 amend superseded + STRUCTURE의 원장 범위 표 제거 + ROADMAP `## Backlog` 제거
+
+### 적용 surface
+- docs/00-meta/STRUCTURE.md (`## Canonical Owner 매핑` — 표 본문)
+- docs/10-charter/DECISION_REGISTER.md (등재 범위 표에 제외 1행)
+- docs/40-validation/IMPROVEMENT_GUIDE.md (`## 4` 용도 + 재분류 규칙)
+- docs/30-workitems/ROADMAP.md (`## Backlog`)
+- .claude/skills/accept-milestone/SKILL.md · repair-acceptance/SKILL.md (라우팅 목적지)
+- .claude/skills/plan-milestone/SKILL.md (R0 Backlog 회수 · R1 재분류)

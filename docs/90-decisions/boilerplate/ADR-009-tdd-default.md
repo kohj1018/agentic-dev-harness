@@ -32,7 +32,7 @@ opt-out 절차:
 검증 흐름:
 - `/validate-workitem`(validator)이 AC ↔ 검증 매핑과 테스트 선행 휴리스틱을 점검.
 - 결과는 validation report에 `AC-1 ✅ / AC-2 ❌(테스트 없음)` 형태로 기록.
-- `/finalize-workitem`은 통합 `validate` 명령 통과 외에 AC 미충족 항목이 있으면 `Needs Fix`로 종료.
+- `/finalize-workitem`은 통합 `validate` 명령 통과 외에 **«기계 검증» AC 미충족 항목**(`[자동 테스트]`·`[산출물 검사]`·표기 부재)이 있으면 `Needs Fix`로 종료. **`[사용자 관측]`·`[플랫폼 관측]` AC의 receipt 미발급만 남은 경우는 막지 않는다** — 그때 report 판정은 `Pending Acceptance`이고([ADR-065](ADR-065-ac-verification-contract.md) D6) finalize가 통과시키며, 차단은 마일스톤 졸업(`PENDING_ACCEPTANCE` — [ADR-067](ADR-067-milestone-graduation-v2.md) D1 item 4 (a'))이 담당한다. **TDD opt-out은 여전히 AC 충족의 면제가 아니다**(ADR-065 D2).
 
 fast 모드:
 - `/implement-workitem --fast [task-id]`는 RGR 사이클을 1회만 돌려 첫 AC만 완료하고 종료. prototype에서 빠르게 흐름을 검증할 때 사용. 나머지 AC는 후속 호출.

@@ -7,7 +7,7 @@ accepted
 
 > **단계 추가 (2026-07-29)**: 본 ADR이 정의한 lifecycle의 *plan 단계와 implement 단계 사이*에 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7의 봉인 게이트 `/seal-milestone`이 들어간다 — `plan-milestone`(→ M/F `contract-ready`) → `plan-workitem`(task `draft`) → **`seal-milestone`(검사·승인·일괄 `ready`)** → `implement-workitem`. 본 ADR의 단계 정의·책임 경계는 그대로 유효하며, 본 표기는 개정(amend)이 아니라 참조 갱신이다.
 
-> **단계 추가 (2026-08-09)** — `/accept-milestone`(사용자 수용 — 권장, 비차단)과 `/repair-acceptance`(수용 finding 수리 — 기존 task 재개방 X)를 lifecycle에 추가한다. 위치는 `/stabilize-milestone` 뒤이며, `사용자 관측`·`플랫폼 관측` modality AC의 receipt 발급을 위한 **task 스코프 모드**(`--task <task-id>`)는 `/validate-workitem` 뒤·`/finalize-workitem` 앞에서 실행된다. 상세는 [ADR-066](ADR-066-milestone-acceptance.md), 증거 계약은 [ADR-065](ADR-065-ac-verification-contract.md).
+> **단계 추가 (2026-08-09)** — `/accept-milestone`(사용자 수용)과 `/repair-acceptance`(수용 finding 수리)를 lifecycle에 추가한다. 위치는 **둘 다 `/stabilize-milestone` 뒤**이며 스코프는 마일스톤 단위 하나다. `사용자 관측`·`플랫폼 관측` modality AC는 `/finalize-workitem`을 막지 않으며(그때 판정값은 `Pending Acceptance` — [ADR-065](ADR-065-ac-verification-contract.md) D6) 그 receipt는 수용 라운드에서 발급된다. **`/repair-acceptance`는 결함이 기존 계약으로 추적 가능하면(`in-AC`) 그 task를 재개방해 `/repair-workitem` → `/validate-workitem` → `/finalize-workitem`으로 마감하고, 추적 불가하면(`out-of-AC`) 재개방 없이 직접 고치고 계약 부채로 등재한다**(ADR-066 D4). 상세는 [ADR-066](ADR-066-milestone-acceptance.md), 졸업 판정값은 [ADR-067](ADR-067-milestone-graduation-v2.md) D3.
 
 ## 현재 유효 결정
 - 8단계 lifecycle(discover→bootstrap→plan→implement→validate→repair→finalize→stabilize) — 각 단계 정의는 본문 `## 결정` 표가 SSOT. bootstrap은 charter/ARCH/ADR-100까지 — M1/F-001 seed는 ADR-057로 plan 단계(plan-milestone)로 이동.
@@ -32,7 +32,7 @@ accepted
 | 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) |
 | 5 | validate | `/validate-workitem` | validator | 판정 + report 기록. **status 변경·코드 수정·커밋 금지.** |
 | 6 | repair (Needs Fix일 때만) | `/repair-workitem` | builder | report의 실패 항목만 수정. **자동 커밋 금지, 새 기능 금지, 범위 밖 변경 금지.** |
-| 7 | finalize (Pass일 때) | `/finalize-workitem` | builder | status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋 |
+| 7 | finalize (`Pass` 또는 `Pending Acceptance`일 때 — ADR-065 D6) | `/finalize-workitem` | builder | status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋. `Pending Acceptance`면 관측 AC를 통과시키고 task `## 8`에 `- ac-pending`을 남긴다 |
 | 8 | stabilize | `/stabilize-milestone` | (qa, reviewer를 위임) | 마일스톤 단위 종합 점검. **코드 수정·커밋·status 변경 금지.** |
 
 > 봉인(seal)은 ADR-060 D7이 소유하는 게이트로 plan과 implement 사이에 들어간다.

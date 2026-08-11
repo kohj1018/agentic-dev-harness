@@ -9,7 +9,7 @@
 | 000 | Boilerplate decision policy | accepted | (+#amend-1: 폴더 분리, +#amend-2: ADR 작성 트리거 표 + [ADR-candidate]) | scope 라벨링 + supersede + 번호 정책 |
 | 001 | Doc hierarchy | accepted | — | docs/ 디렉터리 6분할 결정 |
 | 004 | Model alias policy | accepted | (+#amend-1: agent 이름 역할 중심) | shared 기본값에서 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용 |
-| 005 | Single Source of Truth (SSOT) | accepted | — | 같은 사실은 1곳에서 정의, 다른 곳은 한 줄 + 링크. 정책=ADR 패턴. |
+| 005 | Single Source of Truth (SSOT) | accepted | (+#amend-1: 원장 5종 배타적 기록 범위 + 비중복 불변식) | 같은 사실은 1곳에서 정의, 다른 곳은 한 줄 + 링크. 정책=ADR 패턴. |
 | 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+#amend-1: Surgical Changes + ambiguity surfacing, +#amend-2: implement ambiguity 하드스탑) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
 | 007 | Workitem lifecycle | accepted | (+#amend-1: lock file whitelist 11종, +#amend-2: agent 단위 판정 경계 SSOT, +#amend-3: validate 게이트 강화 + finalize --apply 사유, +#amend-4: 일부 lifecycle skill 메인 세션 + inner-loop model-invocable, +#amend-5: Needs Experience Contract, +#amend-6: pubspec.lock 추가) | discover→bootstrap→plan→implement→validate→repair→finalize→stabilize 8단계 |
 | 008 | Commit convention | accepted | (+#amend-1: monorepo scope, +#amend-2: Refs footer) | Conventional Commits 기본 채택 |
@@ -38,7 +38,7 @@
 | 042 | UX 흐름 품질 (HEART) | accepted | (+#amend-1: §8-1 delta 재정의, +#amend-2: 정량 소비자 자리 신설 + 계측 필드) | FEATURE §8-1 UX 필드 + 지표를 Evidence 루프로 회수 + analyst 가 quant 소비 |
 | 043 | Optional MCP Connectors | accepted | — | 기본 자동연결 X + STACK_SETUP_PLAN 연결 절차(researcher 기반, 전용 skill 없음) + 보안 가드 |
 | 044 | Cross-LLM Discovery Validation | accepted | +#amend-1: Codex 단락 supersede | /validate-discovery + /repair-discovery (기획 층 peer review, ADR-038 패턴 mirror) + reviewer discovery surface |
-| 045 | Document reference contract | accepted | +#amend-1: D6 재발행 임계 4→8 | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
+| 045 | Document reference contract | accepted | +#amend-1: D6 재발행 임계 4→8, +#amend-2: supersede 후 인용 처리(D10) | 참조 ID 규약 + ## Surfaces fan-out SSOT + 현재 유효 결정 + amend/supersede 기준 + checker 건전성 |
 | 046 | Signal-first output contract | accepted | +#amend-1: Decision Brief 압축 예외 | sub-agent 반환 cap 축소(1~2k→≤600) + signal-first 대화/반환 계약 + auto-clarity 보존 리스트 |
 | 047 | Code-as-Agent-Harness paradigm + Mutation Contract | accepted | +#amend-1: 변경 검증법(falsifying evaluation 작성법) | 정체성 + shared substrate 6 layer + harness mutation contract 6 필드 + sandboxed execution / contract formation / deep telemetry / oracle adequacy / workflow topology umbrella SSOT (D1~D9) |
 | 048 | Connected-MCP 사용 강제 (record → enforce) | accepted | — | ADR-043 record-only를 enforce로 확장 — connectors 표에 lifecycle usage/agent access 컬럼 + plan→implement→validate(+stabilize 3-P) MCP 사용 line-item 계약 + 보안 가드 유지 |
@@ -50,7 +50,7 @@
 | 054 | Cross-LLM Stabilize Review | accepted | +#amend-1: 결정5 supersede | /validate-milestone 신설(read-only peer review) + repair-milestone 종합·dedup·echo-rm + stabilize single-origin + .gitignore |
 | 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
 | 056 | Milestone experience contract | accepted | (+#amend-1: 프로토타입 경험 결정 PX 커버리지, +#amend-2: raw-hex 토큰 정의 예외, +#amend-3: 화면 전환 표 + downstream 소비자) | 프로토타입 라운드 + 입구 계약 + 스크린샷 게이트 + Voice 규칙서 |
-| 057 | Planning v2 (unification + batch + seam) | accepted | (+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: cross-feature seam canonical 위치 — 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기) | M 단위 전체 계획 스냅샷 + 계획 잠금(draft→ready→in-progress→done) + seam 계약 + 마일스톤 로드맵 |
+| 057 | Planning v2 (unification + batch + seam) | accepted | (+#amend-1: 마일스톤 로드맵 SSOT, +#amend-2: cross-feature seam canonical 위치 — 소유 우선, +#amend-3: plan-workitem 전체 계획 스냅샷 — 2-tier/draft/refresh 전면 폐기, +#amend-4: ROADMAP `## Backlog` 구간 + 구간별 writer 규약) | M 단위 전체 계획 스냅샷 + 계획 잠금(draft→ready→in-progress→done) + seam 계약 + 마일스톤 로드맵 |
 | 058 | Design Workflow (reference flow + acceptance gate + concept cards) | accepted | +#amend-1: baseline runner 제거 + UI project-native gate 조건부 생성, +#amend-2: JIT canonical asset + fixed conformance + upgrade/recovery, +#amend-3: visual-QA 전제 미충족의 표현 고정(runner-native skip 강제·populated 실패 전환·PENDING 기록) | /bootstrap-design R0~R6 SSOT(ADR-049 supersede) — evidence-on-demand R0 + R2/R6 수용 게이트(렌더·320·populated axe·repair loop) + REFINE/EXPLORE 시안 카드 |
 | 059 | Flutter/모바일 프로파일 (Android·iOS 직접 지원) | accepted | — | ADR-031을 Flutter에 한해 해제 — npm broker + 등록 source root format + analyze 심각도 분리 + 로컬 golden + e2e 5상태·suite 경로 판정 + ARCH 7-5 + 시크릿 2단 분류 |
 | 060 | 기획 결정 마감 + 마일스톤 봉인 (Decision Closure & Milestone Seal) | accepted | (+#amend-1: 배포 라이선스 필수 등재) | 결정 원장 + authority 축 + Decision Brief + contract-ready + /seal-milestone 봉인. 열린 질문 5섹션 폐지 |
