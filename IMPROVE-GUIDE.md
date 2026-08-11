@@ -1671,6 +1671,38 @@ feat(validate): add Pending Acceptance verdict and hoist confidence thresholds i
   - **표기 없음** — `[자동 테스트]`로 간주해 판정한다(legacy 호환). 대응 테스트가 있으면 충족, 없으면 결과 라벨 `미관측`으로 미충족. **`미관측`을 쓰는 경우는 이 한 가지뿐이다**(ADR-065 D1). 표기 부재 자체는 `P2 [Modality-missing] AC-N` 기록 등급이며 그것만으로 미충족을 만들지 않는다.
 ```
 
+### 3.5.3 ⭐ validator.md — 반환 양식의 «Needs Fix 트리거» 정의를 modality에 종속시킨다
+
+파일: `.claude/agents/validator.md`
+
+**3.5.2가 «관측 AC의 미충족은 `Needs Fix` 트리거가 아니다»를 넣지만, 같은 파일의 반환 양식이 «❌ AC면 트리거»를 무조건으로 정의하고 있어 정면 충돌한다.** 그리고 그 줄은 validator가 **실제로 채우는 필드의 판정 기준**이라, 고치지 않으면 관측 AC 하나만 ❌인 task에서 validator가 «트리거: 예»를 반환하고 집계자가 그것을 받아 `Needs Fix`를 낸다 — **3.1.1이 막으려던 그 순환**(`/repair-workitem`으로 갔는데 고칠 코드가 없음)이 팬아웃 경로로 되살아난다. **자동 검사로는 잡히지 않는다** — 7.1의 `Pass | Needs Fix`(파이프 표기)와 다른 문장이다.
+
+**앵커**: `- 그 축의 partial 판정: 이 축이 Needs Fix를 트리거하는가 (P0 발견 / ❌ AC)`
+
+**현재 (줄 전체)**
+```
+- 그 축의 partial 판정: 이 축이 Needs Fix를 트리거하는가 (P0 발견 / ❌ AC) — combined 최종 판정은 메인 집계자 책임
+```
+**바꿀 내용**
+```
+- 그 축의 partial 판정: 이 축이 Needs Fix를 트리거하는가 (P0 발견 / ❌ AC — **단 `[사용자 관측]`·`[플랫폼 관측]`의 receipt 미발급은 트리거가 아니다**, 위 AC 충족 판정) — combined 최종 판정은 메인 집계자 책임
+```
+
+이어서 같은 파일의 **판정값 2종 열거**를 지운다(같은 문장의 뒤쪽에서 이미 «combined 최종 판정»으로만 쓰고 있어 표기가 갈린다. 값 공간의 SSOT는 ADR-065 D6이며 이 파일이 열거를 들고 있을 이유가 없다).
+
+**앵커**: `- 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다`
+
+**현재 (줄 전체)**
+```
+- 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다 — combined Pass/Needs Fix 판정은 메인 집계자가 내린다.
+```
+**바꿀 내용**
+```
+- 그 축에서 P0를 발견했거나 (AC 축이면) ❌ AC가 있으면 partial에 명시한다 — combined 판정은 메인 집계자가 내린다.
+```
+
+> **`## 신호 압축` 절의 «Pass/Needs Fix 판정»은 그대로 둔다** — 그것은 «압축 금지 항목» 목록에서 *판정 결과 자체*를 가리키는 항목명이고 값 공간을 규정하지 않는다. 고치는 것은 *판정 기준을 정의하는* 줄과 *값 공간을 열거하는* 줄뿐이다.
+
 ---
 
 ## 3.6 `/plan-workitem`
@@ -3439,7 +3471,7 @@ Phase 1에서 ADR-065·066·067의 `## Surfaces`에 등재한 파일이 **실재
 
 아래 12개 문장이 **전부 참**이어야 한다. 하나라도 거짓이면 그 문장이 가리키는 Phase로 돌아간다.
 
-1. 관측 AC만 미충족인 task의 채점표 판정은 `Pending Acceptance`다. (3.1.1)
+1. 관측 AC만 미충족인 task의 채점표 판정은 `Pending Acceptance`다. (3.1.1·**3.5.3** — 팬아웃 validator가 그 미충족을 «Needs Fix 트리거»로 반환하면 집계자가 뒤집는다)
 2. `Pending Acceptance` task는 `/finalize-workitem`을 통과해 `done`이 된다. (3.2.1·3.2.2)
 3. 그때 그 task `## 8`에 `- ac-pending`이 남는다. (3.2.2·2.2.1)
 4. `/repair-workitem`은 `Pending Acceptance`를 받으면 아무것도 고치지 않고 종료한다. (3.3.1)
