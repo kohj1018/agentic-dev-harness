@@ -2498,6 +2498,21 @@ feat(milestone-loop): make acceptance milestone-scoped and close the reopen loop
    - **죽은 ADR 인용**: 인용된 ADR의 `## Status` **본문이 `superseded` 또는 `deprecated`로 시작할 때만** `P2 [Ref-dead] <file:line>`. **`accepted (부분 superseded — ...)`로 시작하는 ADR은 살아 있다** — 문자열 `superseded`가 괄호 안에 있다고 죽은 것으로 세지 않는다(이 구분을 빼면 부분 supersede된 ADR 하나가 100건 단위의 오탐을 만든다). **예외(오탐 아님, ADR-045#amend-2 D10)**: (a) 같은 줄에 `(현재 SSOT:`이 병기된 인용(역사 서술 + 현행 포인터를 함께 둔 정본형 — D10의 검사 제외 마커), (b) 그 ADR 자신을 가리키는 인용만 있는 줄(`## Status`·`## Amendment` 등), (c) `README.md` 인덱스 표 행의 supersede 계보 칸, (d) `<!-- -->` 주석 안. 예외에 해당하면 기록하지 않는다.
 ```
 
+이어서 **바로 위 줄(Surfaces forward check)의 죽은-ADR 기준도 같은 «starts with»로 통일한다.** 두 검사가 한 줄 차이로 서로 다른 기준을 쓰면, 느슨한 쪽(`포함`)이 **부분 supersede된 살아있는 ADR의 Surfaces 검사를 조용히 건너뛴다** — 현재 `ADR-038`·`ADR-041`·`ADR-050`이 `accepted (부분 superseded — ...)`이므로 실제로 3개 ADR의 drift가 미검출된다. 오탐이 아니라 **미검출**이라 더 위험하다.
+
+**앵커**: `대상 ADR의 `## Status`가 `superseded`/`deprecated`면 forward-check에서 skip한다`
+
+**교체 대상**: 그 줄의 **조각만** 바꾼다.
+
+**현재 (조각)**
+```
+대상 ADR의 `## Status`가 `superseded`/`deprecated`면 forward-check에서 skip한다(live sync 소스만 점검 — 죽은 ADR의 잔존 Surfaces는 별도 [Ref-dead]가 담당).
+```
+**바꿀 내용 (조각)**
+```
+대상 ADR의 `## Status` **본문이 `superseded` 또는 `deprecated`로 시작할 때만** forward-check에서 skip한다(**아래 «죽은 ADR 인용»과 동일 기준** — `accepted (부분 superseded — ...)`는 살아 있으므로 skip하지 않는다. 느슨하게 «문자열 포함»으로 읽으면 부분 supersede된 **살아있는** ADR의 Surfaces drift가 조용히 검출되지 않는다). live sync 소스만 점검 — 죽은 ADR의 잔존 Surfaces는 별도 [Ref-dead]가 담당.
+```
+
 ### 4.4.2 §1.5 「AC 충족 100% + report 유효」를 5항으로 재작성한다
 
 **앵커**: `- `AC 충족 100% + report 유효` → 본 milestone의 **모든 task**의 최신 `docs/40-validation/reports/<task-id>.md`가 아래 넷을 **모두** 만족(ADR-067 D1 item 4):`
@@ -2577,7 +2592,7 @@ feat(milestone-loop): make acceptance milestone-scoped and close the reopen loop
      - **졸업 가능 = PENDING_ACCEPTANCE** (item 4 (a')만 미충족):
        - **유일한 권장: `/accept-milestone <M>`** — 사람이 직접 실행·확인하는 수용 라운드이며(ADR-066 D1), 미발급 receipt는 그 자리에서만 발급된다(사용자 authority — ADR-065 D1). 미발급 AC 목록(`<task-id>:AC-N`)을 함께 출력한다.
        - **여기서 `/validate-workitem`·`/finalize-workitem` 재실행을 권장하지 않는다** — item 4 (a')는 채점표가 아니라 task `## 8`을 직접 읽으므로 receipt 발급만으로 충족된다.
-       - 수용 라운드 뒤에는 그 skill의 출력이 지시하는 순서를 따른다. 코드 변경이 있었으면 `/repair-acceptance <M>`이 자기 루프 안에서 재validate·재finalize까지 수행하므로, 사용자는 그 뒤 **본 skill을 한 번 더 실행**해 `YES`를 확정한다.
+       - 수용 라운드 뒤에는 그 skill의 출력이 지시하는 순서를 따른다. 코드 변경이 있었으면 `/repair-acceptance <M>`이 자기 루프 안에서 후속을 끝낸다 — **재개방한 `in-AC` task는 `/validate-workitem` + `/finalize-workitem`까지, 재개방하지 않은 `out-of-AC` 영향 task는 `/validate-workitem`만**(그 task는 계속 `done`이라 마감할 것이 없다). 사용자는 그 뒤 **본 skill을 한 번 더 실행**해 `YES`를 확정한다.
      - **졸업 가능 = YES + P0 후속 0건**:
        - **기본 권장: `/plan-milestone`** — 새 milestone(M-(N+1)) + feature 문서 생성 → `contract-ready`. 뒤이어 `/plan-workitem M-(N+1)`(전체 계획 스냅샷, task는 `draft`) → **`/seal-milestone M-(N+1)`**(검사·승인·일괄 `ready`) 순으로 진행(ADR-057#amend-3 / ADR-060 D7)
        - **`/accept-milestone <M>`은 이 상태에서 선택이다** — `YES`는 관측 modality AC가 0건이거나 그 receipt가 이미 전부 유효하다는 뜻이므로 receipt로 막힐 것이 없다. 사용자가 경험 확인을 원하면 실행한다. **단 마일스톤 문서 `## 11`에 `- 판정: 승인`이 이미 기록돼 있고 그 뒤 코드·receipt 변경이 없으면 재권장하지 않는다** — 그 상태에서 다시 권장하면 라운드 상한 3이 무의미하게 소모된다.
@@ -2591,8 +2606,10 @@ feat(milestone-loop): make acceptance milestone-scoped and close the reopen loop
 그 줄 **바로 앞에** 아래 한 줄을 삽입한다(같은 들여쓰기 3칸).
 
 ```
-   - **수용 대기 AC (item 4 (a') 미충족)**: `<task-id>:AC-N (<modality>)` 목록 — 처방은 `/accept-milestone <M>` / 해당없음
+   - **수용 대기 AC (item 4 (a') 미충족)**: `<task-id>:AC-N (<modality>)` 목록 / 해당없음. **`/accept-milestone <M>` 처방은 최종 판정이 `PENDING_ACCEPTANCE`일 때만 붙인다** — `NO`·`BLOCKED`면 목록만 남기고 처방은 아래 「다음 단계」 분기가 소유한다(한 출력이 두 명령을 지시하면 사용자가 어느 쪽을 칠지 알 수 없다)
 ```
+
+**⚠ 처방을 조건부로 두는 이유**: 이 줄은 판정과 무관하게 항상 출력되는 데이터 행이다. 무조건 `/accept-milestone`을 처방으로 달면 최종 판정이 `NO`·`BLOCKED`인 라운드에서도 수용 명령이 먼저 보이고, 「다음 단계」 분기(`/repair-milestone`·환경 복구)와 **서로 다른 명령을 동시에 지시**하게 된다.
 
 ### 4.4.7 책임 경계의 회고 자동 채움 규칙을 갱신한다
 
@@ -2636,6 +2653,27 @@ feat(milestone-loop): make acceptance milestone-scoped and close the reopen loop
 ```
    - 회고 본문: **graduation 줄(`YES|PENDING_ACCEPTANCE|NO|BLOCKED (날짜)` — 단계 8 판정 영속, ADR-057#amend-1·ADR-067 D3)** + 4 항목: 목표 달성도 / scope creep / 비목표 위반 / 핵심 학습 3개 이내.
 ```
+
+### 4.4.10 ⭐ 단계 8에 `BLOCKED` 분기를 신설한다
+
+**4.4.3·4.4.7이 판정값을 4종으로 선언하는데 단계 8의 「다음 단계」 분기는 셋뿐이다**(`PENDING_ACCEPTANCE` / `YES` / `NO 또는 P0 후속 있음`). 그래서 `BLOCKED`으로 기록된 라운드는 **처방이 없다.**
+
+**빠뜨리면 감사 미완이 잘못 라우팅된다**: 단계 4의 축 미반환 회수 규율 ④는 `M<N>-audit-<K>`를 **P0로 등재**하고 graduation을 `BLOCKED (audit incomplete: <단위>)`로 기록한다. 그러면 «P0 후속 있음» 조건에 걸려 사용자가 `/repair-milestone`으로 유도되는데, **그 P0는 코드 결함이 아니라 «못 재봤다»라서 4-판정할 대상이 없다** — 재감사가 필요한 자리에서 repair가 헛돌고 마일스톤은 `BLOCKED`에 머문다. ADR-067 D3가 이 값에 별도 이름을 준 이유가 «평가 실행 불가»의 처방이 다르기 때문이다.
+
+**앵커**: `     - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):`
+
+이 줄 **바로 앞에** 아래 블록을 삽입한다(같은 들여쓰기 5칸).
+
+```
+     - **졸업 가능 = BLOCKED** (평가 실행 불가 — ADR-067 D3). **이 분기가 아래 `NO` 분기보다 우선한다**(우선순위 `BLOCKED` > `NO`) — 감사 미완은 `M<N>-audit-<K>` P0를 등재하므로 «P0 후속 있음»에도 걸리지만, 그 P0의 처방은 repair가 아니다:
+       - **감사 미완(`BLOCKED (audit incomplete: <단위>)`)**: 처방은 **그 축의 재감사**다 — 단계 4의 축 미반환 회수 규율 ①~③(1회 재개 → 다른 qa 재위임 → 메인 직접 감사)을 다시 시도하거나 본 skill을 재실행한다. **`/repair-milestone`은 처방이 아니다** — «못 재봤다»는 상태이지 코드 결함이 아니어서 4-판정할 대상이 없다. 등재된 `M<N>-audit-<K>` P0는 감사가 완료된 뒤 `status: resolved`로 닫는다.
+       - **e2e blocked-on-env**: 처방은 아래 `NO` 분기의 «e2e blocked-on-env» 불릿과 같다(환경 복구 후 본 skill 재실행 — real failure가 아니므로 repair 대상이 아니다).
+       - `BLOCKED`은 이전 라운드에 기록된 `YES`·`PENDING_ACCEPTANCE`를 덮어쓴다(책임 경계의 회고 기록 규칙) — 낡은 값이 남아 하류가 졸업으로 읽는 것을 막는다.
+```
+
+> **분기 순서는 바꾸지 않는다** — 선언된 우선순위는 `BLOCKED` > `NO` > `PENDING_ACCEPTANCE` > `YES`이지만 기존 블록 3개를 재배열하면 4.4.5의 교체 결과와 충돌한다. 대신 새 블록을 `NO` 분기 **바로 앞**에 두고 그 안에 «이 분기가 `NO`보다 우선한다»를 명시했다 — 두 차단 상태가 인접해 읽히고, 재배열 없이 우선순위가 지켜진다.
+>
+> **`e2e blocked-on-env`의 §1.5 표기는 이 라운드에서 바꾸지 않는다** — §1.5는 그 상태를 `졸업 가능: NO (hard, blocked-on-env)`로 내고 있고(사전 상태), 그 사상을 `BLOCKED`으로 옮기는 것은 게이트 의미 변경이라 본 개선 범위(수용 루프·원장) 밖이다. 위 분기는 «그 경우의 처방은 `NO` 분기와 같다»로 연결만 한다.
 
 ---
 
