@@ -3209,6 +3209,8 @@ ADR-045#amend-2 D10(1.4에서 만든 것)을 **실제로 적용하는** 단계�
 
 > **원칙**: 대부분은 «역사·선언»이라 **문장을 고치지 않고 줄 끝에 마커만 붙인다.** 마커를 붙일 수 없는 것(배경 서술·번호 충돌)만 문장을 손본다.
 
+> **⚠ 마커는 리터럴 `(현재 SSOT:` 여야 한다 — 이 형태가 아니면 검사가 그 줄을 건너뛰지 않는다.** ADR-045#amend-2 D10은 «그 줄 끝에 `(현재 SSOT: ADR-NNN)`을 병기한다»로 규정하고, `/stabilize-milestone` §1.0과 아래 7.2는 **`(현재 SSOT:` 문자열이 있는 줄**만 제외한다. 그래서 포인터를 **기존 괄호 안에 넣으면 안 된다** — `(… — ADR-049 supersede, 현재 SSOT: ADR-058)`처럼 쓰면 리터럴 `(현재 SSOT:`가 만들어지지 않아 그 줄이 그대로 `P2 [Ref-dead]`로 발화하고 **7.2의 «22 → 0»이 실패한다.** 기존 괄호를 닫고 **독립 괄호로 덧붙인다** — `(… — ADR-049 supersede) (현재 SSOT: ADR-058)`. 산문형(«현재 SSOT 대응: …», «현재 SSOT는 …이며»)도 같은 이유로 쓰지 않는다.
+
 ---
 
 ## 6.1 `.boilerplate/validation/SIMULATION_RUN.md` — 3건 (종류 E: 실행 기록)
@@ -3228,7 +3230,7 @@ ADR-045#amend-2 D10(1.4에서 만든 것)을 **실제로 적용하는** 단계�
 이 파일의 **첫 헤딩(`# `로 시작하는 줄) 바로 다음**에 빈 줄 하나와 함께 아래를 삽입한다.
 
 ```
-> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. 현재 SSOT 대응: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md), `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md). **기록을 사실대로 두기 위해 원문을 고치지 않는다.**
+> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md))
 ```
 
 ### 6.1.3 남은 두 줄에 마커를 붙인다
@@ -3261,7 +3263,7 @@ ADR-045#amend-2 D10(1.4에서 만든 것)을 **실제로 적용하는** 단계�
 그 줄 **바로 뒤에** 아래를 삽입한다(같은 인용 블록 안).
 
 ```
-> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 2026-07-20 시점의 평가 기록이다. 본문의 `ADR-049` 인용은 그때의 현행 ADR을 가리킨다. 현재 SSOT는 [ADR-058](../../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md)이며, **기록을 사실대로 두기 위해 원문을 고치지 않는다.**
+> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 2026-07-20 시점의 평가 기록이다. 본문의 `ADR-049` 인용은 그때의 현행 ADR을 가리킨다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: [ADR-058](../../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md))
 ```
 
 ### 6.2.2 두 줄에 마커를 붙인다
@@ -3294,7 +3296,7 @@ ADR-045#amend-2 D10(1.4에서 만든 것)을 **실제로 적용하는** 단계�
 ```
 **바꿀 내용**
 ```
-| UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede, 현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
+| UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede) (현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
 ```
 
 ---
@@ -3311,7 +3313,7 @@ ADR-045#amend-2 D10(1.4에서 만든 것)을 **실제로 적용하는** 단계�
 
 **바꿀 내용** (줄 끝 조각만 교체)
 ```
-**디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede — 현재 SSOT: ADR-058).
+**디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede) (현재 SSOT: ADR-058).
 ```
 
 ### 6.4.2
@@ -3367,7 +3369,7 @@ design-preview.html *산출물*은 ADR-058 R6이 계속 사용. (현재 SSOT: AD
 
 **바꿀 내용** (줄 앞부분 조각만 교체)
 ```
-- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede, 현재 SSOT: ADR-058), ADR-042(#amend-1 — §8-1 delta)
+- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede) (현재 SSOT: ADR-058), ADR-042(#amend-1 — §8-1 delta)
 ```
 
 ---
@@ -3388,7 +3390,7 @@ design-preview.html *산출물*은 ADR-058 R6이 계속 사용. (현재 SSOT: AD
 ```
 **바꿀 내용**
 ```
-> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부 — 현재 SSOT: 본 ADR). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-027](ADR-027-interface-decision-allocation.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
+> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부) (현재 SSOT: 본 ADR). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-027](ADR-027-interface-decision-allocation.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
 ```
 
 ### 6.8.2 D5 승계 선언
@@ -3397,7 +3399,7 @@ design-preview.html *산출물*은 ADR-058 R6이 계속 사용. (현재 SSOT: AD
 
 **바꿀 내용** (줄 앞부분 조각만 교체)
 ```
-5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계, 현재 SSOT: 본 ADR)**:
+5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계) (현재 SSOT: 본 ADR)**:
 ```
 
 ### 6.8.3 Mutation Target
@@ -3432,10 +3434,12 @@ STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point. (현재 SSOT: 본
 ```
 **바꿀 내용**
 ```
-- 권장(비차단)으로 두는 이유: 사람 확인 부재로 인한 잘못된 졸업은 아직 관측되지 않았다(ADR-022 ratchet). 승격 트리거는 *졸업 YES가 난 마일스톤에서 사용자가 P0급 경험 결함을 발견한 사례* 이며, 그때 필수 항목으로 올린다(과거 graduation contract가 같은 항목을 soft→hard로 올린 방식과 동형 — 현재 SSOT: ADR-067).
+- **관측 modality AC가 0건인 마일스톤에서** 권장(비차단)으로 두는 이유: 사람 확인 부재로 인한 잘못된 졸업은 아직 관측되지 않았다(ADR-022 ratchet). **관측 AC가 1건이라도 있으면 그 receipt가 졸업 item 4 (a')를 막으므로 그 마일스톤에서는 이 단계가 사실상 필수다**(위 D1). 본 단계를 졸업 checklist **항목**으로 승격하는 트리거는 *졸업 YES가 난 마일스톤에서 사용자가 P0급 경험 결함을 발견한 사례* 이며, 그때 필수 항목으로 올린다(과거 graduation contract가 같은 항목을 soft→hard로 올린 방식과 동형 — 현재 SSOT: ADR-067).
 ```
 
-> **주의**: 이 줄의 «권장(비차단)» 서술 자체는 **1.2에서 이미 손댄 문단과 다른 줄이다.** 1.2를 적용한 뒤에도 이 줄은 그대로 남아 있으므로 여기서 따로 처리한다.
+> **주의**: 이 줄의 «권장(비차단)» 서술 자체는 **1.2에서 이미 손댄 문단과 다른 줄이다.** 1.2를 적용한 뒤에도 이 줄은 그대로 남아 있으므로 여기서 따로 처리한다. **죽은 인용 제거(종류 C)와 함께 스코프도 조인다** — 1.2.2가 D1을 «0건이면 권장 / 1건 이상이면 사실상 필수»로 바꿨는데 이 근거 줄이 «권장(비차단)»을 무조건으로 단언하면 같은 문서가 서로 반대를 말한다. 여기서 «졸업 checklist **항목**으로의 승격»과 «receipt로 인한 사실상 필수»를 구분해 두면 둘이 양립한다.
+
+> **`## 정책 강도`의 «enabling(약): D1 단계 신설(비차단·권장)» 줄은 건드리지 않는다** — 그 칸은 ADR-022의 «**본 ADR이 새로 만드는** 제약의 강도» 분류이고, D1 창설 자체는 새 게이트를 만들지 않는다(차단력은 ADR-067 D1 item 4 (a')가 갖는다). ADR-067의 «D6 비차단 관계»를 1.3에서 건드리지 않은 것과 같은 판단이다.
 
 ---
 
@@ -3492,14 +3496,17 @@ STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point. (현재 SSOT: 본
 
 **⚠ 3종을 `YES`·`NO`·`BLOCKED`(가운뎃점)로 적는다 — `YES|NO|BLOCKED`(파이프)로 쓰지 않는다.** 7.1의 잔존 문자열 검사 #4가 그 파이프 문자열을 «폐지된 3값 표기»로 잡으므로, rollback 서술이 그 형태를 쓰면 **검사가 스스로 실패한다.** 뜻은 동일하다.
 
-### 6.10.6 Surfaces 행
+### 6.10.6 Surfaces 행 — **마커를 붙이지 않고 삭제한다**
 
 **앵커**: `- docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md — superseded note`
 
-**바꿀 내용**
-```
-- docs/90-decisions/boilerplate/ADR-014-milestone-graduation.md — superseded note (현재 SSOT: 본 ADR)
-```
+**이 줄을 삭제한다**(앞뒤 줄은 그대로 두고 이 한 줄만 제거).
+
+**왜 마커가 아니라 삭제인가**: §1.3.7이 바로 이 `## Surfaces` 블록 머리에 **등재 기준**을 박았다 — «본 ADR의 결정을 **실행하거나 집행하는 파일만** 등재한다. 본 ADR을 배경·역사로 언급만 하는 파일(**재지정 문구·supersede 선언 등**)은 등재하지 않는다.» `ADR-014`는 `## Status: superseded` + «superseded by ADR-067» 선언만 담은 파일이므로 정확히 그 제외 대상이고, 마커만 붙이면 **같은 블록의 6줄 위 기준을 스스로 위반하는 행**이 남는다. ADR-045#amend-2 D10도 종류 B(Surfaces 등 대상이 죽은 실행 절차)를 «재작성하거나 **삭제**»로 규정한다.
+
+**역사가 사라지지 않는다**: 이 ADR이 ADR-014의 status·supersede note를 바꿨다는 사실은 §1.3.8이 재작성한 **Mutation Contract Target**(«ADR-014 status·supersede note / ADR-014 인용 파일 전수…»)에 마커와 함께 남아 있다. Surfaces는 *지속 동기 대상*, Target은 *이 ADR이 무엇을 바꿨는가*의 기록이며 — 전자에서 빼고 후자에 남기는 것이 두 필드의 역할 분담이다.
+
+> **`ADR-052`의 같은 형태 1행은 이번 범위 밖이다** — `ADR-052 ## Surfaces`에도 `ADR-014 — ## Amendment 2 + Surfaces add (현재 SSOT: ADR-067)` 행이 있는데, 그 마커는 **이번 라운드 이전에 붙은 것**이라 Phase 6의 22건 기준선에 애초에 포함되지 않았고 그 ADR에는 §1.3.7 같은 등재 기준 선언도 없다. 같은 패턴이므로 다음 라운드 후보로 남긴다(지금 손대면 Phase 6의 파일 목록·건수가 어긋난다).
 
 ---
 
