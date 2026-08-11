@@ -1355,11 +1355,15 @@ docs(templates): add roadmap backlog, ac-pending line, acceptance tag schema and
 - **두 수치 (ADR-065 D4)**: `충족률`(전 modality)과 `자동화율`(`[자동 테스트]`+`[산출물 검사]`)을 따로 계산해 report에 적는다. **confidence ladder의 입력은 자동화율이다** — 사람·플랫폼 관측이 많은 task가 자동으로 High가 되지 않게 한다.
 - **confidence 임계값 (본문 SSOT — 아래 report 양식의 주석은 이 값의 사본이다)**: 평가 순서는 Low → Medium → High이며 **첫 매치로 확정**한다.
   - **Low** (하나라도 매치): 통합 명령 미통과 / oracle gap 카테고리 미명시(누락 ≥2) / **자동화율 < 70%** / **미충족 «기계 검증» AC 있음**
-  - **Medium**: Low 조건 모두 불일치 + High 조건 중 1~2개 미달(자동화율 70~89% 또는 oracle gap 1개 누락)
+  - **Medium** (잔여 등급 — Low도 High도 아닌 전부): Low 조건 모두 불일치 + High 조건을 전부 충족하지는 못함(예: 자동화율 70~89% / oracle gap 1개 누락 / diff trace audit 미통과). **미달 개수에 상한을 두지 않는다** — 상한을 두면 «Low 아님 + High 아님 + 3개 미달»이 어느 등급에도 들어가지 못해 아래 self-check ④가 만족 불가능해진다(`out-of-AC` 직접 수정분의 재validate가 diff trace 미통과 + 자동화율 하락을 동시에 만들므로 실제로 도달하는 조합이다).
   - **High**: 통합 명령 통과 + **자동화율 ≥ 90%** + diff trace audit 통과 + oracle gap 카테고리 전부 명시
   - **Low 조건의 «미충족 AC 있음»을 «기계 검증 AC 한정»으로 읽는 이유**: 사람·플랫폼 관측 비중은 자동화율 <70%가 이미 잡는다. 관측 AC의 receipt 미발급까지 세면 이중으로 깎여 정상 `Pending Acceptance` task가 무조건 Low가 된다(ADR-065 D6).
-- **report 저장 전 self-check (5항목 — 하나라도 어긋나면 저장하지 않고 재계산한다)**: ① 관측 AC의 receipt 판독이 `## 8`의 «마지막 이벤트» 규칙대로인가 ② 판정값이 D6 우선순위의 첫 매치인가 ③ 충족률·자동화율의 분자·분모가 AC 행과 일치하는가(`VC-N` 제외) ④ confidence가 위 임계값의 첫 매치인가 ⑤ `## 다음 권장 액션`이 판정값과 일치하는가(`Pass`·`Pending Acceptance` → finalize / 감사 미완 → 재validate / 그 외 `Needs Fix` → repair).
+- **report 저장 전 self-check (5항목 — 하나라도 어긋나면 저장하지 않고 재계산한다)**: ① 관측 AC의 receipt 판독이 `## 8`의 «마지막 이벤트» 규칙대로인가 ② 판정값이 D6 우선순위의 첫 매치인가 ③ 충족률·자동화율의 분자·분모가 AC 행과 일치하는가(`VC-N` 제외) ④ confidence가 위 임계값의 첫 매치인가 ⑤ `## 다음 권장 액션`이 판정값과 일치하는가(`Pass`·`Pending Acceptance` → finalize / 감사 미완 → 재validate / **`P0 [Spec-gap]` 있음 → 사용자 보고**(아래 spec coverage audit의 «task 자동 추가 금지»가 일반 repair 안내보다 우선한다 — 계획 누락은 코드 수리로 해소되지 않는다) / 그 외 `Needs Fix` → repair).
 ```
+
+**⚠ Medium을 «잔여 등급»으로 쓰는 이유 (빼면 게이트가 잠긴다)**: ladder는 세 등급이 입력 공간을 **덮어야** 한다. 옛 문구(«High 조건 중 1~2개 미달»)는 3개 미달 구간을 비워 두는데, self-check ④가 «첫 매치»를 요구하므로 그 구간에 떨어진 report는 **저장되지 못하고 재계산 루프에 들어간다.** 평가 순서(`Low → Medium → High`)는 그대로 둬도 안전하다 — Medium 조건이 «High 조건을 전부 충족하지는 못함»을 포함하므로 High 자격 report는 Medium에서 거짓이 되어 High로 내려간다.
+
+**⚠ ⑤의 `[Spec-gap]` 예외를 빼면 기존 규칙과 충돌한다**: 같은 파일의 spec coverage audit이 «`P0 [Spec-gap]`은 combined verdict가 Needs Fix지만 자동 후속 호출 없이 사용자 보고로 라우팅한다»를 규정한다(근거: ADR-057#amend-3 결정 6 «현재 M task 자동 추가 없음»). ⑤가 «그 외 Needs Fix → repair»를 무조건으로 두면 그 report는 ⑤를 통과할 수 없거나, 통과시키려고 계획 누락을 `/repair-workitem`으로 밀어 넣게 된다.
 
 ### 3.1.7 ⭐ report 양식 안의 confidence 주석을 본문과 동기화한다
 
@@ -1372,6 +1376,15 @@ docs(templates): add roadmap backlog, ac-pending line, acceptance tag schema and
      - Low (어느 하나라도 매치): 통합 명령 미통과, 또는 oracle gap 카테고리 미명시(누락 카테고리 ≥2), 또는 **자동화율 <70%**, 또는 **미충족 «기계 검증» AC 있음**(`[자동 테스트]`·`[산출물 검사]`·표기 부재 한정 — 관측 modality의 receipt 미발급은 세지 않는다. 사람·플랫폼 관측 비중은 자동화율 <70%가 이미 잡으므로 이중으로 깎으면 정상 `Pending Acceptance` task가 무조건 Low가 된다. 본 조건의 SSOT는 skill 본문의 confidence 임계값이며 이 주석은 그 사본이다 — ADR-065 D6)
 ```
 
+이어서 **같은 주석의 Medium 줄도 본문과 맞춘다**(3.1.6이 Medium을 잔여 등급으로 바꿨으므로, 이 사본을 그대로 두면 집계자가 주석을 읽어 판정 불가 구간을 그대로 재현한다).
+
+**앵커**: `     - Medium: Low 조건 모두 불일치 + High 조건 중 1~2개 미달`
+
+**바꿀 내용**
+```
+     - Medium (잔여 등급 — Low도 High도 아닌 전부): Low 조건 모두 불일치 + High 조건을 전부 충족하지는 못함 (예: 자동화율 70~89% / oracle gap 카테고리 1개 누락 / diff trace audit 미통과). 미달 개수에 상한을 두지 않는다 — 본 조건의 SSOT는 skill 본문의 confidence 임계값이며 이 주석은 그 사본이다
+```
+
 ### 3.1.8 마지막 출력의 판정값을 3종으로 늘린다
 
 **앵커**: `- Pass / Needs Fix` (이 파일에서 유일하다 — report 양식의 `- 판정:` 줄과 다른 줄이다)
@@ -1382,6 +1395,34 @@ docs(templates): add roadmap backlog, ac-pending line, acceptance tag schema and
 ```
 
 **이유**: 메인 세션이 이 줄을 읽고 다음 액션을 발화하므로 2값으로 남으면 `Pending Acceptance`가 `Needs Fix`로 뭉뚱그려진다. **자동 검사로는 잡히지 않는다** — 7.3의 `Pending Acceptance` 존재 검사는 3.1.1·3.1.2가 이미 통과시키므로 이 줄만 낡아 있어도 통과한다.
+
+### 3.1.9 판정 «2값 전제»로 남은 기록 위치 두 곳을 고친다
+
+3값이 되면서 `Pending Acceptance`에 **정의가 없는 자리**가 두 곳 생긴다. 둘 다 report 작성 지시이므로 그대로 두면 집계자가 쓸 자리를 못 찾거나 거짓 문장을 쓴다.
+
+**앵커**: `기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시*`
+
+**교체 대상**: 그 줄의 **조각만** 바꾼다.
+
+**현재 (조각)**
+```
+기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *Pass 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로)
+```
+**바꿀 내용 (조각)**
+```
+기록 위치: *Needs Fix 판정 시* `## 실패 항목` 하단에 한 줄, *`Pass`·`Pending Acceptance` 판정 시* `## Evidence Bundle` 의 *검증된 것* sub-section 하단에 한 줄(`## 실패 항목`은 Needs Fix일 때만 존재하므로)
+```
+
+**앵커**: `- 판정 영향: <Pass 유지 / Needs Fix 트리거 (오직 (c) 의도 외 발견 시)>`
+
+**바꿀 내용**
+```
+- 판정 영향: <판정 유지 / Needs Fix 트리거 (오직 (c) 의도 외 발견 시)>
+```
+
+**이유**: `Pending Acceptance` task의 diff-trace 감사 결과에 «Pass 유지»라고 쓰면 그 report는 자기 판정값과 어긋난 문장을 갖는다. «판정 유지»는 세 값 모두에 참이다.
+
+> **`Pass`를 그대로 두는 자리**: 0단계 감사 미완 회수 규율의 «④에 도달한 축이 하나라도 있으면 `Pass`를 낼 수 없다»는 **참인 문장이므로 고치지 않는다**(그 상태는 P0 → `Needs Fix`이며, 3.1.1의 D6 불릿이 «`Pass` 계열을 낼 수 없다»로 이미 닫는다). 고치는 것은 *거짓이거나 미정의인* 자리 둘뿐이다.
 
 ---
 
