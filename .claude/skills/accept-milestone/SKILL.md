@@ -104,7 +104,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
    - **커밋 안내**: 본 skill이 갱신한 tracked 파일 목록(`QA_FINDINGS.md`·`docs/30-workitems/ROADMAP.md`(`## Backlog`)·`IMPROVEMENT_GUIDE.md`·마일스톤 문서·task 문서, 그리고 정본 문서 변경이 필요해 등재한 경우 `DECISION_REGISTER.md`)을 나열하고 **사용자가 직접 커밋해야 함**을 명시한다. 미커밋으로 두면 후속 task의 `/finalize-workitem`이 그 파일을 범위 밖 변경으로 보고 `Needs Review`로 멈춘다.
    - **receipt 처리 결과**: 발급한 task·AC 목록과 무효화(`- invalidated`)한 task·AC 목록. **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4 (a')가 채점표가 아니라 task `## 8`을 직접 읽기 때문이다(ADR-067 D1). 본 skill은 코드를 고치지 않으므로 채점표를 stale하게 만들지도 않는다.
    - **다음 단계**:
-     - 판정 = 승인: **① `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다(코드를 고치므로 그 skill이 자기 루프 안에서 재validate·재finalize를 수행한다). → **② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정.** `(수용)` 태그 항목이 0건이면 **②만** 수행한다 — receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
+     - 판정 = 승인: **① `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다(코드를 고치므로 그 skill이 자기 루프 안에서 후속을 끝낸다 — **재개방한 `in-AC` task는 `/validate-workitem`+`/finalize-workitem`까지, 재개방하지 않은 `out-of-AC` 영향 task는 `/validate-workitem`만**. 그 task는 계속 `done`이라 마감할 것이 없다). → **② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정.** `(수용)` 태그 항목이 0건이면 **②만** 수행한다 — receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
      - 판정 = 보류: 기본 권장 `/repair-acceptance <M>` — 수용 finding 수리 후 `/accept-milestone <M>` 재실행
      - 판정 = 미완: 환경 복구(또는 사용자 재개) 후 `/accept-milestone <M>` 재실행. **라운드 카운터를 소모하지 않는다**(확인을 못 했으므로 회차로 세지 않는다 — `## 11`의 `- 라운드:` 값을 올리지 않고 `- 판정: 미완`만 기록한다).
      - 프롬프트 동봉 권장: 미해소 결함 라벨 목록 + `재현 불확실` 항목
