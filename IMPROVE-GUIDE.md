@@ -1909,7 +1909,7 @@ argument-hint: "<milestone-id>"
 ```
 **바꿀 내용**
 ```
-     - 판정 = 승인: **① `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다(코드를 고치므로 그 skill이 자기 루프 안에서 재validate·재finalize를 수행한다). → **② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정.** `(수용)` 태그 항목이 0건이면 **②만** 수행한다 — receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
+     - 판정 = 승인: **① `(수용)` 태그를 단 개선 항목이 1건 이상이면 먼저 `/repair-acceptance <M>`** — 그 항목의 유일한 실행 경로이며(ADR-066 D5), 수리 후에는 그 skill 출력이 지시하는 순서를 따른다(코드를 고치므로 그 skill이 자기 루프 안에서 후속을 끝낸다 — **재개방한 `in-AC` task는 `/validate-workitem`+`/finalize-workitem`까지, 재개방하지 않은 `out-of-AC` 영향 task는 `/validate-workitem`만**. 그 task는 계속 `done`이라 마감할 것이 없다). → **② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정.** `(수용)` 태그 항목이 0건이면 **②만** 수행한다 — receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
 ```
 
 ### 4.1.13-b 커밋 안내 목록에 ROADMAP.md를 넣는다
@@ -3402,14 +3402,18 @@ design-preview.html *산출물*은 ADR-058 R6이 계속 사용. (현재 SSOT: AD
 5. **취향 오라클·생성/감사 분리 (D5 — ADR-049 승계) (현재 SSOT: 본 ADR)**:
 ```
 
-### 6.8.3 Mutation Target
+### 6.8.3 Mutation Target — **마커만 붙이지 않고 현행 계약으로 재작성한다**
 
 **앵커**: `STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point.`
 
 **바꿀 내용** (줄 끝 조각만 교체)
 ```
-STRUCTURE·WORKFLOW·.gitignore의 ADR-049→ADR-058 re-point. (현재 SSOT: 본 ADR)
+STRUCTURE·WORKFLOW·.gitignore가 디자인 워크플로우 SSOT로 **본 ADR**을 가리키도록 유지(구 `ADR-049` 인용의 재지정은 완료됨). (현재 SSOT: 본 ADR)
 ```
+
+**왜 마커만으로는 D10 충족이 아닌가**: D10의 5종 분류에서 **종류 B(낡은 지시)의 판별에 «Mutation Contract Target»이 이름으로 열거돼 있고** 처리는 «현재 유효한 내용으로 **재작성하거나 삭제 (의무)**»다. «ADR-049→ADR-058 re-point»는 *이미 실행돼 다시 실행할 것이 없는 절차*이므로 정확히 그 판별에 해당한다 — 마커만 붙이면 `[Ref-dead]` 검사는 통과하지만 **D10이 요구한 재작성을 건너뛴 상태**로 남는다(«그대로 둔다 + 마커»는 종류 D·E 전용이다).
+
+**§1.3.8이 이미 같은 처리를 했다** — ADR-067의 Target에서 «ADR-014 인용 파일 전수(**실행 경로는 재지정, 역사적 서술은 병기**)»를 «ADR-014 인용 파일 전수(**ADR-045#amend-2 D10 분류에 따라 처리**)»로 바꿨다. 죽은 ADR의 *이름*은 «무엇을 바꿨는가»의 기록으로 남기고, *지시 문장*만 현행 유효한 것으로 고치는 것이 종류 B의 처리다. 위 교체문도 같은 형태다 — 앞부분은 «본 ADR을 가리키도록 유지»(지금도 유효한 동기 의무), 괄호는 «구 ADR-049 인용 재지정 완료»(역사 기록), 줄 끝은 검사 제외 마커.
 
 ### 6.8.4 Rollback path
 
