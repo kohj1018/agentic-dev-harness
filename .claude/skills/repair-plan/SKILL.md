@@ -59,7 +59,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 
 **영속 위치 — workitem 타입별로 다름** (open items와 closed decision의 의미 분리):
 - **task (T-NNN)**: 해당 task 문서 `## 8. 메모`에 1줄 append (`## 8`이 자유 메모란).
-- **feature (F-NNN)** 또는 **milestone (M-N)**: `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` sub-section(없으면 신설)에 IMPROVEMENT_GUIDE 스키마(`ID | severity | evidence | linked workitem | status | decision`)로 append. **`## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링`에는 박지 않는다** — 이 둘은 *open items*(해야 할 일)이고 결정 이력은 *closed records*(지나간 판단)라 의미가 다르다. (feature `## 8`은 NFR, milestone `## 8`은 회고 — 결정 이력 위치 아님.)
+- **feature (F-NNN)** 또는 **milestone (M-N)**: `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` sub-section(없으면 신설)에 IMPROVEMENT_GUIDE 스키마(`ID | severity | evidence | linked workitem | status | decision`)로 append. **`## 2. 열린 항목`에는 박지 않는다** — 그 섹션은 *open items*(해야 할 일)이고 결정 이력은 *closed records*(지나간 판단)라 의미가 다르다. (feature `## 8`은 NFR, milestone `## 8`은 회고 — 결정 이력 위치 아님.)
 
 **task scope 영속 형식 (한 줄 = 한 결정)**:
 ```

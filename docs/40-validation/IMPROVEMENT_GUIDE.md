@@ -19,13 +19,16 @@
   - 결정: 다음 라운드 plan에서 T-002에 AC-3 추가.
 ```
 
-## 0. 요약
+## 2. 열린 항목
 
-## 1. 우선순위
+<!-- 마일스톤 단위 `### M1`, `### M2` 그룹으로 누적한다. severity(P0/P1/P2)가 우선순위를 표현하므로
+     별도의 «즉시/권장» 구분을 두지 않는다. 회수자는 /repair-milestone(이번 마일스톤)이다. -->
 
-## 2. 즉시 수정할 항목
+<!-- ## 0. 요약 · ## 1. 우선순위 — 폐지(결번). 파생 요약은 다중 writer 환경에서 본문과 drift한다.
+     번호는 재사용하지 않는다. -->
 
-## 3. 권장 리팩토링
+<!-- ## 3. 권장 리팩토링 — 폐지(결번). `## 2. 열린 항목`으로 통합했다.
+     번호는 재사용하지 않는다. -->
 
 ## 4. 보류 항목
 
@@ -48,13 +51,26 @@
 
 ## 5. Repair decision log
 
-`/repair-plan`(plan 단계 feature/milestone 결정) · `/repair-milestone`(stabilize 후 milestone-level finding 수정 결정) · `/repair-acceptance`(사용자 수용 finding 수정 결정 — ADR-066 D4, ID `<M>-uat-<N>`, `affected: T-NNN` 필수)가 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리 (ADR-047 D7 durable correction history + D1 inspectability). `## 2. 즉시 수정할 항목` / `## 3. 권장 리팩토링`과 의미 분리 — 이 두 섹션은 *open items*이고 본 섹션은 *closed records*(지나간 판단).
+`/repair-plan`(plan 단계 feature/milestone 결정) · `/repair-milestone`(stabilize 후 milestone-level finding 수정 결정) · `/repair-acceptance`(사용자 수용 finding 수정 결정 — ADR-066 D4, ID `<M>-uat-<N>`, `affected: T-NNN` 필수)가 호출됐을 때 본 라운드의 P0+P1 결정을 영속 기록하는 자리 (ADR-047 D7 durable correction history + D1 inspectability). **`## 2. 열린 항목`에는 박지 않는다** — 그 섹션은 *open items*(해야 할 일)이고 결정 이력은 *closed records*(지나간 판단)라 의미가 다르다.
 
-- task scope (T-NNN) 결정은 해당 task `## 8. 메모`에 직접 append — 본 섹션 아님. `/repair-milestone`·`/repair-acceptance`가 per-task 결함(`scope: in-AC`)을 `/repair-workitem`으로 위임한 경우 그 task 결정 이력도 task `## 8`에 남고, 본 섹션에는 cross-cutting 결정 + "T-NNN으로 위임함" routing 한 줄만 둔다.
-- **재개방 없이 고친 것(`scope: out-of-AC`)은 본 섹션에 적고 `affected: T-NNN`으로 역참조한다** — task 문서를 건드리지 않으므로 이 역참조가 유일한 추적 경로다(ADR-066 D4). 그 항목의 «계약 미반영» 사실은 별도로 `## 4. 보류 항목`에 `status: open`으로 등재한다(수리는 끝났지만 계약 반영은 열려 있다 — 서로 다른 사실이므로 항목도 둘이다).
+- **폐쇄 전** task scope (T-NNN) 결정은 해당 task `## 8. 메모`에 직접 append — 본 섹션 아님(`/repair-workitem`이 마일스톤 폐쇄 전에 수행한 라운드).
+- **폐쇄 후** 마일스톤 층이 고친 것은 `scope`와 무관하게 **전부 본 섹션에 적는다**(ADR-068 D1 — 마일스톤 층은 task 문서를 건드리지 않는다). `scope: out-of-AC` 항목은 그 «계약 미반영» 사실을 별도로 `## 4. 보류 항목`에 `status: open`으로 등재한다(수리는 끝났지만 계약 반영은 열려 있다 — 서로 다른 사실이므로 항목도 둘이다).
+- **동일 패턴 전수 검색(pattern-scan) 결과**도 폐쇄 후에는 본 섹션의 그 항목 하위 줄에 적는다(ADR-066#amend-1).
 - ID 컨벤션: `<workitem-id>-repair-<N>`(`/repair-plan`·`/repair-milestone` — 예: `F-001-repair-1`, `M1-repair-2`) / `<milestone-id>-uat-<N>`(`/repair-acceptance` — 예: `M1-uat-1`).
-- **`affected: T-NNN` 필드**: `scope: out-of-AC` 항목에서 **필수**다(재개방하지 않아 task 문서에 흔적이 없으므로). `in-AC`는 task `## 8`에 이력이 남으므로 권장 수준이다. 여러 task에 걸치면 쉼표로 나열하고, 어느 task에도 귀속되지 않는 순수 cross-cutting은 `affected: —`.
+- **필수 필드 3종 (ADR-068 D6)** — `/repair-milestone`·`/repair-acceptance` 항목에 **전부 필수**다. 마일스톤 층은 task를 재개방하지 않으므로 task 문서에 흔적이 남지 않고, 이 세 필드가 유일한 추적 경로다.
+  - `affected: T-NNN` — 영향 task. 여러 개면 쉼표 나열, 순수 cross-cutting은 `affected: —`.
+  - `files:` — 이 항목이 실제로 고친 파일 목록. 문서만 고쳤으면 `files: docs-only`.
+  - `scope: in-AC | out-of-AC` — 그 변경 줄을 기존 계약(task `## 6` AC · task `## 3` line item · feature `## 7` FAC · feature `## 7-2` INV · 승인 프로토타입 · DESIGN 계약)으로 거꾸로 추적할 수 있는가. **애매하면 `out-of-AC`.** `out-of-AC`면 `## 4. 보류 항목`에 계약 부채를 별도 등재한다.
 - evidence label은 기본 `[관측됨]` (finding 자체는 리뷰어/stabilize의 *로컬 문서·코드 관측*에서 나옴 — cross-review 방식의 외부실증은 ADR-038 본문이 owning).
 - 형식은 본 파일 `## 항목 스키마` SSOT 따름.
+
+형식:
+```
+- **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: src/auth/session.ts, tests/auth/session.spec.ts | scope: in-AC | status: applied | decision: Adopt
+  - 발견 (stabilize qa): 세션 만료 후 재요청이 500을 낸다.
+  - 결정: Adopt — AC-2가 401을 약속했다 / 회귀 테스트: tests/auth/session.spec.ts::expired_session_returns_401 (Red→Green 관측, validate에 묶임).
+  - exec-evidence 2026-09-02 (a): 등급1 재실행 가능 — 테스트 전용 DB / 결과: 만료 세션 row 정리 확인.
+  - pattern-scan 2026-09-02 만료 세션 401 처리: 범위 내 1건 수정 / 범위 밖 0건.
+```
 
 <!-- 마일스톤별 그룹핑(`### M1`, `### M2`)은 `/repair-plan`·`/repair-milestone`·`/repair-acceptance`가 *첫 호출 시* 해당 마일스톤 헤더를 자동 신설하고 그 아래에 append. /stabilize-milestone은 본 sub-section을 *추가하거나 수정하지 않음* — /repair-plan·/repair-milestone·/repair-acceptance만 직접 append. 본 ## 5 sub-section은 *신설 시 헤더 + 본 안내 주석만* 두고 `### M-N` 그룹은 비워둔다. -->

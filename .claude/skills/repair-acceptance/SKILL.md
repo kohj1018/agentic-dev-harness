@@ -19,7 +19,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Skill
 
 반드시 먼저 할 일:
 1. `docs/40-validation/acceptance-reviews/<M>.r*.md` glob으로 세션 파일을 회수한다(경로 목록을 메모리에 보관 — 삭제 후 재glob 금지).
-2. `QA_FINDINGS.md` 본 마일스톤 헤더에서 `(수용)` 태그 항목을 회수한다. **`IMPROVEMENT_GUIDE.md`의 `## 2`/`## 3` 안 `(수용)` 태그 항목도 함께 회수한다** — 사용자가 "개선 제안을 이번 마일스톤에서 고치겠다"고 택한 것이 그 자리에 등재된다(ADR-066 D2/D5).
+2. `QA_FINDINGS.md` 본 마일스톤 헤더에서 `(수용)` 태그 항목을 회수한다. **`IMPROVEMENT_GUIDE.md`의 `## 2` 안 `(수용)` 태그 항목도 함께 회수한다** — 사용자가 "개선 제안을 이번 마일스톤에서 고치겠다"고 택한 것이 그 자리에 등재된다(ADR-066 D2/D5).
 3. 둘 다 비어 있으면 *"수리 대상 수용 finding 없음 — `/accept-milestone <M>`을 먼저 실행하세요"* 안내 후 종료(문서 수정 금지).
 4. 대상 task와 그 `## 6-1`·`## 8`을 읽는다(어떤 AC·modality에 걸린 결함인지 확인).
 5. 우선순위(P0 > P1 > P2)로 정렬한다.
@@ -85,7 +85,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Skill
      - 결정: <Adopt 사유 한 줄> / 회귀 테스트: <추가한 테스트 또는 면제 사유>.
    ```
    ID 컨벤션은 `<milestone-id>-uat-<N>`이다. **`affected: T-NNN`은 필수** — task 계획 본문을 건드리지 않으므로 이 역참조가 "어느 task의 산출물을 나중에 누가 왜 고쳤는지"를 추적하는 유일한 경로다. **`scope: in-AC | out-of-AC`도 필수** — 재개방 여부가 그 값으로 갈렸으므로, 나중에 그 판단을 검증하려면 값이 남아 있어야 한다. `in-AC` 항목의 결정 근거는 `/repair-workitem`이 그 task `## 8`에 남기므로 **여기에는 «T-NNN으로 위임함» 한 줄 routing 기록만** 둔다(중복 기록 금지 — `/repair-milestone` `## 5` 규율과 동형).
-8. **원본 finding status 갱신 (4종 전부)** — ① `Adopt`/`Adopt-modified`로 해소한 `QA_FINDINGS.md`의 `(수용)` 항목 → `status: resolved` ② 같은 기준으로 `IMPROVEMENT_GUIDE.md` `## 2`/`## 3`의 `(수용)` 항목 → `status: resolved`(이걸 빠뜨리면 개선 제안이 열린 채 남아 다음 stabilize의 open 스냅샷을 부풀린다) ③ `Out-of-contract`로 재분류한 항목 → 원본을 **실제 목적지로** 닫는다 — 기본은 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key> — 다음 M)`이고, 정본 문서 변경이 필요해 원장으로 보낸 예외만 `status: resolved (재분류: DECISION_REGISTER D-NNN — 다음 M)`다. **앵커가 실제 등재처와 어긋나면 [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1의 비중복 불변식 N-3이 깨진다**(목적지가 로드맵이면 구간까지 적는다) ④ `Needs User Clarification` 항목 → **닫지 않고 `status: open` 유지**.
+8. **원본 finding status 갱신 (4종 전부)** — ① `Adopt`/`Adopt-modified`로 해소한 `QA_FINDINGS.md`의 `(수용)` 항목 → `status: resolved` ② 같은 기준으로 `IMPROVEMENT_GUIDE.md` `## 2`의 `(수용)` 항목 → `status: resolved`(이걸 빠뜨리면 개선 제안이 열린 채 남아 다음 stabilize의 open 스냅샷을 부풀린다) ③ `Out-of-contract`로 재분류한 항목 → 원본을 **실제 목적지로** 닫는다 — 기본은 `status: resolved (재분류: ROADMAP ## Backlog <candidate-key> — 다음 M)`이고, 정본 문서 변경이 필요해 원장으로 보낸 예외만 `status: resolved (재분류: DECISION_REGISTER D-NNN — 다음 M)`다. **앵커가 실제 등재처와 어긋나면 [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1의 비중복 불변식 N-3이 깨진다**(목적지가 로드맵이면 구간까지 적는다) ④ `Needs User Clarification` 항목 → **닫지 않고 `status: open` 유지**.
 9. **세션 파일 삭제 (echo-then-rm)**: 한 파일의 **전 severity finding이 판정 완결됐을 때만** 삭제한다. 삭제 전 `삭제 예정: <경로>`를 출력하고 보관한 경로 목록으로 하나씩 삭제한다(삭제 후 재glob 금지).
    - **미완결 = 보존**: `Needs User Clarification`이 1건이라도 남았거나(사용자 답변 후 재실행이 이어받는다) 부분 범위 지정으로 미처리가 남았으면 **삭제하지 않고** 출력에 `미처리 잔존 — 보존: <경로>`를 명시한다.
 
