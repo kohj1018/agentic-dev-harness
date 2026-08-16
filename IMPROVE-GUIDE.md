@@ -284,7 +284,7 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
 - 채점표의 content-hash 기반 신선도 판정 — ADR-064 D4가 같은 이유로 이미 기각했다.
 
 ## 결과
-- 졸업 판정의 전 입력이 **커밋된 파일**에서 나온다 — 새 체크아웃 재검증이 불필요해진다.
+- 졸업 판정의 **문서 입력**(item 1·4·5)이 전부 **커밋된 파일**에서 나온다 — 새 체크아웃에서 task별 재validate가 불필요해진다(item 2·3의 validate·e2e는 stabilize가 그 자리에서 실행한다).
 - 재개방 연쇄·실행 순서 규칙·채점표 자기무효화가 함께 사라진다.
 - 마일스톤 층 수정의 추적성이 `## 5`의 `affected` + `files` + `scope` 세 필드로 확보된다.
 - 두 원장의 활성 크기가 마일스톤 수와 무관한 상수에 수렴한다.
@@ -678,7 +678,7 @@ mkdir -p docs/40-validation/archive && touch docs/40-validation/archive/.gitkeep
 ```bash
 grep -rn "즉시 수정할 항목\|권장 리팩토링" --include="*.md" --exclude-dir=.git --exclude=IMPROVE-GUIDE.md .
 ```
-→ `IMPROVEMENT_GUIDE.md`의 **결번 주석 1줄**만 남아야 한다.
+→ **2줄만** 남아야 한다 — ① `IMPROVEMENT_GUIDE.md`의 **결번 주석**, ② `ADR-068` D7-1의 폐지 선언(`` `## 3. 권장 리팩토링`을 폐지(결번)하고… ``). ②는 **제거 불가**다: 절을 폐지한다고 쓰려면 그 이름을 불러야 한다.
 
 **확인 명령 2 — 축약형**:
 ```bash
@@ -703,7 +703,7 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 
 **변경 — 그 줄 뒤에 아래를 추가**:
 ```
-       `- closure <날짜> <task-id>: verdict=<Pass|Pending Acceptance> / 기계AC=<충족/전체> / audit=<complete|미완:<축>> / 관측대기=<AC-N 목록|없음> / 자동화율=<%>`  (ADR-068 D2 — writer: finalize-workitem 단독. 마감 시점의 채점표 결론을 커밋되는 자리로 옮겨 적는다. 졸업 item 1·4의 입력이며 채점표(gitignore ephemeral)에 대한 졸업 의존을 없앤다. `## 0. Status`를 done으로 쓰는 것과 같은 편집 라운드에서 쓰고, 이미 있으면 덮어쓰지 않고 append한다 — 마지막 줄이 현재 상태다)
+       `- closure <날짜> <task-id>: verdict=<Pass|Pending Acceptance> / 기계AC=<충족/전체> / audit=<complete|미완:<축>> / 관측대기=<AC-N 목록|없음> / 자동화율=<%>`  (ADR-068 D2 — writer: finalize-workitem 단독. 마감 시점의 채점표 결론을 커밋되는 자리로 옮겨 적는다. 졸업 item 1의 입력이다(`관측대기=`는 item 4 **회수용 색인**일 뿐 판정 근거가 아니다 — 근거는 `## 6-1` + `- ac-acceptance`, ADR-068 D3 item 4). 채점표(gitignore ephemeral)에 대한 졸업 의존을 없앤다. `## 0. Status`를 done으로 쓰는 것과 같은 편집 라운드에서 쓰고, 이미 있으면 덮어쓰지 않고 append한다 — 마지막 줄이 현재 상태다)
 ```
 
 ### (b) receipt writer 목록 정정 — 폐쇄 후 위치 반영
@@ -767,7 +767,7 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 - [ ] (선택) 본 마일스톤 한정 추가 기준 <!-- UI 예시: "경험 게이트 [Experience-drift] P1 0건" (ADR-056 — 채택 시 본 항목이 졸업 차단으로 작동) -->
 
 <!-- 채점표(docs/40-validation/reports/)는 졸업 판정의 입력이 아니다 (ADR-068 D3).
-     구 ADR-067 item 4의 (a)(b)(c)(d)와 mtime 비교는 폐지됐다. -->
+     구 ADR-067 item 4의 (a)(b)(c)(d)와 mtime 비교는 폐지됐다. (현재 SSOT: ADR-068) -->
 ```
 
 ## 4-3. `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md` — 회고에 post-close 줄
@@ -788,7 +788,7 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 ```
 **대체 문장**:
 ```
-     주: 졸업 판정의 전 입력이 커밋된 파일(task `## 8`의 `- closure`·`- ac-acceptance`, QA_FINDINGS)에서 나오므로 새 체크아웃에서도 재validate 없이 판정된다 (ADR-068 D2).
+     주: 정적 항목(item 1·4·5)의 입력이 전부 커밋된 파일(task `## 8`의 `- closure`·`- ac-acceptance`, QA_FINDINGS)이라 **새 체크아웃에서도 task별 `/validate-workitem` 재실행이 필요 없다** (ADR-068 D2). 동적 항목(item 2·3의 통합 validate·e2e)은 그 자리에서 `/stabilize-milestone`이 실행한다.
 ```
 
 **그리고** `## 8` 주석의 `ADR-067 D3`·`ADR-067 D2` 인용을 각각 `ADR-068 D4`·`ADR-068 D5`로 바꾼다.
@@ -2163,11 +2163,11 @@ grep -n "^## 0. Status" \
 ```
 > `docs/20-system/DESIGN.md`는 **남아 있어야 한다**(writer·reader 모두 존재) — 대상에 넣지 않는다.
 
-### 6. 폐지한 원장 섹션 참조 — 기대: **결번 주석 1줄만**
+### 6. 폐지한 원장 섹션 참조 — 기대: **2줄** (결번 주석 + ADR-068 폐지 선언)
 ```bash
 grep -rn "즉시 수정할 항목\|권장 리팩토링" --include="*.md" --exclude-dir=.git --exclude=IMPROVE-GUIDE.md .
 ```
-→ `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 3` 결번 주석 1줄만 남아야 한다. skill 5곳(`repair-milestone`·`repair-acceptance`×2·`repair-plan`·`stabilize-milestone`×2)에 남아 있으면 Phase 3-3 미완이다.
+→ **2줄만** 남아야 한다 — ① `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 3` 결번 주석, ② `ADR-068` D7-1의 폐지 선언(절을 폐지한다고 쓰려면 그 이름을 불러야 하므로 **제거 불가**). skill 5곳(`repair-milestone`·`repair-acceptance`×2·`repair-plan`·`stabilize-milestone`×2)에 남아 있으면 Phase 3-3 미완이다.
 
 ### 7. `- invalidated`의 위치 — 기대: **task `## 8` 유지**
 ```bash
