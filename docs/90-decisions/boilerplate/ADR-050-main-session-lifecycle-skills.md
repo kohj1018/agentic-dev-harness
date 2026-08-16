@@ -56,7 +56,7 @@ repair-workitem은 validator report를 기계적으로 수정하지 않고, repa
 - docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md   — `## 결정`·`## 결과` 자동 호출/repair 라운드 amend 포인터(#adr-007-amend-4)
 
 ## 참고
-- ADR-007(lifecycle), ADR-038(repair-plan 4-판정 대칭), ADR-040(연구·의존성), ADR-046(signal-first), ADR-047(harness mutation), ADR-019(JIT 로딩), ADR-067(evaluator-optimizer).
+- ADR-007(lifecycle), ADR-038(repair-plan 4-판정 대칭), ADR-040(연구·의존성), ADR-046(signal-first), ADR-047(harness mutation), ADR-019(JIT 로딩), ADR-068(evaluator-optimizer).
 
 <a id="adr-050-amend-1"></a>
 ## Amendment 1 (2026-07-25) — dispatcher 사전판정 금지 (자기검증 편향 차단)

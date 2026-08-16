@@ -47,7 +47,7 @@ accepted
 1. Target — plan-milestone(R5, 같은 draft M<N> 재실행으로 미완 라운드 재개)/plan-workitem(입구 계약+9-1+voice cross-check)/stabilize(§3-V·§5-2 제외·voice grep·출력)/builder(비대칭 1줄)/reviewer(렌더 증거+[Design-voice])/validator(§10 정합)/DESIGN.md §10/FEATURE·MILESTONE 템플릿/.gitignore/STRUCTURE/WORKFLOW + ADR-007#amend-5 + ADR-027#amend-5·6 + ADR-042#amend-1.
 2. Failure mode — 사용자 승인 artifact가 오라클로 쓰이는 지점 0 + 승인본이 ephemeral 경로에서 증발 + 첫 시각 확인이 구현 후 + 전역 voice 규칙 부재로 톤 즉흥 재결정(전부 관측됨).
 3. Predicted improvement — 구현 전 경험(화면·인터랙션·카피) 확정으로 마일스톤 종료 후 재작업 감소, 승인본이 독립 오라클로 영속, [Experience-drift]/[Design-voice]로 drift 가시화.
-4. Preserved invariants — stabilize read-only(§3-V는 촬영·판독·보고만)/ADR-058 R2 concept ephemeral 정책(범위 한정 — ADR-058)/hot-loop 스크린샷 금지/ADR-067 graduation 5+1 본체/DESIGN.md 시각 SSOT 지위/비-UI 삭제 경로/자동 차단 X(결정 3 제외).
+4. Preserved invariants — stabilize read-only(§3-V는 촬영·판독·보고만)/ADR-058 R2 concept ephemeral 정책(범위 한정 — ADR-058)/hot-loop 스크린샷 금지/ADR-068 graduation 5+1 본체/DESIGN.md 시각 SSOT 지위/비-UI 삭제 경로/자동 차단 X(결정 3 제외).
 5. Falsifying evaluation — R5가 마일스톤당 계획 시간을 과도하게 늘리거나 [Experience-drift] 재실행 불일치율이 높으면 R5를 opt-in으로 후퇴; [Design-voice] false positive가 노이즈를 유의하게 늘리면 LLM-판정분 후퇴(grep분만 유지).
 6. Rollback path — superseded → R5·입구 계약·§3-V·§10·집행 지점 제거, prototypes/ 경로 폐기(기존 문서 잔존 무해), ADR-007#amend-5 철회, §8-1 원 의미 복원.
 
@@ -73,7 +73,7 @@ accepted
 - docs/00-meta/WORKFLOW.md
 
 ## 참고
-- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede) (현재 SSOT: ADR-058), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-067(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.
+- ADR-058(R2 원형·carve-out·실카피 라운드 배선 — ADR-049 supersede) (현재 SSOT: ADR-058), ADR-042(#amend-1 — §8-1 delta), ADR-007(#amend-5 — 입구 계약 예외 등재), ADR-027(#amend-3 UI 판정, #amend-5 §10 섹션, #amend-6 렌더 증거), ADR-052(Playwright 선설치), ADR-068(item 6), ADR-048(browser MCP는 §3-P 탐색용 — §3-V는 MCP 불요), ADR-022, ADR-047 D3.
 
 <a id="adr-056-amend-1"></a>
 ## Amendment 1 (2026-07-26) — 프로토타입 경험 결정 PX 커버리지 (계획 단계 coverage 대조)

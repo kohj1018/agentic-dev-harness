@@ -43,7 +43,7 @@ plan-workitem에서 `context: fork`(및 `agent:`)를 제거해 메인 세션 인
 - `disable-model-invocation`은 **유지**(ADR-050 D2 범위 한정 — plan-workitem은 텍스트 제안 + 사용자 명시 발화 규약 유지).
 
 ### D4. plan-milestone 신규 skill
-milestone 단위 분해를 plan-workitem에서 분리한 **`/plan-milestone [milestone idea | feature idea]`** 신규 skill을 신설한다 — milestone → feature 분해 + graduation 기준(ADR-067 5+1) authoring을 책임진다. plan-workitem은 feature → task 분해에 집중(역할 경계 명확화).
+milestone 단위 분해를 plan-workitem에서 분리한 **`/plan-milestone [milestone idea | feature idea]`** 신규 skill을 신설한다 — milestone → feature 분해 + graduation 기준(ADR-068 5+1) authoring을 책임진다. plan-workitem은 feature → task 분해에 집중(역할 경계 명확화).
 - `disable-model-invocation: true` + 메인 세션 실행(fork X) + architect `Agent` 위임. `.claude` + `.agents` 양 mirror 신설.
 
 ### D5. wave echo + worktree 병렬 권장 제거 (ADR-038 #d3·#d6 supersede)
@@ -99,7 +99,7 @@ foreman/fan-out 도입으로 메인 세션이 inner-loop를 여러 라운드 운
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md            — #amend-4 `## Dependency Tools` 표
 
 ## 참고
-- ADR-007(lifecycle), ADR-067(graduation — plan-milestone가 5+1 authoring), ADR-019(JIT 로딩 — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
+- ADR-007(lifecycle), ADR-068(graduation — plan-milestone가 5+1 authoring), ADR-019(JIT 로딩 — 조건부 re-read amend), ADR-026(plan schema — `## 9` 5필드 *삭제*, 자연어 의존성만; Surfaces line 55 제거), ADR-038(cross-LLM plan + wave supersede), ADR-040(researcher 위임 — foreman이 호출), ADR-046(signal-first), ADR-047(harness mutation + D9), ADR-050(de-fork + model-invocable — D1 implement 부분 supersede).
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.3 (Optimized Workflow Topology) — 병렬성 위치 재배치의 survey-level 근거.
 
 <a id="adr-051-amend-1"></a>

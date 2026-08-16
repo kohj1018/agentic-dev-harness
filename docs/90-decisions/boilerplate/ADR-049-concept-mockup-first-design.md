@@ -62,7 +62,7 @@ superseded
 ### 결정
 1. **R0 레퍼런스 필수화**: #d28 grounding을 옵션→필수로. 없으면 silent degrade 금지 — DESIGN_RESEARCH.md `## grounding 출처`에 "모델 지식 기반 + 사유" 명시.
 2. **수렴 규칙**: R2/R6 루프 2 사이클 미수렴 시 brief(R0/R1)를 고친다(생성 반복 금지, soft).
-3. **렌더 visual-QA**: stack-guard가 UI e2e scaffold 시 `e2e/visual-qa.spec.*` 생성(breakpoint × 가로 overflow 차단 / 겹침·a11y 권고, 빈 앱 graceful skip). 졸업 e2e 게이트(ADR-052 D3 / ADR-067 D1 item 3) 위에 가로 overflow 차단만 추가.
+3. **렌더 visual-QA**: stack-guard가 UI e2e scaffold 시 `e2e/visual-qa.spec.*` 생성(breakpoint × 가로 overflow 차단 / 겹침·a11y 권고, 빈 앱 graceful skip). 졸업 e2e 게이트(ADR-052 D3 / ADR-068 D3 item 3) 위에 가로 overflow 차단만 추가.
 4. **클래스 anti-slop**: DESIGN.md `## 9`(내용 SSOT는 ADR-027 #7/#23)에 *인스턴스 금지어 추격 대신* 클래스 규율("브랜드 근거 없이 인기 fontstack/트렌드 디폴트 금지") 1줄.
 ### 근거
 - [관측됨] R0 grounding이 옵션이라 median으로 degrade(슬롭 근본원인, #d26/#d28 계승). 토큰 스펙은 overflow/레이아웃 깨짐을 못 잡고 렌더 검증이 inner-loop에 없다. 유행 금지어를 SSOT에 박으면 그 자체가 drift(패션 트레드밀).
@@ -74,7 +74,7 @@ superseded
 - docs/20-system/DESIGN.md                  — §9 클래스룰(내용 SSOT ADR-027)
 - .claude/skills/stack-guard/SKILL.md       — §6-4-1 visual-QA scaffold
 ### 참고
-- ADR-027(DESIGN §9 내용 SSOT), ADR-052 D3(졸업 e2e 게이트), ADR-067 D1 item 3(e2e MUST-run).
+- ADR-027(DESIGN §9 내용 SSOT), ADR-052 D3(졸업 e2e 게이트), ADR-068 D3 item 3(e2e MUST-run).
 
 <a id="adr-049-amend-2"></a>
 ## Amendment 2 (2026-07-16) — designer agent + grounding 위계 + divergence 강제 + 취향 오라클

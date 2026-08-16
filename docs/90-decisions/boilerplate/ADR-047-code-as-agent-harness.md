@@ -41,7 +41,7 @@ accepted
 - `.claude/agents/**.md`
 - `.agents/skills/**/SKILL.md` (Codex wrapper)
 - `.codex/config.toml`
-- *agent 행동을 직접 좁히는* boilerplate ADR (예: ADR-007 lifecycle, ADR-067 graduation, ADR-019 JIT 로딩, ADR-022 ratchet, ADR-038 cross-LLM plan, ADR-044 cross-LLM discovery, ADR-046 signal-first 등)
+- *agent 행동을 직접 좁히는* boilerplate ADR (예: ADR-007 lifecycle, ADR-068 graduation, ADR-019 JIT 로딩, ADR-022 ratchet, ADR-038 cross-LLM plan, ADR-044 cross-LLM discovery, ADR-046 signal-first 등)
 
 **6 필드:**
 1. **Target** — 어떤 컴포넌트의 어떤 동작을 바꾸는가 (file:section).

@@ -30,7 +30,7 @@ AC 충족은 아래 5종 중 **정확히 하나**의 modality로 증명한다. t
 - **묶을 수 없는 검사는 `산출물 검사`가 아니다** — 그 AC는 `사용자 관측`으로 내린다. 이 규칙이 없으면 grep 한 줄이 차단 게이트의 통과 근거가 되어 D6이 세운 배치 기준이 무너진다.
 - **`미관측`은 *authoring 표기*가 아니라 *판정 결과 라벨*이다.** 계획자는 `[미관측]`을 쓰지 않는다(쓸 거리가 없으면 AC를 관측 가능하게 다시 쓴다). 판정자가 `미관측`을 쓰는 경우는 **하나뿐이다 — 표기가 없는데 legacy 판독(`자동 테스트`)으로도 대응 테스트가 없을 때.** **선언된 modality의 증거가 없는 경우는 `미관측`이 아니다** — 그때는 **선언된 modality를 유지한 채 미충족 사유를 적는다**(예: `❌ [사용자 관측] receipt 대기`). modality를 결과 라벨로 덮어쓰면 하류(D6 판정값 산출·`/finalize-workitem` 분기)가 «코드로 고칠 것»과 «사람이 볼 것»을 구분할 근거를 잃는다. **`미관측`은 항상 미충족이며 어떤 게이트도 통과시키지 않는다.**
 - **legacy 호환 (표기 부재의 판독)**: **modality 표기가 없는 AC는 `자동 테스트`로 간주한다.** 기존 fork의 모든 task는 표기가 없으므로 이 규칙이 없으면 재검증에서 전 task가 일괄 미충족이 된다(ADR-022 ratchet 위반). 그 AC에 대응 테스트가 없으면 기존과 똑같이 미충족이다 — 즉 **현행 판정과 동일하게 동작한다.** 신규 task는 표기를 필수로 하며, 표기 없는 AC를 만나면 `/validate-workitem`이 `P2 [Modality-missing] AC-N` 을 기록 등급으로 남긴다(차단하지 않는다).
-- **`사용자 관측`·`플랫폼 관측` receipt의 발급 시점은 마일스톤 층이다** — 발급 경로는 `/accept-milestone <M>`(마일스톤 수용 라운드 — [ADR-066](ADR-066-milestone-acceptance.md) D1) 또는 사용자 직접 기재다. **이 modality의 미충족은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(아래 D6), finalize는 통과시켜 task를 `done`으로 마감한다. 그렇지 않으면 `receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → 수용 라운드 도달 불가 → 발급 불가`의 교착이 생긴다. 미발급 상태는 **졸업 게이트가 잡는다** — 그 receipt 없이는 [ADR-067](ADR-067-milestone-graduation-v2.md) D1 item 4 (a')를 충족하지 못하므로 마일스톤이 졸업하지 못한다(graduation `PENDING_ACCEPTANCE`). **즉 차단 지점을 task 층에서 마일스톤 층으로 옮긴 것이며, 게이트 자체가 사라진 것이 아니다.**
+- **`사용자 관측`·`플랫폼 관측` receipt의 발급 시점은 마일스톤 층이다** — 발급 경로는 `/accept-milestone <M>`(마일스톤 수용 라운드 — [ADR-066](ADR-066-milestone-acceptance.md) D1) 또는 사용자 직접 기재다. **이 modality의 미충족은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(아래 D6), finalize는 통과시켜 task를 `done`으로 마감한다. 그렇지 않으면 `receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → 수용 라운드 도달 불가 → 발급 불가`의 교착이 생긴다. 미발급 상태는 **졸업 게이트가 잡는다** — 그 receipt 없이는 [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D3 item 4를 충족하지 못하므로 마일스톤이 졸업하지 못한다(graduation `PENDING_ACCEPTANCE`). **즉 차단 지점을 task 층에서 마일스톤 층으로 옮긴 것이며, 게이트 자체가 사라진 것이 아니다.**
 - **경계 — 커밋·배포 이후에만 관측 가능한 사실은 그 task의 AC로 두지 않는다.** CI 실행·배포 후 동작·실제 스케줄 발화처럼 *커밋이 있어야 비로소 일어나는* 사실은 finalize 전에 관측할 수 없으므로, 그것을 AC로 박으면 어떤 modality로도 충족할 수 없다. 그런 사실은 **후속 verification task의 AC로 분리한다**(계획 단계 규율 — 측정 가능 AC(ADR-026) + 새 범위 라우팅(ADR-057#amend-3 결정 6)). 그 task의 AC는 `플랫폼 관측`이며, 선행 task가 배포된 뒤 실행된다. **`플랫폼 관측` modality가 다루는 것은 «이미 발생한 플랫폼 실행의 결과를 사용자가 확인해 첨부하는 것»이지 «아직 일어나지 않은 일을 기다리는 것»이 아니다.**
 - **`--waiver`(ADR-064 D1)는 어느 modality에도 쓰지 않는다.** waiver는 *증거가 없다는 사실을 사용자가 승인*하는 것이고 acceptance는 *관측했고 충족했다는 판정*이다. 둘을 섞으면 "검증하지 못했지만 허용"이 "검증 완료"로 바뀐다.
 - **`사용자 관측`·`플랫폼 관측`은 에이전트가 대행 발급하지 않는다** — 사유·결과를 발명하지 않는다(ADR-064 D1 waiver 규정과 동일 근거).
@@ -71,7 +71,7 @@ AC 충족은 아래 5종 중 **정확히 하나**의 modality로 증명한다. t
 ### D4. 두 수치 분리
 `/validate-workitem` report는 커버리지를 두 수치로 적는다.
 
-- **충족률** = (충족 AC 수) / (전체 AC 수) — 전 modality 합산. **report 독자용 요약 수치이며 졸업 게이트의 직접 입력은 아니다** — 졸업 item 4는 기계 검증 AC를 채점표에서(item 4 (a)), 관측 AC를 task `## 8`에서(item 4 (a')) 각각 읽는다([ADR-067](ADR-067-milestone-graduation-v2.md) D1).
+- **충족률** = (충족 AC 수) / (전체 AC 수) — 전 modality 합산. **report 독자용 요약 수치이며 졸업 게이트의 직접 입력은 아니다** — 졸업 item 1은 기계 검증 AC 충족 여부를 task `## 8`의 `- closure` 줄(verdict·audit)에서, item 4는 관측 AC receipt를 task `## 8`의 `- ac-acceptance`에서 각각 읽는다([ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D2·D3).
 - **자동화율** = (`자동 테스트` + `산출물 검사`로 충족한 AC 수) / (전체 AC 수) — **report 신뢰도(confidence) 등급의 입력이다.**
 
 사람·플랫폼 관측이 많은 마일스톤이 자동으로 High 신뢰도가 되지 않게 하기 위해 두 수치를 나눈다. `VC-N`(ADR-064 D2 positive control)은 두 수치의 분자·분모 어디에도 넣지 않는다.
@@ -86,9 +86,9 @@ report `- 판정:` 값은 셋이다. **우선순위는 `Needs Fix` > `Pending Ac
 | `Pending Acceptance` | **사람이 볼 것만 남았다** | 위가 전부 아니고, `사용자 관측`·`플랫폼 관측` AC의 receipt만 미발급 |
 | `Pass` | 전부 충족 | 미충족 AC 0건 |
 
-- **`Pending Acceptance`를 별도 값으로 두는 이유**: 이 상태를 `Needs Fix`로 뭉뚱그리면 `/repair-workitem`으로 라우팅되는데 고칠 코드가 없어 순환에 빠지고(본 ADR 배경이 지목한 그 순환), `Pass`로 뭉뚱그리면 「`Pass`인데 AC 행에 ❌」라는 해명이 필요한 상태가 남는다. **판정값마다 다음 액션이 다르다는 것이 이 enum의 존재 이유다** — `/stabilize-milestone`의 graduation 4종(ADR-067 D3)과 같은 원리이며, 같은 개념이 두 층에서 같은 모양으로 나타난다.
-- **하류 소비**: `/finalize-workitem`은 `Pass`·`Pending Acceptance`를 통과시키고 `Needs Fix`를 차단한다. `/repair-workitem`은 `Pass`·`Pending Acceptance`면 finalize를 안내하고 종료한다. 졸업 item 4 (b)는 `Pass` **또는** `Pending Acceptance`를 허용한다(ADR-067 D1).
-- **`감사 미완(unavailable)`은 `Pending Acceptance`가 아니다** — 그것은 P0이며 `Needs Fix`를 트리거한다. 고칠 것은 없지만 *판정할 수 없는* 상태이므로 `Pass` 계열을 낼 수 없다(ADR-067 D3와 동일 원리).
+- **`Pending Acceptance`를 별도 값으로 두는 이유**: 이 상태를 `Needs Fix`로 뭉뚱그리면 `/repair-workitem`으로 라우팅되는데 고칠 코드가 없어 순환에 빠지고(본 ADR 배경이 지목한 그 순환), `Pass`로 뭉뚱그리면 「`Pass`인데 AC 행에 ❌」라는 해명이 필요한 상태가 남는다. **판정값마다 다음 액션이 다르다는 것이 이 enum의 존재 이유다** — `/stabilize-milestone`의 graduation 4종(ADR-068 D4)과 같은 원리이며, 같은 개념이 두 층에서 같은 모양으로 나타난다.
+- **하류 소비**: `/finalize-workitem`은 `Pass`·`Pending Acceptance`를 통과시키고 `Needs Fix`를 차단한다. `/repair-workitem`은 `Pass`·`Pending Acceptance`면 finalize를 안내하고 종료한다. 졸업 item 1은 closure 줄의 verdict가 `Pass` **또는** `Pending Acceptance`일 것을 요구한다(ADR-068 D3 item 1).
+- **`감사 미완(unavailable)`은 `Pending Acceptance`가 아니다** — 그것은 P0이며 `Needs Fix`를 트리거한다. 고칠 것은 없지만 *판정할 수 없는* 상태이므로 `Pass` 계열을 낼 수 없다(ADR-068 D4와 동일 원리).
 - **confidence ladder 정합**: Low 조건의 «미충족 AC 있음»은 **기계 검증 AC 한정**으로 읽는다. 사람·플랫폼 관측 비중은 **자동화율 <70%** 가 이미 잡으므로 이중으로 깎지 않는다.
 
 ### D5. ADR-063 D6과의 관계
@@ -104,7 +104,7 @@ ADR-063 D6은 *기계적 검사에 차단력을 부여할 수 있는가*를 규�
 - opt-out을 AC 면제로 쓰지 않는 이유: ADR-009 본문에 그 근거가 없고, 면제로 쓰면 `## 6-2` 두 줄을 채우는 것만으로 AC 게이트가 사라진다.
 
 ## Mutation Contract (ADR-047 D3)
-1. **Target** — TASK_TEMPLATE `## 6-1`·`## 8`(`- ac-pending` 포함) / plan-workitem modality authoring / implement-workitem·builder.md modality별 RGR 분기 + `- ac-pending` 기록 / validate-workitem AC 매핑 판정·**D6 판정값 3종**·report 양식·confidence 입력 / finalize-workitem 관측 AC 통과 처리 + `- ac-pending` 기록 / repair-workitem·repair-acceptance·repair-milestone receipt 무효화 / accept-milestone receipt 작성(마일스톤 스코프 단독) / stabilize-milestone 졸업 item 4 (a') 판독 / validator.md 판정 규칙 / ADR-009 opt-out 명확화 / ADR-067 졸업 item 4.
+1. **Target** — TASK_TEMPLATE `## 6-1`·`## 8`(`- ac-pending` 포함) / plan-workitem modality authoring / implement-workitem·builder.md modality별 RGR 분기 + `- ac-pending` 기록 / validate-workitem AC 매핑 판정·**D6 판정값 3종**·report 양식·confidence 입력 / finalize-workitem 관측 AC 통과 처리 + `- ac-pending` 기록 / repair-workitem·repair-acceptance·repair-milestone receipt 무효화 / accept-milestone receipt 작성(마일스톤 스코프 단독) / stabilize-milestone 졸업 item 4 판독 / validator.md 판정 규칙 / ADR-009 opt-out 명확화 / ADR-068 졸업 item 4.
 2. **Failure mode** — (a) 테스트로 확인 불가한 AC가 영구 `❌`로 남아 마일스톤이 졸업하지 못함 (b) 근거 없는 opt-out 예외가 AC 게이트를 무력화 (c) 사람 관측이 waiver 형태로 기록돼 위장 통과 (d) 사람 관측이 커버리지 %에 섞여 신뢰도 등급이 부풀려짐.
 3. **Predicted improvement** — 4개 지점의 판정이 일치하고, `Type: research-spike` task가 완료 가능해지며, report에 충족률·자동화율 두 수치가 남는다.
 4. **Preserved invariants** — ADR-009 RGR 3 phase / ADR-064 D2 `VC-N` 집계 제외 및 D4 receipt 위치·판독 규칙 / `/validate-workitem` report-only 계약 / `/stabilize-milestone` read-only 계약 / ADR-063 D6 배치 기준.
@@ -117,7 +117,7 @@ ADR-063 D6은 *기계적 검사에 차단력을 부여할 수 있는가*를 규�
 
 ## 결과
 - AC 충족의 증명 수단이 5종으로 명시되고, 그 판정 기준이 plan·validate·finalize·stabilize 네 지점에서 같아진다.
-- `사용자 관측`·`플랫폼 관측`의 발급 경로는 둘이다 — [ADR-066](ADR-066-milestone-acceptance.md)의 `/accept-milestone <M>`(stabilize 뒤) 또는 사용자 직접 기재. **그 modality를 쓴 AC가 하나도 없는 마일스톤에서는 수용 라운드가 권장이며 의무가 아니다.** 그 modality를 쓴 AC가 있으면 receipt 없이는 졸업(item 4 (a'))을 통과하지 못하므로 사실상 이 단계를 거치게 된다.
+- `사용자 관측`·`플랫폼 관측`의 발급 경로는 둘이다 — [ADR-066](ADR-066-milestone-acceptance.md)의 `/accept-milestone <M>`(stabilize 뒤) 또는 사용자 직접 기재. **그 modality를 쓴 AC가 하나도 없는 마일스톤에서는 수용 라운드가 권장이며 의무가 아니다.** 그 modality를 쓴 AC가 있으면 receipt 없이는 졸업 item 4를 통과하지 못하므로 사실상 이 단계를 거치게 된다.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. 실제 파일 경로 1행 1개)
 > 등재 기준: 본 ADR의 결정을 **실행하거나 집행하는 파일만** 등재한다. 본 ADR을 배경·역사로 언급만 하는 파일은 등재하지 않는다.
@@ -133,9 +133,9 @@ ADR-063 D6은 *기계적 검사에 차단력을 부여할 수 있는가*를 규�
 - .claude/skills/accept-milestone/SKILL.md              — D3 receipt 작성자 (마일스톤 스코프 단독)
 - .claude/agents/validator.md                           — D1·D4 축 1 판정 규칙
 - docs/90-decisions/boilerplate/ADR-009-tdd-default.md  — D2 opt-out 의미 명확화
-- docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md — D1 modality가 졸업 item 4 (a)/(a') 분기 기준 · D6 판정값이 item 4 (b) 입력
-- .claude/skills/stabilize-milestone/SKILL.md           — D1 item 4 (a') 관측 AC receipt 직접 판독
+- docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md — D1 modality가 졸업 item 4(관측 AC) 판정 기준 · D6 판정값이 closure 줄(item 1) verdict 입력
+- .claude/skills/stabilize-milestone/SKILL.md           — D1 관측 AC receipt 직접 판독 (졸업 item 4)
 - docs/30-workitems/_templates/MILESTONE_TEMPLATE.md    — D1 관측 modality의 졸업 게이트 위치
 
 ## 참고
-- ADR-009(TDD — opt-out 범위), ADR-026(측정 가능 AC), ADR-039(workitem Type — research-spike), ADR-057#amend-3 결정 6(새 범위 라우팅), ADR-063 D6(기계적 검사 배치 기준 — D5), ADR-064 D1·D2·D4(waiver·`VC-N`·receipt 위치), ADR-066(수용 단계 — 관측 발급 경로), ADR-067(졸업 item 4 소비처).
+- ADR-009(TDD — opt-out 범위), ADR-026(측정 가능 AC), ADR-039(workitem Type — research-spike), ADR-057#amend-3 결정 6(새 범위 라우팅), ADR-063 D6(기계적 검사 배치 기준 — D5), ADR-064 D1·D2·D4(waiver·`VC-N`·receipt 위치), ADR-066(수용 단계 — 관측 발급 경로), ADR-068(졸업 item 4 소비처).

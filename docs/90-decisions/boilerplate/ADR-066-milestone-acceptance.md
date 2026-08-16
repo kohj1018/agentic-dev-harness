@@ -17,13 +17,13 @@ accepted
 ### D1. `/accept-milestone` 신규 skill
 `/stabilize-milestone` **뒤**에 사람이 직접 실행·확인하는 단계를 둔다. 실행 환경을 띄우고, 확인할 시나리오를 제시하고, 사용자 피드백을 구조화해 라우팅한다.
 
-- **관측 modality AC가 0건인 마일스톤에서는 졸업 필수 조건이 아니다(권장).** 실행하지 않아도 `YES`로 졸업할 수 있다. 반대로 `사용자 관측`·`플랫폼 관측` modality를 쓴 AC가 1건이라도 있으면 그 receipt 없이는 졸업 item 4 (a')를 충족하지 못하므로(ADR-065 D1 / ADR-067 D1) **본 단계가 사실상 필수 경로가 된다.** 그 상태의 graduation 값이 `PENDING_ACCEPTANCE`다(ADR-067 D3).
+- **관측 modality AC가 0건인 마일스톤에서는 졸업 필수 조건이 아니다(권장).** 실행하지 않아도 `YES`로 졸업할 수 있다. 반대로 `사용자 관측`·`플랫폼 관측` modality를 쓴 AC가 1건이라도 있으면 그 receipt 없이는 졸업 item 4를 충족하지 못하므로(ADR-065 D1 / ADR-068 D3) **본 단계가 사실상 필수 경로가 된다.** 그 상태의 graduation 값이 `PENDING_ACCEPTANCE`다(ADR-068 D4).
 - **졸업 판정 소유권은 `/stabilize-milestone`에 유지한다.** 수용 라운드의 수리는 코드 변경이므로 그 뒤 테스트·e2e 재검증 없이 졸업시키지 않는다.
 
 **스코프는 하나다 — 마일스톤 스코프(`/accept-milestone <M>`)뿐이다.** `/stabilize-milestone` 뒤에 실행하며, 마일스톤 전체 경험 확인 + 자유 탐색 + 피드백 3갈래 라우팅 + 관측 modality AC의 receipt 발급을 한 라운드에서 함께 처리한다. 라운드 카운터를 소모하고 `## 11`에 기록한다.
 
 - **task 스코프 모드를 두지 않는 이유**: 그 모드는 `receipt 없어 finalize 불가 → task done 불가 → stabilize 진입 불가 → 발급 불가` 교착을 풀기 위한 장치였으나, 같은 교착을 **`/finalize-workitem`이 관측 AC 미충족을 통과시키는 것**으로 더 싸게 풀 수 있다([ADR-065](ADR-065-ac-verification-contract.md) D1·D6). task 스코프를 두면 관측 AC를 쓴 task 수만큼 «수용 → 재validate → finalize» 왕복이 추가로 발생한다.
-- **차단은 사라지지 않고 위치가 바뀐다** — 미발급 receipt는 [ADR-067](ADR-067-milestone-graduation-v2.md) D1 item 4 (a')가 졸업 시점에 잡는다. 관측 AC가 하나라도 미발급이면 그 마일스톤의 graduation은 `PENDING_ACCEPTANCE`이며 `YES`가 될 수 없다.
+- **차단은 사라지지 않고 위치가 바뀐다** — 미발급 receipt는 [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D3 item 4가 졸업 시점에 잡는다. 관측 AC가 하나라도 미발급이면 그 마일스톤의 graduation은 `PENDING_ACCEPTANCE`이며 `YES`가 될 수 없다.
 - **커밋·배포 이후에만 일어나는 사실**(CI 실행·배포 후 동작·실제 스케줄 발화)은 애초에 그 task의 AC로 두지 않고 후속 verification task로 분리한다(ADR-065 D1 경계).
 - 마일스톤 스코프 **라운드 상한 3회**. 초과 시 남은 항목은 사용자 확인 후 다음 마일스톤으로 이관한다. **라운드 번호는 세션 파일 수로 계산하지 않는다**(수리 라운드가 그 파일을 삭제하므로 상한이 무력화된다) — 마일스톤 문서 `## 11`에 영속된 `- 라운드:` 값을 읽어 +1 한다.
 
@@ -83,14 +83,14 @@ repair가 결함 하나를 고칠 때 **같은 패턴의 다른 출현을 저장
 
 ## 근거
 - 이 단계는 새 개념이 아니라 §3-V가 남긴 *"사용자 육안 확인 권장"* 의 실행 자리이고, oracle gap 목록의 소비처다. 두 미완성 후단을 잇는다.
-- **관측 modality AC가 0건인 마일스톤에서** 권장(비차단)으로 두는 이유: 사람 확인 부재로 인한 잘못된 졸업은 아직 관측되지 않았다(ADR-022 ratchet). **관측 AC가 1건이라도 있으면 그 receipt가 졸업 item 4 (a')를 막으므로 그 마일스톤에서는 이 단계가 사실상 필수다**(위 D1). 본 단계를 졸업 checklist **항목**으로 승격하는 트리거는 *졸업 YES가 난 마일스톤에서 사용자가 P0급 경험 결함을 발견한 사례* 이며, 그때 필수 항목으로 올린다(과거 graduation contract가 같은 항목을 soft→hard로 올린 방식과 동형 — 현재 SSOT: ADR-067).
+- **관측 modality AC가 0건인 마일스톤에서** 권장(비차단)으로 두는 이유: 사람 확인 부재로 인한 잘못된 졸업은 아직 관측되지 않았다(ADR-022 ratchet). **관측 AC가 1건이라도 있으면 그 receipt가 졸업 item 4를 막으므로 그 마일스톤에서는 이 단계가 사실상 필수다**(위 D1). 본 단계를 졸업 checklist **항목**으로 승격하는 트리거는 *졸업 YES가 난 마일스톤에서 사용자가 P0급 경험 결함을 발견한 사례* 이며, 그때 필수 항목으로 올린다(과거 graduation contract가 같은 항목을 soft→hard로 올린 방식과 동형 — 현재 SSOT: ADR-068).
 - 전용 repair skill을 두는 이유는 위 D4의 authority 차이다(중복이 아니라 특화).
 
 ## Mutation Contract (ADR-047 D3)
 1. **Target** — `.claude/skills/accept-milestone/SKILL.md` / `.claude/skills/repair-acceptance/SKILL.md` / 양 Codex wrapper / `.gitignore` acceptance-reviews / MILESTONE_TEMPLATE `## 11` / stabilize §3-V (d)·§1.0 pattern-scan 회수·단계 8 다음 단계 / validate-workitem·finalize-workitem의 관측 AC 처리 / repair-milestone D5 경계 + D6 pattern-scan + 수리 규율 + 루프 닫기 / repair-workitem D6 pattern-scan / TASK_TEMPLATE `## 8` pattern-scan 형식 / QA_FINDINGS·IMPROVEMENT_GUIDE `## 항목 스키마`(`(수용)` 태그)·IMPROVEMENT_GUIDE `## 4` 계약 부채 / ROADMAP `## Backlog`(D2 계약 변경 목적지) / ADR-007 단계 추가 note / WORKFLOW lifecycle·실행 순서 / DELEGATION 위임 표·실행 순서 / STRUCTURE 로스터·산출물 표·Canonical Owner 매핑 / README·README_ko wrapper 목록.
 2. **Failure mode** — (a) 자동 검증만으로 졸업해 제품 경험 결함이 사용자에게 처음 발견됨 (b) oracle gap이 어디에서도 소비되지 않음 (c) 사용자 피드백이 분류 없이 쌓여 마일스톤이 끝나지 않음 (d) 사용자 관측이 에이전트에 의해 오탐으로 기각됨.
 3. **Predicted improvement** — 수용 라운드가 실행된 마일스톤에 `## 11. 수용 기록`이 남고, 사용자 피드백이 3갈래로 분류돼 계약 변경이 현재 M을 늘리지 않는다.
-4. **Preserved invariants** — `/stabilize-milestone` read-only + 졸업 판정 소유권 / ADR-067 졸업 항목 무증설 / ADR-060 D11 봉인 후 결정 등재 경로 / ADR-047 D7 commit owner / task status 소유권(`/finalize-workitem`·`/repair-workitem` 한정 — `/repair-acceptance`·`/repair-milestone`은 status를 직접 쓰지 않고 `in-AC` 결함을 `/repair-workitem`에 위임한다).
+4. **Preserved invariants** — `/stabilize-milestone` read-only + 졸업 판정 소유권 / ADR-068 졸업 항목 무증설 / ADR-060 D11 봉인 후 결정 등재 경로 / ADR-047 D7 commit owner / task status 소유권(`/finalize-workitem`·`/repair-workitem` 한정 — `/repair-acceptance`·`/repair-milestone`은 status를 직접 쓰지 않고 `in-AC` 결함을 `/repair-workitem`에 위임한다).
 5. **Falsifying evaluation** — ADR-017 dogfood 재실행에서 (a) 비-UI 마일스톤에서 제시할 시나리오가 0건이 되거나, (b) 사용자 피드백 분류가 매번 `Out-of-contract`로 쏠려 수리가 발생하지 않거나, (c) 라운드 상한 3회에 도달하는 사례가 반복되면 D1·D2를 재조정한다.
 6. **Rollback path** — 본 ADR superseded + 두 skill과 wrapper 제거 + `## 11` 섹션 제거 + `.gitignore` 패턴 제거 + stabilize §3-V (d) 문구 복원.
 
@@ -100,7 +100,7 @@ repair가 결함 하나를 고칠 때 **같은 패턴의 다른 출현을 저장
 
 ## 결과
 - `stabilize(PENDING_ACCEPTANCE) → accept → (repair-acceptance) → accept 재확인 → stabilize 재실행 → 졸업(YES)` 흐름이 생긴다.
-- ADR-065의 `사용자 관측` modality가 발급 경로를 갖고, 그 receipt 발급은 **재validate를 유발하지 않는다**(졸업 item 4 (a')가 task `## 8`을 직접 읽는다 — ADR-067 D1).
+- ADR-065의 `사용자 관측` modality가 발급 경로를 갖고, 그 receipt 발급은 **재validate를 유발하지 않는다**(졸업 item 4가 task `## 8`을 직접 읽는다 — ADR-068 D3).
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. 실제 파일 경로 1행 1개)
 > 등재 기준: 본 ADR의 결정을 **실행하거나 집행하는 파일만** 등재한다. 본 ADR을 배경·역사로 언급만 하는 파일은 등재하지 않는다.
@@ -126,3 +126,25 @@ repair가 결함 하나를 고칠 때 **같은 패턴의 다른 출현을 저장
 
 ## 참고
 - ADR-054(cross-LLM stabilize 리뷰 — ephemeral 리뷰 파일·4판정·echo-then-rm 원형), ADR-056(경험 계약 — 승인 프로토타입·§3-V), ADR-060 D11(봉인 후 새 결정 등재), ADR-065(AC 검증 modality — `사용자 관측` 발급), ADR-047 D7(commit owner·durable correction history), ADR-039(`Type: bugfix` — 회귀 테스트 규율의 원형).
+
+<a id="adr-066-amend-1"></a>
+## Amendment 1 (2026-08-17) — 재개방 판별 폐지 (마일스톤 층 폐쇄 경계 정합)
+
+### 배경
+- [관측됨] D4의 `in-AC` 분기는 그 task를 재개방해 `/repair-workitem` → `/validate-workitem` → `/finalize-workitem` 연쇄를 돌게 한다. 이 연쇄가 실행 순서 규칙과 채점표 자기무효화의 직접 원인이었다.
+- [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D1이 마일스톤 층의 task 재개방을 전면 폐지한다.
+
+### 결정
+- **D4의 「재개방 판별」에서 «재개방» 부분을 폐지한다.** `in-AC`·`out-of-AC` 어느 쪽이든 `/repair-acceptance`가 **직접 고친다.** `/repair-workitem` 위임과 그 뒤의 연쇄(`/validate-workitem`·`/finalize-workitem`)는 수행하지 않는다.
+- **`scope: in-AC | out-of-AC` 판별 자체는 유지한다** — 라우팅 분기가 아니라 `IMPROVEMENT_GUIDE.md` `## 5`의 **필수 분류값**으로 남는다(ADR-068 D6). 판별 질문과 계약 여섯 범위는 D4 본문 그대로다.
+- `out-of-AC` 계약 부채 등재(`## 4. 보류 항목`) 의무는 유지하며 `/repair-milestone`에도 동일하게 적용된다(ADR-068 D6).
+- D4의 «본 skill은 커밋하지 않는다»는 유지된다. 연쇄가 사라졌으므로 **커밋 주체는 사용자 하나**가 된다(`/finalize-workitem`이 이 경로에서 호출되지 않는다).
+- D6 pattern-scan의 기록 위치는 task `## 8`이 아니라 `IMPROVEMENT_GUIDE.md` `## 5`의 그 항목 하위 줄로 옮긴다(폐쇄 후 task 문서 불가침 — ADR-068 D1). `/repair-workitem`이 폐쇄 **전**에 수행하는 pattern-scan은 기존대로 task `## 8`이다.
+
+### 강도 (ADR-022)
+- 제약(강) — [관측됨]. 기존 경로의 제거이며 새 요구를 추가하지 않는다.
+
+### 적용 surface
+- .claude/skills/repair-acceptance/SKILL.md
+- .claude/skills/repair-milestone/SKILL.md
+- .claude/skills/repair-workitem/SKILL.md

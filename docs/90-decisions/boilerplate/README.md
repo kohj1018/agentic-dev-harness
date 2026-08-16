@@ -17,7 +17,7 @@
 | 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화, +#amend-4: cross-LLM wrapper 필수 축, +#amend-5: 도구별 memory 비캐노니컬) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
 | 011 | AGENTS.md 100줄 hard cap | accepted | — | AGENTS.md 최대 100줄, 신규 정책은 ADR + 1줄 링크 |
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
-| 014 | Milestone graduation contract | superseded | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3, +#amend-3: 회고 graduation 판정 줄 — 로드맵 파생 입력, +#amend-4: 0-spec 예외 철회 — 실행된 e2e 1개 이상 성공) | graduation checklist 5+1 + 회고 + pre-check + --dry-run → ADR-067로 통합 재발행 |
+| 014 | Milestone graduation contract | superseded | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3, +#amend-3: 회고 graduation 판정 줄 — 로드맵 파생 입력, +#amend-4: 0-spec 예외 철회 — 실행된 e2e 1개 이상 성공) | graduation checklist 5+1 + 회고 + pre-check + --dry-run → ADR-067 → ADR-068로 통합 재발행 (현재 SSOT: ADR-068) |
 | 017 | Dogfood 시뮬레이션 의무 + 재실행 트리거 | accepted | (+#amend-1: 위치 경로 .boilerplate/) | todo CLI baseline 시뮬레이션 + 성공 기준 3개 + 재실행 트리거 3종 |
 | 019 | JIT 컨텍스트 로딩 정책 | accepted | (+#amend-1: 조건부 re-read — ADR-051 D8) | 본문 JIT 로딩(`## Context 정책`) + 사전 fork-load 금지 — context-pack frontmatter는 no-op으로 제거 |
 | 020 | `validate --changed` incremental | accepted | — | finalize는 --changed만, stabilize는 full validate |
@@ -45,7 +45,7 @@
 | 049 | Concept-mockup-first 디자인 흐름 + 레퍼런스 리서치 노트 | superseded (by ADR-058) | (+#amend-1: R0 필수 + 수렴 + visual-QA scaffold + 클래스 anti-slop, +#amend-2: designer agent + grounding 위계 + divergence) | /bootstrap-design 라운드 재구성 R0~R6(DESIGN.md 작성 전 다중 concept 시안 선택) + DESIGN_RESEARCH.md 노트. ADR-027 라운드 구조 #3/#13/#21/#d22/#d26/#27 supersede(ADR-027은 내용·인터페이스 SSOT 유지) |
 | 050 | Main-session, model-invocable lifecycle skills | accepted (부분 superseded by 051) | +#amend-1: dispatcher 사전판정 금지 | de-fork 7종 메인 세션 실행 + 실행 inner-loop 4종 model-invocable + repair-workitem 판단형/report 삭제 |
 | 051 | Main-session orchestration (foreman) + 병렬 fan-out + wave 제거 | accepted | (+#amend-1: 공유 런타임 리소스 partition 가드, +#amend-2: validate orchestration 관측 + fallback 보정, +#amend-3: D4 범위 갱신(M1 통일), +#amend-4: fan-out 크기 판정 기계화 + 하청 정지 회수 + PM 고정) | implement→foreman 병렬/단일 builder 위임(file-disjoint slice 병렬, 작거나 겹치면 단일) + validate/stabilize report-only fan-out + plan de-fork + plan-milestone 신설 + ADR-038 wave(#d3/#d6) 제거 + ADR-047 D9 foreman partition re-anchor + ADR-019 조건부 re-read |
-| 052 | Stack provisioning (install) + E2E readiness | accepted | (+#amend-1: 0-spec 판정 정합화 — 5상태 분류, 문자열 매칭 폐기) | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) → 현재 SSOT: ADR-067 |
+| 052 | Stack provisioning (install) + E2E readiness | accepted | (+#amend-1: 0-spec 판정 정합화 — 5상태 분류, 문자열 매칭 폐기) | stack-guard가 baseline toolchain·e2e 직접 install/provision(실패 시 Needs Install blocker) + 정합 검증 + e2e provision/smoke + E2E MUST-run hard-block(ADR-014#amend-2) + repair-milestone 신설(코드수정 허용·커밋 X) → 현재 SSOT: ADR-068 |
 | 053 | 고-stakes 설계 패널 (stakes-gated design protocol) | accepted | (+#amend-1: ④ ADR 판정 기준, +#amend-2: 종결자를 사용자 선택으로 이동) | stakes 게이트(S1~S5) + 3단 강도(리서치·다각도·적대) + ARCHITECTURE §7 결정 블록 + stabilize backstop |
 | 054 | Cross-LLM Stabilize Review | accepted | +#amend-1: 결정5 supersede | /validate-milestone 신설(read-only peer review) + repair-milestone 종합·dedup·echo-rm + stabilize single-origin + .gitignore |
 | 055 | 입력 적응형 bootstrap-stack 흐름 + 스택 결정 taxonomy(T1/T2/T3) | accepted | — | 무입력=DEEP 결정 라운드(--recommend 흡수)/구체·brownfield=문서화 + 한 세션 auto-execute + --migrate 적응형 + T2/T3 임계(ADR-053 S1)·ADR-101 living-snapshot drift |
@@ -59,8 +59,9 @@
 | 063 | 검증 장치의 실측 검증과 유지 주기 (Verification Harness Integrity) | accepted | — | probe 기반 실측 smoke test + harness 경로 배제 + 재실행 계약 + `[Guard-drift]` 노후 감지(침묵 우선) + 기계적 검사 배치 2문항 |
 | 064 | task 층 증거 계약 (Task-Layer Evidence Contract) | accepted | — | 외부 경계 실행 증거(implement 정지로 차단, validate는 기록 등급) + Red 관측·VC-N 판정력 + `[미실측]` 외부 사실 해소 + 공통 receipt(`## 8`, writer=implement·repair, validate 이전) |
 | 065 | AC verification contract | accepted | — | AC 충족 증명 modality 5종(자동 테스트/산출물 검사/사용자 관측/플랫폼 관측/미관측=미충족) + authority·receipt + 충족률·자동화율 2수치 |
-| 066 | Milestone acceptance | accepted | — | /accept-milestone(사람 직접 확인 — 관측 AC 있으면 사실상 필수, 마일스톤 스코프 단독) + /repair-acceptance(3+1 판정 · in-AC는 repair-workitem 위임(재개방)/out-of-AC는 직접 수정 + 계약 부채) + 피드백 3갈래 라우팅 + D6 pattern-scan |
-| 067 | Milestone graduation contract v2 | accepted | — | ADR-014 통합 재발행. item 4=AC 충족(전 modality) / BLOCKED=평가 실행 불가(e2e env·감사 미완) / 회고 open 스냅샷 |
+| 066 | Milestone acceptance | accepted | (+#amend-1: 재개방 판별 폐지 — ADR-068 정합) | /accept-milestone(사람 직접 확인 — 관측 AC 있으면 사실상 필수, 마일스톤 스코프 단독) + /repair-acceptance(3+1 판정 · in-AC는 repair-workitem 위임(재개방)/out-of-AC는 직접 수정 + 계약 부채) + 피드백 3갈래 라우팅 + D6 pattern-scan |
+| 067 | Milestone graduation contract v2 | superseded | — | ADR-014 통합 재발행. item 4=AC 충족(전 modality) / BLOCKED=평가 실행 불가 / 회고 open 스냅샷 → ADR-068로 통합 재발행 |
+| 068 | 마일스톤 폐쇄 경계 + 졸업 계약 v3 | accepted | — | ADR-067 통합 재발행. task 층 폐쇄 경계 + closure receipt + 졸업 item 4 (a)(b)(c)(d)·mtime 폐지 + 아카이브 회전 (현재 SSOT: ADR-068) |
 
 ## Reserved / Parked / Dropped 번호
 

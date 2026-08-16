@@ -60,7 +60,7 @@ accepted
 - enabling(약, [외부실증]) — full 패널은 게이트 발동 시; ①만 hard-ish(날조 금지), ②③ default/recommend.
 
 ## 참고
-- ADR-006(단순성 게이트), ADR-040(researcher·리서치 품질), ADR-038(cross-LLM 정신), ADR-031(지원 스택), ADR-067(마일스톤), ADR-047 D3(Mutation Contract).
+- ADR-006(단순성 게이트), ADR-040(researcher·리서치 품질), ADR-038(cross-LLM 정신), ADR-031(지원 스택), ADR-068(마일스톤), ADR-047 D3(Mutation Contract).
 
 <a id="adr-053-amend-1"></a>
 ## Amendment 1 (2026-07-16) — ④ "(해당 시) ADR"의 판정 기준·작성 주체 구체화

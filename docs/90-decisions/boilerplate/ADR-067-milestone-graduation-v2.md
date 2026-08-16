@@ -4,7 +4,9 @@
 > area: process
 
 ## Status
-accepted
+superseded (by ADR-068)
+
+> 본 ADR의 결정은 [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md)이 통합 승계했다. 졸업 item 4의 (a)(b)(c)(d)·mtime 판정·`--dry-run`은 폐지됐다. (현재 SSOT: ADR-068)
 
 ## 대체
 - [ADR-014](ADR-014-milestone-graduation.md)를 **supersede**한다(현재 SSOT: 본 ADR). ADR-014의 결정 3개(5+1 checklist / 회고 4항목 / pre-check + `--dry-run`)와 개정 4개(evaluator-optimizer 명명 / E2E MUST-run hard-block / 회고 graduation 줄 / 0-spec 예외 철회)를 본 ADR이 통합 승계하고, 아래 3가지를 변경한다.
