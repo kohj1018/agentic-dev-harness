@@ -404,8 +404,9 @@ superseded (by ADR-068)
 
 **(c) 068 행 추가** — 067 행 **아래**에 삽입:
 ```
-| 068 | 마일스톤 폐쇄 경계 + 졸업 계약 v3 | accepted | — | ADR-067 통합 재발행. task 층 폐쇄 경계 + closure receipt + 졸업 item 4 (a)(b)(c)(d)·mtime 폐지 + 아카이브 회전 |
+| 068 | 마일스톤 폐쇄 경계 + 졸업 계약 v3 | accepted | — | ADR-067 통합 재발행. task 층 폐쇄 경계 + closure receipt + 졸업 item 4 (a)(b)(c)(d)·mtime 폐지 + 아카이브 회전 (현재 SSOT: ADR-068) |
 ```
+> 끝의 마커는 (d)의 014 행과 같은 이유다 — 이 칸도 supersede 계보라 `ADR-067` 문자열이 남는데, 마커가 없으면 Phase 10 check #1이 미처리로 잡는다. 자기 행에 자기 번호를 적는 것이 중복으로 보이지만, «이 줄의 ADR-067 인용은 처리 완료»를 표시하는 검사 제외 마커라 형식이 같아야 한다(ADR-068 자기 *파일*은 경로로 제외한다 — 2-4의 필터 주의 참조).
 
 **(d) 014 행** — 요약 칸 끝의 `→ ADR-067로 통합 재발행`을 **`→ ADR-067 → ADR-068로 통합 재발행 (현재 SSOT: ADR-068)`** 으로 바꾼다. 끝의 마커가 필요한 이유: 이 칸은 supersede 계보라 `ADR-067` 문자열이 남는데, 마커가 없으면 Phase 10 check #1이 미처리로 잡는다(ADR-045#amend-2 D10의 검사 제외 마커).
 
@@ -466,9 +467,11 @@ grep -rn "ADR-067" --include="*.md" . \
   | grep -v "^\./\.git" \
   | grep -v "^\./IMPROVE-GUIDE\.md:" \
   | grep -v "^\./docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2\.md:" \
+  | grep -v "^\./docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3\.md:" \
   | grep -v "현재 SSOT: ADR-068"
 ```
 > **필터 주의**: `grep -v "ADR-067-milestone-graduation-v2.md:"` 처럼 파일명 *문자열*로 거르면 링크형 인용 `[ADR-067](…/ADR-067-milestone-graduation-v2.md)` 이 든 줄까지 함께 걸러져 **재지정 누락이 통과한다.** 위처럼 `^\./경로:` 로 «그 파일의 줄»만 걸러야 한다.
+> **ADR-068 자기 파일을 제외하는 이유**: ADR-068 본문은 `## 대체`·D3·D4·D5·Rollback path 등 **11곳에서 ADR-067을 정당하게 인용**한다(supersede 계보 서술 — 1-1의 전문 그대로이며 고치면 안 된다). 그 줄들은 `(현재 SSOT: 본 ADR)` 형식이라 마커 필터에도 걸리지 않는다. **superseding ADR의 자기 파일은 superseded ADR의 자기 파일과 같은 이유로 경로 제외**하고, 그 밖의 파일은 줄 단위 마커로 처리한다 — 이 둘이 «정당한 잔존»의 유일한 두 형태다.
 
 출력이 비면 완료. 남은 줄이 있으면 위 표로 다시 분류한다.
 
@@ -501,6 +504,45 @@ grep -rn "ADR-067" --include="*.md" . \
 ```
 
 > `<적용일 YYYY-MM-DD>`는 실제 적용하는 날짜로 바꾼다.
+
+## 2-6. 번호 치환만으로 부족한 4곳 ★ 2-4의 «(1) 재지정»을 문장 재작성까지 끝낸다
+
+2-4의 매핑표는 «ADR-067 → ADR-068» **번호**만이 아니라 **가리키는 대상**까지 바꾼다. 아래 넷은 번호만 바꾸면 문장이 거짓이 되거나 존재하지 않는 구조를 가리킨다. `ADR-067` 토큰이 이미 없어져 확인 명령에도 안 잡히므로 여기서 명시한다.
+
+**(a) `docs/90-decisions/boilerplate/ADR-063-verification-harness-integrity.md`** — v3의 item 4는 «관측 AC receipt»이지 «AC 충족 100%»가 아니다. 기계 검증 AC는 item 1(closure)이 소유한다.
+
+**현재 (`## 결정` D2 «프로젝트 빈 케이스» 불릿)**:
+```
+졸업 시점의 판정은 **ADR-068의 기존 5+1 항목이 소유한다**(테스트 0건은 item 4 `AC 충족 100%`에서 드러난다 — 본 ADR은 졸업 항목을 추가하지 않는다).
+```
+**변경**:
+```
+졸업 시점의 판정은 **ADR-068의 기존 5+1 항목이 소유한다**(테스트 0건은 그 task의 기계 검증 AC 미충족 → `- closure` 줄의 `verdict`·`기계AC`로 드러나며 졸업 item 1이 잡는다 — 본 ADR은 졸업 항목을 추가하지 않는다).
+```
+
+**(b) `docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md` 2곳** — v3의 item 4에는 하위 항목이 없으므로 `(a')` 표기를 없앤다.
+
+| 위치 | 현재 | 변경 |
+|---|---|---|
+| D1 아래 발급 경로 불릿 | `receipt 없이는 졸업(item 4 (a'))을 통과하지 못하므로` | `receipt 없이는 졸업 item 4를 통과하지 못하므로` |
+| `## Surfaces`의 stabilize 행 | `— D1 item 4 (a') 관측 AC receipt 직접 판독` | `— D1 관측 AC receipt 직접 판독 (졸업 item 4)` |
+
+> Surfaces 행의 `D1`은 **ADR-065 자신의 D1**(modality 5종)이다 — 형제 행들과 같은 규약이다. `ADR-068 D3`으로 바꾸면 안 된다. 바뀌는 것은 뒤에 붙은 졸업 항목 표기뿐이다.
+
+**(c) `docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md` 1곳** — `## 근거` 첫 불릿의 `졸업 item 4 (a')를 막으므로` → `졸업 item 4를 막으므로`.
+
+**(d) `docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md`** — 2-2가 발행한 ADR-066 Amendment 1이 이 문장을 거짓으로 만든다(재개방 연쇄 폐지). `ADR-066 D4` 인용이라 2-4의 ADR-067 sweep에 걸리지 않는다.
+
+**현재 (`## Status` 아래 «단계 추가 (2026-08-09)» 노트 안)**:
+```
+**`/repair-acceptance`는 결함이 기존 계약으로 추적 가능하면(`in-AC`) 그 task를 재개방해 `/repair-workitem` → `/validate-workitem` → `/finalize-workitem`으로 마감하고, 추적 불가하면(`out-of-AC`) 재개방 없이 직접 고치고 계약 부채로 등재한다**(ADR-066 D4).
+```
+**변경**:
+```
+**`/repair-acceptance`는 `in-AC`·`out-of-AC` 어느 쪽이든 task를 재개방하지 않고 직접 고친다**(ADR-066#amend-1 / [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D1 — `scope`는 라우팅 분기가 아니라 결정 이력의 필수 분류값이며, `out-of-AC`는 계약 부채를 `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에 등재한다).
+```
+
+> 노트의 날짜 머리(`> **단계 추가 (2026-08-09)** —`)와 나머지 문장은 그대로 둔다.
 
 > commit: `docs(adr): supersede ADR-067 with ADR-068, amend ADR-066, note partial supersede on ADR-052/057`
 
@@ -1418,6 +1460,19 @@ grep -n "수행 후 연쇄\|위임한다\|위임분\|위임받은\|(a')" .claude
 
 파일 전체의 `ADR-067 D1 item 4 (a')` → `ADR-068 D3 item 4`, `ADR-067 D3` → `ADR-068 D4`, `ADR-067 D6` → `ADR-068 D8`.
 
+**그리고 `ADR-067` 토큰 없이 `(a')`만 남은 1곳**을 함께 고친다 — (a)가 교체하는 괄호 *바깥*, 같은 줄 맨 끝의 문장이라 (a)·(d) 어느 쪽에도 안 걸린다.
+
+**현재 (「판정 = 승인」 줄 마지막 문장)**:
+```
+receipt 발급은 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).
+```
+**변경**:
+```
+receipt 발급은 재validate를 요구하지 않는다(졸업 item 4가 task `## 8`을 직접 읽는다 — ADR-068 D3).
+```
+
+**확인**: 작업 후 `grep -n "(a')" .claude/skills/accept-milestone/SKILL.md`가 빈 출력이어야 한다.
+
 ## 6-5. `.claude/skills/plan-milestone/SKILL.md` — R0 아카이브 회전
 
 ### (a) R0에 회전 규칙 추가
@@ -2066,9 +2121,11 @@ modality 설명 불릿 목록 **뒤**에 추가:
 ```bash
 grep -rn "ADR-067" --include="*.md" --exclude-dir=.git --exclude=IMPROVE-GUIDE.md . \
   | grep -v "^\./docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2\.md:" \
+  | grep -v "^\./docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3\.md:" \
   | grep -v "현재 SSOT: ADR-068"
 ```
 > **필터 주의**: `grep -v "ADR-067-milestone-graduation-v2.md:"` 처럼 *파일명 문자열*로 거르면 링크형 인용 `[ADR-067](…/ADR-067-milestone-graduation-v2.md)` 이 든 줄까지 함께 걸러져 **재지정 누락이 조용히 통과한다.** 반드시 `^\./경로:` 로 «그 파일의 줄»만 걸러야 한다.
+> **두 파일을 경로로 제외하는 이유**: superseded ADR(067)의 자기 파일은 역사 기록이고, superseding ADR(068)의 자기 파일은 supersede 계보 서술이다(`## 대체`·D3·D4·D5·Rollback path 등 11곳 — 1-1 전문 그대로이며 고치면 안 된다. 그 줄들은 `(현재 SSOT: 본 ADR)` 형식이라 마커 필터에 안 걸린다). **이 둘 외의 정당한 잔존은 전부 줄 단위 마커(`(현재 SSOT: ADR-068)`)로 처리한다** — 파일 단위 제외를 더 늘리면 재지정 누락이 숨는다.
 
 ### 2. 마일스톤 층의 위임 잔재 — 기대: **빈 출력**
 「재개방」이라는 낱말은 금지·부분폐지 서술로 정당하게 남으므로 세지 않는다. **위임을 실제로 지시하는 구조물**만 본다.
