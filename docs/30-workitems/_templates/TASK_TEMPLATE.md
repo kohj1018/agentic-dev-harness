@@ -84,7 +84,7 @@ feature
      - `[산출물 검사]` — `- AC-2 [산출물 검사] → npm run validate — insights 노트에 필수 섹션 3개(대안/권고/출처) 존재` (**검사 수단을 통합 `validate`에 묶는다** — 묶이지 않으면 충족 근거가 아니다. 내용의 *질*을 판정하는 AC는 이 modality가 아니라 `[사용자 관측]`이다)
      - `[사용자 관측]` — `- AC-3 [사용자 관측] → 삭제 확인 다이얼로그 문구·간격을 승인 프로토타입과 대조` (증거는 ## 8의 `- ac-acceptance` 줄)
      - `[플랫폼 관측]` — `- AC-4 [플랫폼 관측] → 선행 배포(T-012) 이후 이미 발화한 03:00 스케줄의 배치 완주를 확인 (증거: 실행 로그 run id)`. **커밋·배포 이후에만 일어나는 사실은 그것을 만든 task가 아니라 후속 verification task의 AC다**(ADR-065 D1 경계) — 같은 task에 두면 finalize 전에 관측할 수 없어 영구 미충족이 된다.
-     - **관측 modality 두 종은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(ADR-065 D6) finalize가 통과시켜 task를 `done`으로 마감하며 `## 8`에 `- ac-pending`을 남긴다. receipt는 `/accept-milestone <M>`(마일스톤 수용 라운드) 또는 사용자 직접 기재로 발급되고, 미발급 상태는 **마일스톤 졸업**에서 잡힌다(ADR-067 D1 item 4 (a') — graduation `PENDING_ACCEPTANCE`).
+     - **관측 modality 두 종은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(ADR-065 D6) finalize가 통과시켜 task를 `done`으로 마감하며 `## 8`에 `- ac-pending`을 남긴다. receipt는 `/accept-milestone <M>`(마일스톤 수용 라운드) 또는 사용자 직접 기재로 발급되고, 미발급 상태는 **마일스톤 졸업**에서 잡힌다(ADR-068 D3 item 4 — graduation `PENDING_ACCEPTANCE`).
      - `[미관측]` — **계획 단계에서 쓰지 않는다**(판정 결과 라벨이지 authoring 표기가 아니다 — ADR-065 D1). 어떤 modality도 정할 수 없으면 AC를 관측 가능하게 다시 쓰거나 task를 쪼갠다.
      - **표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환)** — 기존 fork의 task는 표기가 없으므로 이 규칙이 없으면 재검증에서 일괄 미충족이 된다. 그 AC에 대응 테스트가 없으면 기존과 같이 미충족이며, 표기 부재 자체는 `P2 [Modality-missing]` 기록 등급이다. **신규 task는 표기를 채운다.**
      modality writer: plan-workitem(계획 시 지정) · builder/foreman(구현 시 실제 경로·테스트 id 확정). `사용자 관측`·`플랫폼 관측`의 증거는 사용자만 발급한다(에이전트 대행 금지). -->
@@ -106,13 +106,14 @@ feature
 
 ## 8. 메모
 <!-- task scope /repair-plan이 본 라운드의 P0/P1 결정을 1줄씩 append하는 영속 위치 (ADR-047 D7 durable correction history + D1 inspectability). feature/milestone scope는 IMPROVEMENT_GUIDE.md `## 5. Repair decision log`로 라우트. 그 외 메모도 자유.
-     증거 receipt 위치이기도 하다 (ADR-064 D4 — writer: implement foreman · repair-workitem · repair-milestone · repair-acceptance(외부 경계 코드를 고친 경우). 시점: 그 라운드의 파일 변경이 전부 끝난 뒤 · /validate-workitem 실행 *이전*. validate 이후 append하면 task 문서 mtime이 갱신돼 finalize가 report를 stale로 보고 Needs Validation 교착이 된다):
+     증거 receipt 위치이기도 하다 (ADR-064 D4 — writer: implement foreman · repair-workitem(**폐쇄 전 라운드 한정**). 시점: 그 라운드의 파일 변경이 전부 끝난 뒤 · /validate-workitem 실행 *이전*. **폐쇄 후(산하 전 task done) repair-milestone·repair-acceptance의 실행 증거는 task 문서가 아니라 IMPROVEMENT_GUIDE `## 5` 항목 하위 줄에 적는다 — ADR-068 D1/D6**):
        `- exec-evidence <날짜> <경계 a|b|c>: <등급 1 재실행 가능 | 등급 2 1회성 — 형태> — <무엇에 대고 실행했는가> / 결과: <관측 1줄>`
        `- verify-power <날짜> <AC-N>: red=<observed|opt-out(사유)|characterization(사유)|unrecoverable(사유)> / vc=<VC-N 목록 또는 없음> / mutation=<미승격(G# 미충족) | 승격(변이·관측·사본 삭제 결과)>`
        `- fact-resolved <날짜> <무엇>: <잠정값> → <관측값> / 관측 방법: <1줄>`
        `- ac-acceptance <날짜> <AC-N>: modality=<사용자 관측|플랫폼 관측> / authority=사용자 / source=<출처 식별자 — 플랫폼 관측만> / 환경=<대상·버전> / 절차=<무엇을 했는가> / 결과=<관측 1줄>`  (ADR-065 D3 — writer: accept-milestone 또는 사용자. `authority`는 항상 `사용자`다. 신선도 자동검사 없음 — 고친 주체가 `- invalidated <날짜> <AC-N>: <사유>`로 무효화)
        `- ac-pending <날짜> <AC-N>: modality=<사용자 관측|플랫폼 관측> — 마일스톤 수용 라운드에서 확인 예정`  (ADR-065 D3 — writer: implement-workitem·finalize-workitem. **증거가 아니라 «아직 증거가 없다»는 표시**이며 어떤 게이트도 통과시키지 않는다. 같은 AC에 이미 있으면 중복 append 금지 — **중복 판정은 이 주석 밖의 줄만 센다**(바로 이 예시 줄을 세면 실제 줄이 영원히 append되지 않는다 — ADR-064 D4 판독 규칙). `- ac-acceptance` 발급 시 마지막 이벤트가 바뀌어 자동 무효)
-       `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`  (동일 결함 패턴의 다른 출현 전수 검색 결과 — ADR-066 D6. writer: repair-workitem·repair-acceptance·repair-milestone. 범위 밖 항목은 stabilize·repair-milestone이 회수) -->
+       `- closure <날짜> <task-id>: verdict=<Pass|Pending Acceptance> / 기계AC=<충족/전체> / audit=<complete|미완:<축>> / 관측대기=<AC-N 목록|없음> / 자동화율=<%>`  (ADR-068 D2 — writer: finalize-workitem 단독. 마감 시점의 채점표 결론을 커밋되는 자리로 옮겨 적는다. 졸업 item 1의 입력이다(`관측대기=`는 item 4 **회수용 색인**일 뿐 판정 근거가 아니다 — 근거는 `## 6-1` + `- ac-acceptance`, ADR-068 D3 item 4). 채점표(gitignore ephemeral)에 대한 졸업 의존을 없앤다. `## 0. Status`를 done으로 쓰는 것과 같은 편집 라운드에서 쓰고, 이미 있으면 덮어쓰지 않고 append한다 — 마지막 줄이 현재 상태다)
+       `- pattern-scan <날짜> <패턴 1줄>: 범위 내 N건 수정 / 범위 밖 M건 <경로 목록>`  (동일 결함 패턴의 다른 출현 전수 검색 결과 — ADR-066 D6. writer: repair-workitem(**폐쇄 전 라운드 한정**). **폐쇄 후 repair-milestone·repair-acceptance는 IMPROVEMENT_GUIDE `## 5` 항목 하위 줄에 적는다 — ADR-066#amend-1**. 범위 밖 항목은 stabilize가 두 위치 모두에서 회수) -->
 
 ## 9. 의존성
 <!-- 선행 task를 그 task가 보장할 AC 단위로 참조: `- T-002 ← T-001:AC-2 (인증 인터페이스 정의)`. 비어 있으면 선행 의존 없음.
