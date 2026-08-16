@@ -48,7 +48,6 @@
   ```
   /plan-workitem M1
   ```
-- [ ] bootstrap 후 PROJECT_CHARTER.md / ARCHITECTURE_OVERVIEW.md의 `## 0. Status`를 `draft → ready`로 전환했다 (수동 — 이 두 문서에는 상태 writer skill이 없다)
 - [ ] M1 / F-NNN은 `/plan-milestone`이 `contract-ready`까지 올렸다 (`ready` 전환은 `/seal-milestone`이 한다 — 수동 전환 금지)
 - [ ] `/seal-milestone M1`으로 최종 검사 + 승인 + 일괄 `ready` 봉인을 마쳤다
   ```

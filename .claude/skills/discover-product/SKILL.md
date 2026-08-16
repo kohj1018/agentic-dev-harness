@@ -1,7 +1,7 @@
 ---
 name: discover-product
 description: Run a multi-round discovery (persona / pain / JTBD / scenario / MVP / assumptions) and write DISCOVERY.md.
-argument-hint: "[product description | --fast]"
+argument-hint: "[product description | --fast | --update | --fast --update]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
 ---
