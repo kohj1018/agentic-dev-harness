@@ -1606,9 +1606,11 @@ accepted
 | Charter `## 7` 제약의 **배포 라이선스 줄** | README 2종 `## License`·`## Contributing` · `LICENSE` | 투영 갱신. **그 줄 외의 `## 7` 제약(기술·시간·인력)은 전파 대상이 아니다** — 라이선스는 법률 선택이고 나머지는 기술 제약이라 소비자가 다르다 |
 | ARCH `## 7-1`~`## 7-5` | 산하 task `Architecture-Iface` 링크 | **읽기 검사만** (task 미수정) |
 | ARCH 도구·명령 변경 | `STACK_SETUP_PLAN.md` · verify 스크립트 | **`/stack-guard` 재실행 필요** 명시 |
-| DESIGN `## 2`·`## 7`·`## 9`·`## 10` | 승인 프로토타입 · Design Gate Adapter | design gate 재실행 필요 여부 판정 |
+| DESIGN `## 2`~`## 10` (Colors·Typography·Layout·Elevation·Shapes·Components·Motion·Don'ts·Voice — 시각 계약 전 절) | 승인 프로토타입 · Design Gate Adapter | design gate 재실행 필요 여부 판정 |
 
 **본 skill은 `/stack-guard`·design gate를 직접 실행하지 않는다** — 필요 여부만 판정해 잔여 액션으로 출력한다.
+
+> DESIGN 행이 [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D6의 «계약 여섯 범위»에 든 `DESIGN.md` 항목(§2·§7·§9·§10)보다 넓은 이유: D6은 *이미 한 변경을 기존 계약으로 거꾸로 추적*하는 목록이고, 본 표는 *앞으로 할 변경이 무엇을 무효화하는가*를 판정한다. 승인 프로토타입은 타이포그래피·레이아웃·모션까지 구현하므로 그 절의 변경도 design gate 재실행 판정 대상이다. 두 목록의 목적이 다르므로 같을 필요가 없다.
 
 ### D4. 에스컬레이션 — 절-키 고정 열거
 기준은 «위험한가»가 아니라 **«답을 아직 모르고 그것을 찾는 라운드가 필요한가»** 다. 위험 관리는 D2의 확인 절차와 D5의 충돌 검사가 담당한다.
@@ -1730,7 +1732,7 @@ change-set의 각 대상 절을 전파표에 대입해 «함께 볼 곳»과 «�
 - 지명되지 않은 절을 함께 고치지 않는다. 인접 정리·재포맷 금지(ADR-006).
 
 ## A6. 결정 기록
-A2에서 `user-*`로 판정해 사용자가 확정한 항목은 `docs/10-charter/DECISION_REGISTER.md`에 `status: closed` + `정본:` 앵커로 등재한다(이미 있으면 상태·앵커만 갱신 — 중복 등재 금지). `agent-delegated`는 개별 등재하지 않고 출력의 일괄 확인으로만 처리한다.
+A2에서 `user-*`로 판정해 사용자가 확정한 항목은 `docs/10-charter/DECISION_REGISTER.md`에 `status: closed` + `정본:` 앵커로 등재한다(이미 있으면 상태·앵커만 갱신 — 중복 등재 금지). **항목 형식·필수 필드의 SSOT는 그 파일 상단의 「항목 형식」 블록과 [ADR-060](../../../docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md)이며 여기 재서술하지 않는다** — 신규 등재면 `D-NNN`·`authority`·`disposition`·`질문:`·`영향:`을 그 형식대로 채운다(`closed` + `user-*`는 승인 근거 필수 — 불변식 2). `agent-delegated`는 개별 등재하지 않고 출력의 일괄 확인으로만 처리한다.
 
 ## A7. 마지막 출력
 - 분류: editorial | local semantic | cross-SSOT | foundation(라우팅)
@@ -1738,7 +1740,7 @@ A2에서 `user-*`로 판정해 사용자가 확정한 항목은 `docs/10-charter
 - 전파 결과: 함께 갱신한 파생 문서 / 읽기 검사만 한 대상
 - **잔여 액션** (해당 시): `/stack-guard` 재실행 필요 / design gate 재실행 필요 / `/bootstrap-design --update` 권장 등
 - 봉인 충돌: 등재한 항목 (DECISION_REGISTER D-NNN) / **권장 등재 행 (ROADMAP `## Backlog` — 붙여 넣을 수 있는 완성된 한 줄. 본 skill이 쓰지 않는다)** / 없음
-- 원장 요약: closed N건 / open K건
+- **원장 요약**: `closed N건 / deferred M건 / open K건`
 - **커밋 안내**: 본 skill은 커밋하지 않는다 — 수정 파일을 사용자가 직접 커밋한다.
 
 책임 경계:
@@ -1750,7 +1752,7 @@ A2에서 `user-*`로 판정해 사용자가 확정한 항목은 `docs/10-charter
 정책 근거: [ADR-069](../../../docs/90-decisions/boilerplate/ADR-069-bounded-ssot-amendment.md) D1~D6. authority·Decision Brief는 [ADR-060](../../../docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) D2/D3. 정본 소유권은 [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md).
 
 ## Context 정책 (ADR-019)
-A0에서 특정한 대상 절과 A3 전파표가 지목한 파일만 읽는다 — 사전 fork-load 금지.
+A0에서 특정한 대상 절과 A3 전파표가 지목한 파일을 읽는다. **절차 수행에 필요한 아래 셋도 해당 단계에서 읽는다** — [ADR-069](../../../docs/90-decisions/boilerplate/ADR-069-bounded-ssot-amendment.md) D3 전파표(A3) · 부모 milestone의 `## 0. Status`와 `## 10. 봉인 기록`(A4) · `docs/10-charter/DECISION_REGISTER.md`(A4·A6 등재 — `영향:` 색인으로 관련 항목만). 그 밖의 사전 fork-load는 금지한다.
 ```
 
 ## 7-3. 로스터 3곳 갱신
@@ -1791,6 +1793,11 @@ A0에서 특정한 대상 절과 A3 전파표가 지목한 파일만 읽는다 �
 **(e-3) 같은 표의 `로드맵` 행** — **변경하지 않는다.** `## Backlog` writer는 3종으로 고정이며 amend-ssot는 그 파일에 쓰지 않는다(권장 행만 출력).
 
 ## 7-4. `docs/00-meta/DELEGATION_STRATEGY.md` — Mid-project 동선 표 교체
+
+**먼저 표 바로 위 도입 문장을 고친다** — 표에 `/amend-ssot` 행이 들어오면 «별도 skill 없이»가 거짓이 된다.
+
+**현재**: `charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요하다. 별도 skill 없이 다음 경로를 따른다.`
+**변경**: `charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요하다. 갱신 종류에 따라 아래 경로를 따른다.`
 
 **현재 (135~142행)**:
 ```markdown
