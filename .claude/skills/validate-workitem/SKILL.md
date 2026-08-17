@@ -17,6 +17,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
 - `$ARGUMENTS`에는 task ID가 들어온다 (feature 단위 검토는 `/validate-plan` 책임). FAC↔AC spec coverage 점검 시 본 task 의 상위 feature 문서를 *참조로* 읽는다.
 
 반드시 먼저 할 일:
+0-G. **폐쇄 가드 (ADR-068 D1)**: 대상 task의 `## 0. Status`가 `done`이고 그 마일스톤 산하 **모든** task가 `done`이면, 그 마일스톤은 마일스톤 층이다 — 새 채점표를 만들지 않고 종료한다. 안내: *"이 마일스톤은 전 task가 `done`이라 마일스톤 층입니다. 졸업 판정은 task `## 8`의 `- closure`를 읽으므로 재validate가 필요하지 않습니다. 검증은 `/stabilize-milestone <M>`이 수행합니다."* 산하에 `done`이 아닌 task가 하나라도 있으면 통상 진행한다.
 0. **감사 축 분할 + 병렬 validator 팬아웃 (orchestration)** — diff 규모로 분기한다.
    - **diff가 작으면 (cost guard)**: 팬아웃하지 않고 메인 세션이 직접 단일 inline validator로 1~5단계를 그대로 수행한다(아래 fallback 기준).
    - **diff가 크면**: 메인 세션이 아래 **감사 축**을 독립 sub-task로 분할하고, [DELEGATION 병렬 패턴 #1](../../../docs/00-meta/DELEGATION_STRATEGY.md#병렬-패턴-3종)(한 turn에 `validator` sub-agent 다중 호출)로 *한 turn에* 팬아웃한다. 각 validator는 **자기 축 하나만** scoped로 받고 **partial verdict만 반환**한다(report 작성 금지).
@@ -33,7 +34,7 @@ validator는 report 파일을 쓰지 않는다**(clobber 방지: report 경로�
      - **통합 검증 명령(1단계)은 메인 세션이 1회만 실행**하고 그 결과(exit code + stdout/stderr 요약)를 7번 축 validator와 집계에 공유한다 — N개 validator가 `pnpm validate`를 중복 실행하지 않는다.
      - **small-diff fallback 기준 — 계산이 먼저, 초과 시 재량 0** (cost guard, ADR-051#amend-4): dispatch 전에 크기를 *결정적 명령으로 계산한다*. **tracked 줄 변경** = `git diff HEAD --numstat` 각 행의 (added+deleted) 합(**binary 파일은 numstat이 `-\t-`로 표기 → 0으로 취급**; rename 행 `{old => new}`도 숫자 열은 그대로라 합산 정상); **untracked 신규** = `git status --porcelain --untracked-files=all`(= `-uall`)의 `??` 항목 각 *파일* 줄 수 합(`wc -l`). **`-uall`이 핵심** — 기본 `git status --porcelain`은 untracked 디렉터리를 `?? dir/` 한 줄로 접어 파일 수를 놓치고 `wc -l`을 디렉터리에 돌리면 깨진다(예: untracked 대량 디렉터리가 1로 오계산). **L = 둘의 합, F = numstat 행 수 + untracked 파일 수.** **기준은 working tree 전체(HEAD 대비)** — 정상 lifecycle은 직전 task가 finalize로 커밋돼 tree엔 본 task 변경분만 남으므로 별도 '관련 파일' 선별이 불요하다. **over-count는 안전하다**(크게 세면 fan-out으로 기울 뿐 — 검증을 *더* 하는 쪽). 그래서 무관한 dirty/untracked가 섞여도 **임의 제외하지 말고**(제외가 재량 우회 창구가 된다) 전부 센 뒤 `## Orchestration`에 "오염 tree(무관 파일 포함 가능)" 사유만 적는다. 정확한 수가 필요하면 무관분을 stash 후 재계산해도 되지만 필수 아님 — **공유 worktree에서 사용자 변경을 강제 커밋/stash하지 않는다**. inline 허용은 **(L ≤ 50) 또는 (F ≤ 2 이고 L ≤ 200)**, *그리고* UI/Arch-iface/MCP/spec-coverage 중 둘 이상이 명백히 해당없음 — **셋 다 충족일 때만**. 하나라도 미충족이면 **fan-out 필수 — inline 선택 불가(재량 0)**. 조건 충족이어도 "vertical slice라 하나로 본다" 류 사유로 inline을 택하려면 `## Orchestration`의 fallback 사유에 계산한 F·L + "임계 미달"을 명시 기록한다. **임계 초과인데 inline이면 규칙 위반**(산출물로 반증 가능 — SIMULATION_RUN Round 4 T-002 우회 재발 방지). 경계값(50/200)은 실측 전 추정치라 #amend-4가 재보정 창구다. 어느 경로를 탔든 report `## Orchestration` 기록은 의무다.
      - **축 미반환 회수 규율 (ADR-051#amend-4 결정 2)**: 위임한 validator가 구조화 partial verdict 없이 멈추면 ① 1회 재개(같은 축·같은 형식 명세로 재요청, 이미 확립한 finding 전량 포함을 명시) → ② 그래도 미반환이면 다른 validator에 재위임 → ③ 그래도 불가하면 메인이 그 축을 직접 감사 → ④ 그래도 불가하면 **`감사 미완(unavailable): <축>`으로 기록한다.** "결과 없음"을 조용히 통과시키지 않는다.
-     - **④에 도달한 축이 하나라도 있으면 `Pass`를 낼 수 없다** (근거: ADR-067 D3 평가 규칙 — 미실행 감사가 입력을 주는 판정을 충족으로 단정하지 않는다). report `## 실패 항목`에 `[P0] 감사 미완(unavailable): <축> — 재검증 필요(수정 대상 아님)`을 적고 combined verdict는 `Needs Fix`로 낸다. 단 **후속 라우팅은 `/repair-workitem`이 아니라 `/validate-workitem` 재실행**이다(고칠 코드가 없다) — report `## 다음 권장 액션`에 그렇게 적고 자동 후속 호출을 하지 않는다(`[Spec-gap]`의 사용자 보고 라우팅과 동형). 이 축의 존재는 `## Orchestration`에도 남으므로 졸업 item 4 (c)가 그 값을 읽는다.
+     - **④에 도달한 축이 하나라도 있으면 `Pass`를 낼 수 없다** (근거: ADR-068 D4 평가 규칙 — 미실행 감사가 입력을 주는 판정을 충족으로 단정하지 않는다). report `## 실패 항목`에 `[P0] 감사 미완(unavailable): <축> — 재검증 필요(수정 대상 아님)`을 적고 combined verdict는 `Needs Fix`로 낸다. 단 **후속 라우팅은 `/repair-workitem`이 아니라 `/validate-workitem` 재실행**이다(고칠 코드가 없다) — report `## 다음 권장 액션`에 그렇게 적고 자동 후속 호출을 하지 않는다(`[Spec-gap]`의 사용자 보고 라우팅과 동형). 이 축의 존재는 `## Orchestration`에도 남고, `/finalize-workitem`이 그것을 `- closure`의 `audit=` 칸으로 옮겨 적으므로 졸업 item 1이 읽는다(ADR-068 D2·D3 item 1).
      - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** — 이 매핑이 없으므로(ADR-010) 위 축을 순차로 단일 실행해 같은 partial들을 모은 뒤 동일하게 메인이 집계·작성한다.
 1. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 하나)이 있으면 **항상 실행**하고 stdout/stderr를 수집한다 (메인 세션 연쇄 실행이라도 implement 이후 코드 상태가 바뀌었으므로 직전 결과를 재사용하지 않는다).
    - **명령이 없을 때 (ADR-007#amend-3)**: `docs/00-meta/STACK_SETUP_PLAN.md`가 *존재*하면(스택 확정) skip하지 않고 **`Needs Stack Guard`로 종료** + `/stack-guard` 실행 안내. STACK_SETUP_PLAN.md가 *없으면*(스택 미정) 기존대로 이 단계 skip하고 정적 판정만 한다.
@@ -98,8 +99,8 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
   - **`Pending Acceptance`**: 위가 전부 아니고, **`[사용자 관측]`·`[플랫폼 관측]` AC의 receipt만 미발급**일 때. 이 AC에는 고칠 코드가 없다(receipt는 사용자만 발급한다 — ADR-065 D1).
   - **`Pass`**: 미충족 AC 0건.
   - P1/P2 라벨만 있는 것은 판정을 바꾸지 않는다(라벨은 report에 전수 기록).
-  - **`감사 미완(unavailable)`은 `Pending Acceptance`가 아니다** — P0이므로 `Needs Fix`다. 고칠 것은 없지만 *판정할 수 없는* 상태이므로 `Pass` 계열을 낼 수 없다(ADR-067 D3와 동일 원리).
-  - **하류가 이 값으로 갈린다**: `/finalize-workitem`은 `Pass`·`Pending Acceptance`를 통과시키고 `Needs Fix`를 차단한다. `/repair-workitem`은 `Pass`·`Pending Acceptance`면 종료한다. 졸업 item 4 (b)는 `Pass` 또는 `Pending Acceptance`를 허용한다(ADR-067 D1).
+  - **`감사 미완(unavailable)`은 `Pending Acceptance`가 아니다** — P0이므로 `Needs Fix`다. 고칠 것은 없지만 *판정할 수 없는* 상태이므로 `Pass` 계열을 낼 수 없다(ADR-068 D4와 동일 원리).
+  - **하류가 이 값으로 갈린다**: `/finalize-workitem`은 `Pass`·`Pending Acceptance`를 통과시키고 `Needs Fix`를 차단한다. `/repair-workitem`은 `Pass`·`Pending Acceptance`면 종료한다. 졸업 item 1은 이 판정값을 task `## 8`의 `- closure` 줄에서 읽는다(ADR-068 D3).
 - 각 축의 partial findings(P0/P1/P2)·`[verify-placeholder]`·`[test-id-missing]`·`Spec Gap`·`[Design-inventory*]`·`[MCP-*]`·`[Arch-iface-7-N]`를 누락 없이 해당 report 섹션에 전수 합친다(ADR-046#d3 — cap 때문에 finding 누락 금지).
 - **confidence는 메인 세션이 *집계 후* 재계산**한다(개별 validator의 신뢰도 추정을 그대로 신뢰하지 않는다). 아래 confidence ladder의 입력(통합 명령 통과 여부 / 자동화율 / diff trace 통과 / oracle gap 카테고리 명시 여부)을 *집계된 전체*에서 평가해 Low→Medium→High 첫 매치로 확정한다.
 
@@ -188,7 +189,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 ## 다음 권장 액션
 - Pass: `/finalize-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
 - Needs Fix: `/repair-workitem <task-id>` (메인 세션이 이어서 직접 발화하거나 사용자가 발화 — ADR-050)
-- Pending Acceptance: **`/finalize-workitem <task-id>`** — 이 modality는 마감을 막지 않는다(ADR-065 D1·D6). receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — ADR-066 D1)에서 발급되고 미발급은 졸업 item 4 (a')가 잡는다(ADR-067 D1). **`/repair-workitem`으로 보내지 않는다**(고칠 코드가 없어 순환에 빠진다)
+- Pending Acceptance: **`/finalize-workitem <task-id>`** — 이 modality는 마감을 막지 않는다(ADR-065 D1·D6). receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — ADR-066 D1)에서 발급되고 미발급은 졸업 item 4가 잡는다(ADR-068 D3). **`/repair-workitem`으로 보내지 않는다**(고칠 코드가 없어 순환에 빠진다)
 - `감사 미완(unavailable)` 축 있음: `/validate-workitem <task-id>` 재실행 (수정 대상 아님)
 ```
 

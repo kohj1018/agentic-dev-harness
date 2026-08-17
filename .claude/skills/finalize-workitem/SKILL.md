@@ -28,7 +28,7 @@ agent: builder
    - report 파일이 없거나 stale(파일 mtime이 task 문서 또는 변경된 구현 파일보다 오래됨)하면 `/validate-workitem <task-id>` 선행을 안내하고 `Needs Validation`으로 종료한다(커밋하지 않음).
    - 미충족 AC가 있으면 **아래 「분기 우선순위」에 따라 판정한다**(여기서 무조건 종료하지 않는다). **`미관측`도 미충족이다.**
    - **`## 6-2. TDD opt-out`은 예외가 아니다 (ADR-065 D2)** — opt-out은 Red-first 절차의 면제이지 AC 충족의 면제가 아니다(ADR-009 `opt-out 절차`). opt-out task는 `[산출물 검사]` 등 다른 modality로 충족해야 통과한다. 단 **출력에는 opt-out 사유와 follow-up task ID를 명시한다**(ADR-009가 요구하는 "finalize 시점 사용자 확인").
-   - **분기 우선순위 (반드시 이 순서로 판정한다 — 근거는 report의 `- 판정:` 값이다, ADR-065 D6)**: ① 판정이 **`Needs Fix`** 면 → `Needs Fix`로 종료 + `/repair-workitem <task-id>` 안내(코드로 고칠 것이 있다). ② 판정이 **`Pending Acceptance`** 면 → **통과시킨다.** 그 AC의 receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D1)에서 발급되며(ADR-065 D1), 미발급은 졸업 item 4 (a')가 잡는다([ADR-067](../../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) D1). ③ 판정이 **`Pass`** 면 통과.
+   - **분기 우선순위 (반드시 이 순서로 판정한다 — 근거는 report의 `- 판정:` 값이다, ADR-065 D6)**: ① 판정이 **`Needs Fix`** 면 → `Needs Fix`로 종료 + `/repair-workitem <task-id>` 안내(코드로 고칠 것이 있다). ② 판정이 **`Pending Acceptance`** 면 → **통과시킨다.** 그 AC의 receipt는 마일스톤 수용 라운드(`/accept-milestone <M>` — [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D1)에서 발급되며(ADR-065 D1), 미발급은 졸업 item 4가 잡는다([ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) D3). ③ 판정이 **`Pass`** 면 통과.
    - **②로 통과할 때의 의무 2가지**: (i) 미충족 관측 AC마다 task `## 8`에 `- ac-pending <날짜> <AC-N>: modality=<...> — 마일스톤 수용 라운드에서 확인 예정`을 append한다(같은 AC의 `- ac-pending`이 이미 있으면 중복 append 금지 — **중복 판정은 HTML 주석 밖의 줄만 센다.** TASK_TEMPLATE `## 8` 주석의 형식 예시를 세면 «이미 있다»로 오판해 실제 줄이 영원히 안 남는다). **`## 0. Status`를 `done`으로 쓰는 것과 같은 편집 라운드에서 쓴다**(별도 mtime 갱신을 만들지 않는다). (ii) 마지막 출력에 `수용 라운드 대상 AC: <AC-N 목록>`을 명시하고, 이 마일스톤은 그 receipt 전까지 졸업이 `PENDING_ACCEPTANCE`임을 한 줄 안내한다.
    - **에이전트가 `- ac-acceptance` receipt를 대신 쓰지 않는다**(ADR-065 D1). `- ac-pending`은 receipt가 아니라 미발급 표시이므로 이 금지에 걸리지 않는다.
    - **finalize의 종료값은 `Needs Fix`·`Needs Validation`·`Needs Review`·`Needs Rationale`·`Needs Stack Guard`·정상 마감이다** — 관측 AC 전용 종료값을 따로 두지 않는다(마감을 막지 않으므로 필요 없다).
@@ -48,7 +48,20 @@ agent: builder
      `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `Gemfile.lock`, `composer.lock`, `go.sum`, `Pipfile.lock`, `poetry.lock`, `uv.lock`, `pubspec.lock`
    - **(4) 차이 처리** — 본 skill은 `context: fork` 환경에서 실행되므로 사용자에게 실시간 확인을 받을 수 없다. (1)과 (2)(둘 다 task 문서 제외 기준)가 어긋나면(또는 (1)이 비어 있고 (2)에 add 대상으로 의심되는 파일이 섞여 있으면) **차이를 출력에 명시하고 즉시 종료**한다(`Needs Review` 종료). **단, (3-lock) whitelist에 해당하는 파일은 (1)에 없어도 차이로 보지 않고 자동 add한다.** 사용자가 task 문서의 `## 4-1`을 갱신하거나 `--apply` force 모드로 재실행하도록 안내한다.
    민감 경로가 staged 영역에 들어오면 즉시 종료한다.
-6. staging·안전검사(수행 4-5)가 abort 없이 통과한 뒤에만 task 문서의 `## 0. Status`를 `done`으로 갱신한다(커밋 성공 직전 — 검사 중단 시 done을 쓰지 않아 "done인데 미커밋" 방지).
+6. staging·안전검사(수행 4-5)가 abort 없이 통과한 뒤에만 task 문서를 갱신한다(커밋 성공 직전 — 검사 중단 시 아무것도 쓰지 않아 "done인데 미커밋" 방지). **아래 둘을 *한 번의 편집*으로 함께 쓴다** — 별도 편집으로 나누면 뒤엣것이 staging 밖에 남을 수 있다.
+   - (i) `## 0. Status`를 `done`으로 갱신.
+   - (ii) **closure receipt 발급 (ADR-068 D2)** — 「반드시 먼저 할 일 3」에서 읽은 채점표의 결론을 `## 8. 메모`에 한 줄 append.
+     ```
+     - closure <YYYY-MM-DD> <task-id>: verdict=<Pass|Pending Acceptance> / 기계AC=<충족/전체> / audit=<complete|미완:<축>> / 관측대기=<AC-N 목록|없음> / 자동화율=<%>
+     ```
+     - `verdict` = 채점표의 `- 판정:` 값 그대로.
+     - `기계AC` = `## AC ↔ 검증 매핑`에서 modality가 `[자동 테스트]`·`[산출물 검사]`이거나 표기 부재인 AC의 충족/전체.
+     - `audit` = `## Orchestration`의 `감사 미완(unavailable)` 항목이 없으면 `complete`, 있으면 `미완:<축>`.
+     - **`관측대기` = task `## 6-1`에서 modality가 `[사용자 관측]`·`[플랫폼 관측]`인 AC 중, `## 8`의 (HTML 주석 밖) 그 AC 마지막 이벤트가 `- ac-acceptance`가 아닌 것 전부** (없으면 `없음`). **«이 라운드에 `- ac-pending`을 남긴 AC»가 아니다** — `- ac-pending`은 `/implement-workitem` 6-R도 쓰고 본 skill은 중복 append를 금지하므로, implement가 이미 남긴 AC는 이 라운드에 append가 0건이 되어 목록이 비고 **receipt 없는 관측 AC가 졸업을 통과한다.** 반드시 `## 6-1`을 직접 스캔한다.
+     - `자동화율` = 채점표에 기록된 값.
+     - **같은 task에 `- closure` 줄이 이미 있어도 덮어쓰지 않고 append한다** — 마지막 줄이 현재 상태다.
+     - **이 줄이 졸업 item 1의 유일한 입력이다.** 채점표는 gitignore된 checkout-local 파일이라 커밋되지 않으므로, 이 줄이 없으면 그 마일스톤은 졸업할 수 없다.
+     - 값을 발명하지 않는다 — 채점표에서 읽을 수 없는 칸은 `미상`으로 적고 마지막 출력에 명시한다.
 7. 커밋 메시지 초안을 Conventional Commits 스타일로 생성한다(정책: ADR-008).
    - 형식: `<type>(<scope>): <summary>` — `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf` 등.
    - 본문에 변경 요약 한 단락 + task ID 참조.
@@ -66,6 +79,7 @@ agent: builder
 - 커밋 메시지
 - 갱신된 task status
 - **수용 라운드 대상 AC**: `[사용자 관측]`·`[플랫폼 관측]`로 미충족 통과시킨 AC-N 목록 + `- ac-pending` append 건수 / 해당없음
+- **closure receipt**: append한 `- closure` 줄 전문 (ADR-068 D2)
 - 다음 권장 단계 (다음 task로 진행 또는 마일스톤이면 `/stabilize-milestone`)
 
 가드:
