@@ -1022,7 +1022,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
   2. `## 8. 메모`의 **HTML 주석 밖** 마지막 `- closure` 줄이 존재하는가.
   3. 그 줄의 `verdict`가 `Pass` 또는 `Pending Acceptance`인가. **`Needs Fix`는 미충족이다.**
   4. 그 줄의 `audit`가 `complete`인가. `미완:<축>`이면 미충족이며 graduation은 `BLOCKED (audit incomplete: <축>)`이다.
-  - 하나라도 어긋나면 그 task를 미충족 목록에 넣는다. **`- closure` 줄이 없는 task는 미충족**이며, 처방은 **«사용자가 그 task `## 8`에 `- closure` 줄을 직접 기재»** 다(ADR-068 D3 item 1). **`/validate-workitem`·`/finalize-workitem` 재실행을 처방하지 않는다** — 전자는 폐쇄 상태에서 종료하고 후자는 `done`에 read-only no-op이므로 그 처방은 실행 불가다. 이 개선 이전에 마감된 task에서만 발생한다.
+  - 하나라도 어긋나면 그 task를 미충족 목록에 넣는다(사유를 `status` / `closure 부재` / `verdict` / `audit`로 구분해 적는다). **`## 0. Status`가 `done`인데 `- closure` 줄만 없는 task**의 처방은 **«사용자가 그 task `## 8`에 `- closure` 줄을 직접 기재»** 다(ADR-068 D3 item 1). **`done`이 아닌 task에는 이 처방을 내지 않는다** — 그 task는 아직 task 층이고 단계 2가 종료시킨다. **`/validate-workitem`·`/finalize-workitem` 재실행도 처방하지 않는다** — 전자는 폐쇄 상태에서 종료하고 후자는 `done`에 read-only no-op이므로 그 처방은 실행 불가다. 수기 기재는 이 개선 이전에 마감된 task에서만 발생한다.
   - **채점표(`docs/40-validation/reports/`)를 읽지 않는다.** 졸업 판정은 커밋된 task 문서만 본다(ADR-068 D2).
 - **item 4 — 관측 AC receipt 유효**: **각 task `## 6-1`에서 modality가 `[사용자 관측]`·`[플랫폼 관측]`인 AC를 전수 회수**하고, 그 AC마다 task `## 8`의 (HTML 주석 밖) **마지막 이벤트가 `- ac-acceptance`** 인가(ADR-065 D3 판독 규칙 2)를 본다. `- ac-pending`·`- invalidated`이거나 이벤트가 없으면 미충족. 관측 modality AC가 0건인 task는 해당 없음.
   - `- closure`의 `관측대기=` 목록은 **회수 편의용 색인**일 뿐이다. 그 목록만 읽으면 안 된다 — 수기 기재분이나 구 정의로 쓰인 closure 줄이 목록을 비워 둘 수 있고, 그러면 receipt 없는 관측 AC가 통과한다. **어긋나면 `## 6-1` 스캔 결과를 신뢰한다.**
@@ -1033,9 +1033,9 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
 - **item 3 — E2E Pass**: 단계 3의 e2e 상태 판정을 그대로 반영(ADR-052#amend-1 5상태).
   - **`NOT_APPLICABLE`** (비-UI ∧ item 6에 e2e 미선언) → 해당 없음(통과).
   - **`PASS`** → 통과.
-  - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 실행된 테스트 0개) → `졸업 가능: NO` (hard) + `Needs E2E Smoke`.
+  - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개) → `졸업 가능: NO` (hard) + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-068 D3 item 3). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
   - **`FAIL`** → `졸업 가능: NO` (hard).
-  - **`BLOCKED_ENV`** → `졸업 가능: NO` (hard, blocked-on-env). real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다.
+  - **`BLOCKED_ENV`** → **item 3 미충족** (hard, blocked-on-env). real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다. **최종 graduation은 `NO`가 아니라 단계 8이 확정하는 `BLOCKED (e2e blocked-on-env: <target>)`이다**(ADR-068 D4 — 우선순위 `BLOCKED` > `NO`).
 - **item 5 — P0 severity finding 0건**: `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌 항목 수 0**. 단계 4의 qa 팬아웃이 새 P0를 등재할 수 있으므로 단계 8에서 확정한다.
 - **item 6 — (선택) 본 마일스톤 한정 추가 기준**: 본문 텍스트 그대로 평가(사용자가 자유 기재한 영역 — 해당 항목만 LLM 해석 허용).
 
@@ -1138,6 +1138,18 @@ v3의 item 4에는 `(a')` 같은 하위 항목이 없다. 그런데 `(a')`를 �
 ```
 
 > 7-T 집계 항목에 «검증 레벨 분포» 줄을 추가하는 것은 **Phase 9-2 (c)가 담당**한다 — 여기서 중복해 넣지 않는다.
+
+### (l) inner-loop 호출을 «권하는» 문장 3곳 ★ ADR-068 D1 직접 위반
+
+D1은 마일스톤 층 skill에 대해 «호출하지 않는다»뿐 아니라 **«사용자에게 그 호출을 권하지도 않는다»** 까지 금지한다. 본 skill은 단계 2에서 «전 task done»이 아니면 종료하므로 **항상 마일스톤 층**이다. 아래 셋은 (a)~(k)의 교체 범위 밖이라 그대로 두면 살아남는다.
+
+| 위치 | 현재 | 변경 |
+|---|---|---|
+| 도입부 «그 외 변경은 금지한다» 다음 줄 | `` 후속 작업이 필요하면 `/repair-workitem` 또는 새 task로 텍스트 제안만 출력한다. `` | `` 후속 작업이 필요하면 `/repair-milestone <M>`으로 텍스트 제안만 출력한다. **inner-loop 4종(`/implement-workitem`·`/validate-workitem`·`/repair-workitem`·`/finalize-workitem`)의 호출을 권하지 않으며 새 task 자동 추가도 하지 않는다** (ADR-068 D1 / ADR-057#amend-3 결정 6). `` |
+| 단계 8 「다음 단계」 QA_FINDINGS 분기 | `` … repair-milestone이 4-판정 후 cross-cutting은 직접 수정하고, per-task 코드 결함은 finding 요약과 함께 repair-workitem에 위임(아래 finding-mode)한 뒤 QA_FINDINGS status를 닫는다. (직전 validate가 Needs Fix report를 남긴 task는 기존대로 `/repair-workitem T-NNN` 직접 — report 기반이라 정상.) `` | `` … **repair-milestone이 4-판정 후 per-task 귀속이든 cross-cutting이든 직접 수정하고**(재개방·위임 없음 — ADR-068 D1) QA_FINDINGS status를 닫는다. `` (괄호 문장 전체 삭제) |
+| 단계 8 「다음 단계」 `[Spec-gap]` 분기 (i) | `` 담당 task가 있으면 **현재 M-N에서 `/repair-workitem`(단일) 또는 `/repair-milestone`(교차)**; `` | `` 담당 task가 있으면 **현재 M-N에서 `/repair-milestone M-N`이 직접 수정**(단일 task 귀속이든 교차든 — ADR-068 D1); `` |
+
+**확인**: 작업 후 `grep -n "repair-workitem" .claude/skills/stabilize-milestone/SKILL.md`가 **부정문(«권하지 않는다»·«호출하지 않는다») 문맥만** 남겨야 한다 — Phase 10 check #3과 같은 판독이다.
 
 ## 6-2. `.claude/skills/repair-milestone/SKILL.md`
 
@@ -1298,10 +1310,23 @@ description: Critically recheck milestone-level findings and fix them directly (
 | 마지막 출력 «AC acceptance 무효화» | `재발급 자체는 재validate를 요구하지 않는다(item 4 (a')가 task `## 8`을 직접 읽는다).` | `재발급 자체는 재validate를 요구하지 않는다(졸업 item 4가 task `## 8`을 직접 읽는다 — ADR-068 D3).` |
 | 정책 근거 줄 | `위임 후 연쇄(2-C)와 status writer 고정은 [ADR-057](…)#amend-3 결정 5.` | `폐쇄 후 재개방·연쇄 폐지는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) D1(ADR-057#amend-3 결정 5를 부분 supersede).` |
 
-**확인**: 작업 후 아래가 빈 출력이어야 한다.
+**확인**: 작업 후 아래에서 **`연쇄`를 뺀 나머지 토큰이 0건**이어야 한다.
 ```bash
-grep -n "2-C\|(a')\|위임한다\|위임분\|위임 결과\|연쇄" .claude/skills/repair-milestone/SKILL.md
+grep -n "2-C\|(a')\|위임한다\|위임분\|위임 결과" .claude/skills/repair-milestone/SKILL.md
 ```
+> `연쇄`를 패턴에 넣으면 **(a)가 넣은 «연쇄도 없다»와 아래 정책 근거의 «재개방·연쇄 폐지» 2줄이 정당하게 걸린다** — 부정문이라 지우면 안 된다. Phase 10 check #2가 `연쇄`를 제외하는 이유와 같다(«재개방»이라는 낱말을 세지 않는 것과 동형).
+
+### (k) per-task 결함에도 같은 규율을 걸기 ★ (b)가 라우팅을 없앤 뒤 남는 한정어
+
+(b)가 «per-task든 cross-cutting이든 처리 주체는 같다»로 바꿨으므로, 아래 규율에 붙은 **`cross-cutting` 한정어를 전부 떼야 한다.** 그대로 두면 per-task 수정이 **회귀 테스트 선행(ADR-068 D6 — 제약(강))·pattern-scan·실행 증거**에서 통째로 빠진다. `/repair-acceptance`는 (6-3 (k)가) 이미 «`scope`와 무관하게 전 항목»으로 고쳐 두므로 두 skill이 비대칭이 되기도 한다.
+
+| 위치 | 현재 | 변경 |
+|---|---|---|
+| `2-P` 첫 문장 | `` 각 `Adopt` cross-cutting 결함에 대해 `` | `` **`Adopt`·`Adopt-modified`한 각 결함에 대해**(per-task 귀속이든 cross-cutting이든 — 본 skill이 전부 직접 고치므로 대상도 전부다) `` — `Adopt-modified` 추가는 [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D6(«`Adopt`·`Adopt-modified`한 각 결함마다 1회») 정합 |
+| `2-R` 첫 문장 | `` **회귀 테스트 선행 (ADR-066 D4 준용)**: 수행 2의 cross-cutting 직접 수정마다 `` | `` **회귀 테스트 선행 (ADR-066 D4 준용 / ADR-068 D6)**: **수행 2의 직접 수정마다**(per-task 귀속이든 cross-cutting이든 — ADR-068 D6은 마일스톤 층 수리 전부에 이 규율을 건다) `` |
+| `2-E` 첫 문장 | `본 라운드의 cross-cutting 직접 수정이` | `본 라운드의 직접 수정(per-task 귀속 포함)이` |
+| 마지막 출력 첫 항목 | `- cross-cutting 직접 수정 파일 목록 + 어떤 finding을 어떻게 해소했는지` | `- 직접 수정 파일 목록(per-task 귀속·cross-cutting 모두) + 어떤 finding을 어떻게 해소했는지` |
+| 책임 경계 «자동 커밋하지 않는다» 불릿 | `` - 자동 커밋하지 않는다 — 결과만 반환하고 커밋은 사용자/`/finalize-workitem`이 별도로 (ADR-047 D7 — finalize/user가 commit owner). `` | `` - 자동 커밋하지 않는다 — 결과만 반환하고 **커밋은 사용자가 별도로 한다** (ADR-047 D7). `` — (j)가 교체한 «commit owner는 사용자 하나다» 불릿과 모순되므로 함께 정리한다 |
 
 ## 6-3. `.claude/skills/repair-acceptance/SKILL.md`
 
@@ -1447,6 +1472,15 @@ description: /accept-milestone이 수집한 사용자 수용 finding을 3+1 판�
 ```bash
 grep -n "수행 후 연쇄\|위임한다\|위임분\|위임받은\|(a')" .claude/skills/repair-acceptance/SKILL.md
 ```
+
+### (l) ADR 정합 2곳 — 면제 2종 · pattern-scan 대상
+
+| 위치 | 현재 | 변경 |
+|---|---|---|
+| 수행 2의 «면제» 불릿 | `- **면제**: 코드 3줄 이하 + 외부 행동 불변인 표기·간격·문구 수정. 면제 사유를 결정 이력에 적는다.` | `- **면제**: 코드 3줄 이하 + 외부 행동 불변인 표기·간격·문구 수정, 그리고 **문서만 고치는 finding**(실행 가능한 테스트 대상이 아니다 — ADR-068 D6이 양 repair skill 공통으로 규정한 면제 2종). 면제 사유를 결정 이력에 적는다.` |
+| 수행 5 첫 문장 (위 (e-2) 적용분) | `각 Adopt 결함에 대해` | `**`Adopt`·`Adopt-modified`한 각 결함에 대해**` — ADR-066 D6 원문 정합 |
+
+> 면제 2종은 ADR-068 D6이 «`/repair-milestone`·`/repair-acceptance`» 양쪽에 동일하게 건 규정이다. `/repair-milestone` 2-R에는 이미 둘 다 있으므로 본 항목은 비대칭 해소다.
 
 ## 6-4. `.claude/skills/accept-milestone/SKILL.md`
 
