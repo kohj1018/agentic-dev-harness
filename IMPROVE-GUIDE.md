@@ -865,12 +865,15 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 ```
 
 **변경 — `done` 거부는 «마일스톤 층일 때만»이다. 무조건 거부하면 `/implement-workitem` 3-R (1)의 «선행 task가 done인데 산출이 없으면 그 선행 task를 현재 M에서 repair→validate→finalize» 지시가 실행 불가가 된다.**
+
+★ **위치도 함께 옮긴다 — 이 블록은 «수행 2(report 읽기)» *앞*에 둔다.** 현재 파일에서 2-G는 수행 2 *뒤*에 있는데, 그러면 폐쇄된 마일스톤에서 **수행 2의 종료 분기가 먼저 걸려** `/validate-workitem`(0-G가 종료) 또는 `/finalize-workitem`(`done`에 read-only no-op)을 처방하고 끝난다 — 둘 다 실행 불가한 처방이라 사용자가 두 번 튕긴 뒤에야 `/repair-milestone`에 도달한다. 아래 (b)의 «2-G가 마일스톤 층 진입을 이미 막는다»도 이 순서라야 참이 된다. 라벨은 `2-G` 그대로 둔다(`/validate-workitem`의 `0-G`가 수행 0 앞에 오는 것과 같은 규약이며, ADR-068 Mutation Contract의 «repair-workitem(2-G 조건부 `done` 거부)» 표기도 유지된다).
+
 ```markdown
-2-G. **상태별 입구 게이트 (ADR-068 D1 — 마일스톤 층에서만 `done` 재개방 폐지)**: task `## 0. Status`를 확인한다.
+2-G. **상태별 입구 게이트 (ADR-068 D1 — 마일스톤 층에서만 `done` 재개방 폐지)**: **아래 수행 2(report 읽기)보다 *먼저* 판정한다** — 폐쇄된 마일스톤에서 report 분기가 먼저 걸리면 `/validate-workitem`·`/finalize-workitem`을 잘못 처방하게 된다(둘 다 폐쇄 상태에서 각각 종료·no-op이라 실행 불가한 처방이다). task `## 0. Status`를 확인한다.
    - `draft`/`ready`(아직 구현 전) → repair를 거부하고 "먼저 `/implement-workitem`으로 착수" 안내 후 종료.
    - `in-progress` → 상태를 쓰지 않는 일반 repair로 계속한다.
    - **`done` → 부모 마일스톤의 «층»을 먼저 판정한다.** 그 마일스톤 산하 task를 전수 조회해:
-     - **산하에 `done`이 아닌 task가 하나라도 있으면 (아직 task 층)** → 기존대로 진행한다. report(또는 위임 근거)가 검증된 결함을 가리킬 때만 아래 "수행"의 done 재개방 절차를 따른다. `/repair-workitem`만이 `done` task를 재개방하는 유일한 writer라는 규율은 이 구간에서 유효하다.
+     - **산하에 `done`이 아닌 task가 하나라도 있으면 (아직 task 층)** → 기존대로 진행한다. **아래 수행 2**의 report 판정(또는 finding-mode 근거)이 검증된 결함을 가리킬 때만 아래 "수행"의 done 재개방 절차를 따른다. `/repair-workitem`만이 `done` task를 재개방하는 유일한 writer라는 규율은 이 구간에서 유효하다.
      - **산하 task가 전부 `done`이면 (마일스톤 층)** → **거부하고 종료한다.** 파일·git index·status를 전혀 건드리지 않고 안내한다: *"이 마일스톤은 산하 전 task가 `done`이라 마일스톤 층입니다(ADR-068 D1). 수리는 `/repair-milestone <M>`(stabilize finding) 또는 `/repair-acceptance <M>`(수용 finding)이 재개방 없이 직접 수행합니다."*
    - **`done → in-progress` 역전이는 «폐쇄 전»에만 존재한다.** ADR-057#amend-3 결정 5의 그 전이를 ADR-068 D1이 부분 supersede한 범위가 정확히 그것이다.
 ```
@@ -879,7 +882,7 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 
 **현재 (24행 안, finding-mode 단락)**: `/repair-milestone`·`/repair-acceptance`가 per-task 결함을 위임한다는 전제가 담겨 있다.
 
-**변경 — finding-mode 자체는 남기고 «호출 주체»만 바꾼다.** 폐지하면 `/implement-workitem` 3-R (1)의 «선행 task repair» 경로가 끊긴다 — 그 선행 task의 report는 대개 `Pass`라 report 가드에 먼저 걸리기 때문이다. 단락의 첫 괄호 안 문구만 교체한다.
+**변경 — finding-mode 자체는 남기고 «호출 주체»만 바꾼다.** 폐지하면 `/implement-workitem` 3-R (1)의 «선행 task repair» 경로가 끊긴다 — 그 선행 task의 report는 대개 `Pass`라 report 가드에 먼저 걸리기 때문이다. **첫 괄호와 단락 꼬리 두 곳을 고친다** — 꼬리를 그대로 두면 «위임한 skill»이라는 존재하지 않는 주체가 후속 검증을 맡는 것으로 서술돼, 사용자가 직접 호출한 경우 누가 `/validate-workitem`·`/finalize-workitem`을 돌리는지가 거짓으로 안내된다.
 
 **현재 (24행 finding-mode 단락 첫 부분)**:
 ```
@@ -888,6 +891,17 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 **변경**:
 ```
    - **단, 인자에 finding 요약이 있으면 위 종료 조건 전부에 걸리지 않고 그 finding을 대상으로 진행한다(finding-mode)** — **호출 주체는 사용자, 또는 `/implement-workitem` 3-R (1)의 «선행 task 산출 누락» 경로를 따르는 메인 세션이다. `/repair-milestone`·`/repair-acceptance`는 더 이상 위임하지 않는다(ADR-068 D1).** 이 모드는 폐쇄 *전* task 층에서만 성립한다 — 2-G가 마일스톤 층 진입을 이미 막는다
+```
+
+**같은 단락의 꼬리 — 「위임한 skill」 전제 3곳을 교체한다.**
+
+**현재**:
+```
+**`stale`을 여기 명시하는 것이 중요하다** — 위임하는 skill이 이미 다른 파일을 고친 상태로 부르므로 report는 stale인 것이 정상이고, 앞의 stale 가드가 먼저 걸리면 위임 연쇄가 **첫 고리에서 죽는다.** … (b) QA_FINDINGS·IMPROVEMENT_GUIDE는 건드리지 않으며(status 종료는 위임한 skill 책임 — 본 skill의 "다른 산출물 미접근" 계약 유지), (c) … **위임한 skill이 그 재실행과 이어지는 `/finalize-workitem`까지 자기 루프 안에서 실행하므로, 사용자에게 수동 실행을 요구하지 않는다.**
+```
+**변경** (가운데 (a)·(c) 항목과 "비판적 재점검" 문장은 그대로 둔다):
+```
+**`stale`을 여기 명시하는 것이 중요하다** — 호출 시점에 이미 다른 파일이 바뀌어 있는 것이 정상이라 report는 stale이고, 앞의 stale 가드가 먼저 걸리면 이 경로가 **첫 고리에서 죽는다.** … (b) QA_FINDINGS·IMPROVEMENT_GUIDE는 건드리지 않으며(원장 status 종료는 본 skill의 책임이 아니다 — "다른 산출물 미접근" 계약 유지), (c) … **그 재실행과 이어지는 `/finalize-workitem`을 누가 돌리는지는 호출 주체로 갈린다 — 메인 세션이 `/implement-workitem` 3-R (1) 경로로 호출했으면 그 세션이 이어서 실행하고, 사용자가 직접 호출했으면 사용자가 실행한다(그 경우 마지막 출력에 두 단계를 순서대로 명시한다).**
 ```
 
 ### (c) 수행 1의 재개방 절차 — 조건을 명시해 **유지**
@@ -899,7 +913,7 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 
 **변경 — 재개방 절차는 «폐쇄 전» 조건을 명시해 유지한다**(2-G가 이미 마일스톤 층을 거부하므로 여기 도달했다는 것은 task 층이라는 뜻이다):
 ```markdown
-1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 수정한다. **대상 task가 `done`이었던 경우**(2-G가 «아직 task 층»으로 통과시킨 경우에만 여기 도달한다): Adopt/Adopt-modified가 하나 이상이면 **첫 코드 수정 직전에** task `## 0. Status`를 `done → in-progress`로 갱신·기록한다(전부 Reject면 코드·status 무변경). 재개방 뒤 이 라운드가 중단되거나 실패하면 `in-progress`로 유지한다 — 수정 완료 후 fresh `/validate-workitem`을 거쳐 `/finalize-workitem`이 다시 `done`으로 커밋한다. **마일스톤 층에서는 이 경로에 도달하지 않는다**(2-G에서 종료).
+1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 수정한다. **대상 task가 `done`이었던 경우**(2-G가 «아직 task 층»으로 통과시킨 경우에만 여기 도달한다): Adopt/Adopt-modified가 하나 이상이면 **첫 코드 수정 직전에** task `## 0. Status`를 `done → in-progress`로 갱신·기록한다(전부 Reject면 코드·status 무변경). 재개방 뒤 이 라운드가 중단되거나 실패하면 `in-progress`로 유지한다(임의로 `done`으로 되돌리지 않는다) — 수정 완료 후 fresh `/validate-workitem`을 거쳐 `/finalize-workitem`이 다시 `done`으로 커밋한다. **마일스톤 층에서는 이 경로에 도달하지 않는다**(2-G에서 종료).
 ```
 
 ### (d) 정책 근거 줄 갱신
@@ -931,6 +945,10 @@ grep -rn '`## 2`/`## 3`' --include="*.md" --exclude-dir=.git --exclude=IMPROVE-G
 - 36행 `(근거: ADR-067 D3 평가 규칙 ...)` → `ADR-068 D4`
 - 101행 `(ADR-067 D3와 동일 원리)` → `ADR-068 D4`
 - 102행 `졸업 item 4 (b)는 ... (ADR-067 D1)` → **문장 삭제**. 졸업 item 4에 (b)가 없다. 대신: `졸업 item 1은 이 판정값을 task `## 8`의 `- closure` 줄에서 읽는다(ADR-068 D3).`
+- 37행 `이 축의 존재는 `## Orchestration`에도 남으므로 **졸업 item 4 (c)**가 그 값을 읽는다.` → **`ADR-067` 토큰이 없어 위 sweep에 안 걸리는 잔재다.** v3의 item 4에는 (c)가 없고 감사 미완은 closure의 `audit=` 칸을 거쳐 item 1이 읽는다. 아래로 교체:
+  ```
+  이 축의 존재는 `## Orchestration`에도 남고, `/finalize-workitem`이 그것을 `- closure`의 `audit=` 칸으로 옮겨 적으므로 졸업 item 1이 읽는다(ADR-068 D2·D3 item 1).
+  ```
 - 191행 `미발급은 졸업 item 4 (a')가 잡는다(ADR-067 D1)` → `미발급은 졸업 item 4가 잡는다(ADR-068 D3)`
 
 > commit: `feat(skills): issue closure receipt at finalize and block post-closure task reopening`
