@@ -62,6 +62,7 @@
 | 066 | Milestone acceptance | accepted | (+#amend-1: 재개방 판별 폐지 — ADR-068 정합) | /accept-milestone(사람 직접 확인 — 관측 AC 있으면 사실상 필수, 마일스톤 스코프 단독) + /repair-acceptance(3+1 판정 · in-AC는 repair-workitem 위임(재개방)/out-of-AC는 직접 수정 + 계약 부채) + 피드백 3갈래 라우팅 + D6 pattern-scan |
 | 067 | Milestone graduation contract v2 | superseded | — | ADR-014 통합 재발행. item 4=AC 충족(전 modality) / BLOCKED=평가 실행 불가 / 회고 open 스냅샷 → ADR-068로 통합 재발행 |
 | 068 | 마일스톤 폐쇄 경계 + 졸업 계약 v3 | accepted | — | ADR-067 통합 재발행. task 층 폐쇄 경계 + closure receipt + 졸업 item 4 (a)(b)(c)(d)·mtime 폐지 + 아카이브 회전 (현재 SSOT: ADR-068) |
+| 069 | 상위 정본의 절 단위 부분 개정 (Bounded SSOT Amendment) | accepted | — | /amend-ssot 신설 — 분류 4단 + 결정적 전파표 + 절-키 에스컬레이션 + 봉인 충돌 라우팅 |
 
 ## Reserved / Parked / Dropped 번호
 

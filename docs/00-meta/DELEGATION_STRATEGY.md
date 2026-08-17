@@ -50,6 +50,7 @@
 | 데이터 계측 설계 + 수집 데이터 해석 | analyst | `/consult-expert data <측정 대상>`. `/plan-milestone` **R4** 가 `## 8-1` 계측 필드를 채울 근거가 없으면 `Needs Instrumentation` 으로 **자동 위임**. n·편향·confidence 기준 필수. 도구 설치 X (ADR-062 D10 / ADR-042#amend-2) |
 | 설계층 보안 (위협 모델·보호 등급·인증/인가 경계) | security | `/consult-expert security <대상 자산>`. **코드 취약점 스캔·secret 검출은 범위 밖** — 전자는 **보일러플레이트 미소유**(도구 빌트인·프로젝트 SAST), 후자는 `/stack-guard` 의 scanner 권장(ADR-021#amend-1)·추적 시크릿 점검(ADR-059 D9). 위협 표 전 칸(**잔여 위험 + 근거 URL·확인일 포함**) 필수. 구조 결정은 architect 소유. report-only (ADR-062) |
 | 장문 코드/문서 탐색 | Explore 등 built-in subagent | 선택적 사용. 메인 컨텍스트 오염 방지 |
+| 확정된 상위 정본의 절 단위 부분 개정 | 메인 세션 (amend-ssot) | `/amend-ssot "<변경>" [--from <출처>] [--dry-run]`. 사용자 호출 전용 — 다른 skill·agent는 `Needs SSOT Amendment: <문서/절/근거>` 제안만 만든다. 발굴·재생성 라운드는 하지 않고 foundation 변경은 heavy skill로 라우팅 (ADR-069) |
 
 > **실행 컨텍스트 노트 (ADR-050)**: 본 표의 agent 매핑은 *책임 경계 정의*다(ADR-007#amend-2). 일부 lifecycle skill(validate-workitem/repair-workitem 등)은 이제 메인 세션에서 실행되지만(ADR-050) **같은 책임 경계**를 따른다 — 메인 세션이 그 경계대로 직접 수행하거나, 같은 역할의 agent를 `Agent`로 직접 fork 위임할 수 있다. `.claude/agents/*.md` persona 파일은 그대로 존재한다.
 > **검증 위임 규율 (ADR-050#amend-1)**: 검증/감사(validator·reviewer·qa)를 위임할 때, 일 시키는 쪽은 검증자에게 *무엇을 지적하지 말라*고 미리 말하거나 *심각도를 미리 정해* 주지 않는다(자기검증 편향 차단). 계획·구현과 충돌하는 발견은 숨기지 말고 사람에게 올린다. 단 *지켜야 할 기준·계약*(AC·승인 프로토타입·DESIGN 토큰·seam INV 등)을 그대로 전달하는 것은 필수 맥락이지 사전판정이 아니다 — 이 선을 지킨다.
@@ -130,15 +131,18 @@
 <a id="delegation-midproject"></a>
 ## Mid-project 문서 갱신 동선
 
-charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요하다. 별도 skill 없이 다음 경로를 따른다.
+charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요하다. 갱신 종류에 따라 아래 경로를 따른다.
 
 | 갱신 종류 | 경로 |
 |----------|------|
-| charter 부분 갱신 | 자연어로 메인 세션에 변경 요청 → `planner` agent에 fork 위임 |
-| charter 전면 재정의 | `/discover-product` 재실행(또는 산출물만 갱신) → `/bootstrap-project`로 charter 재생성 |
+| **정본의 절 단위 부분 개정** (charter 한 절·ARCH 시스템 경계·DESIGN 토큰 등 — 답을 이미 알고 문장만 넣으면 되는 변경) | **`/amend-ssot "<변경>"`** — 분류·authority 판정·파생 전파·봉인 충돌 검사를 한 번에 수행 (ADR-069) |
+| charter 전면 재정의 (문제 정의 자체가 바뀜) | `/discover-product --update` 재실행(또는 산출물만 갱신) → `/bootstrap-project --apply`로 charter 재생성 |
+| 페르소나 교체·pain 재발굴 | `/discover-product --update` |
 | architecture 스택 변경 (T2 — 언어/런타임/프레임워크/DB/인증 등 토대 변경, ADR-055) | `/bootstrap-stack --migrate` (타깃 미정이면 DEEP 라운드로 수렴) 후 `/stack-guard` 이어 실행 |
-| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1) — 해당 마일스톤 계획 범위에 포함하며 즉시 generic 호출하지 않음. 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
-| architecture 시스템 경계만 갱신 | 자연어 + `architect` 단발 호출 |
+| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1). 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
+| 시각 방향 전환 (concept 시안 재탐색 필요) | `/bootstrap-design --update` |
+
+> 판별 기준은 «위험한가»가 아니라 **«답을 아직 모르고 그것을 찾는 라운드가 필요한가»** 다(ADR-069 D4). 위험 관리는 `/amend-ssot`의 authority 확인·전파 검사·봉인 충돌 검사가 담당한다.
 
 > 주: `/discover-product`, `/stack-guard`는 현재 `.claude/skills/`에 모두 존재한다.
 
