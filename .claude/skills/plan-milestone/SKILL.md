@@ -51,6 +51,21 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 - **로드맵 재조정 (ADR-057#amend-1·#amend-4)**: `docs/30-workitems/ROADMAP.md`를 읽어 직전 마일스톤 `## 8. 회고`의 `graduation:` 판정 + task done/total로 Done/Now 구간을 최신화한다(graduation=YES면 Now→Done 스냅샷, 진행 중이면 진척 갱신). **미졸업 Now 가드**: 현재 Now 마일스톤의 graduation이 `YES`가 아니면(진행 중·`PENDING_ACCEPTANCE`·`NO`·`BLOCKED`) *명시적 병렬 승인이 없는 한* 새 마일스톤을 Now로 추가하지 않는다 — 안내 문구는 판정별로 갈린다: `PENDING_ACCEPTANCE`면 **"현재 Now(M<N>) 수용 대기 — `/accept-milestone M<N>` 후 진행 권장"**, 그 외면 "현재 Now(M<N>) 미졸업 — 완료 후 진행 권장". 어느 쪽이든 새 Now 생성을 보류한다(단일 Now 규율). Next 후보를 Now로 승격·중복 생성 방지를 위해 각 Next/Later 행은 안정적 candidate key(목표 슬러그)를 갖는다. **로드맵의 `Done`/`Now`/`Next`/`Later` 네 구간은 plan-milestone만 쓴다** — `## Backlog`만 append-only 다중 writer이며(ADR-057#amend-4 결정 2) 그 구간의 정리·승격도 본 skill이 한다.
 - **`## Backlog` 회수 (ADR-057#amend-4)**: 같은 파일의 `## Backlog` 절을 읽어 **수용 라운드·repair-acceptance가 쌓아 둔 범위 후보**를 전수 회수하고 R1의 목표 후보 재료로 넣는다. 각 행은 `- `<candidate-key>` <요약> — 출처: ... / 확신도: ...` 형식이다. **자동 편입하지 않는다 — R0는 회수만 한다.** 사용자 선택은 R1, 분할 확정은 R2이므로 **R0에서 Backlog 행을 제거·이동하지 않는다**(확정 전에 지우면 R2에서 빠진 항목이 사라진다). 착수·후속 배정이 확정된 뒤 **R1이 그 항목의 `## Backlog` 행을 제거하고 candidate-key를 인계한다**(ADR-057#amend-4 결정 3 «Next로 승격하며 Backlog 행 제거» + `## 현재 유효 결정`의 «회수는 R0 → R1») — 이번에 착수하는 분은 R3의 `Now` 행이, 후속 분은 `## Next` 행이 그 key를 그대로 쓴다(#amend-1 candidate-key 매칭 — 중복 생성 방지). 택하지 않은 항목은 그대로 둔다.
 - `docs/40-validation/IMPROVEMENT_GUIDE.md`·`docs/40-validation/QA_FINDINGS.md`의 *open* 항목(특히 P0/P1)을 회수해, 다음 마일스톤이 회수할 부채 후보로 surface(자동 편입 X — 사용자 결정). `[ADR-candidate]` 라벨 항목은 별도로 surface하고, 사용자가 채택하면 **R3 진입 전에 architect 단발 sub-call(입력: 후보 결정 줄·linked workitem·`_ADR_GUIDE` 권장 섹션·project 인덱스의 다음 빈 번호 — ADR-000#amend-2 결정 4 필독 + 번호 충돌 방지)로 `docs/90-decisions/project/ADR-1NN-<slug>.md` 초안(proposed) 작성 + project 인덱스 등재 + 해당 후보 항목 status를 open → resolved(adopted: ADR-1NN)로 갱신**까지 수행한다(ADR-000#amend-2 — 미갱신 시 다음 R0가 이미 채택된 후보를 재surface해 중복 ADR 위험). 기각 시에도 IMPROVEMENT_GUIDE 후보 status를 open → rejected로 갱신한다. **`scope: out-of-AC` 항목은 별도로 surface한다 (ADR-005#amend-1 / ADR-066 D4)**: `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에서 `scope: out-of-AC` + `status: open`인 항목을 전수 회수한다 — **HTML 주석(`<!-- ... -->`) 밖의 줄만 센다**(그 섹션 주석에 같은 술어의 형식 예시가 들어 있어, 주석까지 세면 매 라운드 `<M>-uat-<N>` 유령 항목이 올라온다 — ADR-064 D4 판독 규칙과 동형). 회수한 각 항목에 대해 **«이 동작을 AC로 승격할 것인가»** 를 사용자에게 묻는다. 이것은 「코드에는 들어갔으나 어느 계약에도 근거가 없는 변경」이며, 승격을 택하면 **R4에서 그 feature `## 7. FAC`에 항목으로 넣는다** — **task AC는 본 skill이 만들지 않는다**(위 「경계」: milestone + feature까지. `/plan-workitem`이 그 FAC를 받아 AC로 분해하고 `## 7-1` 매핑을 채운다 — ADR-057 결정 1). 원본은 **그 FAC가 실재한 뒤**(R4 이후) `status: resolved (승격: <feature-id>:FAC-N)`로 닫는다 — N-3 앵커는 실재하는 대상을 가리켜야 한다(ADR-005#amend-1). 택하지 않으면 그대로 열어 둔다. **자동 승격하지 않는다** — 계약을 넓히는 것은 사용자 결정이다.
+- **아카이브 회전 (ADR-068 D7-2)**: 직전 마일스톤의 회고 `graduation:`이 **`YES`일 때만** 수행한다(`YES`가 아니면 아무것도 옮기지 않는다).
+  - 대상: `QA_FINDINGS.md`의 그 `## M-N` 블록에서 `status: resolved`인 항목 + `IMPROVEMENT_GUIDE.md` `## 2`·`## 4`의 그 `### M-N` 그룹에서 `status: resolved`인 항목 + `## 5. Repair decision log`의 그 `### M-N` 그룹 **전체**(closed records라 전량 대상).
+  - **`status: open` 항목은 옮기지 않는다** — 활성 파일에 남아 carry-over가 된다.
+  - 목적지: `docs/40-validation/archive/<M>.md`. 파일이 없으면 아래 골격으로 만든다.
+    ```markdown
+    # <M> 아카이브 (졸업: <YYYY-MM-DD>)
+
+    ## QA_FINDINGS
+
+    ## IMPROVEMENT_GUIDE
+    ```
+    `## 5` 그룹은 `## IMPROVEMENT_GUIDE` 절 아래 `### Repair decision log` 하위 절에 넣는다.
+  - **순서 고정**: ① 아카이브 파일에 append → ② 원본에서 제거. 중단으로 양쪽에 남으면 다음 R0가 «아카이브에 이미 있는 ID를 원본에서 제거»로 정리한다.
+  - **회고 포인터 갱신 (ADR-068 D7-2)**: 그 마일스톤 문서 `## 8. 회고`의 `post-close 수정:` 줄이 `IMPROVEMENT_GUIDE ## 5 ### M<N>`를 가리키고 있으면, 그 그룹이 아카이브로 옮겨졌으므로 포인터를 `docs/40-validation/archive/<M>.md`로 바꾼다. 그 줄이 `없음`이면 손대지 않는다.
+  - 아카이브는 커밋 대상이다(gitignore 아님). 옮긴 항목 수를 R0 출력에 한 줄 남긴다.
 - 직전 마일스톤 부재(첫 호출 — 마일스톤 0개, M1 생성 회차)면 R0를 건너뛰고 회고 carry-over는 "없음"으로 표시.
 
 **R1 — 입력 intake (다음 마일스톤의 재료)**
@@ -70,8 +85,8 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/prototypes
 **R3 — 마일스톤 문서 authoring (MILESTONE_TEMPLATE에서)**
 - **지금 착수하는 마일스톤만 실체화 (rolling-wave — ADR-057#amend-1)**: R2에서 확정한 분할 중 *이번에 착수하는* 마일스톤(기본 1개 = Now)만 `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`를 복사해 `docs/30-workitems/milestones/M<N>-<이름>.md`로 작성한다. `<N>`은 기존 마일스톤 다음 번호(첫 호출이면 M1 — additive, 기존 보존). **R2 분할이 식별한 *후속* 마일스톤은 지금 Mx 문서를 만들지 않는다 — 그 마일스톤의 feature 문서·R5 프로토타입도 만들지 않는다** (로드맵 Next/Later에 얇은 행(미번호 `(M?)`)으로만; R4 컴포넌트·R5 프로토타입은 지금 착수하는 Now 마일스톤의 화면에만 적용). 후속 마일스톤의 feature·프로토타입은 그 마일스톤이 *Now가 되는 회차*에 생성한다. (이래야 "미번호 얇은 후보 vs 실체 문서"가 어긋나지 않는다 — rolling-wave 핵심.)
 - **로드맵 갱신 (ADR-057#amend-1)**: `docs/30-workitems/ROADMAP.md`(baseline shell 존재 — 없으면 헤더 포함 생성)에 이번 마일스톤 행을 **Now**로 쓴다(id·**`candidate-key`**(안정 목표 슬러그 — Later/Next에서 승격됐으면 그 key 그대로 유지, 신규면 새로 발급)·목표·진척·주요 기능 링크·의존). **진척 칸은 `tasks: unplanned`로 둔다** — R3 시점엔 plan-workitem 미실행이라 총 task 수 N을 모른다. plan-workitem이 task를 만든 뒤 다음 plan-milestone R0 재조정이 이 칸을 실제 `done/total`로 갱신한다(`0/N`처럼 미확정 N을 지금 박지 말 것). **직전 Now 행의 Done 전환은 R3가 강제하지 않는다** — 그 마일스톤 회고 `graduation:`이 YES일 때만 Done이며, 판정 반영은 R0 재조정이 담당한다(graduation 확인 없이 Done 박기 금지). R2 분할의 후속 마일스톤은 Next/Later에 얇게만(목표 1줄 + 확신도, `(M?)` 잠정 — 기능·AC·졸업 칸 만들지 말 것). Now 기본 1개(병렬은 명시 결정 시만). 로드맵의 `Done`/`Now`/`Next`/`Later` 네 구간은 plan-milestone만 쓴다 — `## Backlog`만 append-only 다중 writer다(ADR-057#amend-4 결정 2). **R3는 `## Backlog`를 건드리지 않는다**(회수·승격은 R0·R1 담당).
-- `## 5. 완료 기준`은 graduation checklist 5+1 default 그대로 복사(ADR-067). 사용자가 협상한 추가 기준만 "(선택)" 행에 채운다 — 정책 중복 금지(MILESTONE_TEMPLATE·ADR-067이 SSOT).
-- `## 8. 회고`는 비워둔다 — `/stabilize-milestone`이 자동 채움(ADR-067).
+- `## 5. 완료 기준`은 graduation checklist 5+1 default 그대로 복사(ADR-068). 사용자가 협상한 추가 기준만 "(선택)" 행에 채운다 — 정책 중복 금지(MILESTONE_TEMPLATE·ADR-068이 SSOT).
+- `## 8. 회고`는 비워둔다 — `/stabilize-milestone`이 자동 채움(ADR-068).
 - `## 6. 관련 문서`에 Charter / Architecture / 관련 ADR 링크를 채운다.
 
 **R4 — feature 문서 authoring (FEATURE_TEMPLATE에서)**
