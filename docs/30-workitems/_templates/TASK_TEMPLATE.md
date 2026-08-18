@@ -90,7 +90,7 @@ feature
      **검증 레벨 태그 (선택 — 관측 전용, `[자동 테스트]` AC에만)**: modality 뒤에 `{unit|integration|contract|e2e}`를 붙일 수 있다.
      예: `- AC-1 [자동 테스트]{integration} → jest::tests/api/session.spec.ts::test_AC_1_...`
      미기재 시 validate가 테스트 경로로 추론한다(`e2e/`→e2e, `tests/integration/`→integration, 그 외→unit).
-     **관측 2종(`[사용자 관측]`·`[플랫폼 관측]`)과 `[산출물 검사]`는 테스트 경로가 없어 이 축의 대상이 아니다** — 경로 추론을 적용하지 않고 분포에서 `비자동`으로만 센다.
+     **관측 2종(`[사용자 관측]`·`[플랫폼 관측]`)과 `[산출물 검사]`는 테스트 경로가 없어 이 축의 대상이 아니다** — 경로 추론을 적용하지 않고 `레벨 비대상`으로 센다(«비자동»이 아니다 — `[산출물 검사]`는 자동화율 분자에 포함된다. ADR-065 D4).
      **차단하지 않는다** — report와 stabilize telemetry에 분포만 집계한다. 경계(외부 API·DB)를 넘는 AC가
      unit으로만 덮여 있으면 그 사실이 수치로 보이게 하는 것이 목적이다.
      modality writer: plan-workitem(계획 시 지정) · builder/foreman(구현 시 실제 경로·테스트 id 확정). `사용자 관측`·`플랫폼 관측`의 증거는 사용자만 발급한다(에이전트 대행 금지). -->
