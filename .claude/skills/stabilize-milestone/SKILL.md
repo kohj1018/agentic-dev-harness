@@ -218,6 +218,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
 
 수집 소스:
 - 본 마일스톤 산하 모든 task의 `docs/40-validation/reports/<task-id>.md` (존재 시). **부재하면 그 task `## 8`의 마지막 `- closure` 줄에서 `기계AC`·`자동화율`을 읽는다**(ADR-068 D2 — 새 체크아웃에서 telemetry가 통째로 비는 것을 막는다). 그 줄도 없으면 그 task를 «집계 불가»로 세고 출력에 건수를 남긴다.
+- **검증 레벨 분포는 산하 task의 `## 6-1`에서 직접 집계한다** — 채점표에도 `- closure`에도 그 값이 없으므로(closure는 `기계AC`·`자동화율`만 담는다) 커밋된 `## 6-1`이 유일한 항구 출처다. 판정 규칙은 `/validate-workitem`과 같다(**`[자동 테스트]` AC만 레벨 대상**, 명시 `{레벨}` 태그 우선, 미기재는 테스트 경로 추론, 나머지는 `비자동`).
 - 본 마일스톤 산하 feature의 `## 7-1. FAC ↔ AC 매핑표`.
 - `docs/40-validation/QA_FINDINGS.md` 본 milestone 헤더(`## M-N`) 아래.
 - `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 2. 열린 항목` 안의 본 milestone sub-section (`### M-N` 그룹) — Cross-stabilize 회귀 신호 grep 대상. **`## 5. Repair decision log`는 제외** (Step 3 신설 영역, *closed records*라 *open finding 재등장* 측정 대상 아님).
@@ -225,6 +226,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
 집계 항목:
 - Tasks: M done / N total (M/N %)
 - AC↔검증 매핑: 충족 A / 전체 B — 충족률 <%> · 자동화율 <%>
+- AC 검증 레벨 분포: unit N / integration M / contract K / e2e L · 비자동 P  (`[자동 테스트]` AC만 레벨 대상 — 출처: task `## 6-1`)
 - FAC coverage: C ✅ / D total (C/D %)
 - Evidence Bundle 신뢰도 분포: High K / Medium L / Low J (Step 2 도입 후 채워짐 — 미도입 마일스톤은 "해당없음" 한 줄)
 - Validate exit code (가장 최근 실행): 0 / non-zero / 미설정
@@ -244,6 +246,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
 Telemetry — M1
 - Tasks: 12 / 12 (100%)
 - AC↔검증 매핑: 충족 34 / 전체 36 — 충족률 94.4% · 자동화율 88.9%
+- AC 검증 레벨 분포: unit 20 / integration 9 / contract 2 / e2e 1 · 비자동 4
 - FAC coverage: 8 / 8 (100%)
 - Evidence Bundle 신뢰도: High 9 / Medium 2 / Low 1
 - Validate exit code: 0

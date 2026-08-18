@@ -50,11 +50,15 @@ visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. 
 | source digest | (canonical asset SHA-256; non-canonical override면 근거) |
 | conformance | (fixed-suite 결과·실행 시각) |
 
-## CI 권장 출력 (ADR-025)
-`/stack-guard`가 다음 형식의 권장 텍스트 출력 (파일 자동 생성 X — 사용자 결정):
+## CI (ADR-025#amend-1)
+- CI: <generated (.github/workflows/validate.yml) | existing (preserved) | opt-out (사용자 지정) | n/a (<사유>)>
+<!-- git remote가 GitHub이고 스택이 확정되면 /stack-guard 가 기본 생성한다. --no-ci 로 opt-out.
+     기존 파일은 덮어쓰지 않고 `existing (preserved)`로 기록한다. 생성 YAML은 런타임 setup → 의존성 설치 → 통합 validate 3단계를 포함한다. -->
+
+`/stack-guard`가 위 조건 충족 시 아래 형식으로 생성한다(미충족 시 텍스트만 출력):
 
 ```yaml
-# .github/workflows/validate.yml (권장)
+# .github/workflows/validate.yml (생성 형식)
 name: validate
 on: [push, pull_request]
 jobs:
@@ -62,10 +66,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4  # 스택에 맞는 런타임 setup (setup-python/setup-go/flutter-action 등 1종)
+        with:
+          node-version: <버전>
+      - run: <의존성 설치 명령>
       - run: <stack의 validate 명령>
 ```
 
-GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 권장만.
+GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 조건 미충족 시 권장만.
 
 ## Optional MCP Connectors
 <!-- 기본 자동 연결 X (ADR-043). RCE급 도구(예: Playwright browser_run_code_unsafe)는 신뢰 클라이언트 한정. secret은 .env(커밋 X).

@@ -1,7 +1,7 @@
 ---
 name: stack-guard
 description: After /bootstrap-stack, generate verify scripts and a unified `validate` command for the project's stack.
-argument-hint: "[stack summary | empty to read existing docs]"
+argument-hint: "[stack summary | empty to read existing docs] [--no-ci]"
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
 ---
@@ -20,6 +20,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 입력:
 - `$ARGUMENTS`가 있으면 스택 요약을 받아 사용한다.
 - 비어 있으면 `docs/20-system/ARCHITECTURE_OVERVIEW.md`의 "기술 선택" 섹션을 읽어 스택을 추정한다.
+- `--no-ci` 플래그가 있으면 CI workflow를 생성하지 않는다(`## CI 생성` 절 참조). **플래그는 스택 요약으로 해석하지 않는다** — 플래그만 넘어오면 스택 추정은 위 규칙을 따른다.
 
 반드시 먼저 읽을 파일:
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
@@ -336,8 +337,13 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.propertie
 - **Motion 확장 주의**: 본 보일러플레이트는 Motion 을 canonical 8섹션 외 확장으로 둔다(ADR-027#d24). lint 의 section-ordering 은 canonical 8섹션 상대 순서만 보므로 통과하지만, 만약 특정 버전이 비-canonical 섹션을 경고하면 그 경고는 *무시 가능*(의도된 확장).
 - 비-Node 스택·비-UI 프로젝트는 본 항목 skip. *GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합 — npm 의존이라 shared 기본값에는 넣지 않는다.*
 
-## CI 권장 출력 (ADR-025)
-`.github/workflows/validate.yml` 형식 권장 텍스트를 출력한다. **스택 확정 후엔 출력에 그치지 말고 opt-in 파일 생성을 제안**한다 — 사용자가 명시 승인할 때만 `.github/workflows/validate.yml`을 생성(미승인 시 텍스트만; GUARDRAILS "강제 X" 정신). 로컬 PostToolUse hook 1-명령 설정 안내([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))도 함께 출력:
+## CI 생성 (ADR-025#amend-1)
+**아래 두 조건이 모두 참이면 `.github/workflows/validate.yml`을 기본 생성한다** — (i) git remote가 GitHub이고(`git remote -v`로 확인), (ii) 스택 판정이 끝나 통합 `validate` 명령이 존재한다. 생성 사실과 파일 경로를 출력에 명시하고, `docs/00-meta/STACK_SETUP_PLAN.md`에 `CI: generated (.github/workflows/validate.yml)` 한 줄을 기록한다.
+- **`--no-ci` 플래그가 있으면 생성하지 않고** `CI: opt-out (사용자 지정)`을 기록한다.
+- 위 두 조건 중 하나라도 거짓이면(GitHub 아님·스택 미정) 생성하지 않고 **형식 권장 텍스트만** 출력하며 `CI: n/a (<사유>)`를 기록한다.
+- **이미 `.github/workflows/validate.yml`이 있으면 덮어쓰지 않는다** — `CI: existing (preserved)`를 기록하고 커버리지 부족만 출력에 보고한다(`## 재실행 계약` 정합). brownfield 첫 실행의 정상 결과이며 `generated`·`n/a` 어느 쪽으로도 적지 않는다.
+- **생성하는 YAML은 fresh runner에서 실제로 도는 것이어야 한다.** checkout 뒤 곧바로 `validate`만 부르면 런타임·의존성이 없어 실패한다. 감지한 스택에 맞춰 아래 3단계를 반드시 포함한다 — ① 런타임 setup(`actions/setup-node@v4` + `node-version` / `actions/setup-python@v5` / `actions/setup-go@v5` / `subosito/flutter-action@v2` 등 1종), ② 의존성 설치(수행-6-2와 같은 명령 — lockfile 있으면 frozen), ③ 통합 `validate` 실행. **e2e는 기본 워크플로에 넣지 않는다**(브라우저·device 프로비저닝이 필요해 실패 소음이 된다 — 별도 워크플로는 사용자 결정).
+로컬 PostToolUse hook 1-명령 설정 안내([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))도 함께 출력:
 ```yaml
 name: validate
 on: [push, pull_request]
@@ -346,9 +352,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4  # 스택에 맞는 런타임 setup (setup-python/setup-go/flutter-action 등 1종)
+        with:
+          node-version: <버전>
+      - run: <의존성 설치 명령>
       - run: <stack의 validate 명령>
 ```
-GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 권장만.
+GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — **로컬 PostToolUse hook은 언제나 권장만**이고, 위 CI 파일은 조건 충족 시 기본 생성한다(ADR-025#amend-1).
 
 ## validate --changed (incremental, ADR-020)
 - git diff 기반 변경 파일만 lint/typecheck/test.

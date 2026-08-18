@@ -87,6 +87,12 @@ feature
      - **관측 modality 두 종은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(ADR-065 D6) finalize가 통과시켜 task를 `done`으로 마감하며 `## 8`에 `- ac-pending`을 남긴다. receipt는 `/accept-milestone <M>`(마일스톤 수용 라운드) 또는 사용자 직접 기재로 발급되고, 미발급 상태는 **마일스톤 졸업**에서 잡힌다(ADR-068 D3 item 4 — graduation `PENDING_ACCEPTANCE`).
      - `[미관측]` — **계획 단계에서 쓰지 않는다**(판정 결과 라벨이지 authoring 표기가 아니다 — ADR-065 D1). 어떤 modality도 정할 수 없으면 AC를 관측 가능하게 다시 쓰거나 task를 쪼갠다.
      - **표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환)** — 기존 fork의 task는 표기가 없으므로 이 규칙이 없으면 재검증에서 일괄 미충족이 된다. 그 AC에 대응 테스트가 없으면 기존과 같이 미충족이며, 표기 부재 자체는 `P2 [Modality-missing]` 기록 등급이다. **신규 task는 표기를 채운다.**
+     **검증 레벨 태그 (선택 — 관측 전용, `[자동 테스트]` AC에만)**: modality 뒤에 `{unit|integration|contract|e2e}`를 붙일 수 있다.
+     예: `- AC-1 [자동 테스트]{integration} → jest::tests/api/session.spec.ts::test_AC_1_...`
+     미기재 시 validate가 테스트 경로로 추론한다(`e2e/`→e2e, `tests/integration/`→integration, 그 외→unit).
+     **관측 2종(`[사용자 관측]`·`[플랫폼 관측]`)과 `[산출물 검사]`는 테스트 경로가 없어 이 축의 대상이 아니다** — 경로 추론을 적용하지 않고 분포에서 `비자동`으로만 센다.
+     **차단하지 않는다** — report와 stabilize telemetry에 분포만 집계한다. 경계(외부 API·DB)를 넘는 AC가
+     unit으로만 덮여 있으면 그 사실이 수치로 보이게 하는 것이 목적이다.
      modality writer: plan-workitem(계획 시 지정) · builder/foreman(구현 시 실제 경로·테스트 id 확정). `사용자 관측`·`플랫폼 관측`의 증거는 사용자만 발급한다(에이전트 대행 금지). -->
 
 ## 6-2. TDD opt-out

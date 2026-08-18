@@ -145,6 +145,7 @@ validator는 이 파일을 쓰지 않는다(clobber 방지). inline fallback이�
 - AC-4b: ❌ [사용자 관측] receipt 대기 — `## 8`에 유효한 `- ac-acceptance` 없음 (수용 라운드에서 발급 — 판정은 `Pending Acceptance`)
 - AC-5: ❌ [미관측] 표기 없음 → 자동 테스트 간주(legacy) — 대응 테스트 없음. `P2 [Modality-missing] AC-5` 병기
 - **충족률: 4/6 (67%) · 자동화율: 2/6 (33%)**
+- **검증 레벨 분포: unit N / integration M / contract K / e2e L · 비자동 P** — **`[자동 테스트]` AC만 레벨 분포 대상**(명시 `{레벨}` 태그 우선, 미기재는 테스트 경로 추론). 관측 2종·`[산출물 검사]`는 테스트 경로가 없어 `비자동`으로만 센다 (기록 등급)
 
 ## Spec coverage (FAC ↔ AC, ADR-037)
 - FAC-1: ✅ T-001:AC-1
