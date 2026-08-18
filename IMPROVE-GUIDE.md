@@ -2089,11 +2089,38 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 **아래 두 조건이 모두 참이면 `.github/workflows/validate.yml`을 기본 생성한다** — (i) git remote가 GitHub이고(`git remote -v`로 확인), (ii) 스택 판정이 끝나 통합 `validate` 명령이 존재한다. 생성 사실과 파일 경로를 출력에 명시하고, `docs/00-meta/STACK_SETUP_PLAN.md`에 `CI: generated (.github/workflows/validate.yml)` 한 줄을 기록한다.
 - **`--no-ci` 플래그가 있으면 생성하지 않고** `CI: opt-out (사용자 지정)`을 기록한다.
 - 위 두 조건 중 하나라도 거짓이면(GitHub 아님·스택 미정) 생성하지 않고 **형식 권장 텍스트만** 출력하며 `CI: n/a (<사유>)`를 기록한다.
-- **이미 `.github/workflows/validate.yml`이 있으면 덮어쓰지 않는다** — 커버리지 부족만 출력에 보고한다(`## 재실행 계약` 정합).
+- **이미 `.github/workflows/validate.yml`이 있으면 덮어쓰지 않는다** — `CI: existing (preserved)`를 기록하고 커버리지 부족만 출력에 보고한다(`## 재실행 계약` 정합). brownfield 첫 실행의 정상 결과이며 `generated`·`n/a` 어느 쪽으로도 적지 않는다.
 - **생성하는 YAML은 fresh runner에서 실제로 도는 것이어야 한다.** checkout 뒤 곧바로 `validate`만 부르면 런타임·의존성이 없어 실패한다. 감지한 스택에 맞춰 아래 3단계를 반드시 포함한다 — ① 런타임 setup(`actions/setup-node@v4` + `node-version` / `actions/setup-python@v5` / `actions/setup-go@v5` / `subosito/flutter-action@v2` 등 1종), ② 의존성 설치(수행-6-2와 같은 명령 — lockfile 있으면 frozen), ③ 통합 `validate` 실행. **e2e는 기본 워크플로에 넣지 않는다**(브라우저·device 프로비저닝이 필요해 실패 소음이 된다 — 별도 워크플로는 사용자 결정).
 ```
 
-**frontmatter의 `argument-hint`**에 `[--no-ci]`를 추가한다.
+**frontmatter의 `argument-hint`**에 `[--no-ci]`를 추가하고, **입력 절에도 한 줄 등재한다** — 입력 절이 «`$ARGUMENTS`가 있으면 스택 요약을 받아 사용한다»뿐이라 플래그만 넘기면 스택 요약으로 오해될 수 있다(`/discover-product`가 `--fast`를 입력 절에 열거하는 것과 동형).
+
+**추가 위치**: 입력 절의 `- 비어 있으면 …스택을 추정한다.` 줄 뒤.
+```markdown
+- `--no-ci` 플래그가 있으면 CI workflow를 생성하지 않는다(`## CI 생성` 절 참조). **플래그는 스택 요약으로 해석하지 않는다** — 플래그만 넘어오면 스택 추정은 위 규칙을 따른다.
+```
+
+★ **같은 절의 예시 YAML 블록과 그 아래 «권장만» 문장도 함께 고친다** — 위 산문이 «3단계를 반드시 포함»을 요구하는데 바로 아래 예시가 `checkout` + `validate` 2단계로 남으면, 에이전트는 산문보다 옆의 예시를 복사해 **fresh runner에서 깨지는 CI**를 만든다. 9-1(c)의 템플릿 예시와 같은 형태로 맞춘다.
+
+**현재**:
+```yaml
+    steps:
+      - uses: actions/checkout@v4
+      - run: <stack의 validate 명령>
+```
+그 아래: `GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — 권장만.`
+
+**변경**:
+```yaml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4  # 스택에 맞는 런타임 setup (setup-python/setup-go/flutter-action 등 1종)
+        with:
+          node-version: <버전>
+      - run: <의존성 설치 명령>
+      - run: <stack의 validate 명령>
+```
+그 아래: `GUARDRAILS_STRATEGY *"OS/셸 종속 hook 강제 X"* 정신 — **로컬 PostToolUse hook은 언제나 권장만**이고, 위 CI 파일은 조건 충족 시 기본 생성한다(ADR-025#amend-1).`
 
 ### (b) `docs/90-decisions/boilerplate/ADR-025-external-deps-and-ci-recommendation.md` — Amendment 추가
 
@@ -2119,7 +2146,9 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 - .claude/skills/stack-guard/SKILL.md
 ```
 
-`docs/90-decisions/boilerplate/README.md`의 025 행 Amendments 칸에 `(+#amend-1: CI 기본 생성 — 환경 판정 시)`를 적는다.
+`docs/90-decisions/boilerplate/README.md`의 025 행 Amendments 칸에 `(+#amend-1: CI 기본 생성 — 환경 판정 시)`를 적고, **같은 행의 요약 칸도 현재 정책으로 갱신한다** — 요약이 «CI 권장, 강제 X»로 남으면 index-first recall에서 기본 생성 전환을 놓친다(ADR-038·052 행의 선례와 동형).
+
+**변경 후 요약 칸**: `bootstrap-stack 외부 의존 출력 + stack-guard CI — #amend-1이 «권장만»을 **«GitHub remote + 스택 확정 시 기본 생성»**(`--no-ci` opt-out, 기존 파일 보존)으로 전환. 로컬 hook은 권장만`
 
 ### (c) `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` — 절 제목·문구 정합
 
@@ -2128,9 +2157,9 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 **변경**: 절 제목을 `## CI (ADR-025#amend-1)`로 바꾸고, 그 아래에 상태 줄 1개를 둔다(값은 `/stack-guard`가 채운다).
 ```markdown
 ## CI (ADR-025#amend-1)
-- CI: <generated (.github/workflows/validate.yml) | opt-out (사용자 지정) | n/a (<사유>)>
+- CI: <generated (.github/workflows/validate.yml) | existing (preserved) | opt-out (사용자 지정) | n/a (<사유>)>
 <!-- git remote가 GitHub이고 스택이 확정되면 /stack-guard 가 기본 생성한다. --no-ci 로 opt-out.
-     기존 파일은 덮어쓰지 않는다. 생성 YAML은 런타임 setup → 의존성 설치 → 통합 validate 3단계를 포함한다. -->
+     기존 파일은 덮어쓰지 않고 `existing (preserved)`로 기록한다. 생성 YAML은 런타임 setup → 의존성 설치 → 통합 validate 3단계를 포함한다. -->
 ```
 기존 예시 YAML 블록은 남겨 두되 「권장」 문구를 「생성 형식」으로 바꾸고, 위 3단계를 반영한다.
 
@@ -2145,9 +2174,10 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 
 modality 설명 불릿 목록 **뒤**에 추가:
 ```
-     **검증 레벨 태그 (선택 — 관측 전용)**: modality 뒤에 `{unit|integration|contract|e2e}`를 붙일 수 있다.
+     **검증 레벨 태그 (선택 — 관측 전용, `[자동 테스트]` AC에만)**: modality 뒤에 `{unit|integration|contract|e2e}`를 붙일 수 있다.
      예: `- AC-1 [자동 테스트]{integration} → jest::tests/api/session.spec.ts::test_AC_1_...`
      미기재 시 validate가 테스트 경로로 추론한다(`e2e/`→e2e, `tests/integration/`→integration, 그 외→unit).
+     **관측 2종(`[사용자 관측]`·`[플랫폼 관측]`)과 `[산출물 검사]`는 테스트 경로가 없어 이 축의 대상이 아니다** — 경로 추론을 적용하지 않고 분포에서 `비자동`으로만 센다.
      **차단하지 않는다** — report와 stabilize telemetry에 분포만 집계한다. 경계(외부 API·DB)를 넘는 AC가
      unit으로만 덮여 있으면 그 사실이 수치로 보이게 하는 것이 목적이다.
 ```
@@ -2156,16 +2186,23 @@ modality 설명 불릿 목록 **뒤**에 추가:
 
 `## AC ↔ 검증 매핑` 양식의 `- **충족률: ... · 자동화율: ...**` 줄 **뒤**에 추가:
 ```
-- **검증 레벨 분포: unit N / integration M / contract K / e2e L** (명시 태그 우선, 미기재는 경로 추론 — 기록 등급)
+- **검증 레벨 분포: unit N / integration M / contract K / e2e L · 비자동 P** — **`[자동 테스트]` AC만 레벨 분포 대상**(명시 `{레벨}` 태그 우선, 미기재는 테스트 경로 추론). 관측 2종·`[산출물 검사]`는 테스트 경로가 없어 `비자동`으로만 센다 (기록 등급)
 ```
 
 ### (c) `.claude/skills/stabilize-milestone/SKILL.md` — 7-T 집계 항목 추가
 
 집계 항목 목록의 `- AC↔검증 매핑: ...` 줄 뒤에 추가:
 ```
-- AC 검증 레벨 분포: unit N / integration M / contract K / e2e L
+- AC 검증 레벨 분포: unit N / integration M / contract K / e2e L · 비자동 P  (`[자동 테스트]` AC만 레벨 대상 — 출처: task `## 6-1`)
 ```
-그리고 출력 형식 예시 블록에도 같은 줄을 추가한다.
+그리고 출력 형식 예시 블록에도 같은 줄을 추가한다 — **예시 숫자는 바로 위 `AC↔검증 매핑` 줄의 충족/전체·자동화율과 산술이 맞아야 한다**(예: 전체 36 · 자동화율 88.9% → 자동 32 = `unit 20 / integration 9 / contract 2 / e2e 1`, `비자동 4`).
+
+**그리고 수집 소스에 한 줄을 추가한다** — 7-T 수집 소스는 채점표(ephemeral)와 6-1(k)가 넣은 `- closure` fallback뿐인데, closure에는 `기계AC`·`자동화율`만 있고 레벨 분포가 없다. 새 체크아웃에서 이 지표를 산출할 근거가 사라지므로 커밋된 task `## 6-1`을 출처로 명시한다.
+
+**위치**: 수집 소스의 `- 본 마일스톤 산하 feature의 `## 7-1. FAC ↔ AC 매핑표`.` 줄 **앞**.
+```markdown
+- **검증 레벨 분포는 산하 task의 `## 6-1`에서 직접 집계한다** — 채점표에도 `- closure`에도 그 값이 없으므로(closure는 `기계AC`·`자동화율`만 담는다) 커밋된 `## 6-1`이 유일한 항구 출처다. 판정 규칙은 `/validate-workitem`과 같다(**`[자동 테스트]` AC만 레벨 대상**, 명시 `{레벨}` 태그 우선, 미기재는 테스트 경로 추론, 나머지는 `비자동`).
+```
 
 > commit: `feat: default CI workflow generation and AC verification-level annotation`
 
