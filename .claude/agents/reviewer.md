@@ -88,7 +88,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 - **milestone-mode 게이팅**: 하위 task가 0건이면 위 12차원 중 [Plan-sizing]·[Plan-AC-form]·[Plan-dep]는 *비활성*(task 산물 부재)이고, [Plan-seam]도 비활성(task 산물 부재)이며, [Plan-FAC-coverage]는 *반전*된다 — 빈 `## 7-1`(FAC) *및 `## 7-3`(PX)* shell은 정상이므로 unmapped FAC·**unmapped PX**를 P0로 올리지 **않고**(R5-5가 PX 인벤토리만 채우고 plan-workitem 전이라 PX↔AC 매핑이 비어 있는 게 정상 — ADR-056#amend-1), shell이 형식적으로 깨졌을 때만 P2. **[Plan-design] recovery-path 유예(ADR-056#amend-3)**: task 0건이면 `## 9` 전환 표의 존재하는 각 path type 행(primary/failure/recovery)이 승인 프로토타입에 나타나는지만 보고, AC 매핑 미비는 P0/P1로 올리지 않는다(plan-workitem 후 정상 모드에서 AC 커버 재점검). **[Plan-decision]은 task 0건이어도 활성이다.** 그 위에 아래 4차원을 적용한다.
 - [MP-FAC-quality] P0 — FAC 시나리오 수준 + 측정 가능, `## 3` 추적.
 - [MP-feature-scope] P0 — charter 비목표 / milestone 제외 침범.
-- [MP-graduation] P1 — graduation 5+1(ADR-067) + e2e 선언(ADR-052).
+- [MP-graduation] P1 — graduation 5+1(ADR-068) + e2e 선언(ADR-052).
 - [MP-feature-dep] P1 — feature 간 순환·잘못된 병렬.
 (혼합 마일스톤은 feature 단위로 mode 적용. task 1건+면 Plan Quality 12 차원.)
 

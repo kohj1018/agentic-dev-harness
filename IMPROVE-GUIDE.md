@@ -1884,7 +1884,7 @@ R0의 open 항목 회수 불릿(53행) 끝에 추가:
 
 **변경 — 그 뒤에 한 줄 추가**:
 ```markdown
-- **산하 task가 전부 `done`이 되면 그 마일스톤은 «마일스톤 층»이다** — 이후 task 문서·task status·validation report는 불변이며, 네 inner-loop skill을 호출하지 않는다(ADR-068 D1). 수리는 `/repair-milestone`·`/repair-acceptance`가 직접 수행한다.
+- **산하 task가 전부 `done`이 되면 그 마일스톤은 «마일스톤 층»이다** — 이후 task 문서·task status·validation report는 불변이며(**예외는 `## 8`의 AC receipt 2종** — `- ac-acceptance`·`- invalidated`), 네 inner-loop skill을 호출하지 않는다(ADR-068 D1). 수리는 `/repair-milestone`·`/repair-acceptance`가 직접 수행한다.
 ```
 
 ### (c) 5-1 수용 단계 — 재개방 서술 교체
@@ -1916,7 +1916,7 @@ R0의 open 항목 회수 불릿(53행) 끝에 추가:
    → implement → validate ─┬─Pass──────────────→ finalize (## 8에 closure 기록) → 다음 task
                            ├─Pending Acceptance→ finalize (## 8에 closure + ac-pending)
                            └─Needs Fix─────────→ repair → (validate 재실행)
-   ── 산하 전 task done ⇒ 여기부터 «마일스톤 층». task 문서·status·report 불변 (ADR-068 D1) ──
+   ── 산하 전 task done ⇒ 여기부터 «마일스톤 층». task 문서·status·report 불변 (예외: ## 8의 AC receipt 2종 — ADR-068 D1) ──
    → stabilize(+UI: 경험 게이트)
 (opt-in, ADR-054) stabilize → validate-milestone (별 세션) → repair-milestone (원본 세션)
 (ADR-066) stabilize ─┬─YES──────────────────→ 졸업 → plan-milestone (다음 M)
@@ -1976,7 +1976,7 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 |---|---|---|
 | `## 5-1` 첫 불릿 | `그 receipt 없이 졸업 item 4 (a')를 충족하지 못하므로(ADR-065 D1 / ADR-067 D1)` | `그 receipt 없이 졸업 item 4를 충족하지 못하므로(ADR-065 D1 / ADR-068 D3)` |
 | `## 5-1` 둘째 불릿 끝 | `그 상태의 graduation이 `PENDING_ACCEPTANCE`다(ADR-067 D3)` | `그 상태의 graduation이 `PENDING_ACCEPTANCE`다(ADR-068 D4)` |
-| `## 5-1`의 receipt 불릿 | `졸업 item 4 (a')가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-067 D1)` | `졸업 item 4가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-068 D3)` |
+| `## 5-1`의 receipt 불릿 | **불릿 전체**: `` - **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4 (a')가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-067 D1). **재validate가 필요한 것은 «코드가 바뀐 task»뿐이다.** `` | `` - **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-068 D3). **코드가 바뀌어도 per-task 재validate를 하지 않는다** — 수용 라운드의 수리는 이미 마일스톤 층이므로, 검증은 `/repair-acceptance` 5-V의 넷(회귀 테스트 Green·교차 task `## 6-1` 매핑 실행·경계 smoke·`validate --changed`)과 다음 `/stabilize-milestone`의 통합 validate·e2e가 담당한다(ADR-068 D6). `` — **인용 번호만 바꾸면 안 된다**: 꼬리 문장이 per-task 재validate를 지시해 바로 다음 불릿(«사용자가 손으로 돌릴 `/validate-workitem`·`/finalize-workitem`은 없다»)과 정면 충돌한다 |
 
 > `## 5-1`의 lifecycle 그림 안 `ADR-067 D3`은 (d)의 그림 교체가 이미 처리한다.
 
@@ -1999,8 +1999,9 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 
 **변경**:
 ```
-| Milestone graduation checklist 5+1 + 마일스톤 층 폐쇄 경계 | [ADR-068](../90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (정책 SSOT — ADR-067 통합 재발행). → ADR-068 `## Surfaces` 참조. |
+| Milestone graduation checklist 5+1 + 마일스톤 층 폐쇄 경계 | [ADR-068](../90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (정책 SSOT — ADR-067 통합 재발행. 현재 SSOT: ADR-068). → ADR-068 `## Surfaces` 참조. |
 ```
+> 괄호 안 끝의 `현재 SSOT: ADR-068`은 **검사 제외 마커**다(2-3(d)의 014 행과 같은 이유) — 이 칸은 supersede 계보라 `ADR-067` 문자열이 남는데, 마커가 없으면 **Phase 10 check #1이 이 한 줄 때문에 끝까지 통과하지 못한다.** Phase 8이 `ADR-067` sweep의 마지막 구간이므로 여기서 반드시 붙인다.
 
 ### (d) Canonical Owner 표 — amend-ssot 행 추가
 
@@ -2017,7 +2018,7 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 **현재 (117~121행)** — 그 다섯 항목을 아래로 교체한다.
 
 ```markdown
-8. 마일스톤의 모든 task가 `done`이 되면 **그 마일스톤은 «마일스톤 층»이다** — task 문서·task status·validation report는 불변이고 네 inner-loop skill을 호출하지 않는다(ADR-068 D1). `/stabilize-milestone`으로 통합 점검(코드 수정·커밋·status 변경 금지).
+8. 마일스톤의 모든 task가 `done`이 되면 **그 마일스톤은 «마일스톤 층»이다** — task 문서·task status·validation report는 불변이고(**예외는 `## 8`의 AC receipt 2종** — `- ac-acceptance`·`- invalidated`) 네 inner-loop skill을 호출하지 않는다(ADR-068 D1). `/stabilize-milestone`으로 통합 점검(코드 수정·커밋·status 변경 금지).
    - `/stabilize-milestone`은 evaluator-optimizer pattern의 evaluator orchestration이다 (ADR-068 D8) — generator=`/implement-workitem`, optimizer=`/repair-milestone`.
 8.5. `/accept-milestone M-N` — 사람이 직접 실행·확인. **8의 graduation이 `PENDING_ACCEPTANCE`면 이 단계가 유일한 처방이고, `YES`면 선택이다** (ADR-068 D4/D8). 승인 시 8.7로(단 `(수용)` 태그로 이번 M 수리를 택한 개선 제안이 있으면 8.6을 먼저 — ADR-066 D5), 보류 시 8.6으로, `미완`이면 환경 복구·사용자 재개 후 8.5 재실행(라운드 카운터 미소모).
 8.6. (보류 시 · 또는 위 `(수용)` 개선 항목이 있을 때) `/repair-acceptance M-N` → **재개방 없이 직접 고치고 회귀 테스트(Red→Green)를 통합 `validate`에 묶는다**(ADR-068 D6). `- invalidated`가 있으면 `/accept-milestone M-N` 재실행. 라운드 상한 3.
@@ -2045,7 +2046,7 @@ done → in-progress (검증된 완료 결함 — **폐쇄 전 task 층에서만
 
 **추가**:
 ```markdown
-- [마일스톤 층 폐쇄 경계 + 졸업 계약](docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (산하 전 task done ⇒ task 문서·status·report 불변, 재개방 없음)
+- [마일스톤 층 폐쇄 경계 + 졸업 계약](docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (산하 전 task done ⇒ task 문서·status·report 불변 — 예외는 `## 8`의 AC receipt 2종, 재개방 없음)
 ```
 
 > 100줄 hard cap을 지킨다 — 현재 56줄이므로 여유가 있다.
@@ -2302,7 +2303,7 @@ grep -n "부분 supersede" \
   docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md \
   docs/90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md
 ```
-→ ADR-052에 1건(신규), ADR-057에 2건(기존 2026-07-29 + 신규).
+→ **건수가 아니라 «있어야 할 노트»로 확인한다** — ADR-052에 `> **부분 supersede (<적용일>)**` 1건(신규), ADR-057에 그 형식 2건(기존 2026-07-29 + 신규). ADR-057에서 함께 잡히는 나머지 4건은 정상이며 지우지 않는다: **2-5가 지시한 `## Surfaces` 2행의 `(부분 supersede: ADR-068 D1)` 병기** + 선재 2건(결정 1 산문 · 참고 절의 «ADR-051 D4 부분 supersede»).
 
 ### 17. 미치환 placeholder — 기대: **빈 출력**
 ```bash

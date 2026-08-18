@@ -44,13 +44,14 @@
 | feature | `docs/30-workitems/features/F-*-*.md` | `/plan-milestone` (생성), `/plan-workitem`(`## 7-1` AC측·`## 7-2` seam 표 채움) | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
 | workitem 템플릿 | `docs/30-workitems/_templates/{MILESTONE,FEATURE,TASK}_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
-| validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` | ephemeral | generated |
+| validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` (졸업 판정의 입력이 아니다 — ADR-068 D2) | ephemeral | generated |
 | plan review | `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md` | `/validate-plan` (다른 세션·다른 LLM) | ephemeral | generated |
 | discovery review | `docs/40-validation/discovery-reviews/DISCOVERY.<reviewer-tag>.md` | `/validate-discovery` (다른 세션·다른 LLM) | ephemeral | generated |
 | stabilize review | `docs/40-validation/stabilize-reviews/<M>.<reviewer-tag>.md` | `/validate-milestone` (다른 세션·다른 LLM) | ephemeral | generated |
 | acceptance review (수용 세션 원본) | `docs/40-validation/acceptance-reviews/<M>.r<N>.md` | `/accept-milestone` (마일스톤 스코프) | ephemeral | generated |
 | 수용 기록 (acceptance receipt) | milestone 문서 `## 11. 수용 기록` | `/accept-milestone` (마일스톤 스코프 단독) | Record | generated |
 | qa findings | `docs/40-validation/QA_FINDINGS.md` | `/stabilize-milestone` (mile별 누적) · `/accept-milestone`(수용 결함 — `(수용)` 태그) · `/repair-milestone`·`/repair-acceptance`(status 토글) | Record | baseline |
+| 원장 아카이브 (졸업 마일스톤의 닫힌 항목) | `docs/40-validation/archive/<M>.md` | `/plan-milestone` R0 (ADR-068 D7-2) | Record | generated |
 | improvement guide | `docs/40-validation/IMPROVEMENT_GUIDE.md` | `/stabilize-milestone` · `/repair-plan`·`/repair-milestone`·`/repair-acceptance`(`## 5` decision log) · `/accept-milestone`(개선 제안) | Living | baseline |
 | ADR (boilerplate) | `docs/90-decisions/boilerplate/ADR-*.md` (인덱스: `docs/90-decisions/boilerplate/README.md`) | 수동 (boilerplate 진화) | Record | baseline |
 | ADR (project) | `docs/90-decisions/project/ADR-1NN-*.md` (인덱스: `docs/90-decisions/project/README.md`) | `/bootstrap-project`(ADR-100) · `/bootstrap-stack`(ADR-101·--migrate ADR-1NN) · `/plan-milestone` R0([ADR-candidate] 회수) · architect(초안 sub-call) — 트리거 표: ADR-000#amend-2 | Record | generated |
@@ -110,7 +111,8 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
-| Milestone graduation checklist 5+1 | [ADR-067](../90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) (정책 SSOT — 구 계약 통합 재발행). → ADR-067 `## Surfaces` 참조. |
+| Milestone graduation checklist 5+1 + 마일스톤 층 폐쇄 경계 | [ADR-068](../90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (정책 SSOT — ADR-067 통합 재발행. 현재 SSOT: ADR-068). → ADR-068 `## Surfaces` 참조. |
+| 정본의 절 단위 부분 개정 + 파생 전파 (전파표·에스컬레이션·봉인 충돌) | [ADR-069](../90-decisions/boilerplate/ADR-069-bounded-ssot-amendment.md) (정책 SSOT). → ADR-069 `## Surfaces` 참조. |
 | AC 검증 modality·authority·receipt (충족률/자동화율) | [ADR-065](../90-decisions/boilerplate/ADR-065-ac-verification-contract.md) (정책 SSOT). → ADR-065 `## Surfaces` 참조. |
 | 마일스톤 수용 단계 (accept/repair-acceptance·피드백 3갈래) | [ADR-066](../90-decisions/boilerplate/ADR-066-milestone-acceptance.md) (정책 SSOT). → ADR-066 `## Surfaces` 참조. |
 | DISCOVERY=SSOT / Charter=snapshot | [ADR-035](../90-decisions/boilerplate/ADR-035-continuous-discovery.md) (정책 SSOT). → ADR-035 `## Surfaces` 참조 (fan-out SSOT). |

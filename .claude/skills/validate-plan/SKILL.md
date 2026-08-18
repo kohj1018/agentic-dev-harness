@@ -66,7 +66,7 @@ allowed-tools: Read Glob Grep Write
 **milestone-plan 4차원 (milestone-mode 한정, ADR-038#amend-4):**
 13. **[MP-FAC-quality]** — FAC가 *시나리오 수준 + 측정 가능*('works' 류 금지), feature `## 3` 시나리오 추적. P0.
 14. **[MP-feature-scope]** — feature가 charter `## 5 비목표` / milestone `## 4 제외되는 기능` 침범 여부. P0.
-15. **[MP-graduation]** — milestone `## 5 완료 기준` graduation 5+1(ADR-067) 정합 + UI/e2e 시 e2e 선언(ADR-052). P1.
+15. **[MP-graduation]** — milestone `## 5 완료 기준` graduation 5+1(ADR-068) 정합 + UI/e2e 시 e2e 선언(ADR-052). P1.
 16. **[MP-feature-dep]** — feature 간 의존(순환·잘못된 병렬). P1.
 
 판정 규칙 (review verdict — 워크플로우 차단 아님):
