@@ -8,13 +8,13 @@
 |---|------|------|------------|-----------|
 | 000 | Boilerplate decision policy | accepted | (+#amend-1: 폴더 분리, +#amend-2: ADR 작성 트리거 표 + [ADR-candidate]) | scope 라벨링 + supersede + 번호 정책 |
 | 001 | Doc hierarchy | accepted | — | docs/ 디렉터리 6분할 결정 |
-| 004 | Model alias policy | accepted | (+#amend-1: agent 이름 역할 중심) | shared 기본값에서 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용 |
+| 004 | Model alias policy | accepted | (+#amend-1: agent 이름 역할 중심, +#amend-2: 도구 무관 비고정 + 추론 강도 포함) | shared 기본값에 모델·추론 강도를 고정하지 않는다 (Claude=별칭, Codex=키 생략) |
 | 005 | Single Source of Truth (SSOT) | accepted | (+#amend-1: 원장 5종 배타적 기록 범위 + 비중복 불변식) | 같은 사실은 1곳에서 정의, 다른 곳은 한 줄 + 링크. 정책=ADR 패턴. |
 | 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+#amend-1: Surgical Changes + ambiguity surfacing, +#amend-2: implement ambiguity 하드스탑) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
 | 007 | Workitem lifecycle | accepted | (+#amend-1: lock file whitelist 11종, +#amend-2: agent 단위 판정 경계 SSOT, +#amend-3: validate 게이트 강화 + finalize --apply 사유, +#amend-4: 일부 lifecycle skill 메인 세션 + inner-loop model-invocable, +#amend-5: Needs Experience Contract, +#amend-6: pubspec.lock 추가) | discover→bootstrap→plan→implement→validate→repair→finalize→stabilize 8단계 |
 | 008 | Commit convention | accepted | (+#amend-1: monorepo scope, +#amend-2: Refs footer) | Conventional Commits 기본 채택 |
 | 009 | TDD default + opt-out | accepted | (+#amend-1: AC ID 컨벤션, +#amend-2: opt-out 범위 명확화(Red-first 면제 ≠ AC 충족 면제)) | /implement-workitem 디폴트는 Red→Green→Refactor 사이클, opt-out은 사유+follow-up 모두 필요 |
-| 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화, +#amend-4: cross-LLM wrapper 필수 축, +#amend-5: 도구별 memory 비캐노니컬) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
+| 010 | Multi-agent compatibility (AGENTS.md as canonical entry) | accepted | (+#amend-1: Phase 2.5 stack-guard wrapper 승격, +#amend-2: bootstrap-design 자연어 호출 명시, +#amend-3: 자연어 Codex skill 목록 SSOT를 README로 단일화, +#amend-4: cross-LLM wrapper 필수 축, +#amend-5: 도구별 memory 비캐노니컬, +#amend-6: Codex 모델 ID 추적 폐기(비고정)) | AGENTS.md를 캐노니컬 진입 페이지로, Codex CLI도 동일 워크플로우 동작 |
 | 011 | AGENTS.md 100줄 hard cap | accepted | — | AGENTS.md 최대 100줄, 신규 정책은 ADR + 1줄 링크 |
 | 012 | docs/00-meta 문서 아키텍처 정리 | accepted | — | 9→6 흡수 + Diátaxis 모드 라벨 추가 |
 | 014 | Milestone graduation contract | superseded | (+#amend-1: evaluator-optimizer pattern 명명, +#amend-2: E2E MUST-run hard-block — ADR-052 D3, +#amend-3: 회고 graduation 판정 줄 — 로드맵 파생 입력, +#amend-4: 0-spec 예외 철회 — 실행된 e2e 1개 이상 성공) | graduation checklist 5+1 + 회고 + pre-check + --dry-run → ADR-067 → ADR-068로 통합 재발행 (현재 SSOT: ADR-068) |

@@ -9,7 +9,7 @@ accepted
 - AGENTS.md = 캐노니컬 진입 페이지, CLAUDE.md = `@AGENTS.md` import (D1·D2).
 - 워크플로우 본문 SSOT = `.claude/skills/<name>/SKILL.md`, `.agents/skills/`는 얇은 wrapper (D3·D4).
 - Codex wrapper는 inner-loop 빈도 높은 skill + **cross-LLM 리뷰 skill과 그 repair 짝(빈도 무관 필수 — #amend-4)**에 둔다. *자연어 호출* Codex skill의 목록·개수는 README가 SSOT — 본 ADR에 개수를 핀하지 않는다 (#amend-3).
-- `.codex/config.toml` = 안전 baseline + Codex 모델 ID 추적 (D5·D8). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**.
+- `.codex/config.toml` = 안전 baseline만 — **모델·추론 강도는 고정하지 않는다**(D5·D8의 모델 ID 추적 책임은 #amend-6으로 폐기, 정책 owner는 ADR-004#amend-2). **secrets 차단은 Windows unelevated sandbox에선 OS-강제 불가 — AGENTS 정책 의존(config.toml 상단 주석이 실측 SSOT)**.
 - 도구별 memory(Claude MEMORY.md·Codex memories)는 비캐노니컬 — 지속될 결정은 checked-in 문서(마일스톤/feature/ADR)에도 (#amend-5).
 
 ## 배경
@@ -25,10 +25,10 @@ accepted
 | D2 | `CLAUDE.md`는 `@AGENTS.md` import + Claude-only 추가지침 섹션만. |
 | D3 | `.claude/skills/<name>/SKILL.md`가 워크플로우 본문의 canonical owner. |
 | D4 | `.agents/skills/<name>/SKILL.md`는 얇은 wrapper만 — 본문은 D3 위치를 가리킴. |
-| D5 | `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, 모델. **secrets 차단은 Windows unelevated에서 OS-강제 불가 — AGENTS 정책 의존, 파일 주석 참조**). |
+| D5 | `.codex/config.toml`은 안전 baseline 최소 설정만 (sandbox, approval, ~~모델~~ — **모델·추론 강도는 고정하지 않는다, #amend-6**. **secrets 차단은 Windows unelevated에서 OS-강제 불가 — AGENTS 정책 의존, 파일 주석 참조**). |
 | D6 | `.codex/agents/*.toml` custom subagents는 보류 (Phase 3). |
 | D7 | 본 ADR은 ADR-005 SSOT 패턴 1·4를 그대로 적용. 패턴 5("CLAUDE.md = 진입 페이지")는 본 ADR로 표현이 갱신됨 — 캐노니컬 진입 페이지가 `AGENTS.md`로 이동, `CLAUDE.md`는 `@AGENTS.md` import 한 줄. 매핑 표는 본 ADR 본문에 흡수, 별도 `AGENT_TOOL_MATRIX.md` 신설하지 않음. |
-| D8 | Codex는 모델 별칭 체계 없음 — 본 ADR이 Codex 모델 ID 추적 책임. ADR-004(별칭 정책)는 본문상 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화. |
+| D8 | Codex는 모델 별칭 체계 없음 — 본 ADR이 Codex 모델 ID 추적 책임. ADR-004(별칭 정책)는 본문상 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화. **[#amend-6으로 폐기 — 추적 대신 비고정, 정책 owner는 ADR-004#amend-2로 이관]** |
 
 ## 근거
 - 단순성 (ADR-006): 어댑터 표면 최소화.
@@ -49,7 +49,7 @@ accepted
 | Skill discovery surface | `/<skill-name>` | `$<skill-name>` 또는 `/skills` (`.agents/skills/<name>/SKILL.md`는 wrapper body) | 도구별 진입 표면, 본문은 위 행 SSOT |
 | Custom subagent | `.claude/agents/<name>.md` (markdown) | `.codex/agents/<name>.toml` (TOML) | Phase 3 보류 |
 | Hooks | `.claude/settings.json` 안 | `.codex/hooks.json` 또는 `[hooks]` | 본 작업 비범위 |
-| 모델 지정 | 별칭(`opus`/`sonnet`) — ADR-004 | 직접 ID(`gpt-5.5`) — 본 ADR 추적 | 도구별 다름 (구조적 차이) |
+| 모델·추론 강도 지정 | 별칭(`opus`/`sonnet`) — ADR-004 | 비고정 (키 생략 → CLI 권장 기본값/사용자 계층) — #amend-6 | 고정 금지 정책은 ADR-004#amend-2 (수단만 도구별로 다름) |
 | Read 차단 (.env, .env.*, secrets/**) | `.claude/settings.json` `permissions.deny` | `AGENTS.md 정책 의존 (Windows unelevated sandbox — OS-강제 불가, config.toml 주석 참조)` | Claude=OS-강제 / Codex=정책 의존 (비대칭 — config.toml 주석 SSOT) |
 
 ## 결과
@@ -57,7 +57,7 @@ accepted
 - CLAUDE.md는 `@AGENTS.md` import.
 - `.codex/config.toml` 안전 baseline (legacy `sandbox_mode` 유지 — `boilerplate-secure` 프로파일은 미적용, 한계는 파일 주석 참조. upstream default는 박지 않음).
 - `.agents/skills/` wrapper 4개 (Phase 1: `implement/validate/repair/finalize-workitem`).
-- ADR-004 본문은 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화 — Codex는 본 ADR이 모델 ID 추적.
+- ADR-004 본문은 Claude의 별칭만 다루므로 amend 없이 implicit scope를 본 ADR이 명문화 — Codex는 본 ADR이 모델 ID 추적. **[#amend-6으로 폐기 — ADR-004#amend-2가 도구 무관 정책으로 흡수]**
 - 본 ADR은 ADR-005 SSOT 패턴 1·4를 그대로 적용, 패턴 5는 본 ADR로 표현이 갱신됨 (entry page = `AGENTS.md`).
 - **운영 안내 1**: `docs/` 본문(예: `docs/00-meta/WORKFLOW.md`, `DELEGATION_STRATEGY.md`)에 등장하는 `/<skill-name>` 표기는 Claude 슬래시 커맨드다. Codex 사용자는 동일 skill을 `$<skill-name>`으로 읽는다 (Step 6 wrapper와 동일 변환).
 - **운영 안내 2**: `.claude/skills/<name>/SKILL.md`는 D3에 의해 canonical SSOT이므로 직접 편집은 Claude Code 측에서 수행한다. 현재 `.codex/config.toml` baseline에는 `.claude/skills/**` read-only 룰을 박지 않음 (project root `.` = write 만 박혀 있음) — Codex 측에서 `.claude/skills/<name>/SKILL.md` 직접 편집으로 SSOT drift가 발생하는 사례가 *관측되면* 본 ADR을 amend해 `.codex/config.toml` `permissions.boilerplate-secure.filesystem`에 명시적 read 룰을 박는다 (단, 현 config.toml에는 `boilerplate-secure` 프로파일 자체가 없어 그 시점엔 프로파일 신설부터 필요 — Windows unelevated에서 OS-강제 가능 여부도 재확인 대상, 파일 주석 참조). 현재 baseline은 *관측된 실패 없음*([ADR-022](ADR-022-ratchet-principle.md) ratchet 약 정합).
@@ -66,8 +66,8 @@ accepted
 - Phase 1.5 (적용됨): plan-workitem, bootstrap-project, bootstrap-stack, stabilize-milestone 4개 wrapper 추가. 근거 — fork 직후 첫 진입 시나리오(charter → architecture → 첫 분해)에서 자연어 호출 대비 wrapper 가성비가 inner-loop와 동등.
 - Phase 2 자연어 호출 skill: 목록·개수는 README.md / README_ko.md가 SSOT (#amend-3) — 본 ADR은 핀하지 않는다. wrapper 승격 여부는 fork 데이터 회수 후 재평가 (amend-1 후속 작업과 동일 정책).
 - Phase 3: Codex 서브에이전트는 GA(2026-07 확인 — `features.multi_agent` stable·on-by-default, 직접 요청·`AGENTS.md`/skill 지침으로 spawn, 내장 default/worker/explorer agent로 커스텀 persona 없이도 fan-out 가능, 병렬 `agents.max_threads` 기본 6). 본 저장소는 Claude 전용 persona(builder/researcher/qa/reviewer/architect)·라우팅을 Codex subagent로 아직 매핑하지 않아 순차/인라인 degrade를 보수적 기본값으로 둔다 — 실제 Codex fan-out 배선은 별도 설계(Stage 5 item 11c).
-- Codex 모델 ID 갱신은 본 ADR을 새 ADR로 superseding.
-- (Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.
+- ~~Codex 모델 ID 갱신은 본 ADR을 새 ADR로 superseding.~~ **[#amend-6으로 무효 — 모델을 고정하지 않으므로 갱신 이벤트 자체가 없다]**
+- ~~(Step 0-1에서 `gpt-5.5` 미접근 발견 시) 본 ADR "후속 작업"에 사용된 대체 ID와 갱신 책임자 명시.~~ **[#amend-6으로 무효]**
 - ADR-005 SSOT 패턴 5("CLAUDE.md = 진입 페이지")의 표현을 "entry page (AGENTS.md)"로 갱신하는 후속 ADR 또는 in-place 수정 검토. 본 ADR 채택 후 캐노니컬 진입점이 AGENTS.md로 옮겨가므로 패턴 5의 단어가 어긋난다.
 - (Step 0-2에서 스키마 변경 또는 `.` 비상속 발견 시) 적용된 fallback 패턴을 본 ADR "결과" 또는 "후속 작업"에 명시해 추적성 유지.
 - **[정정 2026-07-16: 본 프로파일은 현재 config.toml에 적용돼 있지 않다(legacy workspace-write 유지 — Windows unelevated 한계, 파일 주석 참조). 아래는 이력 보존용 서술.]** `boilerplate-secure` permissions 프로파일 적용 (2026-05-28): `extends = ":workspace"`로 빌트인 워크스페이스 프로파일 상속 + `:workspace_roots` 하위 `**/.env`·`**/.env.*`·`**/secrets`·`**/secrets/**` deny + `network.domains "*" = "allow"`(domains 비우면 모든 도메인 차단됨). legacy `sandbox_mode`/`sandbox_workspace_write` 제거(프로파일과 공존 시 프로파일이 통째로 무시 — ADR-010 item 1 이행). `:workspace`는 filesystem path key가 아니라 built-in 프로파일 이름이므로 `extends`로만 사용한다는 점도 함께 정합화. **실측 검증**(`codex doctor` startup warning 0개 + `.env` read deny + 외부 네트워크 접근)은 커밋 직전 사용자 수행 책임.
@@ -179,3 +179,35 @@ Phase 2 *자연어 호출* Codex skill의 **목록·개수는 README.md / README
 ### 강도 (ADR-022)
 - enabling(약) — 규율 + 프로젝트 시작 시 점검(강제 불가 — 내장 memory는 자동 기록).
 - **Mutation Contract delta**(base 승계): failure = 결정이 memory에만 남아 다른 도구·머신·세션에서 증발; falsifier(ADR-047#amend-1) = dogfood에서 checked-in 없이 memory에만 기록되는지; rollback = 체크리스트 §5 항목 제거.
+
+<a id="adr-010-amend-6"></a>
+## Amendment 6 (2026-08-28) — Codex 모델 ID 추적 폐기 (project 계층 비고정)
+
+### 배경
+- [외부실증] Codex 공식 문서 기준 `model` 키는 정확한 slug만 받고 별칭·`latest` 값이 없다. 대신 *"If you don't specify a model, the ChatGPT desktop app, Codex CLI, or IDE extension uses a recommended model"* — **비지정이 Codex의 별칭 대체물**이다 ([models 문서](https://learn.chatgpt.com/docs/models)).
+- [외부실증] 같은 문서 기준 `.codex/config.toml`에 박혀 있던 `gpt-5.5`는 "previous-generation flagship"으로 한 세대 뒤진 상태였다.
+- [관측됨] Codex 설정 계층은 project(`.codex/config.toml`) > user(`~/.codex/config.toml`)라서, project 핀이 사용자의 최신 기본값을 이 저장소에서만 무효화했다. D8이 추적 책임을 사람에게 지운 것이 ADR-004가 막으려던 staleness를 Codex 쪽에 그대로 남긴 원인이다.
+
+### 결정
+1. `.codex/config.toml`은 **모델·추론 강도를 고정하지 않는다**. 안전 baseline(`sandbox_mode` / `approval_policy` / `[sandbox_workspace_write]` / `[windows]` / `[features]`)만 남긴다 — D5의 "모델" 항목을 뺀다.
+2. **D8(Codex 모델 ID 추적 책임)을 폐기**한다. 갱신 주체는 Codex CLI(권장 기본값)와 사용자 계층이며, 정책 owner는 [ADR-004](ADR-004-model-alias-policy.md)#amend-2(도구 무관 "shared 비고정")로 이관한다. 그에 딸린 후속 작업 2건(모델 ID 갱신을 위한 supersede, `gpt-5.5` 대체 ID 명시)도 함께 무효화된다.
+3. 특정 버전을 강제할 이유가 생기면 ADR-004#amend-2의 예외 경로(별도 ADR + 사유 + 갱신 책임자)를 따른다.
+
+### 거버넌스 주 (amend vs supersede — [ADR-045](ADR-045-doc-reference-contract.md) D6)
+D6상 "기존 결정 뒤집기"는 엄밀히 supersede 대상이나, 본 개정은 (a) 8개 결정 중 파생 1개(D8)와 D5의 한 항목에 국한되고, (b) 본 ADR의 의미(다중 에이전트 도구 호환 매핑)를 유지하며, (c) D8은 *ADR-004가 Codex를 안 다뤄서* 생긴 대리 결정이라 ADR-004#amend-2가 이를 흡수하면 존재 이유가 사라진다. 반면 supersede는 D1~D7 + 개정 5건 + 저장소 전역 60여 인용을 끌고 가는 불균형 비용이다. ADR-045#amend-1의 선례(경계 사례를 거버넌스 주 + amend로 처리)를 따라 amend로 처리한다.
+
+### 적용 surface
+- `.codex/config.toml` — `model = "gpt-5.5"` 삭제 + 비고정 사유 주석.
+- 본 ADR 본문 — `## 현재 유효 결정` 1줄 / D5 / D8 / 도구 표면 매핑 표 "모델 지정" 행 / `## 결과` 1줄 / `## 후속 작업` 2줄에 폐기 표기(원 문구는 Record로 보존).
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행.
+
+### Mutation Contract (ADR-047 D3, 압축)
+- Target: `.codex/config.toml` `model` 키 제거 + 본 ADR D5·D8 폐기 표기.
+- Failure mode: project 계층 모델 핀이 CLI·사용자 계층의 최신 기본값을 덮어 fork마다 staleness가 누적된다([관측됨] `gpt-5.5` 고정 + [외부실증] previous-generation).
+- Predicted improvement: Codex 모델·추론 강도가 CLI 업데이트를 자동 승계 — 사람이 추적할 지점 0.
+- Preserved invariants: 안전 baseline 5종 전부 불변, D3·D4 wrapper 계약 불변, secrets 차단 비대칭 서술(config.toml 주석 SSOT) 불변.
+- Falsifying evaluation: 비지정 상태에서 Codex 세션이 의도보다 낮은 등급 모델로 시작하거나 재현성이 실제로 깨지는 사례가 관측되면 ADR-004#amend-2 예외 경로로 재핀.
+- Rollback path: `.codex/config.toml`에 `model = "<slug>"` 1줄 복원 + 본 amendment 폐기 표기 제거.
+
+### 강도 (ADR-022)
+- constraint(강, [관측됨]+[외부실증]) — project 계층 모델·추론 강도 고정 금지. 예외는 ADR-004#amend-2 경로.

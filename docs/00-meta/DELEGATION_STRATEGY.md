@@ -158,8 +158,9 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 
 ## 모델 표기 정책
 
-shared 기본값에서는 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용한다.
-특정 버전을 강제해야 하면 ADR로 남기고 그 자리에서만 전체 ID를 사용한다.
+shared 기본값에서는 모델·추론 강도의 버전을 고정하지 않는다 — 별칭 체계가 있는 Claude Code는 별칭(`sonnet`, `opus`, `haiku`)을 쓰고,
+별칭 체계가 없는 Codex는 `.codex/config.toml`에서 키 자체를 생략한다 (ADR-004#amend-2).
+특정 버전·강도를 강제해야 하면 ADR로 남기고 그 자리에서만 고정한다.
 정책 근거는 [ADR-004-model-alias-policy.md](../90-decisions/boilerplate/ADR-004-model-alias-policy.md)를 참조한다.
 
 메인 세션 오케스트레이션(foreman·fan-out·wave 제거) 정책은 [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) 참조.

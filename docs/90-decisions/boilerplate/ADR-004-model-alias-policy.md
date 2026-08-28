@@ -5,6 +5,11 @@
 ## Status
 accepted
 
+## 현재 유효 결정
+- shared 기본값(`.claude/settings.json`, `.codex/config.toml`)에 **모델·추론 강도의 버전을 고정하지 않는다** (#amend-2).
+- 달성 수단은 도구별로 다르다 — 별칭 체계가 있는 Claude Code는 별칭(`sonnet`/`opus`/`haiku`), 별칭 체계가 없는 Codex는 **키 자체를 생략**한다 ([ADR-010](ADR-010-multi-agent-compatibility.md)#amend-6).
+- 특정 버전·강도를 강제해야 하면 별도 ADR에 사유와 갱신 책임자를 남기고 그 자리에서만 고정한다.
+
 ## 배경
 이 보일러플레이트의 핵심 가치는 "여러 프로젝트에서 반복 재사용"이다.
 모델 ID를 전체 버전 표기(`claude-opus-4-N` 같은 형태)로 고정하면, fork된 새 프로젝트에서
@@ -42,3 +47,29 @@ agent 이름은 **역할 중심**(`architect` / `builder` / `validator` / `plann
 - Codex 사용자의 의미 혼선 차단 — 모델 별칭 suffix가 붙은 builder 이름이 Codex에서 *어떤 모델*인지 자명하지 않은 문제 해소.
 - 모델 갱신 시 이름 변경 비용 0 — ADR-004 본 정책의 *별칭 자동 갱신* 의도와 정합.
 - ADR-006 단순성 1순위 — 이름은 한 가지 의미만 운반.
+
+<a id="adr-004-amend-2"></a>
+## Amendment 2 (2026-08-28) — 정책 축 확장: 도구 무관 "shared 비고정" + 추론 강도 포함
+
+### 결정
+1. **대상 축 확장** — 본 정책은 모델뿐 아니라 **추론 강도**(Claude `effortLevel` / Codex `model_reasoning_effort`)에도 적용한다. shared 기본값에 추론 강도를 고정하지 않는다.
+2. **도구 축 확장** — 정책 본질을 "shared 기본값에서 별칭만 쓴다"에서 **"shared 기본값에서 버전을 고정하지 않는다"**로 일반화한다. 달성 수단만 도구별로 다르다:
+   - 별칭 체계가 있는 도구(Claude Code) — 별칭(`sonnet`/`opus`/`haiku`)을 쓴다. 기존 결정과 동일.
+   - 별칭 체계가 없는 도구(Codex) — **키 자체를 생략**한다. 비지정이 곧 자동 최신 경로다 ([ADR-010](ADR-010-multi-agent-compatibility.md)#amend-6이 이행).
+3. 예외 절차는 기존과 동일 — 특정 버전·강도를 강제해야 하면 별도 ADR에 사유와 갱신 책임자를 남기고 그 자리에서만 고정한다.
+
+### 근거
+- [외부실증] Claude Code 별칭은 자동 최신 매핑을 제공하고, 추론 강도도 설정 파일이 비면 모델 기본값 또는 사용자 계층이 승계한다 ([model-config 문서](https://code.claude.com/docs/en/model-config)).
+- [외부실증] Codex는 별칭이 없고 `model` 키가 정확한 slug만 받는다. 대신 *"If you don't specify a model, the ChatGPT desktop app, Codex CLI, or IDE extension uses a recommended model"* — 비지정이 별칭과 동등한 자동 최신 경로다 ([models 문서](https://learn.chatgpt.com/docs/models)).
+- [관측됨] ADR-010 D8이 Codex 모델 ID 추적을 사람에게 지운 결과 `.codex/config.toml`에 `gpt-5.5`(previous-generation flagship)가 고정된 채 남았다 — 본 ADR이 막으려던 staleness가 별칭 없는 도구에서 그대로 재현됐다. 게다가 Codex 설정 계층은 project > user라서, 그 핀이 사용자의 최신 기본값을 이 저장소에서만 무효화했다.
+- 추론 강도를 명문화하지 않으면 "팀 일관성"을 이유로 shared 파일에 `effortLevel`이 박혀 같은 staleness가 다른 축에서 재발한다. 현재 비어 있는 것은 정책이 아니라 우연이다.
+
+### 적용 surface
+- `.codex/config.toml` — 모델·추론 강도 키 부재 + 사유 주석 (실제 편집은 ADR-010#amend-6이 owning).
+- `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델 표기 정책`.
+- `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` — D5·D8 폐기 표기 (#amend-6).
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행.
+- `.claude/settings.json`의 `"model": "opus"`는 이미 별칭이라 변경 없음 — 본 amendment는 그 표기를 그대로 승인한다.
+
+### 강도 (ADR-022)
+- constraint(강, [관측됨]+[외부실증]) — shared 기본값에 모델·추론 강도 고정 금지. 예외는 위 3의 별도 ADR 경로.
