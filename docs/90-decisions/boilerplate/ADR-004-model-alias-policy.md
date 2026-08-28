@@ -7,7 +7,8 @@ accepted
 
 ## 현재 유효 결정
 - shared 기본값(`.claude/settings.json`, `.codex/config.toml`)에 **모델·추론 강도의 버전을 고정하지 않는다** (#amend-2).
-- 달성 수단은 도구별로 다르다 — 별칭 체계가 있는 Claude Code는 별칭(`sonnet`/`opus`/`haiku`), 별칭 체계가 없는 Codex는 **키 자체를 생략**한다 ([ADR-010](ADR-010-multi-agent-compatibility.md)#amend-6).
+- shared 도구 설정 파일은 **모델 키 자체를 두지 않는다** — Claude Code `.claude/settings.json`(#amend-3) · Codex `.codex/config.toml`([ADR-010](ADR-010-multi-agent-compatibility.md)#amend-6) 양쪽 다. 승계 대상은 사용자 계층 또는 계정·CLI 기본값.
+- 별칭(`sonnet`/`opus`/`haiku`)은 **역할별 고정이 필요한 자리에서만** 쓴다 — `.claude/agents/<name>.md` frontmatter `model:`. 전체 버전 ID 금지는 불변.
 - 특정 버전·강도를 강제해야 하면 별도 ADR에 사유와 갱신 책임자를 남기고 그 자리에서만 고정한다.
 
 ## 배경
@@ -28,7 +29,7 @@ shared 기본값에서는 모델 별칭(`sonnet`, `opus`, `haiku`)만 사용한�
 - 사람이 모델 갱신을 잊어 staleness가 누적되는 것을 저비용으로 막는다.
 
 ## 결과
-- `.claude/settings.json`: `"model": "opus"` (default 별칭 — 어느 별칭이 default인지는 본 ADR의 강제 사항이 아니다. 정책 본질은 "shared 기본값에서 별칭만 쓴다".)
+- ~~`.claude/settings.json`: `"model": "opus"` (default 별칭 — 어느 별칭이 default인지는 본 ADR의 강제 사항이 아니다. 정책 본질은 "shared 기본값에서 별칭만 쓴다".)~~ **[#amend-3으로 폐기 — 키 자체를 제거]**
 - `.claude/agents/architect.md`: `model: opus`
 - `.claude/skills/bootstrap-project/SKILL.md`, `.claude/skills/bootstrap-stack/SKILL.md`: `model: opus`
 - 다른 sub-agent의 `model: sonnet` 표기는 그대로 유지(이미 별칭).
@@ -69,7 +70,36 @@ agent 이름은 **역할 중심**(`architect` / `builder` / `validator` / `plann
 - `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델 표기 정책`.
 - `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` — D5·D8 폐기 표기 (#amend-6).
 - `docs/90-decisions/boilerplate/README.md` 인덱스 행.
-- `.claude/settings.json`의 `"model": "opus"`는 이미 별칭이라 변경 없음 — 본 amendment는 그 표기를 그대로 승인한다.
+- ~~`.claude/settings.json`의 `"model": "opus"`는 이미 별칭이라 변경 없음 — 본 amendment는 그 표기를 그대로 승인한다.~~ **[#amend-3이 supersede — 별칭이어도 shared 파일에서 제거]**
 
 ### 강도 (ADR-022)
 - constraint(강, [관측됨]+[외부실증]) — shared 기본값에 모델·추론 강도 고정 금지. 예외는 위 3의 별도 ADR 경로.
+
+<a id="adr-004-amend-3"></a>
+## Amendment 3 (2026-08-28) — Claude shared 파일에서도 모델 키 제거 (별칭조차 두지 않음)
+
+### 배경
+- #amend-2 는 "shared 기본값에서 버전을 고정하지 않는다"를 도구 무관 원칙으로 세우면서도, `.claude/settings.json` 의 `"model": "opus"` 는 *이미 별칭이라* 예외로 승인했다.
+- [관측됨] 그 별칭 하나가 사용자 계층을 덮는다. 설정 우선순위가 shared project > user 이므로, 사용자가 `~/.claude/settings.json` 에 `"model": "opus[1m]"` 을 두고 `/model` 로 골라도 다음 실행에서 저장소 pin 이 되돌린다. 별칭은 *버전* staleness 는 막지만 *사용자 선택* 을 덮는 문제는 그대로였다.
+- [외부실증] `model` 은 세션이 시작하는 모델을 정하는 initial selection 이다 — enforcement 가 아니고, 세션 중 `/model` 전환을 막지도 않는다 ([model-config 문서](https://code.claude.com/docs/en/model-config)).
+- [관측됨] 이 저장소의 sub-agent 13개는 전부 frontmatter 에 `model:` 을 각자 박고 있어(`opus` 7 / `sonnet` 6) 세션 모델을 상속하지 않는다. 즉 shared 세션 pin 제거가 역할별 추론 품질 하한선을 건드리지 않는다.
+
+### 결정
+1. `.claude/settings.json` 에서 `"model"` 키를 **제거**한다. shared 도구 설정 파일에는 Claude·Codex 양쪽 모두 모델 키를 두지 않는다 — #amend-2 의 예외를 없애 원칙을 일관화한다.
+2. 별칭의 자리는 **`.claude/agents/<name>.md` frontmatter `model:`** 로 한정한다. 여기서는 역할별 고정이 목적이므로 별칭을 계속 쓴다(전체 버전 ID 금지 불변).
+3. 세션 시작 모델은 사용자 계층(`~/.claude/settings.json` · `.claude/settings.local.json`) 또는 계정 기본값이 승계한다. 팀 차원 강제가 필요하면 프로젝트 자체 정책 ADR-100+ 로 박는다.
+
+### 대안과 제약 (ADR-053)
+- **A. 별칭 유지(`"model": "opus"`)** — 편익: fork 사용자의 메인 세션 추론 품질 하한선을 저장소가 보장. 제약: 사용자 계층을 매 실행 덮어 개인 선택(`opus[1m]` 등)이 무효화되고, 그 사실이 문서 어디에도 없었다.
+- **B. 키 제거(채택)** — 편익: 사용자·계정 기본값 승계, #amend-2 원칙 일관화, `/model` 선택이 지속됨. 제약: **Pro·Team Standard 좌석 fork 사용자의 메인 세션이 계정 기본값(Sonnet 5)으로 시작**한다. 메인 세션에서 도는 lifecycle skill(ADR-050)이 그 모델로 돌므로 무거운 판정의 품질이 좌석에 따라 달라진다. 완화: 무거운 추론은 `architect`(`model: opus`) 등 sub-agent 위임 경로가 이미 존재하고(bootstrap-project·plan-workitem 본문이 그 위임을 지시), 개인은 `.claude/settings.local.json` 1줄로 원복 가능.
+- **C. shared 를 `"opus[1m]"` 로 변경** — 편익: 1M 컨텍스트 기본화. 제약: 1M 이 좌석에 자동 포함되지 않는 환경에서 usage credit 과금·미가용으로 갈 수 있어 비용을 fork 사용자에게 전가. 기각.
+
+### 적용 surface
+- `.claude/settings.json` — `"model"` 키 제거(`permissions.deny` 불변).
+- 본 ADR `## 현재 유효 결정` 2줄 재작성 / `## 결과` 첫 줄 폐기 표기 / #amend-2 `적용 surface` 마지막 줄 supersede 표기.
+- `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델 표기 정책`.
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행.
+- 변경 없음: `.claude/agents/*.md` frontmatter 13개, `.codex/config.toml`(이미 키 부재), `effortLevel` 정책(#amend-2), `permissions.deny`.
+
+### 강도 (ADR-022)
+- constraint(강, [관측됨]+[외부실증]) — shared 도구 설정 파일에 모델 키 금지. 예외는 #amend-2 3의 별도 ADR 경로.

@@ -8,7 +8,7 @@
 |---|------|------|------------|-----------|
 | 000 | Boilerplate decision policy | accepted | (+#amend-1: 폴더 분리, +#amend-2: ADR 작성 트리거 표 + [ADR-candidate]) | scope 라벨링 + supersede + 번호 정책 |
 | 001 | Doc hierarchy | accepted | — | docs/ 디렉터리 6분할 결정 |
-| 004 | Model alias policy | accepted | (+#amend-1: agent 이름 역할 중심, +#amend-2: 도구 무관 비고정 + 추론 강도 포함) | shared 기본값에 모델·추론 강도를 고정하지 않는다 (Claude=별칭, Codex=키 생략) |
+| 004 | Model alias policy | accepted | (+#amend-1: agent 이름 역할 중심, +#amend-2: 도구 무관 비고정 + 추론 강도 포함, +#amend-3: Claude shared 파일에서도 모델 키 제거) | shared 도구 설정 파일에 모델·추론 강도 키를 두지 않는다 (별칭은 agent frontmatter에서만) |
 | 005 | Single Source of Truth (SSOT) | accepted | (+#amend-1: 원장 5종 배타적 기록 범위 + 비중복 불변식) | 같은 사실은 1곳에서 정의, 다른 곳은 한 줄 + 링크. 정책=ADR 패턴. |
 | 006 | Simplicity, Clean Code, and Clean Architecture priority | accepted | (+#amend-1: Surgical Changes + ambiguity surfacing, +#amend-2: implement ambiguity 하드스탑) | 단순성 1순위, Clean Code 2순위, Clean Architecture 3순위 (정당화 시) |
 | 007 | Workitem lifecycle | accepted | (+#amend-1: lock file whitelist 11종, +#amend-2: agent 단위 판정 경계 SSOT, +#amend-3: validate 게이트 강화 + finalize --apply 사유, +#amend-4: 일부 lifecycle skill 메인 세션 + inner-loop model-invocable, +#amend-5: Needs Experience Contract, +#amend-6: pubspec.lock 추가) | discover→bootstrap→plan→implement→validate→repair→finalize→stabilize 8단계 |
