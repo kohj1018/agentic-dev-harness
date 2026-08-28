@@ -9,7 +9,7 @@ accepted
 ## 현재 유효 결정
 - 연결된 MCP는 `STACK_SETUP_PLAN ## Optional MCP Connectors` 표(+`lifecycle usage`/`agent access` 컬럼)에 기록하고, plan(line item authoring)→implement(실행 또는 `Needs MCP Access`)→validate(`[MCP-unused]` audit)→stabilize 3-P(registry-driven) 계약으로 *연결된 MCP가 관련 task에서 실제로 쓰이도록* 권장·점검한다(자동 차단 0 — enabling).
 - ADR-043(record-only)을 *enforce로 확장* — 보안 가드(read-only/secret/RCE 한정/자동연결 X)는 보존(supersede 아님, ADR-043 accepted 유지).
-- `agent access` 부여는 SKILL `allowed-tools`(`mcp__<server>__*`) + (acceptEdits 기본 모드에서 MCP confirm 정지 회피용) read-only MCP 도구의 `permissions.allow` *둘 다* 필요 — 그래야 fork sub-agent가 비대화식으로 자율 호출 가능(E 한계 — 아래 정책 강도).
+- `agent access` 부여는 SKILL `allowed-tools`(`mcp__<server>__*`) **하나로 충분**하다 — `auto` 모드가 MCP 호출을 분류기로 검토해 confirm 정지가 없다 (#amend-1로 `permissions.allow` 병행 요구 폐기; 분류기 없는 모드로 비대화 실행할 때만 read-only 도구를 등재).
 
 ## 배경
 - [관측됨] ADR-043이 `docs/00-meta/STACK_SETUP_PLAN.md` `## Optional MCP Connectors` 표에 *연결 사실*은 기록하게 했으나, 결정 4가 "skill/agent 본문 자동 재작성 X"로 *사용 강제*를 명시적으로 보류했다 → MCP를 환경에 붙여도 plan/implement가 그 존재를 인식·활용하지 않아 "기록만 되고 안 쓰이는" 상태.
@@ -18,7 +18,7 @@ accepted
 
 ## 결정 (6)
 1. **연결 기록을 *사용 의도까지* 구조화** — STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 2 컬럼 추가: `lifecycle usage`(어느 phase/skill이 어떤 capability에 이 MCP를 우선 사용하는가) + `agent access`(이 MCP 도구를 `allowed-tools`로 부여한 skill, 또는 `main-session`). 기존 보안 컬럼(read-only / secret)은 유지.
-2. **연결 절차에 step (e) 추가** (ADR-043 결정 4의 (a)~(d)에 이어) — MCP 연결 시 *lifecycle usage 결정 + 해당 skill `allowed-tools`에 `mcp__<server>__*` 부여*(Claude: SKILL frontmatter / Codex: `.codex/config.toml`의 permissions + `[mcp_servers.*]`)를 사용자가 직접 수행하고 표에 기록. **`allowed-tools` 부여만으로는 부족**하다 — shared 기본 모드가 `acceptEdits`이고 그 모드는 *MCP 호출(및 자동승인 집합 밖 Bash)에 confirm을 요구*한다(GUARDRAILS_STRATEGY `## defaultMode 위험 tier`). fork sub-agent(builder/planner/validator)는 실행 중 confirm에 응답할 수 없으므로, 비대화 자율 호출이 필요한 *read-only* MCP 도구는 `.claude/settings(.local).json`의 `permissions.allow`에도 등재해야 한다(RCE급 도구는 등재 X — 신뢰 클라이언트 confirm 유지). 부여·allow하지 않으면 enforcement는 "권장 출력 + `Needs MCP Access`"까지만 동작(자동 사용 불가).
+2. **연결 절차에 step (e) 추가** (ADR-043 결정 4의 (a)~(d)에 이어) — MCP 연결 시 *lifecycle usage 결정 + 해당 skill `allowed-tools`에 `mcp__<server>__*` 부여*(Claude: SKILL frontmatter / Codex: `.codex/config.toml`의 permissions + `[mcp_servers.*]`)를 사용자가 직접 수행하고 표에 기록. **`allowed-tools` 부여로 충분**하다 — 승계 기본 모드 `auto`는 MCP 호출을 분류기로 검토하므로 fork sub-agent(builder/planner/validator)가 confirm 대기로 멈추지 않는다(GUARDRAILS_STRATEGY `## defaultMode 위험 tier`). *분류기가 없는 모드*(Manual 등)로 비대화 실행할 때만, 자율 호출이 필요한 *read-only* MCP 도구를 `.claude/settings(.local).json`의 `permissions.allow`에 등재한다(RCE급 도구는 등재 X — 신뢰 클라이언트 confirm 유지). **[#amend-1 — 원 문구는 `permissions.allow` 병행 등재를 상시 필수로 요구했다]** `allowed-tools`를 부여하지 않으면 enforcement는 "권장 출력 + `Needs MCP Access`"까지만 동작(자동 사용 불가).
 3. **plan-workitem MCP-aware line item** — `## Optional MCP Connectors` 표가 존재하고 분해 task의 capability가 연결된 MCP의 `lifecycle usage`와 매칭되면, 해당 task `## 3. 구현 항목`에 line item을 자동 추가: `- <capability> 작업 시 <mcp-name> MCP 사용 (STACK_SETUP_PLAN Optional MCP Connectors 참조)`. 권장 텍스트만, 자동 차단 X (ADR-007 책임 경계 / ADR-040 패턴 정합). 표 부재 시 본 step skip(ADR-019 minimal — 표 없으면 사전 read X).
 4. **implement-workitem MCP 실행 + Needs MCP Access** — task `## 3`에 MCP-use line item이 있으면 builder가 그 MCP 도구로 실행한다. MCP 도구가 `allowed-tools`에 없거나 호출 불가면 *날조·우회하지 않고* `Needs MCP Access: <mcp> — <skill> allowed-tools에 mcp__<server>__* 부여 또는 메인 세션 경유 필요`를 출력하고 해당 항목을 skip한다 (ADR-040 "Needs Research" hardstop 패턴 정합 — builder는 추측 금지).
 5. **validator MCP 미실행 audit** — MCP-use line item이 있었는데 실행 흔적(diff / test / 출력)이 없으면 report에 `P2 [MCP-unused] <mcp> — plan이 박은 MCP 사용 line item 미실행` 기록. 자동 차단 X(report 신뢰 등급만 영향).
@@ -53,4 +53,34 @@ accepted
 - ADR-043 (Optional MCP Connectors — record 정책. 본 ADR이 enforce로 확장. ADR-043은 accepted 유지)
 - ADR-040 (researcher + docs-check line item 패턴 — 본 ADR이 동일 2-layer 패턴 재사용)
 - ADR-010 (Claude + Codex 양쪽 emit), ADR-022 (Ratchet), ADR-047 D3 (Mutation Contract)
-- GUARDRAILS_STRATEGY (`acceptEdits`에서 MCP(및 자동승인 집합 밖 Bash)는 confirm — 본 ADR이 그 게이트를 약화시키지 않음)
+- GUARDRAILS_STRATEGY (`auto`에서 MCP·셸 호출은 분류기 검토, 분류기 없는 모드에서는 confirm — 본 ADR이 그 게이트를 약화시키지 않음. #amend-1)
+
+<a id="adr-048-amend-1"></a>
+## Amendment 1 (2026-08-28) — `agent access` 이중 셋업 폐기 (`allowed-tools` 하나로 충분)
+
+### 배경
+- 본 ADR #d2 는 `allowed-tools` 부여에 더해 read-only MCP 도구를 `permissions.allow` 에도 등재하도록 *필수화*했다. 그 근거는 단 하나 — **shared 기본 모드가 `acceptEdits` 이고 그 모드는 MCP 호출에 confirm 을 요구**한다는 것.
+- [관측됨] 그 전제가 사라졌다. `.claude/settings.json` 의 `defaultMode` 핀이 제거돼 CLI built-in default 를 승계한다 ([ADR-047](ADR-047-code-as-agent-harness.md)#amend-2).
+- [외부실증] 승계 기본값 `auto` 에서 MCP 호출은 confirm 이 아니라 **분류기 검토**를 받는다. sub-agent 의 행동도 부모 세션과 같은 규칙으로 검토되므로, 비대화 자율 호출에 `permissions.allow` 가 필요하지 않다 ([permission-modes 문서](https://code.claude.com/docs/en/permission-modes) — 분류기 결정 순서 및 sub-agent 처리).
+
+### 결정
+1. **`agent access` = SKILL `allowed-tools`(`mcp__<server>__*`) 하나**로 축소한다. `permissions.allow` 병행 등재 요구를 폐기한다.
+2. 예외(조건부 잔존): 분류기가 없는 모드로 비대화 실행할 때 — `claude -p`·Agent SDK·Enterprise 플랜·Console API key 처럼 승계값이 Manual 인 경로. 그때만 자율 호출이 필요한 *read-only* 도구를 `permissions.allow` 에 등재한다. RCE급 도구 등재 금지는 불변.
+3. 보안 invariant(ADR-043 계승) 전부 불변 — read-only default / secret 분리 / RCE급 도구 신뢰 클라이언트 한정 / 자동 연결 금지.
+
+### 적용 surface
+- `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` — 연결 절차 (e) 에서 `permissions.allow` 필수 요구 제거(조건부 1문장으로 축약).
+- 본 ADR `## 현재 유효 결정` 1줄 / #d2 / `## 참고` GUARDRAILS 줄. `## Mutation Contract` 3·5 필드의 `permissions.allow` 표기는 Record 로 보존 — 본 amendment 가 정정 SSOT.
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행.
+- 변경 없음: `#d3`~`#d6` 계약, `Needs MCP Access`/`[MCP-access]`/`[MCP-unused]` 판정(모두 `allowed-tools` 축), `## Surfaces` 목록.
+
+### Mutation Contract delta (base 승계)
+- Target: #d2 의 셋업 요구 2개 → 1개 + 템플릿 (e).
+- Failure mode: 없어진 전제 위에 남은 셋업 단계가 fork 사용자에게 영구 부담으로 붙는다(불필요한 `permissions.allow` 확장 = 권한 표면 확대).
+- Predicted improvement: MCP 연결 셋업 단계 축소, 권한 표면 최소화. `[MCP-access]` 강등 사유가 `allowed-tools` 단일 축으로 수렴.
+- Preserved invariants: base 의 보안 invariant 전부 + RCE급 등재 금지 + enabling(자동 차단 0).
+- Falsifying evaluation: `auto` 세션의 fork sub-agent MCP 호출이 분류기에 의해 routine 하게 차단돼 `[MCP-unused]` 가 늘면, #d2 의 `permissions.allow` 등재를 *분류기 차단 회피용*으로 재도입한다(구 문구 복원과는 근거가 다름).
+- Rollback path: 본 amendment 폐기 + #d2 원 문구 복원.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]+[외부실증]) — 요구 축소. 새 제약 없음.

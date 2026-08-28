@@ -60,7 +60,7 @@ ADR 본문 어느 위치에 박는지: `## 결정` 블록(D1~Dn) 다음, `## 결
 
 ### D5. Sandboxed Execution and Permissioned State Transition (*Code as Agent Harness* §3.4.3 정합)
 multi-tier permission이 *harness state*. agent의 위험 transition을 *pre-execution gating* (permission boundary) 또는 *후속 deterministic sensor catch* (D1 Executability와 정합)로 통제한다.
-- 본 보일러는 `.claude/settings.json` 의 `defaultMode` 로 *permission 기본 모드*를 결정 — 4 모드(`default` / `acceptEdits` / `bypassPermissions` / `plan`) 별 위험 tier·정당화·대체 경로는 [docs/00-meta/GUARDRAILS_STRATEGY.md](../../00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier) 의 `## defaultMode 위험 tier` 단락이 적용 surface SSOT.
+- 본 보일러는 `.claude/settings.json` 에 `defaultMode` 를 **고정하지 않고** CLI built-in default 를 승계한다 (#amend-2 — 터미널 세션은 `auto`, 비대화·Enterprise·API key 경로는 `default`). 모드별 행동·위험 tier·정당화·강제 경로는 [docs/00-meta/GUARDRAILS_STRATEGY.md](../../00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier) 의 `## defaultMode 위험 tier` 단락이 적용 surface SSOT (모드 목록도 그 표가 owning — 본 D5는 개수를 핀하지 않는다).
 - 민감 파일 접근 차단은 `.claude/settings.json` 의 `permissions.deny` (현재 `.env` / `secrets/**`) 가 owning.
 - 본 D5는 *원칙 owning* — `[외부실증]` 논문 §3.4.3 sandboxed execution + permissioned state transition 인용 single source. 영구 GUARDRAILS_STRATEGY 본문은 본 D5만 인용.
 
@@ -156,3 +156,34 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 
 ### 강도 (ADR-022)
 - enabling(약) — 방법·러너 명시. 자동 차단 없음.
+
+<a id="adr-047-amend-2"></a>
+## Amendment 2 (2026-08-28) — D5: `defaultMode` 비고정 (CLI built-in default 승계)
+
+### 배경
+- [외부실증] Claude Code v2.1.228+(native Windows는 v2.1.233+)에서 **built-in 시작 모드가 `auto`** 다 — Pro·Max·Team 플랜의 터미널·VS Code 세션 기준. `claude -p`·Agent SDK·Enterprise 플랜·Console API key·feature-flag 미수신 세션은 `default`(Manual) ([permission-modes 문서](https://code.claude.com/docs/en/permission-modes)).
+- [외부실증] `auto` 에서 **작업 디렉터리 내 read·Write/Edit 는 분류기를 거치지 않고 자동 수락**되고(protected path 제외), 그 밖의 셸·네트워크·MCP 호출은 분류기가 검토한다. sub-agent 도 부모와 같은 규칙으로 검토되며 frontmatter `permissionMode` 는 무시된다. 즉 `acceptEdits` 의 RGR 보장은 유지되고, `acceptEdits` 가 confirm 으로 막던 셸·MCP 호출까지 비대화로 통과한다.
+- [외부실증] 프로젝트·로컬 설정 파일에 적은 `"auto"` 는 무효 처리된다 — `auto` 는 *핀을 박지 않는 것*으로만 얻는다.
+- [관측됨] shared `acceptEdits` 핀은 built-in default 를 이 저장소에서만 무효화하고 있었다. GUARDRAILS 의 "fork 사용자 대체 경로(옵션 B) = shared `defaultMode` 제거"가 이미 이 방향을 예비 경로로 적어 두었다.
+
+### 결정
+1. D5 의 첫 항목을 뒤집는다 — `.claude/settings.json` 에 `defaultMode` 를 **고정하지 않고** CLI built-in default 를 승계한다. 모드 목록·행동·위험 tier 는 GUARDRAILS_STRATEGY `## defaultMode 위험 tier` 표가 owning 이며, 본 D5 는 모드 *개수*를 핀하지 않는다(구 "4 모드" 열거 폐기 — 현재 CLI 는 `auto`·`dontAsk` 포함 6 모드).
+2. `permissions.deny`(민감 파일)는 불변 — deny 룰은 모든 모드에서 차단된다.
+3. 모드를 강제해야 하면 개인 `.claude/settings.local.json` 또는 프로젝트 ADR-100+ 로 박는다. 비대화 러너(ADR-017 dogfood·bench)는 승계값이 Manual 이므로 `--permission-mode` 를 명시한다.
+
+### 적용 surface
+- `.claude/settings.json` — `permissions.defaultMode` 제거.
+- `docs/00-meta/GUARDRAILS_STRATEGY.md#guardrails-default-mode-risk-tier` — 표에 `auto` 행 추가 + 정당화·잔여 위험 재작성 + 옵션 B 단락 폐기(제거는 이제 기본값) + 비대화 경로·allow 룰 드롭 주의 신설. `## PostToolUse` 비용 주의 1문구.
+- 본 ADR D5 첫 항목.
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행.
+
+### Mutation Contract (ADR-047 D3, 압축)
+- Target: `.claude/settings.json` `permissions.defaultMode` 제거 + D5 첫 항목 + GUARDRAILS D5 적용 surface.
+- Failure mode: shared 핀이 도구 기본값을 무효화해 (a) 모드 정책이 CLI 업데이트와 어긋난 채 고정되고, (b) `acceptEdits` 가 셸·MCP 호출마다 confirm 을 요구해 비대화 sub-agent 가 `Needs MCP Access` 로 상시 강등된다([관측됨] ADR-048 #d2 가 그 회피용 `permissions.allow` 등재를 필수화하고 있었다).
+- Predicted improvement: 터미널 세션이 분류기 기반 `auto` 로 시작 — 작업 디렉터리 Edit 자동 수락은 유지되면서 셸·MCP confirm 정지가 사라지고, ADR-048 의 이중 셋업 요구가 1개로 축소된다.
+- Preserved invariants: `permissions.deny` 민감 파일 차단(전 모드), protected path·critical path 삭제 비-자동수락, D1 deterministic sensor(후속 validate)로 범위 밖 변경 후행 catch, lifecycle 계약 전부 불변.
+- Falsifying evaluation: dogfood 라운드에서 (a) 분류기 차단으로 lifecycle 이 진행 불가해지거나 (b) 범위 밖·파괴적 행동이 `acceptEdits` 대비 늘면, `defaultMode` 를 명시 핀으로 복구한다.
+- Rollback path: `.claude/settings.json` 에 `"defaultMode": "acceptEdits"` 1줄 복원 + 본 amendment 폐기 표기 제거.
+
+### 강도 (ADR-022)
+- enabling(약, [외부실증]) — 도구 기본값 승계. 제약을 새로 추가하지 않고, 기존 제약(`permissions.deny`·validate 게이트)은 그대로 남는다.

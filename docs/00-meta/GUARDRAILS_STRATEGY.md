@@ -24,26 +24,28 @@
 <a id="guardrails-default-mode-risk-tier"></a>
 ## defaultMode 위험 tier (ADR-047 D5 sandboxed execution + permissioned state transition 정합)
 
-`.claude/settings.json` 의 `defaultMode` 는 *agent의 edit/write 기본 수락 모드*를 결정한다. 본 보일러플레이트는 shared 기본값으로 `"acceptEdits"` 를 박고 있다 — 다음 정당화·위험 tier·대체 경로를 명시한다.
+본 보일러플레이트는 shared 기본값에 `defaultMode` 를 **박지 않는다** — Claude Code CLI 의 built-in default 를 승계한다 (ADR-047#amend-2). 승계 결과는 실행 방식에 따라 다르다: Pro·Max·Team 플랜의 터미널·VS Code 세션은 `auto`, `claude -p`·Agent SDK·Enterprise 플랜·Console API key·feature-flag 미수신 세션은 `default`(Manual).
 
 | 모드 | 행동 | 위험 tier | 본 보일러 적용 |
 |------|------|----------|--------------|
-| `default` | 모든 Write/Edit 마다 confirm | 낮음 | — |
-| `acceptEdits` | Write/Edit + 작업 디렉터리 내 파일시스템 명령 자동 수락 — **Bash** `mkdir`/`touch`/`rm`/`rmdir`/`mv`/`cp`/`sed`, **PowerShell** `Set-Content`/`Add-Content`/`Clear-Content`/`Remove-Item`(+ 공통 별칭) *(공식문서 명시 전체 — 삭제 `rm`/`Remove-Item` 포함)*; 범위 밖 경로·protected path·그 외 Bash/PowerShell·MCP는 confirm | **중간** | **shared 기본값** |
+| `default` (=Manual) | 모든 Write/Edit 마다 confirm | 낮음 | `claude -p`·SDK·Enterprise·API key 세션의 승계값 |
+| `auto` | 작업 디렉터리 내 read·Write/Edit 는 자동 수락(protected path 제외), 그 밖의 셸·네트워크·MCP 호출은 **분류기(classifier)가 사용자 대신 검토** — 승인 또는 차단, confirm 프롬프트 없음 | **중간** | **터미널 세션의 승계값 (사실상 기본)** |
+| `acceptEdits` | Write/Edit + 작업 디렉터리 내 파일시스템 명령 자동 수락 — **Bash** `mkdir`/`touch`/`rm`/`rmdir`/`mv`/`cp`/`sed`, **PowerShell** `Set-Content`/`Add-Content`/`Clear-Content`/`Remove-Item`(+ 공통 별칭); 범위 밖 경로·protected path·그 외 Bash/PowerShell·MCP는 confirm | **중간** | 비대화 실행에서 분류기를 쓰지 않을 때의 명시 선택 |
 | `bypassPermissions` | 모든 도구 자동 수락 | 높음 | local-only 권장 (절대 shared X) |
 | `plan` | 읽기 전용 | 매우 낮음 | 사용자 명시 선택 |
 
-**`acceptEdits` shared 정당화**:
+**비고정(built-in default 승계) 정당화**:
 - 본 보일러플레이트의 lifecycle(plan→implement→validate→repair→finalize→stabilize)이 모든 변경을 *후속 validate에서 검증*한다 (deterministic sensor — ADR-047 D1 Executability 정합). 즉 mid-stream confirm을 빼도 끝단 validator가 catch.
-- 비-acceptEdits 모드에서는 builder가 매 Edit마다 confirm으로 중단 — RGR 사이클이 사실상 불가능해 보일러 디폴트와 충돌.
+- `auto` 에서도 **작업 디렉터리 내 Write/Edit 는 분류기를 거치지 않고 자동 수락**되므로 builder 의 RGR 사이클은 그대로 성립한다. 셸·MCP 호출은 confirm 대신 분류기 검토를 받아 *비대화 sub-agent 도 멈추지 않는다* — sub-agent 의 모든 행동은 부모 세션과 같은 규칙으로 검토되고, sub-agent frontmatter 의 `permissionMode` 는 무시된다.
+- 도구 기본값을 따라가면 CLI 업데이트에 맞춰 모드 정책이 자동 갱신된다 (모델·추론 강도 비고정과 같은 형태 — ADR-004#amend-2).
 
-**`acceptEdits`의 잔여 위험**:
-- builder가 *task 범위 밖* Write/Edit를 자동 수락 — validator의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 하지만 *비가역 파괴*(작업 디렉터리 내 `rm`/`Remove-Item` 등 삭제 명령도 acceptEdits가 자동 수락)는 후행 catch가 무의미 — 실수 삭제 위험을 감수하는 설정임을 명시.
-- 민감 파일 접근은 `permissions.deny`(현재 `.env`/`secrets/**`)에 박혀 있어 차단되지만, *프로젝트 외부 경로* 작업은 별도 sandbox 책임.
+**잔여 위험**:
+- builder 가 *task 범위 밖* Write/Edit 를 자동 수락 — validator 의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 삭제·파괴 명령은 `auto` 에서 분류기 검토를 받지만(critical path 삭제는 어떤 모드에서도 자동 수락 X) 검토를 통과한 삭제는 실행되므로, *비가역 파괴* 위험이 0 이 되는 것은 아니다.
+- 민감 파일 접근은 `permissions.deny`(현재 `.env`/`secrets/**` 등)가 **모든 모드에서** 차단한다(불변). 단 *프로젝트 외부 경로* 작업은 별도 sandbox 책임.
+- **비대화 실행 경로 주의**: `claude -p`·Agent SDK 는 승계값이 `default`(Manual)이라 첫 Edit 에서 응답 없는 confirm 으로 멈춘다. dogfood·bench 러너(ADR-017)처럼 비대화로 lifecycle 을 돌릴 때는 `--permission-mode auto`(또는 `acceptEdits`)를 명시한다 — 플래그가 설정 파일보다 우선한다.
+- `auto` 진입 시 *임의 코드 실행을 허용하는 광범위 allow 룰*(`Bash(*)`·`PowerShell(*)`·`Bash(python*)` 류 인터프리터 wildcard·패키지 매니저 run·`Agent`·`Monitor`)은 자동 드롭되고 모드를 벗어나면 복원된다. shared `.claude/settings.json` 에는 allow 룰이 없어 무영향이지만, local 파일에 박은 사람은 그 룰이 `auto` 에서 무효임을 인지해야 한다.
 
-**fork 사용자 대체 경로** (옵션 B):
-- shared `defaultMode` 제거 + `.claude/settings.local.json` 에 개발자 본인의 모드 설정. 팀 차원의 강제는 *프로젝트 자체 정책 ADR-100+* 으로 박을 것.
-- bypassPermissions 사용은 *로컬 only*. shared로 절대 박지 않는다.
+**모드를 강제해야 하면**: 개인은 `.claude/settings.local.json`, 팀 차원 강제는 *프로젝트 자체 정책 ADR-100+* 으로 박는다. `bypassPermissions` 는 *로컬 only* — shared 로 절대 박지 않는다. 참고로 `.claude/settings.json`·`settings.local.json` 에 `"auto"` 를 적는 것은 **무효**다(공식문서 명시 — auto 는 built-in default 로만 온다).
 
 **참고**: Claude Code 공식 [문서](https://code.claude.com/docs) 의 permission modes 절 + ADR-047 D5 (sandboxed execution + permissioned state transition — 본 단락이 D5 적용 surface, 논문 §3.4.3 인용 SSOT는 ADR-047 D5 본문).
 
@@ -175,4 +177,4 @@
 >
 > **Schema 주의 — `if` 필드 미사용**: Anthropic [hooks docs](https://code.claude.com/docs/en/hooks) 에 따르면 hook 의 `if` 필드는 *정확히 하나의 permission rule* 만 받으며 `|`/`&&`/list 같은 결합 syntax 를 지원하지 않는다. 따라서 본 예시는 *`if` 없이 matcher 만 사용 + verify 스크립트 내부 확장자 필터링* 패턴으로 박는다. fork 사용자가 *Edit / Write 별로 다른 동작이 필요* 하면 **두 hook handler 로 분리** 한다 (`matcher: "Edit"` 1개 + `matcher: "Write"` 1개 — 각자 자기 `if` 단일 rule).
 
-2. 주의: `defaultMode: "acceptEdits"` 환경에서 PostToolUse hook 은 매 Write/Edit 마다 실행 → 비용 폭증 위험. 로컬에서만 활성화 권장. (본 파일 `## /stack-guard 1단계 산출물 범위` 의 `async`/`asyncRewake` 옵션 패턴으로 비용 폭증 완화 가능 — `asyncRewake` 는 exit code 2 에서 Claude 를 깨운다.)
+2. 주의: Write/Edit 를 자동 수락하는 모드(`auto`·`acceptEdits`)에서 PostToolUse hook 은 매 Write/Edit 마다 실행 → 비용 폭증 위험. 로컬에서만 활성화 권장. (본 파일 `## /stack-guard 1단계 산출물 범위` 의 `async`/`asyncRewake` 옵션 패턴으로 비용 폭증 완화 가능 — `asyncRewake` 는 exit code 2 에서 Claude 를 깨운다.)
