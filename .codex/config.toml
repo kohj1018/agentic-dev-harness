@@ -2,7 +2,10 @@
 # References:
 #   https://developers.openai.com/codex/permissions
 
-model = "gpt-5.5"
+# `model` and `model_reasoning_effort` are intentionally unset. Codex has no
+# model alias, so any slug pinned here stays frozen across CLI updates. Leaving
+# them out lets the CLI's recommended default (or the user's own
+# ~/.codex/config.toml) apply — see ADR-004#amend-2 and ADR-010#amend-6.
 approval_policy = "on-request"
 
 # Native Windows `unelevated` sandbox cannot enforce split read/write carveouts
