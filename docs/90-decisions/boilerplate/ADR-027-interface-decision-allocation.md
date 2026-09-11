@@ -3,7 +3,9 @@
 > scope: boilerplate
 
 ## Status
-accepted
+superseded
+
+> 대체: [ADR-073](ADR-073-interface-and-design-content-v2.md) — 통합 재발행(2026-09-11). 본 문서는 history 잔존. (현재 SSOT: ADR-073)
 
 ## 현재 유효 결정
 - 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056) + **내용 계약 확장(§1 긍정적 정체성 · §3 tabular · §4 responsive invariant · §7 category state · §8 semantic motion · §9 WCAG 2.2 a11y — #amend-7)**), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)/`## 7-5`(모바일 — #amend-8)에 둔다. **디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede) (현재 SSOT: ADR-058).

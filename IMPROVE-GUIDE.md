@@ -837,7 +837,7 @@ Stitch canonical 8섹션(Overview / Colors / Typography / Layout / Elevation & D
 
 ### D5. §9 Do's and Don'ts (ADR-027 결정 7 · #amend-2 결정 23 · #amend-7 결정 2 승계)
 - 기존 규율(5색·raw hex 금지·디폴트 폰트 금지·2축 위계) + WCAG 2.2 a11y(대비 4.5:1/3:1, 포커스 링, 키보드, accessible name, 색-단독 금지, primary CTA 1개, reduced-motion, category state) + anti-slop(보라 gradient·nested cards·gradient heading·glassmorphism/neon·전면 center·획일 grid·icon-tile·monospace 장식·bounce easing·장식 sparkline) + 클래스 레벨 규율(브랜드 근거 없는 유행 fontstack 금지).
-- **예외 근거 2종**: 금칙 항목을 채택하려면 `## 1 Overview`에 근거를 적는다 — (a) **브랜드 근거** 또는 (b) **플랫폼 관례**(예: iOS 26 Liquid Glass 머티리얼, Material 3 Expressive 표현). 근거 없는 채택은 위반이다.
+- **예외 근거 2종 (시각 스타일 금칙 한정)**: anti-slop·기존 시각 규율(glassmorphism·neon, 보라 gradient, 유행 fontstack 등) 중 하나를 채택하려면 `## 1 Overview`에 근거를 적는다 — (a) **브랜드 근거** 또는 (b) **플랫폼 관례**(예: iOS 26 Liquid Glass 머티리얼, Material 3 Expressive 표현). 근거 없는 채택은 위반이다. **§9의 `[접근성 — WCAG 2.2]` 블록에는 예외가 없다** — 브랜드·플랫폼 관례는 접근성 요구를 면제하지 못한다(본 ADR `## 정책 강도`가 a11y를 제약(강)으로 분류한 것과 정합).
 - reviewer `[Design-donts]`·`[Design-a11y]`가 미러(ADR-027 #amend-7 결정 7 승계).
 
 ### D6. §10 Voice & Writing v2 — 언어별 블록 + 검토 렌즈 + 일관성
@@ -956,7 +956,7 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
   | (예: customer) | (예: consumer-mobile) | (예: native/android, native/ios) | (예: 390×844, 360×800) | (예: 공통+delta) |
   | (예: admin) | (예: admin-web) | web | 1280×900, 375×812 | 공통+delta |
   ```
-- `## 1. Overview` 주석 끝에 `+ §9 금칙 예외 채택 시 근거 1줄 — (a) 브랜드 근거 또는 (b) 플랫폼 관례(예: iOS 26 Liquid Glass) (ADR-073 D5).` 추가. 주석 안 `(ADR-027#amend-7 …)`·`(ADR-058)` 인용은 각각 `ADR-073 D2`·유지로 바꾼다.
+- `## 1. Overview` 주석 끝에 `+ §9 **시각 스타일** 금칙 예외 채택 시 근거 1줄 — (a) 브랜드 근거 또는 (b) 플랫폼 관례(예: iOS 26 Liquid Glass). `[접근성 — WCAG 2.2]` 블록은 예외 대상이 아니다 (ADR-073 D5).` 추가. 주석 안 `(ADR-027#amend-7 …)`·`(ADR-058)` 인용은 각각 `ADR-073 D2`·유지로 바꾼다.
 - `## 3. Typography` 헤딩 위에 `<a id="design-3-typography"></a>` 추가, 주석을 교체:
   ```markdown
   <!-- 1~2 family, 4~5 size scale, modular ratio (1.125/1.25/1.333), weight pair.
@@ -1000,7 +1000,7 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
     - [LLM-판정] 책임 회피 문구("문제가 발생했습니다"만 있고 원인·다음 행동 없음), 내부 에러코드 노출, 과도한 감탄사
   - 표면별 예시 카피: 버튼(동사 우선, 2~4어절) / 에러(원인 1줄 + 다음 행동 1줄) / 빈 상태(상황 + 첫 행동) / 확인 다이얼로그(결과 + 되돌림 가능 여부)
   - 검토 렌즈 — 토스 UX writing 8원칙 체크 질문(각 카피가 통과하는가): ① 예상 가능한 힌트를 주는가 ② 잡초(불필요한 말)를 뺐는가 ③ 빈 문장이 없는가 ④ 핵심 메시지 하나에 집중하는가 ⑤ 말하듯 쉬운가 ⑥ 강요 대신 제안인가 ⑦ 보편적인 단어인가 ⑧ 숨은 감정을 다뤘는가
-  - 검토 렌즈 — Humanize KR(im-not-ai) A~J 범주는 **AI 문체 탐지 렌즈로만** 쓴다(범주: 접속 부사 과다·상투적 강조·중복 수식·기계적 병렬·과잉 완곡·설명조 종결 등 — 저장소 README의 범주 이름 사용). 변경률 임계값·자동 치환은 UI 문구에 적용하지 않는다.
+  - 검토 렌즈 — Humanize KR(im-not-ai v2.3.2) A~J 범주는 **AI 문체 탐지 렌즈로만** 쓴다 — A 번역투 / B 영어 인용·용어 과다 / C 구조적 AI 패턴 / D AI 특유 관용구 / E 리듬 균일성 / F 수식·중복 / G Hedging 남용 / H 접속사 남발 / I 형식명사 과다 / J 시각 장식 남용. 변경률 임계값·자동 치환은 UI 문구에 적용하지 않는다.
 
   ### English (해당 시)
   - Tone: sentence case, active voice, imperative CTAs, plain language, expand acronyms on first use.
