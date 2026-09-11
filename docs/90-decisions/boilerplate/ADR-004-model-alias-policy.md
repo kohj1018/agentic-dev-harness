@@ -166,3 +166,38 @@ agent 이름은 **역할 중심**(`architect` / `builder` / `validator` / `plann
 - .claude/agents/builder.md                      — frontmatter (`effort` 제거)
 - docs/00-meta/DELEGATION_STRATEGY.md            — `## 모델 표기 정책` 의 effort 문구
 - .boilerplate/validation/SIMULATION_RUN.md      — 실험 기록·Round 12 재측정
+
+<a id="adr-004-amend-6"></a>
+## Amendment 6 (2026-09-11) — 에이전트가 자기 `maxTurns` 를 알고 예산을 잡는다
+
+### 배경
+dogfood Round 11·12 에서 **팬아웃 단위가 보고 0건 상태로 상한에 걸리는 일이 세 번** 났다(발견 24·39).
+
+- [관측됨] stabilize 마일스톤 팬아웃 5단위 중 **4단위**가 보고 전에 소진(qa 22·reviewer 25·reviewer 34·qa 21 tool_uses).
+- [관측됨] `/repair-milestone` 2-V (v) 영향 반경 재감사의 qa 단발 sub-call 이 **tool_uses 20 / 16턴**에서 보고 0건으로 중단.
+- [관측됨] stabilize 2회차 reviewer(design) 단발이 **12턴**에서 보고 0건으로 중단.
+- [관측됨] **위임 프롬프트에 턴 예산을 적어도 효과가 없었다.** 그 세 번 중 둘은 프롬프트에 「30턴 안에 보고를 마쳐라」·「25턴 안에」가 적혀 있었는데, 대상 agent 의 실제 상한은 **16·12** 였다. 호출자는 그 값을 모른다 — agent 파일을 열어 frontmatter 를 읽지 않는 한 알 방법이 없고, 위임 시점에 그것을 읽게 하는 규정도 없다.
+- 세 번 모두 **회수 규율 ①(1회 재개)이 흡수했다** — 재개 뒤 전부 완전한 보고를 냈다. 규율은 설계대로 작동했으나 매번 왕복 한 번을 쓴다.
+
+### 결정
+1. **각 report-only agent 파일이 자기 `maxTurns` 와 «보고 시작 턴» 을 본문에 명시한다.** 보고 시작 턴은 `maxTurns − 4` 로 둔다. 그 절이 위임 프롬프트의 턴 문구를 **이긴다** — 호출자는 피호출자의 상한을 모르기 때문이다.
+2. **미완 보고를 정상 산출로 규정한다**: 조사가 안 끝났으면 «확정한 사실 + 미확인 항목»을 나눠 보고하고 무엇이 왜 남았는지 적는다. 침묵하다 상한에 걸리는 것보다 항상 낫다.
+3. **`maxTurns` 값 자체는 이번에 올리지 않는다.** 세 번 다 재개로 완주했으므로 상한이 근본적으로 모자란다는 근거가 아직 없고, 값을 올리면 비용은 전 호출에 걸리는데 이득은 소수 단위에만 간다. 결정 1·2 를 적용한 뒤에도 «보고 0건 상한 도달»이 반복되면 그때 값을 본다(falsifier).
+
+### 근거
+- 대안 「팬아웃 단위를 더 잘게」는 기각하지 않고 **보류**했다 — 단위 크기는 skill 마다 다르고, 잘게 쪼개면 호출 수와 종합 비용이 는다. 결정 1·2 는 단위 크기와 무관하게 듣는다.
+- 대안 「호출자가 위임 전에 agent frontmatter 를 읽어 예산을 계산한다」는 기각했다 — 호출 경로가 많고(스킬 10여 개) 값이 바뀌면 전부 어긋난다. **값을 아는 쪽이 예산을 잡는 것이 옳다.**
+- 대가: agent 파일마다 한 줄이 늘고 그 줄이 `maxTurns` 와 **손으로 동기화**돼야 한다. 어긋나면 예산이 틀리지만 방향은 안전한 쪽(더 이르게 보고)이다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 1 의 «이 절이 위임 프롬프트를 이긴다».
+- enabling(약, [관측됨]): 결정 2·3.
+
+### Mutation delta (ADR-047 D3)
+- failure = 팬아웃 단위가 보고 없이 상한에 걸려 회수 왕복을 소모한다(관측 3건).
+- predicted = Round 13 에서 «보고 0건 상한 도달» 0건, 미완 보고가 있으면 «확정/미확인» 두 묶음으로 온다.
+- falsifier = (a) 결정 1·2 적용 뒤에도 보고 0건 상한 도달이 2회 이상이면 결정 3 을 뒤집고 `maxTurns` 를 올린다 (b) 에이전트가 예산을 지키느라 **조사를 너무 일찍 접어** 놓친 결함이 다음 라운드에 나오면 보고 시작 턴을 `maxTurns − 2` 로 늦춘다.
+- rollback = 본 amend superseded → agent 본문의 「턴 예산」 절 삭제.
+
+### 적용 surface
+- .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1·2 (`builder` 는 report-only 가 아니고 상한 45 라 제외)
