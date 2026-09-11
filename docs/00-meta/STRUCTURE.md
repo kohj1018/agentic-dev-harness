@@ -37,13 +37,15 @@
 | 테마 쇼케이스 (UI only — 토큰→테마 배선 + Storybook `Theme/Showcase` / `lib/prototype/theme_gallery.dart`) | 스택 관례 경로 + `docs/20-system/prototypes/_theme/manifest.json` | `/bootstrap-design` R6 (builder 단발) | Living | conditional |
 | 레퍼런스 갤러리 (캡처·캐시·gallery.html) | `docs/20-system/design-refs/` | `/bootstrap-design` R0-G · `/design-milestone` R2 (capture-refs.mjs — ADR-058#amend-4) | ephemeral | conditional |
 | 레퍼런스 캡처 asset | `.claude/skills/bootstrap-design/assets/capture-refs.mjs` | 수동 (harness 제공) | Reference | baseline |
-| milestone 승인 프로토타입 (UI only — 경험 계약, 화면 단위) | `docs/20-system/prototypes/M<N>/<screen>.html` | `/plan-milestone` R5 (draft M<N> 재실행으로 미완 라운드 재개) | Record | conditional |
+| 화면 브리프 (UI only) | `docs/20-system/prototypes/M<N>/briefs/<screen>.md` | `/design-milestone` R3 (designer) | Record | conditional |
+| 화면 매니페스트 + 승인 스냅샷 (UI only — 경험 계약 색인·동결 기준선, ADR-072 D3·D4 / native 스냅샷 ADR-059#amend-1) | `docs/20-system/prototypes/M<N>/manifest.json`, `snapshots/*.png` | `/design-milestone` R6~R7 (draft M 재실행으로 재개) | Record | conditional |
+| 코드 프로토타입 (UI only — presentational 컴포넌트·스토리·fixture·위젯 테스트) | ARCH `## 3-1` 트리의 `screens/<screen>/` · `lib/screens/<screen>/` · `lib/prototype/main.dart` · `test/screens/*_prototype_test.dart` | `/design-milestone` R4 (builder) → 구현 task가 배선(ADR-072 D5) | Living | conditional |
 | 경험 게이트 스크린샷 갤러리 (UI only, 검토용 임시) | `docs/40-validation/visual/M-N/` | `/stabilize-milestone` §3-V | ephemeral | conditional |
-| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (26종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert/accept-milestone/repair-acceptance/amend-ssot) | 수동 (boilerplate 제공) | Reference | baseline |
+| Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (27종 — bootstrap-project/bootstrap-stack/bootstrap-design/design-milestone/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert/accept-milestone/repair-acceptance/amend-ssot) | 수동 (boilerplate 제공) | Reference | baseline |
 | Claude sub-agent | `.claude/agents/<name>.md` (13종: architect/builder/validator/planner/reviewer/qa/researcher/designer + 도메인 자문 5종 counsel/strategist/marketer/analyst/security — ADR-062) | 수동 (boilerplate 제공) | Reference | baseline |
 | milestone roadmap | `docs/30-workitems/ROADMAP.md` | `Done`/`Now`/`Next`/`Later` = `/plan-milestone` 단독 (R3 생성/갱신, R0 재조정) · `## Backlog` = append-only 다중 writer (`/accept-milestone`·`/repair-acceptance` 추가, `/plan-milestone` 정리·승격 — ADR-057#amend-4) | Living | baseline |
-| milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-milestone` (M1 포함 — ADR-057) | Living | generated |
-| feature | `docs/30-workitems/features/F-*-*.md` | `/plan-milestone` (생성), `/plan-workitem`(`## 7-1` AC측·`## 7-2` seam 표 채움) | Living | generated |
+| milestone | `docs/30-workitems/milestones/M*-*.md` | `/plan-milestone` (M1 포함 — ADR-057), `/design-milestone`(`## 9` 전환표·`contract-ready`) | Living | generated |
+| feature | `docs/30-workitems/features/F-*-*.md` | `/plan-milestone` (생성), `/plan-workitem`(`## 7-1` AC측·`## 7-2` seam 표 채움), `/design-milestone`(`## 7` 프로토타입 참조·PX 인벤토리) | Living | generated |
 | task | `docs/30-workitems/tasks/T-*-*.md` | `/plan-workitem`, `/implement-workitem` | Living | generated |
 | workitem 템플릿 | `docs/30-workitems/_templates/{MILESTONE,FEATURE,TASK}_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | validation report | `docs/40-validation/reports/<task-id>.md` | `/validate-workitem` (졸업 판정의 입력이 아니다 — ADR-068 D2) | ephemeral | generated |
@@ -63,7 +65,7 @@
 | 스택 결정 registry | `STACK_SETUP_PLAN.md ## Stack Decision Registry` | `/bootstrap-stack` (R-C, 빈 행 0) | Reference | generated |
 | 스캐폴드 기록 | `STACK_SETUP_PLAN.md ## Scaffold` | `/stack-guard` 수행 0 (ADR-071 D5) | Record | generated |
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
-| design gate canonical assets | `.claude/skills/stack-guard/assets/design-gate*.mjs` | 수동 (harness 제공, UI 판정 때만 JIT read/copy/run) | Reference | baseline |
+| design gate canonical assets | `.claude/skills/stack-guard/assets/design-gate.mjs (v3)` (ADR-072 D6) | 수동 (harness 제공, UI 판정 때만 JIT read/copy/run) | Reference | baseline |
 | design gate adapter (UI) | `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록된 project-native 경로 | `/stack-guard` (UI 판정 뒤 생성·self-test) | Reference | conditional |
 | golden 정답 사진 (모바일 앱, 로컬 전용 — 커밋 X) | 프로젝트의 `test/**/goldens/` (golden key가 *테스트 파일이 있는 디렉터리* 기준 상대경로라 `test/` 하위 어느 깊이든 생긴다) | 개발자가 **머신·체크아웃마다 1회** 생성(`flutter test --update-goldens` — 커밋하지 않으므로 새 머신·새 체크아웃엔 없다. ADR-059 D3) | Reference | conditional |
 | E2E smoke registry | `STACK_SETUP_PLAN.md ## E2E Smoke Registry` | `/stack-guard` (ADR-052#amend-1) | Reference | conditional |
@@ -111,7 +113,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | AGENTS.md 진입 페이지 정책 (왜 이 파일을 진입점으로 삼는가) | `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` |
 | 공통 진입 지침 본문 (도구 중립 entry instructions) | `AGENTS.md` |
 | 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` + [ADR-059](../90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md)(Flutter는 직접 지원 — ADR-031#amend-1) |
-| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT — `/bootstrap-design` R5가 저장하고 R6 피드백도 이 파일을 먼저 고친다). 파생물인 테마 쇼케이스(R6 — 코드, 커밋 대상)와 방향 선택용 `design-concepts/concept-*.html`(R2 — 검토·선택 완료 후 삭제)은 `/bootstrap-design`이 생성한다 — **파생물 직접 편집 금지**(수정은 DESIGN.md → 재생성), concept은 영속 금지 (ADR-005). |
+| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT — `/bootstrap-design` R5가 저장하고 R6 피드백도 이 파일을 먼저 고친다). 파생물인 테마 쇼케이스(R6 — 코드, 커밋 대상)와 방향 선택용 `design-concepts/concept-*.html`(R2 — 검토·선택 완료 후 삭제)은 `/bootstrap-design`이 생성한다 — **파생물 직접 편집 금지**(수정은 DESIGN.md → 재생성), concept은 영속 금지 (ADR-005). 화면 경험 계약 = 매니페스트 + 스냅샷 + 브리프(ADR-072) / DESIGN 내용·프로필 계약 = ADR-073. |
 | UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede) (현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |

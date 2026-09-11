@@ -44,12 +44,13 @@
 - [ ] shared 설정에 환경 종속적인 hook를 바로 넣지 않았다
 
 ## 4. 작업 구조 준비
-- [ ] `/plan-milestone`으로 첫 마일스톤(M1)과 feature 문서를 생성했다 (UI 마일스톤이면 R5 프로토타입 라운드까지)
+- [ ] `/plan-milestone`으로 첫 마일스톤(M1)과 feature 문서를 생성했다 (UI 마일스톤은 `draft`로 남는다)
+- [ ] (UI 마일스톤) `/design-milestone M1`로 화면 브리프·코드 프로토타입·승인 스냅샷을 확정하고 M1/F를 `contract-ready`로 올렸다. 권장 커밋 메시지로 커밋했다 (ADR-072)
 - [ ] `/plan-workitem M1`로 M1 전 feature의 task를 1회 전체 계획했다 (전체 스냅샷, ADR-057#amend-3)
   ```
   /plan-workitem M1
   ```
-- [ ] M1 / F-NNN은 `/plan-milestone`이 `contract-ready`까지 올렸다 (`ready` 전환은 `/seal-milestone`이 한다 — 수동 전환 금지)
+- [ ] M1 / F-NNN은 `/plan-milestone`(비-UI) 또는 `/design-milestone`(UI)이 `contract-ready`까지 올렸다 (`ready` 전환은 `/seal-milestone`이 한다 — 수동 전환 금지)
 - [ ] `/seal-milestone M1`으로 최종 검사 + 승인 + 일괄 `ready` 봉인을 마쳤다
   ```
   /seal-milestone M1

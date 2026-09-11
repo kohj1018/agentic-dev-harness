@@ -22,8 +22,8 @@ A document-first agentic dev harness for Claude Code and Codex CLI — sets up d
 /discover-product (optional)
   └─ (optional) /validate-discovery (separate session) → /repair-discovery (origin session)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (frontend only — evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a temporary design-preview.html for final review; mockups removed after approval) [ADR-058]
-  → /plan-milestone (+UI: R5 prototype round) → /plan-workitem M1 (batch)
+  → /bootstrap-design (frontend only — reference gallery (curated hubs, live captures, your own screenshots, DESIGN.md analyses) + evidence-on-demand reference research into DESIGN_RESEARCH.md, multiple concept mockups (REFINE/EXPLORE) to pick a direction *before* writing DESIGN.md with a render/axe acceptance gate, then a native theme showcase kept as code; concept mockups removed after approval) [ADR-058]
+  → /plan-milestone → /design-milestone M1 (UI only — screen briefs with element rationale, stack-native code prototypes with Storybook/Flutter gallery, gate + frozen approval snapshots) [ADR-072] → /plan-workitem M1 (batch)
        └─ (optional) /validate-plan (separate session) → /repair-plan (origin session)
   → /seal-milestone M1 (plan lock gate — final check + your approval, always runs)
   → /implement-workitem
@@ -85,6 +85,7 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 ```text
 # Plan (milestone/feature authoring = /plan-milestone (M1 included); decompose into tasks with ## 9. 의존성 ordering)
 /plan-milestone [milestone idea]
+/design-milestone M1                           # UI milestones only — briefs, code prototypes, gate, frozen approval snapshots → contract-ready (ADR-072)
 /plan-workitem M1
 
 # (Optional) Cross-LLM peer review — see ADR-038
@@ -116,10 +117,10 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 When you hit Claude Code's usage limit or prefer Codex:
 
 1. Run `codex` in the same repo — `AGENTS.md` is auto-loaded.
-2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert, $accept-milestone, $repair-acceptance. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, amend-ssot) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
+2. Documents and policies are equal. Core workflow skills have Codex wrappers ($-prefixed): $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $design-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert, $accept-milestone, $repair-acceptance. Remaining skills (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, amend-ssot) are invoked via natural language. See [WORKFLOW.md](docs/00-meta/WORKFLOW.md).
 3. Core workflow skills are callable via Codex Skills:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone idea>`, `$plan-workitem M1`, `$seal-milestone M1` (plan lock gate — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`, `$accept-milestone M1`, `$repair-acceptance M1`
+   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone idea>`, `$design-milestone M1`, `$plan-workitem M1`, `$seal-milestone M1` (plan lock gate — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <stack>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`, `$accept-milestone M1`, `$repair-acceptance M1`
    - Plan cross-review (opt-in, ADR-038): `$validate-plan M1` (in fresh Codex session) + `$repair-plan M1` (in origin session that ran $plan-workitem)
    - Domain advisory (opt-in, ADR-062): `$consult-expert legal KR <question>`, `$consult-expert strategy <question>`, `$consult-expert marketing <surface>`, `$consult-expert data <target>`, `$consult-expert security <asset>`
    - Discovery / stabilize cross-review (opt-in, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (in fresh Codex session) + `$repair-milestone M1` (in origin session)

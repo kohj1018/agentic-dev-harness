@@ -26,12 +26,12 @@
 
 | 상황 | 우선 위임 대상 | 비고 |
 |------|---------------|------|
-| task 문서가 존재하는 구현 작업 | builder | 범위 밖 변경 금지 |
+| task 문서가 존재하는 구현 작업 | builder | 범위 밖 변경 금지. UI 제작 계약 모드(dispatch `mode: ui-authoring` — design-milestone R4·bootstrap-design R6, ADR-072 D5) |
 | 구현 완료 후 범위 검증 | validator | **단위**: workitem 단위 / **종류**: 판정 + report 전용 / **제약**: 코드·문서 수정 금지 (ADR-007). AC ↔ 검증 매핑(modality별 증거 판정 — ADR-065), 문서 범위 정합. |
 | 중요한 설계 변경, 큰 tradeoff, 상위 아키텍처 수정 | architect | 비용이 크므로 일상 작업에는 사용하지 않음 |
-| 시각/UX 디자인 authoring (레퍼런스 분해·원칙·concept 시안·마일스톤 프로토타입) | designer | **생성 전담** — 감사·비평은 reviewer(design surface). 취향 추천 금지(오라클=사용자). /bootstrap-design R0~R2·plan-milestone R5가 호출 (ADR-058). Codex: 메인이 designer.md 인라인 수행. |
+| 시각/UX 디자인 authoring (레퍼런스 분해·원칙·concept 시안·마일스톤 프로토타입) | designer | **생성 전담** — 감사·비평은 reviewer(design surface). 취향 추천 금지(오라클=사용자). /bootstrap-design R0~R2·`/design-milestone` R3(브리프)가 호출. 코드는 builder(UI 제작 계약 모드) (ADR-058). Codex: 메인이 designer.md 인라인 수행. |
 | 요구사항 정리, workitem 분해 | planner | 아키텍처 결정은 architect로 |
-| 문서/코드의 모순·누락·숨은 복잡도 검토 | reviewer | **단위**: 코드·문서 단위 / **종류**: 구조적 모순 + 숨은 복잡도 + 정책 drift / **제약**: 수정 권장만, 직접 수정 X. Clean Code 6항목 (ADR-006). |
+| 문서/코드의 모순·누락·숨은 복잡도 검토 | reviewer | **단위**: 코드·문서 단위 / **종류**: 구조적 모순 + 숨은 복잡도 + 정책 drift / **제약**: 수정 권장만, 직접 수정 X. Clean Code 6항목 (ADR-006). design-milestone R3 브리프 비평·R6 픽셀 판정도 호출. |
 | 구현 후 회귀 위험·엣지 케이스 점검 | qa | **단위**: milestone / user-flow 단위 / **종류**: 회귀 + 엣지 케이스 + 사용자 위험 / **제약**: 보고만, Write 권한 없음 (stabilize-milestone이 받아 적음). |
 | 독립적인 여러 task 동시 처리 | 병렬 패턴 3종 (아래 단락 참조) | 가벼운 → 무거운 순으로 선택 |
 | `/plan-workitem` 산출물의 cross-LLM peer review (opt-in) | reviewer (plan surface, Plan Quality 12 차원) | 다른 세션 (Claude 새 창 / Codex 등)에서 `$validate-plan` or `/validate-plan` 호출. 임시 리뷰 파일 1개만 작성, workitem 문서 수정 X (ADR-038). |
@@ -105,7 +105,7 @@
 
 1. `/bootstrap-project` → charter + architecture + ADR-100 (workitem 생성 X — ADR-057)
 2. `/bootstrap-stack` → 스택 확정 후 자동화 설계
-3. `/plan-milestone` → (M1 포함) milestone + feature 문서 생성 → **M/F `contract-ready`** (+UI: R5 프로토타입 라운드) / `/plan-workitem M<N>` → 마일스톤 전체 계획 스냅샷 1회, task는 전부 `draft` (ADR-057#amend-3 / ADR-060 D6)
+3. `/plan-milestone` → milestone + feature 문서(비-UI는 `contract-ready`, UI는 `draft`) → (UI) `/design-milestone M<N>` → `contract-ready` / `/plan-workitem M<N>` → 마일스톤 전체 계획 스냅샷 1회, task는 전부 `draft` (ADR-057#amend-3 / ADR-060 D6)
 3a. (선택) `/validate-plan <workitem-id>` — 다른 세션·다른 LLM에서 cross-review. 임시 파일 작성 (ADR-038).
 3b. (선택) `/repair-plan <workitem-id>` — 원본 plan 세션에서 임시 파일 회수 + 적용 + 삭제. **M이 `contract-ready`면 상위 계약 결함도 이 시점에 수정** (ADR-060 D6).
 3c. **`/seal-milestone M<N>`** → 최종 검사 + 사용자 승인 + task→feature→milestone 일괄 `ready` 봉인 (ADR-060 D7). 봉인 전에는 4가 착수하지 않는다.
@@ -141,6 +141,7 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 | architecture 스택 변경 (T2 — 언어/런타임/프레임워크/DB/인증 등 토대 변경, ADR-055) | `/bootstrap-stack --migrate` (타깃 미정이면 DEEP 라운드로 수렴) 후 `/stack-guard` 이어 실행 |
 | 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1). 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 — registry `설치: baseline` 확정분은 `/stack-guard`가 이미 설치(ADR-071 D6) |
 | 시각 방향 전환 (concept 시안 재탐색 필요) | `/bootstrap-design --update` |
+| 승인 UI 코드·공용 컴포넌트·토큰 변경 | 봉인 전 `/design-milestone` 재진입, 봉인 후 다음 M (ADR-069#amend-1) |
 
 > 판별 기준은 «위험한가»가 아니라 **«답을 아직 모르고 그것을 찾는 라운드가 필요한가»** 다(ADR-069 D4). 위험 관리는 `/amend-ssot`의 authority 확인·전파 검사·봉인 충돌 검사가 담당한다.
 

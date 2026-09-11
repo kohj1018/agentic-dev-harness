@@ -12,14 +12,14 @@
 - ARCH `## 7-1`/`## 7-2`/`## 7-3`/`## 7-4` / `## 7-5` 의 채움/삭제/cross-reference 정책은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) (ADR-027#amend-1 포함) SSOT.
 
 ## 3. 작업 단위 분해
-- 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지).
+- 마일스톤·feature 문서는 첫 마일스톤(M1)부터 `/plan-milestone`이 만든다(ADR-057 — bootstrap-project는 charter/architecture까지). UI 마일스톤은 `/design-milestone M<N>`이 화면 층(브리프·코드 프로토타입·스냅샷·PX)을 확정해 `contract-ready`로 올린다(ADR-072).
 - `/plan-milestone`은 `docs/30-workitems/ROADMAP.md`의 **`Done`/`Now`/`Next`/`Later` 네 구간을 단독으로 유지한다**(`## Backlog`는 append-only 다중 writer — `/accept-milestone`·`/repair-acceptance`가 행을 추가하고 본 skill이 정리·승격·재분류 등재를 한다, ADR-057#amend-4) — **R3에서 현재(Now) 행 + 미래 후보(Next/Later) 기록(candidate-key 포함), R0에서 회고 `graduation:` 기반으로 Done/Now 재조정**(직전 Now 행의 Done 전환은 **R0가 담당** — R3는 강제하지 않음; candidate-key는 전 구간 보존) (ADR-057#amend-1). 예정(Next/Later) 행은 "목표 1줄 + 확신도"만 둔다.
 - 마일스톤 단위 목표를 `docs/30-workitems/milestones`에 만든다.
 - 기능 단위 문서를 `docs/30-workitems/features`에 만든다.
 - 실제 구현 단위 문서를 `docs/30-workitems/tasks`에 만든다.
 - task 분해는 `/plan-workitem M<N>` 1회 **전체 계획 스냅샷**으로 전 feature를 함께 확정한다(ADR-057#amend-3). task는 전부 `draft`로 남으며, **`/seal-milestone M<N>`이 최종 검사 + 사용자 승인 후 task→feature→milestone을 일괄 `ready`로 봉인**한다(ADR-060 D7). 봉인 전에는 `/implement-workitem`이 착수하지 않는다.
 - **선택**: `/plan-workitem` 직후 plan 품질 cross-validate가 필요하면, 다른 세션·다른 LLM에서 `/validate-plan <workitem-id>` 1+ 회 → 원본 세션에서 `/repair-plan <workitem-id>`로 회수 (ADR-038). opt-in — 건너뛰어도 정상.
-- (UI 마일스톤) `/plan-milestone` R5 프로토타입 라운드가 화면 경험 계약(승인 프로토타입 — `docs/20-system/prototypes/M<N>/`)을 확정한 뒤 task 분해로 진행한다. UI 확정 feature는 승인 프로토타입(또는 면제 기록) 없이 `/plan-workitem` 분해가 차단된다 (ADR-056).
+- (UI 마일스톤) `/design-milestone M<N>`이 화면 경험 계약(매니페스트·승인 스냅샷·코드 프로토타입 — `docs/20-system/prototypes/M<N>/`)을 확정한 뒤 task 분해로 진행한다. UI 확정 feature는 매니페스트 참조(또는 면제 기록) 없이 `/plan-workitem` 분해가 차단된다 (ADR-072 D9).
 
 ## 3-1. 마일스톤 봉인 (seal)
 - `/seal-milestone M<N>`이 최종 검사(계획 완결성·AC 해석 확정·커버리지·의존성·결정 원장·가설·리뷰 증거)와 사용자 최종 승인을 거쳐 task→feature→milestone을 일괄 `ready`로 전환한다.
@@ -102,7 +102,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
 ## 워크아이템 라이프사이클
 
 ```
-discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M/F = contract-ready]
+discover → bootstrap → plan-milestone → (UI) design-milestone → [M/F = contract-ready]
    → plan-workitem (task 전부 draft)
    → (opt-in, ADR-038) validate-plan (별 세션) → repair-plan (원본 세션)
    → seal-milestone (검사 + 사용자 승인 + task→feature→milestone 일괄 ready)   ← 리뷰 유무와 무관하게 항상 거친다
@@ -154,7 +154,7 @@ done → deprecated (필요 시)
 
 | 전이 | 최소 조건 |
 |------|-----------|
-| (M/F) draft → contract-ready | plan-milestone 라운드 완료 + 확정 재대조 통과 + 원장의 이 M 영향 및 `(미할당)` `open` 0건. **잠금 아님** — task 분해 중 계약 수정 가능 |
+| (M/F) draft → contract-ready | 비-UI: plan-milestone 라운드 완료 / UI: design-milestone R7 완료(매니페스트·스냅샷·PX) + 확정 재대조 통과 + 원장의 이 M 영향 및 `(미할당)` `open` 0건. **잠금 아님** — task 분해 중 계약 수정 가능 |
 | (M/F/task) → ready | `/seal-milestone`이 봉인 조건 전부 통과 + 사용자 명시 승인. **M/F 계약 층은 이 시점부터 잠긴다.** task 층의 실질 기준선은 *첫 구현 시작*이다 — 구현 흔적(`in-progress`·`blocked`·`done`·`deprecated`)이 0건인 동안에는 `/repair-plan`이 task·매핑·의존성을 고칠 수 있고, 고친 뒤 `/seal-milestone` 재실행(재봉인)으로 receipt를 갱신한다 (ADR-060 D6/D7) |
 | ready → in-progress | 실제 구현/작업이 시작됐다 |
 | in-progress → blocked | 외부 의존성이나 미결 질문으로 진행 불가 |

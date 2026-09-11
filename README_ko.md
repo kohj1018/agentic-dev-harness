@@ -22,8 +22,8 @@
 /discover-product (선택)
   └─ (선택) /validate-discovery (별 세션) → /repair-discovery (원본 세션)
   → /bootstrap-project → /bootstrap-stack → /stack-guard
-  → /bootstrap-design (UI 전용 — evidence-on-demand로 레퍼런스를 DESIGN_RESEARCH.md에 조사 + DESIGN.md 작성 *전* 다중 concept 시안(REFINE/EXPLORE)으로 렌더·axe 수용 게이트를 거쳐 방향 선택 + 최종 검토용 design-preview.html, 승인 후 시안 삭제) [ADR-058]
-  → /plan-milestone (+UI: R5 프로토타입 라운드) → /plan-workitem M1 (배치)
+  → /bootstrap-design (UI 전용 — 레퍼런스 갤러리(큐레이션 허브·실제 제품 캡처·사용자 캡처·DESIGN.md 분석본) + evidence-on-demand로 레퍼런스를 DESIGN_RESEARCH.md에 조사 + DESIGN.md 작성 *전* 다중 concept 시안(REFINE/EXPLORE)으로 렌더·axe 수용 게이트를 거쳐 방향 선택 + 네이티브 테마 쇼케이스(코드로 유지), 승인 후 concept 시안 삭제) [ADR-058]
+  → /plan-milestone → /design-milestone M1 (UI 전용 — 요소 근거를 담은 화면 브리프, Storybook/Flutter 갤러리를 갖춘 스택 네이티브 코드 프로토타입, 게이트 + 동결된 승인 스냅샷) [ADR-072] → /plan-workitem M1 (배치)
        └─ (선택) /validate-plan (별 세션) → /repair-plan (원본 세션)
   → /seal-milestone M1 (계획 잠금 게이트 — 최종 검사 + 사용자 승인, 항상 거친다)
   → /implement-workitem
@@ -84,6 +84,7 @@
 ```text
 # 분해 (milestone/feature 생성은 /plan-milestone (M1 포함); feature를 task로 분해 + ## 9. 의존성 순서 선언)
 /plan-milestone [milestone 아이디어]
+/design-milestone M1                        # UI 마일스톤 전용 — 브리프·코드 프로토타입·게이트·동결 승인 스냅샷 → contract-ready (ADR-072)
 /plan-workitem M1
 
 # (선택) 다른 LLM 교차 리뷰 — ADR-038 참조
@@ -115,10 +116,10 @@
 Claude Code 한도에 걸리거나 Codex를 선호할 때:
 
 1. 같은 저장소에서 `codex` 실행 — `AGENTS.md`가 자동 로드된다.
-2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert, $accept-milestone, $repair-acceptance. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, amend-ssot)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
+2. 문서와 정책은 동일. 핵심 workflow skill은 Codex wrapper ($-prefixed)로 제공: $implement-workitem, $validate-workitem, $repair-workitem, $finalize-workitem, $plan-milestone, $design-milestone, $plan-workitem, $seal-milestone, $validate-plan, $repair-plan, $bootstrap-project, $bootstrap-stack, $stabilize-milestone, $repair-milestone, $stack-guard, $validate-discovery, $repair-discovery, $validate-milestone, $consult-expert, $accept-milestone, $repair-acceptance. 나머지 skill (discover-product, review-doc, boilerplate-context, bootstrap-design, research-pack, amend-ssot)은 자연어로 호출. 자세한 워크플로우는 [WORKFLOW.md](docs/00-meta/WORKFLOW.md) 참조.
 3. 자주 쓰는 core workflow skill은 Codex skill로 호출 가능:
    - Inner loop: `$implement-workitem T-001`, `$validate-workitem T-001`, `$repair-workitem T-001`, `$finalize-workitem T-001`
-   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone 아이디어>`, `$plan-workitem M1`, `$seal-milestone M1` (계획 잠금 게이트 — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`, `$accept-milestone M1`, `$repair-acceptance M1`
+   - Planning / bootstrap / seal / stabilize: `$plan-milestone <milestone 아이디어>`, `$design-milestone M1`, `$plan-workitem M1`, `$seal-milestone M1` (계획 잠금 게이트 — ADR-060), `$bootstrap-project <brief>`, `$bootstrap-stack <스택>`, `$stack-guard`, `$stabilize-milestone M1`, `$repair-milestone M1`, `$accept-milestone M1`, `$repair-acceptance M1`
    - Plan 교차 리뷰 (선택, ADR-038): `$validate-plan M1` (별 Codex 세션) + `$repair-plan M1` (`$plan-workitem`을 돌린 원본 세션)
    - 도메인 자문 (선택, ADR-062): `$consult-expert legal KR <질문>`, `$consult-expert strategy <질문>`, `$consult-expert marketing <표면>`, `$consult-expert data <측정 대상>`, `$consult-expert security <대상 자산>`
    - Discovery / stabilize 교차 리뷰 (선택, ADR-044/ADR-054): `$validate-discovery` + `$repair-discovery`, `$validate-milestone M1` (별 Codex 세션) + `$repair-milestone M1` (원본 세션)
