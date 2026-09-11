@@ -485,7 +485,9 @@ accepted
 `.claude/skills/bootstrap-stack/stack-catalog.md`가 프로젝트 유형별(web frontend / API server / CLI / monorepo / Supabase / Flutter) 결정 항목의 **색인**이다. 열: id · 항목 · tier · authority 기본값 · 설치(baseline/task/n/a) · 정본 앵커 · 기본 후보. 결정 본문은 정본 앵커(ARCH `## 7-N` / ADR-101 / STACK_SETUP_PLAN)에만 적는다.
 
 ### D2. disposition 필수 + registry
-`docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`에 카탈로그의 **해당 유형 행 전부**를 한 행씩 적는다. 열: `id | 항목 | disposition | authority | 정본 앵커 | 확인일`. disposition 값은 넷뿐이다.
+`docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`에 카탈로그의 **해당 유형 행 전부**를 적는다. 열: `scope | id | 항목 | disposition | authority | 정본 앵커 | 확인일`.
+
+**행 키는 `(scope, id)`다.** 단일 패키지 프로젝트는 전 행이 `scope: .`이라 id가 곧 키다. monorepo는 **scope마다 값이 갈릴 수 있는 행**(패키지 매니저·lint·test·e2e·유형별 행 전부)을 그 scope마다 한 행씩 두고, 저장소 전체에 한 번만 성립하는 행(레이아웃·라이선스·CI·비밀 취급)만 `scope: *` 한 행으로 둔다. 애매하면 scope별로 나눈다. 이 키가 없으면 «web은 pnpm·Flutter는 pub», «admin은 UI 킷 확정·marketing은 이관» 같은 정상 monorepo 상태를 표현할 수 없고, D5 생성기·D6 설치가 어느 행을 읽을지 정해지지 않는다. disposition 값은 넷뿐이다.
 
 | disposition | 뜻 | 요건 |
 |---|---|---|
@@ -512,16 +514,16 @@ R0 분기를 셋으로 한다.
 ### D5. 스캐폴드 소유 — `/stack-guard` 수행 0 (검증 진입점보다 먼저)
 - **위치**: 수행 1(`validate` 진입점 생성)·수행 2(verify 스크립트·도구 config)보다 **앞**인 «수행 0»이다. 그래야 생성기가 만든 manifest(`package.json`·`pubspec.yaml`·`pyproject.toml`)가 원본이 되고, 수행 1은 그 위에 `validate*` 스크립트 키만 더한다(기존 키·의존 보존). 스캐폴드를 수행 1 뒤에 두면 harness가 먼저 만든 manifest와 생성기 manifest가 충돌한다.
 - **조건**: green-field = 그 scope에 등록 소스 루트 0 **그리고** 프레임워크 manifest 부재. brownfield·부분 초기화(소스 루트 있음, 또는 manifest 존재)는 그 scope의 스캐폴드를 건너뛰고 `skipped (<사유>)`를 남긴다.
-- **scope 단위**: registry `cat-common-repo-layout`이 정한 scope(단일 패키지 `.` / monorepo `apps/web`·`apps/mobile` 등)마다 생성기 1종을 **그 scope 디렉터리에** 돌린다. `## Scaffold`는 scope별 1행.
-- **생성기**: 각 유형의 `cat-<유형>-framework` 확정 행의 공식 생성기(예 `create-next-app`, `npm create vite`, `flutter create`, `uv init`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시. 공식 생성기가 없는 유형(일부 API·CLI)은 «최소 골격» — 소스 루트 1 + 테스트 루트 1 + manifest — 만 만들고 `## Scaffold`에 `generator: minimal`로 적는다.
+- **scope 단위**: registry `cat-common-repo-layout`이 정한 scope(단일 패키지 `.` / monorepo `apps/web`·`apps/mobile` 등)마다 생성기 1종을 **그 scope 디렉터리에** 돌린다. 옵션·생성기 도출은 **그 scope의 registry 행**(`scope`가 그 scope이거나 `*`인 행 — D2의 `(scope, id)` 키)만 읽는다. `## Scaffold`는 scope별 1행.
+- **생성기**: 그 scope 유형의 `cat-<유형>-framework` 확정 행(그 scope의 행)의 공식 생성기(예 `create-next-app`, `npm create vite`, `flutter create`, `uv init`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시. 공식 생성기가 없는 유형(일부 API·CLI)은 «최소 골격» — 소스 루트 1 + 테스트 루트 1 + manifest — 만 만들고 `## Scaffold`에 `generator: minimal`로 적는다.
 - **병합 규칙**: 임시 디렉터리에 생성 → scope 디렉터리로 복사하되 harness 파일은 **절대 덮어쓰지 않는다** — `README.md`·`README_ko.md`·`LICENSE`·`docs/**`·`.claude/**`·`.codex/**`·`.agents/**`·`.boilerplate/**`·`AGENTS.md`·`CLAUDE.md`·`.github/**`. 루트 `.gitignore`는 줄 단위 합집합(저장소 기존 줄 우선, 중복 제거). 그 외 충돌 파일(green-field에서는 정상적으로 없다)은 덮어쓰지 않고 `Scaffold conflict: <경로>`로 사용자 결정에 넘긴다. 생성기가 만든 `.git`은 버린다.
-- **보호 경로 검사**: 복사 직후 `git status --porcelain -- README.md README_ko.md LICENSE AGENTS.md CLAUDE.md docs .claude .codex .agents .boilerplate .github`가 비어 있어야 한다. 비어 있지 않으면 `Scaffold protected-path violation: <경로>`를 출력하고 종료한다(되돌리기는 사용자 결정 — 자동 `checkout` 하지 않는다).
+- **보호 경로 검사(내용 대조)**: 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`) 아래 **«파일 경로 + 내용 해시» 목록**을 복사 **직전**과 **직후**에 각각 만들어 **완전히 같아야** 한다(해시가 바뀐 파일 · 새로 생긴 파일 · 사라진 파일 = 위반). 예: `find <보호 경로> -type f -print0 | sort -z | xargs -0 shasum` — 동등한 digest면 무엇이든 된다. **`git status --porcelain` 출력 비교로 대신하지 않는다**: 이미 ` M` 상태인 파일을 덮어써도 상태 문자열이 그대로라 놓치고(실측 확인), 반대로 «직후 출력이 비어 있어야 한다»는 절대 기준은 정상 lifecycle에서 매번 위반으로 잡힌다 — `/bootstrap-stack`과 본 skill 사이에 커밋이 없어 방금 쓴 `STACK_SETUP_PLAN`·ARCH·원장이 이미 미커밋이기 때문이다. 달라진 경로가 있으면 `Scaffold protected-path violation: <경로>`를 출력하고 종료한다(되돌리기는 사용자 결정 — 자동 `checkout` 하지 않는다).
 - **기록**: `STACK_SETUP_PLAN.md ## Scaffold`에 scope별 `scope | status | 생성기·버전 | 옵션 | 생성 파일 수 | 제외·충돌 | 실행일`. 생성 파일 전량은 `git status --porcelain`으로 사용자가 본다(문서 복사 금지).
 - **커밋하지 않는다.** 출력에 권장 커밋 메시지 한 줄(`chore(scaffold): initialize <framework> project skeleton`).
 - ADR-063 D1의 probe는 이 뒤(수행 5)에 돈다. probe는 여전히 소스 루트를 만들지 않는다.
 
 ### D6. 기초 라이브러리 baseline 설치 — `/stack-guard` 6-2-b
-카탈로그 `설치: baseline`이고 registry `확정`인 행의 패키지를 스캐폴드 직후 설치한다(UI 킷·스타일링·아이콘·UI 미리보기 도구·lint/format 도구·계측 SDK 등). 버전은 registry `확인일` 기준 researcher 고정값. **예외 — 폰트 패키지·파일**: 폰트 선택은 DESIGN `## 3`(ADR-073 D4)이 `/bootstrap-design` R6 쇼케이스에서 확정하므로 stack-guard가 미리 설치하지 않는다. 확정 뒤 R6 배선(builder 단발)이 그 패키지·파일을 추가한다(ADR-058#amend-4 결정 2) — 설치 소유의 명시 예외다. `설치: task` 행은 기존대로 plan-workitem authoring → implement 설치(ADR-040#amend-1·ADR-052 D1). install-ownership은 이제 **4분할**이다: authoring / per-task 실행 / baseline toolchain·e2e / **baseline 라이브러리·스캐폴드(본 ADR)**.
+카탈로그 `설치: baseline`이고 registry `확정`인 행의 패키지(UI 킷·스타일링·아이콘·UI 미리보기 도구·lint/format 도구·계측 SDK 등)를 스캐폴드 직후 설치한다. **설치는 scope별이다** — 그 scope의 registry 행(D2 `(scope, id)` 키)을 그 scope의 패키지 매니저로 설치한다. 버전은 registry `확인일` 기준 researcher 고정값. **예외 — 폰트 패키지·파일**: 폰트 선택은 DESIGN `## 3`(ADR-073 D4)이 `/bootstrap-design` R6 쇼케이스에서 확정하므로 stack-guard가 미리 설치하지 않는다. 확정 뒤 R6 배선(builder 단발)이 그 패키지·파일을 추가한다(ADR-058#amend-4 결정 2) — 설치 소유의 명시 예외다. `설치: task` 행은 기존대로 plan-workitem authoring → implement 설치(ADR-040#amend-1·ADR-052 D1). install-ownership은 이제 **4분할**이다: authoring / per-task 실행 / baseline toolchain·e2e / **baseline 라이브러리·스캐폴드(본 ADR)**.
 - 웹 UI 프로젝트에서 registry `cat-web-ui-preview`가 `Storybook`이면 여기서 설치한다: 프레임워크 공식 통합 패키지 + 애드온은 `a11y`·`viewport`만(추가 애드온·Chromatic·MDX 강제 없음). `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. Flutter는 미리보기 도구를 설치하지 않는다(별도 진입 파일 갤러리 — ADR-072).
 
 ### D7. 버전 currency
@@ -553,7 +555,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 2. Failure mode — 카탈로그에 없는 항목의 즉흥 결정 / 프레임워크 한 토큰이 라운드를 건너뜀 / 소스 0개 위에서 검증 장치가 SKIPPED로 굳음 / 첫 task가 인프라 세팅이 됨 (전부 관측됨).
 3. Predicted improvement — registry 빈 행 0 / probe smoke가 M1 전에 `PASS`·`PARTIAL` 실측 / e2e boot smoke `PASS` / 마일스톤 중 ARCH §7·ADR-101 재편집 횟수 감소.
 4. Preserved invariants — `disable-model-invocation` / bootstrap-stack에 Bash 없음(스캐폴드는 stack-guard) / probe가 소스 루트를 만들지 않음(ADR-063 D1) / 기존 도구 미덮어씀·재실행 계약(ADR-063 D3) / T1/T2/T3 taxonomy(ADR-055) / Dependency Tools 표 의미(ADR-051#amend-4) / Needs Install graceful fallback.
-5. Falsifying evaluation — Round 11(web)·12(Flutter)에서 (a) registry에 빈 행이 남은 채 bootstrap-stack이 성공 종료하면 D2 실패 (b) 수행 0 직후 보호 경로 검사(`git status --porcelain -- <보호 경로>`)가 비어 있지 않으면 D5 실패(수행 3의 STACK_SETUP_PLAN 갱신은 그 뒤이므로 검사 대상이 아니다) (c) 스캐폴드 뒤 probe smoke가 `SKIPPED (등록된 소스 루트 부재)`면 D5 배선 실패 (d) HYBRID 입력(프론트만 지정)에서 백엔드 결정 라운드가 열리지 않으면 D4 실패.
+5. Falsifying evaluation — Round 11(web)·12(Flutter)에서 (a) registry에 빈 행이 남은 채 bootstrap-stack이 성공 종료하면 D2 실패 (b) 수행 0 복사 직전·직후의 보호 경로 «경로+내용 해시» 목록이 달라지면 D5 실패(내용 대조이므로 이미 미커밋 상태인 파일의 덮어쓰기도 잡힌다. 수행 3의 `STACK_SETUP_PLAN` 갱신은 복사 뒤라 대상이 아니다) (c) 스캐폴드 뒤 probe smoke가 `SKIPPED (등록된 소스 루트 부재)`면 D5 배선 실패 (d) HYBRID 입력(프론트만 지정)에서 백엔드 결정 라운드가 열리지 않으면 D4 실패.
 6. Rollback path — 본 ADR superseded → 수행 0·6-2-b·R-C·registry 제거, R0 2분기 복원, ADR-052/055/063 참조 갱신 줄 삭제. 생성된 프로젝트 스캐폴드는 프로젝트 소유라 되돌리지 않는다.
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT. 실제 파일 경로 1행 1개)
@@ -586,7 +588,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 - (d) `반드시 먼저 읽을 파일`에 `- `stack-catalog.md`` 추가.
 - (e) `## BASE 문서화 흐름` 4번(STACK_SETUP_PLAN) 현재: `4. 필요하면 `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 … 생성(이미 있으면 갱신 제안).` → `4. `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 **항상** 생성·갱신한다(ADR-071 D8 — 선택 산출물 아님).` 나머지 문장 유지. 같은 항목 끝에 추가:
   ```
-   - **Stack Decision Registry 기록 (ADR-071 D2)**: `stack-catalog.md`의 해당 유형 행 전부를 `## Stack Decision Registry`에 한 행씩 적고 disposition(`확정 | 해당 없음 | 이관 | 미결정`)·authority·정본 앵커·확인일을 채운다. **빈 행이 남으면 성공 종료하지 않는다.** 결정 본문은 앵커(ARCH `## 7-N`·ADR-101)에만 적는다 — registry는 색인이다.
+   - **Stack Decision Registry 기록 (ADR-071 D2)**: `stack-catalog.md`의 해당 유형 행 전부를 `## Stack Decision Registry`에 적고 `scope`·disposition(`확정 | 해당 없음 | 이관 | 미결정`)·authority·정본 앵커·확인일을 채운다. **행 키는 `(scope, id)`** — 단일 패키지는 전 행 `.`, monorepo는 scope마다 갈릴 수 있는 행을 scope별로 두고 저장소 단위 행만 `*`로 둔다. **빈 행이 남으면 성공 종료하지 않는다.** 결정 본문은 앵커(ARCH `## 7-N`·ADR-101)에만 적는다 — registry는 색인이다.
   ```
 - (f) `## --migrate (T2) 흐름` 앞에 새 절 삽입:
   ```
@@ -620,12 +622,15 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 <!-- 스택 결정 카탈로그(.claude/skills/bootstrap-stack/stack-catalog.md)의 해당 유형 행 전부를 한 행씩 적는다(ADR-071 D2).
      이 표는 색인이다 — 결정 본문은 정본 앵커(ARCH ## 7-N / ADR-101 / 본 파일 다른 절)에만 있다.
      disposition: 확정(앵커 필수) / 해당 없음(사유) / 이관(사유 + 회수 시점) / 미결정(원장 open 등재).
-     빈 행이 남으면 /bootstrap-stack은 성공 종료하지 않는다. /stack-guard 6-2-b는 `설치: baseline` 행 중 확정만 설치한다. -->
-| id | 항목 | disposition | authority | 정본 앵커 | 확인일 |
-|---|---|---|---|---|---|
-| (예: cat-web-framework) | 프레임워크 | 확정 | user-approval | ADR-101 ## 결정 | 2026-09-11 |
-| (예: cat-web-ui-preview) | UI 미리보기 도구 | 확정 (Storybook) | agent-delegated | ARCH ## 7-4 | 2026-09-11 |
-| (예: cat-common-error-reporting) | 에러 리포팅 | 이관 — 사유: 배포 전 불요 / 회수: M2 plan-milestone R1 | agent-delegated | — | |
+     행 키는 (scope, id)다 — 단일 패키지는 전 행 `.`, monorepo는 scope마다 값이 갈릴 수 있는 행(PM·lint·test·e2e·유형별 행)을 scope별로, 저장소 단위 행(레이아웃·라이선스·CI·비밀)만 `*`로 둔다(ADR-071 D2).
+     빈 행이 남으면 /bootstrap-stack은 성공 종료하지 않는다. /stack-guard 6-2-b는 그 scope의 `설치: baseline` 확정 행만 그 scope의 PM으로 설치한다. -->
+| scope | id | 항목 | disposition | authority | 정본 앵커 | 확인일 |
+|---|---|---|---|---|---|---|
+| (예: `.`) | (예: cat-web-framework) | 프레임워크 | 확정 | user-approval | ADR-101 ## 결정 | 2026-09-11 |
+| (예: `.`) | (예: cat-web-ui-preview) | UI 미리보기 도구 | 확정 (Storybook) | agent-delegated | ARCH ## 7-4 | 2026-09-11 |
+| (예: `apps/mobile`) | (예: cat-common-package-manager) | 패키지 매니저 | 확정 (pub) | agent-delegated | 본 파일 ## Dependency Tools | 2026-09-11 |
+| (예: `*`) | (예: cat-common-license-policy) | 배포 라이선스 | 확정 (MIT) | user-choice | Charter ## 7 · LICENSE | |
+| (예: `.`) | (예: cat-common-error-reporting) | 에러 리포팅 | 이관 — 사유: 배포 전 불요 / 회수: M2 plan-milestone R1 | agent-delegated | — | |
 
 ## Scaffold
 <!-- /stack-guard 수행 0이 green-field scope마다 공식 생성기로 뼈대를 만든 뒤 기록한다(ADR-071 D5). 검증 진입점(수행 1)보다 먼저다.
@@ -639,13 +644,13 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 
 ### P2-7. `.claude/skills/stack-guard/SKILL.md`
 - (a) 첫 문단 `이 skill의 1단계 범위:` 목록에 첫 항목으로 추가: `- green-field 스캐폴드(공식 생성기 1종, harness 파일 미덮어쓰기) + 카탈로그 `설치: baseline` 행의 기초 라이브러리 설치 — 그 뒤에 probe·boot smoke·design gate·CI를 실제 코드 위에서 실측한다(ADR-071 D5·D6).`
-- (b) `반드시 먼저 읽을 파일`에 `- `docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`(수행 0·6-2-b 입력)` 추가.
+- (b) `반드시 먼저 읽을 파일`에 두 줄 추가: `- `docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`(수행 0·6-2-b 입력)` · `- `.claude/skills/bootstrap-stack/stack-catalog.md`(`설치: baseline` 판별 — registry에는 `설치` 열이 없어 id로 조인한다, ADR-071 D6)`.
 - (c) 수행 1(`1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.`) **앞**에 새 단계 «0»을 삽입한다(검증 진입점보다 먼저 — 생성기 manifest가 원본이 되도록. 6 안에 넣지 않는다):
   ```
    0. **스캐폴드 (green-field scope 한정 — ADR-071 D5)**: scope(registry `cat-common-repo-layout`)마다 «등록 소스 루트 0 **그리고** 프레임워크 manifest 부재»면 아래를 수행하고, 아니면 `## Scaffold`에 `skipped (<사유>)`를 적고 다음 scope로. 전 scope 처리 후 수행 1로 간다.
-     1. 생성기 = 그 scope 유형의 `cat-<유형>-framework` 확정 행의 공식 생성기 1종(없으면 최소 골격 — 소스 루트 1 + 테스트 루트 1 + manifest, `generator: minimal`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시.
+     1. 생성기 = 그 scope 유형의 `cat-<유형>-framework` 확정 행(registry에서 `scope`가 그 scope이거나 `*`인 행 — ADR-071 D2 `(scope, id)` 키)의 공식 생성기 1종(없으면 최소 골격 — 소스 루트 1 + 테스트 루트 1 + manifest, `generator: minimal`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시.
      2. **임시 디렉터리에 생성**한 뒤 scope 디렉터리로 복사한다. 아래는 **절대 덮어쓰지 않는다**: `README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs/**` `.claude/**` `.codex/**` `.agents/**` `.boilerplate/**` `.github/**`. `.gitignore`는 줄 단위 합집합(저장소 기존 줄 우선, 중복 제거). 그 외 충돌 파일은 덮어쓰지 않고 `Scaffold conflict: <경로>` 출력 + 사용자 결정.
-     2-1. **보호 경로 검사**: `git status --porcelain -- README.md README_ko.md LICENSE AGENTS.md CLAUDE.md docs .claude .codex .agents .boilerplate .github`가 비어 있어야 한다. 아니면 `Scaffold protected-path violation: <경로>` 출력 + 종료(되돌리기는 사용자 결정 — 자동 checkout 금지).
+     2-1. **보호 경로 검사(내용 대조 — ADR-071 D5)**: 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`) 아래 «파일 경로 + 내용 해시» 목록을 복사 **직전**과 **직후**에 각각 만들어 **완전히 같아야** 한다(예: `find <보호 경로> -type f -print0 | sort -z | xargs -0 shasum`, 동등한 digest면 무엇이든). **`git status --porcelain` 비교로 대신하지 않는다** — 이미 ` M`인 파일을 덮어써도 상태 문자열이 같아 놓치고, 절대 기준(`출력이 비어 있음`)은 직전 `/bootstrap-stack`이 쓴 미커밋 문서 때문에 매번 위반으로 잡힌다. 달라진 경로가 있으면 `Scaffold protected-path violation: <경로>` 출력 + 종료(되돌리기는 사용자 결정 — 자동 checkout 금지).
      3. 생성기가 만든 `README`류·예제 페이지는 그대로 둔다(정리는 M1 계획 소관). 생성기가 만든 `.git`은 버린다.
      4. `## Scaffold`에 scope별 1행(scope·status·생성기·버전·옵션·생성 파일 수·제외·충돌·실행일)을 적는다. 생성 파일 전량은 `git status --porcelain`으로 보여 준다(문서 복사 금지).
      5. **커밋하지 않는다.** 출력에 `권장 커밋: chore(scaffold): initialize <framework> project skeleton` 한 줄.
@@ -654,7 +659,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
   ```
 - (d) 6-2-1 뒤(6-3 앞)에 삽입:
   ```
-   - **6-2-b. 기초 라이브러리 baseline 설치 (ADR-071 D6)**: registry에서 `disposition: 확정` **그리고** 카탈로그 `설치: baseline`인 행의 패키지를 6-2와 같은 PM으로 설치한다(UI 킷·스타일링·아이콘·UI 미리보기 도구·계측 SDK 등 — 폰트 제외). 버전은 registry `확인일`의 researcher 고정값. `설치: task` 행은 설치하지 않는다(plan-workitem → implement). 설치 실패는 6-5 `Needs Install` fallback.
+   - **6-2-b. 기초 라이브러리 baseline 설치 (ADR-071 D6)**: registry에서 `disposition: 확정` **그리고** 카탈로그 `설치: baseline`인 행의 패키지를 **scope별로**(그 scope의 행을 그 scope의 PM으로 — `(scope, id)` 키) 설치한다(UI 킷·스타일링·아이콘·UI 미리보기 도구·계측 SDK 등 — 폰트 제외). 버전은 registry `확인일`의 researcher 고정값. `설치: task` 행은 설치하지 않는다(plan-workitem → implement). 설치 실패는 6-5 `Needs Install` fallback.
      - **Storybook (웹 UI + registry `cat-web-ui-preview` = Storybook)**: 프레임워크 공식 통합으로 설치하고 애드온은 `a11y`·`viewport`만 둔다. `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. 정적 빌드 출력 `design-gate-storybook/`이 `.gitignore`에 없으면 추가한다(보일러플레이트 기본 `.gitignore`에는 P5-19가 넣는다 — design gate v3가 이 경로에 빌드해 서빙; Phase 5 P5-6에서 ADR-072 D6 인용을 더한다). Flutter는 미리보기 도구를 설치하지 않는다.
      - **폰트 패키지·파일은 설치하지 않는다** — DESIGN `## 3` 확정 뒤 `/bootstrap-design` R6가 추가한다(ADR-071 D6 예외).
      - 설치 결과를 출력에 `baseline libs: <패키지 목록> (installed | Needs Install)`로 낸다.
@@ -1780,7 +1785,7 @@ docs(adr): re-point citations from ADR-027 and ADR-056 to ADR-073 and ADR-072
 - 별도 디렉터리 `dogfood-web/`에 저장소를 복제(template copy)하고 아래를 순서대로 돌린다(ADR-017 시나리오는 «todo 웹앱 — 목록·추가·완료·삭제 + 빈/오류 상태»).
   1. `/discover-product --fast` → `/bootstrap-project`.
   2. `/bootstrap-stack Next.js + TypeScript + pnpm` (HYBRID — 백엔드·DB 미정 → R1~R2 미결정 T1 행에 한정, R-C 카탈로그 라운드). 확인: registry 빈 행 0, `cat-web-ui-preview: Storybook`.
-  3. `/stack-guard`. 확인: `## Scaffold` `.` 행 `done`, 수행 0 직후 보호 경로 검사 통과(`git status --porcelain -- README.md README_ko.md LICENSE AGENTS.md CLAUDE.md docs .claude .codex .agents .boilerplate .github` 비어 있음 — STACK_SETUP_PLAN 갱신은 그 뒤이므로 대상 아님), 생성기 `package.json`에 `validate*` 키만 추가됨, baseline libs 설치(폰트 패키지 없음), probe smoke `PASS`/`PARTIAL`(SKIPPED 아님), e2e boot smoke `PASS`, Design Gate Adapter `ready (self-test PASS …)` + `copied-from` 채움, `design-gate-storybook/` ignore.
+  3. `/stack-guard`. 확인: `## Scaffold` `.` 행 `done`, 수행 0 보호 경로 내용 대조 통과(복사 직전·직후 보호 경로 «경로+내용 해시» 목록 **동일** — porcelain 문자열 비교가 아니다. 직전 bootstrap-stack이 쓴 미커밋 문서와 수행 3의 STACK_SETUP_PLAN 갱신은 대상 아님), 생성기 `package.json`에 `validate*` 키만 추가됨, baseline libs 설치(폰트 패키지 없음), probe smoke `PASS`/`PARTIAL`(SKIPPED 아님), e2e boot smoke `PASS`, Design Gate Adapter `ready (self-test PASS …)` + `copied-from` 채움, `design-gate-storybook/` ignore.
   4. `/bootstrap-design` (갤러리 라운드: uibowl.io 1건 + 스토어 스크린샷 1건 + inbox 캡처 1건 + getdesign.md 분석본 2건; R1 공유 모드 «단일» + 폰트 후보 2조합; R6 쇼케이스 승인 후 concept 삭제). 확인: DESIGN `## 0` 표 1행, `## 3` 9항목, `## 10` 언어 블록·용어 사전, `## 11` 표, `_theme/manifest.json`, Storybook `Theme/Showcase` 렌더.
   5. `/plan-milestone` → M1 `draft` + 출력 «다음: /design-milestone M1».
   6. `/design-milestone M1` (화면 3개: list·add·empty-error). 확인: 브리프 3개(요소 근거 — reviewer `[Design-element-rationale]` 발화 여부), reviewer 비평 선행, 스토리 상태별, 게이트 blocker 0, `--tokens-only` 0(렌더 출력 보존 확인), 스냅샷 PNG(500KB 경고 0 또는 사유), `manifest.json` approved + `product_entry`, feature `## 7` PX 인벤토리, M1 `contract-ready`.
@@ -1793,7 +1798,7 @@ docs(adr): re-point citations from ADR-027 and ADR-056 to ADR-073 and ADR-072
 
 ### P7-3. dogfood Round 12 — Flutter (Android 에뮬레이터)
 - `dogfood-flutter/`. 시나리오 «습관 메모 앱(Round 8 승계) — 목록·추가·완료 + 웹 관리자 페이지 1개(프로필 2개 검증용, Next.js 정적)».
-  1~3. Round 11과 같되 `/bootstrap-stack Flutter + Android + Next.js admin`(monorepo KEEP-list; iOS는 macOS host에서만 선택 추가 — 선언한 target은 전부 실행 검증한다). 확인: `## Scaffold` `apps/mobile`·`apps/web` 두 행 `done`(각 scope에 생성), `validate:e2e:android`(→ `scripts/e2e-target.mjs android`)·`validate:e2e:web` + 집계 `validate:e2e`, `package.json`에 `-d` 리터럴 없음, Flutter 자가 검사 fixture 2개 생성·`validate`에서 제외.
+  1~3. Round 11과 같되 `/bootstrap-stack Flutter + Android + Next.js admin`(monorepo KEEP-list; iOS는 macOS host에서만 선택 추가 — 선언한 target은 전부 실행 검증한다). 확인: registry가 `(scope, id)` 키로 갈림(`apps/mobile`의 `cat-common-package-manager` = pub / `apps/web` = pnpm — 한 행으로 뭉개지지 않음, ADR-071 D2), `## Scaffold` `apps/mobile`·`apps/web` 두 행 `done`(각 scope에 생성), `validate:e2e:android`(→ `scripts/e2e-target.mjs android`)·`validate:e2e:web` + 집계 `validate:e2e`, `package.json`에 `-d` 리터럴 없음, Flutter 자가 검사 fixture 2개 생성·`validate`에서 제외.
   4. `/bootstrap-design` — `## 0` 표 2행(consumer-mobile / admin-web, 공통+delta), `lib/theme/*` + `theme_gallery.dart` + 웹 쇼케이스 둘 다, 프로필별 delta 블록 §2·§3에만.
   5~7. `/plan-milestone` → `/design-milestone M1`(앱 화면 2 + 웹 화면 1). 확인: Flutter 위젯 테스트 스냅샷(390×844·360×800) PNG(상태별 파일명), guideline 4종 통과, 웹 화면은 Storybook.
   8~10. 구현 1 task → stabilize. 확인: §3-V native 기본 경로(위젯 스냅샷 재생성 + 승인 스냅샷 대조)가 실행되고, 앱 기동 캡처는 가능하면 수행·불가면 `blocked-on-env`를 명시(두 축을 따로 확인), e2e 판정이 선언 target마다 1건씩.
@@ -1944,7 +1949,7 @@ docs(validation): record dogfood rounds 11 and 12 and the builder effort experim
 # 스택 결정 카탈로그 (ADR-071 D1 — 색인)
 
 > 결정 본문은 정본 앵커에만 적는다. 이 표는 «무엇을 검토해야 하는가»의 색인이며, `/bootstrap-stack` R-C가 프로젝트 유형의 행 전부를 `STACK_SETUP_PLAN.md ## Stack Decision Registry`에 disposition과 함께 옮긴다.
-> authority 기본값 기준: 되돌린 뒤 코드·데이터·계정·외부 계약에 파급 → user-approval / 코드 안에서 끝남 → agent-delegated (ADR-060 D9).
+> authority 기본값 기준: 되돌린 뒤 코드·데이터·계정·외부 계약에 파급 → user-approval / 코드 안에서 끝남 → agent-delegated (ADR-060 D2 — ARCH `## 7-x` 소항목 배정 예시는 D9).
 > 설치: baseline = /stack-guard 6-2-b가 설치 / task = plan-workitem authoring → implement 설치 / n/a = 패키지 아님. 폰트 패키지·파일은 예외(DESIGN §3 확정 뒤 bootstrap-design R6 배선이 추가 — ADR-071 D6).
 > **DESIGN.md는 정본 앵커가 아니다** — 시각 값·폰트 선택·컴포넌트 규칙은 `/bootstrap-design`(ADR-058·ADR-073)이 소유한다. 카탈로그 행은 **라이브러리·방식 선택**(ARCH·ADR-101)만 확정한다. authority는 ADR-060 D2의 3값(user-choice / user-approval / agent-delegated).
 
@@ -1963,7 +1968,7 @@ docs(validation): record dogfood rounds 11 and 12 and the builder effort experim
 | cat-common-logging | 로깅 포맷·수집 | T3 | agent-delegated | task | ARCH ## 7 (운영성) | |
 | cat-common-error-reporting | 에러 리포팅 provider | T3 | user-approval | task | ARCH ## 7 | Sentry |
 | cat-common-analytics | 제품 계측 SDK | T3 | user-approval | baseline | ARCH ## 7 (운영 사실 — 이벤트 설계는 FEATURE ## 8-1이 나중에) | |
-| cat-common-i18n | 국제화·로케일 | T3 | user-approval | task | ARCH ## 7-4/7-5 | |
+| cat-common-i18n | 국제화·로케일 | T3 | user-approval | task | ARCH ## 7-4/7-5 (그 절이 없는 유형은 ## 7) | |
 | cat-common-datetime | 날짜·숫자 포맷 라이브러리·TZ 정책 | T3 | agent-delegated | task | ARCH ## 7 | |
 | cat-common-auth-provider | 인증 provider(정책은 7-3/7-4/7-5) | T2 | user-approval | task | ADR-101 · ARCH ## 7-3 | |
 | cat-common-secrets | 비밀 취급 위치·도구 | T2 | user-approval | n/a | ARCH ## 7 · .gitignore | secrets/ 하위 (ADR-059 D9) |
