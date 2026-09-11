@@ -203,6 +203,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 - Flutter: `lib/theme/tokens.dart`·`lib/theme/app_theme.dart`(ThemeData/ColorScheme/TextTheme 배선) + `lib/prototype/theme_gallery.dart` 진입 파일(같은 섹션 순서) + `test/prototype/theme_gallery_test.dart`(프로필 뷰포트 렌더 + Accessibility Guideline 4종 + overflow 0 + 스냅샷 PNG).
 - 폰트 패키지·파일(예: `@fontsource/*`, `assets/fonts/`, Flutter `pubspec.yaml` `fonts:`)은 여기서 추가한다(설치 소유 예외 — ADR-071 D6).
 - 매니페스트: `docs/20-system/prototypes/_theme/manifest.json`(ADR-072 D3 schema, `milestone: "_theme"`)에 쇼케이스 화면을 등록한다.
+- **절별 산출 확인 (필수)**: `## 2`~`## 6` **각 절이 최소 1개 토큰을 내보냈는지** 확인한다. 내보낼 것이 없는 절은 배선 파일 주석에 `<절>: 토큰 없음 — <사유>` 를 남긴다. **색만 내보내고 레이아웃을 빠뜨리는 것이 기본 실패 양식이다** — dogfood Round 12 실측: `tokens.css` 에 container·max-width 토큰이 0건이라 화면 코드가 `960px`·`480px` 을 하드코딩했고 `--tokens-only` 가 6건을 리포트했다(ADR-073 D2 — 그 값들은 DESIGN `## 4` 에 산문으로만 있었다).
 - 파일 상단 주석: `GENERATED FROM docs/20-system/DESIGN.md — 수정은 DESIGN.md → /bootstrap-design R6 재생성. 토큰 외 값 금지.`
 ### R6-2. 게이트 + reviewer 픽셀 판정
 - `STACK_SETUP_PLAN.md ## Design Gate Adapter`가 `ready`인지 확인 후 `validate:design -- --manifest docs/20-system/prototypes/_theme/manifest.json`을 실행한다(경로 추측 금지; `needs-install`·`n/a`면 `Needs Design Gate: /stack-guard` + 승인 보류). 차단(serious/critical axe·좁은 폭 geometry·Flutter guideline·overflow)은 **DESIGN.md를 먼저 고치고** R6-1 재생성(retry ≤2, 초과 시 brief 재검토).
