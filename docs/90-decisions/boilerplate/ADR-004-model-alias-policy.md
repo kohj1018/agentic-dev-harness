@@ -200,4 +200,5 @@ dogfood Round 11·12 에서 **팬아웃 단위가 보고 0건 상태로 상한�
 - rollback = 본 amend superseded → agent 본문의 「턴 예산」 절 삭제.
 
 ### 적용 surface
-- .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1·2 (`builder` 는 report-only 가 아니고 상한 45 라 제외)
+- .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1·2
+- .claude/agents/builder.md — 결정 1·2 (**2026-09-11 편입**). 최초 작성 시 «report-only 가 아니고 상한 45 라 제외» 로 뒀으나, 같은 날 Round 12 R6-1 테마 배선 dispatch 가 **45턴 상한에서 보고 0건으로 중단**됐다 — 상한이 높아도 같은 실패가 난다. builder 는 문구가 다르다: «41턴째에는 새 작업을 시작하지 말고 마무리와 보고», 그리고 «slice 가 41턴에 안 끝날 크기면 착수 전에 보고» 를 더한다(쪼개는 것은 foreman 의 일이다).
