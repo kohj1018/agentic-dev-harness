@@ -189,6 +189,11 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 - **포맷 완성도 point-check (ADR-058 Layer C)**: R5 저장 직후 Google 공식 예시 DESIGN.md(`google-labs-code/design.md/examples` — authoritative, 예: `examples/paws-and-paths/DESIGN.md`(실측 확인된 완성 예시: Brand&Style/Colors/Typography/Layout/Elevation/Shapes/Components + 토큰))와 대조해 메인 세션이 *섹션 완성도·빠짐*만 advisory 점검한다(별도 agent 호출 불요 — 예시 fetch + 비교). **미감·값·시각 방향은 참조 금지**(공식 예시가 glassmorphism/보라 그라디언트라 §9 anti-slop 오염 — format fixture로만). (옵션) UI+Node면 `@google/design.md lint`(stack-guard 권장 명령)도 이 시점에 실행 가능.
 - **DESIGN.md 상태 승격 (ADR-073 D9)**: 본 R5 저장 완료 시 `docs/20-system/DESIGN.md` `## 0. Status`를 `draft` → **`living`**으로 갱신한다(정식·`--fast` 경로 모두 수행 — R6 생략 프로젝트도 승격되도록). 비-UI 삭제 경로는 불변.
 
+### R5-C. 자기 정합 검사 (저장 직전 1회 — 필수)
+- **용어 사전 ↔ 같은 문서의 카피 예시**: `## 10` 용어 사전의 **금지 동의어** 열에 있는 각 낱말을 **DESIGN.md 자기 자신**에서 grep 한다(`## 7` 상태 칸·`## 10` 카피 예시·`## 1` 원칙 문장 등 카피가 들어가는 모든 자리). 일치가 나오면 **사전을 SSOT 로 보고 카피를 고치거나**, 그 낱말이 다른 뜻으로 쓰인 관용구면 사전에 예외 행을 둔다. 둘 중 하나를 하기 전에는 저장하지 않는다.
+- **왜 여기인가**: stabilize 의 5-2b voice grep 은 *변경된 코드 파일*만 보고 **`DESIGN.md` 자체를 제외**한다(규칙 정의 영역이라서). 그래서 문서 안의 자기모순은 어느 기계 검사에도 안 걸리고, 그 카피가 브리프 → 코드로 퍼진 뒤에야 사람 눈에 띈다. 실측(dogfood Round 12): 사전이 「할 일」을 *습관* 의 금지 동의어로 등재했는데 `## 7` `TodayHeader` 행과 `## 10` 카피 예시가 둘 다 「오늘 할 일을 다 했어요」를 썼고, **designer 가 브리프를 쓰다 우연히 발견**했다(5곳으로 이미 번진 뒤였다).
+- **범위는 이 한 파일이다** — 코드 grep 이 아니라서 문맥이 전부 카피이고 오탐이 거의 없다. 발견을 출력에 `[Design-voice-self] <줄>: 사전 금지어 «<낱말>»` 로 남긴다.
+
 ## R6 — 네이티브 테마 쇼케이스 + 검토 루프 + 정리 (ADR-058#amend-4 결정 2)
 
 > 목적: 확정된 DESIGN.md 토큰이 **실제 스택 테마에 배선되어** 충실히 렌더되는지 확인한다. 옮김 오차(토큰→테마)를 여기서 한 번 승인한다. 배선 파일은 제품 코드이며 커밋한다. `--fast`는 R6-2 reviewer 픽셀 판정만 생략(배선·쇼케이스·게이트는 수행). `--update`는 토큰·컴포넌트 변경 시 R6-1을 delta 재생성.
