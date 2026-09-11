@@ -1055,7 +1055,7 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 
 ## Round 12 (2026-09-11~, 습관 메모 앱 + 관리자 웹 / Flutter + Next.js — 프로필·target별 e2e 검증)
 
-> **진행 중** — 본 절은 `/stack-guard`·`/plan-milestone`·`/bootstrap-design`(R1·R3~R6)까지 수행한 시점의 기록이다. `/design-milestone` 이후는 완주 후 채운다.
+> **완주** (2026-09-12) — 1~10단계 전부 수행했다: `/bootstrap-stack` → `/stack-guard` → `/plan-milestone` → `/bootstrap-design` → `/design-milestone`(R0~R7) → `/plan-workitem` → `/validate-plan` → `/repair-plan` → `/seal-milestone` → 구현 5 task → `/stabilize-milestone`. **M1 graduation: YES.**
 > isolated fork (baseline `6207cde` + harness sync `13f6485`·`3ead7e4`). 실제 Flutter 3.47.3 / Dart 3.13.3 / Node 24.20 / pnpm 10.33 / Next 16.3.4. **Android 에뮬레이터(`emulator-5554`)와 iOS 시뮬레이터(iPhone 16e)를 실제로 띄워 실행 검증했다.**
 > 수행 방법의 한계는 Round 8·9·11과 같다 — 메인 세션 skill 구간은 SKILL.md대로 실제 명령 실행·실제 커밋을 동반해 수작업 재현했고, designer·builder·planner 위임만 진짜 sub-agent 실행이다.
 
@@ -1275,6 +1275,10 @@ Phase 7 이 건드린 boilerplate ADR 8종. **개정 수**는 `## Amendment` 헤
 ### 이 Phase 가 실제로 바꾼 것 — 한 문단
 
 **규칙을 쓴 날 돌려 보는 것이 규칙을 잘 쓰는 것보다 중요했다.** Phase 7 이 만든 14개 amendment 중 **같은 날 실행이 고친 것이 4건**이고(ADR-037#amend-4 ×2 · ADR-073#amend-1 ×1 · ADR-005#amend-2 를 낳은 sync 사고 ×1), **리뷰가 고친 것은 0건**이다. 더 나아가 **falsifier 가 신설 당일 발화한 것이 2건**이다(ADR-004#amend-8 · ADR-073#amend-1) — 사전 등록이 실제로 작동한다는 뜻이면서, 동시에 **한 번도 돌려 보지 않은 규칙은 절반쯤 틀려 있다**는 뜻이다. 그래서 Round 13 의 첫 과제를 「새 규칙」이 아니라 **「미검증분 실행」**으로 두었다 — Phase 7 이 건드린 8종 중 완전 실행 검증은 4종뿐이다.
+
+### P7-5 기록 형태 (정직 기록)
+
+IMPROVE-GUIDE P7-5 는 `docs(validation): record dogfood rounds 11 and 12 and the builder effort experiment` **단일 커밋**을 지정했다. 실제로는 **63개 커밋으로 나뉘어 들어갔다**(`6207cde..HEAD`). AGENTS.md 의 「커밋은 작고 논리적인 단위로 나눈다. 커밋 전에 관련 workitem 문서와 구현 범위가 일치하는지 확인한다」가 더 강한 규율이고, 이 Phase 는 **규칙 변경 · 게이트 수정 · 라운드 기록이 뒤섞여** 한 커밋에 넣으면 되돌리기 단위가 사라진다 — 실제로 이 Phase 에서 falsifier 발화로 **되돌려 다시 쓴 처방이 4건**이었고, 그때마다 직전 커밋만 보면 됐다. **빈 커밋으로 지정 메시지를 만들지 않았다** — 기록할 내용이 없는 커밋은 이력을 속인다.
 
 ## Round 13 첫 과제 (P7-4 인계 — 2026-09-12 사용자 확정)
 
