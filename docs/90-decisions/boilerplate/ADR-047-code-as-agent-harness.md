@@ -33,7 +33,7 @@ accepted
 본 표는 *분류 정의*다. 각 layer의 절차·canonical owner는 [docs/00-meta/STRUCTURE.md](../../00-meta/STRUCTURE.md) Canonical Owner 표가 SSOT.
 
 ### D3. Harness Mutation Contract (*Code as Agent Harness* §3.5.3 정합)
-다음 surface 중 하나라도 수정하는 ADR/PR은 본문에 *Harness Mutation Contract 6 필드*를 명시한다 (enabling — 자동 차단 X):
+다음 surface 중 하나라도 수정하는 ADR/PR은 본문에 *Harness Mutation Contract 7 필드*를 명시한다 (enabling — 자동 차단 X. **7번째 「예산 영향」은 amend-3 에서 추가됐고 소급 적용하지 않는다**):
 
 **대상 surface (mutation contract 발동):**
 - `AGENTS.md`
@@ -50,8 +50,9 @@ accepted
 4. **Preserved invariants** — 이 변경에서 *깨면 안 되는* 기존 행동 (예: "validate report 양식 호환", "skill auto-invocation 금지").
 5. **Falsifying evaluation** — 변경 후 어떤 dogfood simulation / fork run에서 회귀가 검출되면 본 변경을 되돌리는가.
 6. **Rollback path** — supersede 시 어떤 ADR로 되돌리는가 또는 어떤 amend가 필요한가.
+7. **예산 영향** (amend-3) — 이 변경이 어떤 위임 단위(sub-agent)의 작업량을 늘리는가, 그 단위의 `maxTurns`·slice 기준을 함께 보았는가. 늘리지 않으면 `없음` 한 줄 — **`없음` 이 정상이고 대다수다**.
 
-ADR 본문 어느 위치에 박는지: `## 결정` 블록(D1~Dn) 다음, `## 결과` 이전 어디든 — 보통 `## 정책 강도` 보조 섹션 *전후* (본 ADR 자체는 *전*에 둠). `## Mutation Contract` 섹션을 두고 위 6 필드를 각 1줄로 박는다.
+ADR 본문 어느 위치에 박는지: `## 결정` 블록(D1~Dn) 다음, `## 결과` 이전 어디든 — 보통 `## 정책 강도` 보조 섹션 *전후* (본 ADR 자체는 *전*에 둠). `## Mutation Contract` 섹션을 두고 위 7 필드를 각 1줄로 박는다.
 
 본 D3는 *원칙 owning* — `[외부실증]` 논문 §3.5.3 인용 single source.
 
@@ -187,3 +188,39 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 
 ### 강도 (ADR-022)
 - enabling(약, [외부실증]) — 도구 기본값 승계. 제약을 새로 추가하지 않고, 기존 제약(`permissions.deny`·validate 게이트)은 그대로 남는다.
+
+## Amendment 3 (2026-09-12) — D3 에 7번째 필드: **예산 영향**
+
+### 배경
+ADR-004#amend-8 의 falsifier (a)가 **규칙 신설 당일에 발화했다.** 그 falsifier 는 그 자체로 본 항목의 **사전 등록된 채택 조건**이었다(사용자 확정 2026-09-12: «(b)는 Round 13 후보로 기록, falsifier 「(a)(c) 뒤에도 쓰기 에이전트가 0건으로 상한 도달하면 채택」»).
+
+- [관측됨] `/validate-plan M1` dispatch 의 `reviewer` 가 `maxTurns: 12` 상한에서 **보고 0건**으로 멈췄다(29 tool_use / 176.0K 토큰 / 455초). 마지막 출력은 **「리뷰 파일 골격을 지금 쓰겠다」**였다 — 산출물을 만들기 **직전**에 죽었다.
+- [관측됨] 같은 실패의 5번째다: builder 2 (Round 12 R4) · planner 2 (`/plan-workitem`) · reviewer 1. **중간 보고는 5/5 에서 한 번도 나오지 않았다.**
+- [관측됨] amend-8 은 `reviewer` 를 예산 상향에서 **명시적으로 제외**했다 — 「쓰기 도구가 있으나 산출물이 보고 1건이므로」. 그 근거가 틀렸다. reviewer 의 부담은 산출물 수가 아니라 **회수 문서 수**다: `/validate-plan M<N>` 은 charter·원장·ARCH·DESIGN·M·feature 3·task 5·매니페스트·`source[]` PX grep 을 전부 읽는다(15+ 문서).
+- 원인 분석: amend-8 의 산식 `읽기 기본 8 + 산출물당 3` 은 **읽기를 상수로 본다.** 읽기 범위가 산출물 수와 무관하게 커지는 위임 단위가 존재하고, 감사 계열(`/validate-plan`·`/validate-workitem`)이 전부 그쪽이다.
+- 더 근본적으로, **규칙을 늘릴 때 그 규칙을 수행할 위임 단위의 예산을 보는 단계가 여전히 없다.** Round 11·12 가 `/validate-plan` 축 5 에 검사 ①~⑧ 과 증명 문장 미러와 제3 형식 판정을 얹는 동안 `reviewer` 의 `maxTurns: 12` 는 한 번도 재검토되지 않았다.
+
+### 결정
+1. **D3 의 필드를 7개로 늘린다.** 7번째: **예산 영향** — 「이 변경이 어떤 위임 단위의 작업량을 늘리는가, 그 단위의 `maxTurns`·slice 기준을 함께 보았는가. 늘리지 않으면 `없음` 한 줄.」 **`없음` 을 쓰는 것이 정상이고 대다수다** — 이 필드의 값은 쓰는 사람이 한 번 멈춰 보게 하는 데 있다.
+2. **대상 surface 는 그대로다.** 새 surface 를 추가하지 않는다 — 기존 6 필드를 요구하는 변경과 정확히 같은 집합이다.
+3. **소급 적용하지 않는다.** 기존 ADR 본문의 `## Mutation Contract` 블록을 일괄 개정하지 않는다. 다음 변경이 그 ADR 을 건드릴 때 함께 채운다.
+
+### 근거
+- 이 항목을 즉시 넣지 않고 Round 13 후보로 미뤘던 이유는 「ADR-047 은 하네스의 중심 계약이라 관측 하나로 항목을 늘리지 않는다」였다. 관측이 **5건**이 됐고, 그중 하나는 **이 항목의 부재를 직접 지목하는 경로**로 났다(amend-8 이 reviewer 를 오분류한 것은 예산을 보는 단계가 없어서가 아니라 *분류를 손으로 했기* 때문인데, 7번째 필드가 있었다면 `/validate-plan` 축 5 를 늘리던 변경이 reviewer 의 값을 보게 했다).
+- 필드를 **7개로 늘리는 대가**는 실재한다 — mutation contract 는 enabling 이고, 항목이 늘수록 쓰는 사람이 형식만 채울 유인이 커진다. 그래서 결정 1 이 `없음` 을 1급 값으로 명시한다.
+- 대안 「예산을 별도 체크리스트로 뺀다」는 기각했다: 체크리스트는 ADR 본문 옆에 없으면 안 읽힌다. mutation contract 는 이미 읽히는 자리다.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]) — 자동 차단 없음. 필드 1줄 추가.
+
+### Mutation delta (ADR-047 D3 — 7 필드로 자기 적용)
+- target = `docs/90-decisions/boilerplate/ADR-047-…md` D3 필드 목록.
+- failure = 규칙을 늘리는 변경이 그 규칙을 수행할 위임 단위의 예산을 보지 않아, 그 단위가 산출물 직전에 조용히 죽는다(관측 5건: builder 2 · planner 2 · reviewer 1).
+- predicted = Round 13 이후 위임 단위의 작업량을 늘리는 ADR 이 `예산 영향` 줄에 그 단위 이름과 값을 적는다. 「보고 0건 상한 도달」이 `/stabilize-milestone` 7-T 계수에 0 으로 남는다.
+- preserved = 대상 surface 집합 불변 · 자동 차단 없음 · 기존 6 필드 의미 불변 · 기존 ADR 소급 개정 없음.
+- falsifier = (a) 다음 3라운드에서 `예산 영향` 줄이 **전부 `없음`** 인데 「보고 0건 상한 도달」이 또 나면 이 필드가 형식만 채워지는 것이므로 되돌리고 예산을 skill 쪽 slice 규율로만 다룬다 (b) 필드 추가 뒤 mutation contract 를 아예 생략한 ADR 이 나오면 7 필드가 부담선을 넘은 것이므로 6 으로 되돌린다.
+- rollback = 본 amend superseded → D3 를 6 필드로 복원.
+- **예산 영향 = 없음** — 본 변경은 ADR 작성자(사람·메인 세션)의 작업만 늘리고 위임 단위의 작업량을 바꾸지 않는다.
+
+### 적용 surface
+- docs/90-decisions/boilerplate/_ADR_GUIDE.md — 7 필드 목록 + 「예산 영향」 작성법

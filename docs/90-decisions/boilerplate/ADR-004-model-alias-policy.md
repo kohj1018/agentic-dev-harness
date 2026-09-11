@@ -279,3 +279,43 @@ amend-7 결정 2 는 **「report-only 에이전트의 값은 건드리지 않는
 - .claude/agents/builder.md — 결정 3 (부분 보고 형식만; `maxTurns: 60` 불변)
 - .claude/skills/plan-workitem/SKILL.md — 결정 4 + amend-7 결정 3 의 slice 규율 적용
 - .claude/skills/stabilize-milestone/SKILL.md — 결정 5 (7-T 계수)
+
+## Amendment 9 (2026-09-12) — amend-8 의 falsifier (a)가 당일 발화했다: 지시를 «보고»에서 «산출물 먼저»로 바꾸고 읽기 축을 산식에 넣는다
+
+### 배경
+amend-8 falsifier (a)는 «결정 1~4 뒤에도 쓰기 도구 보유 에이전트가 보고 0건으로 상한에 닿으면 1회라도 채택»이었다. **같은 날 발화했다.**
+
+- [관측됨] `/validate-plan M1` 의 `reviewer` 가 `maxTurns: 12` 상한에서 **보고 0건**으로 멈췄다(29 tool_use / 176.0K 토큰 / 455초). 마지막 출력이 **「리뷰 파일 골격을 지금 쓰겠다(early write per budget discipline)」** — 즉 **early-write 지시를 받았고, 그것을 실행하려다 죽었다.**
+- [관측됨] 회수 dispatch 에 **「이번 턴에 제일 먼저 파일을 써라. 새 파일을 열기 전에 반드시 파일을 한 번 써 둔 상태여야 한다」**를 넣자 **즉시 완주했다** — 12차원 전부 + 신규 4검사, 미검토 0건, P0 0 / seal-blocking P1 2건.
+- [관측됨] 같은 실패의 **5번째**다: builder 2(Round 12 R4) · planner 2(`/plan-workitem`) · reviewer 1. **중간 보고는 5/5 에서 한 번도 나오지 않았다.**
+- [관측됨] amend-8 은 `reviewer` 를 예산 상향에서 **명시적으로 제외**했다 — 「쓰기 도구가 있으나 산출물이 보고 1건이므로」. 그 근거가 틀렸다. reviewer 의 부담은 산출물 수가 아니라 **회수 문서 수**다: `/validate-plan M<N>` 은 charter·원장·ARCH·DESIGN·M·feature 3·task 5·매니페스트·`source[]` PX grep 을 읽는다(15+ 문서).
+
+### 결정
+1. **지시의 형태를 바꾼다 — «멈추기 전에 보고해라» → «산출물을 먼저 만들고 채워 나가라».** 에이전트 본문의 예산 절에 한 줄을 박는다: 「**주 산출물 파일을 골격만으로 먼저 쓴다. 새 입력을 더 열기 전에 그 파일이 디스크에 있어야 한다.** 그 뒤 차원·항목을 진행하며 갱신한다. 못 본 것은 파일 안에 `미검토: <무엇> — <이유>` 로 남긴다.」 **관측 가능한 지시다** — 「지금 몇 턴째인가」와 달리 「그 파일이 있는가」는 에이전트가 볼 수 있다.
+2. **`reviewer` 를 쓰는 쪽으로 옮긴다** (amend-8 결정 1 의 예외 철회). `maxTurns` 12 → **24**.
+3. **산식에 읽기 축을 넣는다** (amend-8 결정 2 대체): `maxTurns = 읽기 예산 + 3 × 산출물 수`, **읽기 예산 = `max(8, 회수 문서 수)`**. 검증: planner(산출물 4 · 문서 8) = 8 + 12 = **20**(amend-8 값과 같다) · reviewer(`/validate-plan M<N>`: 산출물 1 · 문서 15+ · PX grep 훑기) = 21 → 올림 **24** · builder 는 **60 유지**(한 산출물이 코드+테스트+검증 루프라 3턴 환산이 맞지 않는다).
+4. **slice 기준에 읽기 축을 더한다** (amend-7 결정 3 확장): 「산출물 4개 이상이면 쪼갠다」 **또는 「회수 문서 10개 이상이면 축·범위를 나눈다」**. `/validate-plan` 의 기존 «큰 milestone budget 가이드»가 그 형태다.
+
+### 근거
+- **결정 1 이 이번 amendment 의 핵심이고, 나머지는 보조다.** 다섯 번의 실패가 전부 「거의 끝났는데 산출물이 없다」였다. 에이전트는 **언제 멈출지 예측할 수 없지만 일의 순서는 바꿀 수 있다** — 산출물을 먼저 만들면 상한 중단이 «전부 잃음»에서 «부분 산출물 + 회수»로 내려간다. amend-6(턴 수 지시)·amend-7(작업량 지시)·amend-8(부분 보고 형식)은 셋 다 **멈추는 순간에 무엇을 하라**는 지시였고 셋 다 0/5 였다. 결정 1 은 **멈추기 전에 무엇을 먼저 하라**는 지시다.
+- 결정 1 의 근거 관측은 **n=1 의 강한 형태**다(약한 형태 「일찍 써라」는 같은 dispatch 에서 실패했다). 그래서 falsifier 를 좁게 건다.
+- 결정 2·3 의 대가: reviewer 실패 dispatch 의 비용 상한이 2배가 된다. 결정 4 의 slice 규율이 그것을 상쇄한다.
+- 결정 3 의 대안 「읽기 기본을 일괄 16 으로 올린다」는 기각했다 — 읽기가 가벼운 위임 단위까지 값을 올려 실패 비용만 는다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 1·4.
+- 제약(약, [관측됨]): 결정 2·3.
+
+### Mutation delta (ADR-047 D3 — 7 필드)
+- target = `.claude/agents/*.md` 예산 절 · `reviewer.md` frontmatter · `.claude/skills/validate-plan/SKILL.md`·`plan-workitem/SKILL.md` slice 규율.
+- failure = 위임 단위가 산출물을 만들기 **직전에** 상한에 닿아 전부 잃는다(관측 5건: builder 2 · planner 2 · reviewer 1, 중간 보고 0/5).
+- predicted = Round 13 에서 상한 중단이 나도 **주 산출물 파일이 부분 상태로 디스크에 남는다.** `/stabilize-milestone` 7-T 의 `턴 소진 0건 보고` 가 0 이거나, 1 이상이어도 그 dispatch 의 산출물 파일이 존재한다.
+- preserved = report-only 에이전트의 반환 형식 · signal-first cap · `builder` 60 · 자동 차단 없음.
+- falsifier = (a) 결정 1 적용 뒤에도 «상한 중단 + 산출물 파일 0건» 이 1회라도 나면 순서 지시도 듣지 않는 것이므로 **예산·지시를 더 만지지 말고 slice 강제(결정 4)만 남기고 dispatch 를 기계적으로 쪼갠다** (b) 골격만 쓰고 내용을 안 채운 파일이 반복되면(«미검토» 가 절반 초과) 결정 1 이 형식만 만든 것이므로 되돌린다.
+- rollback = 본 amend superseded → amend-8 의 산식·`reviewer` 12 복원, 결정 1 문구 제거.
+- **예산 영향** = 본 변경이 곧 예산 변경이다 — `reviewer` 12 → 24, 산식에 읽기 축 추가, slice 기준에 회수 문서 수 추가. 다른 위임 단위의 작업량은 늘지 않는다(결정 1 은 순서만 바꾼다).
+
+### 적용 surface
+- .claude/agents/reviewer.md — 결정 1·2 (`maxTurns` frontmatter + 예산 절)
+- .claude/agents/builder.md · planner.md · architect.md · designer.md · validator.md · qa.md · researcher.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1 (예산 절 한 줄)
+- .claude/skills/validate-plan/SKILL.md — 결정 4 (회수 문서 10개 이상이면 축을 나눈다)
