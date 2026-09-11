@@ -38,7 +38,7 @@ accepted
 1. Target — bootstrap-stack SKILL(입력 적응형+DEEP+적응형 --migrate+tier) / plan-workitem 신호 tier 라우팅 / stabilize [Stack-drift] / DELEGATION 행 / STRUCTURE Canonical Owner.
 2. Failure mode — 확정 전 추천 자리 부재로 즉흥 선택 + --recommend→문서화 재호출 seam으로 근거 유실 + T2/T3 임계 부재로 ADR-101 staleness(관측됨).
 3. Predicted improvement — 미결정 시 리서치+라운드 근거 선택 + 한 세션 auto-execute로 seam 제거 + tier 구분 + drift 조기 회수.
-4. Preserved invariants — bootstrap-stack disable-model-invocation + stack-guard 텍스트 handoff(ADR-050 D2); §7-1~7-4 컨벤션 단발(라운드 금지, ADR-027#31); ADR-101 draft proposed+미등재 until 저장; DISCOVERY=SSOT(ADR-035); install-ownership 3분할(ADR-040#amend-1/ADR-052); ADR-041 D2 --migrate contract 유지.
+4. Preserved invariants — bootstrap-stack disable-model-invocation + stack-guard 텍스트 handoff(ADR-050 D2); §7-1~7-5 컨벤션 채움의 자리·소유는 ADR-073 D1 — 단 «라운드 아님» 부분은 ADR-060 D9가 supersede해 `user-approval` 소항목은 Decision Brief 왕복이다; ADR-101 draft proposed+미등재 until 저장; DISCOVERY=SSOT(ADR-035); install-ownership 3분할(ADR-040#amend-1/ADR-052); ADR-041 D2 --migrate contract 유지.
 5. Falsifying evaluation — 입력 적응형 라우터가 결정된 사용자를 라운드로 오라우팅 / [Stack-drift]가 사소 dep에 과발동 / brownfield를 T1 신규결정으로 오판 시 신호 재조정.
 6. Rollback path — 본 ADR superseded → 무플래그=BASE 문서화 복원 + ADR-041 D1(--recommend) 복원(ADR-041 status 되돌림) + DEEP 라운드/[Stack-drift]/tier 라우팅 제거.
 
@@ -46,4 +46,4 @@ accepted
 - enabling(약, [관측됨]) — 라운드·drift 감지 모두 opt-in/report-only(하드 게이트 아님). --recommend supersede는 기능 재배치(순손실 없음).
 
 ## 참고
-- ADR-041(--migrate contract D2 유지 · D1 supersede), ADR-053(stakes 게이트 S1 재사용), ADR-040(researcher 위임), ADR-050(메인 세션 라운드·model-invocation 경계), ADR-035(DISCOVERY=SSOT), ADR-027(§7 컨벤션 단발), ADR-006(단순성), ADR-039(migration task), ADR-052(install-ownership).
+- ADR-041(--migrate contract D2 유지 · D1 supersede), ADR-053(stakes 게이트 S1 재사용), ADR-040(researcher 위임), ADR-050(메인 세션 라운드·model-invocation 경계), ADR-035(DISCOVERY=SSOT), ADR-027(§7 컨벤션 단발) (현재 SSOT: ADR-073 D1), ADR-006(단순성), ADR-039(migration task), ADR-052(install-ownership).

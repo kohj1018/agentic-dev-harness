@@ -119,7 +119,7 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 <a id="adr-007-amend-5"></a>
 ## Amendment 5 (2026-07-16) — plan-workitem 입구 계약 `Needs Experience Contract`
 ### 결정
-"자동 차단 X — 권장 텍스트" 원칙의 명시 예외를 1건 추가한다(#amend-3 `Needs Stack Guard` 동형): `/plan-workitem`은 **UI 확정 feature**(ADR-073 D9) 분해 시 승인 프로토타입 참조·`프로토타입 면제:` 기록이 둘 다 없으면 `Needs Experience Contract`로 종료한다(상세: [ADR-072](ADR-072-design-milestone-and-code-prototype.md) D9 — ADR-056 결정 3 승계. 완성 경로는 `/design-milestone M<N>`). UI 의심은 경고만.
+"자동 차단 X — 권장 텍스트" 원칙의 명시 예외를 1건 추가한다(#amend-3 `Needs Stack Guard` 동형): `/plan-workitem`은 **UI 확정 feature**(ADR-073 D9) 분해 시 승인 프로토타입 참조·`프로토타입 면제:` 기록이 둘 다 없으면 `Needs Experience Contract`로 종료한다(상세: [ADR-072](ADR-072-design-milestone-and-code-prototype.md) D9 — ADR-056 결정 3 승계) (현재 SSOT: ADR-072 D9). 완성 경로는 `/design-milestone M<N>`. UI 의심은 경고만.
 ### 근거
 - [관측됨] 스킬 내부 권장 문구는 우회된다 — 입력 계약만이 집행력을 가진다(스펙=오라클 문제의 앞단 잠금).
 ### 강도 (ADR-022)

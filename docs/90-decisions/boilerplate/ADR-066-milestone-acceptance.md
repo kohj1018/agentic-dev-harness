@@ -126,7 +126,7 @@ repair가 결함 하나를 고칠 때 **같은 패턴의 다른 출현을 저장
 - docs/30-workitems/ROADMAP.md                           — D2 계약 변경의 목적지 (`## Backlog`)
 
 ## 참고
-- ADR-054(cross-LLM stabilize 리뷰 — ephemeral 리뷰 파일·4판정·echo-then-rm 원형), ADR-056(경험 계약 — 승인 프로토타입·§3-V), ADR-060 D11(봉인 후 새 결정 등재), ADR-065(AC 검증 modality — `사용자 관측` 발급), ADR-047 D7(commit owner·durable correction history), ADR-039(`Type: bugfix` — 회귀 테스트 규율의 원형).
+- ADR-054(cross-LLM stabilize 리뷰 — ephemeral 리뷰 파일·4판정·echo-then-rm 원형), ADR-056(경험 계약 — 승인 프로토타입·§3-V) (현재 SSOT: ADR-072), ADR-060 D11(봉인 후 새 결정 등재), ADR-065(AC 검증 modality — `사용자 관측` 발급), ADR-047 D7(commit owner·durable correction history), ADR-039(`Type: bugfix` — 회귀 테스트 규율의 원형).
 
 <a id="adr-066-amend-1"></a>
 ## Amendment 1 (2026-08-17) — 재개방 판별 폐지 (마일스톤 층 폐쇄 경계 정합)

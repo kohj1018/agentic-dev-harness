@@ -77,7 +77,7 @@
 /stack-guard
 ```
 
-`/bootstrap-stack`은 결정(미정 시 리서치+라운드) 또는 문서화를 수행하고 필요한 자동화 방향을 정리한다. `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행하면 통합 `validate` 진입점과 verify 스크립트가 생성된다. 프론트엔드 스택이 감지되면 `/bootstrap-design`도 함께 실행해 `docs/20-system/DESIGN.md`를 채운다 ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
+`/bootstrap-stack`은 결정(미정 시 리서치+라운드) 또는 문서화를 수행하고 필요한 자동화 방향을 정리한다. `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행하면 통합 `validate` 진입점과 verify 스크립트가 생성된다. 프론트엔드 스택이 감지되면 `/bootstrap-design`도 함께 실행해 `docs/20-system/DESIGN.md`를 채운다 ([ADR-073](docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md)).
 
 ### 3단계: 분해 → 구현 → 마감
 

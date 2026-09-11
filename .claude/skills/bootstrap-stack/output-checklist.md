@@ -24,4 +24,4 @@
 
 비-UI 프로젝트는 7-4(프론트)·7-5(모바일) 섹션 생략, 모바일 앱은 7-5만 채움, CLI 프로젝트는 7-2 강화 등 스택 정합.
 
-근거: 본 보일러플레이트는 *Living Doc* 패턴 정합 — 운영 기술 사실은 fork 직후 곧장 검증되는 surface로 박힌다. 7-x 자리 배분은 ADR-027, 소항목 authority는 ADR-060 D9, 카탈로그 행의 disposition은 ADR-071 D2가 소유한다.
+근거: 본 보일러플레이트는 *Living Doc* 패턴 정합 — 운영 기술 사실은 fork 직후 곧장 검증되는 surface로 박힌다. 7-x 자리 배분은 ADR-073 D1, 소항목 authority는 ADR-060 D9, 카탈로그 행의 disposition은 ADR-071 D2가 소유한다.

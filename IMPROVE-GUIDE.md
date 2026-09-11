@@ -936,7 +936,7 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
 - docs/00-meta/STRUCTURE.md                           — 산출물·Canonical Owner
 
 ## 참고
-- ADR-027(superseded — 본 ADR이 승계), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
+- ADR-027(superseded — 본 ADR이 승계), ADR-031(직접 지원 범위 — 새 스택 진입 시 D1에 `## 7-N` 자리 신설), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
 ```
 
 ### P4-2. ADR-027 status 변경
@@ -1849,10 +1849,11 @@ feat(skills): rewire plan-workitem, validate-plan, seal, implement, validate, ac
    규모(2026-09-11 실측): ADR-027 46파일/156줄, ADR-056 29파일/83줄, ADR-058#amend-2 16파일/31줄 ≈ 270줄. **가이드에서 가장 큰 미명세 작업이다 — 별도 세션에서 파일 단위로 처리**하고, 파일마다 처리 후 `bash /tmp/check-refs.sh`를 증분 실행한다. 목록 파일에 처리 표시(`[x] <path>`)를 남겨 재개 가능하게 한다.
 2. 각 줄을 ADR-045 D10 5종으로 분류한다.
    - **A 살아있는 규칙 인용**(skill·agent·템플릿·meta 문서·DESIGN.md·다른 ADR의 유효 결정 본문): 부록 A/B 표로 **재지정**. 앵커가 없는 `ADR-027`·`ADR-056` 단독 인용은 문맥의 결정을 찾아 `ADR-073 D<n>`·`ADR-072 D<n>`으로.
-   - **B 낡은 지시**(Mutation Target·Rollback·Surfaces에 죽은 대상): 현재 유효 내용으로 재작성.
+   - **B 낡은 지시**(Mutation Target·Rollback·Surfaces 항목에 죽은 대상 — 파일 경로 형태 포함): 현재 유효 내용으로 **재작성**한다(마커만 붙이면 안 된다 — 실행 대상이 죽은 채로 남는다). Mutation Contract의 `Preserved invariants`도 그 불변식이 이후 결정에 부분 supersede됐으면 현행 상태를 함께 적는다(예: ADR-055의 «§7-x 컨벤션 단발 — 라운드 금지» ↔ ADR-060 D9가 `user-approval` 소항목을 Decision Brief 왕복으로 전환). Surfaces 항목을 승계 문서로 옮기면 그 문서에 역참조 1줄이 필요하다(검사3).
    - **C 배경 서술**: 링크 제거 + 산문.
    - **D supersede 선언·인덱스 행**: 유지 + `(현재 SSOT: ADR-073|072)` 줄 끝 병기.
-   - **E 실행 기록**(`.boilerplate/validation/SIMULATION_RUN.md`, ADR-045 D6 grandfather 예시, 각 ADR `## Amendment` 본문 안 «당시 규칙» 서술): 유지 + 줄 끝 병기. SIMULATION_RUN 상단 시점 주석에 `ADR-027 → ADR-073 / ADR-056 → ADR-072` 추가.
+   - **E 실행 기록**(`.boilerplate/validation/SIMULATION_RUN.md`, 각 ADR `## Amendment` 본문 안 «당시 규칙» 서술, superseded ADR 본문의 타 ADR 인용): 유지 + 줄 끝 병기. SIMULATION_RUN 상단 시점 주석에 `ADR-027 → ADR-073 / ADR-056 → ADR-072` 추가. **문서·절 단위 «대표 마커»로 줄 단위 병기를 대신하지 않는다** — ADR-045 D10이 «병기는 절 단위가 아니라 줄 단위»로 못박았고(`[Ref-dead]`·부록 E 검사4가 줄 단위로 판정), 대표 마커는 검사에서 그대로 미처리로 남는다.
+   - **형식 예시 인용**(ADR-045 D1의 canonical ID 표·`_ADR_GUIDE.md`처럼 «참조는 이렇게 쓴다»를 보이려고 든 ADR 번호): 병기 대신 **살아있는 ADR로 예시를 교체**한다(자기 참조가 가장 안전 — 예 `ADR-045` / `ADR-045#amend-1` / `ADR-045#d3`). 형식 설명 줄에 SSOT 마커를 다는 것은 의미가 없고, 2열 표에 붙이면 열이 깨진다.
    - ADR-027·ADR-056 **자기 본문** 안의 자기 인용은 그대로. **superseding ADR(ADR-073·ADR-072) 본문의 ADR-027·ADR-056 인용은 supersede 선언(D)이라 마커 불요** — 검사에서 그 두 파일은 제외한다.
 3. 재지정 후 확인:
    ```bash
@@ -2148,7 +2149,10 @@ for f in "$ADR_DIR"/ADR-*.md; do
 done | sort -u > /tmp/dead.txt
 if [ "$MODE_DEAD" = filtered ]; then grep -E "$DEAD_FILTER" /tmp/dead.txt > /tmp/dead.f.txt; mv /tmp/dead.f.txt /tmp/dead.txt; fi
 while read -r dead; do
-  grep -rn "${EXC[@]}" "$dead" . | grep -v "(현재 SSOT:" | grep -v "$ADR_DIR/$dead-" | grep -v "$ADR_DIR/README.md" | grep -v "$ADR_DIR/ADR-07[23]-" | grep -v "<!--"
+  # 제외는 «파일 경로» 기준이다 — 경로 필드($1)만 본다. 줄 전체로 걸면 Surfaces·Mutation Target처럼
+  # 죽은 ADR의 *파일 경로를 본문에 인용한* 줄까지 함께 지워져 미처리분이 0으로 보인다.
+  grep -rn "${EXC[@]}" "$dead" . | grep -v "(현재 SSOT:" | grep -v "<!--" \
+    | awk -F: -v d="$dead" -v a="$ADR_DIR" '$1 !~ (a "/" d "-") && $1 !~ (a "/README.md") && $1 !~ (a "/ADR-07[23]-")'
 done < /tmp/dead.txt | tee /tmp/c4.txt; count /tmp/c4.txt
 
 echo "== 5. 로스터 집합 (skills 디렉터리 ↔ STRUCTURE ↔ README 자연어 목록 ↔ wrappers)"

@@ -102,7 +102,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 - actionable verb. 모호어("modern/clean/sleek") 금지.
 - 예: "정보 밀도 우선", "monochrome + 1 accent", "motion은 의미 전달용만".
 - `--fast` 모드에서도 *최소 1줄*은 필수.
-- **voice 기본값 확인 1회 (ADR-056)**: DESIGN.md `## 10`의 기본값(어조·CTA 스타일)을 사용자에게 제시하고 "채택 or 변경"을 확인한다. `--fast`도 이 확인 1회는 수행.
+- **voice 기본값 확인 1회 (ADR-073 D6)**: DESIGN.md `## 10`의 기본값(어조·CTA 스타일)을 사용자에게 제시하고 "채택 or 변경"을 확인한다. `--fast`도 이 확인 1회는 수행.
 - **프로필·공유 모드 결정 (ADR-073 D3, user-choice)**: 표면이 둘 이상(웹+앱 등)이면 `## 0` 매핑표를 채우고 공유 모드(대부분 공통 / 공통+delta / 독립)를 Decision Brief로 확정한다. 단일 표면이면 1행 + 공유 모드 «단일».
 - **폰트 조합 후보 (ADR-073 D4, user-choice)**: 후보 2~3조합을 Decision Brief로 제시하되 **확정은 R6 쇼케이스에서 실제 문장을 본 뒤**로 미룬다(원장 `open` → R6에서 `closed`). 라이선스 확인은 사용자 몫임을 브리프에 적는다.
 
@@ -118,7 +118,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
   - 3번째 안은 *풀리지 않은 명시적 tension이 있을 때만*.
   각 concept 카드에 `task hypothesis | preserved convention | visible signature | failure sign`을 명시하고 `DESIGN_RESEARCH.md ## 시안 옵션`에 기록한다. **signature가 primary task를 더 빨리 이해시키지 못하면 장식 → 제거**(실험에서 rail·route 장식이 coherence를 해침). counter-reference(안티-레퍼런스)는 R0에서 조건부로 확보된 경우에만 공통 회피 대상으로 둔다. 모든 concept은 `## 9` Don'ts를 공통 회피. **익숙한 control/flow(조작 흐름)는 두 안 모두 보존하는 *공통 통제변수*** — 달라야 하는 건 layout hypothesis·visible signature다. 두 concept이 같은 **layout hypothesis·signature**를 공유하면 재생성(control/flow가 같은 건 재생성 사유 아님 — 통제변수). **concept 대표 화면은 실카피 + 대표 실데이터로 채워 렌더한다(빈 화면 금지 — R2-G populated axe가 유효하려면; dogfood 빈-화면 3.70:1 맹점 방지).**
 - concept HTML authoring은 **designer 단발 sub-call**로 위임한다(HTML 전문이 메인 컨텍스트에 쌓이지 않게 — 파일 적재 + 경로 반환).
-- **실카피 렌더 (ADR-056)**: 대표 화면 문구는 charter 페르소나·시나리오 기반 실제 문구(placeholder 금지). §10 확정 전이므로 "방향 선택용 후보 카피"임을 GENERATED 헤더에 1줄 명시.
+- **실카피 렌더 (ADR-073 D6)**: 대표 화면 문구는 charter 페르소나·시나리오 기반 실제 문구(placeholder 금지). §10 확정 전이므로 "방향 선택용 후보 카피"임을 GENERATED 헤더에 1줄 명시.
 - 모든 concept은 charter `## 2.1 페르소나` / `## 3.1 핵심 시나리오` 기반 **동일 대표 화면**(예: 랜딩 hero / 입력 폼 / 카드 리스트)을 렌더해 *직접 비교* 가능하게 한다.
 - 각 파일 상단 GENERATED 헤더 주석 필수:
   ```html
@@ -187,7 +187,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 - `## 1 Overview`에: (a) `DESIGN_RESEARCH.md` 상대경로 링크 + what-to-borrow/avoid 1~2줄, (b) `선택 concept: <X>(+하이브리드 메모)` 한 줄(ADR-058).
 - `## 10 Voice & Writing`을 언어별 블록(ADR-073 D6)으로 확정 저장한다 — 용어 사전 표는 charter 시나리오의 핵심 명사·동사로 초기 채움. `## 11 기준 자료`는 baseline 표를 유지하고 R0에서 새로 참고한 자료가 있으면 행을 더한다(확인일 필수).
 - **포맷 완성도 point-check (ADR-058 Layer C)**: R5 저장 직후 Google 공식 예시 DESIGN.md(`google-labs-code/design.md/examples` — authoritative, 예: `examples/paws-and-paths/DESIGN.md`(실측 확인된 완성 예시: Brand&Style/Colors/Typography/Layout/Elevation/Shapes/Components + 토큰))와 대조해 메인 세션이 *섹션 완성도·빠짐*만 advisory 점검한다(별도 agent 호출 불요 — 예시 fetch + 비교). **미감·값·시각 방향은 참조 금지**(공식 예시가 glassmorphism/보라 그라디언트라 §9 anti-slop 오염 — format fixture로만). (옵션) UI+Node면 `@google/design.md lint`(stack-guard 권장 명령)도 이 시점에 실행 가능.
-- **DESIGN.md 상태 승격 (ADR-073 D9 / ADR-056)**: 본 R5 저장 완료 시 `docs/20-system/DESIGN.md` `## 0. Status`를 `draft` → **`living`**으로 갱신한다(정식·`--fast` 경로 모두 수행 — R6 생략 프로젝트도 승격되도록). 비-UI 삭제 경로는 불변.
+- **DESIGN.md 상태 승격 (ADR-073 D9)**: 본 R5 저장 완료 시 `docs/20-system/DESIGN.md` `## 0. Status`를 `draft` → **`living`**으로 갱신한다(정식·`--fast` 경로 모두 수행 — R6 생략 프로젝트도 승격되도록). 비-UI 삭제 경로는 불변.
 
 ## R6 — 네이티브 테마 쇼케이스 + 검토 루프 + 정리 (ADR-058#amend-4 결정 2)
 

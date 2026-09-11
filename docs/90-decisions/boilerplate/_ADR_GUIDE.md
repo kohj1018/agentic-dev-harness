@@ -49,7 +49,7 @@ ADR 첫 줄 `> scope:` 다음에 선택적 `> area:` 한 줄을 둔다 — 값: 
 - 작성 주체·시점: DELEGATION_STRATEGY의 ADR 작성 트리거 표(ADR-000#amend-2)를 따른다.
 
 ## 참조 표기 (ADR-045#d1·#d2)
-- ADR 간 참조는 정규 ID로: `ADR-027` / `ADR-027#amend-1` / `ADR-027#d5`. **줄번호 참조 금지** — 대신 내용 서술자나 섹션 anchor.
+- ADR 간 참조는 정규 ID로: `ADR-045` / `ADR-045#amend-1` / `ADR-045#d3`(형식 예시). **줄번호 참조 금지** — 대신 내용 서술자나 섹션 anchor.
 - 다른 파일에서 인용되는 amendment 헤딩 위에 stable anchor를 둔다: `<a id="adr-027-amend-1"></a>` (결정은 anchor 없이 `#dK` 토큰).
 - `## Surfaces`에 등록된 파일은 본문에 `ADR-NNN` 역참조를 둔다(양방향 정합 — stabilize preflight가 점검).
 

@@ -114,7 +114,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | 공통 진입 지침 본문 (도구 중립 entry instructions) | `AGENTS.md` |
 | 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` + [ADR-059](../90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md)(Flutter는 직접 지원 — ADR-031#amend-1) |
 | UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT — `/bootstrap-design` R5가 저장하고 R6 피드백도 이 파일을 먼저 고친다). 파생물인 테마 쇼케이스(R6 — 코드, 커밋 대상)와 방향 선택용 `design-concepts/concept-*.html`(R2 — 검토·선택 완료 후 삭제)은 `/bootstrap-design`이 생성한다 — **파생물 직접 편집 금지**(수정은 DESIGN.md → 재생성), concept은 영속 금지 (ADR-005). 화면 경험 계약 = 매니페스트 + 스냅샷 + 브리프(ADR-072) / DESIGN 내용·프로필 계약 = ADR-073. |
-| UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede) (현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
+| UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede) (현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-073](../90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md). |
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
@@ -127,14 +127,14 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Evidence label (`[관측됨]`/`[외부실증]`/`[가설]` + 합성 표기) | [ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md) (정책 SSOT). → ADR-022 `## Surfaces` 참조 (fan-out SSOT). |
 | Cross-LLM plan validation (opt-in peer review) | [ADR-038](../90-decisions/boilerplate/ADR-038-cross-llm-plan-validation.md) (정책 SSOT). → ADR-038 `## Surfaces` 참조 (fan-out SSOT). |
 | Cross-LLM discovery validation (opt-in peer review) | [ADR-044](../90-decisions/boilerplate/ADR-044-cross-llm-discovery-validation.md) (정책 SSOT). → ADR-044 `## Surfaces` 참조 (fan-out SSOT). |
-| DESIGN.md + ARCH 7-1~7-5 cross-surface enforcement | [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md) #amend-1 (정책 SSOT). 적용 파일 전체는 ADR-027 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-027#amend-3 SSOT. |
+| DESIGN.md + ARCH 7-1~7-5 cross-surface enforcement | [ADR-073](../90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) D8 (정책 SSOT). 적용 파일 전체는 ADR-073 `## Surfaces` 참조 (fan-out SSOT — ADR-045#d3). UI 판정 다중신호 절차 = ADR-073 D9 SSOT. |
 | Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). → ADR-039 `## Surfaces` 참조 (fan-out SSOT). |
 | 출력 스타일 (signal-first 대화/반환 계약) | [ADR-046](../90-decisions/boilerplate/ADR-046-signal-first-output.md) (정책 SSOT). → ADR-046 `## Surfaces` 참조 (fan-out SSOT). |
 | Code-as-Agent-Harness 패러다임 + Harness Mutation Contract | [ADR-047](../90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) (정책 SSOT). → ADR-047 `## Surfaces` 참조 (fan-out SSOT). |
 | 메인 세션 오케스트레이션(foreman·fan-out)·wave 제거 | [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) (정책 SSOT). → ADR-051 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack 결정 taxonomy (T1 기초 / T2 마이그레이션 / T3 라이브러리 추가) + 입력 적응형 bootstrap-stack 흐름 | [ADR-055](../90-decisions/boilerplate/ADR-055-input-adaptive-stack-flow.md) (정책 SSOT). → ADR-055 `## Surfaces` 참조 (fan-out SSOT). |
-| 마일스톤 경험 계약 (프로토타입 라운드·입구 계약·스크린샷 게이트·Voice 규칙서) | [ADR-056](../90-decisions/boilerplate/ADR-056-milestone-experience-contract.md) (정책 SSOT). → ADR-056 `## Surfaces` 참조 (fan-out SSOT). |
+| 마일스톤 경험 계약 (design-milestone 라운드·입구 계약·매니페스트+스냅샷 게이트) | [ADR-072](../90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md) (정책 SSOT). → ADR-072 `## Surfaces` 참조 (fan-out SSOT). Voice 규칙서는 [ADR-073](../90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) D6. |
 | 마일스톤 로드맵 SSOT (Done/Now/Next/Later forward 지도 + `## Backlog` 범위 후보) | [ADR-057](../90-decisions/boilerplate/ADR-057-planning-v2-batch-and-seam.md)#amend-1·#amend-4 (정책 SSOT). 파일: `docs/30-workitems/ROADMAP.md`. 구간별 writer: `Done/Now/Next/Later` = plan-milestone 단독 / `## Backlog` = append-only 다중 writer. |
 | 기획 결정 마감 + 마일스톤 봉인 (원장·authority·contract-ready·seal) | [ADR-060](../90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) (정책 SSOT). → ADR-060 `## Surfaces` 참조 (fan-out SSOT). |
 | Arch-iface 위반 등급 분기 (닫힌 사용자 결정·`Don'ts` → P0) + 닫힌 결정 바인딩의 diff-trace 추적 인정 | [ADR-061](../90-decisions/boilerplate/ADR-061-decision-backed-interface-gate.md) (정책 SSOT). → ADR-061 `## Surfaces` 참조 (fan-out SSOT). |

@@ -7,7 +7,7 @@
 UI design gate도 baseline **프로젝트 실행 파일**로 두지 않는다. 검증된 정본은
 `stack-guard`의 JIT asset으로 격리하고, `/stack-guard`가 UI로 판정한 프로젝트에서만
 project-native adapter로 복사·배선한다. 실제 명령·경로·source digest는
-`docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록한다(ADR-058#amend-2).
+`docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록한다(ADR-072 D6 — ADR-058#amend-2 대체).
 
 권장 방식:
 - 프로젝트의 스택이 정해진 뒤

@@ -34,7 +34,7 @@ maxTurns: 16
 
 **조건부 2개 — 부재는 정상이며 아래처럼 처리한다.**
 
-3. `docs/20-system/DESIGN.md` `## 10. Voice & Writing` — **전역 카피 규칙서. 있으면 준수한다**(규칙 자체의 변경은 `/bootstrap-design --update` 소관 — ADR-056). **부재 시**(비-UI 프로젝트는 fork 직후 DESIGN.md 를 삭제한다) 그 사실을 명시하고 아래 카피 규율 3의 일반 규율만 적용한다.
+3. `docs/20-system/DESIGN.md` `## 10. Voice & Writing` — **전역 카피 규칙서. 있으면 준수한다**(규칙 자체의 변경은 `/bootstrap-design --update` 소관 — ADR-073 D6). **부재 시**(비-UI 프로젝트는 fork 직후 DESIGN.md 를 삭제한다) 그 사실을 명시하고 아래 카피 규율 3의 일반 규율만 적용한다.
 4. `docs/30-workitems/features/F-*.md` `## 8-1` 포지셔닝 필드 — 있으면 기존 포지셔닝 기록으로 읽는다. 첫 마케팅 자문이면 없는 것이 정상이다.
 
 ## 카피 규율

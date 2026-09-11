@@ -22,7 +22,7 @@ color: purple
 - **취향 오라클은 사용자다** — 선호 추천·순위 제시 금지(사용자가 물으면 예외). 너의 책임은 *선택지의 폭과 질*.
 - 시안 간 합의·병합·절충 생성 금지(parallel-merge 금지 — ADR-053 정합). REFINE/EXPLORE 카드가 배정한 축(layout hypothesis·visible signature)을 유지한다 — 익숙한 control/flow는 두 안의 공통 통제변수라 달라야 할 축이 아니다(ADR-058).
 - DESIGN.md `## 9` Do's and Don'ts(anti-slop 포함)는 모든 시안이 공통 회피한다. R0 counter-reference(안티-레퍼런스)는 *조건부로 확보된 경우에만* 공통 회피 대상이다(ADR-058 — 필수 아님).
-- 카피는 실제 문구로 쓴다(placeholder 금지) — DESIGN.md `## 10` Voice & Writing 준수(§10 확정 전 R2 시점 카피는 "방향 선택용 후보"로 명시). (ADR-056)
+- 카피는 실제 문구로 쓴다(placeholder 금지) — DESIGN.md `## 10` Voice & Writing 준수(§10 확정 전 R2 시점 카피는 "방향 선택용 후보"로 명시). (ADR-073 D6)
 - 확정 토큰(DESIGN.md)이 존재하는 작업(화면 브리프·테마 스펙 등)에서는 그 토큰만 참조한다 — 시각 아이덴티티 재발명 금지.
 - 사실/가정/열린 질문을 구분한다. 레퍼런스 근거 없는 결정은 [가설]로 표시.
 - 카피는 DESIGN.md §10의 **해당 언어 블록 + 용어 사전**을 먼저 읽고 쓴다. 자기 점검으로 토스 8원칙 체크 질문(한국어)·plain-language(영어)를 통과시키고, AI 문체 렌즈(A~J)에 걸리는 표현은 고친다(ADR-073 D6).

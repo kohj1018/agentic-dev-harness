@@ -19,7 +19,7 @@ accepted
 - [관측됨] `boilerplate/README.md` ADR-038 행 Amendments 컬럼이 첫 개정만 표기돼 본문 `## Amendment 2`와 어긋났다(인용 drift 실재).
 - [관측됨] `STRUCTURE.md` Canonical Owner 표와 `stabilize-milestone/SKILL.md` §1.0 노트가 `validator.md` 줄번호 형태로 참조 — line shift에 취약.
 - [관측됨] `amend` 토큰이 39개 파일 131회, `amend N / amendN / Amendment N` 표기 혼재 → grep 일관 검색 불가.
-- [관측됨] cross-surface 묶음(ADR-027/038)이 ADR 본문 "적용 위치" + Canonical Owner 셀 두 곳에 산문으로 중복 — fan-out 레지스트리 자신이 SSOT를 위반.
+- [관측됨] cross-surface 묶음(ADR-027/038)이 ADR 본문 "적용 위치" + Canonical Owner 셀 두 곳에 산문으로 중복 — fan-out 레지스트리 자신이 SSOT를 위반(현재 SSOT: ADR-073).
 - 본 repo 관측만으로 [관측됨] 충족. 외부 다중 repo 실증은 미인용.
 
 ## 결정
@@ -29,16 +29,16 @@ ADR·하위 단위의 *canonical 참조 ID*는 다음으로 통일한다. 인용
 
 | 대상 | canonical 참조 ID |
 |------|-------------------|
-| ADR | `ADR-027` |
-| 개정 | `ADR-027#amend-1` |
-| ADR 내 결정 | `ADR-027#d5` |
+| ADR | `ADR-045` |
+| 개정 | `ADR-045#amend-1` |
+| ADR 내 결정 | `ADR-045#d3` |
 | 문서 섹션 | `ARCHITECTURE_OVERVIEW.md#arch-7-1` (stable anchor — D9·부록 B) |
 
 - **유일한 hard ban: 줄번호/line 참조**(validator.md 줄번호 참조, WORKFLOW.md §4 줄번호 참조 등) — line shift에 조용히 깨진다. 내용 서술자(예: `validator.md 의 인터페이스 CHECK 규칙(7-x)`)나 섹션 anchor로 대체한다.
 - `ARCH 7-1`, `DESIGN.md ## 9` 같은 **사람이 읽는 shorthand는 허용**한다(현 문서 스타일 존중). 단 그 shorthand가 *그 자리의 주된/유일한 참조*일 때는 canonical 형태를 1회 병기한다 — 예: `ARCH 7-1 (ARCHITECTURE_OVERVIEW.md#arch-7-1)`. 문맥상 보조 언급은 shorthand 단독 허용.
-- amend 인용 토큰은 `ADR-027#amend-1`로 통일한다(본문 헤딩 `## Amendment 1`은 그대로 둔다). `amend 1 / amend1 / amendment-1`을 *인용 식별자*로 쓰지 않는다.
-- navigational markdown 링크(`[ADR-027](...path...)`)는 그대로 쓴다.
-- **`#amend-M`은 클릭 anchor(D2)로 박지만, `#dK`는 *grep 식별 토큰*일 뿐 — 결정마다 `<a id>`를 박지 않는다**(ADR-027만 27개가 되어 과잉). `ADR-027#d21`은 "ADR-027을 열어 결정 21" 의미의 안정 grep 문자열.
+- amend 인용 토큰은 `ADR-045#amend-1`로 통일한다(본문 헤딩 `## Amendment 1`은 그대로 둔다). `amend 1 / amend1 / amendment-1`을 *인용 식별자*로 쓰지 않는다.
+- navigational markdown 링크(`[ADR-045](...path...)`)는 그대로 쓴다.
+- **`#amend-M`은 클릭 anchor(D2)로 박지만, `#dK`는 *grep 식별 토큰*일 뿐 — 결정마다 `<a id>`를 박지 않는다**(결정이 20개를 넘는 ADR이면 anchor가 그 수만큼 늘어 과잉이 된다). `ADR-045#d3`은 "ADR-045를 열어 결정 3" 의미의 안정 grep 문자열.
 
 ### D2. stable anchor
 다른 파일에서 인용되는 **amendment 헤딩** *바로 위 줄*에 명시 anchor를 둔다(한글 자동 anchor의 heading-edit rot 회피). *결정(decision)은 헤딩이 아니라 번호 목록 항목이라 anchor를 박지 않는다 — `#dK`는 grep 토큰일 뿐(D1).*
@@ -73,7 +73,7 @@ anchor id 규칙: `adr-<번호>-amend-<M>`. *외부 인용이 없는* amendment�
 | 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가 | 신규 ADR로 supersede(amend 흡수 금지) |
 | 개정(amend) 4개 이상 누적 | 통합 재발행(supersede)로 클린 ADR 재작성. 구 ADR은 `superseded`로 history 잔존 |
 
-**적용 시점(중요)**: 본 기준은 ADR-045 이후의 *새 변경*에만 적용한다. 이미 amend가 누적된 기존 ADR(예: 개정(amend) 4개 + surface 다수인 ADR-027)은 **grandfather** — 즉시 재발행 의무 없음. 기존 ADR은 `## 현재 유효 결정` + `## Surfaces` 정리만 하고, *다음 변경이 발생할 때* amend 대신 통합 재발행을 우선 검토한다.
+**적용 시점(중요)**: 본 기준은 ADR-045 이후의 *새 변경*에만 적용한다. 이미 amend가 누적된 기존 ADR(예: 개정(amend) 4개 + surface 다수였던 ADR-027 — 실제로 통합 재발행됐다) (현재 SSOT: ADR-073)은 **grandfather** — 즉시 재발행 의무 없음. 기존 ADR은 `## 현재 유효 결정` + `## Surfaces` 정리만 하고, *다음 변경이 발생할 때* amend 대신 통합 재발행을 우선 검토한다.
 
 supersede 절차는 기존 `_ADR_GUIDE.md` "대체 절차"를 그대로 따른다(상태 변경 + 상단 "대체: ADR-NNN" + 신규 ADR이 구 ADR 참조).
 

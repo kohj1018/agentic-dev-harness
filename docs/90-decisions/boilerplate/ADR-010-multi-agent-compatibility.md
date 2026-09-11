@@ -99,11 +99,11 @@ accepted
 
 ### 결정
 
-[ADR-027](ADR-027-interface-decision-allocation.md)로 신설된 `/bootstrap-design`을 *Phase 2 보류 자연어 호출 skill*의 4번째 항목으로 명시한다. 본 ADR #amend-1의 "나머지 3개(discover-product, review-doc, boilerplate-context)" 표기는 *역사적 기록*으로 보존하되, 현재 상태의 정확한 카운트는 **4개**다 (discover-product, review-doc, boilerplate-context, bootstrap-design).
+[ADR-027](ADR-027-interface-decision-allocation.md) (현재 SSOT: ADR-073)로 신설된 `/bootstrap-design`을 *Phase 2 보류 자연어 호출 skill*의 4번째 항목으로 명시한다. 본 ADR #amend-1의 "나머지 3개(discover-product, review-doc, boilerplate-context)" 표기는 *역사적 기록*으로 보존하되, 현재 상태의 정확한 카운트는 **4개**다 (discover-product, review-doc, boilerplate-context, bootstrap-design).
 
 ### 근거
 
-- ADR-027이 `/bootstrap-design` skill을 신설했으나 본 ADR Phase 2 분류에 반영되지 않음 → canonical(ADR-010) vs README(`README.md` / `README_ko.md`는 4개를 정확히 나열) 사이 count drift.
+- ADR-027(현재 SSOT: ADR-073)이 `/bootstrap-design` skill을 신설했으나 본 ADR Phase 2 분류에 반영되지 않음 → canonical(ADR-010) vs README(`README.md` / `README_ko.md`는 4개를 정확히 나열) 사이 count drift.
 - bootstrap-design은 UI 한정 + 호출 빈도 낮음 + 메인 세션이 R0~R4를 직접 운전(discover-product 패턴) — 자연어 호출이 inner-loop wrapper보다 적합. wrapper 승격 보류 유지.
 
 ### 적용 surface

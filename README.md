@@ -78,7 +78,7 @@ Generates: `README.md`, `docs/10-charter/PROJECT_CHARTER.md`, `docs/20-system/AR
 /stack-guard
 ```
 
-`/bootstrap-stack` decides (research + rounds when undecided) or documents stack choices and outlines needed automation. Then run `/stack-guard` after reviewing `STACK_SETUP_PLAN.md` — it generates the unified `validate` entrypoint and verify scripts. If a frontend stack is detected, also run `/bootstrap-design` to populate `docs/20-system/DESIGN.md` ([ADR-027](docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md)).
+`/bootstrap-stack` decides (research + rounds when undecided) or documents stack choices and outlines needed automation. Then run `/stack-guard` after reviewing `STACK_SETUP_PLAN.md` — it generates the unified `validate` entrypoint and verify scripts. If a frontend stack is detected, also run `/bootstrap-design` to populate `docs/20-system/DESIGN.md` ([ADR-073](docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md)).
 
 ### Step 3: Plan → Implement → Ship
 

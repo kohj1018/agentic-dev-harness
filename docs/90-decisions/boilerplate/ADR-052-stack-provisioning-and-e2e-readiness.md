@@ -21,7 +21,7 @@ accepted
 ## 결정
 
 ### D1. stack-guard install provision (정책 반전 — install-by-default + install-ownership boundary)
-stack-guard에 **install provision 단계**를 신설한다 — 스택 확정/재실행 시 stack-guard가 *직접* 패키지 매니저 install(`pnpm install`/`npm install`/`pip install` 등)을 실행해 authored toolchain(format/lint/typecheck/test devDeps)을 provision하고, UI/web 프로젝트(ADR-027#amend-3 신호)면 `npx playwright install`로 e2e 브라우저까지 설치한다. 설치 후 manifest↔lockfile↔설치 모듈 정합을 검증한다. **이는 stack-guard *본문 정책* "기본 설치 안 함"(소유 ADR 없는 skill-body 정책)을 *의도적으로 반전*하고, ADR-025의 "강제 X 권장만"(외부 의존 부트업·CI 파일 한정) stance를 *baseline toolchain install까지 확장*한다 — ADR-025는 toolchain 설치를 소유하지 않으므로 ADR-025에 대해서는 '반전'이 아니라 '확장'이다** — 검증 시 라이브러리/브라우저 미설치로 인한 에러가 반복 관측됐기 때문(사용자 결정).
+stack-guard에 **install provision 단계**를 신설한다 — 스택 확정/재실행 시 stack-guard가 *직접* 패키지 매니저 install(`pnpm install`/`npm install`/`pip install` 등)을 실행해 authored toolchain(format/lint/typecheck/test devDeps)을 provision하고, UI/web 프로젝트(ADR-073 D9 신호)면 `npx playwright install`로 e2e 브라우저까지 설치한다. 설치 후 manifest↔lockfile↔설치 모듈 정합을 검증한다. **이는 stack-guard *본문 정책* "기본 설치 안 함"(소유 ADR 없는 skill-body 정책)을 *의도적으로 반전*하고, ADR-025의 "강제 X 권장만"(외부 의존 부트업·CI 파일 한정) stance를 *baseline toolchain install까지 확장*한다 — ADR-025는 toolchain 설치를 소유하지 않으므로 ADR-025에 대해서는 '반전'이 아니라 '확장'이다** — 검증 시 라이브러리/브라우저 미설치로 인한 에러가 반복 관측됐기 때문(사용자 결정).
 - **Graceful fallback (skip 아님 — blocker)**: 네트워크/사용자 승인/lockfile 충돌/monorepo workspace 라우팅/sandbox 정책으로 설치가 *실제 실패*하면 fabricate·우회하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요`를 출력하고 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다(implement-workitem ADR-040#amend-1 패턴 동형). 즉 조용히 넘어가지 않고 *blocker*로 남긴다.
 - **install-ownership boundary 명문화**: *어떤 패키지를 추가할지 결정(authoring)* = plan-workitem(ADR-040#amend-1), *task 구현 중 그 task가 추가하는 패키지를 설치(per-task 실행)* = implement-workitem/foreman(ADR-040#amend-1), ***스택 baseline toolchain·e2e tooling을 검증 전에 직접 install/provision + 정합 검증*** = stack-guard(본 D1). 셋은 충돌하지 않는다 — authoring / per-task 실행 / 스택 baseline provision의 3분할(ADR-040 패턴 계승, ADR-025 wiring 책임 확장).
 
@@ -30,7 +30,7 @@ stack-guard에 **E2E provision/smoke 단계**를 신설한다 — `validate:e2e`
 
 ### D3. E2E MUST-run hard-block (ADR-014 graduation item 3 amend) (현재 SSOT: ADR-068)
 ADR-014 graduation checklist item 3 `E2E Pass (스택에 정의된 경우)`를 **`E2E Pass (E2E-applicable 스택은 MUST, exit code 0)`**로 강화한다. (현재 SSOT: ADR-068)
-- *E2E-applicable* 판정 (stabilize §1.5·MILESTONE_TEMPLATE item 3 정합): **UI 프로젝트(ADR-027#amend-3 다중신호 판정) ∨ graduation item 6이 e2e를 명시 선언**이면 필요 → MUST-run (applicable 스택의 `validate:e2e`+provision은 stack-guard D1/D2가 선설치) — 미통과 시 graduation pre-check `졸업 가능: NO` **hard-block**(기존 "정의된 경우"의 soft-pass 제거). **단 0-spec 예외**: 미통과가 `No tests found`(0 spec — scaffold 직후 e2e 미작성)이면 real failure 아님 → PASS-with-warning(coverage P1 권장), hard-block 아님(spec 이 실행돼 실패한 경우만 차단 — stabilize §1.5/3-b 정합).
+- *E2E-applicable* 판정 (stabilize §1.5·MILESTONE_TEMPLATE item 3 정합): **UI 프로젝트(ADR-073 D9 다중신호 판정) ∨ graduation item 6이 e2e를 명시 선언**이면 필요 → MUST-run (applicable 스택의 `validate:e2e`+provision은 stack-guard D1/D2가 선설치) — 미통과 시 graduation pre-check `졸업 가능: NO` **hard-block**(기존 "정의된 경우"의 soft-pass 제거). **단 0-spec 예외**: 미통과가 `No tests found`(0 spec — scaffold 직후 e2e 미작성)이면 real failure 아님 → PASS-with-warning(coverage P1 권장), hard-block 아님(spec 이 실행돼 실패한 경우만 차단 — stabilize §1.5/3-b 정합).
 - *E2E-not-applicable*(비-UI ∧ item 6 e2e 미선언 — 예: 순수 라이브러리/CLI 스택): *해당 없음=통과*. 단 stack-guard가 "E2E 미설정 — applicable 스택이면 설정 권장" 1줄 echo.
 - 본 D3은 ADR-014 `## Amendment 2`로 박는다(아래 Surfaces). (현재 SSOT: ADR-068)
 

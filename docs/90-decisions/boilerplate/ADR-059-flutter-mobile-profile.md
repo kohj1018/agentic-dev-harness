@@ -8,7 +8,7 @@ accepted
 
 ## 배경
 - ADR-031은 mobile native(Flutter 포함)를 *기본 자동화 직접 지원 범위 밖*으로 두고 fork override 경로만 제시했다. 그러나 그 override 절차는 **구현 surface가 없다** — `--override` 발화를 처리하는 skill이 없고, ADR-031에는 `## Surfaces` 블록도 없어 참조 정합 검사가 이 결손을 잡지 못한다.
-- [관측됨] 그 사이 도입된 constraint 3종(ADR-052 D3 e2e 졸업 hard-block / ADR-058 D3 design gate fail-closed / ADR-056 결정 3 경험계약 입구 차단)은 ADR-031이 상정하지 않은 것이며, override 지침이 이들을 다루지 않는다.
+- [관측됨] 그 사이 도입된 constraint 3종(ADR-052 D3 e2e 졸업 hard-block / ADR-058 D3 design gate fail-closed / ADR-056 결정 3 경험계약 입구 차단 (현재 SSOT: ADR-072 D9))은 ADR-031이 상정하지 않은 것이며, override 지침이 이들을 다루지 않는다.
 - [관측됨] Flutter 실측(Flutter 3.44.8 / Dart 3.12.2, Windows 11 + macOS)에서 다음이 확인됐다.
   - 색상 하드코딩 grep이 `.dart`를 검사 대상에 포함하지 않아 **위반 3종 전부 침묵**했다(결과는 "위반 없음"으로 보고됨).
   - `flutter test <e2e디렉터리>`에서 그 디렉터리가 **비어 있으면 유닛 테스트 디렉터리가 대신 실행되고 exit 0**이 나온다. **device 연결 여부와 무관하다** — Android 에뮬레이터를 띄운 상태에서도 같았다(`--machine` 스트림의 suite 경로가 `test/widget_test.dart`·`test/golden_test.dart`이고 `done.success=true`). 즉 종료코드도, device 준비 상태도 "e2e가 돌았는가"의 근거가 되지 못한다.
@@ -97,7 +97,7 @@ accepted
 
 ### D8. 프로젝트 유형 판정의 축 분리
 - 기존의 "UI 프로젝트인가" 단일 축을 다음 세 축으로 분리한다. 세 축은 상호배타가 아니며 동시에 참일 수 있다.
-  - **design surface**: 시각 설계 산출물을 갖는 프로젝트인가. **판정 절차는 기존 그대로 ADR-027#amend-3**(DESIGN.md 존재 → status → 추가 신호)이며 본 ADR이 새 판정 규칙을 만들지 않는다. 이 축이 참이면 design gate(정적 HTML 대상) 대상이다.
+  - **design surface**: 시각 설계 산출물을 갖는 프로젝트인가. **판정 절차는 기존 그대로 ADR-073 D9**(DESIGN.md 존재 → status → 추가 신호)이며 본 ADR이 새 판정 규칙을 만들지 않는다. 이 축이 참이면 design gate(정적 HTML 대상) 대상이다.
   - **runtime target**: 앱이 실제로 도는 곳. canonical 값은 `web` / `native/android` / `native/ios` / `desktop` / `none`이며 한 프로젝트가 여러 개를 선언할 수 있다. `native/*`는 값이 아니라 그 둘을 묶는 **클래스 표기**다 — toolchain 분기는 `native/*` 포함 여부로 하되 **e2e 판정과 registry 행은 개별 값 단위**로 낸다(위 플랫폼별 판정이 성립하는 지점). e2e 도구 선택의 근거.
   - **host environment**: 작업 머신(windows / macos). 실행 가능 범위의 근거.
 - design gate(Playwright + axe)는 **정적 HTML만** 대상으로 한다. runtime target이 `native/*`면 앱 e2e를 Playwright에 배선하지 않는다.
@@ -145,7 +145,7 @@ accepted
   9. **Flutter 프로젝트의 task가 npm devDep 추가를 실제로 필요로 하는 사례가 관측됨 → D2의 `## Dependency Tools` 경계 재검토**(scope당 복수 도구 허용 + "도구 → 소유 패키지 집합" 스키마로 전환할지). 그전까지는 표에 `pub` 1행이고, npm devDep이 필요해지면 `Needs Dependency Tool Decision`으로 멈춰 사용자에게 묻는다 — 조용한 오답보다 안전한 실패를 택한다.
 
 ## Mutation Contract (ADR-047 D3)
-1. **Target** — `.claude/skills/stack-guard/SKILL.md`(verify 표·정적분석 표·toolchain·target 분기·boot smoke·registry·출력 계약) / `.claude/skills/stabilize-milestone/SKILL.md`(§3-b·§3-V·§5-2·§5-2b·§5-3·§5-4·dependency hygiene) / `.claude/skills/plan-workitem/SKILL.md`(task 유형 prefilter·컴포넌트 경로·의존성 신호) / `.claude/skills/validate-workitem/SKILL.md`(Arch-iface audit) / `.claude/skills/validate-plan/SKILL.md`(읽기 목록·`[Plan-arch-iface]`) / `.claude/skills/finalize-workitem/SKILL.md`(lockfile whitelist·민감 경로) / `.claude/skills/implement-workitem/SKILL.md`(의존성 도구) / `.claude/skills/bootstrap-stack/SKILL.md`(디렉터리 트리·Dependency Tools·§7-5 채움) / `.claude/skills/bootstrap-design/SKILL.md`(직접 지원 스택 표기) / `.claude/skills/plan-milestone/SKILL.md`(엔지니어링 내부 경계) / `.claude/agents/validator.md`(모바일 인터페이스 CHECK) / `.claude/agents/reviewer.md`(`[Plan-arch-iface]` 열거) / `.claude/agents/builder.md`(인터페이스 SSOT 열거) / `docs/20-system/ARCHITECTURE_OVERVIEW.md`(`## 7-5`) / `docs/30-workitems/_templates/TASK_TEMPLATE.md`(runner 예시·Architecture-Iface 예시) / `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`(Architecture-Iface 예시) / `docs/00-meta/STRUCTURE.md`(산출물 표·Canonical Owner) / `docs/00-meta/PROJECT_START_CHECKLIST.md` / `docs/00-meta/GUARDRAILS_STRATEGY.md`(진입점 단서) / `docs/00-meta/WORKFLOW.md`(7-x 정책 포인터) / `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`(source root·smoke registry·golden 절차) / `AGENTS.md` / `README.md` / `README_ko.md` / `.gitignore` / `.claude/settings.json` / `docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md`(Amendment 8) / `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md`(Amendment 1) / `docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md`(lockfile 목록) / `docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md`(스택별 표) / `docs/90-decisions/boilerplate/README.md`(인덱스)
+1. **Target** — `.claude/skills/stack-guard/SKILL.md`(verify 표·정적분석 표·toolchain·target 분기·boot smoke·registry·출력 계약) / `.claude/skills/stabilize-milestone/SKILL.md`(§3-b·§3-V·§5-2·§5-2b·§5-3·§5-4·dependency hygiene) / `.claude/skills/plan-workitem/SKILL.md`(task 유형 prefilter·컴포넌트 경로·의존성 신호) / `.claude/skills/validate-workitem/SKILL.md`(Arch-iface audit) / `.claude/skills/validate-plan/SKILL.md`(읽기 목록·`[Plan-arch-iface]`) / `.claude/skills/finalize-workitem/SKILL.md`(lockfile whitelist·민감 경로) / `.claude/skills/implement-workitem/SKILL.md`(의존성 도구) / `.claude/skills/bootstrap-stack/SKILL.md`(디렉터리 트리·Dependency Tools·§7-5 채움) / `.claude/skills/bootstrap-design/SKILL.md`(직접 지원 스택 표기) / `.claude/skills/plan-milestone/SKILL.md`(엔지니어링 내부 경계) / `.claude/agents/validator.md`(모바일 인터페이스 CHECK) / `.claude/agents/reviewer.md`(`[Plan-arch-iface]` 열거) / `.claude/agents/builder.md`(인터페이스 SSOT 열거) / `docs/20-system/ARCHITECTURE_OVERVIEW.md`(`## 7-5`) / `docs/30-workitems/_templates/TASK_TEMPLATE.md`(runner 예시·Architecture-Iface 예시) / `docs/30-workitems/_templates/FEATURE_TEMPLATE.md`(Architecture-Iface 예시) / `docs/00-meta/STRUCTURE.md`(산출물 표·Canonical Owner) / `docs/00-meta/PROJECT_START_CHECKLIST.md` / `docs/00-meta/GUARDRAILS_STRATEGY.md`(진입점 단서) / `docs/00-meta/WORKFLOW.md`(7-x 정책 포인터) / `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`(source root·smoke registry·golden 절차) / `AGENTS.md` / `README.md` / `README_ko.md` / `.gitignore` / `.claude/settings.json` / `docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md`(D1 — `## 7-5` 자리) / `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md`(Amendment 1) / `docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md`(lockfile 목록) / `docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md`(스택별 표) / `docs/90-decisions/boilerplate/README.md`(인덱스)
 2. **Failure mode** — Flutter 파일이 검사 대상에서 빠져 위반이 침묵하는데 결과는 "위반 없음"으로 보고됨 / e2e 디렉터리가 비어 있을 때 유닛 테스트가 대신 실행되고 통과 처리됨 / 웹 프로젝트의 동작·검증 시간이 Flutter 지원 추가로 저하됨 (앞 둘은 관측됨).
 3. **Predicted improvement** — Flutter 프로젝트에서 색상 검출 3/3, e2e 상태 오분류 0, 웹 검증 median 변화 없음.
 4. **Preserved invariants** — lifecycle 단계·순서·스킬 목록 불변 / 문서 계층·상태 전이 불변 / 판정 방식(Pass·Needs Fix·졸업 YES/NO) 불변 / 웹 프로젝트의 검증 명령·소요 시간 불변 / **이미 e2e를 갖고 통과하던 프로젝트의 졸업 판정 불변**(ADR-052#amend-1 결정 4) / 비해당 sub-section 통째 삭제 규칙 불변 / design gate의 차단 등급 불변.
@@ -173,7 +173,7 @@ accepted
 - docs/00-meta/PROJECT_START_CHECKLIST.md
 - docs/00-meta/GUARDRAILS_STRATEGY.md
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
-- docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md
+- docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md
 - docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md
 - docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md
 - docs/90-decisions/boilerplate/ADR-021-static-analysis-recommendation.md
@@ -183,10 +183,10 @@ accepted
 - .gitignore
 
 > `.claude/settings.json`도 본 ADR로 변경되지만 JSON이라 역참조 주석을 넣을 수 없어 Surfaces가 아닌 Mutation Contract Target에만 둔다.
-> **`## 7-5` 자리만 추가되는 소비자**(`validate-workitem`·`validate-plan`·`plan-milestone`·`builder.md`·`FEATURE_TEMPLATE.md`·`WORKFLOW.md`·`bootstrap-stack/output-checklist.md`)는 Flutter 고유 내용을 담지 않으므로 **[ADR-027](ADR-027-interface-decision-allocation.md)#amend-8의 surface**다. 본 ADR은 D7에서 그 자리를 쓰기로 결정할 뿐이고, 자리의 소유·fan-out은 ADR-027이 갖는다. 두 목록이 겹치지 않게 여기서는 제외한다(Mutation Contract Target에는 이번 변경이 실제로 손대는 파일이라 포함).
+> **`## 7-5` 자리만 추가되는 소비자**(`validate-workitem`·`validate-plan`·`plan-milestone`·`builder.md`·`FEATURE_TEMPLATE.md`·`WORKFLOW.md`·`bootstrap-stack/output-checklist.md`)는 Flutter 고유 내용을 담지 않으므로 **[ADR-073](ADR-073-interface-and-design-content-v2.md) D1의 surface**다. 본 ADR은 D7에서 그 자리를 쓰기로 결정할 뿐이고, 자리의 소유·fan-out은 ADR-073이 갖는다. 두 목록이 겹치지 않게 여기서는 제외한다(Mutation Contract Target에는 이번 변경이 실제로 손대는 파일이라 포함).
 
 ## 참고
-- ADR-031 (비웹 스택 범위 — 본 ADR이 Flutter에 한해 해제), ADR-027 (인터페이스 결정 할당), ADR-052 (e2e readiness), ADR-058 (design gate), ADR-048 (MCP 등재), ADR-022 (강도), ADR-047 (mutation contract), ADR-006 (단순성).
+- ADR-031 (비웹 스택 범위 — 본 ADR이 Flutter에 한해 해제), ADR-073 (인터페이스 결정 할당), ADR-052 (e2e readiness), ADR-058 (design gate), ADR-048 (MCP 등재), ADR-022 (강도), ADR-047 (mutation contract), ADR-006 (단순성).
 
 <a id="adr-059-amend-1"></a>
 ## Amendment 1 (2026-09-11) — target별 e2e 진입점 + 집계, 승인 스냅샷·design gate Flutter 어댑터, D12 갱신

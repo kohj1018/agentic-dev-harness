@@ -36,7 +36,7 @@ feature
 <!-- FAC-1, FAC-2 ... 시나리오 수준 측정 가능 기준.
      task `## 6 AC`는 FAC를 만족시키는 구현 단위.
      구 `## 8 검증 방법`을 흡수.
-     UI feature는 승인 프로토타입 참조 줄을 둔다(ADR-056 — 화면 단위 파일, 그 feature가 등장하는 화면마다 1줄):
+     UI feature는 승인 프로토타입 참조 줄을 둔다(ADR-072 D9 — 화면 단위 매니페스트 entry, 그 feature가 등장하는 화면마다 1줄):
      `프로토타입: <screen id> (manifest: ../../20-system/prototypes/M<N>/manifest.json, 진입: <story id | flutter entry>)`.
      `승인 스냅샷: <snapshots 경로 목록>`.
      프로토타입이 무의미한 UI feature는 `프로토타입 면제: <사유>` 한 줄로 대체(plan-workitem 입구 계약의 통과 조건 — 둘 다 없으면 Needs Experience Contract).
@@ -77,7 +77,7 @@ feature
      - primary task: 이 feature에서 사용자의 핵심 1행동.
      - empty / loading / error 흐름: 각 상태에서 사용자가 무엇을 보고 어떻게 복구하는가.
      - accessibility: 키보드·스크린리더·대비 등 흐름 레벨 요구.
-     - copy 톤: DESIGN.md §10 Voice & Writing(전역 규칙서 — ADR-056) 참조 + *이 feature 한정 delta만* 기록 (예: "이 화면만 축하 톤 허용"). 전역 규칙 재서술 금지.
+     - copy 톤: DESIGN.md §10 Voice & Writing(전역 규칙서 — ADR-073 D6) 참조 + *이 feature 한정 delta만* 기록 (예: "이 화면만 축하 톤 허용"). 전역 규칙 재서술 금지.
      - success metric (HEART signal 1개): 목표 → 신호 → 지표 (예: Task success → 완료율 → "온보딩 완료 ≥70%"). 실사용 데이터로 측정해 DISCOVERY §14 Evidence Log(quant)로 회수.
      - 계측 (ADR-042#amend-2): 위 지표를 무엇으로 어떻게 측정하나 — `<이벤트명> @ <발생 지점> / 속성: <목록> / 도구: <도구 또는 "미정">`. 예: `onboarding_completed @ 마지막 스텝 성공 시 / 속성: step_count, elapsed_ms, entry_source / 도구: 미정`. **⚠️ 여기 없는 속성은 나중에 소급 수집할 수 없다** — 측정 목표에서 역산해 필요한 속성을 전부 적는다. 도구·속성 설계가 필요하면 `/consult-expert data`. 개인정보 항목이 포함되면 `/consult-expert legal`(처리방침 기재)·`/consult-expert security`(보호 등급) 를 함께 탄다.
      - (옵션, 마케팅·랜딩 화면 한정) 포지셔닝: audience / JTBD / objection / proof / voice / key action을 *이 필드에 매핑*해 랜딩 카피 근거로 둔다(별도 마케팅 SSOT·스킬 설치 없음 — §10 Voice와 자연 연결). 마케팅 스코프 도입이 아니라 카피 근거 기록 수준. -->
@@ -90,7 +90,7 @@ feature
 - Milestone: <!-- 예: [M1-foundation](../milestones/M1-foundation.md) -->
 - Charter: <!-- 예: [PROJECT_CHARTER](../../10-charter/PROJECT_CHARTER.md) -->
 - Architecture: <!-- 예: [ARCHITECTURE_OVERVIEW](../../20-system/ARCHITECTURE_OVERVIEW.md) -->
-- Architecture-Iface: <!-- 해당 스택 한정. 예: [## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1) / [## 7-5 모바일](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-5). 비해당 스택은 줄 삭제. 정책: ADR-027. -->
+- Architecture-Iface: <!-- 해당 스택 한정. 예: [## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1) / [## 7-5 모바일](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-5). 비해당 스택은 줄 삭제. 정책: ADR-073 D1. -->
 - Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components). 비-UI 프로젝트는 줄 삭제 — 이 줄이 UI feature 신호(ADR-073 D9). -->
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 

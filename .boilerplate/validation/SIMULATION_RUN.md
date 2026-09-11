@@ -1,6 +1,6 @@
 # Simulation Run
 
-> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) → [ADR-068](../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md)) (현재 SSOT: ADR-068)
+> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) → [ADR-068](../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md) / `ADR-027` → [ADR-073](../../docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) / `ADR-056` → [ADR-072](../../docs/90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md)) (현재 SSOT: ADR-068, ADR-073, ADR-072)
 
 > dogfood 시뮬레이션 회차별 누적. 회차 헤더 형식: `## Round N (YYYY-MM-DD, scenario)`.
 
@@ -46,7 +46,7 @@
 
 - **discover-product**: `## 12 Assumption Tracker` / `## 13 Opportunity Backlog` 자연스럽게 채워짐 — ADR-035 living doc 실효성 확인.
 - **bootstrap-project**: FEATURE_TEMPLATE 12섹션(User Story / FAC / NFR) 신설로 feature spec이 구체화됨. Round 1 대비 "who·why" 명확.
-- **bootstrap-stack**: ARCHITECTURE 7-1(API envelope/error registry) + 7-3(DB migration/인증/트랜잭션) sub-section이 Express+Postgres 설정 시 실제로 채워져 유용 — ADR-027 검증.
+- **bootstrap-stack**: ARCHITECTURE 7-1(API envelope/error registry) + 7-3(DB migration/인증/트랜잭션) sub-section이 Express+Postgres 설정 시 실제로 채워져 유용 — ADR-027 검증. (현재 SSOT: ADR-073)
 - **stack-guard (ADR-025)**: docker-compose.yml Postgres 부트업 권장 출력 정상 동작. README에 1단락 추가 흐름 자연스러움.
 - **plan-workitem**: FAC↔AC 매핑표 출력(ADR-037) — FAC-4 unmapped 조기 발굴로 T-002 task 추가 필요 확인. 실제 spec gap 검출 효과.
 - **implement-workitem**: 강력 금지 verb 없음, Given-When-Then AC 형식(ADR-026) 정상 적용.
@@ -83,7 +83,7 @@
 
 ---
 
-## Round 3 (2026-05-24, ADR-027#amend-1 cross-surface DESIGN/ARCH enforcement 보강)
+## Round 3 (2026-05-24, ADR-027#amend-1 cross-surface DESIGN/ARCH enforcement 보강) (현재 SSOT: ADR-073)
 
 > 본 라운드는 신규 제품 시뮬레이션이 아닌 **보일러플레이트 자체 개선 적용 기록**이다. Phase 1~8 의 16개 파일 변경이 완료된 직후 정적 회귀 점검 + 시나리오별 동작 예측을 기록한다. fresh fork 실행 실측은 §12-2 Round 4에서 수행.
 
@@ -91,7 +91,7 @@
 
 | Phase | 핵심 변경 파일 | 결과 |
 |-------|-------------|------|
-| Phase 1 — ADR amend | ADR-027, ADR-038, README.md | ADR-027#d16…#d20 SSOT 확립. ADR-038 Plan Quality 8→10 sync. |
+| Phase 1 — ADR amend | ADR-027, ADR-038, README.md | ADR-027#d16…#d20 SSOT 확립. ADR-038 Plan Quality 8→10 sync. (현재 SSOT: ADR-073) |
 | Phase 2 — 템플릿 | TASK_TEMPLATE, FEATURE_TEMPLATE | `Architecture-Iface:` / `Design:` link 자리 신설. |
 | Phase 3 — plan-workitem | `.claude/skills/plan-workitem/SKILL.md` | read-list + task-type prefilter + self-check + 등록 line-item authoring + architect 호출 신호 4→6 |
 | Phase 4 — validate-plan | `.claude/skills/validate-plan/SKILL.md`, `.claude/agents/reviewer.md` | Plan Quality 8→10 차원 (Plan-design + Plan-arch-iface 추가) |
@@ -120,7 +120,7 @@
 2. **ADR-019 minimal/JIT 정합** `[관측됨]`: plan-workitem read-list 추가는 *해당 스택/UI 한정 + sub-section 한정* (7-1/7-2/7-3/7-4 각각 조건부). implement-workitem 추가 step 은 `task-linked 섹션만` 회수. 전체 fork-load 추가 0건. ✓
 3. **ADR-005 SSOT 정합** `[관측됨]`: DESIGN.md (UI 결정 SSOT) + ARCH 7-x (인터페이스 결정 SSOT) 정의 위치 불변. 변경 surface 는 *인용 + 점검 추가* 만, 정의 복제 0건. ✓
 4. **AGENTS.md 100줄 cap** `[관측됨]`: `wc -l AGENTS.md` = 50줄 (hard cap 100 이내). ✓
-5. **broken link 예측** `[가설]`: 추가된 ADR-027 link 는 모두 기존 파일 (`ADR-027-interface-decision-allocation.md`) 참조. 신규 파일 생성 0건이므로 dangling link 예측 0건. 실측은 Round 4에서 `markdown-link-check` 실행.
+5. **broken link 예측** `[가설]`: 추가된 ADR-027 link 는 모두 기존 파일 (`ADR-027-interface-decision-allocation.md`) 참조. 신규 파일 생성 0건이므로 dangling link 예측 0건. 실측은 Round 4에서 `markdown-link-check` 실행. (현재 SSOT: ADR-073)
 
 ### Smoke test 시나리오 예측 (§10-3, 해소안 A — full 호출)
 
@@ -138,21 +138,21 @@
 
 ### 결정에 미친 영향
 
-- ADR-027#d16…#d20 이 현재 `[가설]` 라벨. Round 4 fresh fork 시뮬레이션 1차 통과 후 `[관측됨+외부실증]` 승격 트리거.
+- ADR-027#d16…#d20 이 현재 `[가설]` 라벨. Round 4 fresh fork 시뮬레이션 1차 통과 후 `[관측됨+외부실증]` 승격 트리거. (현재 SSOT: ADR-073)
 - **통과 조건**: Round 4 에서 5종 시나리오 중 2종 이상 실측 통과 시 #d16…#d20 승격 진행.
 - Round 1/2 마찰점 중 *implement think-before-edit 규율 명시 부재 (P2)* 는 Phase 6 의 plan step 추가로 간접 보완됨 (plan 이 step → verify 형식 권장). 완전 해소는 별도 ADR-009 amend 대상.
 
 ---
 
-## Round 4 (2026-07-17, 2026-07 개선 라운드 적용 기록 — ADR-056 경험 계약 + ADR-057 플래닝 v2)
+## Round 4 (2026-07-17, 2026-07 개선 라운드 적용 기록 — ADR-056 경험 계약 + ADR-057 플래닝 v2) (현재 SSOT: ADR-072)
 
-> 본 라운드는 신규 제품 시뮬레이션이 아닌 **보일러플레이트 자체 개선 적용 기록**(Round 3과 동형)이다. 2026-07 개선 라운드(Stage 0A~5, 신규 ADR-056·057 + amend 14건(12개 ADR))의 적용 완료 직후 정적 회귀 점검 + fresh-fork UI 마일스톤 시나리오의 새 lifecycle 관통을 `[가설]`로 기록한다(ADR-017 재실행 트리거 3종 — 새 ADR·lifecycle 변경·skill 큰 변경 — 전부 해당). fresh-fork 실측 및 Codex `$validate-milestone` 자동완성 실측은 IMPROVE-GUIDE item 11의 사용자 후속 항목으로 남는다. **⚠ 본 라운드는 ADR-017 gate 3지표(사용자 개입 ≤1 / placeholder 충원율 ≥80% / graduation pre-check 미통과 ≤2)를 측정하지 않는 *정적 적용 기록*이다 — 별도 fork 실행이 필요한 gate '통과'가 아니라 fresh-fork 실측 '예약'이다(Round 1/2 = 실측치 보유, Round 3·4 = 정적 기록·[가설]).**
+> 본 라운드는 신규 제품 시뮬레이션이 아닌 **보일러플레이트 자체 개선 적용 기록**(Round 3과 동형)이다. 2026-07 개선 라운드(Stage 0A~5, 신규 ADR-056·057 + amend 14건(12개 ADR))의 적용 완료 직후 정적 회귀 점검 + fresh-fork UI 마일스톤 시나리오의 새 lifecycle 관통을 `[가설]`로 기록한다(ADR-017 재실행 트리거 3종 — 새 ADR·lifecycle 변경·skill 큰 변경 — 전부 해당). fresh-fork 실측 및 Codex `$validate-milestone` 자동완성 실측은 IMPROVE-GUIDE item 11의 사용자 후속 항목으로 남는다. **⚠ 본 라운드는 ADR-017 gate 3지표(사용자 개입 ≤1 / placeholder 충원율 ≥80% / graduation pre-check 미통과 ≤2)를 측정하지 않는 *정적 적용 기록*이다 — 별도 fork 실행이 필요한 gate '통과'가 아니라 fresh-fork 실측 '예약'이다(Round 1/2 = 실측치 보유, Round 3·4 = 정적 기록·[가설]).** (현재 SSOT: ADR-072)
 
 ### 적용 범위
 
 | Stage | 핵심 변경 | 결과 |
 |-------|----------|------|
-| 2 — ADR-056 경험 계약 | plan-milestone R5 + plan-workitem 입구 계약/9-1/3-P + stabilize §3-V + DESIGN §10 Voice + builder/reviewer/템플릿 (+ADR-007#5·027#6) | 프로토타입 라운드 + 입구 계약(이중 잠금) + 스크린샷 게이트 + Voice 규칙서 배선 |
+| 2 — ADR-056 경험 계약 | plan-milestone R5 + plan-workitem 입구 계약/9-1/3-P + stabilize §3-V + DESIGN §10 Voice + builder/reviewer/템플릿 (+ADR-007#5·027#6) | 프로토타입 라운드 + 입구 계약(이중 잠금) + 스크린샷 게이트 + Voice 규칙서 배선 (현재 SSOT: ADR-072) |
 | 3 (커밋 1~3) — ADR-057 플래닝 v2 | bootstrap-project M1 seed 제거 / plan-milestone M1 포함 / plan-workitem 배치·refresh·seam self-check / implement Needs Plan Refresh / finalize 체크포인트 / stabilize --feature / FEATURE §7-2·ARCH §4-1 / reviewer·validate-plan 11차원 (+ADR-007 표·026#3·051#3) | 생성 통일 + 배치 2-tier + feature 체크포인트 + seam 계약 |
 | 4 — ADR-000#amend-2 | ADR 작성 트리거 표 + [ADR-candidate] 회수(stabilize→plan R0) + ADR-053#amend-1 | 작성 주체·시점 SSOT + 후보 증발 차단 |
 | 5 — 정합 검증 | grep sweep 기계 불일치 0; 리뷰서 의미 불일치 1건(trigger 표 ↔ plan-milestone) → sync 수정 | cross-surface 정합 확인 |
@@ -164,8 +164,8 @@
 시나리오: UI 웹앱(할 일 관리), M1 = "홈 목록 + 상세" 화면. 실측은 다음 fresh fork에서 수행, 본 라운드는 코드 정적 분석 기반 `[가설]`.
 
 1. **생성 통일** `[가설]`: `/bootstrap-project` → charter/ARCH/ADR-100까지만, **M1/F-001 seed 안 함**(ADR-057 결정 1). 종료 출력이 `/plan-milestone` 안내. `/plan-milestone`이 R0(첫 호출 — carry-over 없음)~R4로 M1 + feature 문서 생성.
-2. **R5 프로토타입 라운드** `[가설]`: UI 확정(ADR-027#amend-3) → R5 발동. R5-1 화면 목록 → R5-2 designer 단발 sub-call 시안 2~3안(레이아웃/위계/인터랙션 축 divergence, DESIGN `:root` 토큰만) → R5-3 사용자 선택 → R5-4 못생긴 상태 5종 + 실카피(§10) + 인터랙션 캡션 → R5-5 승인본 `docs/20-system/prototypes/M1/home.html` **커밋** + feature `## 7`에 `프로토타입:` 참조 줄. DESIGN §10 부재 시 R5-4 전 기본값 신설 + 확인 1회.
-3. **배치 분해 (2-tier)** `[가설]`: `/plan-workitem M1` → **입구 계약 통과**(승인 프로토타입 존재 — ADR-056 결정 3). 안정 tier(전 feature AC·의존성·§7-1 매핑·seam self-check 1회) 완성 + 가이드 tier는 첫 feature만 full `## 3`, 나머지 draft 마커. 3-P가 각 UI task `## 3`에 프로토타입 참조 line item authoring(Lock 2). seam 신호 미발화(단순 CRUD)면 §7-2 "(해당 없음)".
+2. **R5 프로토타입 라운드** `[가설]`: UI 확정(ADR-027#amend-3) → R5 발동. R5-1 화면 목록 → R5-2 designer 단발 sub-call 시안 2~3안(레이아웃/위계/인터랙션 축 divergence, DESIGN `:root` 토큰만) → R5-3 사용자 선택 → R5-4 못생긴 상태 5종 + 실카피(§10) + 인터랙션 캡션 → R5-5 승인본 `docs/20-system/prototypes/M1/home.html` **커밋** + feature `## 7`에 `프로토타입:` 참조 줄. DESIGN §10 부재 시 R5-4 전 기본값 신설 + 확인 1회. (현재 SSOT: ADR-073)
+3. **배치 분해 (2-tier)** `[가설]`: `/plan-workitem M1` → **입구 계약 통과**(승인 프로토타입 존재 — ADR-056 결정 3). 안정 tier(전 feature AC·의존성·§7-1 매핑·seam self-check 1회) 완성 + 가이드 tier는 첫 feature만 full `## 3`, 나머지 draft 마커. 3-P가 각 UI task `## 3`에 프로토타입 참조 line item authoring(Lock 2). seam 신호 미발화(단순 CRUD)면 §7-2 "(해당 없음)". (현재 SSOT: ADR-072)
 4. **draft 하드스탑** `[가설]`: 둘째 feature 구현 진입 시 `/implement-workitem`이 `## 3 상태: draft` 감지 → **`Needs Plan Refresh` 하드스탑**(ADR-057 결정 4) → `/plan-workitem F-002 --refresh`로 그 시점 코드 기준 재접지 + 마커 제거.
 5. **feature 체크포인트** `[가설]`: feature 전 task done 시 `/finalize-workitem`이 FAC closure 요약 + 다음 단계 제안(ADR-057 결정 5).
 6. **§3-V 경험 게이트** `[가설]`: `/stabilize-milestone M1` → 앱 기동 → 핵심 화면 Playwright 스크린샷 → `docs/40-validation/visual/M-1/` 갤러리 → Read 멀티모달로 **승인 프로토타입 `home.html` vs 실제 렌더 대조**. 불일치 시 `P1 [Experience-drift]` report-only + 갤러리 경로 출력(사용자 육안 확인). 환경 실패 시 blocked-on-env echo(silent skip 금지).
@@ -174,12 +174,12 @@
 ### 회귀 점검 (Stage 5 정적 sweep 재현)
 
 1. **로스터 정합** `[관측됨]`: `.claude/skills` 21 / `.claude/agents` 8(designer 포함) / `.agents/skills` 16 ↔ STRUCTURE·README·DELEGATION 일치. 21−16=5 자연어 정합. ✓
-2. **Plan Quality 11 카운트** `[관측됨]`: reviewer.md·validate-plan·DELEGATION 3곳 일치, 잔여 "10" 7건 전부 amend-1 이력/전이 서술(ADR-027:98·114·ADR-038:52·100·README:34·ADR-057:12·32). ✓
+2. **Plan Quality 11 카운트** `[관측됨]`: reviewer.md·validate-plan·DELEGATION 3곳 일치, 잔여 "10" 7건 전부 amend-1 이력/전이 서술(ADR-027:98·114·ADR-038:52·100·README:34·ADR-057:12·32). ✓ (현재 SSOT: ADR-073)
 3. **anchor 14종** `[관측됨]`: 신규 인용 amend anchor 14개 전부 정확히 1건 실재. ✓
 4. **금지 참조·구체제 잔존 0** `[관측됨]`: ADR-058~061=0, `initial/초기 workitem·milestone·seed된 첫 feature`=0, M2+·`plan-workitem F-001` hit 전부 whitelist(제거-서술 ADR + CHECKLIST 단일예시). ✓
 5. **0C sweep 완결** `[관측됨]`: `^context-pack:`=0(0C-8), `병렬 미지원/파리티`=0(0C-10), `Bash 없음 — e2e 충돌`=0(0C-9). ✓
 6. **gitignore 정합** `[관측됨]`: `prototypes/*/_drafts/`·`visual/` ignore / `prototypes/M1/home.html` tracked(승인본 영속). ✓
-7. **비의도 자동 차단 신규 0건** `[관측됨]`: **의도된 신규 hard-stop 2건은 설계** — 입구 계약 `Needs Experience Contract`(ADR-056 결정3) + draft `Needs Plan Refresh`(ADR-057 결정4)만 constraint(강). 그 외 seam/experience-drift/voice는 전부 report-only 또는 IMPROVEMENT_GUIDE 기록 — 비의도 차단 0. ✓
+7. **비의도 자동 차단 신규 0건** `[관측됨]`: **의도된 신규 hard-stop 2건은 설계** — 입구 계약 `Needs Experience Contract`(ADR-056 결정3) + draft `Needs Plan Refresh`(ADR-057 결정4)만 constraint(강). 그 외 seam/experience-drift/voice는 전부 report-only 또는 IMPROVEMENT_GUIDE 기록 — 비의도 차단 0. ✓ (현재 SSOT: ADR-072)
 8. **git diff --check + Stage 5 sync** `[관측됨]`: 기계 grep 불일치 0. 단 *의미 수준* 불일치 1건(ADR-000#amend-2 트리거 표가 plan-milestone에 부여한 high-stakes ADR authoring 경로가 skill에 부재)은 정적 sweep이 못 잡아 리뷰서 발견 → plan-milestone R2 + ADR-000 Target sync 커밋 1건. **그 sync 커밋 + 본 dogfood 커밋 후 working tree clean.** ✓
 
 ### 성공 기준
@@ -191,9 +191,9 @@
 
 ### 결정에 미친 영향
 
-- ADR-056·057 Predicted improvement 항목은 현재 `[가설]` — fresh-fork 5종 중 UI 2종+ 실측 통과 시 `[관측됨]` 승격.
+- ADR-056·057 Predicted improvement 항목은 현재 `[가설]` — fresh-fork 5종 중 UI 2종+ 실측 통과 시 `[관측됨]` 승격. (현재 SSOT: ADR-072)
 - **Falsifying evaluation 입력 수집 예정**(item 11 (b)): R5 프로토타입 라운드가 마일스톤당 계획 시간을 과도하게 늘리는지 / 배치 세션 컨텍스트 소진으로 부분 완료가 나는지 / seam 신호 소형 feature 과발동 / [Experience-drift] 재실행 불일치율.
-- **미수행으로 남는 실측**(정적 기록이 대체 못 함): (a) 이 라운드 fresh-fork 관통 실측, (b) Round 3이 예고한 ADR-027#amend-1 #d16…#d20 fresh-fork 실측(여전히 미수행), (c) Codex 자동 팬아웃 여부 실측(→ Codex-parity 재프레이밍 별도 라운드).
+- **미수행으로 남는 실측**(정적 기록이 대체 못 함): (a) 이 라운드 fresh-fork 관통 실측, (b) Round 3이 예고한 ADR-027#amend-1 #d16…#d20 fresh-fork 실측(여전히 미수행), (c) Codex 자동 팬아웃 여부 실측(→ Codex-parity 재프레이밍 별도 라운드). (현재 SSOT: ADR-073)
 
 ---
 
@@ -216,7 +216,7 @@
 3. **배치 분해 2-tier** `[관측됨]` — plan-workitem M1 입구 계약 통과(프로토타입 존재), architect sub-call 분해, full 3-G={T-001 storage seam, T-002 capture}, intent-draft+마커={T-003, T-004}. FAC↔AC 100% 매핑, **seam 신호 발화**(todos store 2-writer: add+toggle) → INV-1/2/3 §7-2 canonical. 3-P 프로토타입 참조 line item. ✓
 4. **draft 하드스탑 / --refresh** `[관측됨, 변형]` — T-003/T-004는 구현 진입 *전에* `/plan-workitem F-002 --refresh`로 draft 마커를 선제 제거(실 코드 기준 3-G 재작성) → **하드스탑 자체는 미발동(정상 흐름), --refresh 경로는 실측**. seam 재점검 무효화 0. ✓
 5. **feature 체크포인트** `[관측됨]` — finalize T-002 → F-001 완료, finalize T-004 → F-002+M1 전 task done. ✓
-6. **§3-V 경험 게이트** `[관측됨 — 핵심 수확]` — 앱 기동 + Playwright 6-상태 스크린샷(`visual/M1/`) + 멀티모달 대조 → **P1 [Experience-drift] 실제 검출**: 프로토타입 §2-e의 입력 sticky-pin 구성결정이 구현에 없음(`.stage padding:28vh` 고정, sticky 부재). per-task validate·unit·e2e 전부 green이었으나 경험 계약 drift는 §3-V만 잡음. **게이트가 plan→implement 갭을 설계대로 catch — ADR-056 가치 실증.** ✓✓
+6. **§3-V 경험 게이트** `[관측됨 — 핵심 수확]` — 앱 기동 + Playwright 6-상태 스크린샷(`visual/M1/`) + 멀티모달 대조 → **P1 [Experience-drift] 실제 검출**: 프로토타입 §2-e의 입력 sticky-pin 구성결정이 구현에 없음(`.stage padding:28vh` 고정, sticky 부재). per-task validate·unit·e2e 전부 green이었으나 경험 계약 drift는 §3-V만 잡음. **게이트가 plan→implement 갭을 설계대로 catch — ADR-056 가치 실증.** ✓✓ (현재 SSOT: ADR-072)
 7. **Codex 관통** `[미실측]` — 구조적 한계.
 
 #### ADR-017 gate 3지표 실측
@@ -244,7 +244,7 @@
 
 #### 승격 판정
 
-- **ADR-056 §3-V 경험 게이트** → `[관측됨]` 승격: 실 drift(sticky-pin) 검출로 가치 실증(정적 [가설]에서 승격). 다관점 fan-out(qa가 broken 커밋·design reviewer가 sticky-pin/대비 독립 검출)도 실효 확인.
+- **ADR-056 §3-V 경험 게이트** → `[관측됨]` 승격: 실 drift(sticky-pin) 검출로 가치 실증(정적 [가설]에서 승격). 다관점 fan-out(qa가 broken 커밋·design reviewer가 sticky-pin/대비 독립 검출)도 실효 확인. (현재 SSOT: ADR-072)
 - **ADR-057 배치 2-tier·seam self-check·--refresh·feature 체크포인트** → `[관측됨]` 승격(관통 실행 완료, seam 신호 실발화).
 - **지표 1·2·3 전부 통과** (ADR-017 gate 3/3). M1 graduation NO는 gate와 별개(경험 게이트가 실 drift catch — 정상).
 - **여전히 미실측**(repair 후속 전 기준): Codex 관통, bootstrap-design researcher/reviewer sub-call, **validate-workitem large-diff validator fan-out**(전 task inline), 위 (b)(c). 순수 fresh-session 실측은 별도 세션 필요(구조적 한계).

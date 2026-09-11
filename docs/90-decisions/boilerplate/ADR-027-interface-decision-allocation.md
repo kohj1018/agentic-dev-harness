@@ -11,7 +11,7 @@ superseded
 - 시각 결정은 `DESIGN.md`(UI 한정, Stitch 8섹션 + Motion 확장 + Voice & Writing 확장(§10 — ADR-056) + **내용 계약 확장(§1 긍정적 정체성 · §3 tabular · §4 responsive invariant · §7 category state · §8 semantic motion · §9 WCAG 2.2 a11y — #amend-7)**), 인터페이스 결정은 ARCHITECTURE `## 7-1`(API)/`## 7-2`(CLI)/`## 7-3`(백엔드)/`## 7-4`(프론트)/`## 7-5`(모바일 — #amend-8)에 둔다. **디자인 워크플로우 라운드 구조·R0 리서치·수용 게이트·시안 카드 SSOT는 [ADR-058](ADR-058-design-workflow.md)**(ADR-049 supersede) (현재 SSOT: ADR-058).
 - **`/bootstrap-design`의 *워크플로우 라운드 구조*(레퍼런스→원칙→시안→토큰→DESIGN.md→preview 순서·시점)는 ADR-058이 supersede(R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안 — ADR-049를 거쳐 ADR-058로 이관). 본 ADR은 *DESIGN.md 내용*(아래 #5 Stitch 8섹션+Motion / #6 3-tier 토큰 / #7·#23 Don'ts)과 *ARCH 7-x 인터페이스 할당* SSOT만 유지.** 본 ADR #3/#13/#21/#d22/#d26/#27의 라운드 구조·시안 시점·preview lifecycle(삭제 시점·gitignore 정책) 기술은 historical(net 규칙은 ADR-058). design-preview.html *산출물*은 ADR-058 R6이 계속 사용. (현재 SSOT: ADR-058)
 - `/bootstrap-stack`이 7-1~7-5를 채운다(모바일 앱은 7-5, 웹 프론트는 7-4 — #amend-8).
-- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3 + 신호 정정 #amend-8 결정 4. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056). #amend-6(design reviewer 렌더 증거 주입). #amend-7(DESIGN 내용 계약 확장 — §1 정체성·§9 a11y·§8 semantic motion·§7 category state·§4 responsive invariant·§3 tabular; reviewer a11y 차원·category state 미러).
+- cross-surface enforcement(plan/validate-plan/stabilize/templates/reviewer)는 #amend-1이 SSOT. anti-slop·lint·Motion 정정은 #amend-2. UI 판정 다중신호 절차는 #amend-3 + 신호 정정 #amend-8 결정 4. `--update`는 #amend-4(라운드 구조는 ADR-058). #amend-5(§10 Voice 규칙서 — ADR-056) (현재 SSOT: ADR-073 D6). #amend-6(design reviewer 렌더 증거 주입). #amend-7(DESIGN 내용 계약 확장 — §1 정체성·§9 a11y·§8 semantic motion·§7 category state·§4 responsive invariant·§3 tabular; reviewer a11y 차원·category state 미러).
 - 적용 파일 전체는 아래 `## Surfaces` 참조.
 
 > **부분 supersede (2026-07-29)**: 본 ADR이 정한 "`## 7-1`~`## 7-5` 인터페이스 컨벤션 채움 = architect 단발 sub-call(라운드 아님)" 규정은 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D9가 부분 supersede한다 — 되돌리기 비싼 소항목은 사용자 확정 라운드로 승격한다. 본 ADR의 나머지 결정은 유효하며, 본 표기는 개정(amend)이 아니라 참조 갱신이므로 통합 재발행 서약은 그대로 유효하다.
@@ -211,14 +211,14 @@ superseded
 <a id="adr-027-amend-5"></a>
 ## Amendment 5 (2026-07-16) — DESIGN.md 섹션 목록에 §10 Voice & Writing 확장
 ### 결정
-결정 #5의 섹션 구성을 *"Stitch canonical 8섹션 + Motion 확장 + Voice & Writing 확장(§10)"*으로 정정한다(내용 SSOT는 [ADR-056](ADR-056-milestone-experience-contract.md) 결정 8~11). §10은 canonical 마지막 섹션(Do's and Don'ts) *뒤* 추가라 lint section-ordering 비위반 — #amend-2 결정 24(Motion 확장)와 동일 논리, 재번호 없음.
+결정 #5의 섹션 구성을 *"Stitch canonical 8섹션 + Motion 확장 + Voice & Writing 확장(§10)"*으로 정정한다(내용 SSOT는 [ADR-056](ADR-056-milestone-experience-contract.md) 결정 8~11) (현재 SSOT: ADR-073 D6). §10은 canonical 마지막 섹션(Do's and Don'ts) *뒤* 추가라 lint section-ordering 비위반 — #amend-2 결정 24(Motion 확장)와 동일 논리, 재번호 없음.
 ### 적용 surface
 - docs/20-system/DESIGN.md (§10)
 
 <a id="adr-027-amend-6"></a>
 ## Amendment 6 (2026-07-16) — design-surface reviewer 렌더 증거 주입
 ### 결정
-stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **렌더 증거**(§3-V 스크린샷 갤러리 경로 + visual-qa.spec 최근 결과 — 존재 시)를 주입한다([ADR-056](ADR-056-milestone-experience-contract.md) 결정 6). reviewer는 Read 도구로 이미지를 열람해 판단에 사용한다(도구 변경 없음 — Read는 이미지 지원). "스크린샷 vision hot-loop 제외"(ADR-058)는 유지 — stabilize는 마일스톤 1회라 hot-loop가 아니다. Codex: sub-agent 이미지 열람 parity 미확인 — 경로 echo + 텍스트 결과만으로 degrade 명시.
+stabilize-milestone이 design-surface reviewer를 팬아웃할 때 입력에 **렌더 증거**(§3-V 스크린샷 갤러리 경로 + visual-qa.spec 최근 결과 — 존재 시)를 주입한다([ADR-056](ADR-056-milestone-experience-contract.md) 결정 6) (현재 SSOT: ADR-073 D8). reviewer는 Read 도구로 이미지를 열람해 판단에 사용한다(도구 변경 없음 — Read는 이미지 지원). "스크린샷 vision hot-loop 제외"(ADR-058)는 유지 — stabilize는 마일스톤 1회라 hot-loop가 아니다. Codex: sub-agent 이미지 열람 parity 미확인 — 경로 echo + 텍스트 결과만으로 degrade 명시.
 ### 적용 surface
 - .claude/skills/stabilize-milestone/SKILL.md
 - .claude/agents/reviewer.md

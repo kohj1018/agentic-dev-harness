@@ -47,7 +47,7 @@ fork 사용자가 기본 자동화 범위 밖 스택으로 진행하려면:
 - .claude/skills/bootstrap-stack/SKILL.md          — 스택 조합 평가 시 직접지원 유형 정합 확인
 - .claude/skills/bootstrap-design/SKILL.md         — 컴포넌트 시작점 표의 override 표기
 - .claude/skills/stack-guard/SKILL.md              — 비-Node/범위밖-스택 adapter 경로
-- docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md
+- docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md   — 새 스택이 직접 지원으로 들어오면 D1에 `## 7-N` 자리 신설(ADR-031#amend-1의 `## 7-5` 선례)
 - docs/90-decisions/boilerplate/ADR-053-high-stakes-design-panel.md
 - AGENTS.md
 - README.md

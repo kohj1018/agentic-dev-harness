@@ -37,7 +37,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - 그 slice 의 `## 3` step 들 (전문 아님, 해당 step 만)
    - 그 slice 가 책임지는 AC subset (예: builder-A → AC-1·AC-2, builder-B → AC-3)
    - **task `## 7. 관련 문서` 의 `Design:` / `Architecture-Iface:` link 가 있고 그 slice 와 관련되면** 그 sub-section (예: `DESIGN.md ## 7 Components`, `ARCH ## 7-1`) 경로만 — *plan 이 박은 결정을 충실히 실행하기 위함* (builder 의 독립 디자인 판단 X — EXECUTE 전용). 전체 fork-load 금지. 관련 link 없으면 생략.
-   - 그 slice 의 step 에 *등록 line item* (예: `+ DESIGN.md ## 7 등록`, `+ ARCH ## 7-1 error 레지스트리 등록`) 이 있으면 함께 전달 — builder 가 구현과 *동일 commit* 에 기계적으로 수행한다 (builder 가 등록 여부를 *독립 판단하지 않는다*). (ADR-027)
+   - 그 slice 의 step 에 *등록 line item* (예: `+ DESIGN.md ## 7 등록`, `+ ARCH ## 7-1 error 레지스트리 등록`) 이 있으면 함께 전달 — builder 가 구현과 *동일 commit* 에 기계적으로 수행한다 (builder 가 등록 여부를 *독립 판단하지 않는다*). (ADR-073 D8)
    - **이 slice의 의존성 도구**(3-DT에서 scope별 회수 — 예: `apps/web`→npm, `apps/api`→uv). builder는 지정된 scope의 그 도구만 쓴다 — 새 도구 도입·전환·다른 scope 도구 실행 금지(stray lock·오도구 방지 — ADR-051#amend-4).
    - 병렬 builder 는 *file-disjoint* slice 에만 띄운다. 같은 파일에 실제 write-conflict 가능성이 있으면 *그 slice 들은 순차로* 돌린다(또는 사용자가 별도 worktree 로 격리) — disjoint 인 일반 경우엔 불필요.
    - **same-checkout 제약(WORKFLOW.md 정합)**: worktree 를 쓴 builder 의 변경은 *최종 minimal validate 전에 메인 checkout 으로 병합*한다. validate/finalize 는 같은 checkout 에서 실행해야 하고, validation report(`docs/40-validation/reports/<task-id>.md`)는 gitignored·checkout-local 이라 worktree 에 흩어지면 후속 finalize 가 `Needs Validation` 으로 못 찾는다. 일반 disjoint 병렬(worktree 미사용)은 본 제약과 무관.

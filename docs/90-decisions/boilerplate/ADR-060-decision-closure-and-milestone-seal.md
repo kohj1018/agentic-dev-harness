@@ -15,7 +15,7 @@ accepted
 - 봉인 후 새로 드러난 결정은 원장에 기록하되 **착수를 막지 않고** 기존 finding 라우팅(repair / 사용자 보고 / 다음 M)을 탄다.
 
 ## 배경
-- [관측됨] `DISCOVERY ## 11` / `PROJECT_CHARTER ## 10` / `ARCHITECTURE_OVERVIEW ## 10`의 "열린 질문" 섹션을 읽는 skill이 0곳이다. 기록은 되지만 아무도 회수하지 않는 dead governance field이며, ADR-056#amend-3이 FEATURE `## 8-1`에 대해 진단한 것과 동형이다.
+- [관측됨] `DISCOVERY ## 11` / `PROJECT_CHARTER ## 10` / `ARCHITECTURE_OVERVIEW ## 10`의 "열린 질문" 섹션을 읽는 skill이 0곳이다. 기록은 되지만 아무도 회수하지 않는 dead governance field이며, ADR-056#amend-3(현재 SSOT: ADR-072 D1)이 FEATURE `## 8-1`에 대해 진단한 것과 동형이다.
 - [관측됨] `WORKFLOW.md` 기본 원칙이 "애매한 사항은 문서에 가정과 열린 질문으로 남긴다"로, 상위 정책이 *보존*을 기본값으로 둔다. 개발 전 폐쇄를 요구하는 문장이 저장소 어디에도 없다.
 - [관측됨] 게이트 분포가 되돌리기 비용과 반대다. task/AC 층에는 3중 차단이 있고, 상류(제품 범위·스택·§7-x 인터페이스·시각 방향)에는 결정 폐쇄 게이트가 없다.
 - [관측됨] `bootstrap-stack`이 `ARCH ## 7-1`~`## 7-5` 채움을 "architect 단발 sub-call(라운드 아님)"으로 규정한다. `## 7-3`(DB migration·인증·API versioning)과 `## 7-5`(대상 플랫폼·권한 흐름·서명)는 ADR-053 S1/S4에 정면 해당하는 되돌리기 비싼 결정인데 사용자 확정 없이 자동 확정된다.
@@ -43,7 +43,7 @@ accepted
 
 **`authority`는 결정 결과에서 파생하지 않는다** — 결정이 열릴 때 확정하는 *입력 제약*이다. 파생시키면 에이전트가 핵심 결정을 먼저 `agent-delegated`로 분류한 뒤 스스로 닫을 수 있다. `user-*` → `agent-delegated` 하향은 사용자 명시 승인 없이 불가하며, 변경 시 항목에 이력 줄을 남긴다.
 
-본 축은 ADR-056 결정 4의 비대칭("내부 엔지니어링 선택은 자율, 사용자가 보고 느낄 것을 좁히면 무조건 질문")을 상류로 **일반화**한 것이다. 새 taxonomy 발명이 아니다.
+본 축은 ADR-056 결정 4(현재 SSOT: ADR-072 D5)의 비대칭("내부 엔지니어링 선택은 자율, 사용자가 보고 느낄 것을 좁히면 무조건 질문")을 상류로 **일반화**한 것이다. 새 taxonomy 발명이 아니다.
 
 **ADR-053 S1~S4는 결정권 축이 아니다** — *분석 깊이*(리서치·다각도·적대 검토 발동 여부) 판정에만 쓴다. S2("합리적 대안 2개 이상")는 가역적 내부 선택에도 성립하므로 결정권 트리거로 쓰면 과발동한다.
 
@@ -174,7 +174,7 @@ ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용�
 **근거**: 모든 결정을 미리 알아내는 건 불가능하다. 봉인의 목적은 *최대한 닫는 것*이지 사후 발견을 차단하는 게 아니다. 사후 발견을 차단하면 **정직한 등재가 마일스톤 전체를 멈추는 데드락**이 된다.
 
 ### D12. 다운스트림 마이그레이션 (기존 fork)
-본 개선 이전에 만들어진 프로젝트는 M/F가 이미 `ready`이고 마일스톤 문서에 `## 10`이 없다. 새 착수 게이트(`- 봉인일:` 채움 요구)를 그대로 적용하면 진행 중 프로젝트가 전부 막힌다. **구현 시작 여부로 두 갈래로 흡수한다**(ADR-056 결정 8 다운스트림 마이그레이션 관례와 동형):
+본 개선 이전에 만들어진 프로젝트는 M/F가 이미 `ready`이고 마일스톤 문서에 `## 10`이 없다. 새 착수 게이트(`- 봉인일:` 채움 요구)를 그대로 적용하면 진행 중 프로젝트가 전부 막힌다. **구현 시작 여부로 두 갈래로 흡수한다**(ADR-056 결정 8(현재 SSOT: ADR-073 D6) 다운스트림 마이그레이션 관례와 동형):
 
 **(가) `ready` M + `- 봉인일:` 미채움 + 그 M에 구현 흔적 task 0건 — 계획만 된 프로젝트**
 > **구현 흔적 task** = `in-progress` · `blocked` · `done` · `deprecated`. `blocked`는 `in-progress`에서만, `deprecated`는 `done`에서만 도달하므로 4종 모두 구현 시작 후의 상태다. `in-progress`/`done`만으로 갈래를 나누면 `blocked`만 남은 마일스톤이 (가)로 분류돼 조건 2에서 차단되고 receipt가 없어 implement도 거부되는 교착이 남는다.
@@ -201,7 +201,7 @@ ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용�
 - `repair-plan`에 Charter/ARCHITECTURE/DESIGN 직접 수정 권한 부여 — 저작 소유는 각 bootstrap skill이다(ADR-005/ADR-058). 권장만 하고 고치지 않는다.
 
 ## Mutation Contract (ADR-047 D3)
-1. Target — DECISION_REGISTER.md 신설 / 열린 질문 5섹션 폐지 / M·F `contract-ready` / seal-milestone 신설 + Codex wrapper + 로스터 / plan-milestone · plan-workitem · repair-plan · repair-workitem · implement-workitem · validate-plan · stabilize-milestone / discover-product · bootstrap-project · bootstrap-stack · bootstrap-design · stack-guard / reviewer · architect · planner / WORKFLOW · STRUCTURE · CHECKLIST · DELEGATION · AGENTS · README ×2 / MILESTONE·FEATURE·TASK 템플릿 / ADR-007 · ADR-026 · ADR-027 · ADR-035 · ADR-036 · ADR-037 · ADR-046 · ADR-053 · ADR-057.
+1. Target — DECISION_REGISTER.md 신설 / 열린 질문 5섹션 폐지 / M·F `contract-ready` / seal-milestone 신설 + Codex wrapper + 로스터 / plan-milestone · plan-workitem · repair-plan · repair-workitem · implement-workitem · validate-plan · stabilize-milestone / discover-product · bootstrap-project · bootstrap-stack · bootstrap-design · stack-guard / reviewer · architect · planner / WORKFLOW · STRUCTURE · CHECKLIST · DELEGATION · AGENTS · README ×2 / MILESTONE·FEATURE·TASK 템플릿 / ADR-007 · ADR-026 · ADR-073 · ADR-035 · ADR-036 · ADR-037 · ADR-046 · ADR-053 · ADR-057.
 2. Failure mode — 상류 결정이 문서에 열린 채 남거나 대화에서 증발하고, 구현 중에 기획 질문이 되살아난다(관측됨).
 3. Predicted improvement — 봉인 시점에 현재 M 영향 미결정 0건. 상위 계약 결함을 첫 구현 전에 그 자리에서 수정 가능.
 4. Preserved invariants — ADR-005 SSOT(원장은 인덱스, 정본 저작 소유는 각 bootstrap skill) / ADR-038 opt-in 리뷰 / ADR-019 index-first recall / task 상태기계 / ADR-057 seam 계약(결정 8~14)·결정 6 라우팅 / `남은 미결정 사항` 출력 슬롯 존치 / builder EXECUTE 전용 / 자동 차단 최소화.
@@ -250,7 +250,7 @@ ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용�
 - README_ko.md
 
 ## 참고
-- ADR-056(결정 4 비대칭 — D2의 원형), ADR-053(#amend-2 — D10), ADR-046(#amend-1 — D3 carve-out), ADR-035(#amend-3 — D5), ADR-057(결정 5(a)(b)(f) 부분 supersede — D6/D11, 결정 6 라우팅 유지), ADR-027(§7-x "라운드 아님" 규정 부분 supersede — D9), ADR-007(lifecycle 단계 SSOT — D7이 plan과 implement 사이에 봉인 게이트 추가), ADR-026(#amend-4의 "task `ready` 승격" 주체를 D7이 seal로 이전), ADR-037(#amend-3의 "task `ready` 승격 조건"을 D7이 봉인 조건으로 이전), ADR-036(FEATURE 12섹션 → `## 12` 폐지로 11섹션), ADR-038(opt-in 유지), ADR-019, ADR-005, ADR-006, ADR-022, ADR-047 D3.
+- ADR-056(결정 4 비대칭 — D2의 원형) (현재 SSOT: ADR-072 D5), ADR-053(#amend-2 — D10), ADR-046(#amend-1 — D3 carve-out), ADR-035(#amend-3 — D5), ADR-057(결정 5(a)(b)(f) 부분 supersede — D6/D11, 결정 6 라우팅 유지), ADR-027(§7-x "라운드 아님" 규정 부분 supersede — D9) (현재 SSOT: ADR-073 D1), ADR-007(lifecycle 단계 SSOT — D7이 plan과 implement 사이에 봉인 게이트 추가), ADR-026(#amend-4의 "task `ready` 승격" 주체를 D7이 seal로 이전), ADR-037(#amend-3의 "task `ready` 승격 조건"을 D7이 봉인 조건으로 이전), ADR-036(FEATURE 12섹션 → `## 12` 폐지로 11섹션), ADR-038(opt-in 유지), ADR-019, ADR-005, ADR-006, ADR-022, ADR-047 D3.
 
 <a id="adr-060-amend-1"></a>
 ## Amendment 1 (2026-08-05) — 배포 라이선스를 필수 등재 항목으로

@@ -32,7 +32,7 @@ accepted
 3. **`--refresh F-NNN`**: 해당 feature task들의 `## 3`만 그 시점 실제 코드 기준으로 재접지(JIT read)하고 draft 마커를 제거한다. 협상·AC 재작성 없음(경량). repair 이력(`## 8. 메모`)과 승인 프로토타입 갱신을 반영. + 재접지로 write 대상·2차-write·전이가 배치 추정과 달라지면 그 feature 관련 seam(§7-2 invariant) 유효성을 재점검하고 무효 의심 시 surface(자동 수정 X — 결정 9의 배치 draft 사각 보정).
 4. **`Needs Plan Refresh` 하드스탑**: `/implement-workitem`은 task `## 3`에 draft 마커가 있으면 dispatch 전에 종료하고 `--refresh`를 안내한다(`Needs Plan Decision` 동형). refresh를 잊어도 stale 가이드로 구현하는 사고가 원천 차단된다.
 5. **feature-완료 체크포인트**: `/finalize-workitem`이 status 갱신 후 sibling task를 회수해 해당 feature의 전 task가 done이면 출력에 Feature-완료 블록을 추가 — (a) FAC closure 요약(feature `## 7-1`의 각 매핑 AC가 최신 validation report에서 ✅인지; report 부재는 "확인 불가" degrade), (b) 다음 단계 제안(남은 미-refresh feature의 `--refresh`, 또는 `/stabilize-milestone M-N --feature F-NNN`). 텍스트 제안만 — disable-model-invocation 정책 불변.
-6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만(**해당 feature `## 7-1` 한정** — 뒤 feature FAC 미포함), task-done 점검은 해당 feature 한정(뒤 feature 미완료로 종료 금지), graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056)를 해당 feature 화면·시나리오 한정(qa 결과는 6-S self-synthesis로 QA_FINDINGS에 종합 — reviewer(5)·6·6.5·7·7-T는 skip). QA_FINDINGS는 기존 `### P0/P1/P2` severity 스키마를 유지하고 각 항목 문두에 `(F-NNN)` scope 태그만 붙인다(별도 `### F-NNN` 헤더 금지 — graduation P0 카운트·repair-milestone 회수가 severity 섹션 스키마를 소비). read-only·실행 single-origin(ADR-054) 불변.
+6. **`/stabilize-milestone --feature F-NNN` 스코프**: preflight는 FAC unmapped만(**해당 feature `## 7-1` 한정** — 뒤 feature FAC 미포함), task-done 점검은 해당 feature 한정(뒤 feature 미완료로 종료 금지), graduation pre-check skip(졸업 판정은 milestone 전용임을 출력에 명시), validate 1회 + qa fan-out·3-P·§3-V(ADR-056) (현재 SSOT: ADR-072)를 해당 feature 화면·시나리오 한정(qa 결과는 6-S self-synthesis로 QA_FINDINGS에 종합 — reviewer(5)·6·6.5·7·7-T는 skip). QA_FINDINGS는 기존 `### P0/P1/P2` severity 스키마를 유지하고 각 항목 문두에 `(F-NNN)` scope 태그만 붙인다(별도 `### F-NNN` 헤더 금지 — graduation P0 카운트·repair-milestone 회수가 severity 섹션 스키마를 소비). read-only·실행 single-origin(ADR-054) 불변.
 7. **plan-workitem 조망 echo**: 단일 feature 모드 출력에 "같은 milestone의 미분해 feature 목록"을 1줄 echo.
 
 ## 결정 — B. Cross-task seam 계약 (8~14)
@@ -95,7 +95,7 @@ accepted
 - docs/00-meta/STRUCTURE.md
 
 ## 참고
-- ADR-051(D4 부분 supersede — #amend-3 표기), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-068(graduation은 milestone 전용), ADR-006/ADR-022.
+- ADR-051(D4 부분 supersede — #amend-3 표기), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점) (현재 SSOT: ADR-072), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-068(graduation은 milestone 전용), ADR-006/ADR-022.
 
 <a id="adr-057-amend-1"></a>
 ## Amendment 1 (2026-07-26) — 마일스톤 로드맵 SSOT (얇은 forward 지도)

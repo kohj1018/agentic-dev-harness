@@ -142,4 +142,4 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
 - docs/00-meta/STRUCTURE.md                           — 산출물·Canonical Owner
 
 ## 참고
-- ADR-027(superseded — 본 ADR이 승계), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
+- ADR-027(superseded — 본 ADR이 승계), ADR-031(직접 지원 범위 — 새 스택 진입 시 D1에 `## 7-N` 자리 신설), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.

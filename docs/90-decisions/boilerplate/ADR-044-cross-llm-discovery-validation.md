@@ -39,7 +39,7 @@ accepted
 - .claude/agents/reviewer.md                            — #d3 discovery surface 8 차원
 
 ## 참고
-- ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027#amend-1(reviewer surface 패턴).
+- ADR-038(cross-LLM plan validation — 본 ADR이 mirror), ADR-035(DISCOVERY SSOT + Evidence Log), ADR-007(책임 경계), ADR-027#amend-1(reviewer surface 패턴) (현재 SSOT: ADR-073 D8).
 
 <a id="adr-044-amend-1"></a>
 ## Amendment 1 (2026-07-16) — Codex 호환 단락 supersede (ADR-010#amend-4)

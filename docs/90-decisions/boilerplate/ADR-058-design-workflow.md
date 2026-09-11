@@ -6,7 +6,7 @@
 ## Status
 accepted
 
-> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부) (현재 SSOT: 본 ADR). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-027](ADR-027-interface-decision-allocation.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
+> 대체: [ADR-049](ADR-049-concept-mockup-first-design.md)를 supersede한다(디자인 워크플로우 라운드 구조·R0 grounding·시안 정책 전부) (현재 SSOT: 본 ADR). ADR-049는 `superseded`로 history 잔존. DESIGN.md *내용*·인터페이스 할당 SSOT는 [ADR-073](ADR-073-interface-and-design-content-v2.md)이 계속 소유(본 ADR은 흐름·게이트·리서치·시안 카드만).
 > 승격 범위(정직 — *status 축*과 *검증 축*은 별개다):
 > - **status = `accepted`** — 저장소 `_ADR_GUIDE`상 accepted는 *운영 채택*을 뜻하지 검증 완료가 아니다(wiring이 이미 accepted 전제로 짜여 정합; `trial`은 허용 status가 아니라 분리 불가).
 > - **D3 수용 게이트는 지금 constraint** — ADR-022는 constraint에 `[관측됨]` *또는* `[외부실증]`을 요구하고(둘 중 하나면 자격 충족), repo-local `[관측됨]`으로 충족된다. **실측 개선 축은 serious/critical axe**(design-eval — repair loop로 serious 5/8→0/8). 320 overflow·clip은 게이트가 *결정적으로 상시 검사*하는 축이지만 이 eval에서 5/8→0/8 수치를 낸 건 axe다(320/clip을 같은 수치로 뭉뚱그리지 않는다). 별도 "강 승격" 관문은 없다(constraint 자체가 ADR-022 '강').
@@ -59,7 +59,7 @@ accepted
 1. **Target** — bootstrap-design SKILL R0~R6·`--fast`·`--update` + `allowed-tools`(렌더·axe 실행) / stack-guard JIT canonical design-gate asset + generated `validate:design` adapter / plan-milestone R5 게이트(allowed-tools + R5-5) / researcher.md 디자인 레퍼런스 모드 / designer.md(카드·signature·PX 마커) / reviewer.md(design surface 렌더 증거·픽셀 판정·bootstrap-design 호출자 등재) / DESIGN_RESEARCH.md 스키마 / stack-guard(populated axe·320 reflow) / DESIGN.md §0 주석 R0~R6 / STRUCTURE·WORKFLOW·.gitignore가 디자인 워크플로우 SSOT로 **본 ADR**을 가리키도록 유지(구 `ADR-049` 인용의 재지정은 완료됨). (현재 SSOT: 본 ADR)
 2. **Failure mode** — R0 grounding이 median으로 조용히 후퇴 + 독립 감사가 렌더·DOM을 안 봐 배포불가 결함(serious axe·320 overflow) 통과 + 시안이 "다르기만" 하고 안전·평범(전부 관측됨/실측).
 3. **Predicted improvement** — serious axe 제거(실측 5/8→0/8) + 320 geometry 결함 차단(별도 결정적 축 — 같은 수치로 뭉뚱그리지 않음), 레퍼런스 값 확보 안정화, REFINE/EXPLORE로 의도된 개성.
-4. **Preserved invariants** — DESIGN.md 시각 SSOT / preview·concept ephemeral(ADR-005) / 취향 오라클=사용자 / 생성·감사 분리 / RGR inner-loop 스크린샷 hot-loop 금지(게이트는 1회성 carve-out) / 비-UI DESIGN.md 삭제 경로 / skill auto-invocation 금지 / ADR-027 DESIGN 내용·인터페이스 SSOT 지위.
+4. **Preserved invariants** — DESIGN.md 시각 SSOT / preview·concept ephemeral(ADR-005) / 취향 오라클=사용자 / 생성·감사 분리 / RGR inner-loop 스크린샷 hot-loop 금지(게이트는 1회성 carve-out) / 비-UI DESIGN.md 삭제 경로 / skill auto-invocation 금지 / ADR-073 DESIGN 내용·인터페이스 SSOT 지위.
 5. **Falsifying evaluation** — SIMULATION_RUN.md design-eval의 재검토 트리거(= REPORT §13 7기준) 재실행에서 새 흐름이 archetype별 serious/320/clipping 0안을 매 반복 제공 못 하거나 blind 평균이 current 대비 5% 초과 하락하면 게이트·리서치 강도 재조정(ADR-047#amend-1 방법 — 대조군을 둔 저비용 비교 먼저). 정적 검사는 프로젝트 스택 확정 후 해당 도구로 구성한다.
 6. **Rollback path** — ADR-058을 *새 supersede ADR*로 되돌린다: ADR-058을 supersede하는 신규 ADR을 발행해 라운드 구조(R0 5단 위계·divergence 카드·visual-QA scaffold)를 재채택하고 렌더 게이트·evidence-on-demand·REFINE/EXPLORE를 제거하며 surface를 새 ADR로 re-point한다. **ADR-049 status를 accepted로 되돌리지 않는다** — supersede는 history 영속(ADR-045)이라 status 되돌리기는 기록 왜곡이다. (현재 SSOT: 본 ADR)
 
@@ -81,9 +81,9 @@ accepted
 - docs/00-meta/WORKFLOW.md
 - docs/00-meta/DELEGATION_STRATEGY.md
 - docs/00-meta/PROJECT_START_CHECKLIST.md
-- docs/90-decisions/boilerplate/ADR-027-interface-decision-allocation.md
+- docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md
 - docs/90-decisions/boilerplate/ADR-040-external-research-capability.md
-- docs/90-decisions/boilerplate/ADR-056-milestone-experience-contract.md
+- docs/90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md
 - README.md
 - README_ko.md
 - .gitignore
@@ -95,7 +95,7 @@ accepted
 - .claude/skills/stack-guard/assets/design-gate.mjs — v3 canonical (매니페스트 모드·자가 검사) — 소유 ADR-072 D6
 
 ## 참고
-- ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
+- ADR-073 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-072 (design-milestone 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
 
 <a id="adr-058-amend-1"></a>
 ## Amendment 1 (2026-07-26) — baseline runner 제거 + UI project-native gate 조건부 생성
@@ -108,7 +108,7 @@ accepted
 
 ### 결정
 1. **baseline 실행물 제거**: 보일러플레이트는 `scripts/design-gate.mjs`를 포함하지 않는다. ADR-058 D3의 품질 계약은 유지하되 실행 adapter는 UI 판정 후에만 물질화한다.
-2. **단일 생성자**: `/stack-guard`가 ADR-027#amend-3으로 UI 확정/의심을 판정한 경우에만 감지된 test runner·package manager에 자연스러운 project-native adapter와 논리 진입점 **`validate:design`**을 생성한다. 비-UI면 adapter·Playwright browser·axe·`validate:design`을 생성하지 않는다.
+2. **단일 생성자**: `/stack-guard`가 ADR-073 D9로 UI 확정/의심을 판정한 경우에만 감지된 test runner·package manager에 자연스러운 project-native adapter와 논리 진입점 **`validate:design`**을 생성한다. 비-UI면 adapter·Playwright browser·axe·`validate:design`을 생성하지 않는다.
 3. **명령 registry**: `/stack-guard`는 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 `status | command template | adapter path | output path | capability version`을 기록한다. `/bootstrap-design` R2-G/R6와 `/plan-milestone` R5-5는 경로를 추측하거나 baseline 파일을 찾지 않고 이 표의 `command template`만 실행한다.
 4. **fail-closed preflight**: UI 산출물이 있는데 registry가 없거나 adapter self-test가 미통과면 `Needs Design Gate: /stack-guard`로 승인·프로토타입 승격을 보류한다. MCP·LLM 육안·`visual-qa.spec`만으로 대체하거나 silent skip하지 않는다.
 5. **capability contract v1**: adapter는 정적 HTML 다중 입력/glob, 뷰포트별 fresh render(1280/375/320), font readiness, 3뷰포트 screenshot, page overflow, narrow viewport escape, self/ancestor clipped text, populated axe(1280/320), serious/critical 차단, moderate/minor·axe incomplete 보고, 구조화된 성공/차단/실행불가 결과를 제공한다. 정상 UI 제외는 sr-only 조상·`aria-hidden`/`inert`/`hidden`·accessible-name과 keyboard focus를 가진 실제 가로 overflow container·ellipsis다. 세로-only scroll은 가로 escape 제외 사유가 아니다. `label-content-name-mismatch`는 experimental 기본 비활성에 의존하지 않고 명시 활성화한다.
@@ -127,7 +127,7 @@ accepted
 - `.claude/skills/bootstrap-design/SKILL.md`: registry command 소비 + missing/not-ready hard stop. (당시의 plan-milestone R5 소비자는 ADR-072 D8이 `/design-milestone`으로 옮겼다 — 기록.)
 - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`: adapter registry schema.
 - `docs/00-meta/STRUCTURE.md`, `docs/00-meta/GUARDRAILS_STRATEGY.md`, `scripts/README.md`: baseline→conditional/generated 경계.
-- `docs/20-system/DESIGN.md`, `.claude/agents/reviewer.md`, `ADR-027#amend-7`: 특정 파일명 대신 project-native gate capability를 인용.
+- `docs/20-system/DESIGN.md`, `.claude/agents/reviewer.md`, `ADR-073 D5`: 특정 파일명 대신 project-native gate capability를 인용.
 - `.gitignore`: canonical output 선제 ignore + 비-canonical output의 first-run-before append 계약.
 
 ### 강도 및 Mutation delta
@@ -142,7 +142,7 @@ accepted
 - [관측됨] v1 UI fixture의 generated adapter는 삭제 전 baseline runner와 138줄·SHA-256이 byte-identical했다. 따라서 기존 `10/10`은 **검증된 legacy 구현의 행동 보존**은 증명했지만, 산문 capability만으로 독립 authoring한 구현의 재현성은 증명하지 않았다. `SIMULATION_RUN.md`의 v1 판정 범위를 이 한계에 맞게 정정한다.
 - [관측됨] v1 conformance fixture·기대값도 실행 시 생성돼 구현과 oracle이 같은 산문에서 파생되는 자기참조 위험이 있었다. stale screenshot 정리, 동일 basename 배치, 파일별 render-error 격리, ±1px 허용오차, 예외 경로 browser 종료는 10 logical behavior case가 직접 고정하지 않았다.
 - [관측됨] caller의 missing/not-ready preflight 문구는 존재하지만 실제 `Needs Design Gate` 행동 fixture 기록이 없었다.
-- **UI 순서 재판정**: 정상 순서가 `/bootstrap-stack → /stack-guard → /bootstrap-design`이라 DESIGN status가 draft인 것은 맞다. 그러나 `/bootstrap-stack`은 frontend면 ARCH 7-4를 채우므로 정상 흐름은 ADR-027#amend-3의 **UI 의심** 분기로 adapter를 만든다. "항상 비-UI 오판"은 사실이 아니다. 다만 초기 신호 부족으로 `n/a`가 된 뒤 frontend가 확인되는 재실행 복구는 명시가 필요하다.
+- **UI 순서 재판정**: 정상 순서가 `/bootstrap-stack → /stack-guard → /bootstrap-design`이라 DESIGN status가 draft인 것은 맞다. 그러나 `/bootstrap-stack`은 frontend면 ARCH 7-4를 채우므로 정상 흐름은 ADR-073 D9의 **UI 의심** 분기로 adapter를 만든다. "항상 비-UI 오판"은 사실이 아니다. 다만 초기 신호 부족으로 `n/a`가 된 뒤 frontend가 확인되는 재실행 복구는 명시가 필요하다.
 
 ### 결정
 1. **JIT canonical asset**: direct-support Node UI의 정본은 `.claude/skills/stack-guard/assets/design-gate.mjs`다. `/stack-guard`는 UI 확정/의심 때만 이 asset을 읽어 project-native 경로로 byte-copy하고 entry를 배선한다. 비-UI에서는 asset을 읽거나 복사하거나 design 의존/browser를 설치하지 않는다. `.boilerplate/`는 검증 Record 전용이므로 executable 정본을 두지 않으며, Git history 회수는 squash/template-copy에서 깨져 정본 경로로 쓰지 않는다.
