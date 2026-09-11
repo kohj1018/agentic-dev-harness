@@ -74,8 +74,8 @@ accepted
   - **[관측됨] 이 순서를 안 지키면 실제로 오분류한다**: 빈 `integration_test/`는 `protocolVersion=0.1.1` + suite `test/widget_test.dart` + `done.success=true` → 2항에서 `EMPTY`. smoke를 넣고 device를 연결하지 않으면 스트림이 아예 비어 `protocolVersion`이 없고 exit 1 → 1항에서 `BLOCKED_ENV`. 순서 없이 suite 개수만 세면 후자도 `EMPTY`가 되어 "테스트를 쓰라"는 잘못된 처방이 나간다.
 - **registry는 필요조건이 아니라 강화 수단이다.** `STACK_SETUP_PLAN.md ## E2E Smoke Registry`에 canonical smoke가 등록돼 있으면 위 3항을 *"등록된 smoke 이름과 일치하는 테스트가 성공"* 으로 좁혀 판정한다. 등록이 없으면 **3항을 이름 제약 없이 적용하고**(= 선언된 e2e 디렉터리 안의 아무 테스트든 1개 이상 성공) `P1 [E2E-registry] <target> — canonical smoke 미등록, /stack-guard로 등록 권장`을 기록한다. **등록 부재만으로 졸업을 차단하지 않는다** — 실제로 e2e를 갖고 통과하던 기존 프로젝트를 서류 미비로 막는 것은 ADR-022 ratchet 위반이고, 위 2항만으로 실측 결함은 이미 막힌다.
 - **플랫폼별 판정**: 선언된 runtime target마다 각각 `PASS`여야 한다. Android만 통과하고 iOS가 미실행이면 iOS는 `EMPTY` 또는 `BLOCKED_ENV`이며 졸업은 차단된다.
-  - **판정은 target마다 나므로 실행도 target마다 한다.** `validate:e2e` 진입점은 **하나로 유지**하고(이름을 target별로 쪼개지 않는다 — 웹 단독 프로젝트의 진입점 구성을 바꾸지 않기 위해서다), **선언된 e2e 대상 target이 둘 이상이면 판정하는 쪽이 target마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩 호출**한다. `<device id>`는 registry의 선택 규칙을 `flutter devices --machine` 출력에 대입해 얻는다. target이 하나면 `-d` 없이 1회 호출로 충분하다(러너가 후보를 좁혀 자동 선택한다).
-  - **한 진입점을 두 도구가 다툴 수는 없다**: `web`과 `native/*`를 함께 선언한 저장소에서 `validate:e2e`가 이미 다른 계열(Playwright ↔ Flutter)로 물려 있으면 **덮어쓰지 않고 `FAIL(wiring)`으로 보고하고 멈춘다**. 조용히 놔두면 나중 target이 영구 `EMPTY`가 되어 *"테스트를 쓰라"* 는 틀린 처방이 나가고, 실제 원인(배선 부재)은 드러나지 않는다.
+  - **판정은 target마다 나므로 실행도 target마다 한다.** `validate:e2e` 진입점은 **하나로 유지**하고(이름을 target별로 쪼개지 않는다 — 웹 단독 프로젝트의 진입점 구성을 바꾸지 않기 위해서다), **선언된 e2e 대상 target이 둘 이상이면 판정하는 쪽이 target마다 `npm run validate:e2e -- -d <device id>` 로 한 번씩 호출**한다. `<device id>`는 registry의 선택 규칙을 `flutter devices --machine` 출력에 대입해 얻는다. target이 하나면 `-d` 없이 1회 호출로 충분하다(러너가 후보를 좁혀 자동 선택한다). (참조 갱신 2026-09: #amend-1 결정 1이 target별 진입점 + 집계로 대체)
+  - **한 진입점을 두 도구가 다툴 수는 없다**: `web`과 `native/*`를 함께 선언한 저장소에서 `validate:e2e`가 이미 다른 계열(Playwright ↔ Flutter)로 물려 있으면 **덮어쓰지 않고 `FAIL(wiring)`으로 보고하고 멈춘다**. 조용히 놔두면 나중 target이 영구 `EMPTY`가 되어 *"테스트를 쓰라"* 는 틀린 처방이 나가고, 실제 원인(배선 부재)은 드러나지 않는다. (참조 갱신 2026-09: #amend-1 결정 1이 target별 진입점 + 집계로 대체)
   - **기본 전제는 "한 마일스톤을 한 머신에서 끝낸다"** 다. iOS는 빌드 자체가 macOS + Xcode 전용이므로, **iOS를 target으로 선언한 마일스톤은 macOS에서 작업한다** — 그러면 host 이동도, 증거 이관도 필요 없다.
   - 그럼에도 Windows에서 진행하다 iOS 판정만 남는 상황이 생기면 iOS는 `BLOCKED_ENV`로 남는다. 이때만 예외로, macOS에서 1회 수행한 결과를 registry의 `마지막 PASS(host·날짜·커밋)` 칸에 적어 증거로 쓴다. **유효 조건은 하나 — 기록된 커밋이 지금 판정하려는 커밋과 같을 때만** 인정한다. 다르면 다시 `BLOCKED_ENV`다(코드가 바뀌었는지 사람이 판단하게 두지 않는다).
 - registry의 실행 대상 칸에는 `emulator-5554` 같은 **임시 id를 적지 않고** 선택 규칙(예: `연결된 android device 1대`)을 적는다. **이 칸의 문자열이 실행 명령에 그대로 들어가지는 않는다** — 대신 판정하는 쪽이 **`flutter devices --machine` 출력에 이 규칙을 대입해 그때의 실제 id를 얻어** `-d` 에 넣는다. 즉 규칙은 *id를 고르는 방법*을 적는 자리이고, id 자체는 매 실행 시점에 조회로 결정된다(그래서 재부팅으로 id가 바뀌어도 문서가 상하지 않는다).
@@ -119,7 +119,7 @@ accepted
 ### D11. 경로 길이
 - Windows에서 프로젝트 루트 경로가 길면 iOS 생성 경로 순회가 실패한다(관측: 전체 277자에서 실패, 123자에서 정상). D2의 등록 source root 방식은 이 경로를 순회하지 않으므로 영향을 받지 않는다. 다만 프로젝트 루트를 짧게 두는 것을 권장한다.
 
-### D12. 경험 게이트의 native degrade (숨기지 않고 기록한다)
+### D12. 경험 게이트의 native degrade (숨기지 않고 기록한다) (참조 갱신 2026-09: #amend-1 결정 4)
 - 마일스톤 안정화의 경험 게이트는 *앱을 띄우고 화면을 캡처해 승인 프로토타입과 대조*하는 절차이며, 기동 명령을 `package.json`의 `dev`/`start`에서 회수한다. **Flutter 앱에는 그 진입점이 없다.**
 - 이번 라운드에서는 device 스크린샷 경로를 배선하지 않는다. 대신 **degrade를 명시 기록한다** — native 프로젝트에서 앱 기동 캡처는 `blocked-on-env`로 남고, 대조는 프로토타입 HTML을 `file://`로 렌더한 쪽만 수행한다. 실행 자체를 조용히 건너뛰지 않으며, 미실행 사유를 매번 출력한다.
 - **이 결정은 skill 수정을 요구하지 않는다.** 경험 게이트는 이미 *"기동 명령 불명·실패면 `blocked-on-env` 라벨 + 미실행 사유 echo"* 경로를 갖고 있고, Flutter 프로젝트는 `dev`/`start` 스크립트가 없어 그 경로로 자연히 떨어진다. 본 결정은 그 결과가 *의도된 것*임을 기록하는 항이다 — 이 문장을 근거로 게이트 지시문을 고치지 않는다(웹 경로에 손대지 않기 위해서다).
@@ -187,3 +187,28 @@ accepted
 
 ## 참고
 - ADR-031 (비웹 스택 범위 — 본 ADR이 Flutter에 한해 해제), ADR-027 (인터페이스 결정 할당), ADR-052 (e2e readiness), ADR-058 (design gate), ADR-048 (MCP 등재), ADR-022 (강도), ADR-047 (mutation contract), ADR-006 (단순성).
+
+<a id="adr-059-amend-1"></a>
+## Amendment 1 (2026-09-11) — target별 e2e 진입점 + 집계, 승인 스냅샷·design gate Flutter 어댑터, D12 갱신
+
+### 배경
+- [관측됨] D4는 `validate:e2e` 진입점을 하나로 두고 `web`과 `native/*`가 함께 선언되면 `FAIL(wiring)`으로 멈춘다. 웹+앱을 한 저장소에서 다루는 프로젝트(ADR-073 D3 프로필)가 이 경로에서 막힌다.
+- [관측됨] D12는 native 시각 대조를 degrade로 두었다. ADR-072가 코드 프로토타입·위젯 테스트 스냅샷을 도입하므로 native에서도 승인 스냅샷 대조가 가능해진다.
+
+### 결정
+1. **target별 진입점 + 실행 시점 device 해석**: `validate:e2e:web`(Playwright) · `validate:e2e:android` · `validate:e2e:ios`를 두고 **`validate:e2e`는 집계 진입점**으로 선언된 target을 순차 실행해 target별 상태를 한 줄씩 출력한다. native 진입점은 `node scripts/e2e-target.mjs <android|ios>`(stack-guard 생성)로 배선한다 — 이 스크립트가 `flutter devices --machine`에 registry의 «실행 대상 선택 규칙»을 대입해 **그때의 device id를 얻어** `flutter test <인자> -d <id>`를 실행하고 `--machine` 스트림을 그대로 전달한다. **인자는 `-- ` 뒤로 받아 그대로 넘긴다**(기본 `integration_test`) — 기존 진입점을 target별로 옮길 때 테스트 경로·`--flavor` 같은 옵션이 사라지지 않게 하고, resolver는 device 선택만 더한다. **`package.json`에 `-d <id>`를 박지 않는다**(D4의 «임시 id 금지» 불변 — 해석 시점만 스크립트로 옮긴 것). 후보 0개면 `BLOCKED_ENV`, iOS는 host가 macOS일 때만. 각 target의 구조화 출력·판정 순서는 ADR-052#amend-1 그대로. 단일 target 프로젝트는 `validate:e2e`가 그 하나만 실행하므로 **웹 단독 프로젝트의 구성은 바뀌지 않는다**. D4의 «진입점 하나로 유지 · 다른 계열이면 FAIL(wiring)» 문장은 본 결정이 대체한다 — `/stack-guard` 6-4·`/stabilize-milestone` 3-b도 갱신.
+2. **승인 스냅샷(native)**: `/design-milestone` R6가 위젯 테스트(`test/screens/<screen>_prototype_test.dart`)로 프로필 논리 크기 PNG를 생성하고 게이트가 PNG 그대로 `docs/20-system/prototypes/M<N>/snapshots/`에 저장한다(커밋). golden(D3 — `test/**/goldens/`, 로컬 전용)과 **경로·목적이 다르다**: golden은 픽셀 회귀 오라클(로컬), 승인 스냅샷은 사람·AI 육안 참조(커밋, 픽셀 diff 금지). D3은 불변.
+3. **design gate Flutter 어댑터**: `validate:design -- --manifest`가 `flutter:<test file>` preview를 `flutter test --reporter json`으로 실행해 Accessibility Guideline 4종(D5)·overflow·예외를 blocker로 정규화한다(ADR-072 D6). D5의 «존재 강제 없음»은 유지 — 강제 대상은 프로토타입 테스트뿐이다.
+4. **D12 갱신**: §3-V native 경로는 «위젯 테스트 스냅샷 재생성 + 승인 스냅샷 대조»를 기본으로 하고, 앱 기동 캡처(`flutter drive`/integration_test 스크린샷)는 가능할 때만 추가한다. 실행 불가 사유 echo 의무는 유지.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 1 — 혼합 target에서 `FAIL(wiring)` 대신 target별 실행.
+- enabling(약): 결정 2·3·4.
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md (6-4 진입점·6-4-1 Flutter fixture)
+- .claude/skills/stabilize-milestone/SKILL.md (3-b target별 호출·§3-V native)
+- .claude/skills/design-milestone/SKILL.md (R4 위젯 테스트·R6 스냅샷)
+- .claude/skills/stack-guard/assets/design-gate.mjs (flutter 어댑터)
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md (`## E2E Smoke Registry` 주석 — 진입점 표기. target별 실행 스크립트는 프로젝트 측 생성물이라 boilerplate surface가 아니다)
+- docs/00-meta/STRUCTURE.md (승인 스냅샷 행)

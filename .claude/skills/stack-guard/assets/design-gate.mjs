@@ -34,7 +34,10 @@ function expandGlob(pat) {
   if (!pat.includes('*')) return [pat];
   if (pat.includes('**')) { // 재귀 glob — src/screens/**/*.tsx
     const base = pat.slice(0, pat.indexOf('**')).replace(/[/\\]$/, '') || '.';
-    const rx = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '(?:.*/)?').replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*') + '$');
+    const rx = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*\*\//g, '\u0000').replace(/\*\*/g, '\u0001') // ** 먼저 자리표시자로 — 뒤의 * 치환이 생성된 정규식을 다시 바꾸지 않게
+      .replace(/\*/g, '[^/]*')
+      .replace(/\u0000/g, '(?:.*/)?').replace(/\u0001/g, '.*') + '$');
     return walkFiles(base).filter((f) => rx.test(f));
   }
   const slash = Math.max(pat.lastIndexOf('/'), pat.lastIndexOf('\\'));
@@ -444,7 +447,7 @@ function flutterSelfTestScopes(explicit) {
 
 async function runSelfTest(opts) {
   const cases = [];
-  const { chromium, AxeBuilder } = await loadPlaywright();
+  const { chromium, AxeBuilder } = await loadPlaywright(opts.scopes ?? []); // monorepo — 브라우저가 apps/web에만 있을 수 있다
   const browser = await launchBrowser(chromium);
   try {
     const a = await selfTestCase('known-bad', knownBadHtml(), ['page-overflow', 'axe:color-contrast', 'axe:button-name'], { browser, AxeBuilder });
@@ -458,7 +461,7 @@ async function runSelfTest(opts) {
     const tmpManifest = {
       version: 1, milestone: 'self-test',
       profiles: { default: { viewports: [{ w: 1280, h: 900 }] } },
-      screens: [{ id: 'self-good', feature: 'self-test', profile: 'default', scope: '.', preview: 'url:' + goodFile, states: [{ id: 'default', preview: 'url:' + goodFile, baseline: true }] }],
+      screens: [{ id: 'self-good', feature: 'self-test', profile: 'default', scope: (opts.scopes && opts.scopes[0]) || '.', preview: 'url:' + goodFile, states: [{ id: 'default', preview: 'url:' + goodFile, baseline: true }] }],
     };
     const manifestPath = join(dir, 'manifest.json');
     writeFileSync(manifestPath, JSON.stringify(tmpManifest, null, 2));
@@ -513,7 +516,7 @@ function runTokensOnly(opts) {
 
 // ---------- html 모드 ----------
 async function runHtmlMode(opts) {
-  const { chromium, AxeBuilder } = await loadPlaywright();
+  const { chromium, AxeBuilder } = await loadPlaywright(opts.scopes ?? []);
   const browser = await launchBrowser(chromium);
   const result = { version: 3, mode: 'html', screens: [], summary: { blockers: 0, reports: 0, unavailable: 0 } };
   const viewports = opts.viewports && opts.viewports.length

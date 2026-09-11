@@ -147,7 +147,9 @@ find . -name '*.dart' -not -path './.dart_tool/*' -not -path './build/*' \
      마지막 PASS 칸은 host 제약으로 지금 실행할 수 없는 target의 증거를 보존한다.
      **유효 조건은 하나 — 기록된 커밋이 지금 판정하려는 커밋과 정확히 같을 때만 인정한다.**
      다르면 다시 BLOCKED_ENV다. "코드가 바뀌었는지"를 사람이 판단하게 두지 않는다
-     (판단 여지를 주면 증거가 슬며시 늘어난다 — ADR-059 D4). -->
+     (판단 여지를 주면 증거가 슬며시 늘어난다 — ADR-059 D4).
+     진입점은 target별 validate:e2e:<target> + 집계 validate:e2e (ADR-059#amend-1). 단일 target은 validate:e2e 하나.
+     native 진입점은 scripts/e2e-target.mjs가 이 칸의 선택 규칙을 실행 시점에 device id로 해석한다(칸의 문자열은 여전히 명령에 그대로 들어가지 않는다). -->
 
 | runtime target | status | smoke 파일 경로 | 테스트 이름 | 실행 대상 선택 규칙 | 마지막 PASS (host·날짜·커밋) | 등록일 |
 |---|---|---|---|---|---|---|
