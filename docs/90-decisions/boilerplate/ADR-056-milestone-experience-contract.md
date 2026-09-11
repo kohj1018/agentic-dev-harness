@@ -4,7 +4,9 @@
 > area: design/process
 
 ## Status
-accepted
+superseded
+
+> 대체: [ADR-072](ADR-072-design-milestone-and-code-prototype.md) (2026-09-11). 본 문서는 history 잔존. (현재 SSOT: ADR-072)
 
 ## 현재 유효 결정
 - UI 마일스톤 경험 계약은 `/plan-milestone M<N>`의 R5에서 사용자 피드백·게이트를 거쳐 최종 화면 HTML로 승인한다. 같은 draft M 재실행만 미완 R5를 재개하며, M/F `ready` 뒤 `--prototype` 재진입·재승인·부분 보류는 없다. 변경은 다음 M(#amend-1, ADR-057#amend-3).

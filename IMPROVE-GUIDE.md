@@ -1195,7 +1195,7 @@ feat(skills): add reference gallery round and native theme showcase to bootstrap
 
 ### P5-1. ADR-072 작성 — `docs/90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md`
 
-```markdown
+````markdown
 # ADR-072 — 디자인 마일스톤 + 코드 프로토타입 + UI 제작 계약 + design gate v3
 
 > scope: boilerplate
@@ -1230,7 +1230,7 @@ accepted
 ### D3. 코드 프로토타입 + 매니페스트
 - **코드 위치·규칙**: 웹은 ARCH `## 3-1` 트리의 컴포넌트 디렉터리 하위 `screens/<screen>/` — `<Screen>.<ext>`(presentational: props-in/callbacks-out, fetch·store·router import 금지; 확장자는 스택 관례 `.tsx`/`.vue`/`.svelte`/Astro 컴포넌트) + `<Screen>.stories.<ext>`(상태별 스토리 = fixture — Storybook 프레임워크 통합 관례) + `fixtures.<ext>`(출처 표기 — ADR-064 D5). Flutter는 `lib/screens/<screen>/`(위젯, 데이터는 생성자 인자) + `lib/prototype/main.dart`(갤러리 진입 — 화면·상태 목록) + `test/screens/<screen>_prototype_test.dart`(프로필 뷰포트 렌더 + Accessibility Guideline 4종 + overflow 0 + 스냅샷 PNG). 파일 상단 **추적 헤더** 주석: `feature: F-NNN | PX: PX-M<N>-<screen>-01..NN | DESIGN: §2 <token set>, §7 <components> | 승인: <YYYY-MM-DD>`.
 - **PX 마커**: 코드 주석 `// PX-M<N>-<screen>-NN: <한 줄 결정>`(JSX 안 `{/* … */}`). 문법·불변식·소유 규칙은 ADR-056#amend-1 승계(마일스톤 번호=버전, 한 화면 내 중복 금지, 각 PX는 구현 feature 정확히 1곳 `## 7`).
-- **매니페스트** `docs/20-system/prototypes/M<N>/manifest.json`(커밋, 부록 C schema): `version`, `milestone`, `profiles`(name → viewports), `screens[]` — `id`, `feature`, `profile`, `preview`(`story:<storybook-id>` 또는 `flutter:<test file>` + `entry: lib/prototype/main.dart#<screen>`), `source[]`(코드 경로), `states[]`(각 `{ id, preview, baseline? }` — 상태별 스토리 id 또는 위젯 테스트 group; `baseline: true`는 브리프의 «승인 필요 상태»), `px[]`, `snapshots[]`, `brief`, `product_entry`(제품 라우트·딥링크 — R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` + 배선 task line item이 확정), `approved{date, by}`, `supersedes[]`(이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 그 화면의 기준선을 이 M이 새로 잡을 때), `handoff{ run, remaining_wiring[] }`. **이 파일이 게이트·validate-plan·seal·stabilize·accept의 단일 입력**이다(경로 추측 금지).
+- **매니페스트** `docs/20-system/prototypes/M<N>/manifest.json`(커밋, 필드 정의는 본 ADR `## 매니페스트 schema (v1)` — 이 ADR이 schema SSOT다): `version`, `milestone`, `profiles`(name → viewports), `screens[]` — `id`, `feature`, `profile`, `scope`(monorepo 실행 scope — 기본 `.`), `preview`(`story:<storybook-id>` 또는 `flutter:<test file>` + `entry: lib/prototype/main.dart#<screen>`), `source[]`(코드 경로), `states[]`(각 `{ id, preview, baseline? }` — 상태별 스토리 id 또는 위젯 테스트 group; `baseline: true`는 브리프의 «승인 필요 상태»), `px[]`, `snapshots[]`, `brief`, `product_entry`(제품 라우트·딥링크 — R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` + 배선 task line item이 확정), `approved{date, by}`, `supersedes[]`(이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 그 화면의 기준선을 이 M이 새로 잡을 때), `handoff{ run, remaining_wiring[] }`. **이 파일이 게이트·validate-plan·seal·stabilize·accept의 단일 입력**이다(경로 추측 금지).
 - **fixture 보존**: 스토리·fixture·위젯 테스트는 삭제하지 않는다(테스트 자산 — 구현 task가 그대로 쓴다).
 - **미리보기**: 웹 Storybook(정적 빌드는 게이트가 `design-gate-storybook/`에 생성), Flutter `flutter run -t lib/prototype/main.dart`. 제품 라우트에 개발 전용 페이지를 두지 않는다(불가한 스택만 예외 — 사유를 매니페스트 `handoff.run`에 적음).
 - **불확실 화면 2안**: 브리프 `구성 불확실` 화면만 `<Screen>.stories.tsx`에 `A`/`B` 스토리(또는 Flutter 갤러리 항목 2개). 선택 후 탈락안 삭제.
@@ -1252,15 +1252,16 @@ accepted
 ### D6. design gate v3 (매니페스트 모드 + 설치 시 자가 검사)
 - **실행물**: canonical `.claude/skills/stack-guard/assets/design-gate.mjs` v3를 `/stack-guard`가 project-native 경로(기본 `scripts/design-gate.mjs`)에 복사하고 `validate:design`(npm 계열)에 배선한다. **`design-gate-conformance.mjs`(고정 적합성 oracle)·capability version 핸드셰이크는 폐지**한다. 복사 시점의 canonical sha256은 registry `copied-from`에 남긴다 — caller는 대조하지 않으며, stack-guard 재실행의 local-modification 판별과 stabilize의 canonical 갱신 감지에만 쓴다.
 - **모드**: `--html <files|glob>`(concept HTML — bootstrap-design R2-G) / `--manifest <path> [--only <screen id,...>] [--snapshot <dir>] [--no-build]`(화면·쇼케이스 — R6·design-milestone·stabilize·validate-workitem) / `--self-test`(설치 시) / `--tokens-only <glob>`(토큰 외 리터럴 스캔 — 기록 등급, 렌더 출력을 건드리지 않는다). 렌더 모드(`--html`·`--manifest`·`--self-test`)만 `design-gate-shots/`를 초기화한다. 출력 `design-gate-shots/report.json` + 스크린샷. exit `0`(pass) / `1`(blocker) / `2`(실행 불가 — Needs Install·미정의 플래그·모르는 매니페스트 `version`). 자식 프로세스 기동 실패(EPERM·EACCES·ENOENT)는 exit 2, 기동 후 시간 초과·출력 초과는 exit 1(ADR-063 D1 spawn 3분기 승계).
+- **실행 scope(monorepo)**: 각 화면의 `scope`(기본 `.`)를 어댑터 명령의 **작업 디렉터리**로 쓴다 — `build-storybook`은 Storybook이 설치된 scope(예 `apps/web`), `flutter test`는 `pubspec.yaml`이 있는 scope(예 `apps/mobile`)에서 돈다. 매니페스트·`source[]`·`snapshots[]`·출력 디렉터리 경로는 **저장소 루트 기준**으로 유지한다(한 매니페스트가 웹·Flutter 화면을 함께 담기 때문 — 부록 예시 참조).
 - **웹 어댑터**: `preview: "story:<id>"` → Storybook 정적 빌드(`build-storybook -o design-gate-storybook/` — **매 실행 재빌드**; 같은 세션 반복에서만 `--no-build`로 재사용, mtime 캐시 없음) + 내장 정적 서버(임시 포트) → 화면의 `states[]` 각 `preview`(없으면 화면 `preview` 1개)를 `iframe.html?id=<id>&viewMode=story`로 프로필 뷰포트마다 fresh render → populated axe(serious/critical 차단, moderate/minor 보고) + 좁은 폭 geometry(page overflow·viewport escape·clipped text — 기존 v2 로직·오탐 제외 유지). `--html`은 `file://` 렌더로 같은 검사.
 - **Flutter 어댑터**: `preview: "flutter:<test file>"` → `flutter test <file> --reporter json`(위젯 테스트가 프로필 논리 크기 렌더 + `meetsGuideline` 4종 + `FlutterError`(RenderFlex overflow) 0 + PNG 저장 — 캡처 이름 `<screen>-<state>-<w>x<h>.png`) → 결과를 같은 report schema로 정규화. 차단 = guideline 실패·overflow·예외. **컴파일 오류·러너 기동 실패는 exit 2**(blocker가 아니라 실행 불가)로 구분한다.
 - **자가 검사(4케이스)**: `--self-test`는 (a) 내장 known-bad HTML — **규칙별 기대**: `page-overflow`(320) ≥1 · `color-contrast` ≥1 · `button-name` ≥1이 각각 blocker로 잡혀야 한다(합계가 아니라 규칙별 — 한 규칙의 다중 검출이 다른 규칙의 결함을 가리지 않게) (b) 내장 known-good HTML — blocker 0 (c) 내장 정적 HTML 2개를 임시 매니페스트(`preview: "url:<path>"`)로 서빙해 매니페스트 경로·report·`--snapshot` 저장까지 exit 0 (d) Flutter 프로젝트면 `test/design_gate/self_bad_test.dart`(known-bad: 탭 타겟 20px + 대비 2:1) 실패 + `test/design_gate/self_ok_test.dart`(known-good) 통과 — 컴파일 오류는 exit 2로 구분. 넷 다 기대와 같아야 `self-test: PASS`. 불일치 → `status: wiring-fail`. 통과하면 registry `status: ready (self-test PASS <YYYY-MM-DD>)`.
 - **registry 6필드**: `status | command template | adapter path | manifest 규약 | self-test 일자 | copied-from(복사 시 canonical sha256)`. caller는 `status: ready`만 확인한다(missing/n/a/needs-install/wiring-fail면 `Needs Design Gate: /stack-guard` + 승인 보류 — fail-closed 유지). `adapter path`는 stabilize §1.0 (a) 실재 검사용, `copied-from`은 stack-guard 재실행(사본 sha == copied-from이면 무수정 → 새 canonical로 교체 + copied-from 갱신, 다르면 diff 보고 + 사용자 결정)과 stabilize §1.0 (b)(canonical 현재 sha ≠ copied-from → `/stack-guard` 재실행 권장)에만 쓴다.
 - **품질 계약 불변**: ADR-058 D3(serious/critical axe·좁은 폭 geometry 차단, reviewer 픽셀 판정, repair ≤2, populated 전제). 토큰 외 리터럴 스캔은 문자열 검사라 기록 등급(ADR-063 D6) — design-milestone 승인 체크리스트가 «0건 또는 사유 기입»을 요구한다.
-- **single-origin**: `design-gate-shots/`·`design-gate-storybook/`은 매 실행 초기화 — 같은 checkout에서 동시 2실행 금지(ADR-063 D7 승계).
+- **single-origin**: `design-gate-shots/`는 렌더 모드 매 실행 초기화, `design-gate-storybook/`는 **빌드를 수행할 때만** 재생성한다(`--no-build` 실행은 기존 빌드를 보존한다 — 초기화하면 재사용할 대상이 사라진다). `--no-build`는 **같은 세션에서 코드 변경 없이 반복 실행할 때만** 쓴다(빌드 입력이 바뀌었으면 재빌드 — mtime 캐시를 두지 않으므로 호출 측 책임이다). 같은 checkout에서 동시 2실행 금지(ADR-063 D7 승계).
 
 ### D7. stabilize §3-V v2
-- 웹: 매니페스트 `screens[]`마다 (a) 스토리 렌더(게이트 `--manifest`)와 (b) 제품 라우트 렌더(dev server + 매니페스트 `product_entry` — `null`이면 «제품 진입점 미기록» 사유 echo + (a) 대조만)를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/`에 두고, **승인 스냅샷과 나란히** Read로 대조한다. Flutter: (a) 위젯 테스트 스냅샷 재생성 + (b) 통합 테스트 스크린샷(가능 시, 아니면 `blocked-on-env` 명시). 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(D5-5). 앵커 위계: ① 승인 스냅샷 ② DESIGN 파생 체크리스트. 불일치 `P1 [Experience-drift]` report-only(승계) — 봉인 AC·PX↔AC 위반을 동반해 재현되면 별도 P0 결함(ADR-070 D1). 실행 의무·silent skip 금지 승계.
+- 웹: 매니페스트 `screens[]`마다 (a) 스토리 렌더(게이트 `--manifest`)와 (b) 제품 라우트 렌더(dev server + 매니페스트 `product_entry` — `null`이면 «제품 진입점 미기록» 사유 echo + (a) 대조만)를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/`에 두고, **승인 스냅샷과 나란히** Read로 대조한다. Flutter: (a) 위젯 테스트 스냅샷 재생성 + (b) 통합 테스트 스크린샷(가능 시, 아니면 `blocked-on-env` 명시). 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(D5-5). **매니페스트에 없는 UI 화면**(`프로토타입 면제:` feature · 이전 M 승인본을 변경 없이 재사용하는 화면)도 제품 렌더 (b)는 만들어 ② 경로로 대조한다 — 순회 대상을 매니페스트로만 좁히면 ADR-056 결정 5의 면제·부재 화면 fallback이 사라진다. 앵커 위계: ① 승인 스냅샷(그 화면을 등록한 M의 것) ② DESIGN 파생 체크리스트. 불일치 `P1 [Experience-drift]` report-only(승계) — 봉인 AC·PX↔AC 위반을 동반해 재현되면 별도 P0 결함(ADR-070 D1). 실행 의무·silent skip 금지 승계.
 
 ### D8. `/plan-milestone` 분리
 R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 3` ↔ F `## 3` ↔ F `## 7` FAC)까지 하고 **`draft` 유지** + 출력 «다음: `/design-milestone M<N>`». 비-UI는 기존대로 `contract-ready`. draft UI M 재실행 시 R0~R4 완료면 재실행 없이 같은 안내를 낸다. `contract-ready` UI M의 텍스트 계약 수정은 plan-milestone, 화면 층 수정은 design-milestone 재진입.
@@ -1268,7 +1269,7 @@ R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 
 ### D9. 하류 소비자 배선
 - `/plan-workitem` 입구 계약: `contract-ready` + feature `## 7` `프로토타입:`(매니페스트 screen id) 또는 `프로토타입 면제:`. 부재 시 `Needs Experience Contract` + «`/design-milestone M<N>`» 안내(ADR-007#amend-5 문구 갱신). task `## 3`에 `승인 UI 재사용` line item authoring, PX↔AC는 매니페스트 `px[]`에서.
 - `/validate-plan`·reviewer `[Plan-FAC-coverage]`: PX 소유·문법 검사의 source = 매니페스트 `px[]` + 코드 주석 grep(`^PX-M<N>-<screen>-\d{2,}$`). 매니페스트 화면마다 스냅샷 파일 실재 + 각 feature `프로토타입:` id가 매니페스트에 존재.
-- `/seal-milestone` 조건 4에 UI M «매니페스트 존재 + 스냅샷 실재» 추가.
+- `/seal-milestone` 조건 4에 UI M «매니페스트 존재 + 스냅샷 실재» 추가. **`프로토타입:` 값은 `<screen>`(이 M 등록) 또는 `M<K>/<screen>`(이전 M 승인본을 변경 없이 재사용)이며, 검사는 그 id가 가리키는 M의 매니페스트·스냅샷을 본다** — 이 M이 등록한 화면이 0개인 재사용 전용 UI 마일스톤을 매니페스트 부재로 오차단하지 않는다.
 - `/implement-workitem` 3-R (b): «승인 프로토타입 경로 실재» = 매니페스트 entry + `source[]` 파일 실재.
 - `/validate-workitem`·validator: `[Design-reuse-drift]`(D5-4). 게이트 재실행은 «task `## 3`에 `승인 UI 재사용` line item이 있고 diff가 그 화면의 매니페스트 `source[]`를 건드릴 때만» `--manifest <M> --only <screen id>`로 한다(task마다 Storybook 재빌드 비용을 막는다).
 - 배선 task가 라우트를 확정하면 task `## 3`의 `- product_entry 확정: <route> → 매니페스트 갱신` line item(plan-workitem authoring)을 implement가 실행해 매니페스트 `product_entry`만 갱신한다(다른 필드 write 금지).
@@ -1281,6 +1282,84 @@ R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 
 - 비-UI 마일스톤은 본 skill을 부르지 않는다. UI 프로젝트의 비-UI feature는 R1이 `프로토타입 면제: 비-UI feature`를 자동 기입.
 - Codex: designer/builder/reviewer 위임을 메인 인라인(순차 페르소나 + `under-verified`)으로 degrade. 게이트·캡처는 그대로 실행.
 - 종료 후 `/clear` 권장. 화면 6~8개 초과면 두 세션 분할(R3까지 / R4~R7) — 같은 M 재실행이 재개.
+
+## 매니페스트 schema (v1)
+```json
+{
+  "version": 1,
+  "milestone": "M1",
+  "profiles": {
+    "consumer-mobile": { "platform": ["native/android", "native/ios"], "viewports": [{ "w": 390, "h": 844 }, { "w": 360, "h": 800 }] },
+    "admin-web": { "platform": ["web"], "viewports": [{ "w": 1280, "h": 900 }, { "w": 375, "h": 812 }] }
+  },
+  "screens": [
+    {
+      "id": "onboarding",
+      "feature": "F-001",
+      "profile": "consumer-mobile",
+      "scope": "apps/mobile",
+      "preview": "flutter:test/screens/onboarding_prototype_test.dart",
+      "entry": "lib/prototype/main.dart#onboarding",
+      "source": ["lib/screens/onboarding/onboarding_screen.dart", "lib/screens/onboarding/fixtures.dart"],
+      "states": [
+        { "id": "default", "preview": "flutter:test/screens/onboarding_prototype_test.dart#default" },
+        { "id": "loading", "preview": "flutter:test/screens/onboarding_prototype_test.dart#loading" },
+        { "id": "error", "preview": "flutter:test/screens/onboarding_prototype_test.dart#error" },
+        { "id": "empty", "preview": "flutter:test/screens/onboarding_prototype_test.dart#empty" },
+        { "id": "long-title", "preview": "flutter:test/screens/onboarding_prototype_test.dart#long-title", "baseline": true },
+        { "id": "overflow", "preview": "flutter:test/screens/onboarding_prototype_test.dart#overflow" }
+      ],
+      "px": ["PX-M1-onboarding-01", "PX-M1-onboarding-02"],
+      "brief": "briefs/onboarding.md",
+      "snapshots": [
+        "snapshots/onboarding-default-390x844.png", "snapshots/onboarding-default-360x800.png",
+        "snapshots/onboarding-empty-390x844.png", "snapshots/onboarding-error-390x844.png",
+        "snapshots/onboarding-long-title-390x844.png"
+      ],
+      "product_entry": null,
+      "approved": { "date": "2026-09-20", "by": "user" },
+      "supersedes": [],
+      "handoff": {
+        "run": "flutter run -t lib/prototype/main.dart",
+        "remaining_wiring": ["habits 목록 데이터 소스", "완료 토글 저장", "오류 상태 실제 예외 매핑"]
+      }
+    },
+    {
+      "id": "admin-list",
+      "feature": "F-003",
+      "profile": "admin-web",
+      "scope": "apps/web",
+      "preview": "story:screens-adminlist--default",
+      "source": ["src/components/screens/admin-list/AdminList.tsx", "src/components/screens/admin-list/AdminList.stories.tsx", "src/components/screens/admin-list/fixtures.ts"],
+      "states": [
+        { "id": "default", "preview": "story:screens-adminlist--default" },
+        { "id": "loading", "preview": "story:screens-adminlist--loading" },
+        { "id": "error", "preview": "story:screens-adminlist--error" },
+        { "id": "empty", "preview": "story:screens-adminlist--empty" },
+        { "id": "long-title", "preview": "story:screens-adminlist--long-title" },
+        { "id": "overflow", "preview": "story:screens-adminlist--overflow" }
+      ],
+      "px": ["PX-M1-admin-list-01"],
+      "brief": "briefs/admin-list.md",
+      "snapshots": [
+        "snapshots/admin-list-default-1280x900.png", "snapshots/admin-list-default-375x812.png",
+        "snapshots/admin-list-empty-1280x900.png", "snapshots/admin-list-error-1280x900.png"
+      ],
+      "product_entry": "/admin/items",
+      "approved": { "date": "2026-09-20", "by": "user" },
+      "supersedes": [],
+      "handoff": { "run": "npm run storybook", "remaining_wiring": ["목록 fetch", "권한 가드"] }
+    }
+  ]
+}
+```
+- `preview`는 `story:<storybook id>`·`flutter:<test file>[#<group>]`·(게이트 자가 검사 전용) `url:<path>` 중 하나. `entry`는 사람이 여는 진입점(선택). `states[].preview`가 상태별 렌더 대상이고, 화면 `preview`는 default 상태 fallback이다.
+- `scope`는 **어댑터 명령을 돌릴 작업 디렉터리**다(단일 패키지는 `.` — 생략 시 기본값). `build-storybook`은 Storybook이 설치된 scope, `flutter test`는 `pubspec.yaml`이 있는 scope에서 돈다. 매니페스트·`source[]`·`snapshots[]`·`brief`·출력 디렉터리 경로는 **저장소 루트 기준**이다 — 한 매니페스트가 웹·Flutter 화면을 함께 담기 때문이다(위 예시가 그 경우다).
+- `snapshots[]` 파일명은 `<screen>-<state>-<w>x<h>.png`. 기준선 집합 = 각 뷰포트 `default` + 1차 뷰포트 `empty`·`error` + `baseline: true` 상태.
+- `product_entry`는 제품 라우트·딥링크. design-milestone R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` → 배선 task line item이 확정해 implement가 이 필드만 갱신한다. stabilize §3-V ②(제품 렌더)의 입력.
+- `supersedes[]`는 이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 이 M이 그 화면의 기준선을 새로 잡을 때. 이전 M 파일은 불변. 소비자는 «가장 최근 M의 등록·supersedes»를 현재 기준선으로 해석한다.
+- `_theme/manifest.json`은 `milestone: "_theme"`, 화면 id `theme-showcase`(프로필별 `theme-showcase-<profile>`), `feature: "—"`, `px: []`, `product_entry: null`.
+- 화면 id는 kebab-case이며 숫자로 끝나지 않는다. 게이트는 `version !== 1`이면 exit 2. 필드 추가는 minor로 하되 `version`은 호환 깨질 때만 올린다.
 
 ## 비결정 (No)
 - HTML 프로토타입 병행 유지 — 이중 절차. 제품 라우트 개발 전용 페이지 기본화 — 제품 코드 오염. Chromatic·Widgetbook 기본 도입 — 의존 증가. 픽셀 diff 오라클 — host 편차. 면제 판정값 — ADR-070.
@@ -1349,7 +1428,7 @@ Low~Medium — 코드 재사용·브리프·갤러리 효과는 [가설]. 게이
 
 ## 참고
 - ADR-056(superseded — 승계 원천), ADR-058(#amend-4), ADR-073, ADR-059(#amend-1), ADR-060 D6·D7, ADR-009, ADR-064 D5, ADR-069(#amend-1), ADR-063 D6·D7, ADR-057#amend-3 결정 4, ADR-007#amend-5, ADR-047 D3, ADR-022.
-```
+````
 
 ### P5-2. ADR-056 status 변경
 - `## Status` `accepted` → `superseded`. 아래 줄: `> 대체: [ADR-072](ADR-072-design-milestone-and-code-prototype.md) (2026-09-11). 본 문서는 history 잔존. (현재 SSOT: ADR-072)`. `## 현재 유효 결정`·본문·amendment는 원문 유지.
@@ -1485,8 +1564,8 @@ policy:
 - **공통**: 렌더 모드(`--html`·`--manifest`·`--self-test`)만 실행 시작에 `design-gate-shots/`를 초기화한다(ADR-063 D7). `--tokens-only`는 출력 디렉터리를 건드리지 않는다(R6에서 렌더 뒤에 돌아도 reviewer가 볼 스크린샷이 남는다). 자식 프로세스(`storybook build`·`flutter test`) 기동 실패(`EPERM`·`EACCES`·`ENOENT`)는 exit 2, 기동 후 시간 초과·출력 초과는 exit 1(ADR-063 D1 spawn 3분기 승계). 결과는 `design-gate-shots/report.json`(schema: `{ version: 3, mode, screens: [{ id, profile, viewport: {w,h}, preview, blockers: [{rule, selector|widget, detail}], reports: [...], screenshot }], summary: { blockers, reports, unavailable } }`). exit 0/1/2.
 - **`--html`**: v2와 같다(1280/375/320 fresh render, 320 geometry, populated axe 1280·320). 뷰포트 override `--viewports 1280x900,375x812`.
 - **`--manifest`**: JSON 읽기 → `version !== 1`이면 exit 2. `--only`가 있으면 그 화면만. `profiles[<screen.profile>].viewports` + 항상 `320x720` geometry 전용 추가(웹만). 화면의 `states[]` 각 `preview`(없으면 화면 `preview` 1개)를 렌더한다:
-  - `story:<id>` → (1) `npx storybook build -o design-gate-storybook --quiet`를 **매 실행** 수행(`--no-build`가 있으면 기존 빌드 재사용 — 같은 세션 반복용; mtime 캐시 없음) (2) `node:http`로 임시 포트 정적 서빙 (3) `http://127.0.0.1:<port>/iframe.html?id=<id>&viewMode=story`를 뷰포트별 fresh goto → v2 검사 함수. 빌드 실패·Storybook 미설치 → 그 화면 `unavailable` + 전체 exit 2.
-  - `flutter:<test file>` → `flutter test <file> --reporter json --dart-define=DESIGN_GATE_OUT=design-gate-shots` 실행. 테스트 파일 규약(design-milestone R4가 생성): 각 프로필 크기마다 `tester.binding.setSurfaceSize`, `pumpWidget`, `expectLater(tester, meetsGuideline(...))` 4종, `FlutterError.onError` 수집(RenderFlex overflow 등) 0 확인, `captureImage`로 PNG를 `DESIGN_GATE_OUT/<screen>-<state>-<w>x<h>.png` 저장. 러너는 json 이벤트에서 `testDone` 실패를 blocker로 정규화(`rule: guideline:<name> | overflow | exception`). `flutter` 미설치·러너 기동 실패·컴파일 오류(스트림에 `protocolVersion` 없음 또는 `error` 이벤트만)는 exit 2로 구분한다.
+  - `story:<id>` → (1) `npx storybook build -o design-gate-storybook --quiet`를 **화면의 `scope`(기본 `.`)를 작업 디렉터리로** 매 실행 수행(`--no-build`가 있으면 기존 빌드 재사용 — 같은 세션 반복용; **그 실행에서는 `design-gate-storybook/`을 초기화하지 않는다**; mtime 캐시 없음) (2) `node:http`로 임시 포트 정적 서빙 (3) `http://127.0.0.1:<port>/iframe.html?id=<id>&viewMode=story`를 뷰포트별 fresh goto → v2 검사 함수. 빌드 실패·Storybook 미설치 → 그 화면 `unavailable` + 전체 exit 2.
+  - `flutter:<test file>` → 화면의 `scope`(`pubspec.yaml`이 있는 디렉터리 — 기본 `.`)를 작업 디렉터리로 `flutter test <file> --reporter json --dart-define=DESIGN_GATE_OUT=design-gate-shots` 실행(매니페스트·`source[]`·출력 경로는 저장소 루트 기준 — ADR-072 D6 실행 scope). 테스트 파일 규약(design-milestone R4가 생성): 각 프로필 크기마다 `tester.binding.setSurfaceSize`, `pumpWidget`, `expectLater(tester, meetsGuideline(...))` 4종, `FlutterError.onError` 수집(RenderFlex overflow 등) 0 확인, `captureImage`로 PNG를 `DESIGN_GATE_OUT/<screen>-<state>-<w>x<h>.png` 저장. 러너는 json 이벤트에서 `testDone` 실패를 blocker로 정규화(`rule: guideline:<name> | overflow | exception`). `flutter` 미설치·러너 기동 실패·컴파일 오류(스트림에 `protocolVersion` 없음 또는 `error` 이벤트만)는 exit 2로 구분한다.
   - `--snapshot <dir>`이 있으면 통과 화면의 기준선 집합(각 뷰포트 default + 1차 뷰포트 empty·error + `states[].baseline: true`)을 PNG 그대로 `<dir>/<screen>-<state>-<w>x<h>.png`로 복사한다(변환 없음). 파일당 500KB 초과는 `report.summary.snapshotWarnings[]`에 경고(차단 아님).
 - **`--tokens-only`**: glob 파일에서 정의 라인(`--<name>: #hex`, `static const Color … =`, tokens 파일 경로) 제외 후 `#hex`·`[#hex]`(Tailwind arbitrary)·`Color(0x…)`·`Colors.<x>`·`\b\d+px\b`(spacing 토큰 정의 밖)를 grep. 결과는 `report.tokens[]`(기록 등급 — exit에 영향 없음).
 - **`--self-test`**(4케이스): (a) 내장 known-bad HTML(뷰포트 escape `width: 200vw` 요소 + 대비 2:1 텍스트 + 라벨 없는 `<button><svg/></button>`) 렌더 → **규칙별** blocker 기대: `page-overflow`(320) ≥1 · `color-contrast` ≥1 · `button-name` ≥1. (b) 내장 known-good HTML → blocker 0. (c) 내장 정적 HTML 2개를 임시 디렉터리에 쓰고 임시 매니페스트(`preview: "url:<path>"`)로 서빙해 매니페스트 경로·report·`--snapshot` 저장까지 exit 0. (d) `pubspec.yaml`이 있으면 `test/design_gate/self_bad_test.dart`(stack-guard가 생성: 20px 탭 타겟 + 2:1 대비 위젯) 실패 + `test/design_gate/self_ok_test.dart` 통과 — 컴파일 오류는 exit 2. 넷 다 기대 일치 → `self-test: PASS` exit 0, 불일치 → `self-test: FAIL` exit 1, 실행 불가 → exit 2.
@@ -1650,7 +1729,7 @@ policy:
 - (a) §3-V 전체((a)~(d) + Codex)를 교체:
   ```
   3-V. **경험 게이트 — 구현 화면 vs 승인 스냅샷 대조 (ADR-072 D7, UI 확정 마일스톤 한정)**: MCP 불요 체계 감사. **실행 자체는 의무 — silent skip 금지**(미실행 사유 echo; 판정은 report-only).
-     - (a) `docs/20-system/prototypes/M<N>/manifest.json`을 읽는다(부재 = `blocked-on-env` 아님 — 계약 결함 `P0 [Experience-contract] 매니페스트 부재`). 화면마다 두 렌더를 만든다: **① 스토리/위젯 렌더** — `validate:design -- --manifest <경로> --snapshot docs/40-validation/visual/M-N/proto/`; **② 제품 렌더** — 웹은 dev server 기동(명령은 STACK_SETUP_PLAN·`package.json` `dev`/`start`에서 회수, readiness 대기, 종료 시 kill — 재사용 규칙 기존대로) 후 매니페스트 `product_entry`(`null`이면 «제품 진입점 미기록» 사유 echo + ① 대조만)의 라우트를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/app/`, Flutter는 통합 테스트 스크린샷이 가능하면 그것, 아니면 `blocked-on-env` 명시(ADR-059#amend-1 결정 4). blocker가 있어 `--snapshot` 복사에서 빠진 화면은 `design-gate-shots/`의 캡처를 ①로 쓴다.
+     - (a) `docs/20-system/prototypes/M<N>/manifest.json`을 읽는다(부재 = `blocked-on-env` 아님 — 계약 결함 `P0 [Experience-contract] 매니페스트 부재`). 화면마다 두 렌더를 만든다(**매니페스트에 없는 UI 화면 — `프로토타입 면제:` feature·이전 M 승인본 재사용 — 은 ②만 만들어 (b)의 ② 경로로 대조한다, ADR-072 D7**): **① 스토리/위젯 렌더** — `validate:design -- --manifest <경로> --snapshot docs/40-validation/visual/M-N/proto/`; **② 제품 렌더** — 웹은 dev server 기동(명령은 STACK_SETUP_PLAN·`package.json` `dev`/`start`에서 회수, readiness 대기, 종료 시 kill — 재사용 규칙 기존대로) 후 매니페스트 `product_entry`(`null`이면 «제품 진입점 미기록» 사유 echo + ① 대조만)의 라우트를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/app/`, Flutter는 통합 테스트 스크린샷이 가능하면 그것, 아니면 `blocked-on-env` 명시(ADR-059#amend-1 결정 4). blocker가 있어 `--snapshot` 복사에서 빠진 화면은 `design-gate-shots/`의 캡처를 ①로 쓴다.
      - (b) 각 화면에 대해 **승인 스냅샷(`snapshots/`) ↔ ① ↔ ②**를 Read(멀티모달)로 나란히 대조한다. 앵커 위계: ① 승인 스냅샷(존재 시) ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면). 관점: 레이아웃·상태·카피·토큰 준수 — 픽셀 일치가 아니라 경험 계약 준수. ① vs 승인 스냅샷 불일치는 «승인 후 UI 코드 변경»이므로 같은 M 재승인 또는 다음 M `supersedes` 등재 여부를 함께 본다. 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(ADR-072 D5-5).
      - (c) 불일치는 QA_FINDINGS에 `P1 [Experience-drift] <screen> — <1줄> (앵커: 스냅샷|DESIGN 파생 / 렌더: proto|app)` report-only. 판독 불확실은 «판독 불확실» 명시. 시각 불일치가 봉인 AC·PX↔AC 위반을 동반하고 재현되면 그것은 별도 P0 결함(재현 줄 포함)으로 등재한다(ADR-070 D1).
      - (d) 단계 8 출력에 갤러리 경로 + «사용자 육안 확인은 `/accept-milestone <M>`이 수행한다» 1줄. 관측 modality AC가 1건이라도 있으면 사실상 필수 경로(ADR-068 D3).
@@ -1662,7 +1741,7 @@ policy:
 - (e) 단계 8 `(UI) 경험 게이트 결과: [Experience-drift] N건 + 스크린샷 갤러리 경로` 유지. 문서 내 `ADR-056` → 부록 B, `ADR-058#amend-2` → `ADR-072 D6`, `ADR-027#…` → 부록 A.
 
 ### P5-16. 나머지 스킬 한 줄씩
-- `seal-milestone` 조건 4(`4. **커버리지** — …`) 끝에: `**UI M은 추가로** `docs/20-system/prototypes/M<N>/manifest.json` 존재 + 각 화면 `approved.date`·`snapshots[]` 파일 실재 + 각 UI feature `프로토타입:` id가 매니페스트에 존재(ADR-072 D9). 부재면 봉인 거부 + «`/design-milestone M<N>`».` 봉인 receipt 형식은 불변.
+- `seal-milestone` 조건 4(`4. **커버리지** — …`) 끝에: `**UI M은 추가로** `docs/20-system/prototypes/M<N>/manifest.json` 존재 + 각 화면 `approved.date`·`snapshots[]` 파일 실재 + 각 UI feature `프로토타입:` id가 그 id가 가리키는 M(`<screen>`=이 M / `M<K>/<screen>`=이전 M 재사용)의 매니페스트에 존재(ADR-072 D9). 부재면 봉인 거부 + «`/design-milestone M<N>`».` 봉인 receipt 형식은 불변.
 - `implement-workitem` 3-R (b) `UI면 승인 프로토타입 경로가 **실제로 바뀌었거나 사라졌는지**` → `UI면 매니페스트의 그 화면 entry + `source[]` 파일이 **실재하고 approved 상태인지**(ADR-072 D9)`. 3-R 뒤 문장 `(참조 프로토타입 경로 삭제·상위 ## 7/INV 변경 등 계획 전제 붕괴)` → `(매니페스트 entry·source 삭제·상위 `## 7`/INV 변경 등)`. `일반 오류(테스트·타입·구현 누락·프로토타입 세부 불일치)` 유지.
 - `accept-milestone` R0 2 `## 7의 프로토타입: 참조 줄` → `## 7의 프로토타입: 참조 줄 + 매니페스트(`snapshots[]`·`handoff.run`)`; R2 5 `승인 프로토타입 경로(docs/20-system/prototypes/M<N>/<screen>.html)를 함께 제시해` → `승인 스냅샷 경로(`docs/20-system/prototypes/M<N>/snapshots/`)와 미리보기 실행 명령(`handoff.run`)을 함께 제시해`. R4/근거의 `프로토타입 경로` → `스냅샷 경로`. R0 2 줄 끝에 `(ADR-072 D9)`를 붙인다(역참조).
 - `repair-plan` 4-M `프로토타입 재승인이 필요한 수정(화면 구성·PX 변경)은 직접 고치지 말고 /plan-milestone M<N> 재개를 안내한다(R5 승인 루프가 소유)` → `… `/design-milestone M<N> --screens <id,...>` 재진입을 안내한다(R3~R6 승인 루프가 소유 — ADR-072 D1 (iii))`.
@@ -1882,81 +1961,10 @@ docs(validation): record dogfood rounds 11 and 12 and the builder effort experim
 | `#amend-2`(raw hex 정의 예외) | `ADR-072`(stabilize §5-2 정의/사용처 구분 — 인용 재지정) |
 | `#amend-3`(전환표) | `ADR-072 D1`(R1 전환표)·`D9` |
 
-## 부록 C. 화면 매니페스트 schema (v1)
+## 부록 C. 화면 매니페스트 schema (v1) — ADR-072로 이관
 
-```json
-{
-  "version": 1,
-  "milestone": "M1",
-  "profiles": {
-    "consumer-mobile": { "platform": ["native/android", "native/ios"], "viewports": [{ "w": 390, "h": 844 }, { "w": 360, "h": 800 }] },
-    "admin-web": { "platform": ["web"], "viewports": [{ "w": 1280, "h": 900 }, { "w": 375, "h": 812 }] }
-  },
-  "screens": [
-    {
-      "id": "onboarding",
-      "feature": "F-001",
-      "profile": "consumer-mobile",
-      "preview": "flutter:test/screens/onboarding_prototype_test.dart",
-      "entry": "lib/prototype/main.dart#onboarding",
-      "source": ["lib/screens/onboarding/onboarding_screen.dart", "lib/screens/onboarding/fixtures.dart"],
-      "states": [
-        { "id": "default", "preview": "flutter:test/screens/onboarding_prototype_test.dart#default" },
-        { "id": "loading", "preview": "flutter:test/screens/onboarding_prototype_test.dart#loading" },
-        { "id": "error", "preview": "flutter:test/screens/onboarding_prototype_test.dart#error" },
-        { "id": "empty", "preview": "flutter:test/screens/onboarding_prototype_test.dart#empty" },
-        { "id": "long-title", "preview": "flutter:test/screens/onboarding_prototype_test.dart#long-title", "baseline": true },
-        { "id": "overflow", "preview": "flutter:test/screens/onboarding_prototype_test.dart#overflow" }
-      ],
-      "px": ["PX-M1-onboarding-01", "PX-M1-onboarding-02"],
-      "brief": "briefs/onboarding.md",
-      "snapshots": [
-        "snapshots/onboarding-default-390x844.png", "snapshots/onboarding-default-360x800.png",
-        "snapshots/onboarding-empty-390x844.png", "snapshots/onboarding-error-390x844.png",
-        "snapshots/onboarding-long-title-390x844.png"
-      ],
-      "product_entry": null,
-      "approved": { "date": "2026-09-20", "by": "user" },
-      "supersedes": [],
-      "handoff": {
-        "run": "flutter run -t lib/prototype/main.dart",
-        "remaining_wiring": ["habits 목록 데이터 소스", "완료 토글 저장", "오류 상태 실제 예외 매핑"]
-      }
-    },
-    {
-      "id": "admin-list",
-      "feature": "F-003",
-      "profile": "admin-web",
-      "preview": "story:screens-adminlist--default",
-      "source": ["src/components/screens/admin-list/AdminList.tsx", "src/components/screens/admin-list/AdminList.stories.tsx", "src/components/screens/admin-list/fixtures.ts"],
-      "states": [
-        { "id": "default", "preview": "story:screens-adminlist--default" },
-        { "id": "loading", "preview": "story:screens-adminlist--loading" },
-        { "id": "error", "preview": "story:screens-adminlist--error" },
-        { "id": "empty", "preview": "story:screens-adminlist--empty" },
-        { "id": "long-title", "preview": "story:screens-adminlist--long-title" },
-        { "id": "overflow", "preview": "story:screens-adminlist--overflow" }
-      ],
-      "px": ["PX-M1-admin-list-01"],
-      "brief": "briefs/admin-list.md",
-      "snapshots": [
-        "snapshots/admin-list-default-1280x900.png", "snapshots/admin-list-default-375x812.png",
-        "snapshots/admin-list-empty-1280x900.png", "snapshots/admin-list-error-1280x900.png"
-      ],
-      "product_entry": "/admin/items",
-      "approved": { "date": "2026-09-20", "by": "user" },
-      "supersedes": [],
-      "handoff": { "run": "npm run storybook", "remaining_wiring": ["목록 fetch", "권한 가드"] }
-    }
-  ]
-}
-```
-- `preview`는 `story:<storybook id>`·`flutter:<test file>[#<group>]`·(게이트 자가 검사 전용) `url:<path>` 중 하나. `entry`는 사람이 여는 진입점(선택). `states[].preview`가 상태별 렌더 대상이고, 화면 `preview`는 default 상태 fallback이다.
-- `snapshots[]` 파일명은 `<screen>-<state>-<w>x<h>.png`. 기준선 집합 = 각 뷰포트 `default` + 1차 뷰포트 `empty`·`error` + `baseline: true` 상태.
-- `product_entry`는 제품 라우트·딥링크. design-milestone R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` → 배선 task line item이 확정해 implement가 이 필드만 갱신한다. stabilize §3-V ②(제품 렌더)의 입력.
-- `supersedes[]`는 이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 이 M이 그 화면의 기준선을 새로 잡을 때. 이전 M 파일은 불변. 소비자는 «가장 최근 M의 등록·supersedes»를 현재 기준선으로 해석한다.
-- `_theme/manifest.json`은 `milestone: "_theme"`, 화면 id `theme-showcase`(프로필별 `theme-showcase-<profile>`), `feature: "—"`, `px: []`, `product_entry: null`.
-- 화면 id는 kebab-case이며 숫자로 끝나지 않는다. 게이트는 `version !== 1`이면 exit 2. 필드 추가는 minor로 하되 `version`은 호환 깨질 때만 올린다.
+본 schema는 **ADR-072 `## 매니페스트 schema (v1)`가 소유**한다(P5-1 골격에 포함 — 본 가이드는 완료 후 삭제되므로 여기에 두면 계약이 사라진다).
+매니페스트를 읽는 소비자(게이트·validate-plan·seal·stabilize·accept)는 그 절을 인용한다.
 
 ## 부록 D. 스택 결정 카탈로그 초안 (`stack-catalog.md` 본문)
 

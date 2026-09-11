@@ -32,8 +32,13 @@ async function loadChromium() {
   for (const base of bases) {
     const req = createRequire(join(base, 'package.json'));
     for (const spec of ['playwright', '@playwright/test']) {
-      try { return (await import(pathToFileURL(req.resolve(spec)).href)).chromium; }
-      catch (e) { errors.push(`${base}:${spec} — ${e.code ?? e.message}`); }
+      try {
+        const mod = await import(pathToFileURL(req.resolve(spec)).href);
+        // playwright는 CJS 재-export라 namespace에 named `chromium`이 없다 — default(module.exports)에서 꺼낸다.
+        const c = mod.chromium ?? mod.default?.chromium;
+        if (c) return c;
+        errors.push(`${base}:${spec} — chromium export 없음`);
+      } catch (e) { errors.push(`${base}:${spec} — ${e.code ?? e.message}`); }
     }
   }
   console.error('Needs Install: npm i -D @playwright/test && npx playwright install — 캡처 미실행(모듈 부재).');
@@ -74,6 +79,13 @@ try {
           const res = await page.goto(url, { waitUntil: 'domcontentloaded' });
           // 로그인 벽·봇 차단은 예외를 던지지 않고 403/401 페이지를 그대로 렌더한다 — 상태 코드로 걸러야 «정상 캡처»로 둔갑하지 않는다.
           if (!res || !res.ok()) throw new Error(`HTTP ${res ? res.status() : 'no-response'} — 로그인 벽·봇 차단 가능`);
+          // 200으로 끝나는 로그인 리다이렉트(302 → /login)도 «정상 캡처»가 되면 안 된다 — 최종 URL이 로그인 경로로 바뀌었으면 실패로 본다(휴리스틱).
+          const finalUrl = page.url();
+          if (finalUrl !== url) {
+            const f = new URL(finalUrl);
+            const loginish = /(^|[/.])(login|signin|sign-in|auth|sso)([/?#]|$)/i;
+            if (loginish.test(f.pathname) || loginish.test(f.hostname)) throw new Error(`로그인 리다이렉트 — 최종 URL ${finalUrl}`);
+          }
           let n = 0;
           const shoot = async () => {
             const shotPath = join(SHOTS_DIR, `${id}-${flow.name}-${n}-${vp.w}x${vp.h}.png`);
