@@ -286,6 +286,14 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 
 ## 메인 세션 실행 + 무거운 추론 위임 (ADR-050)
 본 skill은 fork sub-agent가 아니라 **메인 세션**에서 직접 실행된다(bootstrap-project·discover-product 패턴 정합). 메인 컨텍스트 비대화를 막기 위해:
+
+**분할 authoring 순서 (ADR-004#amend-8 결정 4 + amend-7 결정 3)** — 마일스톤 **전체 스냅샷 원칙은 불변**이다(ADR-057#amend-3). 한 실행 안에서 세 단계로 간다.
+
+1. **뼈대 (메인)** — 전체 task 목록·ID·공용 task·의존을 **먼저 확정**한다. 이 목록이 SSOT다.
+2. **분할 authoring (위임, 병렬 가능)** — 뼈대를 **feature 단위**로 갈라 조각마다 planner 단발 sub-call 을 보낸다. **한 조각의 산출물은 4개 이하**(task 문서 + 그 feature 의 `## 7-1`·`## 7-3` 를 합쳐 센다). dispatch 에 **1의 task 목록·ID 를 그대로 실어 보낸다** — **각 조각이 task 목록을 따로 발명하는 것은 금지**다(조각마다 다른 분해가 나오면 3의 대조가 성립하지 않는다).
+3. **전체 집합 대조 (메인)** — cross-task seam self-check·`## 7-1` 매핑·3-S 승인 표면 대조는 **전체 task 집합을 대상으로 메인이 한 번에** 돈다. 조각 안에서 부분적으로 돌지 않는다.
+
+조각이 상한에 닿아 부분 보고(「쓴 파일 목록 + 남은 것 1줄」)를 내면, **회수 dispatch 에 그 파일 목록을 그대로 실어** 보낸다 — 재개한 에이전트가 같은 파일을 다시 열지 않는다. 실측(Round 12): 11 산출물을 한 dispatch 에 넣었더니 `planner` 가 **2회 연속 보고 0건**으로 멈췄고 3회차에야 끝나 누계 463K 토큰이 들었다.
 - 무거운 추론(대규모 task 분해 설계·AC interpretation diversity 판단·sizing 협상·아키텍처 영향 분석)은 `Agent` 도구로 **architect 단발 sub-call**에 위임하고, 반환된 결론만 본 skill이 문서에 반영한다(architect의 `model: opus`가 추론 품질 보장). 본 skill이 직접 모든 task 본문을 펼쳐 inline으로 추론하지 않는다.
 - 대상 파일 JIT 읽기는 step 3-G대로 *그 task가 건드릴 실제 파일*에 한정한다(ADR-019 minimal).
 - 분해 완료 후 사용자에게 `/clear` 또는 새 세션을 권장한다 — 다음 단계(`/implement-workitem`)가 깨끗한 컨텍스트에서 시작하도록.

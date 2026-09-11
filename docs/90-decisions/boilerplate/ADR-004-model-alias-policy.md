@@ -238,3 +238,44 @@ dogfood Round 11·12 에서 **팬아웃 단위가 보고 0건 상태로 상한�
 - .claude/agents/builder.md — 결정 1·2 (`maxTurns` frontmatter + 「턴 예산」 절 교체)
 - .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1 (문구만 교체, `maxTurns` 불변)
 - .claude/skills/design-milestone/SKILL.md · .claude/skills/implement-workitem/SKILL.md — 결정 3 slice 크기 기준
+
+## Amendment 8 (2026-09-12) — amend-7 의 분류가 틀렸다: 예산 축은 «쓰기 도구 보유»이고, 예산은 산출물 규모로 잡는다
+
+### 배경
+amend-7 결정 2 는 **「report-only 에이전트의 값은 건드리지 않는다 — 그쪽에서는 실패가 없었다」**를 근거로 `builder` 만 45 → 60 으로 올렸다. 그 분류가 dogfood Round 12 에서 반증됐다.
+
+- [관측됨] `/plan-workitem M1` dispatch 가 `planner` 의 `maxTurns: 12` 상한에서 **보고 0건**으로 멈췄다(1회차 28 tool_use / 136.3K 토큰 / 360초, 텍스트 출력 없음).
+- [관측됨] 회수 dispatch 에 **산출물 목록·우선순위·「침묵으로 끝나면 통째로 미반환이 된다」를 명시해** 다시 보냈는데도 **또 보고 0건**으로 멈췄다(2회차 12 tool_use / 162.0K 토큰 / 257초, 마지막 출력 「Now F-002.」 — builder 실패 때의 「Now the stories file.」과 같은 문장 형태다). 3회차에 완주했고 **누계 463K 토큰 · 약 15분**이 들었다.
+- [관측됨] `planner.md` 에는 amend-7 결정 1 문구가 **전문 그대로** 있다. 지시가 없어서가 아니다.
+- [관측됨] **`planner` 는 report-only 가 아니다.** `tools: Read, Glob, Grep, Write, Edit` 이고 이번 산출물은 task 문서 5개 + feature 3개의 `## 7-1`·`## 7-2`·`## 7-3` = **11 산출물**이었다. 로스터에서 쓰기 도구를 가진 에이전트는 `builder`·`planner`·`architect`·`designer`·`reviewer` 5종이다.
+- [관측됨] `architect` 는 **`maxTurns` 자체가 없고** amend-7 의 「작업 예산」 문구도 없다 — amend-7 fan-out 이 빠뜨렸다(적용 surface 목록에 `architect.md` 가 없다).
+- [관측됨] 더 깊은 원인: Round 11 의 `d3119d3` 이 `/plan-workitem` 에 **3-S 승인 표면 대조**(매니페스트·브리프·DESIGN `## 7`·승인 컴포넌트 시그니처 읽기)를 얹어 위임 단위의 작업량을 늘렸는데, **규칙을 늘릴 때 그 규칙을 수행할 에이전트의 예산을 보는 단계가 없다.**
+
+### 결정
+1. **예산 축을 «쓰기 도구 보유»로 다시 긋는다.** `planner`·`architect`·`designer` 를 `builder` 와 같은 «쓰는 쪽»으로 분류한다(`reviewer` 는 쓰기 도구가 있으나 산출물이 보고 1건이므로 현행 유지).
+2. **예산은 산출물 규모로 잡는다** — `maxTurns = 읽기 기본 8 + 산출물당 3`. slice 상한이 4 산출물(amend-7 결정 3)이므로 문서 산출 에이전트의 값은 **8 + 4×3 = 20** 이다. `planner` 12 → **20**, `designer` 16 → **20**, `architect` 미지정 → **20**. `builder` 는 **60 유지** — 한 산출물이 코드+테스트+검증 루프라 같은 산식이 맞지 않고, amend-7 falsifier (a)가 그 값에 걸려 있다.
+3. **쓰기 에이전트의 부분 보고 형식을 고정한다** — 「**쓴 파일 목록 + 남은 것 1줄**」. 서술을 요구하지 않는다(서술을 요구하면 예산이 남아 있을 때만 낼 수 있다).
+4. **회수 dispatch 는 이미 쓴 파일 목록을 넘긴다.** 호출자가 그 목록을 읽어 전달하므로 재개한 에이전트가 같은 파일을 다시 열지 않는다.
+5. **`/stabilize-milestone` 7-T 에 계수 한 줄을 더한다** — `턴 소진 0건 보고: N회`. 이 실패는 지금까지 사람이 알아채야만 보였다.
+
+### 근거
+- 결정 1 의 근거는 관측이지 이론이 아니다 — amend-7 은 「report-only 는 실패가 없었다」를 규칙으로 승격했는데, **`planner` 를 report-only 로 센 것이 오류**였다. 같은 오류로 `architect` 는 값도 문구도 못 받았다.
+- 결정 2 의 대안 「planner 도 60」을 택하지 않았다: 실패한 dispatch 의 비용 상한만 올린다. 산출물 규모 산식은 slice 규율(amend-7 결정 3)과 한 몸으로 움직여서, **slice 를 지키면 20 으로 충분하고 slice 를 어기면 60 도 모자란다**(이번 관측이 정확히 그 경우다 — 11 산출물).
+- **ADR-047 D3 Mutation Contract 에 «예산 영향» 항목을 지금 넣지 않는다** (사용자 확정 2026-09-12) — Round 13 후보로 남긴다. 채택 조건: **결정 1·2·3·4 적용 뒤에도 쓰기 도구 보유 에이전트가 «보고 0건 상한 도달» 을 1회라도 내면 채택한다.** ADR-047 은 하네스의 중심 계약이라 관측 하나로 항목을 늘리지 않는다.
+- 대가: 문서 산출 에이전트의 실패 비용 상한이 12~16 → 20 으로 는다. slice 규율이 그 대가를 상쇄한다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 2 의 산식과 값.
+- 제약(약, [관측됨]): 결정 3·4·5.
+
+### Mutation delta (ADR-047 D3)
+- failure = 쓰기 도구를 가진 에이전트가 산출물을 거의 다 만들어 놓고 보고 없이 멈춰, 호출자가 회수 dispatch 를 반복한다(관측 2회 연속, 누계 463K 토큰).
+- predicted = Round 13 에서 `planner`·`designer`·`architect` 의 «보고 0건 상한 도달» 0건. 상한에 닿으면 「쓴 파일 목록 + 남은 것 1줄」이 온다.
+- falsifier = (a) 결정 1~4 뒤에도 쓰기 도구 보유 에이전트의 «보고 0건 상한 도달» 이 **1회라도** 나면 **지시로 풀리는 문제가 아니다** — ADR-047 D3 에 «예산 영향» 항목을 넣고(위 근거의 Round 13 후보 채택) 예산 상향 대신 slice 강제로 간다 (b) 산식 `8 + 3×산출물` 이 과다해 20턴 dispatch 의 실사용이 매번 12턴 아래로 끝나면 산식을 재측정해 낮춘다.
+- rollback = 본 amend superseded → `planner` 12 · `designer` 16 · `architect` 미지정 복원, 부분 보고 형식·7-T 계수 제거.
+
+### 적용 surface
+- .claude/agents/planner.md · designer.md · architect.md — 결정 1·2·3 (`maxTurns` frontmatter + 「작업 예산」 절)
+- .claude/agents/builder.md — 결정 3 (부분 보고 형식만; `maxTurns: 60` 불변)
+- .claude/skills/plan-workitem/SKILL.md — 결정 4 + amend-7 결정 3 의 slice 규율 적용
+- .claude/skills/stabilize-milestone/SKILL.md — 결정 5 (7-T 계수)
