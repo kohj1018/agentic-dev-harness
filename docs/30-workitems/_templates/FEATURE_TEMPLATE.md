@@ -50,6 +50,10 @@ feature
      형식: FAC-N → T-NNN:AC-N, T-MMM:AC-M (다대다 허용) — 매핑 뒤에 증명 문장 1줄을 같은 줄에 붙인다:
        `- FAC-1 → T-001:AC-2 — 증명: AC-2 의 <어느 조건>이 FAC-1 의 <어느 요구>를 검증한다` (ADR-072#amend-2)
        증명 문장을 쓸 수 없으면 그 매핑은 «우변은 실재하나 의미가 빈» 상태다 — AC 문안을 고치거나 AC 를 추가한다.
+       **두 슬롯을 다 채운다** — <어느 조건>과 <어느 요구>가 **둘 다** 문장에 있어야 한다. 「AC-2 의 <조건>이 FAC-1 을 **그대로** 검증한다」처럼 오른쪽 슬롯을 「그대로·동일하게·바로」로 때우면 읽는 사람이 FAC 본문을 따로 열어야 다리를 확인할 수 있다 — 그것은 증명이 아니다.
+       코드를 인용할 때는 **줄 번호가 아니라 식별자**를 쓴다(`today_list_screen.dart:92` X / `TodayListScreen 의 remaining` O) — 줄 번호는 다음 커밋에 바로 어긋난다.
+       **제3 형식 (ADR-037#amend-4)**: 승인 표면이 이미 검증하는 FAC 는 `- FAC-N → 승인 스냅샷 <경로> (manifest: <screen id>) — 증명: …` 로 적는다.
+       두 조건을 **모두** 만족할 때만 쓴다 — (i) 그 검증 산출물이 경로로 실재하고 (ii) 이번 M 의 어느 task 도 그 화면 `source[]` 파일을 변경 대상에 넣지 않는다. 우변이 비었거나 `(해당 task 없음)` 처럼 검증자를 지목하지 않은 행은 그대로 unmapped 다.
      unmapped 0건이 /seal-milestone 봉인 조건 — plan-workitem은 발견 시 성공 종료 금지, 승격은 하지 않는다(ADR-037#amend-3 / ADR-060 D7). 구현 시작 후 발견되면 validator(ADR-037) 및 stabilize preflight가 P0 [Spec-gap]로 보고 + 사용자 결정.
      본 subsection은 ## 7 FAC와 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X*. -->
 - FAC-1 →

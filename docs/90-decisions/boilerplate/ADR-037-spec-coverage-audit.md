@@ -111,3 +111,41 @@ plan-workitem의 FAC↔AC *전체 매핑표 echo*를 폐지한다. plan 출력�
 
 ### 강도 (ADR-022)
 - constraint(강) — 계획 완료 조건과 구현 후 계획 잠금을 동시에 보존. validator는 report-only이고 문서·코드를 직접 수정하지 않는다.
+
+## Amendment 4 (2026-09-12) — 승인 표면이 검증하는 FAC 에 매핑 자리가 없다
+
+### 배경
+ADR-072 가 «승인 프로토타입 + 게이트» 라는 검증 매체를 새로 들였는데, `## 7-1` 은 여전히 **task AC 만** 우변으로 안다. 그 사이에 낀 FAC 가 unmapped 로 오검출된다.
+
+- [관측됨] dogfood Round 12 `F-003 FAC-4`(좁은 폭에서 표만 가로 스크롤한다)는 승인 컴포넌트 `AdminHabits.tsx` 가 이미 구현했고 **이번 M 의 어떤 task 도 그 마크업을 건드리지 않는다.** 검증도 이미 있다 — 승인 스냅샷 `admin-habits-narrow-320-320x800.png` 과 게이트의 좁은 폭 geometry 검사가 그것이다.
+- [관측됨] planner 는 `- FAC-4 → (해당 task 없음) — <근거>` 로 적고 "남은 미결정 사항" 에 올렸다. 판단 자체는 옳다 — **변경하지 않는 코드에 새 AC 를 얹지 않는다**(ADR-006). 그런데 amend-3 결정 1·4 의 회수 규칙은 「unmapped 또는 비어 있음」을 세므로 이 행은 **`P0 [Spec-gap]` + graduation `NO`** 로 잡힌다.
+- 남은 두 선택지는 둘 다 나쁘다: 억지 AC 를 만들면 ADR-006 을 어기고, FAC 를 지우면 요구가 사라진다.
+
+### 결정
+1. **`## 7-1` 우변에 제3의 형식을 허용한다** — `- FAC-N → 승인 스냅샷 <경로> (manifest: <screen id>) — 증명: <그 스냅샷/게이트 검사의 어느 결과>가 FAC-N 의 <어느 요구>를 검증한다`. 증명 문장 규율(ADR-072#amend-2 결정 4)은 그대로 적용된다.
+2. **이 형식은 두 조건을 모두 만족할 때만 쓴다** — (i) 그 FAC 를 실제로 검증하는 승인 산출물(스냅샷·게이트 검사)이 **경로로 실재**하고 (ii) 이번 M 의 **어느 task 도 그 화면 `source[]` 파일을 변경 대상에 넣지 않는다.** 하나라도 어기면 쓸 수 없다 — task 가 그 파일을 건드리는 순간 배선이 표현을 바꿀 수 있고, 그때는 AC 가 필요하다.
+3. **회수 규칙 정정** — amend-3 결정 1·4 와 `/stabilize-milestone` preflight 3 의 «unmapped» 정의에서 이 형식을 **뺀다**. 우변이 비었거나 `(해당 task 없음)` 처럼 **검증자를 지목하지 않은** 행만 unmapped 다.
+4. **봉인 시 재확인** — `/seal-milestone` 은 이 형식의 행마다 조건 (ii)를 다시 본다(산하 task 의 변경 파일 목록 대조). 봉인 직전에 그 파일을 건드린 task 가 있으면 봉인을 막고 보고한다.
+
+### 근거
+- 대안 「FAC 를 design 층으로 옮긴다」는 기각했다 — FAC 는 feature 의 수용 조건이고, 검증 매체가 다르다고 요구의 소속이 바뀌지는 않는다.
+- 대안 「unmapped 를 경고로 낮춘다」도 기각했다 — 진짜 unmapped 의 차단력이 같이 내려간다. **형식을 늘리는 쪽이 등급을 낮추는 쪽보다 안전하다.**
+- 조건 (ii)가 이 형식의 안전장치 전부다. 그것이 없으면 「승인됐으니 검증됐다」가 배선 변경을 덮는 만능 면제가 된다.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 2·4 — 조건 두 개와 봉인 재확인.
+- enabling(중, [관측됨]): 결정 1·3.
+
+### Mutation delta (ADR-047 D3)
+- failure = 승인 표면이 이미 검증하는 FAC 가 `P0 [Spec-gap]` 로 오검출돼 졸업을 막거나, 그것을 피하려 변경하지 않는 코드에 억지 AC 가 생긴다(관측 1건, Round 12 `F-003 FAC-4`).
+- predicted = Round 13 에서 이 형식을 쓴 행은 preflight·validator 에서 unmapped 로 세지 않고, 조건 (ii) 위반은 봉인에서 잡힌다.
+- falsifier = (a) 이 형식이 **전체 FAC 의 30% 를 넘게** 쓰이면 task 분해가 승인 표면 뒤로 숨는 것이므로 조건을 더 좁힌다(예: 「그 화면이 이번 M 의 어느 feature 의 주 화면도 아닐 때」) (b) 조건 (ii)를 어긴 행이 봉인에서 걸리는 일이 반복되면 형식 자체가 오용되기 쉬운 것이므로 결정 1 을 되돌린다.
+- rollback = 본 amend superseded → 제3 형식 제거, unmapped 정의 원복.
+
+### 적용 surface
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md — `## 7-1` 주석에 제3 형식
+- .claude/skills/plan-workitem/SKILL.md — 결정 1·2 (분해 시 이 형식을 쓸 조건)
+- .claude/skills/stabilize-milestone/SKILL.md — 결정 3 (preflight 3 의 unmapped 정의)
+- .claude/skills/seal-milestone/SKILL.md — 결정 4 (봉인 재확인)
+- .claude/skills/validate-plan/SKILL.md · .claude/agents/reviewer.md — 결정 3 (`[Plan-FAC-coverage]` 판정)
+- .claude/skills/validate-workitem/SKILL.md · .claude/agents/validator.md — 결정 3
