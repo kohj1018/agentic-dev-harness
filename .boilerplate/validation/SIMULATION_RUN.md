@@ -1015,6 +1015,39 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 ### 수정분 커밋
 `fix(harness): correct design gate adapter, protected-path timing and Red definition from dogfood round 11`
 
+## Round 12 (2026-09-11~, 습관 메모 앱 + 관리자 웹 / Flutter + Next.js — 프로필·target별 e2e 검증)
+
+> **진행 중** — 본 절은 `/stack-guard`·`/plan-milestone`·`/bootstrap-design`(R1·R3~R6)까지 수행한 시점의 기록이다. `/design-milestone` 이후는 완주 후 채운다.
+> isolated fork (baseline `6207cde` + harness sync `13f6485`·`3ead7e4`). 실제 Flutter 3.47.3 / Dart 3.13.3 / Node 24.20 / pnpm 10.33 / Next 16.3.4. **Android 에뮬레이터(`emulator-5554`)와 iOS 시뮬레이터(iPhone 16e)를 실제로 띄워 실행 검증했다.**
+> 수행 방법의 한계는 Round 8·9·11과 같다 — 메인 세션 skill 구간은 SKILL.md대로 실제 명령 실행·실제 커밋을 동반해 수작업 재현했고, designer·builder·planner 위임만 진짜 sub-agent 실행이다.
+
+### 이 라운드가 잡은 것 — 요지
+
+Round 12 의 값은 «웹 전용 라운드가 구조적으로 못 보는 것»에 있다. 실제로 **P0급 2건(발견 54·55)이 Flutter 경로에서만 나왔고 둘 다 게이트가 `blockers: 0` 을 내는 동안 성립했다.**
+
+- **발견 54 — Flutter 승인 스냅샷 경로가 끊겨 있었다.** 어댑터가 `DESIGN_GATE_OUT` 을 `--dart-define`(컴파일 타임 상수)으로만 넘기는데 위젯 테스트가 `Platform.environment` 로 읽으면 null 이라 **PNG 가 한 장도 생기지 않는다.** ADR-072 D4(승인 스냅샷)·D7 §3-V native 경로가 통째로 성립하지 않는 상태였다.
+- **발견 55 — 생성된 Flutter 스냅샷의 글자가 전부 네모다.** `flutter test` 는 폰트를 로드하지 않으면 tofu 로 그린다. 같은 쇼케이스의 웹 스냅샷은 한국어 카피·대비비 라벨·대표 화면이 전부 읽힌다. 「육안 대조 참조」의 절반이 원리상 비어 있었다.
+- **발견 38·56 — 루트 기준 규칙이 monorepo scope 에 닿지 않는다** (같은 계열 2건). 스캐폴드가 `apps/web/AGENTS.md`·`CLAUDE.md` 를 심었는데 루트 201파일 해시는 완전 동일했고, 게이트 빌드 출력이 `apps/web/design-gate-storybook/` 에 생겨 scope 도구가 그것을 format 대상으로 삼아 `validate` 가 300초 timeout 났다.
+- **발견 42 — `shadcn init` 이 DESIGN 토큰 결정 전에 `globals.css` 를 선점한다.**
+
+### 1~3단계 `/bootstrap-stack` → `/stack-guard` (2026-09-11)
+
+- **registry**: 확정 37 / 해당 없음 18 / 이관 5 / 미결정 0 / **빈 행 0**. `(scope, id)` 키가 실제로 갈렸다 — `cat-common-package-manager` 가 `apps/mobile: pub` · `apps/web: pnpm` 두 행이다(ADR-071 D2 의도대로, 한 행으로 뭉개지지 않음).
+- **수행 0 스캐폴드**: `apps/mobile` = `flutter create` 3.47.3(110파일) · `apps/web` = `create-next-app` 16.3.4(24파일), 두 행 다 `done`. **루트 보호 경로 201파일 해시가 복사 직전·직후 완전 동일**하고 0-H(실행 시작·종료)도 변경 0건, `AGENTS.md` 57줄 유지.
+- **자가 검사 4케이스 전부 PASS** — 웹 전용 프로젝트에서 도달 불가였던 **(d) Flutter fixture 가 이 저장소에서 처음 실행됐다**. ADR-072#amend-1 결정 2 의 falsifier (a)가 발화하지 않는다.
+- **probe smoke**: 5회차 전부 기대대로 → `PASS (probe verified, project clean)`. monorepo 라 회차마다 두 scope 에 하나씩 두고 fail-fast 로 미도달한 scope 는 단독 실행으로 재측정했다(회차 수 불변 — 발견 45 가 그 규칙을 skill 에 박았다). `flutter analyze` 겸업은 진단 카테고리로 갈랐다 — round 2 `unused_local_variable`(lint 규칙 id), round 3 `return_of_invalid_type`(타입 error).
+- **`validate:e2e` 집계: web PASS / android PASS / ios PASS** — 선언 target 3개를 전부 실기기(에뮬레이터·시뮬레이터)에서 돌렸다. `package.json` 어디에도 `-d` 리터럴이 없고 `scripts/e2e-target.mjs` 가 실행 시점에 `flutter devices --machine` 으로 device id 를 해석한다(ADR-059#amend-1 결정 1 의도대로).
+
+### 4~5단계 `/plan-milestone` → `/bootstrap-design` (2026-09-11)
+
+- **`/plan-milestone`**: M1 `draft` 유지 + feature 3개, 셋 다 `## 11` 에 `Design:` 줄 → UI 마일스톤 판정이 정상 작동. `## 9` 화면 전환은 비워 뒀고(design-milestone R1 소관) `## 7-1`·`## 7-3` 도 미작성으로 남겼다.
+- **DESIGN `## 0` 프로필표 2행** (consumer-mobile / admin-web), 공유 모드 «공통+delta».
+- **프로필 delta 블록은 `## 2`·`## 3` 에만 4개**. `## 1`·`## 4`~`## 11` 은 공통이다. **ADR-073 의 falsifier(«delta 가 §2~§10 전 절에 생기면 D3 재검토»)가 발화하지 않는다** — 두 표면이 실제로 갈린 것은 (a) 다크 모드 차단 방식 (b) 폰트 전달 방식 둘뿐이었다.
+- **R6-1 테마 배선**: Flutter `lib/theme/*` + `theme_gallery.dart` + 위젯 테스트, 웹 `tokens.css` + `Theme.stories.tsx` — **둘 다** 생성. `_theme` 매니페스트에 두 화면 등록, 게이트 blockers 0 / reports 0.
+- **킷 토큰 충돌 해소**: `globals.css` 의 shadcn 변수 14개를 DESIGN semantic 토큰의 **별칭으로 단방향 재정의**(shadcn → DESIGN). ADR-071 D6 확장으로 그 규칙을 박았다(발견 42).
+- **갤러리 라운드(R0-G)는 생략했다** — 세션 예산. DESIGN `## 11` 에 그 사실을 명시했고 플랫폼 공식 가이드라인만 기준 자료로 적었다.
+
+
 ## Builder Effort Experiment (ADR-004#amend-4) — 측정일 2026-09-11
 
 - task: **T-002-todo-screen-wiring** (승인 UI 2개 배선 + 도메인 연결 + 계측 이벤트 + 테스트 3건)
