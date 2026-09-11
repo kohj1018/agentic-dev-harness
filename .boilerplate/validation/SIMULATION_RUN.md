@@ -1025,7 +1025,7 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 | 1. ADR 번호·링크 목적지 존재 | count 0 | **0** |
 | 2. amend 앵커 존재 | count 0 | **0** |
 | 3. Surfaces 역참조 (이번 라운드 ADR) | count 0 | **0** |
-| 4. 죽은 ADR 인용 (ADR-027·056) | count 0 | **0** |
+| 4. 죽은 ADR 인용 (ADR-027 (현재 SSOT: ADR-073) · ADR-056 (현재 SSOT: ADR-072)) | count 0 | **0** |
 | 5. 로스터 집합 (skills ↔ STRUCTURE ↔ README ×2 ↔ wrappers) | ok 4줄 | **ok 4줄** (skill 27종) |
 | 6. 인덱스 amend 수 ↔ 본문 `## Amendment N` 수 | count 0 | **0** |
 | 3. `--all-surfaces` (전 ADR) | Phase 0 기준선 9 **이하** | **9** — 늘지 않음 |
