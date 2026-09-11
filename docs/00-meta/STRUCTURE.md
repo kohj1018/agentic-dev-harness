@@ -34,7 +34,9 @@
 | design (UI only) | `docs/20-system/DESIGN.md` | `/bootstrap-design` (UI 스택 포함 시) | Living | conditional |
 | design research note (UI only) | `docs/20-system/DESIGN_RESEARCH.md` | `/bootstrap-design` (R0 레퍼런스 + R2 선택 근거) | Reference | conditional |
 | design concept mockups (UI only, 검토용 임시 — 선택·승인 후 삭제) | `docs/20-system/design-concepts/concept-*.html` | `/bootstrap-design` (R2, 선택 후 R6 삭제) | ephemeral | conditional |
-| design preview (UI only, 검토용 임시 — 승인 후 삭제) | `docs/20-system/design-preview.html` | `/bootstrap-design` (R6, 검토 후 삭제) | ephemeral | conditional |
+| 테마 쇼케이스 (UI only — 토큰→테마 배선 + Storybook `Theme/Showcase` / `lib/prototype/theme_gallery.dart`) | 스택 관례 경로 + `docs/20-system/prototypes/_theme/manifest.json` | `/bootstrap-design` R6 (builder 단발) | Living | conditional |
+| 레퍼런스 갤러리 (캡처·캐시·gallery.html) | `docs/20-system/design-refs/` | `/bootstrap-design` R0-G · `/design-milestone` R2 (capture-refs.mjs — ADR-058#amend-4) | ephemeral | conditional |
+| 레퍼런스 캡처 asset | `.claude/skills/bootstrap-design/assets/capture-refs.mjs` | 수동 (harness 제공) | Reference | baseline |
 | milestone 승인 프로토타입 (UI only — 경험 계약, 화면 단위) | `docs/20-system/prototypes/M<N>/<screen>.html` | `/plan-milestone` R5 (draft M<N> 재실행으로 미완 라운드 재개) | Record | conditional |
 | 경험 게이트 스크린샷 갤러리 (UI only, 검토용 임시) | `docs/40-validation/visual/M-N/` | `/stabilize-milestone` §3-V | ephemeral | conditional |
 | Claude skill 본문 | `.claude/skills/<name>/SKILL.md` (26종 — bootstrap-project/bootstrap-stack/bootstrap-design/discover-product/plan-milestone/plan-workitem/seal-milestone/validate-plan/repair-plan/implement-workitem/validate-workitem/repair-workitem/finalize-workitem/stabilize-milestone/repair-milestone/validate-milestone/stack-guard/review-doc/boilerplate-context/research-pack/validate-discovery/repair-discovery/consult-expert/accept-milestone/repair-acceptance/amend-ssot) | 수동 (boilerplate 제공) | Reference | baseline |
@@ -109,7 +111,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | AGENTS.md 진입 페이지 정책 (왜 이 파일을 진입점으로 삼는가) | `docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md` |
 | 공통 진입 지침 본문 (도구 중립 entry instructions) | `AGENTS.md` |
 | 보일러플레이트 직접 지원 스택 범위 | `docs/90-decisions/boilerplate/ADR-031-non-web-out-of-scope.md` + [ADR-059](../90-decisions/boilerplate/ADR-059-flutter-mobile-profile.md)(Flutter는 직접 지원 — ADR-031#amend-1) |
-| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT). 검토용 파생 뷰 `design-preview.html`(R6) 와 방향 선택용 `design-concepts/concept-*.html`(R2) 는 `/bootstrap-design` 이 생성하고 검토·선택 완료 후 삭제 — 직접 편집·영속 금지 (ADR-005). |
+| UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT — `/bootstrap-design` R5가 저장하고 R6 피드백도 이 파일을 먼저 고친다). 파생물인 테마 쇼케이스(R6 — 코드, 커밋 대상)와 방향 선택용 `design-concepts/concept-*.html`(R2 — 검토·선택 완료 후 삭제)은 `/bootstrap-design`이 생성한다 — **파생물 직접 편집 금지**(수정은 DESIGN.md → 재생성), concept은 영속 금지 (ADR-005). |
 | UI 디자인 워크플로우 (R0~R6 + evidence-on-demand 리서치 + 수용 게이트 + REFINE/EXPLORE 시안) | [ADR-058](../90-decisions/boilerplate/ADR-058-design-workflow.md) (정책 SSOT — ADR-049 supersede) (현재 SSOT: ADR-058). → ADR-058 `## Surfaces` 참조. DESIGN.md *내용*·인터페이스 할당은 [ADR-027](../90-decisions/boilerplate/ADR-027-interface-decision-allocation.md). |
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |

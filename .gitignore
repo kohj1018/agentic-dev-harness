@@ -24,9 +24,11 @@ docs/40-validation/stabilize-reviews/*.md
 # acceptance-reviews (ephemeral) — ADR-066 D3
 docs/40-validation/acceptance-reviews/*.md
 !docs/40-validation/acceptance-reviews/.gitkeep
-# design exploration/preview (ephemeral, never committed — ADR-058 / ADR-027#d22): concept 시안 + DESIGN.md 파생 preview
+# design exploration (ephemeral — ADR-058): concept 시안. R6 테마 쇼케이스는 코드라 커밋 대상(ADR-058#amend-4)
 docs/20-system/design-concepts/
-docs/20-system/design-preview.html
+
+# 레퍼런스 갤러리 (ephemeral — ADR-058#amend-4): 캡처·캐시·갤러리 페이지. 저작권 자료라 커밋하지 않는다
+docs/20-system/design-refs/
 # milestone experience contract (ADR-056): prototypes/M<N>/<screen>.html 승인본은 커밋 대상(ignore 금지).
 # 탐색 시안(_drafts)과 스크린샷 갤러리만 ephemeral.
 docs/20-system/prototypes/*/_drafts/

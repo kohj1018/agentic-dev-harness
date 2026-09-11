@@ -38,11 +38,12 @@ color: white
   - shadcn/ui — 토큰이 CSS가 아니라 JSON/registry에 있으므로 **JSON 엔드포인트** fetch
   - **비압축 개별 토큰 파일 우선**(minified 번들은 몇 값만 나옴). raw CSS가 없으면 **JSON 토큰 엔드포인트로 확장**.
   - **예시 URL + 버전 해석 규칙**(404 재발 방지): 정확 버전 고정 `unpkg.com/<pkg>@<x.y.z>/<path>` 권장. 버전 미상이면 `@latest`로 시도 → 404면 GitHub raw(`raw.githubusercontent.com/<org>/<repo>/<tag>/<path>`) fallback. 예: `unpkg.com/@radix-ui/colors/slate.css` · `unpkg.com/@primer/primitives/dist/tokens/` · `unpkg.com/@shopify/polaris-tokens/dist/` · Tailwind 색은 공식 문서/`tailwindcss` 패키지 `theme`. (정확 경로·파일명은 패키지 버전마다 다르므로 fetch 전 디렉터리 확인 — 추측 금지.)
-- **거부 목록**: mobbin·copycats류 "가짜 요약/갤러리" 사이트는 값 추출 소스로 쓰지 않는다(이름 찾는 lead로만, 최종 근거는 canonical 제품·공식 문서·source/token 코드로 승격).
+- **거부 목록**: mobbin·copycats류 "가짜 요약/갤러리" 사이트는 값 추출 소스로 쓰지 않는다(이름 찾는 lead로만, 최종 근거는 canonical 제품·공식 문서·source/token 코드로 승격) — **갤러리 후보(시각 관측 lead)로는 허용**한다(ADR-058#amend-4 결정 1). 값 추출 소스 거부는 불변.
 - 추출 대상: `:root` CSS custom property / font-family stack / hex·rgba 상위 N개 / spacing·radius·shadow 수치 / JSON 토큰. minified 전문 반환 금지 — 증류만.
 - 한계 정직 보고: 실제 제품 페이지(Linear/Stripe/Vercel 등)는 markdown 변환으로 CSS가 소실돼 값 추출이 자주 실패([관측됨] 0/3). stylesheet/토큰 URL을 못 찾으면 "추출 불가 — <사유>" 반환, 날조 금지.
 - 값 복제 금지: "추출 토큰은 구조 학습용 — 통째 복제는 클론화" 1줄 포함.
 - 반환 양식: DESIGN_RESEARCH.md 최소 schema(source/canonical | role | 뒷받침한 결정 | 검증(visual/behavior/code) | 관측일 | borrow | avoid | confidence) + `#### 추출 토큰 (코드)` fenced block.
+- **갤러리 후보 수집 (ADR-058#amend-4 결정 1)**: 호출 측이 «갤러리 후보»를 요청하면 4층(큐레이션 허브 / 실제 제품 URL / 스토어 스크린샷 / getdesign.md 분석본) 후보를 `id | url | kind | 출처 유형 | 사용 주의 | 방향타 대응` 표로 반환한다. 캡처·다운로드는 하지 않는다(메인 세션이 `capture-refs.mjs`로 수행). 로그인 필요·봇 차단 가능성을 아는 대로 표기한다. getdesign.md는 VoltAgent 커뮤니티의 비공식 분석본임을 항상 명시한다.
 
 출력:
 - 핵심 발견(신뢰도 라벨 포함) 최대 7개.

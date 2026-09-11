@@ -1080,12 +1080,23 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
 - #amend-1 헤딩 아래·#amend-2 헤딩 아래 각각 `> (현재 SSOT: ADR-072 D6 — #amend-4 결정 4로 이관)` 한 줄.
 
 ### P4-5. `.claude/skills/bootstrap-design/assets/capture-refs.mjs` 신설
-Node ESM. 헤더 주석 `// reference gallery capture (ADR-058#amend-4 결정 1)`. 입력 JSON(`docs/20-system/design-refs/refs.json` — skill이 작성): `{ "viewports": [{w,h,name}], "targets": [{ "id", "url", "kind": "live|store|hub", "flows": [{ "name", "steps": [{ "action": "goto|click|wait", "selector" }] }] }] }`. 동작: (1) 세 `kind` 모두 Playwright chromium(stack-guard 설치분 재사용, 없으면 `Needs Install` exit 2)으로 target·viewport별 캡처 → `docs/20-system/design-refs/shots/<id>-<flow|page>-<n>-<w>x<h>.png`. `kind`는 카드의 `출처 유형` 라벨(live / store-screenshot / curated-hub)과 `사용 주의` 기본값에만 쓰인다. (2) 실패(로그인 벽·봇 차단·타임아웃)는 `캡처 불가 — <사유>`로 `shots/_log.json`에 기록하고 그 target은 **링크 카드**로 대체한다(exit 0 유지 — 일부 실패는 정상). `fill` 액션은 지원하지 않는다(자격 증명 입력 경로 자체를 두지 않는다). (3) `docs/20-system/design-refs/inbox/`의 이미지(png/jpg/webp)를 `출처 유형: user-capture` 카드로 갤러리에 합친다. (4) `gallery.html`(자기완결 — 썸네일 grid + 링크 카드 + 체크박스 + 메모 textarea + «선택 내보내기» → `selection.json`)을 생성한다. 보안: `browser_run_code`류 없음, 로그인·자격 증명 없음.
+Node ESM. 헤더 주석 `// reference gallery capture (ADR-058#amend-4 결정 1)`. 입력 JSON(`docs/20-system/design-refs/refs.json` — skill이 작성): `{ "viewports": [{w,h,name}], "resolveFrom": ["<dir>"](선택 — monorepo 설치 scope), "targets": [{ "id", "url", "kind": "live|store|hub", "usage": "<사용 주의>"(선택 — 기본값을 덮는다, 예 `concept-only`), "flows": [{ "name", "steps": [{ "action": "goto|click|wait", "selector" }] }] }] }`.
+
+동작:
+1. **경로 기준은 저장소 루트**다(스크립트 위치에서 역산 — 어느 디렉터리에서 실행하든 `docs/20-system/design-refs/`에 쓴다). **Playwright 해석은 `resolveFrom` → cwd → 저장소 루트 순**으로 `createRequire`로 시도한다(monorepo는 `apps/web/node_modules`에만 설치돼 루트 해석이 실패한다). 전부 실패하면 시도 경로를 echo하고 `Needs Install` exit 2.
+2. **뷰포트가 바깥 루프**다 — 뷰포트마다 새 context를 그 크기로 열고 그 안에서 흐름을 조작한다(리사이즈 *뒤* 클릭하면 모바일 전용 요소가 타임아웃된다). **흐름은 단계마다 1장**씩 찍는다(시작 화면 + 각 step 후) → `shots/<id>-<flow|page>-<n>-<w>x<h>.png`. «≤3 흐름 × ≤6 화면» 예산은 `refs.json`을 쓰는 쪽이 지킨다.
+3. **`goto` 응답 상태를 검사한다** — 로그인 벽·봇 차단은 예외를 던지지 않고 403/401 페이지를 그대로 렌더하므로, `res.ok()`가 아니면 `HTTP <status> — 로그인 벽·봇 차단 가능`으로 실패 처리한다(그러지 않으면 차단 화면이 «정상 캡처» 카드가 된다). 실패는 `shots/_log.json`에 `캡처 불가 — <사유>`로 남기고 그 target은 **링크 카드**로 대체한다(exit 0 유지 — 일부 실패는 정상).
+4. `kind`는 `출처 유형` 라벨(live / store-screenshot / curated-hub)과 `사용 주의` **기본값**만 정한다 — target의 `usage`가 있으면 그것을 쓴다(Behance·Dribbble의 `concept-only`가 사라지지 않게).
+5. `fill` 액션은 지원하지 않는다(자격 증명 입력 경로 자체를 두지 않는다).
+6. `docs/20-system/design-refs/inbox/`의 이미지(png/jpg/webp)를 `출처 유형: user-capture` 카드로 갤러리에 합친다.
+7. `gallery.html`(자기완결 — 썸네일 grid + 링크 카드 + 체크박스 + 메모 textarea + «선택 내보내기»)을 생성한다. **카드 식별자는 인덱스 기반 `data-key`**이고 메모는 그 카드 안에서 읽는다(후보 id와 inbox 파일명이 겹칠 수 있어 id로 찾으면 남의 메모가 나간다). 텍스트는 HTML escape, 이미지·링크 경로는 URL 인코딩한다(파일명에 `"`가 있으면 속성이 깨진다).
+
+보안: `browser_run_code`류 없음, 로그인·자격 증명 없음.
 
 ### P4-6. `.claude/skills/bootstrap-design/SKILL.md`
 - (a) frontmatter `allowed-tools`에 추가: `Bash(node .claude/skills/bootstrap-design/assets/capture-refs.mjs*)` `Bash(pnpm build-storybook*)` `Bash(npm run build-storybook*)` `Bash(yarn build-storybook*)` `Bash(bun run build-storybook*)` `Bash(flutter test*)`. `Bash(rm docs/20-system/design-preview.html)`는 삭제(R6 산출물이 HTML이 아님). `WebFetch(domain:github.com)`에 `WebFetch(domain:getdesign.md)` 추가.
 - (b) 도입부 `> 패턴:` 줄에 `**R0 캡처(capture-refs)·R6 테마 배선(builder 단발)**은 Bash·코드 작성이 필요해 각각 메인 세션 실행·builder 위임이다(designer는 Bash 없음).` 추가. `> 라운드 구조…SSOT는 ADR-058` 줄의 `ADR-027` → `ADR-073`.
-- (c) `## 모드` `--fast` 설명을 `**갤러리 라운드(R0-G)·R2 concept·R4·R6-2 reviewer 픽셀 판정 생략 — R6-1 테마 배선·쇼케이스·게이트는 수행**(`_theme/manifest.json`이 design-milestone 필수 입력)`으로 바꾼다(기존 «R6 생략» 문구 삭제). `--update`에 `프로필 추가·공유 모드 변경·폰트 교체는 R1 브리프 재실행 + R6 재검토(ADR-073 D11); **토큰·컴포넌트가 바뀌면 R6-1 배선을 delta 재생성한다(생략 금지)**; §10이 v1 형식(언어 블록·용어 사전 없음)인 기존 fork는 R5에서 §10 v2로 마이그레이션(기본값 채움 + 확인 1회 — 구 plan-milestone R5의 §10 신설 경로 승계)` 추가.
+- (c) `## 모드` `--fast` 설명을 `**갤러리 라운드(R0-G)·R2 concept·R4·R6-2 reviewer 픽셀 판정 생략 — R6-1 테마 배선·쇼케이스·게이트는 수행**(`_theme/manifest.json`이 design-milestone 필수 입력)`으로 바꾼다(기존 «R6 생략» 문구 삭제). `--update`에 `프로필 추가·공유 모드 변경·폰트 교체는 R1 브리프 재실행 + R6 재검토(ADR-073 D11); **토큰·컴포넌트가 바뀌면 R6-1 배선을 delta 재생성한다(생략 금지)**; §10이 v1 형식(언어 블록·용어 사전 없음)인 기존 fork는 R5에서 §10 v2로 마이그레이션(기본값 채움 + 확인 1회 — 구 plan-milestone R5의 §10 신설 경로 승계)` 추가. **같은 취지로 `## --update 모드` 상세 절차의 `- R6 — 시각 방향이 크게 바뀌면 preview 재생성·검토 루프(아니면 생략).` 줄도 교체한다**(그대로 두면 «토큰만 바뀌면 R6 생략»이 되어 새 delta 재생성 의무와 충돌한다): `- R6 — **토큰·컴포넌트가 하나라도 바뀌면 R6-1 테마 배선을 delta 재생성한다(생략 금지 — DESIGN과 제품 테마가 어긋나는 것을 막는다, ADR-058#amend-4 결정 2).** 시각 방향이 크게 바뀌면 R6-2 게이트·픽셀 판정까지 다시 돈다.`
 - (d) `## 반드시 먼저 읽을 파일`의 STACK_SETUP_PLAN 줄 → `- `docs/00-meta/STACK_SETUP_PLAN.md` (`## Design Gate Adapter` `status: ready (self-test PASS <날짜>)` — R2-G·R6 게이트 실행 전제; `## Stack Decision Registry`의 UI 킷·스타일링·미리보기 도구 행 — R6 배선 대상)`.
 - (e) `## R0` 절의 `- **레퍼런스 노트 영속화 (필수, `--fast`는 minimal)**` 불릿 **앞**에 새 하위 절 삽입:
   ```
@@ -1119,7 +1130,8 @@ Node ESM. 헤더 주석 `// reference gallery capture (ADR-058#amend-4 결정 1)
   - 파일 상단 주석: `GENERATED FROM docs/20-system/DESIGN.md — 수정은 DESIGN.md → /bootstrap-design R6 재생성. 토큰 외 값 금지.`
   ### R6-2. 게이트 + reviewer 픽셀 판정
   - `STACK_SETUP_PLAN.md ## Design Gate Adapter`가 `ready`인지 확인 후 `validate:design -- --manifest docs/20-system/prototypes/_theme/manifest.json`을 실행한다(경로 추측 금지; `needs-install`·`n/a`면 `Needs Design Gate: /stack-guard` + 승인 보류). 차단(serious/critical axe·좁은 폭 geometry·Flutter guideline·overflow)은 **DESIGN.md를 먼저 고치고** R6-1 재생성(retry ≤2, 초과 시 brief 재검토).
-  - reviewer(design surface) 단발 sub-call이 `design-gate-shots/` 스크린샷을 Read로 열람해 위계·밀도·slop·overlap을 판정(Design Consistency 6차원 전부 — DESIGN 확정 후). Codex: 순차 페르소나 + `under-verified` 명시.
+  - reviewer(design surface) 단발 sub-call이 `design-gate-shots/` 스크린샷을 Read로 열람해 위계·밀도·slop·overlap을 판정(Design Consistency 6차원 전부 — DESIGN 확정 후). Codex: 순차 페르소나 + `under-verified` 명시. **reviewer가 차단 등급(위계 붕괴·critical overlap·장식 slop)을 내면 러너 차단과 같은 경로**로 DESIGN.md를 먼저 고치고 R6-1 재생성(retry ≤2, 초과 시 승인 보류 + brief 재검토). moderate/minor·취향은 보고만.
+  - 게이트 command가 **exit 2(Needs Install)**로 끝나면 사유를 echo하고 승인을 보류한다(fail-closed — ADR-058 D3). 승인 전에는 R6-4 정리와 후속 단계 권장을 수행하지 않는다.
   ### R6-3. 검토 루프 + 폰트 확정
   - 사용자에게 «`npm run storybook`(또는 `flutter run -t lib/prototype/theme_gallery.dart`)으로 열어 확인해 주세요» 안내. 피드백은 **DESIGN.md 먼저 수정 → 재생성**. 2사이클 미수렴 시 brief(R0/R1) 수정.
   - 폰트 조합을 여기서 확정하고 원장 `closed` + `DESIGN.md ## 3` 앵커. `## 3` 폰트 블록의 잠정값을 확정값으로 갱신.
@@ -1159,7 +1171,10 @@ Node ESM. 헤더 주석 `// reference gallery capture (ADR-058#amend-4 결정 1)
 ### P4-11. `docs/00-meta/STRUCTURE.md` 산출물 표
 - `design preview` 행 → `| 테마 쇼케이스 (UI only — 토큰→테마 배선 + Storybook `Theme/Showcase` / `lib/prototype/theme_gallery.dart`) | 스택 관례 경로 + `docs/20-system/prototypes/_theme/manifest.json` | `/bootstrap-design` R6 (builder 단발) | Living | conditional |`
 - 행 추가: `| 레퍼런스 갤러리 (캡처·캐시·gallery.html) | `docs/20-system/design-refs/` | `/bootstrap-design` R0-G · `/design-milestone` R2 (capture-refs.mjs — ADR-058#amend-4) | ephemeral | conditional |` / `| 레퍼런스 캡처 asset | `.claude/skills/bootstrap-design/assets/capture-refs.mjs` | 수동 (harness 제공) | Reference | baseline |`
-- Canonical Owner `UI 시각 디자인` 행: `design-preview.html`(R6) 언급 → `테마 쇼케이스(R6 — 코드, 커밋)`.
+- Canonical Owner `UI 시각 디자인` 행 전체를 아래로 교체한다(단순 치환하면 «직접 편집·영속 금지»의 주어가 DESIGN.md로 읽혀 R5 저장·R6 수정 절차와 충돌한다 — 금지 대상은 *파생물*이다):
+  ```
+  | UI 시각 디자인 | `docs/20-system/DESIGN.md` (SSOT — `/bootstrap-design` R5가 저장하고 R6 피드백도 이 파일을 먼저 고친다). 파생물인 테마 쇼케이스(R6 — 코드, 커밋 대상)와 방향 선택용 `design-concepts/concept-*.html`(R2 — 검토·선택 완료 후 삭제)은 `/bootstrap-design`이 생성한다 — **파생물 직접 편집 금지**(수정은 DESIGN.md → 재생성), concept은 영속 금지 (ADR-005). |
+  ```
 
 ### P4-12. `docs/00-meta/WORKFLOW.md`
 - 줄 11의 R6 설명 `R6(DESIGN.md 파생 preview 최종 확인 + 게이트)` → `R6(DESIGN.md 토큰의 스택 테마 배선 + 네이티브 쇼케이스 확인 + 게이트 — ADR-058#amend-4)`; `R6 preview를 승인한 뒤** concept/preview 시안을 삭제하고` → `R6 쇼케이스를 승인한 뒤** concept 시안을 삭제하고(쇼케이스·배선은 커밋)`; 끝의 `DESIGN.md *내용*·인터페이스 할당 SSOT는 ADR-027.` → `ADR-073.`
