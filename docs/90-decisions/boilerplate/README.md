@@ -65,7 +65,7 @@
 | 069 | 상위 정본의 절 단위 부분 개정 (Bounded SSOT Amendment) | accepted | +#amend-1: 승인 UI·공용 컴포넌트 전파 행 | /amend-ssot 신설 — 분류 4단 + 결정적 전파표 + 절-키 에스컬레이션 + 봉인 충돌 라우팅 |
 | 070 | finding 심각도·종결·수렴 계약 | accepted | — | P0 정의표 + 재현 필수 + 채택 전 5값 검토 + 4-판정 전부 종결 + 원인 단위·영향 반경 재감사 + 라운드 예산 3·수렴 실패 브리프(면제값 없음) |
 | 071 | 스택 결정 카탈로그 + 스캐폴드 소유 | accepted | #amend-1: harness 경로 무결성 실행 시작·종료 확장 + Storybook 애드온 기본값 정정 | 카탈로그 색인 + registry disposition 필수 + BASE/HYBRID/DEEP + /stack-guard 수행 0 스캐폴드·6-2-b baseline 라이브러리(Storybook 포함) — ADR-052 D1·055·063 D1 부분 supersede |
-| 072 | 디자인 마일스톤 + 코드 프로토타입 + UI 제작 계약 + design gate v3 | accepted | #amend-1: design gate 어댑터 3건 정정(PM `--`·자가 검사 케이스 수·단축 hex 오탐), #amend-2: plan 승인 표면 대조 self-check 3축(UI 지시 출처·계측 배선 가능성·FAC 증명 문장) | ADR-056 supersede. /design-milestone(브리프→코드→게이트→스냅샷→contract-ready) + 매니페스트 + 승인 스냅샷 + UI 제작 계약(봉인 전 예외·가짜 Red 금지·재사용 추적) + gate v3(매니페스트 모드·자가 검사 — ADR-058#amend-2 대체) |
+| 072 | 디자인 마일스톤 + 코드 프로토타입 + UI 제작 계약 + design gate v3 | accepted | #amend-1: design gate 어댑터 3건 정정(PM `--`·자가 검사 케이스 수·단축 hex 오탐), #amend-2: plan 승인 표면 대조 self-check 3축(UI 지시 출처·계측 배선 가능성·FAC 증명 문장), #amend-3: 미리보기 하네스 가시 요소 금지 + 가시 요소 = `source[]` | ADR-056 supersede. /design-milestone(브리프→코드→게이트→스냅샷→contract-ready) + 매니페스트 + 승인 스냅샷 + UI 제작 계약(봉인 전 예외·가짜 Red 금지·재사용 추적) + gate v3(매니페스트 모드·자가 검사 — ADR-058#amend-2 대체) |
 | 073 | 인터페이스 결정 책임 분배 + DESIGN.md 내용 계약 v2 | accepted | — | ADR-027 통합 재발행. 프로필(웹+앱 단일 파일) + §3 폰트 블록 + §10 언어별 렌즈·용어 사전 + §9 플랫폼 관례 예외 + §11 기준 자료 확인일 + cross-surface·UI 판정 통합 |
 
 ## Reserved / Parked / Dropped 번호

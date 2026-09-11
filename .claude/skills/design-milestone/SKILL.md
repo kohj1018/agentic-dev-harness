@@ -69,7 +69,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 2. `validate:design -- --manifest docs/20-system/prototypes/M<N>/manifest.json --only <이번 대상 화면>` 실행(같은 세션에서 **코드 변경 없이** 반복할 때만 `--no-build` — builder 재생성 뒤에는 반드시 재빌드한다, ADR-072 D6). exit 1 blocker는 builder에 selector·요약을 되먹여 재생성(≤2회), 초과 시 승인 보류 + 브리프 재검토. exit 2면 사유 echo + 보류.
 3. `--tokens-only <screens 경로>` 결과가 0건이 아니면 고치거나 브리프에 사유를 적는다(승인 체크리스트 항목 — 이 모드는 렌더 출력을 지우지 않는다).
 4. reviewer(design surface) 단발 sub-call이 `design-gate-shots/`를 Read로 열람해 위계·밀도·slop·overlap·도메인 fit을 판정(차단은 재생성).
-5. 사용자 최종 승인(화면 단위). **승인 체크리스트**: happy + 못생긴 상태 5종 + category state 렌더됨 / 실카피(§10) / 인터랙션 계약 테스트(키보드·포커스·취소·콜백) 존재·통과 / PX 마커 ≥1 / 토큰 외 리터럴 0 또는 사유 / 접근성 blocker 0.
+5. 사용자 최종 승인(화면 단위). **승인 체크리스트**: happy + 못생긴 상태 5종 + category state 렌더됨 / 실카피(§10) / 인터랙션 계약 테스트(키보드·포커스·취소·콜백) 존재·통과 / PX 마커 ≥1 / 토큰 외 리터럴 0 또는 사유 / 접근성 blocker 0 / **하네스 요소 0**(ADR-072#amend-3) — 렌더에 보이는 가시 요소가 전부 그 화면 `source[]` 파일 안에 있는가. 데코레이터·wrapper 가 넣은 제목·헤더·랜드마크·폭 컨테이너가 하나라도 보이면 **승인하지 않는다**: 컴포넌트로 옮기거나 공용 셸을 별도 화면으로 등록한 뒤 재렌더한다. 대조는 `design-gate-shots/` 렌더와 매니페스트 `source[]` 를 나란히 놓고 한다.
 6. 승인 직후 `validate:design -- --manifest <경로> --only <화면> --snapshot docs/20-system/prototypes/M<N>/snapshots/`로 기준선 스냅샷(각 뷰포트 default + 1차 뷰포트 empty·error + `baseline: true` 상태)을 `snapshots/<screen>-<state>-<w>x<h>.png`로 저장한다(500KB 초과 경고). 매니페스트 `approved{date, by: user}`·`snapshots[]`·`product_entry`(`## 9`·ARCH 라우팅에서 도출, 미정이면 `null`)·`handoff{run, remaining_wiring[]}` 채움. 이전 M 승인 화면에 영향(공용 컴포넌트·토큰 변경)이 있으면 그 화면을 **이 M 매니페스트에 `supersedes: ["M<K>/<screen>"]`로 재등록**해 함께 렌더·승인·스냅샷(이전 M 파일은 불변 — ADR-072 D5-5).
 
 ## R7 — feature 기입 · 정합 재대조 · contract-ready

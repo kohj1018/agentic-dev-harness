@@ -43,6 +43,7 @@ color: cyan
 dispatch 입력에 `mode: ui-authoring`이 있으면 아래를 따른다.
 - **presentational만**: props-in / callbacks-out(웹) · 생성자 인자(Flutter). fetch·store·router·영속 저장·환경변수 import 금지. 데이터는 `fixtures.<ext>` / 갤러리 항목에서만 온다(출처 표기 — ADR-064 D5).
 - **산출물**: 웹 `screens/<screen>/<Screen>.<ext>` + `<Screen>.stories.<ext>`(브리프의 상태 전부를 스토리로 — happy·긴 제목·빈·로딩·에러·항목 과다·category state; `구성 불확실`이면 `A`/`B`) + `fixtures.<ext>` — **확장자는 스택 관례**(`.tsx`/`.vue`/`.svelte`/Astro — ADR-072 D3). Flutter `lib/screens/<screen>/` + `lib/prototype/main.dart` 갤러리 등록 + `test/screens/<screen>_prototype_test.dart`(프로필 논리 크기 `setSurfaceSize` → `pumpWidget` → `meetsGuideline` 4종 → `FlutterError` 0 → `DESIGN_GATE_OUT`이 있으면 PNG 저장).
+- **미리보기 하네스는 provider 만**(ADR-072#amend-3): 스토리 데코레이터(웹)·위젯 테스트 wrapper(Flutter)에 **가시 요소를 넣지 않는다** — 제목·헤더·랜드마크·네비게이션·카드 테두리·폭 컨테이너 금지. 허용은 무가시 provider 뿐이다(테마/토큰 provider, 뷰포트·`setSurfaceSize`, 라우터·로케일·스토어 stub). **화면의 가시 요소는 전부 매니페스트 `source[]` 파일에서 나온다** — 화면 셸(제목·폭 컨테이너)이 필요하면 데코레이터가 아니라 컴포넌트 안에 둔다. 여러 화면이 같은 셸을 공유하면 셸을 별도 화면으로 등록할지 `Needs Design Decision` 으로 보고한다.
 - **토큰만**: DESIGN.md 토큰 배선(`_theme` 경로)만 참조. raw hex·px 리터럴 금지(게이트 `--tokens-only`가 잡는다).
 - **추적 헤더** 파일 상단: `feature: F-NNN | PX: … | DESIGN: §2 <token set>, §7 <components> | 승인: <미정>`. **PX 마커** 주석 `// PX-M<N>-<screen>-NN: <한 줄>`(브리프의 PX 후보 id 그대로).
 - **TDD**: 시각 탐색 코드에 Red-first를 요구하지 않는다. 브리프의 **인터랙션 계약**만 스토리 interaction test(웹) 또는 위젯 테스트(Flutter)로 쓴다 — 키보드 도달·포커스 순서·취소·확인·콜백 호출. 반환에 «Red 관측» 대신 «인터랙션 계약 테스트 N건 통과»를 적는다.

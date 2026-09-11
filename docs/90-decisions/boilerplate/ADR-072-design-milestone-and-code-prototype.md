@@ -34,11 +34,13 @@ accepted
 - **PX 마커**: 코드 주석 `// PX-M<N>-<screen>-NN: <한 줄 결정>`(JSX 안 `{/* … */}`). 문법·불변식·소유 규칙은 ADR-056#amend-1 승계(마일스톤 번호=버전, 한 화면 내 중복 금지, 각 PX는 구현 feature 정확히 1곳 `## 7`).
 - **매니페스트** `docs/20-system/prototypes/M<N>/manifest.json`(커밋, 필드 정의는 본 ADR `## 매니페스트 schema (v1)` — 이 ADR이 schema SSOT다): `version`, `milestone`, `profiles`(name → viewports), `screens[]` — `id`, `feature`, `profile`, `scope`(monorepo 실행 scope — 기본 `.`), `preview`(`story:<storybook-id>` 또는 `flutter:<test file>` + `entry: lib/prototype/main.dart#<screen>`), `source[]`(코드 경로), `states[]`(각 `{ id, preview, baseline? }` — 상태별 스토리 id 또는 위젯 테스트 group; `baseline: true`는 브리프의 «승인 필요 상태»), `px[]`, `snapshots[]`, `brief`, `product_entry`(제품 라우트·딥링크 — R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` + 배선 task line item이 확정), `approved{date, by}`, `supersedes[]`(이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 그 화면의 기준선을 이 M이 새로 잡을 때), `handoff{ run, remaining_wiring[] }`. **이 파일이 게이트·validate-plan·seal·stabilize·accept의 단일 입력**이다(경로 추측 금지).
 - **fixture 보존**: 스토리·fixture·위젯 테스트는 삭제하지 않는다(테스트 자산 — 구현 task가 그대로 쓴다).
+- **미리보기 하네스에 가시 요소 금지 ([#amend-3](#adr-072-amend-3))**: 스토리 데코레이터(웹)·위젯 테스트 wrapper(Flutter)는 **테마·뷰포트 provider 만** 둔다 — 제목·헤더·랜드마크·네비게이션·카드 테두리·폭 컨테이너를 주입하지 않는다. **화면의 가시 요소는 전부 `source[]` 에서 나온다**: 승인 렌더에 보이는데 `source[]` 파일에 없으면 그 화면은 승인 대상이 아니며, 그 요소를 컴포넌트로 옮기거나 화면 밖 공용 셸이면 셸을 별도 화면으로 등록한다.
 - **미리보기**: 웹 Storybook(정적 빌드는 게이트가 `design-gate-storybook/`에 생성), Flutter `flutter run -t lib/prototype/main.dart`. 제품 라우트에 개발 전용 페이지를 두지 않는다(불가한 스택만 예외 — 사유를 매니페스트 `handoff.run`에 적음).
 - **불확실 화면 2안**: 브리프 `구성 불확실` 화면만 `<Screen>.stories.<ext>`에 `A`/`B` 스토리(또는 Flutter 갤러리 항목 2개). 선택 후 탈락안 삭제.
 
 ### D4. 승인 스냅샷 (동결 기준선)
 - R6 사용자 승인 직후 게이트가 캡처해 `snapshots/<screen>-<state>-<w>x<h>.png`로 저장한다. **형식은 PNG**(Playwright·Flutter 위젯 테스트가 직접 만드는 형식 — 변환 의존 없음). 기준선 집합 = 각 뷰포트의 `default` 상태 + 1차 뷰포트의 `empty`·`error` 상태 + 매니페스트 `states[].baseline: true` 상태. 파일당 500KB 초과는 게이트가 경고한다(차단 아님 — 화면 단순화 권고). **커밋 대상**. `approved.date`와 함께 동결된다 — 같은 M 안에서(봉인 전) 재승인하면 같은 파일을 대체하고, **봉인 뒤에는 그 M의 스냅샷·매니페스트를 다시 쓰지 않는다**(D5-5).
+- **스냅샷은 `source[]` 가 렌더한 것만 담는다 ([#amend-3](#adr-072-amend-3))** — 하네스가 주입한 요소가 들어가면 「승인본 = 제품」 등식이 깨져 배선 task 가 재현할 근거 없는 요소가 기준선에 굳는다. 실측: 데코레이터 `h1` 이 12/12 스냅샷에 들어가 D5-4 `[Design-reuse-drift]` 는 바이트 동일로 통과했는데 제품의 그 요소는 0개였다(Round 11).
 - 용도: stabilize §3-V·accept·validate-plan의 **사람·AI 육안 대조 참조**. **픽셀 diff 오라클로 쓰지 않는다**(Flutter는 host마다 1~3% 다름 — ADR-059 D3). golden(`test/**/goldens/`, 로컬 전용)과 별개 경로·별개 목적이다.
 - Flutter 스냅샷은 위젯 테스트가 논리 크기로 렌더해 생성한다(디바이스 불요). 안전 영역·글자 확대 1.3배는 권장 상태.
 
@@ -294,3 +296,40 @@ dogfood Round 11(웹)에서 **같은 원인의 결함이 4건** 나왔다 — �
 - .claude/skills/validate-plan/SKILL.md                   — 결정 5 미러
 - .claude/agents/reviewer.md                              — 결정 5 미러
 - docs/30-workitems/_templates/FEATURE_TEMPLATE.md        — 결정 4 `## 7-1` 행 형식
+
+<a id="adr-072-amend-3"></a>
+## Amendment 3 (2026-09-11) — 미리보기 하네스가 승인 화면에 가시 요소를 주입한다 (「승인본 = 제품」 등식 파손)
+
+### 배경
+dogfood Round 11(웹)에서 `/stabilize-milestone` §3-V 경험 게이트**만이** 잡아낸 P0 3건의 공통 원인이다.
+- [관측됨] **게이트는 매니페스트 `preview: story:<id>` 를 렌더한다.** 그래서 스토리 데코레이터가 주입한 마크업이 그대로 승인 스냅샷에 들어간다. 실측: `TodoEmptyError.stories.tsx` 의 데코레이터가 `<h1>오늘 할 일</h1>` + 640px 컨테이너 + 패딩을 주입했고, 컴포넌트 `TodoEmptyError.tsx` 자체에는 `h1` 이 없다.
+- [관측됨] **그 요소는 배선 task 가 제품에 만들 근거를 어디서도 받지 못한다.** 컴포넌트에도 `handoff.remaining_wiring[]` 에도 없기 때문이다. 결과: 제품 empty/error 상태의 `h1` **0개**, `main` 폭 **291.94px**(승인본 640px).
+- [관측됨] **D5-4 `[Design-reuse-drift]` 는 통과했다** — proto 재렌더 ↔ 승인 스냅샷 **12/12 바이트 동일**. 즉 「재사용 task 표현 diff 0」이 *vacuous 하게* 충족된다. 비교 대상이 애초에 제품이 아니기 때문이다. `validate` exit 0 · `validate:e2e` 6/6 · axe 0 도 전부 green 이었다.
+- Flutter 위젯 테스트 wrapper(`MaterialApp`·`Scaffold`·`AppBar`)도 정확히 같은 자리에 있다 — 웹 전용 현상이 아니다.
+
+### 결정
+1. **미리보기 하네스는 테마·뷰포트 provider 만 둔다.** 스토리 데코레이터(웹)·위젯 테스트 wrapper(Flutter)에 제목·헤더·랜드마크·네비게이션·카드 테두리·폭 컨테이너 같은 **가시 요소를 두지 않는다.** 허용은 렌더에 필요한 **무가시 provider** 뿐이다 — 테마/토큰 provider, 뷰포트·`setSurfaceSize`, 라우터·로케일·스토어 stub.
+2. **화면의 가시 요소는 전부 매니페스트 `source[]` 에서 나온다.** 승인 렌더에 보이는데 `source[]` 파일에 없는 요소가 있으면 그 화면은 승인 대상이 아니다. 해소는 둘 중 하나다 — (i) 그 요소를 컴포넌트로 옮긴다(기본) (ii) 그 요소가 화면 밖 공용 셸이면 **셸을 별도 화면으로 등록**해 자기 `source[]`·스냅샷·배선 경로를 갖게 한다. 어느 쪽도 아닌 채로 승인하지 않는다.
+3. **R6 승인 체크리스트에 「하네스 요소 0」 항목을 둔다**(design-milestone R6-5). 승인 직전에 렌더와 `source[]` 를 사람이 대조한다.
+4. **탐지기는 이번에 만들지 않는다.** 게이트가 «데코레이터 없는 렌더를 추가 대조»하는 안은 Round 12(Flutter — wrapper 형태가 다르다) 재관측 뒤에 형태를 정한다. 지금은 규칙만 박는다.
+
+### 근거
+- 기각한 대안 (a) **매니페스트에 `decorator_provides[]` 를 두고 `handoff.remaining_wiring[]` 에 자동 편입**: 하네스가 가시 요소를 갖는 것을 *정상 경로로 승인*하게 된다. 그러면 승인 스냅샷은 영원히 제품보다 큰 화면이고, 배선 task 는 매번 「승인본에는 있으나 컴포넌트에는 없는 것」을 재현해야 한다 — 재현의 오라클이 스냅샷 이미지뿐이라 D5-3 의 «표현을 다시 쓰지 않는다» 와 정면으로 충돌한다.
+- 기각한 대안 (c) **`product_entry` 가 있는 화면은 승인 시점에 제품 렌더도 함께 승인**: 제품 라우트는 배선 task 가 끝나야 존재하므로 승인 시점에 렌더할 것이 없다. 순서가 성립하지 않는다.
+- 채택 근거: 원인은 «승인 대상의 경계가 어디까지인가»가 규정돼 있지 않았다는 것이다. D3 는 `source[]` 를 *코드 경로*로만 정의했고 «렌더에 보이는 것과 같은 집합인가»는 말하지 않았다. 결정 2 가 그 등식을 명시한다.
+- 대가: 데코레이터로 세워 두던 화면 셸(제목·컨테이너)을 컴포넌트 안으로 옮기면 **컴포넌트가 자기 셸을 갖는다** — presentational 경계(D3)는 깨지지 않지만 화면 단위가 커진다. 셸을 공유하는 화면이 여럿이면 결정 2 (ii)의 별도 화면 등록이 그 비용을 흡수한다.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 1·2 — 승인 대상의 정의이며 위반 시 승인 자체가 무효다.
+- enabling(약, [관측됨]): 결정 3·4.
+
+### Mutation delta (ADR-047 D3)
+- failure = 승인 스냅샷이 제품에 도달할 수 없는 요소를 포함하고, 그 사실을 §3-V 경험 게이트(마일스톤 말미)까지 아무도 모른다. 그 사이 D5-4·게이트·e2e·axe 는 전부 green 이다(관측됨).
+- predicted = Round 12 에서 승인 화면의 가시 요소가 전부 `source[]` 안에 있고, §3-V 제품 대조가 「승인본에 있으나 제품에 없는 요소」 0건을 낸다.
+- falsifier = (a) Round 12 에서 wrapper 가 여전히 가시 요소를 주입했는데 R6 체크리스트가 통과시키면 결정 3 실패(그때 탐지기를 만든다) (b) 결정 2 (i) 대로 셸을 컴포넌트에 넣었더니 화면 간 셸 중복이 3회 이상 생기면 (ii) 의 별도 화면 등록을 기본값으로 승격한다.
+- rollback = 본 amend superseded → 데코레이터 제약 해제 + (a) 안(`decorator_provides[]`)으로 전환.
+
+### 적용 surface
+- docs/90-decisions/boilerplate/ADR-072-…md               — D3 `source[]`·D4 스냅샷에 부기 (본 amend 로 부기)
+- .claude/skills/design-milestone/SKILL.md                — 결정 3 R6-5 체크리스트 항목
+- .claude/agents/builder.md                               — 결정 1·2 ui-authoring 모드 산출물 규칙
