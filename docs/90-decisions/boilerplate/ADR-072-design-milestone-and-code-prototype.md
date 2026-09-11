@@ -163,6 +163,7 @@ R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 
 - `scope`는 **어댑터 명령을 돌릴 작업 디렉터리**다(단일 패키지는 `.` — 생략 시 기본값). `build-storybook`은 Storybook이 설치된 scope, `flutter test`는 `pubspec.yaml`이 있는 scope에서 돈다. 경로 기준은 셋으로 갈린다 — **`source[]`·`preview`의 파일 경로는 그 화면의 `scope` 기준 상대**(위 예시의 `lib/screens/…`·`test/screens/…`는 `scope: apps/mobile` 기준이다 — 어댑터가 그 scope를 작업 디렉터리로 돌기 때문), **`brief`·`snapshots[]`는 매니페스트 디렉터리 상대**(`briefs/<screen>.md`·`snapshots/<screen>-<state>-<w>x<h>.png` — D4 저장 규칙 그대로), **게이트 출력(`design-gate-shots/`)은 저장소 루트 기준**(scope가 여럿이어도 스크린샷이 한 곳에 모여야 reviewer가 나란히 본다).
 - `snapshots[]` 파일명은 `<screen>-<state>-<w>x<h>.png`. 기준선 집합 = 각 뷰포트 `default` + 1차 뷰포트 `empty`·`error` + `baseline: true` 상태.
 - **`states[].render` (선택 — schema v1 minor, 2026-09-11)**: 그 상태가 **렌더 조건으로 정의될 때** 그 조건을 적는다. `{ "viewports": [{"w":320,"h":800}], "textScale": 2 }`. 선언이 있으면 게이트는 **그 조건에서만** 렌더·기준선 캡처하고(프로필 밖 폭도 허용 — 기준선 대상이다), 없으면 프로필 뷰포트 전체를 쓴다. **왜 필요한가**: 브리프의 «못생긴 상태»는 조건을 달고 온다(`narrow-320`·`overflow`@360×800·`long-name`@textScale 1.3·`zoom-200`). 조건을 표현할 자리가 없으면 게이트가 그것을 **조용히 버리고** 프로필 뷰포트로 찍는다 — dogfood Round 12 실측: `admin-habits-narrow-320-1280x900.png` 이 승인 기준선으로 생성됐고 내용은 **1280px 전체 폭의 3열 표가 멀쩡히 나온 장면**이었다(스토리의 viewport global 은 게이트의 `setViewportSize` 에 무시된다). 이름과 내용이 어긋난 기준선은 사람이 봐도 이상함을 못 느낀다 — 그림 자체는 정상이기 때문이다. `version` 은 올리지 않는다(필드 추가는 minor).
+- **`구성 불확실`(A/B) 의 표현 — 새 필드가 아니라 상태 쌍 (2026-09-11, amend-4)**: 브리프 `## 13` 이 방향 2안을 남긴 화면은 **그 선택이 렌더에 보이는 상태마다** `<state>-a`·`<state>-b` 두 상태를 `states[]` 에 등록한다(`default-a`·`default-b`·`overflow-a`·`overflow-b` …). `variant` 필드를 새로 두지 **않는다** — 웹 갈래는 이미 스토리 = 상태로 그렇게 표현하고 있어서(«`구성 불확실`이면 `A`/`B`» 스토리) 필드를 더하면 같은 것을 가리키는 표기가 둘이 된다. 상태로 두면 `preview`·`baseline`·`render`·스냅샷 명명·게이트 렌더가 전부 기존 기계를 그대로 쓴다. **왜 필요한가**: 상태 축이 없으면 두 안의 렌더가 같은 파일명으로 충돌한다 — dogfood Round 12 실측: builder 가 충돌을 피하려 PNG 저장을 A안에만 걸었고, 그 결과 R6-4 reviewer 가 연 `design-gate-shots/` 에도 승인 스냅샷 26장에도 **B안이 한 장도 없었다.** 사용자가 「둘 다 보고 정한다」고 유보한 선택인데 볼 것이 처음부터 한쪽뿐이었다. 선택 확정 후 탈락 상태는 `states[]` 에서 지운다(R5).
 - `product_entry`는 제품 라우트·딥링크. design-milestone R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` → 배선 task line item이 확정해 implement가 이 필드만 갱신한다. stabilize §3-V ②(제품 렌더)의 입력.
 - `supersedes[]`는 이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 이 M이 그 화면의 기준선을 새로 잡을 때. 이전 M 파일은 불변. 소비자는 «가장 최근 M의 등록·supersedes»를 현재 기준선으로 해석한다.
 - `_theme/manifest.json`은 `milestone: "_theme"`, 화면 id `theme-showcase`(프로필별 `theme-showcase-<profile>`), `feature: "—"`, `px: []`, `product_entry: null`.
@@ -338,3 +339,37 @@ dogfood Round 11(웹)에서 `/stabilize-milestone` §3-V 경험 게이트**만�
   (본 ADR 자신의 D3 `source[]`·D4 스냅샷에도 부기했다 — 자기 파일이라 surface 행으로 세지 않는다)
 - .claude/skills/design-milestone/SKILL.md                — 결정 3 R6-5 체크리스트 항목
 - .claude/agents/builder.md                               — 결정 1·2 ui-authoring 모드 산출물 규칙
+
+## Amendment 4 (2026-09-11) — `구성 불확실` 이 미선택인 채로 `contract-ready` 를 통과한다
+
+### 배경
+dogfood Round 12 `today-list` 은 브리프 `## 13` 에 「E6 「습관 추가」 하단 배치 — R4에서 2안을 만들고 사용자가 고른다(취향 오라클 = 사용자)」를 남겼고, `## 15` 리스크 3(「2안 선택 전에는 하단 패딩 수치가 확정되지 않는다」)도 열어 뒀다. 그런데 R6 승인과 R7 `contract-ready` 승격이 **둘 다 통과했다.**
+
+- [관측됨] R7-3 의 승격 조건은 `DECISION_REGISTER.md` 의 `open` 0건이다. 원장은 D-001~D-009 로 `closed 6 / deferred 3 / open 0` 이었다 — **A/B 선택은 원장에 행이 없다.** 브리프 `## 13` 은 원장 밖의 **병렬 미결 자리**이고, 어느 관문도 그 자리를 보지 않는다(발견 62).
+- [관측됨] 결과적으로 코드의 enum 기본값 `AddButtonLayout.extendedFab` 이 사용자가 자기 몫으로 유보한 선택을 조용히 대신했고, 승인 스냅샷 26장이 그 기본값으로 동결됐다.
+- [관측됨] 더 근본적으로, **볼 것이 한쪽뿐이었다.** R4 규정의 「`구성 불확실`이면 `A`/`B`」는 **웹 갈래에만** 붙어 있다(스토리 id 가 축을 자연히 갖는다). Flutter 갈래는 테스트 파일 한 줄뿐이고 PNG 이름 `<screen>-<state>-<w>x<h>.png` 에 축이 없다. builder 는 두 안을 전부 렌더했지만(22 케이스 통과) 파일명 충돌을 피하려 저장을 A안에만 걸었다 — 프로필 비대칭이다(발견 63).
+- [관측됨] 사후 확인: 저장 가드를 상태 접미사(`<state>-A|B`)로 풀어 재실행하니 22장이 충돌 없이 나왔고, 두 안의 차이(마지막 행을 가리는 범위)가 그림에서 바로 보였다. **상태 축 하나면 충분하다.**
+
+### 결정
+1. **A/B 를 상태로 모델링한다** — `구성 불확실` 화면은 선택이 렌더에 보이는 상태마다 `<state>-a`·`<state>-b` 두 상태를 매니페스트에 등록한다. 새 스키마 필드를 두지 않는다(`## 매니페스트 schema (v1)` 주석 참조). Flutter 위젯 테스트는 그 상태 id 로 group·PNG 이름을 낸다.
+2. **R4 가 원장 행을 만든다** — `구성 불확실` 화면마다 `DECISION_REGISTER.md` 에 `authority: user-choice` · `status: open` 행을 만들고 브리프 `## 13` 이 그 `D-NNN` 을 인용한다. 새 탐지기를 만들지 않는다 — **R7-3 의 기존 `open` 검사가 그대로 그물이 된다.**
+3. **R6-5 승인 체크리스트에 두 줄** — (i) 대상 화면 브리프 `## 13` 이 「없음」이거나 그 `D-NNN` 이 원장에서 `closed` 인가 (ii) A/B 화면은 **두 안의 렌더가 모두** `design-gate-shots/` 에 있는가.
+4. **R5 는 선택 확정 후 재촬영한다** — 탈락 상태·코드·테스트를 지우고 남은 상태의 스냅샷을 다시 찍는다. 선택에 딸린 수치(하단 패딩 등)가 그때 확정되기 때문이다.
+
+### 근거
+- 결정 2 만 하면 원장 행은 생기지만 **볼 렌더가 없어 선택 자체가 불가능하다** — 62 를 고쳐도 63 이 남는다. 결정 1 만 하면 렌더는 둘 다 남지만 아무도 선택을 요구하지 않는다. **둘 다 한다.**
+- 결정 1 의 대안 「`states[].variant` 필드 신설 + 게이트 PNG 명명 확장」을 택하지 않았다: (i) 웹은 이미 스토리 = 상태로 표현하므로 표기가 둘이 된다 (ii) 게이트 어댑터를 또 건드려야 한다 — 이번 라운드에 그 파일에서 이미 P0 2건(발견 54·58)이 나왔다 (iii) 얻는 것은 «두 상태가 한 선택의 양안임» 을 기계가 아는 것뿐인데, 그 정보는 브리프 `## 13` 과 원장 행이 이미 갖고 있다.
+- 대가: 상태 수가 는다(선택이 보이는 상태 × 2). R6 렌더 시간이 그만큼 늘고, 선택 후 R5 가 절반을 지운다.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 2·3 — 미선택 상태로는 `contract-ready` 에 닿지 못한다.
+- 제약(중, [관측됨]): 결정 1·4.
+
+### Mutation delta (ADR-047 D3)
+- failure = 사용자가 자기 몫으로 유보한 구성 선택이 코드 기본값으로 조용히 결정되고, 그 상태로 승인 스냅샷 동결과 `contract-ready` 승격까지 간다(관측 1건, Round 12 `today-list`).
+- predicted = Round 13 에서 `구성 불확실` 화면은 (i) 원장에 `open` 행을 갖고 (ii) 두 안의 렌더가 모두 남고 (iii) 선택 전에는 R7-3 이 승격을 막는다.
+- falsifier = (a) 상태 접미사가 상태 수를 불려 R6 렌더 시간이 유의하게 늘면(웹 Storybook 재빌드 포함 1화면 기준 2배 이상) 결정 1 을 `variant` 필드로 되돌린다 (b) 원장 행이 있는데도 승격이 통과하면 원인은 원장이 아니라 **R5 진입 자체**이므로 R5 를 silent-skip 금지 관문으로 승격한다 (c) `구성 불확실` 이 3안 이상으로 나오는 실측이 1건이라도 있으면 `-a`/`-b` 명명을 `-<slug>` 로 일반화한다.
+- rollback = 본 amend superseded → 상태 접미사·원장 행·체크리스트 2줄 제거, 웹 갈래의 `A`/`B` 스토리 규정만 복원.
+
+### 적용 surface
+- .claude/skills/design-milestone/SKILL.md — 결정 1·2·3·4 (R4·R5·R6-5)

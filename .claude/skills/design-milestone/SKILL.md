@@ -58,19 +58,23 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 - 웹: `screens/<screen>/<Screen>.<ext>` + `<Screen>.stories.<ext>`(확장자는 스택 관례 — `.tsx`/`.vue`/`.svelte`; 상태별 스토리: happy + 못생긴 상태 5종 + category state, `구성 불확실`이면 `A`/`B`) + `fixtures.<ext>`(출처 표기). Flutter: `lib/screens/<screen>/` + `lib/prototype/main.dart` 갤러리 등록 + `test/screens/<screen>_prototype_test.dart`(프로필 크기 렌더 + guideline 4종 + overflow 0 + PNG — ADR-059#amend-1 결정 2·3).
 - 각 코드에 PX 마커 주석을 단다(브리프 PX 후보 → 확정 id). 토큰 외 리터럴 금지.
 - 매니페스트 `docs/20-system/prototypes/M<N>/manifest.json`에 화면을 등록한다(**`scope`는 그 화면 코드가 있는 패키지 디렉터리 — 단일 패키지는 `.`, monorepo는 `apps/web`·`apps/mobile` 등. 게이트가 어댑터 명령을 돌릴 작업 디렉터리다**; `states[]`는 `{id, preview}`로 상태별 스토리 id·테스트 group까지, 브리프의 «승인 필요 상태»는 `baseline: true`; `approved`·`product_entry`는 비움).
+- **`구성 불확실`(A/B) 화면 (ADR-072#amend-4)** — 두 가지를 함께 한다.
+  - **상태 쌍으로 등록**: 선택이 **렌더에 보이는 상태마다** `<state>-a`·`<state>-b` 두 상태를 `states[]` 에 둔다(`default-a`/`default-b`/`overflow-a`/`overflow-b` …). 웹은 스토리 id 가, Flutter 는 위젯 테스트 group 과 PNG 이름이 그 id 를 따른다. **`variant` 필드를 새로 만들지 마라** — 상태로 두면 `baseline`·`render`·스냅샷 명명이 전부 기존 기계를 그대로 쓴다. Flutter 에서 A/B 를 위젯 파라미터로 받아 한 테스트 안에서 돌리면 **PNG 파일명이 겹쳐 한 안이 조용히 덮인다**(Round 12 실측: 그래서 builder 가 저장을 A안에만 걸었고 B안 렌더가 한 장도 남지 않았다).
+  - **원장 행을 만든다**: `DECISION_REGISTER.md` 에 `authority: user-choice` · `status: open` 행을 만들고, 브리프 `## 13` 이 그 `D-NNN` 을 인용하도록 고친다. R7-3 의 기존 `open` 검사가 그대로 그물이 되므로 새 검사기는 만들지 않는다.
 - builder 반환은 경로·PX 목록·남은 리스크만(코드 전문 금지).
 
 ## R5 — 선택·수정 루프 (사용자)
 - 안내: «`npm run storybook`에서 `Screens/<screen>` 스토리(또는 `flutter run -t lib/prototype/main.dart`)를 열어 상태별로 확인해 주세요. 원하시면 추천을 요청하실 수 있어요.»
 - 피드백은 builder 재생성으로 반영(사용자 직접 편집 X). 브리프와 어긋나는 변경 요청은 브리프를 먼저 고친다. 2사이클 미수렴 시 브리프 재검토.
-- `A`/`B` 선택 후 탈락안 스토리·항목 삭제.
+- **`A`/`B` 화면은 두 안의 렌더 경로를 나란히 제시한다** — `design-gate-shots/<screen>-<state>-a-…png` 와 `-b-…png` 를 상태별로 짝지어 안내한다. 한쪽만 있으면 R4 로 되돌아간다(선택을 요청해 놓고 볼 것을 한쪽만 주지 않는다).
+- 선택 확정 후: 탈락안 상태·스토리·코드(enum 값·분기)·테스트를 **삭제**하고, 그 `D-NNN` 을 원장에서 `closed`(disposition·근거 기입)로 닫고, 브리프 `## 13` 을 「없음 — D-NNN 에서 <선택> 확정」으로 고친다. **남은 상태의 스냅샷은 다시 찍는다** — 선택에 딸린 수치(하단 패딩·컨테이너 폭 등)가 그때 확정되기 때문이다.
 
 ## R6 — 게이트 + 픽셀 판정 + 승인 + 스냅샷
 1. `STACK_SETUP_PLAN.md ## Design Gate Adapter` `status: ready`가 아니면 `Needs Design Gate: /stack-guard` + 승격 보류(silent skip 금지).
 2. `validate:design -- --manifest docs/20-system/prototypes/M<N>/manifest.json --only <이번 대상 화면>` 실행(같은 세션에서 **코드 변경 없이** 반복할 때만 `--no-build` — builder 재생성 뒤에는 반드시 재빌드한다, ADR-072 D6). exit 1 blocker는 builder에 selector·요약을 되먹여 재생성(≤2회), 초과 시 승인 보류 + 브리프 재검토. exit 2면 사유 echo + 보류.
 3. `--tokens-only <screens 경로>` 결과가 0건이 아니면 고치거나 브리프에 사유를 적는다(승인 체크리스트 항목 — 이 모드는 렌더 출력을 지우지 않는다).
 4. reviewer(design surface) 단발 sub-call이 `design-gate-shots/`를 Read로 열람해 위계·밀도·slop·overlap·도메인 fit을 판정(차단은 재생성).
-5. 사용자 최종 승인(화면 단위). **승인 체크리스트**: happy + 못생긴 상태 5종 + category state 렌더됨 / 실카피(§10) / 인터랙션 계약 테스트(키보드·포커스·취소·콜백) 존재·통과 / PX 마커 ≥1 / 토큰 외 리터럴 0 또는 사유 / 접근성 blocker 0 / **하네스 요소 0**(ADR-072#amend-3) — 렌더에 보이는 가시 요소가 전부 그 화면 `source[]` 파일 안에 있는가. 데코레이터·wrapper 가 넣은 제목·헤더·랜드마크·폭 컨테이너가 하나라도 보이면 **승인하지 않는다**: 컴포넌트로 옮기거나 공용 셸을 별도 화면으로 등록한 뒤 재렌더한다. 대조는 `design-gate-shots/` 렌더와 매니페스트 `source[]` 를 나란히 놓고 한다.
+5. 사용자 최종 승인(화면 단위). **승인 체크리스트**: happy + 못생긴 상태 5종 + category state 렌더됨 / 실카피(§10) / 인터랙션 계약 테스트(키보드·포커스·취소·콜백) 존재·통과 / PX 마커 ≥1 / 토큰 외 리터럴 0 또는 사유 / 접근성 blocker 0 / **하네스 요소 0**(ADR-072#amend-3) — 렌더에 보이는 가시 요소가 전부 그 화면 `source[]` 파일 안에 있는가. 데코레이터·wrapper 가 넣은 제목·헤더·랜드마크·폭 컨테이너가 하나라도 보이면 **승인하지 않는다**: 컴포넌트로 옮기거나 공용 셸을 별도 화면으로 등록한 뒤 재렌더한다. 대조는 `design-gate-shots/` 렌더와 매니페스트 `source[]` 를 나란히 놓고 한다. / **`구성 불확실` 마감**(ADR-072#amend-4) — 대상 화면 브리프 `## 13` 이 「없음」이거나 그 `D-NNN` 이 원장에서 `closed` 인가, 그리고 아직 열려 있다면 **두 안의 렌더가 모두** `design-gate-shots/` 에 있는가. 한쪽 렌더만 있는 채로 승인하지 않는다.
 6. 승인 직후 `validate:design -- --manifest <경로> --only <화면> --snapshot docs/20-system/prototypes/M<N>/snapshots/`로 기준선 스냅샷(각 뷰포트 default + 1차 뷰포트 empty·error + `baseline: true` 상태)을 `snapshots/<screen>-<state>-<w>x<h>.png`로 저장한다(500KB 초과 경고). 매니페스트 `approved{date, by: user}`·`snapshots[]`·`product_entry`(`## 9`·ARCH 라우팅에서 도출, 미정이면 `null`)·`handoff{run, remaining_wiring[]}` 채움. 이전 M 승인 화면에 영향(공용 컴포넌트·토큰 변경)이 있으면 그 화면을 **이 M 매니페스트에 `supersedes: ["M<K>/<screen>"]`로 재등록**해 함께 렌더·승인·스냅샷(이전 M 파일은 불변 — ADR-072 D5-5).
 
 ## R7 — feature 기입 · 정합 재대조 · contract-ready
