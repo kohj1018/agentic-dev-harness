@@ -46,7 +46,7 @@ R0 — 운영 환경 가정 확인:
    1. 생성기 = 그 scope 유형의 `cat-<유형>-framework` 확정 행(registry에서 `scope`가 그 scope이거나 `*`인 행 — ADR-071 D2 `(scope, id)` 키)의 공식 생성기 1종(없으면 최소 골격 — 소스 루트 1 + 테스트 루트 1 + manifest, `generator: minimal`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시.
    2. **임시 디렉터리에 생성**한 뒤 scope 디렉터리로 복사한다. 아래는 **절대 덮어쓰지 않는다**: `README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs/**` `.claude/**` `.codex/**` `.agents/**` `.boilerplate/**` `.github/**`. `.gitignore`는 줄 단위 합집합(저장소 기존 줄 우선, 중복 제거). 그 외 충돌 파일은 덮어쓰지 않고 `Scaffold conflict: <경로>` 출력 + 사용자 결정.
    2-1. **보호 경로 검사(내용 대조)**: 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`) 아래 **«파일 경로 + 내용 해시» 목록**을 복사 **직전**과 **직후**에 각각 만들어 **완전히 같아야** 한다(해시가 바뀐 파일 · 새로 생긴 파일 · 사라진 파일 = 위반). 예: `find <보호 경로> -type f -print0 | sort -z | xargs -0 shasum`. 달라진 경로가 있으면 `Scaffold protected-path violation: <경로>` 출력 + 종료(되돌리기는 사용자 결정 — 자동 checkout 금지).
-   3. 생성기가 만든 `README`류·예제 페이지는 그대로 둔다(정리는 M1 계획 소관). 생성기가 만든 `.git`은 버린다.
+   3. 생성기가 만든 `README`류·예제 페이지는 그대로 둔다(정리는 M1 계획 소관). 생성기가 만든 `.git`은 버린다. **단 그 산출물을 프로젝트가 고른 formatter 로 1회 정규화한다** — 생성기 기본 스타일(따옴표·세미콜론 등)은 registry 가 확정한 formatter 와 다른 것이 보통이라, 그대로 두면 수행 5 의 통합 `validate` format 단계가 **영구히 실패**하고 probe 회차 판정이 프로젝트 실패에 묻힌다(dogfood Round 12 실측). 삭제가 아니라 형식만 맞추는 것이므로 «생성기 산출물을 그대로 둔다»와 충돌하지 않는다.
    4. `## Scaffold`에 scope별 1행(scope·status·생성기·버전·옵션·생성 파일 수·제외·충돌·실행일)을 적는다. 생성 파일 전량은 `git status --porcelain`으로 보여 준다(문서 복사 금지).
    5. **커밋하지 않는다.** 출력에 `권장 커밋: chore(scaffold): initialize <framework> project skeleton` 한 줄.
    6. Dart/Flutter면 수행 0 직후 `## Dart Source Roots`를 실측 갱신한다(생성기가 `lib/`·`test/`를 만들었으므로).
@@ -86,6 +86,7 @@ R0 — 운영 환경 가정 확인:
    > ⚠️ **닷 디렉터리(`.stack-guard-probe/` 등)나 `.gitignore` 등재 경로에 만들면 안 된다.** (i) 다수 formatter/linter 가 `.gitignore` 를 기본 존중해 대상에서 제외하고, (ii) TypeScript `include` 의 `**/*` 는 `.` 로 시작하는 세그먼트를 매칭하지 않으며, (iii) 테스트 러너의 glob 은 dot 파일을 기본 제외한다. 그러면 위반 probe 가 실패하지 않아 **판정력이 정상인 검사도 FAIL 로 오분류**된다.
 
    - **위치**: 등록된 소스 루트 / 테스트 루트 **안**. 파일명은 그 스택의 include·test glob 에 걸리는 형태 + 명백한 표식. 예: `src/__stackguard_probe__.ts` · `src/__stackguard_probe__.test.ts` · `lib/__stackguard_probe__.dart` · `test/__stackguard_probe___test.dart` · `tests/test___stackguard_probe__.py`
+   - **scope 가 여럿이면(monorepo) 회차마다 scope 마다 하나씩 둔다** — 같은 단계가 scope 별로 한 번씩 돌고 앞 scope 가 fail-fast 로 멈추면 뒤 scope 의 판정력이 측정되지 않는다. 멈춰서 도달하지 못한 scope 의 그 단계는 **5-c-0 (ii) 의 단독 실행으로 재측정**한다(예: `pnpm --dir apps/web exec biome format .`). 재측정이므로 **회차 수는 늘지 않는다**(dogfood Round 12 실측 — 2 scope × 5회차를 5회차로 유지).
    - **등록된 소스/테스트 루트가 아직 없으면**(수행 0 스캐폴드가 `skipped`인 brownfield·부분 초기화 상태 — green-field는 수행 0이 먼저 만들므로 정상 경로에서는 발생하지 않는다, ADR-071 D5) probe 를 둘 자리가 없으므로 `SKIPPED (probe unavailable — 등록된 소스 루트 부재)` 로 보고한다. **디렉터리를 새로 만들지 않는다** — 소스 트리 구조는 스캐폴드·계획의 소관이고 본 skill 은 `## 재실행 계약` 대로 *변경이 필요한 것만* 건드린다. 이 SKIPPED 는 5-f 로 기록되고 스캐폴드 후 재실행 때 해소된다(`[Guard-drift]` 가 그 재실행을 권고한다).
    - **`.gitignore` 에 등재하지 않는다.** 잔여물은 5-d 삭제로만 통제하고, 남았을 때 `git status` 에 보이는 것이 정상이다(조용히 무시되는 것보다 안전하다).
    - 같은 이름의 파일이 이미 있으면 **덮어쓰지 않고** 그 항목만 건너뛰고 사유를 보고한다.

@@ -156,7 +156,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
   - **`EMPTY`** (선언된 e2e 디렉터리 하위에서 **실행된** 테스트 0개) → `졸업 가능: NO` (hard) + `Needs E2E Smoke`. 프로비저닝 단계와 달리 졸업 시점에는 차단한다(ADR-068 D3 item 3). *registry 미등록은 이 상태의 사유가 아니다* — 미등록은 `P1 [E2E-registry]` 기록 대상일 뿐이다.
   - **`FAIL`** → `졸업 가능: NO` (hard).
   - **`BLOCKED_ENV`** → **item 3 미충족** (hard, blocked-on-env). real failure가 아니므로 라벨을 구분해 출력하고 환경 복구를 안내한다. **최종 graduation은 `NO`가 아니라 단계 8이 확정하는 `BLOCKED (e2e blocked-on-env: <target>)`이다**(ADR-068 D4 — 우선순위 `BLOCKED` > `NO`).
-- **item 5 — P0 severity finding 0건**: `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌 항목 수 0**. 단계 4의 qa 팬아웃이 새 P0를 등재할 수 있으므로 단계 8에서 확정한다.
+- **item 5 — P0 severity finding 0건**: `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` 섹션에서 **`status: resolved`가 아닌 항목 수 0**. **«항목» 은 `- **<ID>** |` 로 시작하는 줄만 센다** — 항목의 하위 산문 줄에도 `status: open` 같은 문자열이 나올 수 있고(수리 라운드가 «`status: open` 유지» 라고 적는다), 문자열 grep 으로 세면 계수가 부풀려진다(dogfood Round 11 실측 — 2건이 4건으로). 단계 4의 qa 팬아웃이 새 P0를 등재할 수 있으므로 단계 8에서 확정한다.
 - **item 6 — (선택) 본 마일스톤 한정 추가 기준**: 본문 텍스트 그대로 평가(사용자가 자유 기재한 영역 — 해당 항목만 LLM 해석 허용).
 
 **본 단계의 출력** (판정을 회고에 쓰지 않는다):
