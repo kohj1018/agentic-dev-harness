@@ -951,10 +951,42 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 | 11 | `todo-add` 프로토타입에서 「추가」가 `disabled`면 브라우저 암묵 제출이 없어 **공백 입력 + Enter가 무반응** — 브리프의 `invalid` 상태가 구현에서 도달 불가였다 | 관측 | **조치 불요** — R4 인터랙션 계약 테스트가 Red로 잡아 `onKeyDown`으로 해소. ADR-072 D5 «행동 계약은 게이트·테스트»의 실효 사례 |
 | 12 | `/plan-workitem` cross-feature seam self-check가 실제 계약 충돌 검출 — PX-M1-todo-empty-error-04(읽기 실패 중 입력 가능) ↔ «실패한 읽기 위에 덮어쓰지 않는다» | 관측 | **조치 불요** — INV-2(«`error` 중 추가는 재읽기 성공 후에만 저장»)로 확정. ADR-057 결정 12가 의도대로 작동 |
 | 13 | `--tokens-only`의 단축 hex가 카피 문구를 오탐 — 실측 18건 중 6건이 「PR #412」의 `#412` | P2 | **수정** — 스타일시트에서만 3~8자리, 코드 파일은 6·8자리만 탐지(ADR-072#amend-1 결정 3). 재실측 18 → 12건, 오탐 0건 |
-| 14 | builder effort 실험(ADR-004#amend-4 결정 3) 조건 (a)~(d) 미수행 — `.claude/agents/builder.md` frontmatter 수정이 auto 모드 분류기의 `[Self-Modification]`에 걸렸다 | 환경 | **사용자 승인 후 재개** — 부수 관측: frontmatter 편집 직후 곧바로 dispatch하면 hot-reload가 반영되지 않는다(`maxTurns: 1`을 넣은 preflight가 3 step 완주). 조건 전환 사이에 대기가 필요하다 |
+| 14 | builder effort 실험(ADR-004#amend-4 결정 3) 조건 (a)~(d) — `.claude/agents/builder.md` frontmatter 수정이 auto 모드 분류기의 `[Self-Modification]`에 걸려 1차 중단 | 환경 | **사용자 승인 후 수행** — 결과는 `## Builder Effort Experiment` 절. **frontmatter hot-reload 는 «편집 직후 dispatch 하면 반영 안 되고, 시간이 지난 뒤 dispatch 하면 반영된다»**: 편집 직후 preflight(`maxTurns: 1`)는 3 step 완주했고, 대기 후 dispatch 한 조건 (b)(`maxTurns: 20`)는 **tool_uses 정확히 20 에서 상한 중단**됐다. 조건 전환 사이 대기가 실험 설계의 필수 조건이다 |
+
+| 15 | `[Spec-gap]`이 «매핑은 있으나 의미가 빈» 경우를 못 잡는다 — F-002의 FAC-1(새로고침 유지)·FAC-5(쓰기 실패 알림)가 둘 다 T-004:AC-3를 가리키는데 그 AC 본문은 INV-2 시나리오다. unmapped가 아니라 발화하지 않는다 | P2 | **기록만** — ADR-037 커버리지 검사는 «우변이 실재하는가»만 본다. 의미 대조는 자동 판정이 어려워 validate 축 3의 *기록 등급 관찰*로 두는 것이 현실적이다. Round 12에서 재관측 후 문구화 판단 |
+| 16 | 축 5(UI Design inventory)가 «UI 프로젝트» 신호만으로 매번 spawn — `.tsx`를 하나도 안 건드린 T-003에서도 validator 한 명이 «해당없음»만 반환 | P2 | **기록만** — spawn 신호를 «diff에 UI surface 파일이 있음»으로 좁히는 안. 발견 5와 함께 Round 12 실측 뒤 재보정 |
+| 17 | 비용 압력이 실제 규칙 이탈을 만들었다 — T-003 validate에서 foreman이 «1축=1 validator»를 어기고 축 3·8을 한 validator에 합쳤다(리포트 `## Orchestration`에 이탈로 기록) | 관측 | **기록만** — 발견 5의 임계 문제가 «규칙을 어기게 만드는» 형태로 드러난 실측. 실측 비용: T-001 6 dispatch/약 16.3만 토큰, T-003 5 dispatch/약 14.6만 토큰, 최장 축은 둘 다 diff-trace(176초/99초) |
+
+| 18 | **계획이 승인 UI 계약상 배선 불가능한 계측 이벤트를 요구했다** — T-002 `## 3` step 5와 F-001 `## 8-1`이 `todo_add_rejected`(공백 거부) 이벤트를 지정했으나, 승인된 `TodoAdd` 프로토타입은 공백 제출을 **내부에서 삼키고 콜백을 부르지 않는다**. 배선 계층에서는 그 시도를 관측할 수단이 없다 | P1 | **기록만(봉인 후 발견)** — 억지 분기를 넣으면 도달 불가 dead code가 되어 ADR-006 self-check 위반이다. 해소하려면 `TodoAdd`에 `onReject` 콜백이 필요하고 그건 **승인 UI 시그니처 변경**이라 `/design-milestone` 재진입 또는 다음 M 사안이다(ADR-060 D6). 원인: `/plan-workitem` 3-I가 계측 line item을 authoring할 때 **그 이벤트가 승인 프로토타입의 콜백 표면에서 실제로 발화 가능한지 대조하지 않는다** — 3-P(승인 UI 재사용)와 3-I(계측)가 서로를 보지 않는다. **builder effort 실험의 4조건 중 2조건(b·c)이 서로 독립적으로 같은 충돌을 발견하고 억지 구현 대신 보고를 택했다** — 우연이 아니라 계획의 구조적 결함이다 |
 
 ### 수정분 커밋
 `fix(harness): correct design gate adapter, protected-path timing and Red definition from dogfood round 11`
 
-## Builder Effort Experiment (ADR-004#amend-4)
-- 상태: Round 11 dogfood에서 측정 예정 — 조건 (a)~(d) 결과 표는 그때 채운다(실험 설계는 ADR-004#amend-4 결정 3).
+## Builder Effort Experiment (ADR-004#amend-4) — 측정일 2026-09-11
+
+- task: **T-002-todo-screen-wiring** (승인 UI 2개 배선 + 도메인 연결 + 계측 이벤트 + 테스트 3건)
+- 사본: dogfood-web `bb9645b`(T-001 커밋 완료, T-002·T-003 미포함)에서 뜬 격리 사본 4개. slice 프롬프트 본문은 **바이트 동일**(4,564B — 루트 경로 한 줄만 상이).
+- **각 셀 n=1이다.** 아래 수치는 경향 신호이지 통계가 아니다.
+- `effort`를 명시하지 않은 (a)·(c)는 **세션 effort를 물려받는다** — 본 측정 세션은 `xhigh`였다. 따라서 실제 비교축은 «xhigh vs medium»이다.
+
+| 조건 | maxTurns | effort | 소요(ms) | tool_uses | subagent 토큰 | 완료 AC | validate | foreman 회수 턴 | Red 보고 |
+|---|---:|---|---:|---:|---:|---|---|---:|---|
+| (a) 현재 | 20 | — (xhigh 상속) | 132,522 | 17 | 42,761 | 3/3 | OK | 0 | **부분 누락** — `analytics.ts`는 «no-op으로 먼저 만든 뒤 관측을 생략하고 진행»했다고 스스로 보고 |
+| (b) effort만 | 20 | medium | 338,873 | 23 (1차 **20에서 상한 중단** → 회수) | 62,019 | 3/3 | OK | **1** | 완전 — AC 3건 전부 실제 DOM 어설션 실패 인용 |
+| (c) 턴만 | 45 | — (xhigh 상속) | 161,769 | 18 | 49,451 | 3/3 | OK | 0 | 완전 |
+| (d) 둘 다 | 45 | medium | 309,489 | 22 | 76,199 | 3/3 | OK | 0 | 완전 |
+
+### 판정
+
+- **완료율·검증 실패는 4조건 모두 동일하다** — AC 3/3, `pnpm validate` 전 단계 통과, 승인 UI(`TodoAdd.tsx`) 바이트 무변경.
+- **`effort: medium`은 느리고 비싸다.** medium 두 조건(b·d)의 소요는 338.9초·309.5초, 상속(xhigh) 두 조건(a·c)은 132.5초·161.8초로 **약 2배**다. 토큰도 62.0K·76.2K 대 42.8K·49.5K로 높다. «깊이보다 완주»라는 채택 근거(#amend-4 결정 2)와 반대 방향이다.
+- **`maxTurns: 45`는 값싼 보험이다.** (a)는 17턴으로 20 안에 우연히 들어왔고 (b)는 정확히 20에서 잘려 회수 턴 1회를 썼다. 45는 필요 없을 때 비용이 0이고 필요할 때 foreman 왕복을 없앤다.
+- **품질 편차는 effort·turn 축과 정렬되지 않았다.** 도달 불가능한 `todo_add_rejected` 분기를 (a)·(d)는 코드에 넣었고((d)만 리스크로 보고) (b)·(c)는 넣지 않고 사유를 보고했다. 네 조건이 2:2로 갈렸고 조건 축과 무관하다.
+
+### ADR-004#amend-4 결정 4 적용 — **규칙에 공백이 있다**
+
+결정 4는 두 갈래만 규정한다: «(d)가 (a) 대비 저하 없이 **시간이 줄면** 확장 / **저하가 있으면** effort 제거». 관측된 결과는 **저하는 없는데 시간이 늘었다**는 제3의 경우이며 어느 갈래에도 해당하지 않는다. Mutation delta의 falsifier(«(d)에서 완료율·검증 실패가 (a)보다 나쁨») 도 문자 그대로는 발화하지 않았다.
+
+- **본 라운드는 `builder.md`를 바꾸지 않고 채택값(`maxTurns: 45` + `effort: medium`)으로 되돌려 두었다.** 수치는 `effort` 제거를 가리키지만, 그것은 accepted ADR 결정을 뒤집는 일이고 결정 4가 그 경우를 규정하지 않았으므로 **사용자 판단 대상**이다.
+- 권고: `effort: medium` 제거 + `maxTurns: 45` 유지. 근거는 위 두 번째·세 번째 불릿이다. 채택 시 ADR-004 `## Amendment 5`로 박고 결정 4의 세 번째 갈래(«저하는 없으나 시간이 늘면»)를 함께 규정한다.
+- Round 12에서 같은 task 유형(Flutter 배선)으로 1회 더 재면 n=2가 된다.
