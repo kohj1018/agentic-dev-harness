@@ -1147,6 +1147,27 @@ Round 12 의 값은 «웹 전용 라운드가 구조적으로 못 보는 것»�
 - 나머지 3종(`androidTapTarget`·`iOSTapTarget`·`labeledTapTarget`)은 기하·시맨틱 기반이라 글리프 렌더에 원리상 무관하다. 다만 텍스트 폭이 달라져 레이아웃이 움직일 수는 있으므로 **원리 주장에 기대지 않고 재실행으로 확인했다** — 폰트 적재 후 29 테스트 전부 통과, 실패는 「—」 1건뿐이었다.
 - 같은 이유로 **R6 게이트의 `blockers: 0` 도 그 구간에서는 1종 미측정 상태의 0 이었다.** 발견 54(PNG 미생성)·58(렌더 조건 무시)에 이어 **같은 라운드에서 게이트 신뢰도 결함이 3건**이고, 셋 다 게이트가 `blockers: 0` 을 내는 동안 성립했다.
 
+### 10단계 구현 + `/stabilize-milestone M1` (2026-09-12) — **졸업 YES**
+
+- **구현 5 task**: T-001(도메인·저장, 메인 세션 수작업) · T-002~T-004(Flutter 배선, builder dispatch 3회) · T-005(관리자 정적 데이터, builder dispatch 1회). **네 dispatch 전부 승인 UI 바이트 무변경**이고, 넷 다 범위 밖 조치·미구현을 **먼저 보고**했다.
+- **Red 관측의 질**: T-003·T-004 가 **컴파일되는 오답 스텁**을 따로 만들어 어설션 실패를 봤다(`pumpAndSettle timed out`·`Expected: true, Actual: <false>`). 「모듈 부재 컴파일 오류는 Red 가 아니다」(`builder.md` 27행 / ADR-064 D2 · ADR-072 D5)를 **dispatch 프롬프트에 없이도** 지켰다.
+- **졸업 6항목 전부 통과** — 마감 스냅샷(5/5 `verdict=Pass`) · 통합 validate OK · **e2e 3 target(web·android·ios) 실기기 PASS** · 관측 AC 0건 · M-1 P0 0건 · 추가 기준 0건.
+- **열린 항목 1건 (P1, M1-001)**: `PX-M1-add-habit-01` 의 포커스 복귀가 제품 경로에서 배선되지 않았다 → 발견 76.
+- **stabilize 가 잡은 내 형식 오류 1건 (정직 기록)**: `- closure` 줄 5건을 ADR-068 D2 의 SSOT 형식(`verdict=` / `기계AC=` / `audit=` / `관측대기=` / `자동화율=`) 없이 **내 임의 형식으로 썼다.** 졸업 item 1 이 그것을 입력으로 읽어 잡았다. 원인은 **`finalize-workitem` 이 그 줄의 단독 writer인데 이 라운드가 그 skill 구간을 수작업 재현하면서 형식 SSOT(TASK_TEMPLATE 주석)를 읽지 않은 것**이다 — 보일러플레이트 결함이 아니라 수행 방법의 한계다.
+- **5-2 raw-hex grep 을 규정대로 돌리니 발견 77 이 나왔다** — 그전에 **임의 grep 으로 먼저 돌려 오탐을 의심**했고, 규정대로 다시 돌려서야 진짜 원인(예외 패턴이 Dart 타입 생략형을 놓치고, 하네스가 생성하라고 한 파일들을 안 덮는다)이 보였다. **임의 grep 의 결과로 규칙을 고쳤으면 틀린 처방을 박을 뻔했다.**
+
+### ADR-017 성공 기준 (Round 12)
+
+| 지표 | 목표 | 실측 | 판정 |
+|---|---:|---|---|
+| 사용자 개입 | ≤1 | **0** — skill 산출물 직접 편집 0건(정의상 «질문 응답 제외». 이 라운드의 사용자 결정 9건은 전부 Decision Brief·A/B 선택·AC 해석 확정·봉인 승인 등 **ADR-060 이 설계상 요구하는 응답**이다) | 통과 |
+| placeholder 충원율 | ≥80% | **100%** — 생성·소유 산출물 15개(DISCOVERY/CHARTER/ARCH/DESIGN/STACK_SETUP_PLAN/ADR-100/ADR-101/M1/F×3/T×5) 전부 실콘텐츠. 남은 angle-bracket 7건은 전부 주석·경로 템플릿·예시 문법 | 통과 |
+| graduation pre-check 미통과 사유 | ≤2 | **0** — 6항목 전부 통과 | 통과 |
+
+**ADR-017 gate: 3/3 통과. M1 graduation: YES (open P1 1건은 졸업을 막지 않는다 — item 5 는 P0 기준이다).**
+
+**규모**: feature 3 / task 5 / AC 16(unit 5 · integration 11) / FAC 14 / PX 13 / INV 6 / 승인 화면 3 · 상태 18 · 스냅샷 26.
+
 ### 결정에 미친 영향 (Round 12)
 
 Round 12 가 **ADR 8종에 개정 14건**을 만들었다(Phase 7 신규 기준 — 위 「Phase 7 개정 목록」 표). 그중 이 라운드가 **없었으면 나오지 않았을** 것만 추린다.
