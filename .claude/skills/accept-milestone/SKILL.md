@@ -24,7 +24,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 
 ## R0. 맥락 회수 (ADR-019 minimal — 필요한 것만)
 1. 마일스톤 문서 `## 3`(포함 기능)·`## 5`(완료 기준)·`## 8`(회고 — graduation 값)·`## 9`(화면 전환, 있으면).
-2. 산하 feature `## 7-1`(FAC↔AC)·`## 7-3`(PX↔AC, UI 한정)·`## 7`의 `프로토타입:` 참조 줄.
+2. 산하 feature `## 7-1`(FAC↔AC)·`## 7-3`(PX↔AC, UI 한정)·`## 7`의 `프로토타입:` 참조 줄 + **그 참조가 가리키는 M의 매니페스트**(`M<K>/<screen>` 재사용이면 그 이전 M 파일)의 `snapshots[]`·`handoff.run`(ADR-072 D9). 그 화면을 이후 M이 `supersedes`로 재등록했으면(`docs/20-system/prototypes/M*/manifest.json`의 `supersedes[]`에 그 `M<K>/<screen>`이 있으면) **가장 최근 등록·승인본**의 `snapshots[]`·`handoff.run`을 쓴다 — 현재 코드의 기준선은 그쪽이다(ADR-072 D5-5).
 3. 산하 task `## 6-1`에서 **`[사용자 관측]`·`[플랫폼 관측]` modality AC 전량**과 `## 8`의 기존 `- ac-acceptance`/`- invalidated` 줄.
 4. 각 task `docs/40-validation/reports/<task-id>.md`의 `## Evidence Bundle → 검증하지 못한 것(oracle gap)` 섹션 — **기계가 확인하지 못한 것의 목록이며 본 단계의 1차 시나리오 재료다.**
 5. `QA_FINDINGS.md` 본 마일스톤 헤더 — AI가 이미 찾은 것(중복 보고 방지용으로만 쓴다. 사용자에게 미리 알려 주지 않는다 — 선입견 차단).
@@ -59,11 +59,11 @@ allowed-tools: Read Glob Grep Write Edit Bash
    ```
    [N/M] <무엇을 할까요 — 구체적 조작 1~2줄>
    기대: <무엇이 보이거나 일어나야 하는가>
-   근거: <AC-N | PX-... | 프로토타입 경로 | oracle gap 카테고리>
+   근거: <AC-N | PX-... | 스냅샷 경로 | oracle gap 카테고리>
    ```
 3. 사용자 응답을 받는다. **"기대와 달랐다"면 R4의 재현 3필드를 그 자리에서 채운다.**
 4. `[사용자 관측]`·`[플랫폼 관측]` AC는 **충족/미충족을 명시적으로 물어** 그 자리에서 판정을 확정한다(뭉뚱그리지 않는다 — 이 응답이 receipt가 된다).
-5. UI 마일스톤이면 승인 프로토타입 경로(`docs/20-system/prototypes/M<N>/<screen>.html`)를 함께 제시해 사용자가 나란히 비교할 수 있게 한다.
+5. UI 마일스톤이면 R0 2가 회수한 **가장 최근 등록·승인본**의 스냅샷 경로(`docs/20-system/prototypes/M<K>/snapshots/`)와 미리보기 실행 명령(`handoff.run`)을 함께 제시해 사용자가 나란히 비교할 수 있게 한다.
 
 ## R3. 자유 탐색
 "이제 자유롭게 만져 보세요. 이상한 점·기대와 다른 점을 말씀해 주세요"로 열고, 사용자가 말하는 것을 받는다. **AI가 먼저 결함을 지목하지 않는다**(사용자 관점을 오염시키지 않는다).

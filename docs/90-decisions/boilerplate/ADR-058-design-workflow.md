@@ -124,7 +124,7 @@ accepted
 
 ### 적용 surface
 - `.claude/skills/stack-guard/SKILL.md`: UI-only adapter 생성·registry·self-test 단일 writer.
-- `.claude/skills/bootstrap-design/SKILL.md`, `.claude/skills/plan-milestone/SKILL.md`: registry command 소비 + missing/not-ready hard stop.
+- `.claude/skills/bootstrap-design/SKILL.md`: registry command 소비 + missing/not-ready hard stop. (당시의 plan-milestone R5 소비자는 ADR-072 D8이 `/design-milestone`으로 옮겼다 — 기록.)
 - `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`: adapter registry schema.
 - `docs/00-meta/STRUCTURE.md`, `docs/00-meta/GUARDRAILS_STRATEGY.md`, `scripts/README.md`: baseline→conditional/generated 경계.
 - `docs/20-system/DESIGN.md`, `.claude/agents/reviewer.md`, `ADR-027#amend-7`: 특정 파일명 대신 project-native gate capability를 인용.

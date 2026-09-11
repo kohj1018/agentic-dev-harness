@@ -23,7 +23,7 @@ draft
 - [ ] E2E Pass — UI 프로젝트(ADR-027#amend-3) 또는 아래 item 6에서 e2e 선언 시 필요. **선언된 e2e 디렉터리에서 실제 실행된 테스트가 1개 이상 성공**해야 통과(registry 등록이 있으면 그 smoke 이름 일치까지 확인). 실행 0개(EMPTY)·실패(FAIL)·환경 불가(BLOCKED_ENV)는 모두 졸업 차단 (ADR-052#amend-1 / ADR-068 D3 item 3)
 - [ ] 관측 AC receipt 유효 — 각 task `## 6-1`에서 modality가 `[사용자 관측]`·`[플랫폼 관측]`인 AC를 전수 회수해, 그 AC마다 task `## 8`의 (HTML 주석 밖) 마지막 이벤트가 `- ac-acceptance`인가(ADR-065 D3 판독 규칙 2). `- closure`의 `관측대기=`는 회수 편의용 색인일 뿐 판정 근거가 아니다. 본 항목만 미충족이면 graduation은 `PENDING_ACCEPTANCE`다
 - [ ] P0 severity finding 0건 (QA_FINDINGS의 본 마일스톤 헤더 기준)
-- [ ] (선택) 본 마일스톤 한정 추가 기준 <!-- UI 예시: "경험 게이트 [Experience-drift] P1 0건" (ADR-056 — 채택 시 본 항목이 졸업 차단으로 작동) -->
+- [ ] (선택) 본 마일스톤 한정 추가 기준 <!-- UI 예시: "경험 게이트 [Experience-drift] P1 0건" (ADR-072 D7 — 채택 시 본 항목이 졸업 차단으로 작동) -->
 
 <!-- 채점표(docs/40-validation/reports/)는 졸업 판정의 입력이 아니다 (ADR-068 D3).
      구 ADR-067 item 4의 (a)(b)(c)(d)와 mtime 비교는 폐지됐다. (현재 SSOT: ADR-068) -->
@@ -48,8 +48,8 @@ draft
 - 비목표(charter ## 5) 위반 사례: <있으면 1줄>
 - 핵심 학습 3개 이내
 
-## 9. 화면 전환 (UI — 다화면 또는 단일 화면의 비가역·분기·복구 흐름 시 — ADR-056#amend-3)
-<!-- 순수 정적 단일 화면·비-UI 마일스톤은 "(해당 없음)"; 단일 화면이라도 비가역/파괴 동작(삭제·결제·전송)·분기·다단계 오류→복구(submit→error→retry)·modal·확인 dialog가 있으면 채운다(트리거=화면 수가 아니라 비가역 동작·분기·복구 상태 존재 — ADR-056#amend-3). /plan-milestone R5-1이 채운다.
+## 9. 화면 전환 (UI — 다화면 또는 단일 화면의 비가역·분기·복구 흐름 시 — ADR-072 D1 — ADR-056#amend-3 승계)
+<!-- 순수 정적 단일 화면·비-UI 마일스톤은 "(해당 없음)"; 단일 화면이라도 비가역/파괴 동작(삭제·결제·전송)·분기·다단계 오류→복구(submit→error→retry)·modal·확인 dialog가 있으면 채운다(트리거=화면 수가 아니라 비가역 동작·분기·복구 상태 존재 — ADR-072 D1 — ADR-056#amend-3 승계). /design-milestone R1이 채운다(ADR-072 D1). plan-milestone은 비워 둔다.
      형식: | path type(primary/failure/recovery) | 현재 화면/상태 | 사용자 행동 | 다음 화면/상태 | owner feature | prototype |
      plan-workitem이 owner feature의 **존재하는** 각 path type 행(primary·failure·recovery)을 task AC로 회수, validate-plan [Plan-design]이 존재 점검. -->
 

@@ -62,6 +62,8 @@ fast 모드:
 - legacy 코드 수정은 characterization test 선행 후 RGR(task 단위 사용자 결정).
 - prototype 단계의 opt-out 비율을 `/stabilize-milestone`이 보고 항목으로 추가할지 후속 검토.
 
+> 참조 갱신 (2026-09): `/design-milestone`이 만드는 시각 탐색 UI 코드는 Red-first 대상이 아니며 행동 계약은 게이트·interaction/위젯 테스트가 검사한다([ADR-072](ADR-072-design-milestone-and-code-prototype.md) D5). 배선 task는 본 ADR 그대로.
+
 ## Amendment 1 (2026-05-15) — AC ID 컨벤션 강화 (P1 경고, 데이터 트리거 시 P0 격상)
 
 ### 결정

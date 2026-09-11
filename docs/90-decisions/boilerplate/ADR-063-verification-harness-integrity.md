@@ -9,7 +9,7 @@ accepted
 ## 배경
 - [관측됨] `/stack-guard`의 smoke test는 생성된 `validate` 명령을 1회 실행하는 것이 전부이고, 4단계(format/lint/typecheck/test) 커버리지 판정은 **모델이 자기 산출물을 읽고 산문으로 추론**한다. 확인 장치가 없다.
 - [관측됨] 정상 lifecycle(`PROJECT_START_CHECKLIST` 3단계 `/stack-guard` → 4단계 `/plan-milestone`)에서 stack-guard 실행 시점의 소스 파일 수는 0이다. 스캐폴드 단계가 체크리스트에 없다. 이 상태에서 검사 도구가 실패 코드를 내면 현행 판정 표는 `WIRING FAIL → 종료`로 흘러, **정상 경로가 산출물 결함으로 오분류**된다.
-- [관측됨] 프로젝트 도구(formatter/linter)의 기본 검사 범위는 프로젝트 전역이라 `.claude/skills/stack-guard/assets/design-gate*.mjs`(canonical)와 `scripts/design-gate.mjs`(materialized 사본)가 포맷 대상에 들어간다. 포맷되면 SHA-256 digest가 바뀌어 conformance oracle이 `source-integrity: false` + exit 1로 게이트를 차단하고, `status: wiring-fail`로 굳는다.
+- [관측됨] 프로젝트 도구(formatter/linter)의 기본 검사 범위는 프로젝트 전역이라 `.claude/skills/stack-guard/assets/design-gate*.mjs`(canonical — 현재는 `design-gate.mjs` 하나다, 현재 SSOT: ADR-072 D6)와 `scripts/design-gate.mjs`(materialized 사본)가 포맷 대상에 들어간다. 포맷되면 SHA-256 digest가 바뀌어 conformance oracle이 `source-integrity: false` + exit 1로 게이트를 차단하고, `status: wiring-fail`로 굳는다.
 - [관측됨] `/stack-guard` 산출물은 최초 1회 생성 후 drift 감지 트리거가 없다. registry 4종·design gate digest는 재실행 시 실측 갱신되지만 `validate` 커버리지와 `scripts/verify.*` 재실행 정책은 정의되지 않았다.
 - [관측됨] 재실행 시 무엇이 갱신되고 무엇이 보존되는지의 정책이 SKILL 본문 6곳에 흩어져 한눈에 보이지 않는다.
 - [외부실증] ADR-047 D8(Oracle Adequacy) — pass/fail 단일 신호는 과신을 만든다. verifier는 무엇을 검증하지 못했는지 선언해야 한다. 현행 smoke test는 정확히 그 과신 상태다.
@@ -34,6 +34,8 @@ accepted
 - **미검증 상태는 기록으로 남긴다 — 졸업 차단 항목은 신설하지 않는다.** 범위 밖·생성 불가·미도달 SKIPPED와 단계 부재로 인한 `PARTIAL`은 프로비저닝 단계에서 정상이고, 최종 판정을 `STACK_SETUP_PLAN.md ## 통합 명령 사용법`에 `probe smoke: <판정> (<확인일>)` 1줄로 기록해 **D4 (d)가 다음 마일스톤에 회수**한다. 졸업 게이트(ADR-068)에 새 항목을 넣지 않는 근거는 본 ADR의 D6 기준 그대로다 — 기록 문자열을 읽는 검사는 문법을 이해하지 못하므로 **기록 등급 상한**이고(1문항), *SKIPPED 상태로 졸업한 사례*는 관측된 바 없다(2문항). 기록이 없으면 재실행 권고 자체가 발화하지 않으므로 이 1줄은 필수다.
 - **프로젝트 빈 케이스는 차단하지 않는다** — probe가 전부 기대대로인데 프로젝트 lint 룰이 비었거나 프로젝트 테스트가 0건이면 비차단 경고로 보고한다. 프로비저닝 단계에서 정상인 상태이며, 졸업 시점의 판정은 **ADR-068의 기존 5+1 항목이 소유한다**(테스트 0건은 그 task의 기계 검증 AC 미충족 → `- closure` 줄의 `verdict`·`기계AC`로 드러나며 졸업 item 1이 잡는다 — 본 ADR은 졸업 항목을 추가하지 않는다).
 - 선례: `design-gate-conformance.mjs`가 동일 패턴(fixture 생성 → 통과/위반 양쪽 판정 → `finally` 삭제)을 이미 수행한다.
+
+> 참조 갱신 (2026-09): `design-gate-conformance.mjs`는 [ADR-072](ADR-072-design-milestone-and-code-prototype.md) D6이 폐지했다. 아래 spawn 3분기(기동 실패 → exit 2 / 기동 후 실패 → exit 1 / adapter exit 2 승계)는 v3 `design-gate.mjs`의 `--self-test`·Storybook 빌드·Flutter 러너 spawnSync에 그대로 적용된다.
 
 **같은 원리를 design gate conformance 에도 적용한다**: [관측됨] `design-gate-conformance.mjs` 는 `spawnSync` 의 `result.error`(자식 프로세스를 **띄우지 못한** 경우 — 관리 환경의 EPERM 등)를 `status === 2` 분기에 걸지 않고 `bounded-process-completion: false` 로만 기록해, 최종 exit 1(= `wiring-fail`)로 보고한다. 그러나 프로세스 기동 실패는 **환경 문제(execution unavailable)** 이지 산출물 결함이 아니며, ADR-058#amend-2 는 *"oracle exit 2는 needs-install/실행불가로 그대로 승계"* 를 이미 규정한다. 따라서 **기동 실패만** exit 2 로 승계한다 — `result.error.code` 가 `EPERM`·`EACCES`·`ENOENT` 계열일 때다. **기동 후 실패**(`ETIMEDOUT` 시간 초과·`ENOBUFS` 출력 초과)는 *adapter 가 유계 시간에 끝나지 않았다*는 뜻이므로 `bounded-process-completion` 실패로 기록하고 **exit 1 로 즉시 종료**한다 — 구분 없이 exit 2 로 승계하면 그 check 가 **영구히 참**이 되어 ADR-058#amend-2 가 세운 판정이 사라지고, 반대로 그냥 통과시키면 빈 출력이 뒤 검사의 오분류(부재 검사가 *공허하게 참*이 되는 경우 포함)를 만들어 원인이 묻힌다. **이 세 분기(기동 실패 / 기동 후 실패 / adapter exit 2)를 conformance 의 모든 `spawnSync` 호출**(core / same-basename batch / render-error isolation / pixel tolerance — 4회)에 **동일하게** 적용한다. 한 곳만 걸면 뒤 회차의 같은 사건이 오분류를 재생산한다. 이 수정은 conformance asset 내부이며 adapter 의 canonical digest 를 바꾸지 않으므로 capability 승격이 필요 없다.
 
@@ -110,13 +112,13 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - .claude/skills/stack-guard/SKILL.md                          — D1 probe / D2 harness 경로 / D3 재실행 계약 / D7 규약 / D8 전역 규칙 확인
-- .claude/skills/stack-guard/assets/design-gate-conformance.mjs — D1 환경 실패 승계(spawn 실패 → exit 2)
+- .claude/skills/stack-guard/assets/design-gate.mjs — D1 환경 실패 승계(spawn 실패 → exit 2; v3 자가 검사·Storybook 빌드·Flutter 러너의 spawnSync 3분기)
 - .claude/skills/stabilize-milestone/SKILL.md                   — D4 `[Guard-drift]`
 - docs/00-meta/GUARDRAILS_STRATEGY.md                           — D5 유지 주기 표 / D6 배치 기준
 - .gitattributes                                                — D8 전역 줄바꿈 규칙
 
 ## Mutation Contract (ADR-047 D3)
-1. **Target** — stack-guard SKILL 수행-5(smoke test 판정 + `probe smoke:` 기록)·수행-1/2(도구 config 생성)·수행-4(`.gitattributes` 전역 규칙 확인)·신설 `## 재실행 계약` / `design-gate-conformance.mjs` 의 spawn 실패 분기 / stabilize SKILL §1.0 8번째 항목 / GUARDRAILS 유지 주기·배치 기준 단락 / `.gitattributes` 전문.
+1. **Target** — stack-guard SKILL 수행-5(smoke test 판정 + `probe smoke:` 기록)·수행-1/2(도구 config 생성)·수행-4(`.gitattributes` 전역 규칙 확인)·신설 `## 재실행 계약` / `design-gate.mjs`(v3) 의 spawn 실행 분기 / stabilize SKILL §1.0 8번째 항목 / GUARDRAILS 유지 주기·배치 기준 단락 / `.gitattributes` 전문.
 2. **Failure mode** — (a) 4단계 커버리지를 산문 추론으로 판정해 검사 누락이 통과됨 (b) 소스 0개 정상 상태가 `WIRING FAIL`로 오분류돼 lifecycle이 막힘 (c) harness 자산 포맷으로 design gate digest가 깨져 게이트가 `wiring-fail`로 굳음 (d) 프로젝트 성장 후 `validate`가 절반만 검사하면서 "통과"를 보고함 (e) 확장자 열거 누락으로 fresh clone이 CRLF 체크아웃돼 형식 검사가 코드 변경 없이 실패함.
 3. **Predicted improvement** — probe 회차별 판정이 실측 결과로 채워짐 / 소스 0개·brownfield 기존 위반 상태에서 stack-guard가 종료하지 않음(미도달 회차가 `PROBE FAIL` 대신 단독 실행 재측정 또는 `SKIPPED(미도달)`로 분류됨) / 단계 부재가 `SKIPPED`가 아니라 `missing: <단계>`로 드러남 / `probe smoke:`가 `PROBE FAIL`·`PARTIAL`·`SKIPPED`(또는 줄 부재)로 남으면 다음 마일스톤에 `[Guard-drift]`로 회수됨(`PROBE OK, PROJECT FAIL`은 정상이므로 회수 대상이 아니다) / design gate digest 불일치가 도구 config 단계에서 예방됨 / `[Guard-drift]`가 registry 경로 부재를 마일스톤마다 감지 / `git check-attr eol`이 전 텍스트 확장자에서 `lf`를 반환.
 4. **Preserved invariants** — 기존 도구 미덮어씀 정책 / `Needs Install` graceful fallback / e2e 5상태 판정(ADR-052#amend-1) / design gate capability version·digest 정책(ADR-058#amend-2) / stabilize read-only 계약 / adapter 코드 불변(digest 안정) / **secret scanner의 harness 경로 포함**(D2 배제는 포맷·타입·커버리지 한정) / 프로비저닝 단계 빈 케이스의 비차단 등급 / **졸업 게이트 무증설** — ADR-068의 5+1 항목은 그대로이며 본 ADR은 기록·권고까지만 한다.

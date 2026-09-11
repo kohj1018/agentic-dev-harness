@@ -30,7 +30,8 @@ feature
      단계가 feature ## 7-2의 invariant를 집행하면 끝에 (INV-N) 태그를 붙일 수 있다 (ADR-057).
      외부 계약 사실(엔드포인트·파라미터명·응답 필드명/타입/nullable·페이지네이션·인증 헤더 형식)을 아직 실측하지 않았으면 확정으로 적지 말고 다음 형식으로 박는다 (ADR-064 D3):
        `- [미실측] <무엇> — 잠정값: <값> / 출처: <URL 또는 문서> / 확인 방법: <어떻게 실측> / 해소: 구현 1단계`
-     번호 단계 아래 하위 불릿으로 둘 수 있고, 이후 참조 키는 단계 번호가 아니라 `<무엇>` 문자열이다(단계 재배치에 깨지지 않게). implement가 실측 후 `[실측 YYYY-MM-DD]`로 바꾸고 관측값으로 교체한다. AC(## 6)에는 이 표기를 쓰지 않는다 — AC는 행동을, ## 3는 배선 사실을 담는다. -->
+     번호 단계 아래 하위 불릿으로 둘 수 있고, 이후 참조 키는 단계 번호가 아니라 `<무엇>` 문자열이다(단계 재배치에 깨지지 않게). implement가 실측 후 `[실측 YYYY-MM-DD]`로 바꾸고 관측값으로 교체한다. AC(## 6)에는 이 표기를 쓰지 않는다 — AC는 행동을, ## 3는 배선 사실을 담는다.
+     UI task는 `- 승인 UI 재사용: <컴포넌트 경로> (manifest: <screen id>) — 배선만: <데이터/권한/저장/라우팅 연결 항목> (AC-N)` line item을 둔다(plan-workitem authoring — ADR-072 D5-3). 표현을 다시 쓰는 line item은 두지 않는다. -->
 
 ## 3-T. 트러블슈팅 (Type=bugfix 일 때만 — 아니면 본 섹션 삭제)
 <!-- 증상만 있고 AC가 없는 작업의 root-cause 절차. 채운 뒤 회귀 테스트 AC를 ## 6에 박는다. -->
@@ -60,7 +61,7 @@ feature
      문맥상 허용: handles, supports — 단 *무엇을 / 어떻게*까지 명시되면 허용
      AC 3개 이하 권장(4개 이상이면 task 분해 *권장 텍스트*).
      위반 시 planner는 *재분해 권장 텍스트*를 출력, builder는 *재분해 요청 텍스트*를 Red phase 직전 출력 — 자동 차단은 하지 않는다(사용자 결정). 정책: ADR-026.
-     UI task로 프로토타입 경험 결정을 구현하는 AC는 끝에 `(PX-M<N>-<screen>-NN)` 태그를 붙일 수 있다(ADR-056#amend-1 — (AC-N)·(INV-N) 태그와 동형). feature `## 7-3` PX↔AC 매핑의 근거. -->
+     UI task로 프로토타입 경험 결정을 구현하는 AC는 끝에 `(PX-M<N>-<screen>-NN)` 태그를 붙일 수 있다(ADR-072 D3 — (AC-N)·(INV-N) 태그와 동형). feature `## 7-3` PX↔AC 매핑의 근거. -->
 - AC-1 [Given] ... [When] ... [Then] ...
 - AC-2 [Given] ... [When] ... [Then] ...
 
@@ -82,7 +83,7 @@ feature
      **검증 modality 표기 (ADR-065 D1 — 필수)**: 각 AC 행의 **AC 번호 바로 뒤**에 그 AC를 무엇으로 증명하는지 `[modality]`를 붙인다.
      - `[자동 테스트]` — `- AC-1 [자동 테스트] → jest::tests/auth/me.spec.ts::test_AC_1_...`
      - `[산출물 검사]` — `- AC-2 [산출물 검사] → npm run validate — insights 노트에 필수 섹션 3개(대안/권고/출처) 존재` (**검사 수단을 통합 `validate`에 묶는다** — 묶이지 않으면 충족 근거가 아니다. 내용의 *질*을 판정하는 AC는 이 modality가 아니라 `[사용자 관측]`이다)
-     - `[사용자 관측]` — `- AC-3 [사용자 관측] → 삭제 확인 다이얼로그 문구·간격을 승인 프로토타입과 대조` (증거는 ## 8의 `- ac-acceptance` 줄)
+     - `[사용자 관측]` — `- AC-3 [사용자 관측] → 삭제 확인 다이얼로그 문구·간격을 승인 스냅샷과 대조` (증거는 ## 8의 `- ac-acceptance` 줄)
      - `[플랫폼 관측]` — `- AC-4 [플랫폼 관측] → 선행 배포(T-012) 이후 이미 발화한 03:00 스케줄의 배치 완주를 확인 (증거: 실행 로그 run id)`. **커밋·배포 이후에만 일어나는 사실은 그것을 만든 task가 아니라 후속 verification task의 AC다**(ADR-065 D1 경계) — 같은 task에 두면 finalize 전에 관측할 수 없어 영구 미충족이 된다.
      - **관측 modality 두 종은 `/finalize-workitem`을 막지 않는다** — 그 AC만 미충족이면 `/validate-workitem` 판정은 `Pending Acceptance`이고(ADR-065 D6) finalize가 통과시켜 task를 `done`으로 마감하며 `## 8`에 `- ac-pending`을 남긴다. receipt는 `/accept-milestone <M>`(마일스톤 수용 라운드) 또는 사용자 직접 기재로 발급되고, 미발급 상태는 **마일스톤 졸업**에서 잡힌다(ADR-068 D3 item 4 — graduation `PENDING_ACCEPTANCE`).
      - `[미관측]` — **계획 단계에서 쓰지 않는다**(판정 결과 라벨이지 authoring 표기가 아니다 — ADR-065 D1). 어떤 modality도 정할 수 없으면 AC를 관측 가능하게 다시 쓰거나 task를 쪼갠다.
@@ -99,7 +100,8 @@ feature
 <!-- 본문이 비어 있으면 TDD 적용 (기본). opt-out 하려면 아래 두 줄을 *모두* 채워 본문에 추가한다 — 하나라도 비면 형식 위반:
      - 사유: <왜 TDD를 건너뛰는가>
      - Follow-up task: <TDD로 재구현할 task ID>
-     예: spike 종료 후 T-014에서 TDD로 재구현 (사유: 외부 의존 탐색). -->
+     예: spike 종료 후 T-014에서 TDD로 재구현 (사유: 외부 의존 탐색).
+     - design-milestone이 만든 UI 코드의 시각 탐색분은 TDD 대상이 아니다(ADR-072 D5) — 배선 task는 배선 AC에 TDD 적용. -->
 
 ## 7. 관련 문서
 - Milestone: <!-- 예: [M1-foundation](../milestones/M1-foundation.md) -->

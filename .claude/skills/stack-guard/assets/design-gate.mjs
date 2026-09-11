@@ -326,7 +326,7 @@ async function runManifestMode(opts, ctx) {
 
   const result = { version: 3, mode: 'manifest', screens: [], summary: { blockers: 0, reports: 0, unavailable: 0, snapshotWarnings: [] } };
   let unavailable = false;
-  const { chromium, AxeBuilder } = await loadPlaywright(screens.map((s) => s.scope || '.'));
+  const { chromium, AxeBuilder } = await loadPlaywright([...screens.map((s) => s.scope || '.'), ...(opts.scopes ?? [])]); // 자가 검사 (c)는 --scopes 전체를 넘긴다(첫 scope에만 모듈이 없으면 오탐 exit 2)
   const browser = await launchBrowser(chromium);
   const storybookServers = new Map(); // scope -> http.Server (같은 scope 재사용 — screens 여러 개가 한 scope를 공유)
   try {
@@ -467,7 +467,7 @@ async function runSelfTest(opts) {
     writeFileSync(manifestPath, JSON.stringify(tmpManifest, null, 2));
     const snapDir = join(dir, 'snapshots');
     mkdirSync(snapDir, { recursive: true });
-    const c = await runManifestMode({ mode: 'manifest', manifestPath, only: null, snapshot: snapDir, noBuild: false }, {});
+    const c = await runManifestMode({ mode: 'manifest', manifestPath, only: null, snapshot: snapDir, noBuild: false, scopes: opts.scopes ?? [] }, {});
     const cBlockers = c.result.screens.flatMap((s) => s.blockers);
     const cPass = cBlockers.length === 0 && existsSync(join(snapDir, 'self-good-default-1280x900.png'));
     cases.push({ case: 'c-manifest-url', pass: cPass });

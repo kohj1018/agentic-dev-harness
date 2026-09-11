@@ -29,15 +29,14 @@ docs/20-system/design-concepts/
 
 # 레퍼런스 갤러리 (ephemeral — ADR-058#amend-4): 캡처·캐시·갤러리 페이지. 저작권 자료라 커밋하지 않는다
 docs/20-system/design-refs/
-# milestone experience contract (ADR-056): prototypes/M<N>/<screen>.html 승인본은 커밋 대상(ignore 금지).
-# 탐색 시안(_drafts)과 스크린샷 갤러리만 ephemeral.
-docs/20-system/prototypes/*/_drafts/
+# milestone experience contract (ADR-072): prototypes/M<N>/{manifest.json,briefs/,snapshots/} 승인본은 커밋 대상(ignore 금지). 스크린샷 갤러리만 ephemeral.
 docs/40-validation/visual/
 # design-workflow eval 근거 (ADR-058): 원본 산출물(REPORT/concept HTML/metrics/스크린샷 등)은 무거워 local-only —
 # 폴더 전체를 ignore하고 핵심 판정만 .boilerplate/validation/SIMULATION_RUN.md "Design Workflow Eval" 섹션에 distill.
 .boilerplate/validation/design-workflow-eval-20260720/
-# canonical validate:design output (다른 output path는 stack-guard가 첫 실행 전에 추가 — ADR-058#amend-2)
+# canonical validate:design output (다른 output path는 stack-guard가 첫 실행 전에 추가 — ADR-072 D6)
 design-gate-shots/
+design-gate-storybook/
 # Flutter/Dart 빌드 산출물 (경로 앞에 **/ 를 붙여 monorepo 하위 패키지까지 매칭 — 앞에 / 가 있는 패턴은 루트에만 걸린다)
 .dart_tool/
 .flutter-plugins

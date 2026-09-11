@@ -37,9 +37,10 @@ feature
      task `## 6 AC`는 FAC를 만족시키는 구현 단위.
      구 `## 8 검증 방법`을 흡수.
      UI feature는 승인 프로토타입 참조 줄을 둔다(ADR-056 — 화면 단위 파일, 그 feature가 등장하는 화면마다 1줄):
-     `프로토타입: [M<N>/<screen>.html](../../20-system/prototypes/M<N>/<screen>.html) (진입: <라우트/상태 진입 메모>)`.
+     `프로토타입: <screen id> (manifest: ../../20-system/prototypes/M<N>/manifest.json, 진입: <story id | flutter entry>)`.
+     `승인 스냅샷: <snapshots 경로 목록>`.
      프로토타입이 무의미한 UI feature는 `프로토타입 면제: <사유>` 한 줄로 대체(plan-workitem 입구 계약의 통과 조건 — 둘 다 없으면 Needs Experience Contract).
-     경험 결정(PX) 인벤토리(ADR-056#amend-1 — plan-milestone R5-5가 승인 프로토타입 HTML의 `<!-- PX-M<N>-<screen>-NN: <한 줄 결정> -->` 마커를 *그대로 복사*, **이 feature가 *구현하는* PX만**; 한 화면이 여러 feature에 걸치면 PX별로 구현 feature에 분산 기록(화면 통째로 몰지 않음 — INST-1 사각 방지); 화면-공통은 shell/layout feature 또는 DESIGN.md §4, cross-feature 정합은 `## 7-2` INV/seam):
+     경험 결정(PX) 인벤토리(ADR-072 D3 — design-milestone R7이 코드 PX 주석 `// PX-M<N>-<screen>-NN: <한 줄 결정>`를 *그대로 복사*, **이 feature가 *구현하는* PX만**; 한 화면이 여러 feature에 걸치면 PX별로 구현 feature에 분산 기록(화면 통째로 몰지 않음 — INST-1 사각 방지); 화면-공통은 shell/layout feature 또는 DESIGN.md §4, cross-feature 정합은 `## 7-2` INV/seam):
      `경험 결정(PX):`
      `- PX-M<N>-<screen>-01: <한 줄 결정 (예: 입력창을 화면 상단에 sticky 고정)>`
      `- PX-M<N>-<screen>-02: <...>` -->
@@ -61,7 +62,7 @@ feature
      unmapped INV는 plan 출력 "남은 미결정 사항"에 surface. validator가 task 검증 시 위반·테스트 커버를 점검. -->
 
 ## 7-3. 프로토타입 경험(PX) ↔ AC 매핑 (subsection of ## 7)
-<!-- UI feature 한정(ADR-056#amend-1). /plan-workitem 3-P가 채운다(영속 SSOT — plan 출력은 echo).
+<!-- UI feature 한정(ADR-072 D3·D9). /plan-workitem이 채운다(영속 SSOT — plan 출력은 echo).
      형식: PX-M<N>-<screen>-NN → T-NNN:AC-M, T-MMM:AC-K (다대다 허용)
      `## 7` PX 인벤토리의 어떤 PX도 참조하지 않는 AC/미매핑 PX(unmapped PX)는 [Plan-FAC-coverage]가 unmapped FAC와 동일 기준으로 잡는다(P0 권장).
      본 subsection은 ## 7과 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)". -->
@@ -90,7 +91,7 @@ feature
 - Charter: <!-- 예: [PROJECT_CHARTER](../../10-charter/PROJECT_CHARTER.md) -->
 - Architecture: <!-- 예: [ARCHITECTURE_OVERVIEW](../../20-system/ARCHITECTURE_OVERVIEW.md) -->
 - Architecture-Iface: <!-- 해당 스택 한정. 예: [## 7-1 API](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-1) / [## 7-5 모바일](../../20-system/ARCHITECTURE_OVERVIEW.md#arch-7-5). 비해당 스택은 줄 삭제. 정책: ADR-027. -->
-- Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components). 비-UI 프로젝트는 줄 삭제. -->
+- Design: <!-- UI 프로젝트 한정. 예: [DESIGN ## 7 Components](../../20-system/DESIGN.md#design-7-components). 비-UI 프로젝트는 줄 삭제 — 이 줄이 UI feature 신호(ADR-073 D9). -->
 - ADR: <!-- 예: [ADR-007-workitem-lifecycle](../../90-decisions/boilerplate/ADR-007-workitem-lifecycle.md) -->
 
 <!-- ## 12. 열린 질문 — 폐지(결번). 이 feature의 미결정은 docs/10-charter/DECISION_REGISTER.md가 소유한다(항목의 `영향:` 칸에 M ID와 이 F ID를 함께 적는다 — ADR-060 D1). -->

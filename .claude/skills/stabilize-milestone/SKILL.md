@@ -61,7 +61,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
 4. **모드 라벨 ↔ 본문 정합 휴리스틱** (ADR-012): 모든 `docs/00-meta/` 파일의 `> 모드: ...` 라벨이 본문과 명백히 어긋나는지 점검 (휴리스틱 한계 명시).
    - mismatch 시 P2 `[Doc-mode] <file>` 기록.
 
-5. **DESIGN.md + ARCH 7-x cross-surface drift 검출** (ADR-027#d19) — *(5-2) 는 정규식 기반 deterministic, (5-3)(5-4) 는 mechanical/best-effort heuristic — 휴리스틱 한계는 항목별 echo*:
+5. **DESIGN.md + ARCH 7-x cross-surface drift 검출** (ADR-073 D8) — *(5-2) 는 정규식 기반 deterministic, (5-3)(5-4) 는 mechanical/best-effort heuristic — 휴리스틱 한계는 항목별 echo*:
 
    5-0. **변경 파일 회수 — git diff 의존 금지**: stabilize-milestone 은 정상 lifecycle 에서 `/finalize-workitem` 으로 *이미 커밋된* 후 호출되므로 working tree `git diff` 는 비어 있다. 본 마일스톤 task 의 변경 파일 회수 우선순위:
    - **(a) 1차 — task 문서**: 본 마일스톤 산하 모든 task (`docs/30-workitems/tasks/T-*.md`) 의 `## 4-1. 변경 예정 파일/경로` 본문 회수. (TASK_TEMPLATE 정합 — finalize 시 `--apply` 또는 명시 update 로 채워짐)
@@ -69,7 +69,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - **(c) 3차 — validation report fallback**: 위 둘 다 비어 있는 task 는 `docs/40-validation/reports/<task-id>.md` 의 diff trace audit 단락 회수.
    - **(d) 모두 실패 시**: 본 task 는 *조사 불가* 로 표시 + IMPROVEMENT_GUIDE 에 `P2 [Stabilize-recovery] T-NNN — 변경 파일 회수 불가` 기록 후 다음 task 로 계속.
 
-   5-1. **UI 프로젝트 판정** — **ADR-027#amend-3 "UI 판정 다중신호 절차"** 적용(부재→비-UI: 5-1~5-3 skip+사유 echo / status≠draft→UI: 5-1~5-3 활성 / status=draft+추가신호≥1→UI 의심: IMPROVEMENT_GUIDE에 `P1 [Design-draft] DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 권장` 기록 + 5-1~5-3 활성 / 신호 0→silent skip).
+   5-1. **UI 프로젝트 판정** — **ADR-073 D9 "UI 판정 다중신호 절차"** 적용(부재→비-UI: 5-1~5-3 skip+사유 echo / status≠draft→UI: 5-1~5-3 활성 / status=draft+추가신호≥1→UI 의심: IMPROVEMENT_GUIDE에 `P1 [Design-draft] DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 권장` 기록 + 5-1~5-3 활성 / 신호 0→silent skip).
 
    5-2. **UI 프로젝트 — raw color grep** (정규식 deterministic, **기록 등급 — 진행 차단 안 함**): 5-0 에서 회수한 변경 파일 중 아래 두 갈래로 검사한다.
    - **웹 계열** — 확장자 `.tsx`/`.jsx`/`.ts`/`.js`/`.vue`/`.svelte`/`.astro`/`.css`/`.scss`/`.html`: `#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})\b` 패턴 grep(ERE — 3·4·6·8자리 hex 전부; `\b`로 더 긴 hex 런의 부분매치 방지). 일치 시 `P1 [Design-rawhex] <file:line> — DESIGN.md ## 2 token 으로 교체 권장`.
@@ -77,15 +77,15 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    - **Dart 정의 라인 예외**: `static +const +Color +[A-Za-z_]+ *=` 형태의 줄은 토큰 *정의*이므로 제외한다(웹의 CSS custom property 정의 라인 예외와 동형).
    - **한계(사실 기록)**: 본 검사는 문자열 검색이라 문법을 이해하지 못한다. **주석 안·문자열 리터럴 안의 색값도 함께 잡는다**(실측 확인). 그래서 본 항목은 기록 등급이며 진행을 차단하지 않는다. 문법을 이해하는 검사가 필요하면 Dart 의 공식 analyzer plugin 방식과 별도 패키지인 `custom_lint` 중 하나를 고른다(둘은 같은 것이 아니다 — ADR-059 D6).
 
-   > 웹 계열의 **제외 (ADR-056#amend-2 — 정의/사용처 라인 구분)**: (a) DESIGN.md 자체 파일, (b) `docs/20-system/prototypes/` 하위(자기완결 프로토타입), (c) **CSS custom property *정의* 라인**(`--<name>: #hex` 형태 — 토큰 정의는 정상; dogfood `src/index.css :root` 오탐 해소). **파일명(`theme`/`tokens` 등)으로 파일 전체를 빼지 않는다**(사용처 위반 은폐 방지 — 정의/사용처는 (c) 라인 형태로만 구분). 검사 대상은 정의 밖 *사용처*(`color:#hex`·`background:#hex` 등) raw hex — 전면 `:root` 제외 금지.
+   > 웹 계열의 **제외 (ADR-072 — 정의/사용처 라인 구분)**: (a) DESIGN.md 자체 파일, (b) **CSS custom property *정의* 라인**(`--<name>: #hex` 형태 — 토큰 정의는 정상; dogfood `src/index.css :root` 오탐 해소). **파일명(`theme`/`tokens` 등)으로 파일 전체를 빼지 않는다**(사용처 위반 은폐 방지 — 정의/사용처는 (b) 라인 형태로만 구분). 검사 대상은 정의 밖 *사용처*(`color:#hex`·`background:#hex` 등) raw hex — 전면 `:root` 제외 금지.
 
-   5-2b. **UI 프로젝트 — voice grep** (정규식 deterministic — ADR-056 결정 10): 5-0 회수 변경 파일(5-2의 웹 계열 확장자 집합 + `.dart`)에서 (a) placeholder 카피 패턴(`lorem ipsum`/`TODO copy`/`sample text`/`여기에 텍스트`), (b) DESIGN.md `## 10` "금지 표현"의 `[grep 가능]` 정규식을 grep. 일치 시 `P1 [Design-voice-grep] <file:line> — DESIGN.md ## 10 위반` 기록. DESIGN.md `## 10` 부재 시 (a)만 수행. **DESIGN.md 자체는 grep 대상 제외** (규칙 정의 영역 — 5-2와 동형).
+   5-2b. **UI 프로젝트 — voice grep** (정규식 deterministic — ADR-073 D6): 5-0 회수 변경 파일(5-2의 웹 계열 확장자 집합 + `.dart`)에서 (a) placeholder 카피 패턴(`lorem ipsum`/`TODO copy`/`sample text`/`여기에 텍스트`), (b) DESIGN.md `## 10` "금지 표현"의 `[grep 가능]` 정규식을 grep. 일치 시 `P1 [Design-voice-grep] <file:line> — DESIGN.md ## 10 위반` 기록. DESIGN.md `## 10` 부재 시 (a)만 수행. **DESIGN.md 자체는 grep 대상 제외** (규칙 정의 영역 — 5-2와 동형).
 
    5-3. **UI 프로젝트 — 컴포넌트 인벤토리 drift** (best-effort heuristic): `src/components/`, `app/components/`, `components/`, `lib/widgets/`, `lib/**/widgets/` 중 존재하는 디렉터리의 컴포넌트 파일명 (예: `Button.tsx`, `Card.tsx`, `primary_button.dart`) 목록 ↔ DESIGN.md `## 7. Components` 본문에 명시된 컴포넌트 이름 비교. 코드에는 있지만 DESIGN.md 에 없는 컴포넌트 발견 시 `P1 [Design-inventory-drift] <component> — DESIGN.md ## 7 등록 권장` 기록. 반대 (DESIGN.md 에 있는데 코드에 없음) 는 unimplemented planned component → `P2 [Design-inventory-pending] <component>` 기록. **휴리스틱 한계 echo 권장** (`인벤토리 drift 검출은 free-form 문서 키워드 매칭 — false positive/negative 가능`).
 
    5-4. **7-x Don'ts 위반 grep** (best-effort heuristic): ARCH 의 `## 7-1` / `## 7-2` / `## 7-5` 의 `### Don'ts` 본문에서 *명시적 금지 키워드* 를 추출 → 5-0 회수 변경 파일에서 해당 키워드 grep. 위반 의심 발견 시 `P1 [Arch-iface-violation] <file:line> — ARCH ## 7-N Don'ts 위반 의심: <키워드>` 기록 — **free-form 키워드 적중은 확정 위반이 아니라 *확인 후보*이므로 P1 로 적고 `/repair-milestone` 의 4-판정에서 확인한다**(확정 위반과 같은 라벨을 쓰면 라벨을 읽는 쪽이 차단력을 오인한다 — 실측). **휴리스틱 한계 echo 강제** (`Don'ts 키워드 추출은 free-form 텍스트 기반 — false negative 多. 본 grep 미작동 시 reviewer 의 design surface 위임이 보조 catch`).
 
-   > **7-3 백엔드 / 7-4 프론트 의 milestone-level deterministic gap 명시**: 현 ARCH TEMPLATE 의 `## 7-3` / `## 7-4` 는 `### Don'ts` 자리가 없어 본 5-4 grep 이 *skip* 한다(`## 7-5`는 `### Don'ts`를 가지므로 대상이다). 단 이것이 *전면 gap 은 아니다* — 7-3/7-4 결정과의 정합은 **per-task validate-workitem (validator.md 의 인터페이스 CHECK 규칙 — UI/API/CLI/7-x) 의 CHECK 단계가 task 단위로 점검**한다 (DB migration / 인증 / 트랜잭션 / 라우팅 / 상태관리 등). 즉 *milestone-level deterministic preflight* 에서만 빠지고, *task-level validation* 에서는 잡힌다. milestone 누적 drift 가 우려되면 stabilize 의 reviewer `code` surface (Step 5) 가 아키텍처 부채로 추가 catch. 향후 7-3/7-4 에 `### Don'ts` 자리를 TEMPLATE 에 추가하면 본 grep 도 확장 가능 (별도 ADR-027 amend 후보).
+   > **7-3 백엔드 / 7-4 프론트 의 milestone-level deterministic gap 명시**: 현 ARCH TEMPLATE 의 `## 7-3` / `## 7-4` 는 `### Don'ts` 자리가 없어 본 5-4 grep 이 *skip* 한다(`## 7-5`는 `### Don'ts`를 가지므로 대상이다). 단 이것이 *전면 gap 은 아니다* — 7-3/7-4 결정과의 정합은 **per-task validate-workitem (validator.md 의 인터페이스 CHECK 규칙 — UI/API/CLI/7-x) 의 CHECK 단계가 task 단위로 점검**한다 (DB migration / 인증 / 트랜잭션 / 라우팅 / 상태관리 등). 즉 *milestone-level deterministic preflight* 에서만 빠지고, *task-level validation* 에서는 잡힌다. milestone 누적 drift 가 우려되면 stabilize 의 reviewer `code` surface (Step 5) 가 아키텍처 부채로 추가 catch. 향후 7-3/7-4 에 `### Don'ts` 자리를 TEMPLATE 에 추가하면 본 grep 도 확장 가능 (별도 ADR-073 amend 후보).
 
    5-5. **해당 스택 부재 시 본 항목 skip** + skip 사유 echo: `[Design/Arch-iface] check skipped: <reason>`. 예: `[Design] check skipped: docs/20-system/DESIGN.md 부재 (비-UI 프로젝트)`.
 
@@ -111,7 +111,7 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
      - **`output path` 는 검사하지 않는다** — `design-gate-shots/` 는 `.gitignore` 대상이고 adapter 가 매 실행 통째로 생성·초기화하는 ephemeral 산출물이라 **fresh clone·정리 직후 부재가 정상**이다. 검사하면 매 마일스톤 오탐이 나 침묵 우선 원칙과 충돌한다.
      - `## Dependency Tools` 는 경로 열이 없어 대상이 아니다. `status: n/a`·미대상 행도 대상이 아니다 — e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다.
      - 템플릿 예시 행(`(예: …)`)이 남아 있으면 그 경로는 실재하지 않으므로 그대로 `P2` 가 되며 처방(`/stack-guard` 재실행)이 정확하다 — 별도 예외를 두지 않는다.
-   - (b) **design gate digest** — `## Design Gate Adapter` 의 `status` 가 **`ready` 인 경우에만**, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치를 확인한다. 불일치 시 `P2 [Guard-drift] design gate adapter digest 불일치 — /stack-guard 재실행 권장` (읽기 전용 — 여기서 고치지 않는다). 실행 명령은 OS 별로 — Unix/macOS `shasum -a 256 <path>` (또는 `sha256sum`), Windows PowerShell `Get-FileHash -Algorithm SHA256 <path>`. 두 도구 모두 없으면 이 항목만 skip + `digest check skipped: no sha256 tool`.
+   - (b) **design gate canonical 갱신** — `status: ready`인 경우 canonical `.claude/skills/stack-guard/assets/design-gate.mjs`의 SHA-256 ≠ registry `copied-from`이면 `P2 [Guard-drift] design gate canonical 갱신됨 — /stack-guard 재실행 권장`(읽기 전용 — mtime·날짜 비교 없음; sha256 도구 부재 시 skip + 사유 echo).
    - (c) **등록 밖 소스 디렉터리** — **소스 루트 registry 를 갖는 스택에서만 수행한다.** 현재 그 registry 를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며, **비-Dart 스택에서는 `/bootstrap-stack` 이 그 절을 삭제하므로 판정 기준이 없다 → 이 항목을 건너뛴다**(사유 echo 불요 — 침묵). 기준 없이 "등록 밖"을 판정하면 TS/Python/Go 의 `src/`·`tests/` 가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다. Dart 스택에서 발견 시 `P2 [Guard-drift] 등록 밖 Dart source root: <경로> — /stack-guard 재실행 권장`.
    - (d) **probe 판정 기록** — `## 통합 명령 사용법` 의 `probe smoke:` 값으로 판정한다.
      - **정상(무출력)**: `PASS (probe verified, …)` 2종 · **`PROBE OK, PROJECT FAIL`**. 후자는 probe 전 회차가 기대대로였고 **프로젝트 코드만** 실패한 상태이므로 검증 장치의 노후가 아니다 — 재실행해도 같은 결과이니 처방이 무의미하고, 그 프로젝트 실패는 졸업 item 2(`통합 validate Pass`)와 단계 3 이 이미 잡는다.
@@ -164,7 +164,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
 2. 각 task의 status를 점검 — `done`이 아닌 항목이 있으면 명단을 출력하고 종료(완료를 강제하지 않음).
 3. 통합 `validate` 명령을 실행한다 + **e2e 필요성 판정 후 필수 실행**(ADR-052 — silent-skip 금지):
    - **3-a. e2e 필요성 판정**: 본 마일스톤이 e2e를 필요로 하는가를 deterministic 신호로 결정한다 —
-     (i) **UI 프로젝트** (ADR-027#amend-3 다중신호 UI 판정: DESIGN.md status≠draft, 또는 status=draft+신호≥1) → 필요,
+     (i) **UI 프로젝트** (ADR-073 D9 다중신호 UI 판정: DESIGN.md status≠draft, 또는 status=draft+신호≥1) → 필요,
      (ii) graduation item 6 `(선택) 본 마일스톤 한정 추가 기준`이 e2e를 명시 선언 → 필요.
      둘 다 아니면 *불필요* → `E2E: 불필요 (비-UI ∧ item 6 미선언)` 한 줄 echo 후 통과 처리(이 경우만 skip 허용 — 사유 명시).
    - **3-b. 필요 시 `validate:e2e` 실행 (silent-skip 금지)**: e2e가 필요하면 반드시 실행하고 **구조화된 러너 출력**을 수집해 ADR-052#amend-1의 5상태로 분류한다. exit code만으로 판정하지 않는다.
@@ -175,19 +175,19 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
      - 출력 문자열 매칭은 위 판정을 보조하는 용도로만 쓴다.
    - **stabilize는 read-only다 — 여기서 e2e/코드를 고치지 않는다.** 실패(real/env 무관)는 단계 8의 `/repair-milestone` 분기로 텍스트 라우팅만 한다.
 3-P. **(옵션) 탐색적 QA via browser/E2E MCP** (ADR-048#d6 registry-driven / ADR-043 보안 — STACK_SETUP_PLAN `## Optional MCP Connectors`에 browser/E2E capability MCP가 *등재 + `agent access` 부여* + UI 프로젝트일 때만; 미등재·access 미부여·비-UI는 silent skip + 사유 echo): 실제 앱을 구동해 본 마일스톤 feature의 시나리오(happy/alt/fail) + qa 엣지케이스를 *탐색*한다(accessibility 트리·클릭/입력·스크린샷·네트워크). 발견한 결함을 `docs/40-validation/QA_FINDINGS.md`에 기록하고, **재현 케이스를 영속 E2E 테스트(`validate:e2e`에 묶이는 커밋 가능한 파일)로 남길 것을 권장**(자동 커밋 X — stabilize는 코드·커밋 금지, 후속 task 제안). 실패는 `Type: bugfix` task(ADR-039)로 라우팅. **보안: `browser_run_code_unsafe`류 RCE급 도구는 사용하지 않는다** — accessibility snapshot·표준 브라우저 조작만.
-3-V. **경험 게이트 — 구현 화면 vs 승인 프로토타입 대조 (ADR-056 결정 5, UI 확정 마일스톤 한정)**: 3-P(옵션·MCP-gated *탐색* QA)와 별개의 **MCP 불요 체계 감사**다. **UI 확정 마일스톤에서 실행 자체는 의무 — silent skip 금지**(미실행 시 사유를 단계 8 출력에 echo; 판정은 report-only).
-   - (a) 앱 기동(dev server) — **기동 명령은 `docs/00-meta/STACK_SETUP_PLAN.md`의 기록·`package.json` scripts(`dev`/`start`)에서 회수**(불명·실패면 blocked-on-env 라벨: §3-b 환경 실패 처리와 동형 — 사용자 환경 복구 안내 + 미실행 사유 echo). 본 마일스톤 핵심 화면(승인 프로토타입 보유 화면, ≤6~8개, 기본 뷰포트 1종)을 Playwright CLI로 스크린샷 → `docs/40-validation/visual/M-N/`에 저장(gitignore ephemeral). **각 화면의 진입 라우트·상태는 feature 문서 `프로토타입:` 참조 줄의 진입 메모에서 회수**. **촬영 전 readiness 확인(포트 응답 대기) 후 촬영하고, 완료 후 본 단계가 기동한 dev server를 종료한다**(기동 시 PID 회수 → 촬영 후 kill; 프로세스 누수·포트 잔류 방지. 3-P 등이 이미 서버를 띄운 상태면 재기동 대신 재사용 — "본 단계가 처음 기동" 가정 금지).
-   - (b) 각 스크린샷을 Read(멀티모달)로 열람해 대조. **앵커 위계**: ① `docs/20-system/prototypes/M<N>/<screen>.html`(커밋된 승인본 — 존재 시. 같은 뷰포트로 `file://` 렌더-캡처해 나란히 대조 가능) ② 부재·면제 화면은 DESIGN.md §2 토큰/§7 컴포넌트/§9 Don'ts/§10 voice 파생 체크리스트로 fallback. 대조 관점: 레이아웃·상태(빈/에러 표현)·카피·토큰 준수 — 픽셀 일치가 아니라 *경험 계약 준수*(best-effort — 최종 확인은 사용자 육안).
-   - (c) 불일치는 QA_FINDINGS에 `P1 [Experience-drift] <화면> — <불일치 1줄> (앵커: 프로토타입|DESIGN 파생)` report-only 기록(졸업 차단 X — item 6 채택 시만 차단). 판독 자체가 불확실하면 finding 대신 "판독 불확실" 명시.
-   - (d) 최종 출력(단계 8)에 갤러리 경로 + **"사용자 육안 확인은 `/accept-milestone <M>`이 수행한다 — 스펙 자체의 오류는 사람이 잡는다"** 1줄(ADR-066 D1). 본 단계의 AI 판독은 `[Experience-drift]` 후보를 올리는 데까지이며, 그 확인의 실행 자리는 수용 단계다. **산하 task에 관측 modality AC가 1건이라도 있으면 그 단계는 «권장»이 아니라 사실상 필수 경로다**(receipt 없이는 item 4를 충족하지 못한다 — ADR-068 D3). 0건이면 권장이며 졸업 필수 조건이 아니다.
-   - Codex: 멀티모달 편차 시 (a) 갤러리 생성까지 수행 + (b) 대조는 "사용자 수동 검토" 안내로 degrade.
+3-V. **경험 게이트 — 구현 화면 vs 승인 스냅샷 대조 (ADR-072 D7, UI 확정 마일스톤 한정)**: MCP 불요 체계 감사. **실행 자체는 의무 — silent skip 금지**(미실행 사유 echo; 판정은 report-only).
+   - (a) `docs/20-system/prototypes/M<N>/manifest.json`을 읽는다(**이 M이 등록한 화면이 있어야 하는데** 부재면 `blocked-on-env`가 아니라 계약 결함 `P0 [Experience-contract] 매니페스트 부재`. 전 화면이 `프로토타입 면제:`이거나 이전 M 재사용이면 이 M 파일 부재가 정상이며, 그때는 feature `## 7`의 `프로토타입:` id가 가리키는 M의 매니페스트·스냅샷을 읽는다). 화면마다 두 렌더를 만든다(**매니페스트에 없는 UI 화면 — `프로토타입 면제:` feature·이전 M 승인본 재사용 — 은 ②만 만들어 (b)의 ② 경로로 대조한다, ADR-072 D7**): **① 스토리/위젯 렌더** — `validate:design -- --manifest <경로> --snapshot docs/40-validation/visual/M-N/proto/`; **② 제품 렌더** — 웹은 dev server 기동(명령은 STACK_SETUP_PLAN·`package.json` `dev`/`start`에서 회수, readiness 대기, 종료 시 kill — 재사용 규칙 기존대로) 후 매니페스트 `product_entry`(`null`이면 «제품 진입점 미기록» 사유 echo + ① 대조만)의 라우트를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/app/`, Flutter는 통합 테스트 스크린샷이 가능하면 그것, 아니면 `blocked-on-env` 명시(ADR-059#amend-1 결정 4). blocker가 있어 `--snapshot` 복사에서 빠진 화면은 `design-gate-shots/`의 캡처를 ①로 쓴다.
+   - (b) 각 화면에 대해 **승인 스냅샷(`snapshots/`) ↔ ① ↔ ②**를 Read(멀티모달)로 나란히 대조한다. 앵커 위계: ① 승인 스냅샷(존재 시) ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면). 관점: 레이아웃·상태·카피·토큰 준수 — 픽셀 일치가 아니라 경험 계약 준수. ① vs 승인 스냅샷 불일치는 «승인 후 UI 코드 변경»이므로 같은 M 재승인 또는 다음 M `supersedes` 등재 여부를 함께 본다. 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(ADR-072 D5-5).
+   - (c) 불일치는 QA_FINDINGS에 `P1 [Experience-drift] <screen> — <1줄> (앵커: 스냅샷|DESIGN 파생 / 렌더: proto|app)` report-only. 판독 불확실은 «판독 불확실» 명시. 시각 불일치가 봉인 AC·PX↔AC 위반을 동반하고 재현되면 그것은 별도 P0 결함(재현 줄 포함)으로 등재한다(ADR-070 D1).
+   - (d) 단계 8 출력에 갤러리 경로 + «사용자 육안 확인은 `/accept-milestone <M>`이 수행한다» 1줄. 관측 modality AC가 1건이라도 있으면 사실상 필수 경로(ADR-068 D3).
+   - Codex: 캡처까지 수행 + 대조는 «사용자 수동 검토» 안내로 degrade.
 4. **병렬 qa verifier 팬아웃 — 고정 1개가 아니라 *필요한 만큼*** (feature / user-flow / surface 단위로 분할). 메인 세션이 본 마일스톤의 feature·핵심 시나리오·surface 목록을 회수해 *독립 점검 단위*로 쪼개고, 각 단위마다 qa agent를 1개씩 병렬 위임한다(회귀·엣지케이스 점검). qa는 보고만 한다(qa.md의 tools에 Write 없음).
    - **위임 시 ADR-046#d3 적용: finding은 cap 때문에 누락하지 말고 전수 반환 — cap은 서술/과정 설명에만.**
    - **입력에 ADR-070 D1 severity 정의표를 그대로 전달한다**(기준 전달 — 사전판정 아님). P0 재현 줄 형식도 함께 전달한다.
    - **축 미반환 회수 규율 (ADR-051#amend-4 결정 2)**: qa 단위가 구조화 반환 없이 멈추면 ① 1회 재개(같은 단위·같은 형식, 이미 확립한 finding 전량 포함 명시) → ② 다른 qa에 재위임 → ③ 메인이 그 단위를 직접 감사 → ④ 그래도 불가하면 **`QA_FINDINGS.md`의 본 마일스톤 `### P0`에 `- **M<N>-audit-<K>** | P0 | [관측됨] | linked: M<N> | status: open` + 하위 줄 `- 감사 미완(unavailable): <단위> — <4단계 실패 사유>`를 등재하고**, 단계 8의 graduation을 `BLOCKED (audit incomplete: <단위>)`로 기록한다(ADR-068 D4). **qa 팬아웃은 졸업 predicate ⑤의 유일한 입력이므로, 돌지 않은 감사를 근거로 "P0 0건"을 단정하지 않는다.**
    - 다음 라운드에서 그 단위의 감사가 성공하면 본 skill이 그 `M<N>-audit-<K>` 항목의 `status: open`을 `resolved`로 갱신한다(**본 skill이 자기가 만든 감사-미완 항목에 한해 status를 닫는 유일한 예외** — 그 밖의 finding status는 `/repair-milestone`·`/repair-acceptance` 소유).
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (동일한 분할 단위를 *순차 단일 qa 호출*로 한 단위씩 처리, 결과는 동일하게 누적).
-5. **병렬 reviewer verifier 팬아웃 — 필요한 만큼** (리팩토링 후보·아키텍처 부채). 각 reviewer 입력에 Clean Code 6항목 체크리스트(ADR-006) + `review surface: code` + **ADR-046#d3(finding 전수 반환 — report-only)** 를 명시 전달한다. **UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃** — DESIGN.md `## 9. Do's and Don'ts` 위반 의심 grep 결과를 입력으로 받아 비판적 검토. reviewer도 보고만 한다. design reviewer 입력에는 grep 결과에 더해 **렌더 증거**를 주입한다 — §3-V 갤러리 경로(`docs/40-validation/visual/M-N/`) + visual-qa.spec 최근 결과(존재 시). reviewer는 Read로 이미지를 열람한다(ADR-027#amend-6). Codex: 경로 echo + 텍스트 결과만 전달로 degrade.
+5. **병렬 reviewer verifier 팬아웃 — 필요한 만큼** (리팩토링 후보·아키텍처 부채). 각 reviewer 입력에 Clean Code 6항목 체크리스트(ADR-006) + `review surface: code` + **ADR-046#d3(finding 전수 반환 — report-only)** 를 명시 전달한다. **UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃** — DESIGN.md `## 9. Do's and Don'ts` 위반 의심 grep 결과를 입력으로 받아 비판적 검토. reviewer도 보고만 한다. design reviewer 입력에는 grep 결과에 더해 **렌더 증거**를 주입한다 — §3-V 갤러리 경로(`proto/`·`app/`) + **승인 스냅샷 경로(매니페스트)** + visual-qa.spec 최근 결과. reviewer는 Read로 이미지를 열람한다(ADR-073 D8). Codex: 경로 echo + 텍스트 결과만 전달로 degrade.
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (분할 단위를 순차 reviewer 호출로 처리).
    - **축 미반환 회수 규율**: 단계 4와 같은 4단계를 밟는다. 단 ④에 도달해도 **판정을 바꾸지 않는다** — reviewer 결과는 졸업 predicate 입력이 아니다(report-only). `IMPROVEMENT_GUIDE.md`에 `P2 [Audit-unavailable] reviewer:<단위> — 감사 미완`을 기록하고 단계 8 출력에 사유를 echo한다. 미반환을 P0로 올리면 "결과 없음"이 "결과 있음"(정상 반환한 P1 부채는 졸업을 막지 않는다)보다 강해지는 역전이 생긴다. reviewer가 정상 반환한 **결함**은 6-S가 QA_FINDINGS로 보내 졸업 입력이 된다(ADR-070 D7). 미반환 자체는 여전히 판정을 바꾸지 않는다.
 6-S. **메인 세션 self-synthesis (report-only 계약 유지)**: 위 4·5의 *모든* 병렬 verifier가 반환한 보고를 메인 세션이 직접 종합한다.
@@ -279,7 +279,7 @@ Telemetry — M1
      각 항목에 [ADR-022](../../../docs/90-decisions/boilerplate/ADR-022-ratchet-principle.md) evidence label 부착.
      *AGENTS.md / agent / skill body는 자동 수정 X — 보고만*.
      **경험·사용 관점 교훈(제품을 실제로 써 본 결과에서 나온 것) 유무를 별도로 확인**한다 — 교훈이 검증-정교화 방향으로만 쌓이는 편향 방지([관측됨] 실사용에서 경험 축 교훈 0건).
-     - DESIGN.md / ARCH 7-x cross-surface drift 가 본 마일스톤 중에 N회 이상 발견됐다면 *ADR-027#amend-1 적용 본문* 이 누락된 fork 인지 점검 권장.
+     - DESIGN.md / ARCH 7-x cross-surface drift 가 본 마일스톤 중에 N회 이상 발견됐다면 *ADR-073 D8 적용 본문* 이 누락된 fork 인지 점검 권장.
    - **Telemetry aggregate** (단계 7-T 결과 echo — 수치만, IMPROVEMENT_GUIDE 신규 항목 X).
    - **다음 단계** ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
      - **졸업 가능 = PENDING_ACCEPTANCE** (item 4만 미충족):

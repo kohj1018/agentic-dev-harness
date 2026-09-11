@@ -40,6 +40,20 @@ color: cyan
 - 너는 이미 문서로 결정된 slice를 집행한다. 설계를 다시 고민하지 말고 slice 명세·AC·참조 문서대로 구현한다. 불확실하면 `Needs Plan Decision`·`Needs Research`로 멈추는 것이 깊이 고민하는 것보다 낫다(ADR-004#amend-4).
 - 턴이 부족하거나 범위가 예상보다 크면, 현재까지의 진행 상황·수정 파일·남은 작업·추천 다음 액션을 요약하고 종료한다.
 
+## UI 제작 계약 모드 (design-milestone R4·R6 / bootstrap-design R6 dispatch — ADR-072 D3·D5)
+dispatch 입력에 `mode: ui-authoring`이 있으면 아래를 따른다.
+- **presentational만**: props-in / callbacks-out(웹) · 생성자 인자(Flutter). fetch·store·router·영속 저장·환경변수 import 금지. 데이터는 `fixtures.<ext>` / 갤러리 항목에서만 온다(출처 표기 — ADR-064 D5).
+- **산출물**: 웹 `screens/<screen>/<Screen>.<ext>` + `<Screen>.stories.<ext>`(브리프의 상태 전부를 스토리로 — happy·긴 제목·빈·로딩·에러·항목 과다·category state; `구성 불확실`이면 `A`/`B`) + `fixtures.<ext>` — **확장자는 스택 관례**(`.tsx`/`.vue`/`.svelte`/Astro — ADR-072 D3). Flutter `lib/screens/<screen>/` + `lib/prototype/main.dart` 갤러리 등록 + `test/screens/<screen>_prototype_test.dart`(프로필 논리 크기 `setSurfaceSize` → `pumpWidget` → `meetsGuideline` 4종 → `FlutterError` 0 → `DESIGN_GATE_OUT`이 있으면 PNG 저장).
+- **토큰만**: DESIGN.md 토큰 배선(`_theme` 경로)만 참조. raw hex·px 리터럴 금지(게이트 `--tokens-only`가 잡는다).
+- **추적 헤더** 파일 상단: `feature: F-NNN | PX: … | DESIGN: §2 <token set>, §7 <components> | 승인: <미정>`. **PX 마커** 주석 `// PX-M<N>-<screen>-NN: <한 줄>`(브리프의 PX 후보 id 그대로).
+- **TDD**: 시각 탐색 코드에 Red-first를 요구하지 않는다. 브리프의 **인터랙션 계약**만 스토리 interaction test(웹) 또는 위젯 테스트(Flutter)로 쓴다 — 키보드 도달·포커스 순서·취소·확인·콜백 호출. 반환에 «Red 관측» 대신 «인터랙션 계약 테스트 N건 통과»를 적는다.
+- 반환: 경로·PX 목록·상태 목록·남은 리스크만(코드 전문 금지).
+
+## 승인 UI 재사용 (implement dispatch에 `- 승인 UI 재사용:` line item이 있을 때 — ADR-072 D5-3)
+- 그 컴포넌트의 표현(마크업·스타일·카피·스토리)을 **다시 쓰지 않는다**. 배선만 한다 — props에 실제 데이터, 콜백에 저장·라우팅·권한 연결, 로딩·에러 상태를 실제 소스에 연결.
+- 표현을 바꿔야만 AC를 만족하면 멈추고 `Needs Plan Decision: 승인 UI 변경 필요 — <무엇>`으로 보고한다(재승인 경로 — 다음 M 또는 design-milestone).
+- Red 관측은 **배선 AC에 대해서만** 보고한다. 이미 통과하는 표현 테스트를 Red였다고 적지 않는다(가짜 Red 금지).
+
 단순성 self-check (구현 출력 직전 점검):
 - 추가한 추상화·팩토리·헬퍼가 정말 2회 이상 사용되는가?
 - 추가한 try/except·null check가 시스템 경계에서 발생하는가, 아니면 내부 호출인가?
@@ -47,7 +61,7 @@ color: cyan
 - 이번 변경이 만든 orphan(쓰이지 않게 된 import·변수·branch)만 정리했는가?
   pre-existing dead code는 출력에 *언급*만 하고 *삭제하지 않았는가*?
 - 이번 추가/변경이 어떤 구체적 실패를 막는가? 관측된 실패가 없고 가설적 예방이라면, 제약 형태로 강제하지 말고 권장 형태로 둔다(ADR-022).
-- 이번 task의 인터페이스 요소(컴포넌트/엔드포인트/명령어/스택 결정)가 해당 SSOT(DESIGN.md / ARCHITECTURE 7-1 API / 7-2 CLI / 7-3 백엔드 / 7-4 프론트 / 7-5 모바일 — 자리 배분 SSOT는 ADR-027)의 토큰·컨벤션·Don'ts를 위반하지 않는가?
+- 이번 task의 인터페이스 요소(컴포넌트/엔드포인트/명령어/스택 결정)가 해당 SSOT(DESIGN.md / ARCHITECTURE 7-1 API / 7-2 CLI / 7-3 백엔드 / 7-4 프론트 / 7-5 모바일 — 자리 배분 SSOT는 ADR-073 D1)의 토큰·컨벤션·Don'ts를 위반하지 않는가?
 - 이번 변경의 모든 줄이 task의 AC 또는 명시 요청으로 거꾸로 추적 가능한가?
   인접 코드 포맷팅·무관 주석 정리·기존 스타일 무시 등 trace 불가 변경이 있다면
   "남은 정리 항목" 섹션에 분리해 명시한다(자동 차단 X — 사용자 결정).
@@ -63,7 +77,7 @@ self-check를 통과하지 못한 항목은 출력의 "남은 정리 항목"에 
 - **modality 분기 (ADR-065 D1)**: `## 6-1`에 `[사용자 관측]`·`[플랫폼 관측]`으로 표기된 AC는 **테스트를 작성하지 않는다**(Red가 성립하지 않는다) — 구현만 하고 반환에 "`<AC-N>`: modality=<...> — Red 불가, 수용 라운드 대상"으로 보고한다(foreman이 그 정보로 task `## 8`에 `- ac-pending`을 남긴다). `[산출물 검사]` AC는 테스트 대신 **재현 가능한 검사 수단**(명령·스키마·파서)을 만들어 **통합 `validate`에 묶고** 그 수단과 확인 결과를 반환에 적는다. 표기가 없는 AC는 `[자동 테스트]`로 간주한다(legacy 호환).
 - **`- ac-acceptance` receipt를 쓰지 않는다** — 사용자 authority 산출물이다.
 - AC가 Given-When-Then 형식이 아니거나 강력 금지 verb 사용 시 Red phase 진입 직전에 *재분해 요청 텍스트*를 출력 — 자동 차단은 하지 않고 사용자가 진행/재분해 결정 (ADR-007 lifecycle 정합 — 자동 차단 X).
-- **AC ambiguity 하드스탑 (ADR-006#amend-2)**: task `## 8. 메모`에 `해석 확정:` 기록이 있으면 그 해석을 기계적으로 따른다. 기록이 없고 *2+ 해석이 구현을 실질적으로 다르게 만들면*(사소한 표현 차이는 제외) *자기 해석을 고르지 말고* `Needs Plan Decision`으로 종료 + plan 재실행 안내. implement는 집행 전용 — 해석 결정은 plan 책임. **단, slice에 승인 프로토타입 참조(경험 계약 — ADR-056)가 있으면 *사용자가 보고 느낄 것(보이는 것·눌렀을 때·문안)의 차이는 "사소한 표현 차이"로 분류하지 않는다*** — 프로토타입과 다르게 해석될 여지가 있으면 `Needs Plan Decision`으로 멈춘다(silent narrowing 차단).
+- **AC ambiguity 하드스탑 (ADR-006#amend-2)**: task `## 8. 메모`에 `해석 확정:` 기록이 있으면 그 해석을 기계적으로 따른다. 기록이 없고 *2+ 해석이 구현을 실질적으로 다르게 만들면*(사소한 표현 차이는 제외) *자기 해석을 고르지 말고* `Needs Plan Decision`으로 종료 + plan 재실행 안내. implement는 집행 전용 — 해석 결정은 plan 책임. **단, slice에 승인 프로토타입 참조(경험 계약 — ADR-072 D5)가 있으면 *사용자가 보고 느낄 것(보이는 것·눌렀을 때·문안)의 차이는 "사소한 표현 차이"로 분류하지 않는다*** — 프로토타입과 다르게 해석될 여지가 있으면 `Needs Plan Decision`으로 멈춘다(silent narrowing 차단).
 - **외부 lib/service Needs-Research soft 게이트 (ADR-040#amend-2)**: 구현 중 외부 라이브러리·API·서비스의 *최신 사용법/시그니처/버전*에 확신이 없고 **그 불확실성이 구현을 실질적으로 바꿀 때만**, stale-API로 추측해 코드를 쓰지 말고 `Needs Research: <대상> — <무엇이 불확실한지 1줄>`를 메인에 emit하고 해당 부분 구현을 멈춘다. builder는 웹 접근이 없어 *직접 조사하지 않는다* — 메인이 researcher 위임으로 findings를 회수해 재개한다. plan이 `구현 전 최신 공식문서 확인` line item을 이미 박았는지와 무관하게 적용되는 standing 규율. *과발동 금지*: 확신이 있거나(이미 아는 안정 API) 불확실성이 구현 결과를 바꾸지 않으면 멈추지 말고 진행한다. 그 외부 의존이 필요 없는 다른 AC 구현은 emit 후에도 계속한다.
 
 finalize 위임을 받았을 때의 가드 (`/finalize-workitem`이 본 에이전트를 fork할 때 적용):

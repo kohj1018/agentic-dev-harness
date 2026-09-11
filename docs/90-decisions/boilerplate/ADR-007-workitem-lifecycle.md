@@ -27,7 +27,7 @@ accepted
 |---|------|-------|-----------|----------|
 | 1 | discover | `/discover-product` | (메인 세션 운전) | persona/pain/JTBD/시나리오 발굴 → DISCOVERY.md |
 | 2 | bootstrap | `/bootstrap-project` | architect | DISCOVERY.md → charter/architecture/ADR-100 (M1/F-001 seed는 ADR-057로 제거 — plan 단계로 이동) |
-| 3 | plan | `/plan-milestone`(모든 milestone+feature — M1 포함, ADR-057) · `/plan-workitem M<N>`(마일스톤 전체 계획 스냅샷 — ADR-057#amend-3) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone — M1 포함) + task 분해(plan-workitem — `M<N>` 1회 전체) |
+| 3 | plan | `/plan-milestone`(모든 milestone+feature — M1 포함, ADR-057) · `/design-milestone M<N>`(UI M 화면 경험 계약 — plan-milestone 뒤·plan-workitem 앞, ADR-072) · `/plan-workitem M<N>`(마일스톤 전체 계획 스냅샷 — ADR-057#amend-3) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone — M1 포함) + task 분해(plan-workitem — `M<N>` 1회 전체) |
 | — | seal | `/seal-milestone` | (메인 세션) | 계획 최종 검사 + 사용자 승인 + task→feature→milestone 일괄 `ready` 승격. 내용 수정·커밋 없음 (ADR-060 D7) |
 | 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) |
 | 5 | validate | `/validate-workitem` | validator | 판정 + report 기록. **status 변경·코드 수정·커밋 금지.** |
@@ -119,7 +119,7 @@ lock file은 task 단위 변경의 부산물 → `## 4-1` 강제는 단순성 �
 <a id="adr-007-amend-5"></a>
 ## Amendment 5 (2026-07-16) — plan-workitem 입구 계약 `Needs Experience Contract`
 ### 결정
-"자동 차단 X — 권장 텍스트" 원칙의 명시 예외를 1건 추가한다(#amend-3 `Needs Stack Guard` 동형): `/plan-workitem`은 **UI 확정 feature**(ADR-027#amend-3) 분해 시 승인 프로토타입 참조·`프로토타입 면제:` 기록이 둘 다 없으면 `Needs Experience Contract`로 종료한다(상세: [ADR-056](ADR-056-milestone-experience-contract.md) 결정 3). UI 의심은 경고만.
+"자동 차단 X — 권장 텍스트" 원칙의 명시 예외를 1건 추가한다(#amend-3 `Needs Stack Guard` 동형): `/plan-workitem`은 **UI 확정 feature**(ADR-073 D9) 분해 시 승인 프로토타입 참조·`프로토타입 면제:` 기록이 둘 다 없으면 `Needs Experience Contract`로 종료한다(상세: [ADR-072](ADR-072-design-milestone-and-code-prototype.md) D9 — ADR-056 결정 3 승계. 완성 경로는 `/design-milestone M<N>`). UI 의심은 경고만.
 ### 근거
 - [관측됨] 스킬 내부 권장 문구는 우회된다 — 입력 계약만이 집행력을 가진다(스펙=오라클 문제의 앞단 잠금).
 ### 강도 (ADR-022)

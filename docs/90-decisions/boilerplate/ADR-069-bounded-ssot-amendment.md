@@ -93,3 +93,12 @@ change-set이 **봉인된 계약**에 영향을 주면 그 문서를 수정하�
 
 ## 참고
 - ADR-005(SSOT·정본 소유권), ADR-035(DISCOVERY=SSOT / Charter=snapshot), ADR-055(스택 taxonomy T1/T2/T3), ADR-058(design workflow), ADR-060(authority·Decision Brief·봉인).
+
+<a id="adr-069-amend-1"></a>
+## Amendment 1 (2026-09-11) — D3 전파표에 승인 UI 코드·공용 컴포넌트·토큰 행 추가
+### 결정
+D3 표에 행을 더한다: `| 승인 UI 코드(프로토타입)·공용 컴포넌트·DESIGN 토큰 변경 | 그 컴포넌트·토큰을 쓰는 승인 화면(전 M 매니페스트 `source[]`·`supersedes[]`) | 재승인 판정 — 봉인 전이면 `/design-milestone M<N> --screens <id>` 재진입(같은 M 대체), 봉인 후면 다음 M 매니페스트에 `supersedes`로 재등록(이전 M 불변 — ADR-072 D5-5) |`. DESIGN 행의 «함께 볼 곳»에 `매니페스트·승인 스냅샷`을 더한다.
+### 강도 (ADR-022)
+- enabling(약) — 표 행 추가.
+### 적용 surface
+- .claude/skills/amend-ssot/SKILL.md (A3 인용 줄에 #amend-1 표기 — 전파표 재서술 없음)

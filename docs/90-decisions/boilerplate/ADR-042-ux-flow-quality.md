@@ -37,7 +37,7 @@ accepted
 <a id="adr-042-amend-1"></a>
 ## Amendment 1 (2026-07-16) — §8-1 copy 톤 필드를 DESIGN.md §10 delta로 재정의
 ### 결정
-FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milestone-experience-contract.md)(결정 8~11)의 DESIGN.md §10을 참조하고 **feature-특이 delta만** 기록한다(전역 규칙 재서술 금지). 근거: [관측됨] §8-1은 downstream 소비자 0인 죽은 필드였고, 전역 자산(존댓말·용어)을 feature 필드에 두면 feature 간 drift가 구조적으로 열린다.
+FEATURE §8-1의 "copy 톤" 항목은 전역 규칙서 [ADR-056](ADR-056-milestone-experience-contract.md)(결정 8~11, 현재 SSOT: ADR-073 D6)의 DESIGN.md §10을 참조하고 **feature-특이 delta만** 기록한다(전역 규칙 재서술 금지). 근거: [관측됨] §8-1은 downstream 소비자 0인 죽은 필드였고, 전역 자산(존댓말·용어)을 feature 필드에 두면 feature 간 drift가 구조적으로 열린다.
 ### 적용 surface
 - docs/30-workitems/_templates/FEATURE_TEMPLATE.md (§8-1 주석)
 
