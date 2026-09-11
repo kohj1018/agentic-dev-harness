@@ -116,6 +116,7 @@ discover → bootstrap → plan-milestone(+UI: 프로토타입 라운드) → [M
                      ├─PENDING_ACCEPTANCE──→ accept-milestone <M> ─┬─승인─→ stabilize 재실행 → 졸업
                      │                                             ├─보류─→ repair-acceptance (직접 수정 — 재개방 없음) → accept-milestone 재실행
                      ├─NO──────────────────→ repair-milestone (직접 수정 — 재개방 없음) → stabilize 재실행
+                     │      (round ≥ 3인데 P0 open이면 stabilize가 수렴 실패 브리프 출력 — 계속 수리 / 비차단 보류 / NO 유지 + 병렬 Now. 면제 판정값 없음 — ADR-070 D5)
                      └─BLOCKED─────────────→ 감사 미완: 그 축 재감사 / e2e blocked-on-env: 환경 복구 (repair 대상 아님 — ADR-068 D4) → stabilize 재실행
 ```
 

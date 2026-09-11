@@ -36,7 +36,7 @@ draft
 <!-- ## 7. 열린 질문 — 폐지(결번). 이 마일스톤의 미결정은 docs/10-charter/DECISION_REGISTER.md가 소유한다(항목의 `영향:` 칸에 이 M ID를 적는다 — ADR-060 D1). -->
 
 ## 8. 회고 (stabilize 자동 채움)
-- graduation: <YES | PENDING_ACCEPTANCE | NO | BLOCKED> (<날짜>)  <!-- stabilize 단계 8 최종 판정(단계 4~6 qa 팬아웃 P0(QA_FINDINGS)만 반영, reviewer report-only 미반영) 영속 — §1.5 사전점검 아님. ROADMAP.md 파생 입력이며 **Done 전환은 YES일 때만**이다 (ADR-068 D4·ADR-057#amend-1).
+- graduation: <YES | PENDING_ACCEPTANCE | NO | BLOCKED> (<날짜>)  <!-- stabilize 단계 8 최종 판정(QA_FINDINGS `### P0` 미해소 항목만 반영 — 보고자 무관, 성격 기준 등재 ADR-070 D7) 영속 — §1.5 사전점검 아님. ROADMAP.md 파생 입력이며 **Done 전환은 YES일 때만**이다 (ADR-068 D4·ADR-057#amend-1).
      PENDING_ACCEPTANCE = 관측 AC receipt만 남고 나머지 전부 충족: `PENDING_ACCEPTANCE (관측 AC 미발급: T-004:AC-2, ...)` → 처방은 `/accept-milestone <M>`.
      BLOCKED = 평가 실행 불가 2종: `BLOCKED (e2e blocked-on-env: <target>)` / `BLOCKED (audit incomplete: <축>)`.
      우선순위: BLOCKED > NO > PENDING_ACCEPTANCE > YES. 매 stabilize 실행이 이 줄을 최신 판정으로 덮어쓴다(낡은 YES 잔존 방지).

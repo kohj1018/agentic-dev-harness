@@ -80,7 +80,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 
 ## R5. 3갈래 분류 + 라우팅 (ADR-066 D2)
 각 피드백을 아래로 분류하고 **사용자에게 확인받은 뒤** 기록한다.
-1. **계약 위반(결함)** — 이번 마일스톤이 약속한 AC·승인 프로토타입·DESIGN 계약을 안 지킴 → `QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2`에 기존 스키마로 등재(항목 문두에 `(수용)` 태그). 라벨은 기존 체계를 쓴다(`[Experience-drift]`·`[Design-voice]` 등). severity 기준: 사용자가 진행 불가·데이터 손상·약속한 핵심 시나리오 실패 = P0.
+1. **계약 위반(결함)** — 이번 마일스톤이 약속한 AC·승인 프로토타입·DESIGN 계약을 안 지킴 → `QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2`에 기존 스키마로 등재(항목 문두에 `(수용)` 태그). 등재 시 `| status: open | decision: confirmed`와 하위 줄 `- 재현: 사용자 관측 — 시나리오 [N/M] <조작> → <관측>`을 함께 적는다(사용자 관측이 곧 재현 관측 — ADR-070 D2). severity는 ADR-070 D1 표를 따른다(아래 «severity 기준» 문장은 그 표의 요약이다). 라벨은 기존 체계를 쓴다(`[Experience-drift]`·`[Design-voice]` 등). severity 기준: 사용자가 진행 불가·데이터 손상·약속한 핵심 시나리오 실패 = P0.
 2. **계약 변경(범위)** — 계약 자체를 바꾸려는 것(방향 변경·새 기능) → **`docs/30-workitems/ROADMAP.md`의 `## Backlog`에 한 줄 등재**한다. 형식: `- `<candidate-key>` <한 줄 요약> — 출처: 수용 라운드 M<N> r<라운드> / 확신도: <높음/중간/낮음>`. `<candidate-key>`는 목표 슬러그이며(예: `offline-merge`) 이후 `/plan-milestone` R0이 이 key로 회수·승격한다. **현재 마일스톤에서 고치지 않는다.**
    - **`DECISION_REGISTER.md`에 쓰지 않는다.** 두 원장의 배타 범위는 «해소되면 무엇이 남는가»로 갈린다 — 정본 문서(charter·ARCH·DESIGN)의 한 절이 바뀌면 register, 다음 마일스톤 문서 하나가 생기면 Backlog다. 계약 변경 제안은 후자다.
    - **예외 — 정본 문서를 고쳐야 성립하는 항목**(예: charter `## 5. 비목표`를 뒤집는 요구)은 `DECISION_REGISTER.md`에 `status: open` + `- 발견: 수용 라운드 (M<N>)`으로 등재한다(ADR-060 D11). **한 항목을 양쪽에 동시에 쓰지 않는다.**

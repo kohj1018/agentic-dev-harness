@@ -9,7 +9,7 @@
 
 - 필수 4필드: `ID | severity | evidence label | linked workitem`
 - 처리 후 필수 2필드(P0·P1): `status | decision` — 6-S 검토(ADR-070 D2)나 `/repair-milestone` 4-판정(ADR-070 D3)을 거친 P0·P1은 두 필드가 비어 있을 수 없다. P2와 미처리 항목은 권장.
-- `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다** — 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
+- `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 그 로그를 쓴 skill의 수리 판정값을 그대로 쓴다** — `/repair-plan` = `Adopt | Adopt-modified | Reject-FP | Reject-conflict` / `/repair-milestone` = `Adopt | Adopt-modified | Reject-FP | Reject-context` / `/repair-acceptance` = `Adopt | Adopt-modified | Out-of-contract | Needs User Clarification`(ADR-066 D4 — 수용 경로에 `Reject-false-positive`는 없다). 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
 - evidence label은 [boilerplate/ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md)의 `[관측됨]` / `[외부실증]` / `[가설]` (+ 합성 표기) 중 1개.
 - **선택 태그 `(수용)`**: `/accept-milestone`이 사용자 수용 라운드에서 등재한 항목에 붙인다. **위치는 굵은 ID 바로 뒤·첫 `|` 앞으로 고정한다** — `- **M1-003** (수용) | P2 | ...`. 이 태그가 `/repair-acceptance`의 유일한 회수 신호이며 문자열 `(수용)` 정확 일치로 grep된다(ADR-066 D5). `/repair-milestone`은 이 태그가 붙은 항목을 4-판정하지 않는다.
 
@@ -66,6 +66,7 @@
 - 형식은 본 파일 `## 항목 스키마` SSOT 따름.
 - **round 줄 (ADR-070 D5)**: `/repair-milestone`는 실행 시작 시 그 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K는 기존 최대값 + 1. `/stabilize-milestone` 단계 8이 최대 K를 읽어 예산(3)과 대조한다.
 - **원인·반경·재감사 줄 (ADR-070 D4)**: Adopt 항목 하위에 `- 원인:` · `- 영향 반경:` · `- 재감사: <대상 N파일> / 새 finding K건` · 라운드 끝에 `- 자기 점검: …` 한 줄.
+- **확인 미완 항목은 본 절에 적지 않는다**: 라운드가 판정을 못 내린 항목(`decision: needs-confirmation` 유지)의 영속 자리는 원본 원장 항목(`status: open` + 막힌 이유)이다(ADR-070 D3). 본 절은 closed records이므로 `status: applied` + 수리 판정값을 가진 항목만 담는다.
 
 형식:
 ```

@@ -81,6 +81,7 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
    - `- closure`의 `관측대기=` 목록은 **회수 편의용 색인**이며 판정의 근거가 아니다. 그 목록과 `## 6-1` 스캔 결과가 어긋나면 **`## 6-1`을 신뢰한다**(수기 기재·구 정의로 작성된 closure 줄 방어).
    - **본 항목만 미충족이고 1·2·3·5가 전부 충족이면 graduation은 `PENDING_ACCEPTANCE`다**(D4).
 5. **P0 severity finding 0건** — `QA_FINDINGS.md`의 본 마일스톤 헤더 `### P0`에서 `status: resolved`가 아닌 항목 수 0.
+> 참조 갱신 (2026-09): `status`·`decision` 값과 종결 규칙은 ADR-070 D2·D3이 소유한다. item 5의 계수 정의는 불변이나 입력원은 D7로 reviewer 결함까지 넓어진다.
 6. (선택) 본 마일스톤 한정 추가 기준.
 
 - **채점표(`docs/40-validation/reports/`)는 졸업 판정의 입력이 아니다.** ADR-067 D1 item 4의 (a)(b)(c)(d)와 mtime 비교는 전부 폐지된다.
@@ -110,6 +111,7 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
   3. 외부 경계·핵심 journey를 건드렸으면 해당 integration/e2e smoke
   4. `validate --changed` 1회(미지원이면 통합 `validate`)
   전체 검증은 다음 `/stabilize-milestone`의 통합 `validate` + e2e가 담당한다.
+> 참조 갱신 (2026-09): [ADR-070](ADR-070-finding-severity-closure-and-convergence.md) D4가 검증 집합에 다섯째 항목(영향 반경 재감사)을 더한다. 본 D6의 네 항목은 그대로다.
 - **결정 이력 필수 필드** — `IMPROVEMENT_GUIDE.md` `## 5. Repair decision log`에 P0/P1 전부를 append하고 아래 두 필드를 **양 skill 공통 필수**로 한다.
   - `files:` — 이 항목이 고친 파일 목록. 문서만 고쳤으면 `files: docs-only`. **재개방이 없으므로 이것이 «어느 파일을 고쳤나»의 유일한 영속 자리다.**
   - `scope: in-AC | out-of-AC` — «이 변경 줄을 기존 계약으로 거꾸로 추적할 수 있는가». 계약의 범위는 여섯이다: task `## 6. AC` · task `## 3`의 line item · feature `## 7. FAC` · feature `## 7-2`의 INV · 승인 프로토타입 · `DESIGN.md` 계약. **애매하면 `out-of-AC`로 적는다**(추적 부채를 남기는 쪽이 안전하다).

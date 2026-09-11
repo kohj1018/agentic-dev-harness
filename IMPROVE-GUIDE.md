@@ -106,7 +106,7 @@
 
 **DESIGN.md 새 절·앵커**: `## 0` 프로필 매핑표(`design-0-profiles`), `## 3` 폰트 결정 블록(`design-3-typography`), `## 10` 언어별 하위 블록, `## 11. 기준 자료`(`design-11-sources`).
 
-**QA_FINDINGS·IMPROVEMENT_GUIDE `decision` 값**: `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`. repair 로그(`## 5`)의 `decision`은 기존 `Adopt | Adopt-modified | Reject-FP | Reject-context` 유지. **두 어휘의 경계는 스키마 본문에도 한 줄로 박는다**(P1-3 — 같은 파일 안에서 `## 항목 스키마`와 `## 5` 예시가 모순되지 않게).
+**QA_FINDINGS·IMPROVEMENT_GUIDE `decision` 값**: `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`. repair 로그(`## 5`)의 `decision`은 **그 로그를 쓴 skill의 기존 판정값 유지** — `/repair-plan` `Adopt | Adopt-modified | Reject-FP | Reject-conflict` / `/repair-milestone` `Adopt | Adopt-modified | Reject-FP | Reject-context` / `/repair-acceptance` `Adopt | Adopt-modified | Out-of-contract | Needs User Clarification`(ADR-066 D4). **두 어휘의 경계는 스키마 본문에도 한 줄로 박는다**(P1-3 — 같은 파일 안에서 `## 항목 스키마`와 `## 5` 예시가 모순되지 않게).
 
 **finding 하위 줄 마커 신설**: `- 재현:` · `- 재현 재실행:` · `- 종결 근거:` · `- 출처:` (ADR-070 D1·D3·D7) / `- 수렴-보류: 회수 <시점> | 조건: …` (ADR-070 D5 B — 보류해도 `status`는 `open` 유지. finding 원장에 `deferred` 상태를 신설하지 않는다) / `## 5` 그룹 줄 `- round:` · `- convergence-decision:` (D5).
 
@@ -217,7 +217,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - **P0는 `confirmed`가 되기 전에 채택하지 않는다.** 재현이 명령 한 번인 경우(빌드 실패 등)도 그 명령을 돌린다.
 - **재현 재실행의 경계**: 코드·문서·상태를 바꾸지 않는 명령만 메인이 직접 돌린다. dev server·테스트 DB가 필요한 재현은 stabilize 단계 3이 이미 띄운 환경에서 qa 단발 sub-call로 돌리고, 그것도 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`이 수행)으로 둔다. 6-S의 read-only 계약(코드·status 미변경)은 유지된다.
 - 이 검토는 사후 판정이다. verifier 입력에는 D1 표만 준다.
-- **어휘 경계**: 위 5값은 **원본 finding 항목**의 `decision`이다. `IMPROVEMENT_GUIDE.md ## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다 — 전자는 증거 상태, 후자는 수리 처분이라 축이 다르다. 두 어휘를 섞지 않는다.
+- **어휘 경계**: 위 5값은 **원본 finding 항목**의 `decision`이다. `IMPROVEMENT_GUIDE.md ## 5. Repair decision log`의 `decision`은 **그 로그를 쓴 skill의 수리 판정값**을 그대로 쓴다(`/repair-plan` `Reject-conflict` · `/repair-milestone` `Reject-context` · `/repair-acceptance` `Out-of-contract`·`Needs User Clarification` — 경로마다 다르다). 전자는 증거 상태, 후자는 수리 처분이라 축이 다르다. 두 어휘를 섞지 않는다. 라운드가 판정을 못 내린 항목은 `## 5`에 적지 않는다 — 그 영속 자리는 원본 항목의 `status: open` + `decision: needs-confirmation` + 막힌 이유다(D3).
 
 ### D3. 종결 규칙 (4-판정 전부가 원본을 닫는다)
 `/repair-milestone`의 4-판정은 원본 finding의 `status`를 **전부** 갱신한다.
@@ -251,6 +251,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - `- 새 근거: <이번에 새로 관측된 것>`
 - `- 종결 항목과 동일성: 없음 | <ID>와 동일 → 그 항목 재개(재개 사유 기록)`
 - `- 종결을 뒤집는 증거: 없음 | <무엇>`
+**재개 조건**: 종결 항목과 동일해도 재개는 이번 판정이 `confirmed`일 때만이다. `rejected-*`·`unsubstantiated`로 다시 판정됐으면 종결을 유지하고 그 항목 하위에 `- 재보고: <날짜> — 동일 증상, 종결 유지(<decision> 근거)` 한 줄만 남긴다(새 ID도 만들지 않는다) — 근거 없이 재개하면 같은 오탐이 매 라운드 졸업을 막아 D3의 종결 규칙이 무의미해진다.
 `원인 미확인`도 허용값이다.
 
 ### D7. 보고자 기준 라우팅 폐지 — 성격 기준
@@ -325,12 +326,13 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
 ### P1-3. `docs/40-validation/IMPROVEMENT_GUIDE.md`
 - `## 항목 스키마`: P1-2와 동일하게 두 줄 교체(재현 줄 문장은 "결함이면 QA_FINDINGS가 제자리다(ADR-070 D7)"로 바꿈). **둘째 줄은 5값의 적용 범위를 «원본 finding 항목 한정»으로 못 박고 `## 5` 로그의 `decision`이 `Adopt | Adopt-modified | Reject-FP | Reject-context`임을 같은 줄에 병기한다** — 그러지 않으면 같은 문서의 `## 5` 예시(`decision: Adopt`)와 「형식은 `## 항목 스키마` SSOT 따름」이 서로 모순된다(§2 고정표 · ADR-070 D2 어휘 경계).
   ```
-  - `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다** — 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
+  - `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 그 로그를 쓴 skill의 수리 판정값을 그대로 쓴다** — `/repair-plan` = `Adopt | Adopt-modified | Reject-FP | Reject-conflict` / `/repair-milestone` = `Adopt | Adopt-modified | Reject-FP | Reject-context` / `/repair-acceptance` = `Adopt | Adopt-modified | Out-of-contract | Needs User Clarification`(ADR-066 D4 — 수용 경로에 `Reject-false-positive`는 없다). 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
   ```
 - `## 5. Repair decision log` 안내 단락 끝에 추가:
   ```
   - **round 줄 (ADR-070 D5)**: `/repair-milestone`는 실행 시작 시 그 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K는 기존 최대값 + 1. `/stabilize-milestone` 단계 8이 최대 K를 읽어 예산(3)과 대조한다.
   - **원인·반경·재감사 줄 (ADR-070 D4)**: Adopt 항목 하위에 `- 원인:` · `- 영향 반경:` · `- 재감사: <대상 N파일> / 새 finding K건` · 라운드 끝에 `- 자기 점검: …` 한 줄.
+  - **확인 미완 항목은 본 절에 적지 않는다**: 라운드가 판정을 못 내린 항목(`decision: needs-confirmation` 유지)의 영속 자리는 원본 원장 항목(`status: open` + 막힌 이유)이다(ADR-070 D3). 본 절은 closed records이므로 `status: applied` + 수리 판정값을 가진 항목만 담는다.
   ```
 - 형식 예시 블록에 위 하위 줄 예를 한 줄씩 추가한다(`- round:`는 `### M-N` 그룹 줄이라 항목 예시에 넣지 않는다).
 - `## 5` 끝 HTML 주석의 writer 목록(`/repair-plan`·`/repair-milestone`·`/repair-acceptance`만 append)에 예외 한 줄 추가 — ADR-070 D5가 `/plan-milestone` R0에 `- convergence-decision: C` 기록을 맡기므로 목록과 충돌한다.
@@ -360,8 +362,8 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
   변경:
   ```
   - **성격 기준 라우팅 (ADR-070 D7)**: 보고자와 무관하게 결함(동작·데이터·보안·계약 위반)은 `docs/40-validation/QA_FINDINGS.md`, 개선(구조·중복·명명·부채·문서 정합)은 `docs/40-validation/IMPROVEMENT_GUIDE.md`에 적는다. 항목 하위 줄 `- 출처: qa | reviewer(<surface>) | preflight | peer(<tag>)`로 보고자를 남긴다.
-  - **채택 전 검토 (ADR-070 D2 — 등재 전 1회, P0·P1 전부)**: 각 항목을 `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated` 중 하나로 판정해 `decision:`에 적는다. **P0는 `- 재현:` 절차를 qa 단발 sub-call(명령 1회면 메인)이 다시 실행해 관측했을 때만 `confirmed`다. 코드·문서·상태를 바꾸는 재현은 메인이 직접 돌리지 않는다 — 단계 3이 띄운 환경에서 qa로, 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`).** P1은 보고의 재현·근거를 코드·문서로 확인하면 `confirmed`(재실행 불요). 재현 줄이 없으면 `[Finding-unreproduced]`를 붙여 `needs-confirmation`(하위 줄 `- 대상 / 확인 방법 / 막힌 이유` 3필드)으로 둔다. `rejected-*`·`unsubstantiated`는 `status: resolved`로 등재한다(unsubstantiated는 `### 관찰 메모`에 한 줄). 판정 근거 한 줄을 남긴다. 이것은 사후 판정이며 verifier에게 심각도를 미리 지정하는 것이 아니다.
-  - **같은 마일스톤의 2회차 이후 stabilize에서 새로 등재하는 P0**는 ADR-070 D6의 4가지 사실 줄(이전 감사 범위 / 새 근거 / 종결 항목과 동일성 / 종결을 뒤집는 증거)을 하위에 적는다. 종결 항목과 동일하면 새 ID를 만들지 않고 그 항목을 `status: open`으로 재개하고 재개 사유를 적는다.
+  - **채택 전 검토 (ADR-070 D2 — 등재 전 1회, P0·P1 전부)**: 각 항목을 `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated` 중 하나로 판정해 `decision:`에 적는다. **P0는 `- 재현:` 절차를 qa 단발 sub-call(명령 1회면 메인)이 다시 실행해 관측했을 때만 `confirmed`다. 코드·문서·상태를 바꾸는 재현은 메인이 직접 돌리지 않는다 — 단계 3이 띄운 환경에서 qa로, 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`).** P1은 보고의 재현·근거를 코드·문서로 확인하면 `confirmed`(재실행 불요). **P0인데** 재현 줄이 없으면 `[Finding-unreproduced]`를 붙여 `needs-confirmation`(하위 줄 `- 대상 / 확인 방법 / 막힌 이유` 3필드)으로 둔다(ADR-070 D1 — 이 조건은 P0 한정이다. 정적으로 확인되는 P1에 재현을 요구하지 않는다). `rejected-*`·`unsubstantiated`는 `status: resolved`로 등재한다(unsubstantiated는 `### 관찰 메모`에 한 줄). 판정 근거 한 줄을 남긴다. 이것은 사후 판정이며 verifier에게 심각도를 미리 지정하는 것이 아니다.
+  - **같은 마일스톤의 2회차 이후 stabilize에서 새로 등재하는 P0**는 ADR-070 D6의 4가지 사실 줄(이전 감사 범위 / 새 근거 / 종결 항목과 동일성 / 종결을 뒤집는 증거)을 하위에 적는다. 종결 항목과 동일하면 새 ID를 만들지 않는다 — **이번 판정이 `confirmed`일 때만** 그 항목을 `status: open`으로 재개하고 재개 사유(= 종결을 뒤집는 증거)를 적는다. `rejected-*`·`unsubstantiated`로 다시 판정됐으면 **종결을 유지하고** 그 항목 하위에 `- 재보고: <날짜> — 동일 증상, 종결 유지(<decision> 근거 한 줄)`만 남긴다(ADR-070 D6 — 근거 없이 재개하면 같은 오탐이 매 라운드 졸업을 막는다).
   ```
 - (b) 단계 4 qa 팬아웃 입력에 추가(`- **위임 시 ADR-046#d3 적용…` 불릿 다음):
   ```
@@ -403,7 +405,7 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
   ```
   5. **원본 finding 종결 — 4-판정 전부 (ADR-070 D3)**: IMPROVEMENT_GUIDE `### M-N`·QA_FINDINGS `## M-N`의 원본 항목에 대해 — Adopt/Adopt-modified는 **원본 `- 재현:` 절차를 다시 실행해 통과를 관측한 뒤** `status: resolved` + 하위 줄 `- 재현 재실행: <날짜> 통과`; Reject-FP는 `status: resolved` + `decision: rejected-fp` + 근거; Reject-context는 `status: resolved` + `decision: rejected-context` + 근거; needs-confirmation 유지분은 `status: open` 그대로 + 막힌 이유 갱신(판정된 open). 재현 줄이 없는 항목(P1·P2·개선·문서)은 `- 종결 근거: <검증 수단 → 결과>` 한 줄이 종결 증거다. **판정 없이 원본을 `open`인 채 두지 않는다**(Reject 원본이 열려 있으면 다음 stabilize가 같은 P0를 다시 센다). closed records인 `## 5`로 옮기지 않고 *status만* 토글한다.
   ```
-- (e-2) 수행 6(stabilize-reviews 삭제)의 «전 severity finding이 4-판정 완결» 판정에서 `needs-confirmation`은 완결로 센다(3필드가 QA_FINDINGS로 옮겨졌으므로 — ADR-070 D3).
+- (e-2) 수행 6(stabilize-reviews 삭제)의 «전 severity finding이 4-판정 완결» 판정에서 `needs-confirmation`은 완결로 센다(3필드가 QA_FINDINGS로 옮겨졌으므로 — ADR-070 D3). **단 peer 리뷰에서만 나온 finding은 먼저 성격에 따라 QA_FINDINGS(결함)·IMPROVEMENT_GUIDE(개선)에 ID·`status: open`·`decision: needs-confirmation`·3필드로 등재해야 완결로 센다** — 등재 전이면 파일을 보존한다(gitignore된 리뷰 파일과 함께 미확인 P0가 사라지는 것을 막는다).
 - (f) 마지막 출력에 추가: `- round: K (ADR-070 D5)` · `- 반경 재감사: 대상 N파일 / 새 finding K건 / 자기 점검 결과` · `- 종결: resolved N건(Adopt M / Reject K) · needs-confirmation 유지 J건`.
 - (g) 정책 근거 문단에 `finding 심각도·종결·수렴은 [ADR-070](../../../docs/90-decisions/boilerplate/ADR-070-finding-severity-closure-and-convergence.md).` 추가.
 

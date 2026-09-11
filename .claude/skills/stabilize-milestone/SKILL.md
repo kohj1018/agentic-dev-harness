@@ -10,8 +10,8 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
 
 이 skill은 **코드 수정·커밋·workitem status 변경을 하지 않는다.**
 다음 네 종류의 문서 갱신만 정상 책임이다:
-1. `docs/40-validation/QA_FINDINGS.md` 누적 기록 (qa 위임 결과).
-2. `docs/40-validation/IMPROVEMENT_GUIDE.md` 누적 기록 (reviewer 위임 결과 + deterministic preflight 결과).
+1. `docs/40-validation/QA_FINDINGS.md` 누적 기록 (결함 — 보고자 무관, ADR-070 D7).
+2. `docs/40-validation/IMPROVEMENT_GUIDE.md` 누적 기록 (개선 — 보고자 무관 + deterministic preflight 결과).
 3. milestone 문서의 `## 8. 회고` 섹션 자동 채움 ([ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) graduation contract — status 변경 X, 본문 단락 갱신만).
    - 회고 본문: **graduation 줄(`YES|PENDING_ACCEPTANCE|NO|BLOCKED (날짜)` — 단계 8 판정 영속, ADR-057#amend-1·ADR-068 D4)** + `open 항목 스냅샷` + **`post-close 수정` 줄(ADR-068 D5)** + 4 항목: 목표 달성도 / scope creep / 비목표 위반 / 핵심 학습 3개 이내.
 4. `docs/10-charter/DECISION_REGISTER.md` **append** — 점검에서 드러난 *기획 결정*을 `status: open` + `- 발견: 봉인 후 (M<N>)`으로 등재(ADR-060 D11 writer). 기존 항목의 상태는 바꾸지 않는다. 상세는 아래 `봉인 후 새 결정 등재` 절.
@@ -183,14 +183,17 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
    - Codex: 멀티모달 편차 시 (a) 갤러리 생성까지 수행 + (b) 대조는 "사용자 수동 검토" 안내로 degrade.
 4. **병렬 qa verifier 팬아웃 — 고정 1개가 아니라 *필요한 만큼*** (feature / user-flow / surface 단위로 분할). 메인 세션이 본 마일스톤의 feature·핵심 시나리오·surface 목록을 회수해 *독립 점검 단위*로 쪼개고, 각 단위마다 qa agent를 1개씩 병렬 위임한다(회귀·엣지케이스 점검). qa는 보고만 한다(qa.md의 tools에 Write 없음).
    - **위임 시 ADR-046#d3 적용: finding은 cap 때문에 누락하지 말고 전수 반환 — cap은 서술/과정 설명에만.**
+   - **입력에 ADR-070 D1 severity 정의표를 그대로 전달한다**(기준 전달 — 사전판정 아님). P0 재현 줄 형식도 함께 전달한다.
    - **축 미반환 회수 규율 (ADR-051#amend-4 결정 2)**: qa 단위가 구조화 반환 없이 멈추면 ① 1회 재개(같은 단위·같은 형식, 이미 확립한 finding 전량 포함 명시) → ② 다른 qa에 재위임 → ③ 메인이 그 단위를 직접 감사 → ④ 그래도 불가하면 **`QA_FINDINGS.md`의 본 마일스톤 `### P0`에 `- **M<N>-audit-<K>** | P0 | [관측됨] | linked: M<N> | status: open` + 하위 줄 `- 감사 미완(unavailable): <단위> — <4단계 실패 사유>`를 등재하고**, 단계 8의 graduation을 `BLOCKED (audit incomplete: <단위>)`로 기록한다(ADR-068 D4). **qa 팬아웃은 졸업 predicate ⑤의 유일한 입력이므로, 돌지 않은 감사를 근거로 "P0 0건"을 단정하지 않는다.**
    - 다음 라운드에서 그 단위의 감사가 성공하면 본 skill이 그 `M<N>-audit-<K>` 항목의 `status: open`을 `resolved`로 갱신한다(**본 skill이 자기가 만든 감사-미완 항목에 한해 status를 닫는 유일한 예외** — 그 밖의 finding status는 `/repair-milestone`·`/repair-acceptance` 소유).
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (동일한 분할 단위를 *순차 단일 qa 호출*로 한 단위씩 처리, 결과는 동일하게 누적).
 5. **병렬 reviewer verifier 팬아웃 — 필요한 만큼** (리팩토링 후보·아키텍처 부채). 각 reviewer 입력에 Clean Code 6항목 체크리스트(ADR-006) + `review surface: code` + **ADR-046#d3(finding 전수 반환 — report-only)** 를 명시 전달한다. **UI 프로젝트는 추가로 `review surface: design` reviewer를 1개 더 팬아웃** — DESIGN.md `## 9. Do's and Don'ts` 위반 의심 grep 결과를 입력으로 받아 비판적 검토. reviewer도 보고만 한다. design reviewer 입력에는 grep 결과에 더해 **렌더 증거**를 주입한다 — §3-V 갤러리 경로(`docs/40-validation/visual/M-N/`) + visual-qa.spec 최근 결과(존재 시). reviewer는 Read로 이미지를 열람한다(ADR-027#amend-6). Codex: 경로 echo + 텍스트 결과만 전달로 degrade.
    - **Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade** (분할 단위를 순차 reviewer 호출로 처리).
-   - **축 미반환 회수 규율**: 단계 4와 같은 4단계를 밟는다. 단 ④에 도달해도 **판정을 바꾸지 않는다** — reviewer 결과는 졸업 predicate 입력이 아니다(report-only). `IMPROVEMENT_GUIDE.md`에 `P2 [Audit-unavailable] reviewer:<단위> — 감사 미완`을 기록하고 단계 8 출력에 사유를 echo한다. 미반환을 P0로 올리면 "결과 없음"이 "결과 있음"(정상 반환한 P1 부채는 졸업을 막지 않는다)보다 강해지는 역전이 생긴다.
+   - **축 미반환 회수 규율**: 단계 4와 같은 4단계를 밟는다. 단 ④에 도달해도 **판정을 바꾸지 않는다** — reviewer 결과는 졸업 predicate 입력이 아니다(report-only). `IMPROVEMENT_GUIDE.md`에 `P2 [Audit-unavailable] reviewer:<단위> — 감사 미완`을 기록하고 단계 8 출력에 사유를 echo한다. 미반환을 P0로 올리면 "결과 없음"이 "결과 있음"(정상 반환한 P1 부채는 졸업을 막지 않는다)보다 강해지는 역전이 생긴다. reviewer가 정상 반환한 **결함**은 6-S가 QA_FINDINGS로 보내 졸업 입력이 된다(ADR-070 D7). 미반환 자체는 여전히 판정을 바꾸지 않는다.
 6-S. **메인 세션 self-synthesis (report-only 계약 유지)**: 위 4·5의 *모든* 병렬 verifier가 반환한 보고를 메인 세션이 직접 종합한다.
-   - qa 보고 → `docs/40-validation/QA_FINDINGS.md`에 누적 기록. reviewer 보고 → `docs/40-validation/IMPROVEMENT_GUIDE.md`에 정리.
+   - **성격 기준 라우팅 (ADR-070 D7)**: 보고자와 무관하게 결함(동작·데이터·보안·계약 위반)은 `docs/40-validation/QA_FINDINGS.md`, 개선(구조·중복·명명·부채·문서 정합)은 `docs/40-validation/IMPROVEMENT_GUIDE.md`에 적는다. 항목 하위 줄 `- 출처: qa | reviewer(<surface>) | preflight | peer(<tag>)`로 보고자를 남긴다.
+   - **채택 전 검토 (ADR-070 D2 — 등재 전 1회, P0·P1 전부)**: 각 항목을 `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated` 중 하나로 판정해 `decision:`에 적는다. **P0는 `- 재현:` 절차를 qa 단발 sub-call(명령 1회면 메인)이 다시 실행해 관측했을 때만 `confirmed`다. 코드·문서·상태를 바꾸는 재현은 메인이 직접 돌리지 않는다 — 단계 3이 띄운 환경에서 qa로, 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`).** P1은 보고의 재현·근거를 코드·문서로 확인하면 `confirmed`(재실행 불요). **P0인데** 재현 줄이 없으면 `[Finding-unreproduced]`를 붙여 `needs-confirmation`(하위 줄 `- 대상 / 확인 방법 / 막힌 이유` 3필드)으로 둔다(ADR-070 D1 — 이 조건은 P0 한정이다. 정적으로 확인되는 P1에 재현을 요구하지 않는다). `rejected-*`·`unsubstantiated`는 `status: resolved`로 등재한다(unsubstantiated는 `### 관찰 메모`에 한 줄). 판정 근거 한 줄을 남긴다. 이것은 사후 판정이며 verifier에게 심각도를 미리 지정하는 것이 아니다.
+   - **같은 마일스톤의 2회차 이후 stabilize에서 새로 등재하는 P0**는 ADR-070 D6의 4가지 사실 줄(이전 감사 범위 / 새 근거 / 종결 항목과 동일성 / 종결을 뒤집는 증거)을 하위에 적는다. 종결 항목과 동일하면 새 ID를 만들지 않는다 — **이번 판정이 `confirmed`일 때만** 그 항목을 `status: open`으로 재개하고 재개 사유(= 종결을 뒤집는 증거)를 적는다. `rejected-*`·`unsubstantiated`로 다시 판정됐으면 **종결을 유지하고** 그 항목 하위에 `- 재보고: <날짜> — 동일 증상, 종결 유지(<decision> 근거 한 줄)`만 남긴다(ADR-070 D6 — 근거 없이 재개하면 같은 오탐이 매 라운드 졸업을 막는다).
    - **no-cap-drop (ADR-046#d3)**: 여러 verifier의 finding을 합칠 때도 cap 때문에 누락 금지 — finding은 전수 기록하고, cap은 *대화 출력의 서술/과정 요약*에만 적용한다.
    - **dedup**: 분할 단위가 겹쳐 동일 finding이 여러 verifier에서 중복 반환될 수 있다. 동일 `<라벨> <file:line> <증상>` 항목은 1건으로 병합하되, *서로 다른 단위에서 관측됨*은 근거로 보존(병합 시 관측 surface를 한 줄로 합산).
    - reviewer 결과에 구조 변경이 필요해 보이면 메인 세션에 architect 추가 호출을 텍스트로 제안.
@@ -238,6 +241,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
   - **합계 = N + M + K**. 형식: `Open 전체: QA_FINDINGS N + IMPROVEMENT_GUIDE M + carry-over(P0/P1) K = (N+M+K)건` — **carry-over에 `(P0/P1)`을 붙여 출력한다**. N·M은 전 severity인데 K는 P0/P1만 세므로(다른 마일스톤 항목은 색인 스캔 대상 — `/repair-milestone` 회수 규율과 동형), 표기하지 않으면 `## 8. 회고`에 영속되는 수치를 읽는 사람이 기준을 오독한다.
   - **두 원장을 각각 읽어야만 알 수 있는 수이므로 한 줄로 합산해 남긴다**(한쪽만 읽고 남은 항목 수를 오독한 사례가 관측됨). 같은 값을 milestone `## 8. 회고`의 `open 항목 스냅샷:` 줄에도 기록한다(ADR-068 D5).
 - Cross-stabilize 회귀 신호: *이전 모든 milestone들*(`## M-1` ~ `## M-(N-1)`)의 P1 라벨 finding이 본 milestone의 **QA_FINDINGS(`## M-N`)** 또는 **IMPROVEMENT_GUIDE 의 `## 2. 열린 항목` 안 `### M-N`** 두 sub-section에 *재등장*한 항목 수 (라벨 grep, 휴리스틱 한계 echo — 동의어/오타 false-negative 가능. 본 grep은 *정확한 라벨 매칭*만 잡음. `## 5. Repair decision log`는 *closed records*라 회귀 신호 대상 아님).
+- **수렴 (ADR-070 D8)**: `round K`(IMPROVEMENT_GUIDE `## 5` `### M-N`의 `- round:` 최대값, 없으면 0) / P0 신규 a · 해소 b · 재개 c / P0 재현 첨부율 <%> / needs-confirmation d건
 
 본 단계는 *수치 echo만* — IMPROVEMENT_GUIDE / QA_FINDINGS에 새 항목 박지 않음. Cross-stabilize 회귀 신호가 1+ 건이면 단계 8 출력의 "P1 / P2 후속 작업"에 *patterned drift 의심* 한 줄 추가.
 
@@ -253,6 +257,7 @@ Telemetry — M1
 - Findings: P0 0 / P1 3 / P2 7
 - Open 전체: QA_FINDINGS 4 + IMPROVEMENT_GUIDE 6 + carry-over(P0/P1) 1 = 11건
 - Cross-stabilize 회귀 신호: 0건
+- 수렴: round 2 / P0 신규 1 · 해소 3 · 재개 0 / 재현 첨부율 100% / needs-confirmation 0
 ```
 
 8. 최종 출력:
@@ -290,6 +295,7 @@ Telemetry — M1
        - **e2e blocked-on-env**: 처방은 아래 `NO` 분기의 «e2e blocked-on-env» 불릿과 같다(환경 복구 후 본 skill 재실행 — real failure가 아니므로 repair 대상이 아니다).
        - `BLOCKED`은 이전 라운드에 기록된 `YES`·`PENDING_ACCEPTANCE`를 덮어쓴다(책임 경계의 회고 기록 규칙) — 낡은 값이 남아 하류가 졸업으로 읽는 것을 막는다.
      - **졸업 가능 = NO 또는 P0 후속 있음** (분기 옵션 ≤3):
+       - **수렴 실패 브리프 (ADR-070 D5)**: 7-T의 `round K`가 **3 이상**이고 `### P0`에 `status: open`이 남아 있으면, 판정은 그대로 두고 `[Convergence]` 라벨로 Decision Brief 6블록(`authority: user-choice`, `영향: M<N>`, DECISION_REGISTER 등재)을 출력한다 — 남은 P0/P1 각각의 `decision`·근거·영향·수리 범위·보류 가능 여부 + 선택지 A(계속 수리) / B(비차단 항목에 `- 수렴-보류: 회수 <시점> | 조건: …` 하위 줄을 달아 이번 라운드 대상에서 빼고 차단 항목만 수리 — `status`는 `open` 유지, finding 원장에 `deferred` 상태를 만들지 않는다) / C(`NO` 유지 + 병렬 Now 승인으로 다음 마일스톤 진행 — carry-over 표시 지속, 해소 후 `/repair-milestone M<N>`이 원본을 닫고 본 skill 재실행으로 `YES`). **판정값 신설·`YES` 병기·P0의 P1 재분류는 하지 않는다.** 항목을 DECISION_REGISTER에 `open`으로 등재하고(정상 책임 4), 사용자가 같은 세션에서 답하면 *그 항목에 한해* `closed` + 앵커를 쓴다. **`## 5`의 `- convergence-decision:` 줄은 답변 시점과 무관하게 후속 skill이 남긴다**(A·B → `/repair-milestone` 1-R, C → `/plan-milestone` R0 — 본 skill은 `## 5`에 쓰지 않는다, ADR-070 D5). `## 5` `### M-N`에 `- convergence-decision:` 줄이 이미 있으면 새 P0 ID가 생겼거나 K − 결정 round ≥ 2일 때만 다시 낸다. **`BLOCKED` 분기에서도 같은 조건(round ≥ 3 + open P0)이면 동일 브리프를 낸다** — 감사 미완·환경 불가와 별개로 남은 P0의 진행 경로를 사용자가 정해야 한다.
        - **milestone-level P0/P1 (여러 task 교차) 또는 e2e real failure 있음: `/repair-milestone M-N` 권장** (ADR-052) — 단일 task로 격리되지 않는 회귀·교차 결함과 실제 e2e 수정은 milestone 단위 repair로 라우팅. stabilize가 read-only로 남기 위한 코드 수정 경로다.
        - QA_FINDINGS 발견(P0/P1)은 단일 task 격리든 교차든 `/repair-milestone M-N` 로 회수한다 — **repair-milestone이 4-판정 후 per-task 귀속이든 cross-cutting이든 직접 수정하고**(재개방·위임 없음 — ADR-068 D1) QA_FINDINGS status를 닫는다.
        - `[Spec-gap]` finding 있음: 미커버 FAC를 분기 — (i) M-N이 *약속한* FAC의 구현 누락·버그이고 담당 task가 있으면 **현재 M-N에서 `/repair-milestone M-N`이 직접 수정**(단일 task 귀속이든 교차든 — ADR-068 D1); **담당 task 자체가 없으면**(정상적으론 plan-time `[Plan-FAC-coverage]` 100% 게이트가 막으므로 드묾) 현재 M-N의 미이행 약속으로 graduation `NO`를 유지하고 사용자에게 보고한다. 현재 M에 새 task를 자동·권장 생성하거나 FAC 취소로 거짓 통과시키지 않는다. 본 계약에 정해진 자동 해소 경로는 없으며 사용자 판단을 기다린다. (ii) *새 기능·기획 변경*(M-N 약속 아님)이면 다음 마일스톤(M-(N+1)), (iii) 계획이 근본적으로 잘못됐으면 자동 수정 없이 **사용자 중단·보고** (ADR-057#amend-3 결정 6 — F-NNN 재계획 경로 없음)
@@ -305,7 +311,7 @@ Telemetry — M1
 - 누적 문서 갱신 + milestone `## 8. 회고` 자동 채움 — **회고의 `graduation:` 줄은 §1.5의 정적 항목 값(item 1·4)과 단계 3~6의 동적 항목 값(item 2·3·5·6)을 합쳐 단계 8에서 1회만 기록한다**(ADR-068 D3·D4). **§1.5의 정적 값을 여기서 재계산하지 않는다** — 본 skill이 단계 4~6에서 QA_FINDINGS·IMPROVEMENT_GUIDE를 쓰므로 재계산하면 자기 쓰기가 판정에 섞인다. 값은 `YES|PENDING_ACCEPTANCE|NO|BLOCKED`+날짜 4종이며 우선순위는 `BLOCKED` > `NO` > `PENDING_ACCEPTANCE` > `YES`다.
   - **item 4만 미충족이고 1·2·3·5가 전부 충족이면 `PENDING_ACCEPTANCE (관측 AC 미발급: <task-id>:AC-N 목록)`** 으로 기록한다 — `NO`로 쓰지 않는다.
   - **감사 미완이 있으면 `BLOCKED (audit incomplete: <축>)`**, e2e 환경 불가면 `BLOCKED (e2e blocked-on-env: <target>)`. 이 값은 이전 라운드의 `YES`·`PENDING_ACCEPTANCE`를 덮어쓴다.
-  - P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 반영한다(qa 팬아웃分 — reviewer는 report-only로 미반영).
+  - P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 반영한다(성격 기준으로 등재된 결함 — 보고자 무관, ADR-070 D7).
   - 회고의 `open 항목 스냅샷:` 줄도 여기서 채운다(ADR-068 D5).
   - **회고의 `post-close 수정:` 줄도 여기서 채운다 (ADR-068 D5)** — `IMPROVEMENT_GUIDE.md` `## 5. Repair decision log`의 본 마일스톤 `### M-N` 그룹 항목 수를 세고 각 항목의 `scope:` 값으로 in-AC/out-of-AC를 분해한다. 그룹이 없으면 `없음`.
   - 로드맵 파일은 안 건드린다(다음 plan-milestone R0가 이 줄을 읽어 재조정).

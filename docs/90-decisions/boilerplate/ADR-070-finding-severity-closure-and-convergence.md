@@ -44,7 +44,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - **P0는 `confirmed`가 되기 전에 채택하지 않는다.** 재현이 명령 한 번인 경우(빌드 실패 등)도 그 명령을 돌린다.
 - **재현 재실행의 경계**: 코드·문서·상태를 바꾸지 않는 명령만 메인이 직접 돌린다. dev server·테스트 DB가 필요한 재현은 stabilize 단계 3이 이미 띄운 환경에서 qa 단발 sub-call로 돌리고, 그것도 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`이 수행)으로 둔다. 6-S의 read-only 계약(코드·status 미변경)은 유지된다.
 - 이 검토는 사후 판정이다. verifier 입력에는 D1 표만 준다.
-- **어휘 경계**: 위 5값은 **원본 finding 항목**의 `decision`이다. `IMPROVEMENT_GUIDE.md ## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다 — 전자는 증거 상태, 후자는 수리 처분이라 축이 다르다. 두 어휘를 섞지 않는다.
+- **어휘 경계**: 위 5값은 **원본 finding 항목**의 `decision`이다. `IMPROVEMENT_GUIDE.md ## 5. Repair decision log`의 `decision`은 **그 로그를 쓴 skill의 수리 판정값**을 그대로 쓴다(`/repair-plan` `Reject-conflict` · `/repair-milestone` `Reject-context` · `/repair-acceptance` `Out-of-contract`·`Needs User Clarification` — 경로마다 다르다). 전자는 증거 상태, 후자는 수리 처분이라 축이 다르다. 두 어휘를 섞지 않는다. 라운드가 판정을 못 내린 항목은 `## 5`에 적지 않는다 — 그 영속 자리는 원본 항목의 `status: open` + `decision: needs-confirmation` + 막힌 이유다(D3).
 
 ### D3. 종결 규칙 (4-판정 전부가 원본을 닫는다)
 `/repair-milestone`의 4-판정은 원본 finding의 `status`를 **전부** 갱신한다.
@@ -78,6 +78,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - `- 새 근거: <이번에 새로 관측된 것>`
 - `- 종결 항목과 동일성: 없음 | <ID>와 동일 → 그 항목 재개(재개 사유 기록)`
 - `- 종결을 뒤집는 증거: 없음 | <무엇>`
+**재개 조건**: 종결 항목과 동일해도 재개는 이번 판정이 `confirmed`일 때만이다. `rejected-*`·`unsubstantiated`로 다시 판정됐으면 종결을 유지하고 그 항목 하위에 `- 재보고: <날짜> — 동일 증상, 종결 유지(<decision> 근거)` 한 줄만 남긴다(새 ID도 만들지 않는다) — 근거 없이 재개하면 같은 오탐이 매 라운드 졸업을 막아 D3의 종결 규칙이 무의미해진다.
 `원인 미확인`도 허용값이다.
 
 ### D7. 보고자 기준 라우팅 폐지 — 성격 기준

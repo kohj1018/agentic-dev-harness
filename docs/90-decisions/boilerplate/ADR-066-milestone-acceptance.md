@@ -59,6 +59,7 @@ accepted
   - **애매하면 재개방한다** — 실패 방향을 안전한 쪽(비용만 더 듦)으로 고정한다.
 - **`out-of-AC` 계약 부채 등재 (필수)**: `out-of-AC`로 고친 항목마다 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 **`## 4. 보류 항목`**에 `status: open`으로 등재한다 — 「코드에는 들어갔으나 어느 계약에도 근거가 없다」는 사실과, 다음 `/plan-milestone` R0가 회수해 **AC 승격 여부를 사용자에게 묻는다**는 회수 경로를 함께 적는다. 이 등재가 없으면 그 기능은 영구히 계약 밖에 남는다.
 - **본 skill은 커밋하지 않는다**(ADR-047 D7). 단 `in-AC` 위임 뒤의 연쇄에서 `/finalize-workitem`이 **그 task의 `## 4-1` 파일 + task 문서**를 커밋한다 — `out-of-AC` 수정 파일과 원장 갱신은 여전히 사용자가 커밋한다. 즉 commit owner는 «task 마감분 = `/finalize-workitem` / 그 밖 전부 = 사용자»로 갈린다.
+> 참조 갱신 (2026-09): 수용 finding의 `decision` 값·종결 규칙은 [ADR-070](ADR-070-finding-severity-closure-and-convergence.md) D2·D3을 따른다(사용자 관측이 재현 관측이다. 본 D4의 «Reject-false-positive 없음»은 유지 — 수용 경로에 `rejected-fp`는 없다). `(수용)` 태그·소유는 불변.
 
 ### D5. 경계
 - 입력 출처로 갈린다 — `acceptance-reviews`에서 나온 finding은 `/repair-acceptance`, `/stabilize-milestone`이 만든 finding은 `/repair-milestone`.

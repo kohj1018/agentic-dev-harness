@@ -24,6 +24,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 
 반드시 먼저 할 일:
 1. milestone 문서를 읽고 포함된 feature/task 목록을 회수한다 (`## 8. 회고`의 기존 repair 결정 이력 맥락 포함).
+1-R. **round 카운터 (ADR-070 D5)**: `IMPROVEMENT_GUIDE.md ## 5`의 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K = 그 그룹의 기존 `- round:` 최대값 + 1(첫 실행 1). 이 줄이 `/stabilize-milestone` 단계 8 수렴 판정의 유일한 입력이다. 사용자가 수렴 실패 브리프(ADR-070 D5)에 A·B로 답한 뒤의 첫 실행이면(답변이 같은 세션이었는지와 무관) 같은 그룹에 `- convergence-decision: <A|B> (round K, <날짜>)`를 append하고 DECISION_REGISTER의 그 `[Convergence]` 항목을 `closed`로 쓴다(이미 닫혀 있으면 그대로 둔다). **선택지 B로 답했으면 `- 수렴-보류:` 줄이 달린 finding을 이 라운드의 4-판정·수정 대상에서 제외한다**(ADR-070 D5 B — 원본은 `open`으로 남아 다음 M `/plan-milestone` R0가 회수한다).
 2. `docs/40-validation/QA_FINDINGS.md`의 본 milestone 헤더(`## M-N`) 아래 `### P0` / `### P1` / `### P2` 항목을 회수한다. **다른 마일스톤 헤더의 미해소(`status`≠`resolved`) P0/P1은 색인 스캔만 하고 — 본 skill은 본 milestone만 수정(책임 경계) — 고치지 말고 `carry-over 미해결: M-X → /repair-milestone M-X 권장`으로 flag한다**(index-first recall — 본 milestone 헤더로만 자르면 carry-over 누락). *IMPROVEMENT_GUIDE 회수(step 3)도 다른 마일스톤 `### M-X` 미해소 P0/P1을 동일 기준으로 색인 스캔·flag(대칭).*
 3. `docs/40-validation/IMPROVEMENT_GUIDE.md`의 본 milestone sub-section(`### M-N` 그룹)에서 `status: open` 항목을 회수한다 — `## 2. 열린 항목` 안의 그룹. **`## 5. Repair decision log`는 회수 대상 아님** (closed records — 이미 지나간 판단).
 3-1. `IMPROVEMENT_GUIDE.md`의 `P1 [Pattern-spread]` 항목을 회수한다 — 이는 `/repair-workitem`·`/repair-acceptance`가 task 범위 밖이라 고치지 못한 **동일 패턴의 다른 출현**이다. cross-cutting 결함으로 취급해 4-판정 후 직접 수정하거나(범위 내), 새 범위면 사용자 보고 + 다음 M 후보로 남긴다. 해소하면 그 ID의 `status`를 `resolved`로 토글한다(수행 5와 동일 경로 — 그러면 stabilize가 재등재하지 않는다).
@@ -41,9 +42,11 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 - **Reject-false-positive** — stabilize 단계가 잘못 봄 (예: 이미 충족됨 / deterministic preflight 휴리스틱 오탐 / placeholder 오인 / 이미 존재하는 link를 누락이라고 본 경우).
 - **Reject-context** — stabilize가 milestone 범위·상위 제약을 놓침 (예: charter `## 5. 비목표`상 의도된 미구현 / ARCH 결정상 정당한 동작).
 > 자기 판단을 신뢰하되, 애매하면 Adopt 쪽으로 보수적으로. Reject는 *근거가 코드/문서로 확인될 때만*.
+> **severity는 ADR-070 D1 표로 판정한다.** Adopt-modified에서 severity를 낮출 수 있으나(예: 재현되나 우회 가능 → P1) 사유를 한 줄 적는다. **`decision: needs-confirmation` 항목은 먼저 확인을 시도한다** — 확인되면 `confirmed`로 바꾸고 Adopt 경로, 반증되면 Reject-*, 여전히 불가면 `needs-confirmation` 유지 + 막힌 이유 갱신(그 P0는 졸업을 계속 막는다).
 
 수행:
 1. Adopt / Adopt-modified 항목을 우선순위(P0 > P1 > P2) 순으로 처리한다.
+1-C. **원인 단위 묶기 (ADR-070 D4)**: Adopt 항목을 root cause로 묶어 한 수정으로 처리한다(증상마다 따로 고치지 않는다). 각 항목의 `## 5` 로그에 `- 원인: <한 줄>` · `- 영향 반경: <변경 파일 + 그것을 참조하는 파일·화면>`을 적는다.
 2. **모든 Adopt/Adopt-modified 결함을 본 skill이 직접 수정한다 (ADR-068 D1 — 라우팅 분기 없음).** per-task 결함이든 cross-cutting이든 처리 주체는 같다. 대표 유형 4종:
    - **per-task 결함** (특정 `T-NNN`에 귀속되는 코드/AC 결함): 그 코드를 직접 고친다. **task status·계획 본문은 건드리지 않는다**(task 문서에 쓰는 것은 2-B의 `- invalidated` 한 줄뿐이다). 추적은 수행 4의 `affected: T-NNN` + `files:` + `scope:` 세 필드가 담당한다.
    - **doc-consistency finding** (deterministic preflight의 `[Doc-link]`/`[ADR-ref]`/`[Arch-iface-violation]`): 해당 문서를 직접 수정. **단 봉인으로 잠긴 계약 본문은 고치지 않는다** — feature `## 7. FAC`·`## 7-1` 매핑표·milestone `## 3`처럼 `ready` 봉인 대상인 절을 고쳐야 성립하는 finding(대표적으로 `[Spec-gap]`)은 **수정하지 않고 사용자 보고 + 다음 M 후보**로 남긴다(ADR-060 D6/D7 잠금 / ADR-057#amend-3 결정 6 / ADR-068 D6). 고칠 수 있는 것은 코드·테스트·잠기지 않은 문서(원장·ARCH 산문·링크·인덱스)뿐이다.
@@ -66,7 +69,9 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 
 2-B. **AC acceptance 무효화 (ADR-065 D3 — writer 3종 중 하나)**: 그 수정이 어떤 AC의 동작 경로를 건드렸고 그 AC의 modality가 `[사용자 관측]`·`[플랫폼 관측]`이면 그 task `## 8`에 `- invalidated <날짜> <AC-N>: repair-milestone cross-cutting 수정으로 재확인 필요`를 append한다(기존 `- ac-acceptance`는 지우지 않는다 — 이력이다). **새 receipt를 대신 쓰지 않는다**(사용자 authority).
 
-2-V. **자체 검증 — 즉시 파손 감지 (ADR-068 D6 검증 집합)**: 위 2·2-S·2-P·2-R·2-E·2-B를 마친 뒤 1회 수행한다. 내용은 넷이다: (i) 본 라운드에 추가한 회귀 테스트가 전부 Green이고 **통합 `validate`에 묶여 있는지** 확인한다(묶이지 않으면 졸업 item 2가 검사하지 못한다), (ii) 변경 파일과 교차하는 task의 `## 6-1` 자동 테스트 매핑 대상을 실행한다, (iii) 외부 경계·핵심 journey를 건드렸으면 해당 integration/e2e smoke를 실행한다, (iv) 통합 검증 명령이 `--changed`를 지원하면 `validate --changed`를(미지원이면 통합 `validate`를) 1회 실행한다. **이것은 전체 검증이 아니다** — 「방금 한 수정이 즉시 깨졌는가」만 본다. e2e 전량·qa 팬아웃·문서 정합·졸업 판정은 `/stabilize-milestone` 책임이다.
+2-V. **자체 검증 — 즉시 파손 감지 (ADR-068 D6 검증 집합)**: 위 2·2-S·2-P·2-R·2-E·2-B를 마친 뒤 1회 수행한다. 내용은 다섯이다: (i) 본 라운드에 추가한 회귀 테스트가 전부 Green이고 **통합 `validate`에 묶여 있는지** 확인한다(묶이지 않으면 졸업 item 2가 검사하지 못한다), (ii) 변경 파일과 교차하는 task의 `## 6-1` 자동 테스트 매핑 대상을 실행한다, (iii) 외부 경계·핵심 journey를 건드렸으면 해당 integration/e2e smoke를 실행한다, (iv) 통합 검증 명령이 `--changed`를 지원하면 `validate --changed`를(미지원이면 통합 `validate`를) 1회 실행한다.
+   (v) **영향 반경 재감사 (ADR-070 D4)** — 1-C의 영향 반경(변경 파일 + 의존 파일·화면)을 대상으로 qa 단발 sub-call(`scope: delta` + 파일 목록 + ADR-070 D1 표)로 회귀·엣지 점검을 돌린다(Codex: 메인이 qa.md 인라인). 결과를 `- 재감사: <대상 N파일> / 새 finding K건`으로 로그에 남기고 새 finding은 6-S와 같은 채택 전 검토(ADR-070 D2)를 거쳐 등재한다. 종료 전 `- 자기 점검: 이 수정으로 새로 열릴 수 있는 P0 후보 — <없음 | 목록>`을 남기고 후보가 있으면 같은 라운드에서 확인한다.
+   **이것은 전체 검증이 아니다** — 「방금 한 수정이 즉시 깨졌는가」만 본다. e2e 전량·qa 팬아웃·문서 정합·졸업 판정은 `/stabilize-milestone` 책임이다.
    - **고치는 대상은 본 라운드 수정이 만든 실패로 한정한다.** baseline은 직전 `/stabilize-milestone` 단계 3의 통합 validate 결과다(같은 메인 세션이면 컨텍스트에 있고, 없으면 본 라운드 시작 시 1회 실행해 잡는다). baseline에 이미 있던 실패는 고치지 않고 출력에 명시한다.
    - 실패를 고치면 다시 실행한다. **최대 3회.** 초과하면 `Needs Follow-up: <실패 목록>`으로 명시하고 종료한다.
    - 통합 명령이 없으면 (ii)를 skip하고 사유를 출력에 남긴다(별도 hardstop 없음).
@@ -85,8 +90,8 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
    **`affected: T-NNN` · `files:` · `scope:` 세 필드가 전부 필수다 (ADR-068 D6)** — 본 skill은 task를 재개방하지 않으므로 이 셋이 "어느 task의 산출물을, 어느 파일에서, 어떤 계약 근거로 고쳤는지"를 추적하는 유일한 경로다. `scope: out-of-AC`면 `## 4. 보류 항목` 등재도 함께 한다(2-S). 어느 task에도 귀속되지 않는 순수 cross-cutting은 `affected: —`.
    **폐쇄 후에는 위임이 없으므로 routing 기록도 없다** — per-task 결함이든 cross-cutting이든 본 `## 5`에 결정 전문을 적는다. 폐쇄 전 `/repair-workitem` 라운드가 task `## 8`에 남긴 이력은 그대로 두고 여기 옮겨 적지 않는다.
 
-5. **원본 finding status 갱신** — Adopt/Adopt-modified로 해소한 IMPROVEMENT_GUIDE `### M-N`의 open 항목은 `status: open` → `status: resolved`로 갱신(closed records인 `## 5`로 옮기지 않고 *open 항목의 status만* 토글 — open items와 closed records의 의미 분리 유지). QA_FINDINGS `## M-N`의 해소된 항목도 동일하게 `status: resolved` 표기.
-6. **stabilize-reviews 파일 삭제 (echo-then-rm, ADR-054)**: 한 파일의 *전 severity finding이 4-판정 완결됐을 때만* 그 파일을 삭제한다 — 부분 범위(`M1 "P0만"` 등)로 미처리 finding이 남은 파일은 *삭제하지 않고 보존*하고 출력에 "미처리 잔존 — 보존: <경로>"를 명시한다(stabilize-reviews는 gitignore된 ephemeral이라 삭제 시 그 안의 peer finding이 어디에도 안 남는다 — repair-workitem report 삭제 가드와 동형). **삭제 전 경로 echo 강제** — `삭제 예정: <경로>` 출력 후 Bash `rm`으로 한 개씩 정확히 삭제. 미리 회수한 경로 목록을 사용(삭제 후 재glob 금지 — 삭제된 파일이 목록에 없는 다른 파일까지 재수집 오인 방지).
+5. **원본 finding 종결 — 4-판정 전부 (ADR-070 D3)**: IMPROVEMENT_GUIDE `### M-N`·QA_FINDINGS `## M-N`의 원본 항목에 대해 — Adopt/Adopt-modified는 **원본 `- 재현:` 절차를 다시 실행해 통과를 관측한 뒤** `status: resolved` + 하위 줄 `- 재현 재실행: <날짜> 통과`; Reject-FP는 `status: resolved` + `decision: rejected-fp` + 근거; Reject-context는 `status: resolved` + `decision: rejected-context` + 근거; needs-confirmation 유지분은 `status: open` 그대로 + 막힌 이유 갱신(판정된 open). 재현 줄이 없는 항목(P1·P2·개선·문서)은 `- 종결 근거: <검증 수단 → 결과>` 한 줄이 종결 증거다. **판정 없이 원본을 `open`인 채 두지 않는다**(Reject 원본이 열려 있으면 다음 stabilize가 같은 P0를 다시 센다). closed records인 `## 5`로 옮기지 않고 *status만* 토글한다.
+6. **stabilize-reviews 파일 삭제 (echo-then-rm, ADR-054)**: 한 파일의 *전 severity finding이 4-판정 완결됐을 때만*(`needs-confirmation`은 3필드가 QA_FINDINGS로 옮겨졌으므로 완결로 센다 — ADR-070 D3. **peer 리뷰에서만 나온 finding을 `needs-confirmation`으로 유지하려면 먼저 성격에 따라 QA_FINDINGS(결함)·IMPROVEMENT_GUIDE(개선)에 ID·`status: open`·`decision: needs-confirmation`·3필드로 등재해야 완결로 센다** — 등재 전이면 파일을 보존한다. 그러지 않으면 미확인 P0가 gitignore된 리뷰 파일과 함께 사라져 다음 회수·졸업 판정에서 빠진다) 그 파일을 삭제한다 — 부분 범위(`M1 "P0만"` 등)로 미처리 finding이 남은 파일은 *삭제하지 않고 보존*하고 출력에 "미처리 잔존 — 보존: <경로>"를 명시한다(stabilize-reviews는 gitignore된 ephemeral이라 삭제 시 그 안의 peer finding이 어디에도 안 남는다 — repair-workitem report 삭제 가드와 동형). **삭제 전 경로 echo 강제** — `삭제 예정: <경로>` 출력 후 Bash `rm`으로 한 개씩 정확히 삭제. 미리 회수한 경로 목록을 사용(삭제 후 재glob 금지 — 삭제된 파일이 목록에 없는 다른 파일까지 재수집 오인 방지).
 
 책임 경계:
 - 새 기능을 추가하지 않는다.
@@ -115,8 +120,11 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 - 미해결 항목 (있으면)
 - AC acceptance 무효화 (ADR-065 D3): N건(AC-N 목록) / 해당없음 — **무효화가 1건 이상이면 그 마일스톤의 graduation은 `PENDING_ACCEPTANCE`가 되므로 `/stabilize-milestone` 뒤에 `/accept-milestone <M>`으로 receipt를 재발급한다.** 재발급 자체는 재validate를 요구하지 않는다(졸업 item 4가 task `## 8`을 직접 읽는다 — ADR-068 D3).
 - 후속 권장 액션 (순서 고정): ① `/stabilize-milestone <M-N>` 재실행으로 졸업 판정 갱신 → ② 판정이 `PENDING_ACCEPTANCE`면 `/accept-milestone <M-N>`, `YES`면 `/plan-milestone`로 다음 마일스톤. **사용자가 손으로 돌려야 할 `/validate-workitem`·`/finalize-workitem`은 없다 — 이 경로에 재개방이 없다.**
+- round: K (ADR-070 D5)
+- 반경 재감사: 대상 N파일 / 새 finding K건 / 자기 점검 결과
+- 종결: resolved N건(Adopt M / Reject K) · needs-confirmation 유지 J건
 
-정책 근거: 비판적 재점검·전 severity 완결은 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-workitem·repair-plan 대칭. milestone 졸업 contract는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md). 결정 이력 영속·commit owner 분리는 [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7. 단순성·범위 추적은 [ADR-006](../../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md). repair-milestone 신규 skill 거버넌스: [ADR-052](../../../docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) D4. 동일 패턴 전수 검색(2-P)은 [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D6. 폐쇄 후 재개방·연쇄 폐지는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) D1(ADR-057#amend-3 결정 5를 부분 supersede). 재개방 폐지·post-close 수리 계약은 ADR-068 D1·D6.
+정책 근거: 비판적 재점검·전 severity 완결은 [ADR-050](../../../docs/90-decisions/boilerplate/ADR-050-main-session-lifecycle-skills.md) D3 / repair-workitem·repair-plan 대칭. milestone 졸업 contract는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md). 결정 이력 영속·commit owner 분리는 [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7. 단순성·범위 추적은 [ADR-006](../../../docs/90-decisions/boilerplate/ADR-006-simplicity-and-architecture.md). repair-milestone 신규 skill 거버넌스: [ADR-052](../../../docs/90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) D4. 동일 패턴 전수 검색(2-P)은 [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D6. 폐쇄 후 재개방·연쇄 폐지는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) D1(ADR-057#amend-3 결정 5를 부분 supersede). 재개방 폐지·post-close 수리 계약은 ADR-068 D1·D6. finding 심각도·종결·수렴은 [ADR-070](../../../docs/90-decisions/boilerplate/ADR-070-finding-severity-closure-and-convergence.md).
 
 ## Context 정책 (ADR-019)
 `반드시 먼저 읽을 파일`은 *최소 충분*. 추가 ADR/architecture 섹션은 finding 본문에서 발화 시 인용 — 사전 fork-load 금지.
