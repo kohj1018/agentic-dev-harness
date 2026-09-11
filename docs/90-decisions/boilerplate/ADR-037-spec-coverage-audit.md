@@ -123,6 +123,7 @@ ADR-072 가 «승인 프로토타입 + 게이트» 라는 검증 매체를 새�
 
 ### 결정
 1. **`## 7-1` 우변에 제3의 형식을 허용한다** — `- FAC-N → 승인 스냅샷 <경로> (manifest: <screen id>) — 증명: <그 스냅샷/게이트 검사의 어느 결과>가 FAC-N 의 <어느 요구>를 검증한다`. 증명 문장 규율(ADR-072#amend-2 결정 4)은 그대로 적용된다.
+1-b. **`## 7-3` PX↔AC 에도 같은 형식을 허용한다** — `- PX-M<N>-<screen>-NN → 승인 스냅샷 <경로> (manifest: <screen id>)`. 같은 원인이 같은 모양으로 나타나기 때문이다: 승인 컴포넌트가 이미 구현한 경험 결정은 이번 M 의 어느 AC 도 참조하지 않는다(실측 Round 12 `PX-M1-admin-habits-01` 은 `F-003 FAC-4` 와 **같은 요구·같은 스냅샷**이다). 증명 문장은 요구하지 않는다 — `## 7-3` 은 원래 그 규율 밖이다(ADR-072#amend-2 결정 4). 조건 2·3·4 는 그대로 적용된다.
 2. **이 형식은 두 조건을 모두 만족할 때만 쓴다** — (i) 그 FAC 를 실제로 검증하는 승인 산출물(스냅샷·게이트 검사)이 **경로로 실재**하고 (ii) 이번 M 의 **어느 task 도 그 화면 `source[]` 파일을 변경 대상에 넣지 않는다.** 하나라도 어기면 쓸 수 없다 — task 가 그 파일을 건드리는 순간 배선이 표현을 바꿀 수 있고, 그때는 AC 가 필요하다.
 3. **회수 규칙 정정** — amend-3 결정 1·4 와 `/stabilize-milestone` preflight 3 의 «unmapped» 정의에서 이 형식을 **뺀다**. 우변이 비었거나 `(해당 task 없음)` 처럼 **검증자를 지목하지 않은** 행만 unmapped 다.
 4. **봉인 시 재확인** — `/seal-milestone` 은 이 형식의 행마다 조건 (ii)를 다시 본다(산하 task 의 변경 파일 목록 대조). 봉인 직전에 그 파일을 건드린 task 가 있으면 봉인을 막고 보고한다.
@@ -143,7 +144,7 @@ ADR-072 가 «승인 프로토타입 + 게이트» 라는 검증 매체를 새�
 - rollback = 본 amend superseded → 제3 형식 제거, unmapped 정의 원복.
 
 ### 적용 surface
-- docs/30-workitems/_templates/FEATURE_TEMPLATE.md — `## 7-1` 주석에 제3 형식
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md — `## 7-1`·`## 7-3` 주석에 제3 형식
 - .claude/skills/plan-workitem/SKILL.md — 결정 1·2 (분해 시 이 형식을 쓸 조건)
 - .claude/skills/stabilize-milestone/SKILL.md — 결정 3 (preflight 3 의 unmapped 정의)
 - .claude/skills/seal-milestone/SKILL.md — 결정 4 (봉인 재확인)

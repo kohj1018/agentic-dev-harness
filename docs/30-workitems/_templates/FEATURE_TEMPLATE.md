@@ -71,7 +71,8 @@ feature
 <!-- UI feature 한정(ADR-072 D3·D9). /plan-workitem이 채운다(영속 SSOT — plan 출력은 echo).
      형식: PX-M<N>-<screen>-NN → T-NNN:AC-M, T-MMM:AC-K (다대다 허용)
      `## 7` PX 인벤토리의 어떤 PX도 참조하지 않는 AC/미매핑 PX(unmapped PX)는 [Plan-FAC-coverage]가 unmapped FAC와 동일 기준으로 잡는다(P0 권장).
-     본 subsection은 ## 7과 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)". -->
+     본 subsection은 ## 7과 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X* (## 7-1·## 7-2 선례). 비-UI feature는 "(해당 없음)".
+     **제3 형식 (ADR-037#amend-4 결정 1-b)**: 승인 컴포넌트가 이미 구현해 이번 M 의 어느 AC 도 참조하지 않는 PX 는 `- PX-… → 승인 스냅샷 <경로> (manifest: <screen id>)` 로 적는다 — 조건은 `## 7-1` 제3 형식과 같다(산출물 실재 + 어느 task 도 그 `source[]` 를 변경 대상에 넣지 않음). 증명 문장은 요구하지 않는다. -->
 - PX-M<N>-<screen>-01 →
 - PX-M<N>-<screen>-02 →
 
