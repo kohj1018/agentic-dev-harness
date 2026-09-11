@@ -28,7 +28,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 
 ## R0 — preflight + 회수
 1. 전제 확인(하나라도 아니면 무엇을 먼저 돌릴지 안내 후 종료): M `draft`(또는 분기 b) / 산하 feature에 `## 3`·`## 7 FAC` 있음 / DESIGN `## 0 Status` ≠ draft + 프로필 매핑표 있음 / Design Gate Adapter `status: ready` / `_theme/manifest.json` 존재(없으면 «`/bootstrap-design` R6 먼저»).
-2. 대상 화면 = 입력 분기 (b)의 (i)(ii)(iii). 비-UI feature는 `## 7`에 `프로토타입 면제: 비-UI feature` 자동 기입. 중단 재개는 화면별로 판정한다(매니페스트 `approved` + feature `## 7` 기입 여부).
+2. 대상 화면 = 입력 분기 (b)의 (i)(ii)(iii). 비-UI feature는 `## 7`에 `프로토타입 면제: 비-UI feature` 자동 기입. 중단 재개는 화면별로 판정한다(매니페스트 `approved` + feature `## 7` 기입 여부). **두 신호가 어긋나면 재개한다**(보수적 — 둘 다 참일 때만 skip). 중단은 바로 그 둘 사이에서 일어나기 때문이다 — 매니페스트를 쓰고 feature 를 못 쓴 채 끊기거나 그 반대. 엇갈림 자체를 출력에 `재개 신호 엇갈림: <screen> (매니페스트 <값> / feature `## 7` <값>)` 한 줄로 남긴다 — 직전 실행이 중간에 끊겼다는 신호다(dogfood Round 12 회귀 (e) 실측).
 3. DESIGN `## 11` 확인일이 12개월 초과면 «researcher 재확인 권장» 1줄(자동 갱신 아님).
 4. 이전 M 매니페스트에서 공용 컴포넌트 목록을 회수한다(재사용 후보). 대상 화면이 이전 M 승인 화면의 공용 컴포넌트·토큰을 바꾸면 그 화면을 이 M에 `supersedes`로 재등록할 후보로 표시한다(ADR-072 D5-5).
 5. DESIGN `## 10`이 v1 형식(언어 블록·용어 사전 없음)이면 «`/bootstrap-design --update`로 §10 v2 마이그레이션 먼저» 안내 후 종료(구 plan-milestone R5의 §10 신설 경로 승계).

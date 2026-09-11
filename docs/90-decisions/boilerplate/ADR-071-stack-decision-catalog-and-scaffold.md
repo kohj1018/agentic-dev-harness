@@ -60,6 +60,8 @@ R0 분기를 셋으로 한다.
 ### D6. 기초 라이브러리 baseline 설치 — `/stack-guard` 6-2-b
 카탈로그 `설치: baseline`이고 registry `확정`인 행의 패키지(UI 킷·스타일링·아이콘·UI 미리보기 도구·lint/format 도구·계측 SDK 등)를 스캐폴드 직후 설치한다. **설치는 scope별이다** — 그 scope의 registry 행(D2 `(scope, id)` 키)을 그 scope의 패키지 매니저로 설치한다. 버전은 registry `확인일` 기준 researcher 고정값. **예외 — 폰트 패키지·파일**: 폰트 선택은 DESIGN `## 3`(ADR-073 D4)이 `/bootstrap-design` R6 쇼케이스에서 확정하므로 stack-guard가 미리 설치하지 않는다. 확정 뒤 R6 배선(builder 단발)이 그 패키지·파일을 추가한다(ADR-058#amend-4 결정 2) — 설치 소유의 명시 예외다. `설치: task` 행은 기존대로 plan-workitem authoring → implement 설치(ADR-040#amend-1·ADR-052 D1). install-ownership은 이제 **4분할**이다: authoring / per-task 실행 / baseline toolchain·e2e / **baseline 라이브러리·스캐폴드(본 ADR)**.
 - 웹 UI 프로젝트에서 registry `cat-web-ui-preview`가 `Storybook`이면 여기서 설치한다: 프레임워크 공식 통합 패키지 + 애드온은 `a11y`·`viewport`만(추가 애드온·Chromatic·MDX 강제 없음). `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. Flutter는 미리보기 도구를 설치하지 않는다(별도 진입 파일 갤러리 — ADR-072).
+- **킷이 쓴 토큰·팔레트는 `/bootstrap-design` R6-1 소관이다 (2026-09-11 — 폰트 예외와 같은 이유)**. 생성형 UI 킷의 `init`(예: `shadcn init`)은 스타일시트에 자기 토큰 세트·팔레트·폰트 변수를 함께 쓴다. 그 시점에는 DESIGN `## 2`·`## 3` 이 아직 없으므로 **그 값들은 결정이 아니라 자리표시자**다. `/stack-guard` 는 킷을 설치하되 그 블록을 손대지 않고 `STACK_SETUP_PLAN` 에 «킷이 쓴 토큰 블록 — R6-1 재배선 대상: <파일>» 로 기록만 한다. **R6-1 이 킷 변수를 DESIGN semantic 토큰의 별칭으로 재정의해 출처를 하나로 만든다**(예: `--primary: var(--color-accent)`; 반대 방향 금지). 폰트 패키지를 설치하지 않는 규칙과 달리 **킷 자체는 설치한다** — 컴포넌트 코드가 그 패키지를 import 하기 때문이다.
+- **킷이 끌고 오는 번들 의존은 결정의 일부다 — 제거 대상이 아니다.** `shadcn init` 의 `@base-ui/react`·`class-variance-authority`·`tw-animate-css`·`cn`·`shadcn` 처럼 킷이 자기 동작을 위해 추가하는 패키지는 `cat-web-ui-kit` 확정의 **딸린 결과**이며 ADR-071#amend-1 의 «결정 집합 밖 애드온 제거» 대상이 아니다(그 규칙은 *선택 가능한 애드온*을 가린다 — Storybook 의 Chromatic·vitest·docs·mcp 처럼). registry 의 그 킷 행에 번들 의존 목록을 적어 «결정의 일부» 임을 남긴다.
 
 ### D7. 버전 currency
 새로 결정하거나 불확실한 행만 researcher 단발 sub-call로 현재 메이저·호환성·발행일을 확인해 registry `확인일`에 적는다. 이미 실측된 스택(brownfield lockfile)은 재조사하지 않는다.
@@ -99,6 +101,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 - .claude/skills/bootstrap-stack/stack-brief-template.md  — D1 행 참조
 - .claude/skills/bootstrap-stack/output-checklist.md      — D8
 - .claude/skills/stack-guard/SKILL.md                     — D5·D6 · 수행 0 2-0 scope 하위 harness 파일 탐지(**2026-09-11 추가** — 발견 38)
+- .claude/skills/bootstrap-design/SKILL.md               — D6 킷 토큰 별칭 재정의(R6-1) (**2026-09-11 추가** — 발견 42)
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md    — D2·D5 절
 - .claude/skills/plan-workitem/SKILL.md                   — D6 설치 line item 경계
 - docs/00-meta/PROJECT_START_CHECKLIST.md                 — 2·3절 문구

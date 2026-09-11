@@ -39,6 +39,12 @@ gate 미통과 시:
 - 발견된 lifecycle 깨짐을 ADR 후보로 즉시 박는다.
 - Phase 2~8 우선순위만 재조정 (작업 자체는 진행).
 
+
+### dogfood 의 졸업 상한 (2026-09-11 — Round 11 실측)
+**dogfood 라운드는 `graduation: YES` 에 구조적으로 도달할 수 없다.** 졸업 item 4 는 `[사용자 관측]`·`[플랫폼 관측]` AC 마다 `- ac-acceptance` receipt 를 요구하고, 그 receipt 의 authority 는 사용자다(ADR-065 D1 — 「사용자가 판정하지 않은 AC 에 receipt 를 쓰지 않는다」). 세션은 관측을 **수행**할 수 있어도 판정을 **소유**할 수 없다. 따라서 관측 modality AC 가 하나라도 있는 마일스톤은 dogfood 에서 **`PENDING_ACCEPTANCE` 가 상한**이다.
+- 성공 기준의 «graduation 미통과 ≤2» 는 이 상한을 전제로 읽는다 — item 4 만 미충족인 상태는 «미통과» 로 세지 않는다.
+- 라운드 기록에는 **대행 관측을 수행했다는 사실과 receipt 를 발급하지 않았다는 사실을 둘 다** 남긴다(Round 11 `## 11` 수용 기록 선례). 대행 관측으로 receipt 를 쓰면 그 순간 ADR-065 D1 이 무의미해진다.
+- 이것은 결함이 아니라 **설계된 경계**다. 고치려면 receipt authority 를 바꿔야 하고 그것은 이 ADR 의 범위가 아니다.
 ## Round 1 결과 요약 (2026-05-15, todo CLI / Node+TS+Vitest)
 - 사용자 개입: 1회 ≤ 1 ✓
 - 충원율: ~89% ≥ 80% ✓

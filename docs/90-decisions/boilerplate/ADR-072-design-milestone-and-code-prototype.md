@@ -48,6 +48,7 @@ accepted
 1. **범위**: `/design-milestone` R4~R6가 만드는 presentational 코드·스토리·fixture·위젯 테스트·테마 배선(ADR-058#amend-4 R6)만. 데이터·권한·저장·라우팅 배선은 만들지 않는다.
 2. **TDD**: 시각 탐색 코드에 Red-first를 요구하지 않는다. **행동 계약**(키보드 도달·포커스 순서·취소·확인·콜백 호출)은 R6에서 게이트(axe/guideline) + 스토리 interaction test 또는 위젯 테스트로 검사한다 — 브리프의 인터랙션 계약 항목이 그 테스트의 명세다.
 3. **가짜 Red 금지**: 이후 구현 task는 승인 UI를 «재사용»한다. task `## 3`에 `- 승인 UI 재사용: <컴포넌트 경로> (manifest: <screen id>) — 배선만: <데이터/권한/저장 연결>` line item을 두고, builder는 그 컴포넌트의 표현을 다시 쓰지 않으며 Red 관측은 **배선 AC에 대해서만** 보고한다. 이미 통과하는 표현 테스트를 «Red였다»고 적지 않는다.
+3-1. **표현이 아닌 «행동» 변경 (2026-09-11 — dogfood Round 11 실측)**: D5-3·D5-4 는 *표현*(마크업·스타일·카피·스토리)을 다루고 `[Design-reuse-drift]` 도 표현 기준이라, 승인 컴포넌트의 **이벤트 핸들러·포커스 관리·가드 로직**만 바꾸면 아무것도 발화하지 않는다. 판정 기준은 하나다 — **그 변경이 브리프 `## 인터랙션 계약` 의 문장을 바꾸면 재승인 대상이고, 바꾸지 않으면 재승인 없이 고치되 로그에 고지한다**(`/repair-milestone` 은 `## 5` 항목에, 구현 task 는 `## 8` 에 «승인 컴포넌트 행동 변경: <무엇> — 인터랙션 계약 무변경» 한 줄). 배선 계층으로 옮길 수 있는 변경이면 그쪽이 먼저다 — 승인 파일을 건드리는 것은 **그 신호가 배선 계층에 원리상 없을 때**만이다(실측: `onDelete(id)` 시그니처에 포인터 좌표가 없어 reflow 클릭 통과를 배선에서 가를 수 없었다).
 4. **추적**: 추적 헤더 + PX 마커 + 매니페스트 `source[]`가 «어느 feature·PX·DESIGN 결정에서 왔는가»의 경로다. validator는 `승인 UI 재사용` task의 diff가 배선(props·데이터·이벤트 연결)에 한정되는지 보고, 표현 마크업이 바뀌었는데 재승인 등재가 없으면 `P1 [Design-reuse-drift]`.
 5. **공용 컴포넌트·토큰 변경 → 새 기준선 append(이전 M 불변)**: M<N+1>에서 이전 M 승인 화면에 쓰인 공용 컴포넌트·토큰을 바꾸면, 그 화면을 M<N+1> 매니페스트 `screens[]`에 **다시 등록**하고 `supersedes: ["M<K>/<screen>"]`을 적어 R6에서 렌더·승인·스냅샷을 M<N+1> `snapshots/`에 저장한다. 이전 M의 매니페스트·스냅샷·봉인 증거는 **건드리지 않는다**(마일스톤 번호 = 버전 — ADR-056#amend-1 승계, ADR-057#amend-3 결정 4). 소비자(stabilize §3-V·accept·validate-plan)는 화면의 현재 기준선을 «가장 최근 M의 등록 또는 supersedes»로 해석한다. 봉인 전(`contract-ready`)이면 같은 M 안에서 재승인·대체한다. `/amend-ssot` 전파표 행(ADR-069#amend-1)이 이 판정을 낸다.
 6. **세션 인계**: 매니페스트 `handoff`에 실행 방법·남은 배선 목록을 적는다(별도 HANDOFF 파일 없음).
@@ -207,6 +208,7 @@ Low~Medium — 코드 재사용·브리프·갤러리 효과는 [가설]. 게이
 - .claude/skills/validate-workitem/SKILL.md               — D5-4
 - .claude/skills/accept-milestone/SKILL.md                — D9 스냅샷 제시
 - .claude/skills/repair-plan/SKILL.md                     — D9 4-M
+- .claude/skills/repair-milestone/SKILL.md               — D5-3-1 행동 변경 로그 고지 (**2026-09-11 추가**)
 - .claude/skills/stabilize-milestone/SKILL.md             — D7 §3-V·§1.0 게이트 항목·§5-2 제외 정리
 - .claude/skills/amend-ssot/SKILL.md                      — D5-5 (A3 인용 줄에 #amend-1 표기 — 전파표 재서술 없음)
 - .claude/skills/stack-guard/SKILL.md                     — D6 게이트 v3·registry

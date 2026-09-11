@@ -31,7 +31,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
   - R2(concept 시안 재탐색) — *시각 방향 전환 시에만*. 토큰/컴포넌트만 손보면 생략.
   - R3/R4 — 바뀐 토큰·컴포넌트만 부분 갱신(미변경 토큰·§1~§9 구조 보존, 전면 재작성 X).
   - R5 — 저장(변경분 반영).
-  - R6 — **토큰·컴포넌트가 하나라도 바뀌면 R6-1 테마 배선을 delta 재생성한다(생략 금지 — DESIGN과 제품 테마가 어긋나는 것을 막는다, ADR-058#amend-4 결정 2).** 시각 방향이 크게 바뀌면 R6-2 게이트·픽셀 판정까지 다시 돈다.
+  - R6 — **토큰·컴포넌트가 하나라도 바뀌면 R6-1 테마 배선을 delta 재생성한다(생략 금지 — DESIGN과 제품 테마가 어긋나는 것을 막는다, ADR-058#amend-4 결정 2).** 그리고 **R6-3b 승인 기준선 영향 대조를 반드시 수행한다** — 토큰 하나가 이전 M 의 승인 스냅샷을 조용히 무효로 만든다. 시각 방향이 크게 바뀌면 R6-2 게이트·픽셀 판정까지 다시 돈다.
 - 대규모 재디자인(브랜드/방향 전환)은 *결정 근거*를 ADR로 남길 것을 권장(시각 방향 변경은 되돌리기 비용이 큼).
 
 ## 반드시 먼저 읽을 파일
@@ -194,7 +194,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 > 목적: 확정된 DESIGN.md 토큰이 **실제 스택 테마에 배선되어** 충실히 렌더되는지 확인한다. 옮김 오차(토큰→테마)를 여기서 한 번 승인한다. 배선 파일은 제품 코드이며 커밋한다. `--fast`는 R6-2 reviewer 픽셀 판정만 생략(배선·쇼케이스·게이트는 수행). `--update`는 토큰·컴포넌트 변경 시 R6-1을 delta 재생성.
 
 ### R6-1. 테마 배선 + 쇼케이스 생성 (builder 단발 sub-call, dispatch에 `mode: ui-authoring` — designer 스펙 입력)
-- 웹: `src/styles/tokens.css`(또는 스택 관례 경로)에 DESIGN `## 2~6` 토큰을 CSS 변수로, Tailwind/테마 설정이 그 변수를 참조하게 배선. **DESIGN `## 9` 의 상태 규정 중 의사 클래스가 필요한 것(포커스 링·hover·disabled)은 전역 CSS 로 함께 배선한다** — 인라인 스타일·style prop 으로는 `:focus-visible` 을 표현할 수 없어, 배선하지 않으면 이후 모든 화면에 브라우저 기본 포커스 링(팔레트 밖 색)이 그대로 나온다(dogfood Round 11 관측). Storybook `Theme/Showcase` 스토리 1개 — 섹션 순서: Tokens(swatch+hex+대비비 / typography scale — **폰트 후보 조합별 실제 서비스 문장** / spacing / radius·shadow) → Components(`## 7` 인벤토리 각 category expected 상태 — hover/focus는 상태 클래스 변형 병행) → 대표 화면 2~3개(실카피). 프로필이 둘 이상이면 프로필별 스토리(`Theme/Showcase/<profile>`).
+- 웹: `src/styles/tokens.css`(또는 스택 관례 경로)에 DESIGN `## 2~6` 토큰을 CSS 변수로, Tailwind/테마 설정이 그 변수를 참조하게 배선. **생성형 UI 킷이 이미 쓴 토큰 블록이 있으면**(`/stack-guard` 6-2-b 가 `STACK_SETUP_PLAN` 에 기록해 둔다) **지우지 말고 킷 변수를 DESIGN semantic 토큰의 별칭으로 재정의한다** — `--primary: var(--color-accent)` 처럼 킷 쪽이 DESIGN 을 가리키게 한다. **반대 방향(DESIGN 이 킷 변수를 가리킴)은 금지** — 출처가 둘이 되면 DESIGN 이 SSOT 가 아니게 된다(ADR-071 D6). **DESIGN `## 9` 의 상태 규정 중 의사 클래스가 필요한 것(포커스 링·hover·disabled)은 전역 CSS 로 함께 배선한다** — 인라인 스타일·style prop 으로는 `:focus-visible` 을 표현할 수 없어, 배선하지 않으면 이후 모든 화면에 브라우저 기본 포커스 링(팔레트 밖 색)이 그대로 나온다(dogfood Round 11 관측). Storybook `Theme/Showcase` 스토리 1개 — 섹션 순서: Tokens(swatch+hex+대비비 / typography scale — **폰트 후보 조합별 실제 서비스 문장** / spacing / radius·shadow) → Components(`## 7` 인벤토리 각 category expected 상태 — hover/focus는 상태 클래스 변형 병행) → 대표 화면 2~3개(실카피). 프로필이 둘 이상이면 프로필별 스토리(`Theme/Showcase/<profile>`).
 - Flutter: `lib/theme/tokens.dart`·`lib/theme/app_theme.dart`(ThemeData/ColorScheme/TextTheme 배선) + `lib/prototype/theme_gallery.dart` 진입 파일(같은 섹션 순서) + `test/prototype/theme_gallery_test.dart`(프로필 뷰포트 렌더 + Accessibility Guideline 4종 + overflow 0 + 스냅샷 PNG).
 - 폰트 패키지·파일(예: `@fontsource/*`, `assets/fonts/`, Flutter `pubspec.yaml` `fonts:`)은 여기서 추가한다(설치 소유 예외 — ADR-071 D6).
 - 매니페스트: `docs/20-system/prototypes/_theme/manifest.json`(ADR-072 D3 schema, `milestone: "_theme"`)에 쇼케이스 화면을 등록한다.
@@ -206,6 +206,12 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(rm docs/20-system/design-con
 ### R6-3. 검토 루프 + 폰트 확정
 - 사용자에게 «`npm run storybook`(또는 `flutter run -t lib/prototype/theme_gallery.dart`)으로 열어 확인해 주세요» 안내. 피드백은 **DESIGN.md 먼저 수정 → 재생성**. 2사이클 미수렴 시 brief(R0/R1) 수정.
 - 폰트 조합을 여기서 확정하고 원장 `closed` + `DESIGN.md ## 3` 앵커. `## 3` 폰트 블록의 잠정값을 확정값으로 갱신.
+### R6-3b. 승인 기준선 영향 대조 (`--update` 필수 — ADR-072 D5-5 / dogfood Round 12 회귀 (c))
+- **토큰·컴포넌트가 하나라도 바뀐 `--update` 라운드는 종료 전에 이것을 한다.** 커밋된 `docs/20-system/prototypes/M*/manifest.json` 을 전부 찾아, 각 화면을 `validate:design -- --manifest <경로> --snapshot <임시 디렉터리>` 로 재렌더한 뒤 **그 M 의 커밋된 `snapshots/` 와 바이트 대조**한다.
+- 달라진 화면이 있으면 출력에 낸다 — `승인 기준선 영향: M<K>/<screen> (<n>/<m> 스냅샷 상이)` + 해소 경로 두 가지: **(i) 그 화면을 다음 M 매니페스트에 `supersedes: ["M<K>/<screen>"]` 로 재등록**(ADR-072 D5-5 — 이전 M 파일은 불변) **(ii) 봉인 전 M 이면 같은 M 안에서 재승인·대체**(D4). **어느 쪽도 본 skill 이 자동으로 하지 않는다** — 기준선 이동은 승인 행위다.
+- **게이트의 `blockers: 0` 은 이 질문에 답하지 않는다** — 게이트는 렌더해서 a11y·geometry 만 보고 승인본과 대조하지 않는다. 실측(Round 12 회귀 (c)): accent 토큰 1개를 바꾸자 M1 승인 스냅샷 **12개 중 6개**가 바이트 상이해졌는데 게이트는 blockers 0 이었다.
+- 매니페스트가 0개면(첫 디자인 라운드) 침묵한다. 임시 디렉터리는 대조 후 지운다.
+
 ### R6-4. 정리
 - 승인 시 `docs/20-system/design-concepts/concept-*.html`만 삭제한다. 테마 배선·쇼케이스·`_theme/manifest.json`은 **유지·커밋 대상**(살아 있는 참조 — `/design-milestone`이 재사용).
 - 안내: «concept 삭제됨 / 테마 쇼케이스는 코드로 유지(재생성: `/bootstrap-design` R6)».
