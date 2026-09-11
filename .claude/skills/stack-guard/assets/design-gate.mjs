@@ -202,7 +202,7 @@ function stateRenderViewports(state, profileViewports) {
 }
 
 // viewports 원소: { w, h, geometryOnly? } — geometryOnly면 axe 생략(매니페스트 profile 밖에서 주입한 320x720 등).
-async function renderScreen({ browser, AxeBuilder, url, name, viewports, textScale }) {
+async function renderScreen({ browser, AxeBuilder, url, name, viewports, textScale, fonts }) {
   const entries = [];
   // 글자 확대 조건(ADR-072 D4 `states[].render.textScale`)은 브라우저 컨텍스트에 건다 —
   // CSS zoom 은 리플로우를 일으켜 실제 확대와 같고, transform:scale 은 리플로우가 없어 부적합하다.
@@ -226,6 +226,15 @@ async function renderScreen({ browser, AxeBuilder, url, name, viewports, textSca
         const shot = join(SHOTS, `${name}-${vp.w}x${vp.h}.png`); // 높이까지 넣는다 — 같은 폭 다른 높이 뷰포트가 서로 덮어쓰지 않게
         await page.screenshot({ path: shot, fullPage: true });
         entry.screenshot = shot;
+        // 결정 글꼴 2차 검사 (ADR-073#amend-1 결정 5 — 보고 등급).
+        // 네트워크·캐시·헤드리스 상태에 좌우되므로 차단하지 않는다. 1차(정적 선언)가 차단을 맡는다.
+        if (fonts && fonts.length && !vp.geometryOnly) {
+          const missing = await page.evaluate((fams) => {
+            if (!document.fonts || !document.fonts.check) return [];
+            return fams.filter((f) => !document.fonts.check(`16px "${f}"`));
+          }, fonts).catch(() => []);
+          for (const f of missing) entry.reports.push({ rule: 'font-not-loaded', selector: null, detail: `DESIGN 이 고른 글꼴 "${f}" 가 렌더 시점에 로드되지 않았다 — @font-face·next/font/local 배선 확인` });
+        }
         if (!vp.geometryOnly) {
           const res = await runAxe(page, AxeBuilder);
           for (const v of res.violations) {
@@ -328,6 +337,38 @@ function runFlutterTest(scope, testFile) {
 }
 
 // ---------- manifest 모드 ----------
+// 결정 글꼴의 «선언»이 실재하는가 (ADR-073#amend-1 결정 5 — 1차, 차단 등급).
+// 패밀리 이름을 CSS 변수에 쓴 것은 배선이 아니다 — @font-face / next/font/local / pubspec fonts: 중 하나가 있어야 한다.
+function checkFontDeclarations(families, scopes) {
+  const out = [];
+  for (const family of families) {
+    const esc = family.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let found = null;
+    for (const scope of scopes) {
+      const pub = join(scope, 'pubspec.yaml');
+      if (existsSync(pub)) {
+        const y = readFileSync(pub, 'utf8');
+        if (/^\s*fonts:/m.test(y) && new RegExp('family:\\s*[\'"]?' + esc, 'm').test(y)) { found = pub; break; }
+      }
+      for (const d of ['src', 'lib', 'app', 'styles', 'assets']) {
+        const root = join(scope, d);
+        if (!existsSync(root)) continue;
+        for (const f of walkFiles(root)) {
+          if (!/\.(css|scss|ts|tsx|js|jsx|mjs)$/.test(f)) continue;
+          let txt = '';
+          try { txt = readFileSync(f, 'utf8'); } catch { continue; }
+          if (!txt.includes(family)) continue;
+          if (/@font-face/.test(txt) || /next\/font\/local/.test(txt) || /localFont\s*\(/.test(txt)) { found = f; break; }
+        }
+        if (found) break;
+      }
+      if (found) break;
+    }
+    out.push({ family, declared: !!found, at: found });
+  }
+  return out;
+}
+
 async function runManifestMode(opts, ctx) {
   let manifest;
   try { manifest = JSON.parse(readFileSync(opts.manifestPath, 'utf8')); }
@@ -342,6 +383,11 @@ async function runManifestMode(opts, ctx) {
   if (!screens.length) { console.error('검사할 화면이 없다 — 매니페스트 screens[] 비어 있음'); process.exit(2); }
 
   const result = { version: 3, mode: 'manifest', screens: [], summary: { blockers: 0, reports: 0, unavailable: 0, snapshotWarnings: [] } };
+  // 결정 글꼴 1차 검사 (ADR-073#amend-1 결정 5 — 차단). 선언 실재만 본다: 결정론적이라 blocker 로 쓸 수 있다.
+  // `manifest.fonts` 가 없으면 통째로 건너뛴다(schema v1 minor — 기존 매니페스트 호환).
+  if (manifest.fonts && manifest.fonts.length) {
+    result.fontDeclarations = checkFontDeclarations(manifest.fonts, [...new Set(screens.map((s) => s.scope || '.'))]);
+  }
   let unavailable = false;
   const { chromium, AxeBuilder } = await loadPlaywright([...screens.map((s) => s.scope || '.'), ...(opts.scopes ?? [])]); // 자가 검사 (c)는 --scopes 전체를 넘긴다(첫 scope에만 모듈이 없으면 오탐 exit 2)
   const browser = await launchBrowser(chromium);
@@ -389,7 +435,7 @@ async function runManifestMode(opts, ctx) {
         // 선언이 없으면 프로필 뷰포트 전체. 조건을 무시하면 「320에서 밀리는가」의 기준선이
         // 1280 스크린샷이 되어 이름과 내용이 어긋난다(dogfood Round 12 실측).
         const stateViewports = stateRenderViewports(state, viewports);
-        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale });
+        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale, fonts: manifest.fonts });
         for (const e of entries) result.screens.push({ id: screen.id, profile: screen.profile, viewport: e.viewport, preview, blockers: e.blockers, reports: e.reports, screenshot: e.screenshot });
       }
       // 승인 스냅샷은 «통과한 화면»만 동결한다(ADR-072 D4) — 차단된 화면이 기존 승인본을 덮어쓰면 기준선이 오염된다.
@@ -583,6 +629,10 @@ async function main() {
 
   const { result, exitOverride } = outcome;
   for (const s of result.screens) { result.summary.blockers += (s.blockers || []).length; result.summary.reports += (s.reports || []).length; }
+  // 결정 글꼴 1차 검사는 화면이 아니라 매니페스트 전체에 걸린다 — 화면 blockers 와 별도로 세고 exit 1 에 넣는다.
+  const undeclared = (result.fontDeclarations || []).filter((f) => !f.declared);
+  result.summary.fontBlockers = undeclared.length;
+  result.summary.blockers += undeclared.length;
   const reportPath = opts.report || join(SHOTS, 'report.json');
   writeFileSync(reportPath, JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result, null, 2));

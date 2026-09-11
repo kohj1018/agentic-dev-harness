@@ -144,3 +144,47 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
 
 ## 참고
 - ADR-027(superseded — 본 ADR이 승계), ADR-031(직접 지원 범위 — 새 스택 진입 시 D1에 `## 7-N` 자리 신설), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
+
+## Amendment 1 (2026-09-12) — 폰트 «전달 방식» 결정에 대응하는 배선 단계가 없다
+
+### 배경
+D4 는 `## 3` 폰트 결정 블록에 **전달 방식(self-host / CDN / 앱 번들)**을 요구한다. 그런데 그 결정을 **실제 로딩까지 끌고 가는 단계가 어디에도 없다.** dogfood Round 12 가 그 공백을 전부 통과했다.
+
+- [관측됨] DESIGN `## 3` 은 **Pretendard 단일 · mono `(해당 없음)` · 전달 방식 self-host** 를 확정했다(후보 2조합 비교·선택 근거까지 채워진 정상 블록이다).
+- [관측됨] `apps/web/src/app/layout.tsx` 는 `create-next-app` 스캐폴드가 심은 **`Geist`·`Geist_Mono`(next/font/google)** 를 그대로 로드한다. DESIGN 이 기각한 패밀리이고 `mono` 는 「해당 없음」인데 살아 있다.
+- [관측됨] `apps/web/src/styles/tokens.css` 는 `--font-family-base: "Pretendard Variable", system-ui, …` 로 **이름만** 선언한다. `@font-face` 도 폰트 파일도 없다 — **패밀리 이름을 CSS 변수에 쓰는 것은 배선이 아니다.** 브라우저는 곧장 fallback 으로 떨어진다.
+- [관측됨] Storybook preview 는 `globals.css` 만 import 한다. 따라서 **승인 스냅샷 26장이 결정된 글꼴이 아닌 fallback 으로 찍혔다.** 게이트는 이것을 원리상 못 본다 — 게이트가 보는 것은 스토리 렌더이고, 폰트 로딩은 그 바깥(Next 앱 셸)에 있다.
+- [관측됨] Flutter 쪽은 같은 공백이 **다른 증상**으로 났다 — `flutter test` 가 폰트를 로드하지 않아 스냅샷 글자가 전부 tofu 였다(발견 55). **두 플랫폼의 승인 스냅샷이 모두 결정된 글꼴 없이 찍혔고 둘 다 검출되지 않았다.**
+- [관측됨] `/bootstrap-design` R6-1 에 방금 박은 그물(「`## 2`~`## 6` 각 절이 최소 1개 토큰을 내보냈는지 확인」 — 발견 61)은 **통과시켰다.** `## 3` 이 `--font-family-base` 를 내보냈기 때문이다. **이름도 토큰이다.**
+
+### 결정
+1. **R6-1 은 전달 방식까지 배선한다** — self-host 면 폰트 파일 + `@font-face`(또는 프레임워크의 local-font 경로), 앱 번들이면 `pubspec.yaml` `fonts:` 선언과 asset 파일. **패밀리 이름을 CSS 변수·테마에 쓴 것은 배선으로 치지 않는다.** 배선하지 않으면 DESIGN `## 3` 에 `- 배선: 미배선 — <사유>` 를 적는다(침묵 금지).
+2. **스캐폴드가 심은 폰트를 제거한다** — 수행 0 이 만든 `next/font/google` import, 킷 기본 fontstack 등 DESIGN `## 3` 이 고르지 않은 패밀리는 R6-1 에서 지운다(발견 42 와 같은 계열 — 스캐폴드 결정이 DESIGN 결정보다 오래 산다).
+3. **`/design-milestone` 가 두 지점에서 막는다** — R0 preflight 가 DESIGN `## 3` 에 `미배선` 표기를 발견하면 **스냅샷 승인을 진행하지 않고** R6-1 로 돌려보낸다. R6-5 승인 체크리스트에 **「결정 글꼴 실재」**를 더한다(렌더에 그 패밀리가 실제로 적용됐는가).
+4. **`/plan-workitem` 3-S 에 축을 더한다** — task `## 3` 의 지시가 **DESIGN 확정 결정과 충돌하지 않는가**(§3 글꼴이 첫 사례다). Round 12 의 T-005 `## 3` step 3 은 「`Geist`/`Geist_Mono` 에 `preload: true` 명시」라고 **기각된 패밀리를 유지하라고 지시**하고 있었다.
+5. **그물은 2단계로 둔다** — **1차 정적 검사**(필수): 결정된 패밀리에 대한 **선언이 실재하는가** — 웹은 `@font-face` 또는 `next/font/local`, Flutter 는 `pubspec.yaml` `fonts:`. 선언이 없으면 **blocker**. **2차 런타임 검사**(보고 등급): 렌더 직후 `document.fonts.check('16px "<family>"')` 가 false 면 `report`(차단 아님 — 네트워크·캐시 상태에 좌우된다). Flutter 는 `FontLoader` 로드 여부.
+
+### 근거
+- 결정 1 의 핵심은 **「이름 ≠ 배선」** 한 줄이다. 그것이 없으면 R6-1 의 토큰 그물이 계속 통과시킨다 — 실제로 그랬다.
+- 결정 5 를 정적/런타임 2단계로 가른 이유: 런타임 검사만 두면 CI·오프라인에서 흔들려 blocker 로 못 쓴다. 정적 선언 검사는 결정론적이라 blocker 로 쓸 수 있고, **이번 실패를 정적 검사만으로 잡을 수 있었다**(`@font-face` 0건 · `pubspec fonts:` 0건).
+- 결정 3 을 R0 와 R6 **둘 다**에 건 이유: R0 만이면 배선을 나중에 푼 경우를 못 막고, R6 만이면 화면을 다 그린 뒤에야 막혀 비용이 크다.
+- 대가: R6-1 이 폰트 파일을 확보해야 하므로 라이선스 확인(D4)이 **실제 차단 경로**가 된다. 그것이 의도다 — 라이선스 미확인 폰트를 번들하는 것보다 낫다.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 3·5 의 1차 정적 검사.
+- 제약(중, [관측됨]): 결정 1·2·4.
+
+### Mutation delta (ADR-047 D3 — 7 필드)
+- target = `.claude/skills/bootstrap-design/SKILL.md` R6-1 · `.claude/skills/design-milestone/SKILL.md` R0·R6-5 · `.claude/skills/plan-workitem/SKILL.md` 3-S · `.claude/skills/stack-guard/assets/design-gate.mjs`.
+- failure = DESIGN 이 고른 글꼴이 어디에도 로드되지 않은 채 승인 스냅샷이 찍히고, 제품은 스캐폴드 기본 글꼴로 나간다(관측 2건, 웹·Flutter 각 1 — 증상은 fallback 렌더와 tofu 로 달랐다).
+- predicted = Round 13 에서 R6-1 종료 시 `@font-face`/`pubspec fonts:` 선언이 실재하거나 DESIGN `## 3` 에 `미배선` 사유가 있다. 게이트 1차 정적 검사 blocker 0.
+- preserved = D4 블록 9항목 불변 · 게이트 기존 검사 의미 불변 · 폰트 조합은 여전히 `user-choice`.
+- falsifier = (a) 1차 정적 검사가 «선언은 있는데 파일이 없다»를 통과시키는 사례가 1건이라도 나면 검사를 파일 실재까지 넓힌다 (b) 2차 런타임 검사의 `report` 가 3라운드 연속 전부 오탐이면(네트워크·헤드리스 사유) 2차를 제거하고 1차만 남긴다.
+- rollback = 본 amend superseded → R6-1 배선 규칙·게이트 폰트 검사 제거, D4 블록만 복원.
+- **예산 영향** = `/bootstrap-design` R6-1 의 산출물이 1~2개(폰트 파일·선언) 는다. `designer`·`builder` 의 `maxTurns` 재검토 불필요 — 산출물 4개 상한 안이다.
+
+### 적용 surface
+- .claude/skills/bootstrap-design/SKILL.md — 결정 1·2
+- .claude/skills/design-milestone/SKILL.md — 결정 3
+- .claude/skills/plan-workitem/SKILL.md — 결정 4
+- .claude/skills/stack-guard/assets/design-gate.mjs — 결정 5
