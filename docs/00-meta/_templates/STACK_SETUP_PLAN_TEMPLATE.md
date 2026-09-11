@@ -60,19 +60,17 @@ pnpm validate   # 또는 npm run validate / make validate / task validate
 visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. /stack-guard 가 매 실행 기록·갱신 (ADR-058#amend-3 결정 5). 비-UI 는 이 줄을 삭제한다. -->
 
 ## Design Gate Adapter
-<!-- UI 프로젝트에서만 /stack-guard가 채우는 실행 registry (ADR-058#amend-2).
-     bootstrap-design R2-G/R6와 plan-milestone R5-5는 command template을 그대로 사용하며 경로를 추측하지 않는다.
-     비-UI면 status=n/a만 기록하고 adapter/entry를 생성하지 않는다.
-     UI에서 current version·source digest·fixed conformance 중 하나라도 확인되지 않으면 승인·프로토타입 승격을 보류한다. -->
+<!-- UI 프로젝트에서만 /stack-guard가 채우는 실행 registry (ADR-072 D6). caller(bootstrap-design R2-G/R6, design-milestone R6, stabilize §3-V, validate-workitem)는 command template을 그대로 쓰고 경로를 추측하지 않는다.
+     비-UI면 status=n/a만 기록한다. status가 ready가 아니면 승인·프로토타입 승격을 보류한다(fail-closed).
+     같은 checkout에서 validate:design을 동시에 2개 실행하지 않는다(출력 디렉터리를 매 실행 초기화 — ADR-063 D7). -->
 | field | value |
 |-------|-------|
-| status | `n/a` (`ready` / `needs-install` / `wiring-fail`) |
-| command template | (예: `pnpm validate:design -- <html...>`) |
-| adapter path | (canonical asset을 복사한 project-native path) |
-| output path | (screenshots/result path) |
-| capability version | `ADR-058#amend-2/v2` |
-| source digest | (canonical asset SHA-256; non-canonical override면 근거) |
-| conformance | (fixed-suite 결과·실행 시각) |
+| status | `n/a` (`ready (self-test PASS <YYYY-MM-DD>)` / `needs-install` / `wiring-fail`) |
+| command template | (예: `npm run validate:design -- <args>` — args: `--html <files>` / `--manifest <path> [--only <id>] [--snapshot <dir>] [--no-build]` / `--self-test` / `--tokens-only <glob>`) |
+| adapter path | (예: `scripts/design-gate.mjs` — stabilize §1.0 (a) 실재 검사 대상) |
+| manifest 규약 | `docs/20-system/prototypes/<M<N> 또는 _theme>/manifest.json` (ADR-072 D3 schema v1) |
+| self-test 일자 | (마지막 자가 검사 PASS 일자) |
+| copied-from | (복사 시점 canonical `design-gate.mjs` SHA-256 — caller는 대조하지 않는다; stack-guard 재실행·stabilize §1.0 (b)만 사용) |
 
 ## CI (ADR-025#amend-1)
 - CI: <generated (.github/workflows/validate.yml) | existing (preserved) | opt-out (사용자 지정) | n/a (<사유>)>

@@ -12,7 +12,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - green-field 스캐폴드(공식 생성기 1종, harness 파일 미덮어쓰기) + 카탈로그 `설치: baseline` 행의 기초 라이브러리 설치 — 그 뒤에 probe·boot smoke·design gate·CI를 실제 코드 위에서 실측한다(ADR-071 D5·D6).
 - 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2) — **이때 `package.json` 이 없으면**(순수 Dart/Flutter 프로젝트엔 기본적으로 없다) **최소 형태로 생성하고 `scripts` 에 진입점을 박는다.** 생성하지 않으면 `npm run validate` 자체가 성립하지 않는다. **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 가장 자연스러운 런타임 1종.
-- UI 판정 시 canonical asset byte-copy + project-native `validate:design` entry + fixed browser conformance + `STACK_SETUP_PLAN.md ## Design Gate Adapter` registry 기록(ADR-058#amend-2). 비-UI는 asset을 읽거나 복사하지 않는다.
+- UI 판정 시 canonical design gate v3 asset을 project-native `validate:design`에 배선하고 **자가 검사 1회**를 통과시켜 `STACK_SETUP_PLAN.md ## Design Gate Adapter`(6필드)에 기록(ADR-072 D6). 비-UI는 asset을 읽거나 복사하지 않는다.
 - cross-platform 차이가 큰 팀이면 `.claude/settings.local.json` 예시 동봉 권장.
 - 생성된 `docs/00-meta/STACK_SETUP_PLAN.md`에 hook 절차 SSOT([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))를 link하는 1줄 안내. 절차 본문은 embed 금지 (SSOT 정합).
 
@@ -27,7 +27,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
 - `docs/00-meta/STACK_SETUP_PLAN.md` (있으면)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
-- UI 판정 시에만 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md#adr-058-amend-2`와 `.claude/skills/stack-guard/assets/design-gate*.mjs`
+- UI 판정 시에만 `.claude/skills/stack-guard/assets/design-gate.mjs`(v3) — 소유 ADR-072 D6
 - `docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`(수행 0·6-2-b 입력)
 - `.claude/skills/bootstrap-stack/stack-catalog.md`(`설치: baseline` 판별 — registry에는 `설치` 열이 없어 id로 조인한다, ADR-071 D6)
 
@@ -55,7 +55,7 @@ R0 — 운영 환경 가정 확인:
 2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
 2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
    - `.claude/`, `.codex/`, `.agents/`, `.boilerplate/`
-   - `STACK_SETUP_PLAN.md ## Design Gate Adapter` 에 기록된 **materialized adapter 경로**(기본 `scripts/design-gate.mjs`). 이 사본은 프로젝트 소스 트리 안에 있어 harness 디렉터리 제외만으로는 보호되지 않는다. **포맷되면 SHA-256 digest 가 바뀌어 conformance oracle 이 게이트를 차단하고 `status: wiring-fail` 로 굳는다.**
+   - `STACK_SETUP_PLAN.md ## Design Gate Adapter` 에 기록된 **materialized adapter 경로**(기본 `scripts/design-gate.mjs`). 이 사본은 프로젝트 소스 트리 안에 있어 harness 디렉터리 제외만으로는 보호되지 않는다. **포맷되면 자가 검사 fixture 문자열이 깨질 수 있다(자가 검사 재실행으로 복구 — 재실행 계약).**
    - **formatter 의 Markdown 대상에서 `docs/`** — 이 저장소의 기계 점검 다수가 문서 문자열에 의존한다(로스터의 종 수 표기·ADR 인덱스 행·Amendments 칸·`## Amendment N` 카운트). formatter 가 표를 재정렬하면 그 점검들이 조용히 깨진다. lint·typecheck 와는 무관한 항목이다.
    - **⚠️ secret scanner 는 배제 대상이 아니다 — 반대로 harness 경로를 포함해야 한다.** `.claude/settings.json`·`.codex/config.toml`·agent 설정에 토큰·키가 유입될 수 있고 그것이 정확히 scanner 가 잡아야 하는 대상이다. 포맷·타입 검사의 배제와 보안 스캔의 범위를 분리한다.
    - **정확한 exclude 설정 키는 도구·버전마다 다르므로 실행 시점에 그 도구 문서로 확인한다** — 본 SKILL 에 특정 키를 박지 않는다(도구 버전업 시 틀린 지시가 된다).
@@ -70,7 +70,7 @@ R0 — 운영 환경 가정 확인:
 
      비-Dart 프로젝트는 `/bootstrap-stack` 이 이 절을 이미 삭제했으므로 대상이 아니다(ADR-059 D2).
      - `## E2E Smoke Registry` — e2e 대상 프로젝트면 **선언한 runtime target마다 한 행**으로 `status | 파일 경로 | 테스트 이름 | 실행 대상 선택 규칙 | 마지막 PASS(host·날짜·커밋) | 등록일`을 기록. 실행 대상 칸에는 재부팅하면 달라지는 임시 id 대신 선택 규칙을 적는다(이 칸은 기록용이며 실행 명령에 그대로 들어가지 않는다). 대상 아니면 `status: n/a`만 기록(ADR-052#amend-1).
-     - `## Design Gate Adapter` — UI면 실제 command template·adapter/output 경로·current capability version·source digest·fixed conformance 결과를 기록하고, 비-UI면 `status: n/a`만 기록(ADR-058#amend-2).
+     - `## Design Gate Adapter` — UI면 6필드(status·command template·adapter path·manifest 규약·self-test 일자·copied-from)를 6-4-1이 기록, 비-UI면 `status: n/a`만(ADR-072 D6).
      - `## Dependency Tools` — **보완만**(ADR-051#amend-4 수행-6-2-0): 표·행이 없으면 관측 신호로 채우고, `/bootstrap-stack`이 기록한 행은 덮어쓰지 않는다(불일치는 출력 보고 + 사용자 결정).
      - PostToolUse hook 자동 등록은 prototyping 후 별도 항목 — 현재 단계에서는 매뉴얼 등록 안내
      - hook 등록 절차는 [GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md) link만 박는다 (SSOT — 본 skill이 절차 본문 embed 금지).
@@ -137,17 +137,17 @@ R0 — 운영 환경 가정 확인:
    - **`BLOCKED_ENV`** (browser/device/toolchain 미설치·미기동) → `validate:e2e: BLOCKED_ENV — Needs Install: <실제 명령>`. 종료 X.
 
    **상태 정의와 판정 순서의 SSOT는 ADR-052#amend-1 결정 3이다** — 위 행은 *본 단계의 처리*(종료/비종료)만 정하고 정의를 재선언하지 않는다. 순서는 `FAIL(wiring)`·`BLOCKED_ENV` → `EMPTY` → `FAIL(project)` → `PASS`이며 먼저 성립하는 상태로 확정한다(행 나열 순서가 아니라 이 순서다 — 뒤집으면 진입점 부재를 `EMPTY`로 오분류해 고쳐야 할 산출물 결함을 통과시킨다). 상태 판정은 **구조화된 러너 출력**으로 한다(출력 문자열 매칭은 보조 fallback). `STACK_SETUP_PLAN.md ## E2E Smoke Registry`에 등록이 있으면 **선언된 runtime target별로** 읽어 `PASS` 조건을 *등록된 smoke 이름 일치*까지 좁히고, target마다 상태를 따로 낸다. **등록이 없어도 명령은 실행한다** — 위 경로 기준으로 판정하고 `P1 [E2E-registry] <target> — canonical smoke 미등록` 만 함께 기록한다(ADR-052#amend-1 결정 4).
-   `validate:design` 판정 행 (UI 한정, ADR-058#amend-2):
-   - **direct-support Node UI는 generated bytes=canonical source digest + fixed conformance 전부 통과**; override는 기록된 source basis + 동등한 v2 conformance 전부 통과 → registry `status: ready`, `validate:design self-test: PASS (fixed suite, capability ADR-058#amend-2/v2)`. digest/conformance 어느 하나라도 빠지면 ready 금지.
-   - **module/browser 설치 실패** → registry `status: needs-install`, `Needs Install: <실제 명령>`; design artifact 승인 보류.
-   - **entry/source digest/fixed fixture 기대 분류 불일치 또는 local modification** → registry `status: wiring-fail`, `validate:design self-test: WIRING FAIL`; 자동 덮어쓰기 없이 원인을 고치고 fixed suite 전체 재실행 전까지 종료.
-   - **비-UI** → registry `status: n/a`; canonical asset read/copy, adapter·entry·browser 설치를 design gate 목적으로 수행하지 않음.
+   `validate:design` 판정 행 (UI 한정, ADR-072 D6):
+   - **자가 검사 통과** → registry `status: ready (self-test PASS <YYYY-MM-DD>)`, 출력 `validate:design self-test: PASS`.
+   - **module/browser/flutter 부재** → `status: needs-install` + `Needs Install: <실제 명령>`; design artifact 승인 보류.
+   - **자가 검사 기대 불일치**(known-bad를 통과시킴) → `status: wiring-fail` + `validate:design self-test: FAIL`; 원인을 고치고 재실행 전까지 `ready` 금지.
+   - **비-UI** → `status: n/a`; asset read/copy·browser 설치 없음.
 
 
    > 핵심 구분: stack-guard 의 책무는 *wiring* (`validate` + `validate:e2e` + UI `validate:design` entry·browser·conformance 까지). 프로젝트 실 위반은 *프로젝트 책무* 라 smoke test 가 잡되 stack-guard 가 차단하지 않는다.
 
 6. **Toolchain 선설치 + E2E readiness** (실행 순서상 step 5 smoke test *앞*에 수행 — `allowed-tools` 의 Bash 활용, 신규 권한 불필요):
-   - **6-1. 판정 (3축, 상호배타 아님 — ADR-059 D8 / ADR-027#amend-3 / ADR-058#amend-2)**: 매 실행 현재 파일로 다시 판정한다. 세 축을 **각각** 결정하며 동시에 참일 수 있다.
+   - **6-1. 판정 (3축, 상호배타 아님 — ADR-059 D8 / ADR-073 D9 / ADR-072 D6)**: 매 실행 현재 파일로 다시 판정한다. 세 축을 **각각** 결정하며 동시에 참일 수 있다.
      - **design surface**: `docs/20-system/DESIGN.md` 부재 → 없음. 존재 + `## 0. Status` ≠ `draft` → 있음. 존재 + status == `draft` → 추가 신호((a) ARCH `## 7-4` 또는 `## 7-5` 활성, (b) ARCHITECTURE_OVERVIEW 기술 선택이 화면 있는 유형) ≥1 → 있음(의심 포함). 신호 0 → 없음. **design gate(6-4-1)는 이 축만 본다.**
      - **runtime target**: ARCH `## 7. 기술 선택`과 프로젝트 manifest로 판정. canonical 값은 `web`(브라우저에서 도는 앱) / `native/android` / `native/ios` / `desktop` / `none`(라이브러리·CLI)이다 — **Android 와 iOS 는 개별 값이며 `native` 하나로 합쳐 적지 않는다**(합치면 ADR-059 D4 플랫폼별 판정이 성립하지 않는다). `native/*`는 값이 아니라 그 둘을 묶는 클래스 표기이며 toolchain 분기에만 쓴다. **e2e 도구 선택(6-3·6-4)은 이 축만 본다.** 여러 값이 동시에 참일 수 있다.
      - **host environment**: 현재 OS(`windows` / `macos`). 실행 가능 범위 판단에만 쓴다. iOS 관련 항목은 `macos` 에서만 수행하고, 그 외에서는 `[미수행 — host 제약]` 으로 기록한다.
@@ -177,14 +177,14 @@ R0 — 운영 환경 가정 확인:
        - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. **`native/*` 는 클래스 표기이므로 행으로 쓰지 않는다** — `native/android` 와 `native/ios` 를 함께 선언했으면 **두 행**이고 `web` 까지 선언했으면 세 행이다(ADR-059 D8). 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
      - **6-4-b. golden 초기 절차 안내 (runtime target 에 `native/*` 가 포함되고 화면이 있을 때)**: golden(픽셀 비교) 정답 사진은 **커밋하지 않으며 머신마다 로컬 생성**한다(ADR-059 D3). `.gitignore` 에 `**/test/**/goldens/` 와 `**/test/**/failures/` 가 있는지 확인하고 없으면 추가한다 — **`**/test/goldens/` 처럼 한 단계만 쓰면 안 된다**: golden key 는 그 테스트 파일이 있는 디렉터리 기준 상대경로라(`LocalFileComparator.basedir`) `test/widgets/foo_test.dart` 의 `goldens/foo.png` 는 `test/widgets/goldens/` 에 생성되고 한 단계 패턴에는 걸리지 않는다. 그리고 `STACK_SETUP_PLAN.md` 에 아래 절차를 1회성 안내로 기록한다 — *"새 체크아웃 직후 첫 `validate` 는 정답 사진 부재로 실패한다. `flutter test --update-goldens` 를 1회 실행하고 생성된 이미지를 육안 확인한 뒤 진행한다."* golden 테스트 위젯에는 `debugShowCheckedModeBanner: false` 를 준다. **재생성 규율도 함께 적는다** — *"`--update-goldens` 는 (a) 정답 사진이 아직 없을 때, (b) UI 를 의도적으로 바꾸고 새 모습을 육안 확인했을 때만 쓴다. golden 실패를 통과시키려고 덮어쓰지 않는다 — 그러면 회귀가 정답으로 굳는다."*
      - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
-   - **6-4-1. Canonical design acceptance adapter + Visual-QA scaffold (UI/web 한정, ADR-058#amend-2)**:
-     - **JIT read 경계**: 6-1이 UI 확정/의심일 때만 `.claude/skills/stack-guard/assets/design-gate.mjs`와 `design-gate-conformance.mjs`를 읽고 실행한다. 비-UI는 두 asset을 컨텍스트에 로드하거나 project로 복사하지 않는다(ADR-019).
-     - **direct-support Node UI 물질화**: canonical `design-gate.mjs`를 project-native 경로(기본 `scripts/design-gate.mjs`)에 **byte-copy**하고 감지된 package manager에 논리 entry `validate:design`을 배선한다. **이 진입점은 npm 계열(`npm run` / `pnpm` / `yarn` / `bun run`)로 박는다** — `task` 와 `make` 는 하위 명령의 종료코드를 자기 코드로 바꿔(각각 201, 2) adapter 의 `exit 1`(차단)과 `exit 2`(실행 불가) 구분을 없앤다(ADR-059 D2). Flutter 등 비-Node 스택에서도 design gate 진입점만은 npm 으로 둔다. 산문을 보고 재작성하지 않는다. adapter는 다중 HTML/glob 입력을 직접 확장하고 `{ blockers, reports, screenshots }` + exit 0(pass)/1(blocker)/2(execution unavailable)를 낸다.
-     - **source integrity + fixed conformance (direct-support Node UI)**: generated adapter SHA-256이 conformance asset의 canonical digest와 같은지 먼저 확인한 뒤 `node .claude/skills/stack-guard/assets/design-gate-conformance.mjs <generated-adapter-path>`를 실제 Chromium으로 실행한다. oracle exit 2는 `needs-install`/실행불가로 그대로 승계하고, exit 1은 source/conformance `wiring-fail`로 기록한다. fixture·기대값은 conformance asset이 소유하며 생성하지 않는다. 기존 10 behavior case + same-basename batch + stale cleanup + per-file render-error isolation + 1px tolerance pass/2px escape block + bounded completion을 전부 통과하기 전 `ready` 금지.
-     - **version/re-run policy**: current capability는 `ADR-058#amend-2/v2`. registry가 v1/누락/lower-version이면 (a) 기록된 `source digest`가 있는 경우 실제 bytes와 같거나, (b) digest 필드가 없던 legacy v1의 실제 bytes가 canonical digest와 같을 때만 미수정으로 인정해 canonical v2로 교체하고 fixed suite 전체를 재실행한다. 어느 기준도 충족하지 않으면 local modification으로 판정해 **덮어쓰지 않고** `wiring-fail (local modifications)` + diff/채택 사용자 결정을 요청한다. current version/digest도 conformance는 재실행한다.
-     - **output ignore + 실행 single-origin (ADR-063 D7)**: canonical output `design-gate-shots/`는 baseline `.gitignore`가 선제 보호한다. override adapter가 다른 output path를 쓰면 **첫 adapter 실행 전에** 그 정확한 project-relative 경로를 `.gitignore`에 추가한다. **adapter 는 매 실행 이 디렉터리를 통째로 초기화하므로(stale 픽셀 차단), 같은 checkout 에서 `validate:design` 을 동시에 2개 실행하지 않는다** — 뒤에 시작한 실행이 앞 실행의 스크린샷을 지운다(`/stabilize-milestone` 의 실행 single-origin 규약과 동형). 이 사실을 `STACK_SETUP_PLAN.md ## Design Gate Adapter` 기록에 1줄 부기한다.
-     - **registry 기록**: `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 `status | command template | adapter path | output path | capability version=ADR-058#amend-2/v2 | source digest | conformance`를 실제 값으로 채운다. 비-UI는 `status: n/a`만. module/browser 부재=`needs-install`, source/entry/conformance/local-modification 불일치=`wiring-fail`.
-     - **비-Node/범위밖-스택**: ADR-031 범위 밖 스택(project ADR supersede 경로 — `--override` 플래그는 미구현)이 canonical Node asset을 쓸 수 없으면 동등한 project-native adapter와 별도 source 근거를 기록하되, v2 behavior/fixed fixture 기대값을 실제 browser로 만족하기 전 `ready`로 표시하지 않는다.
+   - **6-4-1. design gate v3 어댑터 + Visual-QA scaffold (UI 한정 — ADR-072 D6 / ADR-058#amend-3)**:
+     - **JIT read 경계**: 6-1이 UI 확정/의심일 때만 `.claude/skills/stack-guard/assets/design-gate.mjs`를 읽는다. 비-UI는 로드·복사·설치 없음(ADR-019).
+     - **물질화**: canonical v3를 project-native 경로(기본 `scripts/design-gate.mjs`)로 복사하고 `validate:design` 진입점을 **npm 계열**로 박는다(`make`·`task` 금지 — exit 1/2 구분 보존, ADR-059 D2). Flutter도 design gate 진입점만 npm이다. command template: `<pm> validate:design -- <args>`.
+     - **Storybook 정적 빌드 출력**: `design-gate-storybook/`을 `.gitignore`에 추가(첫 실행 전).
+     - **Flutter 자가 검사 fixture**: `pubspec.yaml`이 있으면 `test/design_gate/self_bad_test.dart`(known-bad 위젯 — 20px 탭 타겟 + 2:1 대비; 헤더 주석 «design gate self-test fixture — 실패가 정상»)와 `test/design_gate/self_ok_test.dart`(known-good)를 생성한다. **주의**: `flutter test`가 이 파일을 통합 `validate`에서 실행하지 않도록 `validate`의 test 단계에서 `test/design_gate/`를 제외한다(제외 방법은 도구 문서 확인 — SKILL에 키를 박지 않는다).
+     - **자가 검사(4케이스)**: `<pm> validate:design -- --self-test` 실행(Flutter scope가 루트가 아니면 `--scopes apps/mobile`처럼 fixture를 만든 scope를 함께 넘긴다 — 루트 `pubspec.yaml`만 보면 monorepo에서 (d)가 조용히 빠진다) → 위 판정 행. **capability 버전 핸드셰이크·고정 적합성 oracle은 없다**(ADR-072 D6이 ADR-058#amend-2를 대체). 복사 직후 canonical asset의 SHA-256을 registry `copied-from`에 적는다(caller 대조 없음).
+     - **registry 기록(6필드)**: `status | command template | adapter path | manifest 규약(docs/20-system/prototypes/<M|_theme>/manifest.json — ADR-072 D3) | self-test 일자 | copied-from`. 비-UI는 `status: n/a`만.
+     - **single-origin**: `design-gate-shots/`는 렌더 실행마다 초기화, `design-gate-storybook/`는 빌드할 때만 재생성(`--no-build` 실행은 보존 — ADR-072 D6). 어느 쪽이든 같은 checkout에서 동시 2실행 금지(ADR-063 D7). 이 사실을 registry 하단에 1줄 부기.
      - **구현 앱 Visual-QA (별도 surface)**: e2e scaffold 시 `e2e/visual-qa.spec.*`도 생성해 렌더된 앱을 검사한다. breakpoint 320/375/768/1440 page overflow는 차단, 요소 겹침은 권고, populated axe serious/critical은 차단·moderate/minor는 권고. 가능한 runner에서는 generated geometry/axe helper를 두 surface가 재사용한다.
        - **전제 처리 (ADR-058#amend-3 — 표현을 고정한다)**: ① **spec이 전제를 소유한다** — 스스로 seed/fixture로 populated 상태를 만든 뒤 검사하므로 대상 요소 부재는 *항상 실패* 다. ② 소유가 불가능한 표면(로그인·외부 의존 필수)만 2분기로 한다 — **독립적인 empty 신호**(라우트 응답·명시적 seed 상태 표시. **대상 landmark 부재를 empty 근거로 쓰지 않는다** — selector·wiring 파손과 구분되지 않는다)로 앱이 비었음이 확인되면 `test.skip()`, **populated인데 selector·fixture·라우트가 준비되지 않았으면 실패시킨다**(그 실패가 `validate:e2e`의 `FAIL(project)`로 졸업을 차단한다 — 새 게이트를 만들지 않는다).
        - **`annotations`만 남기고 `return`하는 형태를 생성하지 않는다** — 러너가 passed로 집계해 "검사가 돌았다"는 거짓 신호가 된다. 판정 보류는 `test.skip()`(또는 그 스택의 동등 API)으로만 표현한다.
@@ -202,12 +202,12 @@ R0 — 운영 환경 가정 확인:
 - 생성/갱신한 파일 목록
 - 운영 환경 가정 (R0 결과)
 - 통합 명령 호출 방법 (예: `pnpm validate`; UI/web 이면 `pnpm validate:e2e` 도)
-- 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-027#amend-3 근거 신호 / runtime target: web·native/android·native/ios·desktop·none — 복수 선언 가능, `native` 단독 표기 금지 / host: windows·macos) — ADR-059 D8
+- 판정 결과 3축 (design surface: 있음(의심 포함)/없음 — ADR-073 D9 근거 신호 / runtime target: web·native/android·native/ios·desktop·none — 복수 선언 가능, `native` 단독 표기 금지 / host: windows·macos) — ADR-059 D8
 - Toolchain 설치 결과 (`deps install: DONE (<pkg-manager>)` / `Needs Install: <명령>`); UI/web 이면 browser 설치 결과 (`playwright install: DONE` / `Needs Install: npx playwright install`)
 - 매뉴얼 hook 등록 절차 SSOT 위치 ([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md)) — 생성된 STACK_SETUP_PLAN.md에는 link만 박힘.
 - validate smoke test 결과 (`PASS (probe verified, project clean)` / `PASS (probe verified, empty rules/tests warning)` / `PROBE OK, PROJECT FAIL` / `PARTIAL (probe verified: … / not reached: …)` / `PROBE FAIL(<단계>)` / `SKIPPED (probe out of tool scope — …)` / `SKIPPED (probe unavailable — …)`) + 해당 시 `missing: <단계>` + **probe cleanup 결과** (`DONE (<n>개)` / `FAILED — 수동 삭제 필요: <경로 목록>`) + `STACK_SETUP_PLAN` 의 `probe smoke:` 기록 갱신 여부
 - validate:e2e 상태 (e2e 대상 한정, runtime target별 — NOT_APPLICABLE / EMPTY / PASS / FAIL(wiring) / FAIL(project) / BLOCKED_ENV — ADR-052#amend-1)
-- validate:design adapter 결과 (UI 한정 — current capability/source digest + registry status + command/path + fixed conformance 또는 Needs Install/WIRING FAIL; 비-UI는 n/a)
+- validate:design adapter 결과 (UI 한정 — registry status + self-test 일자 + command; 비-UI는 n/a)
 - 후속 권장 단계 (`/plan-milestone` — M/F가 아직 없으면(ADR-057); `contract-ready` M에 task 0건/`draft`가 있으면 `/plan-workitem M<N>` → `/seal-milestone M<N>`(ADR-060); 이미 봉인·구현 중이면 `/implement-workitem` 또는 다음 M)
 - 스택별 default verify template은 본 skill의 "스택별 verify 풀세트" 표 기준. 도구 변경 시 ARCHITECTURE_OVERVIEW.md ## 7-X 갱신.
 - **옵션: Claude PostToolUse async adapter 예시** (사용자가 채택 시 `.claude/settings.local.json` 에 복사). GUARDRAILS_STRATEGY.md 의 PostToolUse 동기 hook 예시와 동일하게 *Unix / Windows 2 OS 예시* 모두 제공 — 동일 schema 에 `async: true` + `asyncRewake: true` 만 추가:
@@ -269,13 +269,13 @@ R0 — 운영 환경 가정 확인:
 | 도구 config 의 harness 경로 배제 | 누락된 배제 항목만 **추가** (기존 규칙 미수정 — 수행-2-1) |
 | `## Dart Source Roots` | 매 실행 **실측 갱신** (실제 소스 트리 조회) |
 | `## E2E Smoke Registry` | 매 실행 **실측 갱신** (runtime target 별 재판정) |
-| `## Design Gate Adapter` | 매 실행 **digest + conformance 재검증**, 낮은 capability version 은 승격 |
+| `## Design Gate Adapter` | 매 실행 **자가 검사 재실행**. canonical asset sha ≠ registry `copied-from`이면 갱신 대상 — project 사본 sha == `copied-from`(무수정)일 때만 새 canonical로 교체 + `copied-from` 갱신, 다르면(local modification) 덮어쓰지 않고 diff 보고 + 사용자 결정 |
 | `## Dependency Tools` | **보완만** — `/bootstrap-stack` 기록 행 미수정, 불일치는 보고 + 사용자 결정 |
 | `.gitattributes` | 전역 규칙 존재 확인 + 누락 규칙만 추가 (수행-4) |
 | 임시 probe (`src/__stackguard_probe__.*` 등 등록 소스·테스트 루트 안) | 실행 시 생성 → 회차별 판정 → **전부 삭제**. `.gitignore` 에 등재하지 않는다(등재하면 도구가 검사에서 제외해 판정 불가) |
 | `STACK_SETUP_PLAN ## 통합 명령 사용법` 의 `probe smoke:` 줄 | 매 실행 **최종 판정으로 갱신** (수행-5-f — `[Guard-drift]` (d) 의 유일한 입력) |
 
-**재실행 시점**: `/bootstrap-stack --migrate` 직후, `/stabilize-milestone` 이 `P2 [Guard-drift]` 를 기록한 뒤(다음 `/plan-milestone` R0 가 회수해 안내), design gate capability version 승격 시.
+**재실행 시점**: `/bootstrap-stack --migrate` 직후, `/stabilize-milestone` 이 `P2 [Guard-drift]` 를 기록한 뒤(다음 `/plan-milestone` R0 가 회수해 안내), design gate canonical asset 갱신 시.
 
 ## 정적 분석 도구 권장 (스택별 1종, ADR-021)
 
@@ -341,7 +341,7 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.propertie
 
 `validate` 명령에 lint 단계로 통합 권장 — CI fail 처리는 프로젝트 결정.
 
-## DESIGN.md lint 권장 (UI + Node 계열 한정, ADR-027#d25)
+## DESIGN.md lint 권장 (UI + Node 계열 한정, ADR-073 D10)
 - **조건**: `docs/20-system/DESIGN.md` 존재(UI 프로젝트) **그리고** 스택이 Node 계열(npx 사용 가능)일 때만.
 - **권장 명령** (강제 X, shared 기본값 미등록 — 사용자가 채택 시 `validate` 의 lint 단계 또는 CI에 wiring):
   ```bash
@@ -353,8 +353,8 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.propertie
 
 **설치 배선 — `@axe-core/playwright` devDep**: 6-2 toolchain 설치 또는 6-4-1 scaffold 시점에 `@axe-core/playwright`를 **devDep로 설치**한다(감지된 PM으로, 예: `npm i -D @axe-core/playwright`) — 설치하지 않으면 generated visual-qa spec·`validate:design` adapter가 `needs-install`/exit 2로 끝난다. 설치 실패는 stack-guard 6-5 `Needs Install` fallback(날조 금지). UI 프로젝트는 Playwright(재사용) + `@axe-core/playwright`(신규 devDep) 둘을 갖는다.
 
-> **기존 fork 마이그레이션**: 기존 `e2e/visual-qa.spec.*`는 덮어쓰지 않는다. v1/lower adapter는 위 digest 정책으로 v2 업그레이드하고, local modification은 자동 덮어쓰기 금지. 기존 `status=n/a`도 frontend 신호가 생긴 재실행에서 UI로 승격한다. UI→비-UI 전환은 사용자 확인 뒤 generated adapter/entry만 제거한다(ADR-058#amend-2).
-- **Motion 확장 주의**: 본 보일러플레이트는 Motion 을 canonical 8섹션 외 확장으로 둔다(ADR-027#d24). lint 의 section-ordering 은 canonical 8섹션 상대 순서만 보므로 통과하지만, 만약 특정 버전이 비-canonical 섹션을 경고하면 그 경고는 *무시 가능*(의도된 확장).
+> **기존 fork 마이그레이션**: 기존 `e2e/visual-qa.spec.*`는 덮어쓰지 않는다. v1/v2 adapter(`design-gate-conformance.mjs` 존재)는 v3 사본으로 교체하고 conformance 파일과 registry의 digest·capability·conformance 행을 제거한 뒤 자가 검사를 돌린다. local modification은 diff 보고 + 사용자 결정. 기존 `status=n/a`도 frontend 신호가 생긴 재실행에서 UI로 승격한다. UI→비-UI 전환은 사용자 확인 뒤 generated adapter/entry만 제거한다(ADR-072 D6).
+- **Motion 확장 주의**: 본 보일러플레이트는 Motion 을 canonical 8섹션 외 확장으로 둔다(ADR-073 D2). lint 의 section-ordering 은 canonical 8섹션 상대 순서만 보므로 통과하지만, 만약 특정 버전이 비-canonical 섹션을 경고하면 그 경고는 *무시 가능*(의도된 확장).
 - 비-Node 스택·비-UI 프로젝트는 본 항목 skip. *GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합 — npm 의존이라 shared 기본값에는 넣지 않는다.*
 
 ## CI 생성 (ADR-025#amend-1)
