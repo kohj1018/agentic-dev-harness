@@ -259,3 +259,38 @@ dogfood Round 11(웹)에서 D6 어댑터를 실제로 돌려 얻은 실측 3건�
 - .claude/skills/stack-guard/assets/design-gate.mjs       — 결정 1·3 (canonical sha 변경 — 재실행 계약대로 `copied-from` 갱신)
 - .claude/skills/stack-guard/SKILL.md                     — 결정 1·2 문구
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md    — `## Design Gate Adapter` command template·self-test 일자 칸
+
+<a id="adr-072-amend-2"></a>
+## Amendment 2 (2026-09-11) — plan 이 승인 표면을 대조하지 않는다 (계획 self-check 3축)
+
+### 배경
+dogfood Round 11(웹)에서 **같은 원인의 결함이 4건** 나왔다 — 전부 `/plan-workitem` 이 승인된 표면(매니페스트·DESIGN 인벤토리·FAC)을 보지 않고 task `## 3` 와 `## 7-1` 을 authoring 한 데서 나온다.
+- [관측됨] **계측 이벤트가 승인 UI 콜백에서 발화 불가.** 계획이 `todo_add_rejected`(공백 거부)를 지시했으나 승인된 `TodoAdd` 는 공백 제출을 내부에서 삼키고 콜백을 부르지 않는다. 4개 격리 구현 중 **2개가 도달 불가 dead code 를 넣었고** 2개는 충돌을 스스로 발견했다.
+- [관측됨] **신규 UI 요소가 인벤토리 등록 없이 제품에 들어갔다.** 저장 실패 배너를 `## 3` 가 지시하면서 `+ DESIGN.md ## 7 등록` line item 을 두지 않았고 어떤 AC 도 그 배너를 요구하지 않았다. validate 축 5 가 `P1 [Design-inventory-planless]` 로 **잡기는 했으나 구현이 끝난 뒤이고 비차단 기록 등급**이다. `[Design-reuse-drift]`(D5-4)는 *승인 파일의 변경*만 보므로 새 파일의 신규 요소에는 원리상 발화하지 않는다.
+- [관측됨] **FAC↔AC 매핑이 «우변은 실재하나 의미가 빈» 상태.** `[FAC-semantic-hollow]` 가 두 feature·네 task **전부에서 6/6 재현**됐다(예: 「새로고침 유지」와 「쓰기 실패 알림」 두 FAC 가 같은 AC 를 가리키는데 그 AC 본문은 제3의 시나리오). ADR-037 커버리지 검사는 «우변이 실재하는 task:AC 를 가리키는가»만 보므로 아무도 의미를 대조하지 않는다.
+- [관측됨] 나머지 2건(`source` 구분 불가 / 재읽기 실패 시 입력 유지 불가)도 동일 계열이다.
+
+### 결정
+1. **`/plan-workitem` 에 `3-S. 승인 표면 대조 self-check` 를 둔다** — 분해 직후 1회, 3축. 자동 차단은 하지 않고 전부 "남은 미결정 사항" 으로 surface 한다(ADR-007 책임 경계 유지).
+2. **(a) UI 지시의 출처** — `## 3` 가 지시하는 사용자 가시 요소는 ① 승인 매니페스트 `source[]`·`px[]` 실재 ② DESIGN `## 7` 인벤토리 재사용 ③ 신규 중 하나여야 한다. ③이면 `+ DESIGN.md ## 7 등록` line item 을 같이 박고, 그 요소가 **승인 화면의 시각 표면을 바꾸면** 재승인 경로(`/design-milestone` 재진입 또는 다음 M — ADR-060 D6)를 surface 한다. 어디에도 못 넣는 UI 지시는 `## 3` 에 쓰지 않는다. 대응 AC 가 0개인 UI 지시도 surface 한다.
+3. **(b) 계측의 배선 가능성** — 3-I 로 옮긴 각 이벤트를 매니페스트 `source[]` 의 컴포넌트 시그니처와 대조해 발화 가능한 것만 line item 으로 만든다. 불가능하면 `- 계측 배선 불가: …` 로 surface 한다. 판정 규칙 SSOT 는 3-S (b) 이고 3-I 는 포인터만 둔다.
+4. **(c) FAC 매핑 행의 증명 문장** — `## 7-1` 의 각 매핑 행에 `— 증명: AC-M 의 <조건>이 FAC-N 의 <요구>를 검증한다` 1줄을 붙인다. 쓸 수 없으면 AC 문안을 고치거나 AC 를 추가한다. 둘 다 불가능하면 `- FAC 증명 불가: …` 로 surface 하되 **봉인을 자동 차단하지는 않는다**(unmapped 와 등급이 다르다). `## 7-3` PX 행에는 적용하지 않는다.
+5. **validate-plan `[Plan-design]`·`[Plan-FAC-coverage]` 에 미러**한다(reviewer 동일 차원 포함) — plan 이 놓쳐도 계획 검증이 잡는 2-layer. 등급은 둘 다 `P1` 이며, 증명 문장 위반은 **unmapped 와 구분해** 보고한다.
+
+### 근거
+- 개별 패치(3-I 에 한 줄, 축 5 에 한 줄)를 4번 반복하는 대안은 기각했다 — 네 건의 원인이 하나이므로 규칙도 한 곳에 모아야 다음 사례가 같은 곳에서 걸린다. 대가는 3-S 가 plan 실행마다 3축을 돌아 **토큰·시간이 늘고 오탐 surface 가 늘 수 있다**는 것이다. 자동 차단을 붙이지 않아 오탐 비용을 사용자 판독으로 흡수한다.
+- 증명 문장을 **차단 등급으로 올리지 않은** 이유: 의미 대조는 자동 판정이 어렵다. 사람이 읽는 한 줄을 강제하는 쪽이 기계 판정을 흉내 내는 것보다 정직하다.
+- 대안 «validate-workitem 축 3 을 기록 등급 필수로 승격»은 **아직 채택하지 않고 승격 후보로 남긴다**(Round 12 재관측 후 판단) — 본 amend 는 계획 시점 처방이고, 그쪽은 구현 후 처방이라 효과가 겹치는지 먼저 본다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 2 의 «어디에도 못 넣는 UI 지시는 쓰지 않는다».
+- enabling(약, [관측됨]): 나머지 — 전부 surface 이며 차단하지 않는다.
+
+### Mutation delta (ADR-047 D3)
+- failure = plan 이 승인 표면과 무관한 `## 3`·`## 7-1` 을 쓰고, 결함이 구현 후에야 비차단 등급으로 드러난다(관측 4건) / predicted = Round 12 에서 dead code·미등록 요소 0건, `## 7-1` 전 행에 증명 문장 존재 / falsifier = Round 12 에서 (a) 3-S 를 돌렸는데 같은 계열 결함이 또 구현 후에 처음 잡히면 결정 1 실패 (b) 증명 문장이 형식만 채운 동어반복으로 나오면 결정 4 실패(그때는 문장 형식을 예시로 더 좁힌다) (c) surface 가 노이즈로 채워져 사용자가 전부 무시하면 오탐 비용이 편익을 넘는다 / rollback = 본 amend superseded → 3-S 제거, 3-I 의 계측 규칙 복원, 미러 2줄 삭제.
+
+### 적용 surface
+- .claude/skills/plan-workitem/SKILL.md                   — 결정 1~4 (3-S 신설, 3-I 는 포인터)
+- .claude/skills/validate-plan/SKILL.md                   — 결정 5 미러
+- .claude/agents/reviewer.md                              — 결정 5 미러
+- docs/30-workitems/_templates/FEATURE_TEMPLATE.md        — 결정 4 `## 7-1` 행 형식

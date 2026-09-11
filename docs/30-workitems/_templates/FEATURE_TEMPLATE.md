@@ -47,7 +47,9 @@ feature
 
 ## 7-1. FAC ↔ AC 매핑표 (subsection of ## 7)
 <!-- /plan-workitem이 task 분해 시 본 subsection을 채운다 (영속 SSOT — plan 출력은 echo).
-     형식: FAC-N → T-NNN:AC-N, T-MMM:AC-M (다대다 허용)
+     형식: FAC-N → T-NNN:AC-N, T-MMM:AC-M (다대다 허용) — 매핑 뒤에 증명 문장 1줄을 같은 줄에 붙인다:
+       `- FAC-1 → T-001:AC-2 — 증명: AC-2 의 <어느 조건>이 FAC-1 의 <어느 요구>를 검증한다` (ADR-072#amend-2)
+       증명 문장을 쓸 수 없으면 그 매핑은 «우변은 실재하나 의미가 빈» 상태다 — AC 문안을 고치거나 AC 를 추가한다.
      unmapped 0건이 /seal-milestone 봉인 조건 — plan-workitem은 발견 시 성공 종료 금지, 승격은 하지 않는다(ADR-037#amend-3 / ADR-060 D7). 구현 시작 후 발견되면 validator(ADR-037) 및 stabilize preflight가 P0 [Spec-gap]로 보고 + 사용자 결정.
      본 subsection은 ## 7 FAC와 한 묶음 — ADR-036 섹션 구조(## 12 폐지로 11 main section — ADR-060 D1)에 *추가 main section 신설 X*. -->
 - FAC-1 →
