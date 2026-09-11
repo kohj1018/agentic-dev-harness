@@ -19,6 +19,8 @@ accepted
 - **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). UI 판정 뒤 `/stack-guard`가 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고, 고정 fixture conformance와 source digest를 통과한 v2만 사용한다(#amend-1·#amend-2). *진짜 품질 지렛대*.
 - **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
 - 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
+- **R0 레퍼런스 갤러리 절차(4층 소스 + 큐레이션 라운드)·R6 네이티브 테마 쇼케이스 — #amend-4.**
+- **게이트 실행물(adapter·자가 검사·registry)은 ADR-072 D6이 소유한다 — #amend-4 결정 4. D3 품질 계약은 본 ADR.**
 
 ## 배경
 - [관측됨] 실사용 fork에서 시안이 단조롭고 어디서 본 듯함 + R0 grounding이 median으로 조용히 후퇴(슬롭 근본원인). 레퍼런스 값 추출이 실제 제품 페이지에서 자주 실패(Linear/Stripe/Vercel 0/3 — markdown 변환으로 CSS 소실).
@@ -69,7 +71,7 @@ accepted
 
 ## Surfaces  (본 ADR 변경 시 동기 갱신 — fan-out SSOT)
 - .claude/skills/bootstrap-design/SKILL.md
-- .claude/skills/plan-milestone/SKILL.md    — R5-5 프로토타입 수용 게이트 caller(allowed-tools + R5-5; R2-G/R6는 bootstrap-design 소관)
+- .claude/skills/design-milestone/SKILL.md    — R2 갤러리·R6 게이트 품질 계약 caller
 - .claude/skills/stack-guard/SKILL.md
 - .claude/skills/stabilize-milestone/SKILL.md — #amend-3 결정 5 `[Guard-drift]` (e) visual-QA 전제 기록 회수
 - docs/20-system/DESIGN.md                  — 현재 디자인 흐름 근거
@@ -90,14 +92,14 @@ accepted
 - .claude/agents/designer.md                 — R0 분해 + REFINE/EXPLORE 시안 + repair 되먹임
 - .claude/agents/reviewer.md                 — Design Consistency 6차원 + R2-G/R6 게이트 호출자
 - scripts/README.md                          — baseline 프로젝트 실행 코드 없음 + UI adapter 생성 경계
-- .claude/skills/stack-guard/assets/design-gate.mjs — direct-support Node UI canonical adapter
-- .claude/skills/stack-guard/assets/design-gate-conformance.mjs — 고정 fixture·기대값·source digest conformance
+- .claude/skills/stack-guard/assets/design-gate.mjs — v3 canonical (매니페스트 모드·자가 검사) — 소유 ADR-072 D6
 
 ## 참고
 - ADR-027 (DESIGN 내용·인터페이스 SSOT), ADR-040#amend-4 (researcher 디자인 레퍼런스 모드 — 소스 위계는 ADR-058이 부분 supersede), ADR-056 (R5 프로토타입·경험 계약), ADR-047 (mutation contract), ADR-045 (참조 계약), ADR-053 (parallel-merge 금지), ADR-005 (SSOT).
 
 <a id="adr-058-amend-1"></a>
 ## Amendment 1 (2026-07-26) — baseline runner 제거 + UI project-native gate 조건부 생성
+> (현재 SSOT: ADR-072 D6 — #amend-4 결정 4로 이관)
 
 ### 배경
 - [관측됨] shared baseline의 `scripts/design-gate.mjs`는 Node·Playwright·axe를 전제하지만, `GUARDRAILS_STRATEGY.md`와 `scripts/README.md`는 런타임 종속 검증 코드를 스택 확정 뒤 생성하도록 규정한다. `STRUCTURE.md`가 이 파일을 `baseline`으로 둔 상태는 문서 중심·cross-stack 보일러플레이트 경계와 충돌한다.
@@ -134,6 +136,7 @@ accepted
 - **Mutation delta (ADR-047 D3)**: failure=baseline runner 삭제 뒤 UI adapter 미생성·미기록·미실행 또는 생성 구현이 v1 capability 일부를 누락 / predicted improvement=비-UI fork 실행 코드 0 + stack-specific 생성 원칙 정합, D3 결함 검출력 보존 / preserved=base Mutation Contract의 DESIGN SSOT·사용자 취향 오라클·생성/감사 분리·gate repair loop·비-UI 삭제 경로 / falsifier=UI dogfood self-test 10케이스 중 하나라도 기대 분류 불일치, runtime caller의 `scripts/design-gate.mjs` hardcode 잔존, 비-UI dogfood에 gate artifact 생성 / rollback=amend-1을 supersede하는 후속 ADR로 baseline runner 복원(ADR-058 D3 자체는 유지).
 <a id="adr-058-amend-2"></a>
 ## Amendment 2 (2026-07-26) — canonical asset + fixed conformance + upgrade/recovery
+> (현재 SSOT: ADR-072 D6 — #amend-4 결정 4로 이관)
 
 ### 배경과 v1 증거 정정
 - [관측됨] v1 UI fixture의 generated adapter는 삭제 전 baseline runner와 138줄·SHA-256이 byte-identical했다. 따라서 기존 `10/10`은 **검증된 legacy 구현의 행동 보존**은 증명했지만, 산문 capability만으로 독립 authoring한 구현의 재현성은 증명하지 않았다. `SIMULATION_RUN.md`의 v1 판정 범위를 이 한계에 맞게 정정한다.
@@ -190,3 +193,47 @@ accepted
 - .claude/skills/stack-guard/SKILL.md
 - .claude/skills/stabilize-milestone/SKILL.md
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md
+
+<a id="adr-058-amend-4"></a>
+## Amendment 4 (2026-09-11) — 레퍼런스 갤러리 절차(4층 소스 + 큐레이션) + R6 네이티브 테마 쇼케이스 + 게이트 실행물 계약 이관
+
+### 배경
+- [관측됨] R0는 텍스트 리서치와 토큰 패키지 값 추출뿐이라 AI가 레퍼런스 화면을 «보지» 못한다. design-eval은 «텍스트 레퍼런스를 늘려도 시각 점수가 오르지 않는다»까지만 말하고, 시각 관측·사람 큐레이션의 효과는 미측정이다([가설]). 사용자 fork에서 시안이 낡거나 평범하다는 보고가 반복된다.
+- [관측됨] 앱 화면은 AI가 설치·조작할 수 없고, 로그인 필요 사이트는 캡처가 막힌다. 디자이너 관행은 큐레이션 허브(uibowl.io·Mobbin·Refero 등)와 스토어 스크린샷을 먼저 본다.
+- [관측됨] R6 프리뷰는 HTML이라 «DESIGN.md 토큰 → 스택 테마 배선»의 오차를 잡지 못하고, 그 오차는 첫 마일스톤 화면에서 늦게 드러난다. 코드 프로토타입(ADR-072)이 도입되면 이 배선이 선행돼야 한다.
+- [관측됨] 게이트 실행물 계약(#amend-1 결정 5·6·#amend-2 digest·capability·conformance)은 «복사본이 원본과 같은가»를 증명할 뿐 이 프로젝트에 맞는가를 증명하지 못하며, Flutter 어댑터가 생기면 전제(단일 Node 파일) 자체가 깨진다. 인용 규모(2026-09-11 실측): `ADR-058#amend-2` 16파일/31줄.
+
+### 결정
+1. **레퍼런스 갤러리 절차(R0 확장)** — `/bootstrap-design` R0와 `/design-milestone` R2가 공유한다. 소스 4층:
+   - **1층 큐레이션 허브**: uibowl.io(국내 앱·웹·게임, 컴포넌트·인터랙션 필터, 로그인 없이 열람), Mobbin, Refero, Screenlane, Page Flows, Nicelydone(앱 흐름) / Land-book, Godly, Awwwards(웹) / App Store·Google Play 공개 스크린샷(앱 최우선 — 로그인 불요) / Behance·Dribbble은 실제 제품이 아니므로 `concept-only` 표기. Pinterest는 주 소스에서 제외(3층으로만). 허브도 `capture-refs.mjs`의 자동 캡처 대상이다(내부 참고용 — 캡처물은 `참고용(재배포 금지)`으로 표기하고 제품·문서에 재배포하지 않는다). 로그인 벽 뒤 화면은 캡처되지 않으므로 공개 열람 페이지만 찍히고, 나머지는 사용자가 열어 본 뒤 3층 캡처로 넣는다. 1층 허브는 Layer B 값 추출 소스가 아니다(researcher 거부 목록 유지 — 시각 관측 lead로만).
+   - **2층 실제 제품**: `capture-refs.mjs`(Playwright)로 지정 URL을 프로필 뷰포트로 캡처. 흐름 관측은 **관측 목적별**(온보딩·검색·결제·오류 복구 등)로 예산 안에서(기본 ≤3 흐름 × ≤6 화면). 봇 차단·로그인 필요는 `캡처 불가 — <사유>`로 정직 표기하고 3층을 요청한다. 자격 증명은 다루지 않는다.
+   - **3층 사용자 캡처**: `docs/20-system/design-refs/inbox/`(gitignore)에 사용자가 이미지를 넣는다. 앱 프로젝트의 주 경로.
+   - **4층 DESIGN.md 분석본**: getdesign.md(VoltAgent 커뮤니티 디렉터리, 550+ 분석본 — 공식 문서 아님)를 `docs/20-system/design-refs/cache/`(gitignore)에 내려받아 designer가 **어휘·토큰 범위·컴포넌트 규칙·결정을 근거 짓는 방식**을 참고한다. **Google 공식 예시는 4층에 넣지 않는다** — 결정 2 Layer C대로 «선택이 끝난 R5의 format fixture»로만 쓴다(공식 예시 `atmospheric-glass`가 §9 anti-slop 위반이라 창작 컨텍스트 R0~R2 유입은 미감 오염 — 본 amendment도 아래에서 Layer A/B/C 유지를 명시한다). 기록은 `getdesign.md 분석본(<brand>)`로 적고 «<brand> 공식»으로 적지 않는다. 값·문구를 그대로 옮기지 않는다(ADR-040#amend-4 값 복제 금지 승계).
+   - **갤러리 라운드(기본 — `--fast`만 생략)**: 1~3층 캡처를 `docs/20-system/design-refs/gallery.html`(gitignore, 자기완결) 한 페이지로 묶어 사용자가 브라우저에서 고르고 메모한다. **선택본만** designer가 분해한다. 취향 오라클=사용자 불변.
+   - `DESIGN_RESEARCH.md` 항목 schema에 `- 출처 유형: live | curated-hub | store-screenshot | user-capture | design-md-analysis`와 `- 사용 주의: 참고용(재배포 금지) | concept-only | 비공식 분석본` 두 줄을 추가한다. Layer A/B/C·role 3종·정지 규칙·최소 schema는 유지.
+2. **R6 = 네이티브 테마 쇼케이스**: R6는 HTML preview 대신 **DESIGN.md 토큰을 실제 스택 테마에 배선**하고 그것을 렌더한다. 웹: `src/styles/tokens.css`(CSS 변수) + Tailwind/테마 설정 + Storybook `Theme/Showcase` 스토리(토큰 swatch·타이포 scale·컴포넌트 category state·대표 화면 2~3개 — 실카피). Flutter: `lib/theme/tokens.dart`·`lib/theme/app_theme.dart` + `lib/prototype/theme_gallery.dart` 진입 파일. 배선 파일은 제품 코드이므로 **커밋한다**(HTML preview와 달리 삭제하지 않는다). 게이트는 매니페스트 모드(ADR-072 D6)로 쇼케이스를 검사한다. 사용자 승인 뒤 concept HTML만 삭제한다. 폰트 결정(ADR-073 D4)은 이 쇼케이스에서 실제 문장을 본 뒤 확정한다. Storybook·테마 배선 코드 authoring은 builder 단발 sub-call(dispatch `mode: ui-authoring` — designer는 Bash 없음, 스펙만 낸다). **`--fast`도 R6-1 배선·쇼케이스·게이트는 수행한다**(갤러리·R6-2 reviewer 픽셀 판정만 생략) — `_theme/manifest.json`이 `/design-milestone`의 필수 입력이기 때문이다. `--update`에서 토큰·컴포넌트가 바뀌면 R6-1 배선을 delta 재생성한다(DESIGN만 바뀌고 테마가 낡는 것을 막는다). 폰트 패키지·파일 추가는 R6-1 배선의 일부다(설치 소유 예외 — ADR-071 D6).
+3. **R1 확장**: 공유 모드(ADR-073 D3)·폰트 조합(ADR-073 D4) Decision Brief 추가(user-choice). R2 concept HTML은 유지한다(방향 탐색 일회성 — 세 방향을 네이티브로 배선하면 비용이 3배).
+4. **게이트 실행물 계약 이관**: #amend-1 결정 5·6(capability v1·conformance self-test)과 #amend-2 전부(canonical asset digest·capability v2·fixed conformance·upgrade/recovery)를 [ADR-072](ADR-072-design-milestone-and-code-prototype.md) D6(design gate v3 — 매니페스트 모드 + 설치 시 자가 검사 4케이스 + 복사 시 fingerprint)이 **대체**한다. D3의 품질 계약(serious/critical axe·좁은 폭 geometry·reviewer 픽셀 판정·repair loop ≤2·fail-closed)은 그대로다. #amend-1·#amend-2 본문은 기록으로 두고 각 헤딩 아래 `(현재 SSOT: ADR-072 D6)`를 병기한다. #amend-3(visual-QA 전제 표현)은 유효하다.
+
+### 근거
+- 갤러리·큐레이션은 «AI가 보고, 사람이 고른다»로 취향 오라클을 유지하면서 관측 기반 주장(D2)을 실제로 가능하게 한다. 효과는 [가설] — 재검토 트리거에 둔다.
+- 테마 배선을 R6로 당기면 옮김 오차가 한 곳(토큰→테마)에서 한 번 승인된다.
+
+### 강도 (ADR-022)
+- enabling(약, [가설]): 결정 1·2·3. 결정 4는 실행물 소유 이관(품질 계약 불변).
+- 재검토 트리거: Round 11·12에서 갤러리 라운드가 마일스톤당 1시간을 넘거나 선택본이 0건이면 `--fast` 기본화 검토 / 큐레이션 선택본 기반 시안이 R2-G reviewer 픽셀 판정에서 이전 라운드보다 나쁘면 1층 소스 축소.
+
+### Mutation delta (ADR-047 D3)
+- Target = bootstrap-design R0·R1·R6·allowed-tools / `capture-refs.mjs` 신설 / researcher.md 디자인 레퍼런스 모드 / designer.md / DESIGN_RESEARCH schema / `.gitignore` / STRUCTURE.
+- failure = 텍스트만 보는 리서치의 median 회귀 / HTML preview가 테마 배선 오차를 못 잡음 / digest 계약이 Flutter에서 불성립 (관측됨).
+- falsifier = 갤러리 선택본 0건 반복 / R6 쇼케이스가 gate 매니페스트 모드에서 exit 2로 굳음 / 자가 검사가 알려진 불량을 통과시킴.
+- rollback = R0 갤러리 라운드·R6 네이티브 제거, HTML preview 복원; 결정 4는 ADR-072 rollback과 함께.
+
+### 적용 surface
+- .claude/skills/bootstrap-design/SKILL.md
+- .claude/skills/bootstrap-design/assets/capture-refs.mjs
+- .claude/agents/researcher.md
+- .claude/agents/designer.md
+- docs/20-system/DESIGN.md (§0 R0~R6 주석)
+- docs/00-meta/STRUCTURE.md
+- .gitignore
