@@ -929,5 +929,32 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 - **남은 최우선 미검증은 D1의 차단 경로다** — `Needs Execution Evidence` 정지와 `--waiver` 해제는 이번 3 시나리오가 건드리지 않았고, D7이 "실질 차단은 여기 하나뿐"이라고 배치한 지점이라 **차기 라운드 1순위**다(증거 확보 불가 환경 fixture 1개면 잰다).
 - **차기 라운드 후보**: (a) `Needs Execution Evidence` + `--waiver` 실측 · (b) 시나리오 6(코드를 고친 repair의 exec-evidence 재기록) · (c) D4가 명시한 구멍(repair가 갱신을 조용히 건너뛰는 사례) 누적 관측 — ADR-064가 "2회 이상이면 라운드 식별자 기반 구조화 스키마로 승격"이라 규정한 카운터의 현재 값은 **0** · (d) 나머지 반증 시나리오 1·4·5·7.
 
+## Round 11 (2026-09-11~, todo 웹앱 / Next.js + Storybook — ADR-070~073 적용 검증)
+
+> **진행 중** — 본 절은 `/stack-guard`·`/bootstrap-design`·`/design-milestone`·`/plan-workitem`·`/seal-milestone`·첫 구현 task까지 수행한 시점의 기록이다. 단계별 마찰점·성공 기준 충족·결정에 미친 영향은 라운드 완주 후 채운다.
+> isolated fork (baseline `6207cde`). 실제 Node 24.20 / pnpm 10.33 / Next 16.3.4 / Flutter 미사용. 수행 방법의 한계는 Round 8·9와 같다 — `disable-model-invocation: true`인 메인 세션 skill 구간은 에이전트가 SKILL.md대로 **실제 명령 실행·실제 커밋을 동반해** 수작업 재현했고, builder·validator 위임만 진짜 sub-agent 실행이다.
+
+### harness 발견 → 조치
+
+| # | 발견 | 등급 | 조치 |
+|---|---|---|---|
+| 1 | design gate command template `<pm> validate:design -- <args>`가 pnpm에서 `exit 2` — pnpm은 `--`를 스크립트 인자로 그대로 넘기고 어댑터가 «미정의 플래그»로 본다 | P1 | **수정** — 어댑터가 bare `--`를 무시(ADR-072#amend-1 결정 1). 템플릿·skill에 PM 차이 명시. 실측 재확인: 같은 명령이 pnpm에서 3케이스 PASS |
+| 2 | `next dev`가 실행마다 `AGENTS.md`에 자기 규칙 블록 10줄을 append(57→67줄). stack-guard 보호 경로 대조가 수행 0 전후만 돌아 못 잡음 | P1 | **수정** — `/stack-guard` 수행 0-H 신설(실행 시작·종료 harness 경로 해시 대조, 보고 등급·자동 되돌림 없음) + 마지막 출력 항목(ADR-071#amend-1 결정 1) |
+| 3 | «자가 검사 4케이스»가 웹 전용 프로젝트에서 도달 불가 — (d)는 `pubspec.yaml` scope 전용이라 정상 결과가 3케이스 | P2 | **수정** — 판정 기준을 «케이스 수»에서 «실행된 케이스가 전부 기대와 같은가»로 정정(ADR-072#amend-1 결정 2). registry `self-test 일자`에 케이스 수 병기 |
+| 4 | `storybook init`(v10)이 결정 집합 밖 애드온 4종 + `vitest.config.ts`를 함께 설치. 「viewport 애드온」은 SB 8부터 존재하지 않음(코어 global) | P2 | **수정** — 카탈로그 기본 후보를 «a11y 애드온만»으로 정정 + 설치 직후 결정 밖 애드온 제거 명시(ADR-071#amend-1 결정 2) |
+| 5 | `/validate-workitem` inline 임계(`L≤50`)가 TDD task에 낮다 — T-001(순수 함수 4개 + 테스트) 실측 **F=6·L=91**로 초과해 6축 fan-out 강제(재량 0). 축 2 단독 176초 / 6축 subagent 토큰 약 16만 | P2 | **기록만** — ADR-051#amend-4가 «실측 전 추정치, 재보정 창구»라 명시한 값의 첫 실측이다. Round 12 실측을 더한 뒤 재보정한다(단일 표본으로 임계를 옮기지 않는다) |
+| 6 | foreman이 `/implement-workitem` 6-R(receipt 기록)을 건너뛰고 validate로 진행 — 축 7 validator가 `P1 [Verify-power-missing] AC-1..3`으로 사후 검출 | P1 | **수정** — 6-R 앞에 누락 방지 문단 + 마지막 출력에 `receipt 기록 (6-R)` 필수 항목 신설(없으면 «6-R 미수행») |
+| 7 | builder의 «Red»가 모듈 부재 import 실패로 끝남 — 어설션이 0건 실행돼 판정력 근거가 아님(가짜 Red의 가장 흔한 형태) | P1 | **수정** — implement Red phase 정의와 `builder.md`에 «모듈 부재·컴파일 오류로 0건 실행은 Red가 아니다 — 의도적 오구현을 먼저 두고 어설션 실패를 관측» 명시. **완화 확인됨**: 같은 문구를 넣은 T-003 dispatch에서 builder가 실제로 오구현 → 어설션 실패 3종 관측 후 구현 |
+| 8 | `/bootstrap-design` R6-1 테마 배선이 DESIGN `## 9` 포커스 링 규정을 배선하지 않아, 승인 화면에 브라우저 기본 파란 포커스 링(팔레트 밖 색)이 렌더됨. 인라인 스타일로는 의사 클래스 표현 불가 | P2 | **수정** — R6-1에 «의사 클래스가 필요한 상태 규정은 전역 CSS로 함께 배선» 명시 |
+| 9 | 단일 라우트 앱에서 «화면»이 라우트가 아니라 상태 묶음이 된다 — ADR-072 R1의 «feature당 대표 1화면»이 흔들림 | 관측 | **기록만** — 각 브리프에 «화면 도출 메모»로 승격 근거를 남기는 것으로 이번 라운드는 해소. 반복 관측되면 R1 문구 후보 |
+| 10 | `create-next-app`이 `AGENTS.md`·`CLAUDE.md`·`README.md`를 생성 — 수행 0 보호 경로 목록이 정확히 셋을 막음(복사 직전·직후 201파일 해시 동일) | 관측 | **조치 불요** — ADR-071 D5 보호 규칙이 실제로 작동한 첫 관측. 발견 2는 그 규칙의 *시점*이 좁다는 별개 문제 |
+| 11 | `todo-add` 프로토타입에서 「추가」가 `disabled`면 브라우저 암묵 제출이 없어 **공백 입력 + Enter가 무반응** — 브리프의 `invalid` 상태가 구현에서 도달 불가였다 | 관측 | **조치 불요** — R4 인터랙션 계약 테스트가 Red로 잡아 `onKeyDown`으로 해소. ADR-072 D5 «행동 계약은 게이트·테스트»의 실효 사례 |
+| 12 | `/plan-workitem` cross-feature seam self-check가 실제 계약 충돌 검출 — PX-M1-todo-empty-error-04(읽기 실패 중 입력 가능) ↔ «실패한 읽기 위에 덮어쓰지 않는다» | 관측 | **조치 불요** — INV-2(«`error` 중 추가는 재읽기 성공 후에만 저장»)로 확정. ADR-057 결정 12가 의도대로 작동 |
+| 13 | `--tokens-only`의 단축 hex가 카피 문구를 오탐 — 실측 18건 중 6건이 「PR #412」의 `#412` | P2 | **수정** — 스타일시트에서만 3~8자리, 코드 파일은 6·8자리만 탐지(ADR-072#amend-1 결정 3). 재실측 18 → 12건, 오탐 0건 |
+| 14 | builder effort 실험(ADR-004#amend-4 결정 3) 조건 (a)~(d) 미수행 — `.claude/agents/builder.md` frontmatter 수정이 auto 모드 분류기의 `[Self-Modification]`에 걸렸다 | 환경 | **사용자 승인 후 재개** — 부수 관측: frontmatter 편집 직후 곧바로 dispatch하면 hot-reload가 반영되지 않는다(`maxTurns: 1`을 넣은 preflight가 3 step 완주). 조건 전환 사이에 대기가 필요하다 |
+
+### 수정분 커밋
+`fix(harness): correct design gate adapter, protected-path timing and Red definition from dogfood round 11`
+
 ## Builder Effort Experiment (ADR-004#amend-4)
 - 상태: Round 11 dogfood에서 측정 예정 — 조건 (a)~(d) 결과 표는 그때 채운다(실험 설계는 ADR-004#amend-4 결정 3).
