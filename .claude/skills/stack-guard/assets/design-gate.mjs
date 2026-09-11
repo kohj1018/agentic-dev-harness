@@ -339,34 +339,34 @@ function runFlutterTest(scope, testFile) {
 // ---------- manifest 모드 ----------
 // 결정 글꼴의 «선언»이 실재하는가 (ADR-073#amend-1 결정 5 — 1차, 차단 등급).
 // 패밀리 이름을 CSS 변수에 쓴 것은 배선이 아니다 — @font-face / next/font/local / pubspec fonts: 중 하나가 있어야 한다.
-function checkFontDeclarations(families, scopes) {
-  const out = [];
-  for (const family of families) {
-    const esc = family.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    let found = null;
-    for (const scope of scopes) {
-      const pub = join(scope, 'pubspec.yaml');
-      if (existsSync(pub)) {
-        const y = readFileSync(pub, 'utf8');
-        if (/^\s*fonts:/m.test(y) && new RegExp('family:\\s*[\'"]?' + esc, 'm').test(y)) { found = pub; break; }
-      }
-      for (const d of ['src', 'lib', 'app', 'styles', 'assets']) {
-        const root = join(scope, d);
-        if (!existsSync(root)) continue;
-        for (const f of walkFiles(root)) {
-          if (!/\.(css|scss|ts|tsx|js|jsx|mjs)$/.test(f)) continue;
-          let txt = '';
-          try { txt = readFileSync(f, 'utf8'); } catch { continue; }
-          if (!txt.includes(family)) continue;
-          if (/@font-face/.test(txt) || /next\/font\/local/.test(txt) || /localFont\s*\(/.test(txt)) { found = f; break; }
-        }
-        if (found) break;
+function checkFontDeclaration(family, scope) {
+  const esc = family.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let found = null;
+  const pub = join(scope, 'pubspec.yaml');
+  if (existsSync(pub)) {
+    const y = readFileSync(pub, 'utf8');
+    if (/^\s*fonts:/m.test(y) && new RegExp('family:\\s*[\'"]?' + esc, 'm').test(y)) found = pub;
+  }
+  if (!found) {
+    for (const d of ['src', 'lib', 'app', 'styles', 'assets']) {
+      const root = join(scope, d);
+      if (!existsSync(root)) continue;
+      for (const f of walkFiles(root)) {
+        if (!/\.(css|scss|ts|tsx|js|jsx|mjs)$/.test(f)) continue;
+        let txt = '';
+        try { txt = readFileSync(f, 'utf8'); } catch { continue; }
+        if (!txt.includes(family)) continue;
+        // 패밀리 «이름» 만 쓴 것은 배선이 아니다 — 실제 선언이 같은 파일에 있어야 한다.
+        if (/@font-face/.test(txt) || /next\/font\/local/.test(txt) || /localFont\s*\(/.test(txt)) { found = f; break; }
       }
       if (found) break;
     }
-    out.push({ family, declared: !!found, at: found });
   }
-  return out;
+  // node_modules 패키지 CSS 를 @import 한 것은 «배선»으로 치지 않는다 (ADR-073#amend-1 falsifier (a) 발화 후 좁힘).
+  // 실측: 패키지 CSS 의 상대 `url(./woff2/…)` 을 번들러가 자산으로 잡지 않아 선언은 있는데
+  // 빌드에 파일이 복사되지 않았고, 1차는 통과하고 2차(런타임)만 잡았다.
+  // 자기 소스에 @font-face 를 두고 자기 자산을 참조해야 번들러가 파일을 끌고 온다.
+  return { family, scope, declared: !!found, at: found };
 }
 
 async function runManifestMode(opts, ctx) {
@@ -384,9 +384,17 @@ async function runManifestMode(opts, ctx) {
 
   const result = { version: 3, mode: 'manifest', screens: [], summary: { blockers: 0, reports: 0, unavailable: 0, snapshotWarnings: [] } };
   // 결정 글꼴 1차 검사 (ADR-073#amend-1 결정 5 — 차단). 선언 실재만 본다: 결정론적이라 blocker 로 쓸 수 있다.
-  // `manifest.fonts` 가 없으면 통째로 건너뛴다(schema v1 minor — 기존 매니페스트 호환).
-  if (manifest.fonts && manifest.fonts.length) {
-    result.fontDeclarations = checkFontDeclarations(manifest.fonts, [...new Set(screens.map((s) => s.scope || '.'))]);
+  // 글꼴은 프로필별로 갈린다(DESIGN `## 3` 전달 방식이 프로필 delta다) — `profiles.<p>.fonts` 를 읽는다.
+  // 선언이 없으면 통째로 건너뛴다(schema v1 minor — 기존 매니페스트 호환).
+  {
+    const pairs = new Map(); // `${scope}\u0000${family}` -> { family, scope }
+    for (const sc of screens) {
+      const fams = ((manifest.profiles || {})[sc.profile] || {}).fonts || [];
+      for (const family of fams) pairs.set(`${sc.scope || '.'}\u0000${family}`, { family, scope: sc.scope || '.' });
+    }
+    if (pairs.size) {
+      result.fontDeclarations = [...pairs.values()].map(({ family, scope }) => checkFontDeclaration(family, scope));
+    }
   }
   let unavailable = false;
   const { chromium, AxeBuilder } = await loadPlaywright([...screens.map((s) => s.scope || '.'), ...(opts.scopes ?? [])]); // 자가 검사 (c)는 --scopes 전체를 넘긴다(첫 scope에만 모듈이 없으면 오탐 exit 2)
@@ -435,7 +443,7 @@ async function runManifestMode(opts, ctx) {
         // 선언이 없으면 프로필 뷰포트 전체. 조건을 무시하면 「320에서 밀리는가」의 기준선이
         // 1280 스크린샷이 되어 이름과 내용이 어긋난다(dogfood Round 12 실측).
         const stateViewports = stateRenderViewports(state, viewports);
-        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale, fonts: manifest.fonts });
+        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale, fonts: (profile.fonts || []) });
         for (const e of entries) result.screens.push({ id: screen.id, profile: screen.profile, viewport: e.viewport, preview, blockers: e.blockers, reports: e.reports, screenshot: e.screenshot });
       }
       // 승인 스냅샷은 «통과한 화면»만 동결한다(ADR-072 D4) — 차단된 화면이 기존 승인본을 덮어쓰면 기준선이 오염된다.
