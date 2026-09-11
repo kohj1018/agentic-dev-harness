@@ -202,3 +202,39 @@ dogfood Round 11·12 에서 **팬아웃 단위가 보고 0건 상태로 상한�
 ### 적용 surface
 - .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1·2
 - .claude/agents/builder.md — 결정 1·2 (**2026-09-11 편입**). 최초 작성 시 «report-only 가 아니고 상한 45 라 제외» 로 뒀으나, 같은 날 Round 12 R6-1 테마 배선 dispatch 가 **45턴 상한에서 보고 0건으로 중단**됐다 — 상한이 높아도 같은 실패가 난다. builder 는 문구가 다르다: «41턴째에는 새 작업을 시작하지 말고 마무리와 보고», 그리고 «slice 가 41턴에 안 끝날 크기면 착수 전에 보고» 를 더한다(쪼개는 것은 foreman 의 일이다).
+
+<a id="adr-004-amend-7"></a>
+## Amendment 7 (2026-09-11) — amend-6 의 falsifier (a)가 발화했다: 턴 수 지시를 작업량 지시로 바꾸고 builder 상한을 올린다
+
+### 배경
+**같은 날 오후에 amend-6 이 반증됐다.** amend-6 결정 1 은 각 에이전트 본문에 「`maxTurns − 4` 턴째에 보고를 시작한다」를 넣었고, falsifier (a)는 «적용 뒤에도 보고 0건 상한 도달이 **2회 이상**이면 결정 3(값 유지)을 뒤집고 `maxTurns` 를 올린다»였다.
+
+- [관측됨] Round 12 R4 의 **두 builder dispatch 가 둘 다** 45턴 상한에서 **보고 0건**으로 멈췄다(웹: 마지막 출력 「Now the stories file.」 / 모바일: 「Now let's run `dart format`…」). 둘 다 `builder.md` 의 41턴 문구 **와** dispatch 프롬프트의 같은 문장을 받은 상태였다.
+- [관측됨] **둘 다 작업 자체는 거의 끝나 있었다** — 웹은 파일 4개가 다 있었고 모바일은 `flutter analyze` 클린 + 34 테스트 통과까지 갔다. 죽은 자리는 **최종 검증 단계**다.
+- [관측됨] 같은 amend-6 을 받은 **report-only 에이전트(designer 브리프 3종·reviewer 브리프 비평)는 정상 보고했다.** 실패는 builder 에 몰려 있다.
+- 원인 분석: 규칙이 **관측 불가능한 것을 지시한다**. 에이전트에게 「지금 몇 턴째인가」를 보여 주는 장치가 없다 — 「41턴째에」는 지킬 수 없는 지시다. report-only 가 살아남은 것은 규칙을 지켜서가 아니라 **일이 상한보다 작았기 때문**으로 읽는 것이 정직하다(발견 59).
+
+### 결정
+1. **턴 수 지시를 «작업량» 지시로 바꾼다** (결정 1 대체). 에이전트 본문의 문구를 관측 가능한 신호로 교체한다 — 「slice 를 받으면 **먼저 산출물을 나열하고**, 그 목록의 **절반을 끝낸 시점에 남은 것을 점검한다.** 남은 일이 이미 한 것보다 많아 보이면 **그때 중간 보고**를 내고 계속한다. 끝내지 못한 채 멈추는 것보다 절반 보고가 항상 낫다.」 턴 수는 어디에도 적지 않는다.
+2. **`builder` 의 `maxTurns` 를 45 → 60 으로 올린다** (결정 3 뒤집기 — falsifier (a)가 규정한 응답). 두 관측 다 «상한이 조금 모자랐다»에 가깝다(작업이 거의 끝난 자리에서 죽었다). report-only 에이전트의 값은 **건드리지 않는다** — 그쪽에서는 실패가 없었고, 값을 올리면 비용만 는다.
+3. **slice 크기 규율을 foreman 쪽에 명시한다**: 한 dispatch 에 «화면 1개 + fixtures + 스토리/테스트 + 검증»을 넣으면 60턴도 빠듯하다. `/design-milestone` R4 와 `/implement-workitem` 은 **화면·slice 를 나눌 때 «산출물 4개 이상이면 쪼갠다»** 를 기준으로 삼는다.
+
+### 근거
+- 결정 1 의 대안 「턴 수를 프롬프트에 더 크게 적는다」는 이미 실패했다 — 두 dispatch 다 프롬프트에 41을 받았다. **지시의 강도가 아니라 관측 가능성이 문제다.**
+- 결정 2 만 하고 결정 1 을 안 하면 60턴에서 같은 일이 난다(벽이 옮겨갈 뿐). 결정 1 만 하고 2 를 안 하면 falsifier 가 규정한 응답을 어긴다. **둘 다 한다.**
+- 대가: `maxTurns: 60` 은 실패한 dispatch 의 비용 상한을 올린다. 그 대가를 결정 3 의 slice 규율로 상쇄한다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 3 의 «산출물 4개 이상이면 쪼갠다».
+- enabling(약, [관측됨]): 결정 1·2.
+
+### Mutation delta (ADR-047 D3)
+- failure = builder 가 거의 끝낸 일을 보고 없이 잃고 회수 왕복을 쓴다(관측 2건, 같은 라운드).
+- predicted = Round 13 에서 builder 의 «보고 0건 상한 도달» 0건, 중간 보고가 있으면 «완료/미완» 두 묶음으로 온다.
+- falsifier = (a) `maxTurns: 60` 에서도 보고 0건 상한 도달이 1회라도 나면 **상한 문제가 아니다** — 결정 2 를 되돌리고 결정 3(slice 쪼개기)만 남긴다 (b) 중간 보고가 «절반»을 자의적으로 잡아 매번 초반에 나오면 결정 1 의 기준을 산출물 수로 더 좁힌다.
+- rollback = 본 amend superseded → amend-6 의 턴 수 문구 복원 + `maxTurns: 45`.
+
+### 적용 surface
+- .claude/agents/builder.md — 결정 1·2 (`maxTurns` frontmatter + 「턴 예산」 절 교체)
+- .claude/agents/qa.md · reviewer.md · validator.md · researcher.md · designer.md · planner.md · analyst.md · security.md · counsel.md · strategist.md · marketer.md — 결정 1 (문구만 교체, `maxTurns` 불변)
+- .claude/skills/design-milestone/SKILL.md · .claude/skills/implement-workitem/SKILL.md — 결정 3 slice 크기 기준

@@ -53,6 +53,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 - 사용자 승인(화면 단위, 압축 포맷). `구성 불확실` 화면은 방향 2안을 Decision Brief로(user-choice, 추천 블록은 요청 시). 승인된 브리프의 카피가 곧 실카피다.
 
 ## R4 — 코드 초안 (builder, UI 제작 계약 모드)
+- **slice 크기 (ADR-004#amend-7 결정 3)**: 한 dispatch 의 산출물이 **4개를 넘으면 쪼갠다.** 실측(Round 12 R4): «화면 1개 + fixtures + 스토리/위젯 테스트 + 갤러리 등록 + 검증»을 한 dispatch 에 넣었더니 **두 builder 가 다 턴 상한에서 보고 없이 멈췄다**(작업은 거의 끝난 상태였다). 화면이 둘이면 화면마다, 한 화면의 산출물이 많으면 «코드+fixtures» / «스토리·테스트» 로 가른다.
 - 화면마다 builder 단발 sub-call(dispatch에 `mode: ui-authoring` 명시 — 입력: 승인 브리프 + DESIGN 토큰·`_theme` 배선 경로 + 재사용 컴포넌트 목록 + ADR-072 D3 규칙 + 추적 헤더 형식 + PX 마커 문법). **presentational만** — props-in/callbacks-out, fetch·store·router 금지.
 - 웹: `screens/<screen>/<Screen>.<ext>` + `<Screen>.stories.<ext>`(확장자는 스택 관례 — `.tsx`/`.vue`/`.svelte`; 상태별 스토리: happy + 못생긴 상태 5종 + category state, `구성 불확실`이면 `A`/`B`) + `fixtures.<ext>`(출처 표기). Flutter: `lib/screens/<screen>/` + `lib/prototype/main.dart` 갤러리 등록 + `test/screens/<screen>_prototype_test.dart`(프로필 크기 렌더 + guideline 4종 + overflow 0 + PNG — ADR-059#amend-1 결정 2·3).
 - 각 코드에 PX 마커 주석을 단다(브리프 PX 후보 → 확정 id). 토큰 외 리터럴 금지.

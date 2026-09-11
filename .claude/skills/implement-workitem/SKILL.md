@@ -27,6 +27,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - 실측이 막히면(네트워크·자격증명·승인 차단) 추측으로 진행하지 않고 `Needs Fact Resolution: <무엇> — <막힌 사유>`를 출력하고 **그 사실이 필요한 부분을 미완으로 둔다**(그 사실이 필요 없는 다른 AC 구현은 계속).
 4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition; *partition 직전 `docs/00-meta/STACK_SETUP_PLAN.md`(있으면)의 "테스트 격리 미설정" 표식을 회수* — 공유 런타임 리소스 순차화 입력):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
+   - **slice 크기 상한 (ADR-004#amend-7 결정 3)**: 한 slice 의 **산출물이 4개를 넘으면 쪼갠다**(파일 disjoint 여부와 별개 축이다). 실측(Round 12 R4): «화면 1개 + fixtures + 스토리/테스트 + 갤러리 등록 + 검증» 을 한 dispatch 에 넣었더니 **두 builder 가 다 턴 상한에서 보고 없이 멈췄다** — 작업은 거의 끝난 상태였고 죽은 자리는 최종 검증이었다. 산출물이 많으면 «코드+fixtures» / «테스트·등록» 으로 가른다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
    - 파일이 **겹치거나** step A 산출물을 step B 가 import/호출하는 *명백한* 선후 의존이 있으면 → 같은 slice(한 builder) 또는 *순차* dispatch. 의존은 `## 3` step 경로만 보고 rough 하게 판단 — 깊은 그래프 분석 금지.
    - **공유 변이 지점·테스트 의존 주의(조용한 clobber 방지)**: manifest/lockfile·barrel(`index.*`)·DI 컨테이너·route registry 처럼 *여러 slice 가 동시에 append 할 수 있는 공유 파일*은 `## 3` 에 명시 안 돼도 *겹치는 파일*로 간주 → 순차/단일. slice B 의 테스트가 slice A 코드를 import 하면 disjoint 아님 → 순차. *의심되면 단일 builder*.
