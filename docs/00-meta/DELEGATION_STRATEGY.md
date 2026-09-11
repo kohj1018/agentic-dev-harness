@@ -160,6 +160,7 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 
 shared 도구 설정 파일(`.claude/settings.json` · `.codex/config.toml`)에는 모델·추론 강도 키를 두지 않는다 — 사용자 계층과 계정·CLI 기본값이 승계한다 (ADR-004#amend-2·#amend-3).
 별칭(`sonnet`, `opus`, `haiku`)은 역할별 고정이 필요한 `.claude/agents/<name>.md` frontmatter `model:`에서만 쓴다. 전체 버전 ID 금지는 불변.
+추론 강도 `effort:`도 같은 자리(agent frontmatter)에서만 역할별로 고정한다 — 현재 builder만 `medium`(ADR-004#amend-4). 메인 세션은 사용자 계층에서 `high` 이상을 권장하며, `CLAUDE_CODE_EFFORT_LEVEL` 환경변수를 전역에 두면 agent `effort`가 무력화되므로 두지 않는다.
 특정 버전·강도를 강제해야 하면 ADR로 남기고 그 자리에서만 고정한다.
 정책 근거는 [ADR-004-model-alias-policy.md](../90-decisions/boilerplate/ADR-004-model-alias-policy.md)를 참조한다.
 

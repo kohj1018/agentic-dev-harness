@@ -103,3 +103,31 @@ agent 이름은 **역할 중심**(`architect` / `builder` / `validator` / `plann
 
 ### 강도 (ADR-022)
 - constraint(강, [관측됨]+[외부실증]) — shared 도구 설정 파일에 모델 키 금지. 예외는 #amend-2 3의 별도 ADR 경로.
+
+<a id="adr-004-amend-4"></a>
+## Amendment 4 (2026-09-11) — agent frontmatter `effort` 허용 + builder 실험
+
+### 배경
+- [관측됨] 보조 AI(sub-agent)가 메인 세션의 추론 깊이를 그대로 물려받아, 이미 문서로 결정된 slice를 구현하는 builder가 과도하게 오래 생각한다(사용자 fork 보고 — 중간 중단 다수, SIMULATION_RUN Round 4 INST-1~5).
+- [외부실증] Claude Code sub-agent frontmatter는 `effort: low|medium|high|xhigh|max`를 지원하며 세션 effort를 덮는다. 단 환경변수 `CLAUDE_CODE_EFFORT_LEVEL`이 설정돼 있으면 그것이 우선한다. `maxTurns`는 행동 횟수 상한이며 속도를 높이지 않는다(부분 출력 마커만 남긴다).
+- [관측됨] 이 저장소의 sub-agent 13개는 `model:`만 고정하고 `effort:`는 어디에도 없다. Codex는 `.claude/agents/*.md`를 읽지 않으므로(persona 매핑 없음 — ADR-010) 이 키는 Codex 경로에 영향이 없다.
+
+### 결정
+1. **`effort`는 역할별 고정 대상이다** — 별칭(`model:`)과 같은 자리(`.claude/agents/<name>.md` frontmatter)에서만 쓴다. shared 설정 파일(`.claude/settings.json`)에는 여전히 두지 않는다(#amend-2·#amend-3 불변). 값은 `low|medium|high|xhigh|max` 중 하나이며 버전 고정이 아니므로 본 정책의 «비고정» 원칙과 충돌하지 않는다.
+2. **1차 적용은 builder만**: `maxTurns: 20 → 45`, `effort: medium` 추가. 근거 — builder는 «이미 문서화된 결정을 집행»하는 역할이라 깊이보다 완주가 중요하다. 판단 역할(architect·designer·reviewer·qa·validator·planner·researcher·자문 5종)은 변경하지 않는다.
+3. **실험 설계(ADR-047#amend-1 — 대조군)**: Round 11 dogfood의 같은 task 1개를 네 조건으로 돌린다 — (a) 현재(20·effort 없음) (b) effort만(20·medium) (c) 턴만(45·effort 없음) (d) 둘 다(45·medium). 측정: 소요 시간, 완료율(AC 충족), foreman 회수 턴, `validate` 실패 수, Red 관측 보고 누락. 결과를 SIMULATION_RUN `## Builder Effort Experiment`에 기록한다.
+4. **확장 규칙**: (d)가 (a) 대비 완료율·검증 실패에서 저하 없이 시간이 줄면 validator·qa에 `effort: medium`을 다음 라운드 후보로 올린다(별도 amendment). 저하가 있으면 builder의 `effort`를 제거하고 `maxTurns`만 유지한다.
+5. **사용자 환경 안내**: 메인 세션은 사용자 계층에서 `high` 이상을 권장하고, `CLAUDE_CODE_EFFORT_LEVEL`을 전역 환경변수로 두지 않는다(두면 agent `effort`가 무력화된다). 이 안내는 DELEGATION_STRATEGY `## 모델 표기 정책`에 둔다.
+6. **Codex parity**: 본 저장소는 Claude persona 위임을 Codex subagent로 매핑하지 않아 builder가 메인 인라인으로 돈다(ADR-010). 따라서 본 실험은 Codex 경로에 적용하지 않으며, Codex 쪽 추론 강도는 `.codex/config.toml`의 비지정 정책(ADR-010#amend-6)을 그대로 둔다. Codex subagent별 effort 지원 여부는 매핑을 도입할 때 확인한다.
+
+### 적용 surface
+- `.claude/agents/builder.md` — frontmatter
+- `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델 표기 정책`
+- `.boilerplate/validation/SIMULATION_RUN.md` — 실험 기록
+- `docs/90-decisions/boilerplate/README.md` 인덱스 행
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]+[외부실증]) — 1개 agent 한정 + 대조군 실험. 확장은 실측 후.
+
+### Mutation delta (ADR-047 D3)
+- failure = builder가 slice 중간에 턴 소진으로 멈추거나 과도한 추론으로 지연 / falsifier = (d)에서 완료율·검증 실패가 (a)보다 나쁨 → 그때는 결정 4대로 `effort`만 제거하고 `maxTurns: 45`는 유지한다 / rollback = **본 amend superseded** 시 frontmatter 두 줄 원복(`effort` 삭제 + `maxTurns: 20`).

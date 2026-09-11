@@ -746,7 +746,7 @@ feat(skills): add stack catalog round, decision registry and stack-guard scaffol
 - enabling(약, [관측됨]+[외부실증]) — 1개 agent 한정 + 대조군 실험. 확장은 실측 후.
 
 ### Mutation delta (ADR-047 D3)
-- failure = builder가 slice 중간에 턴 소진으로 멈추거나 과도한 추론으로 지연 / falsifier = (d)에서 완료율·검증 실패가 (a)보다 나쁨 / rollback = frontmatter 두 줄 원복.
+- failure = builder가 slice 중간에 턴 소진으로 멈추거나 과도한 추론으로 지연 / falsifier = (d)에서 완료율·검증 실패가 (a)보다 나쁨 → 그때는 결정 4대로 `effort`만 제거하고 `maxTurns: 45`는 유지한다 / rollback = **본 amend superseded** 시 frontmatter 두 줄 원복(`effort` 삭제 + `maxTurns: 20`).
 ```
 
 ### P3-2. `.claude/agents/builder.md` frontmatter
@@ -774,7 +774,7 @@ feat(skills): add stack catalog round, decision registry and stack-guard scaffol
 - Amendments 칸에 `, +#amend-4: agent frontmatter effort 허용 + builder 실험` 추가.
 
 ### P3-4b. `.boilerplate/validation/SIMULATION_RUN.md` 실험 절 stub
-- 파일 끝에 `## Builder Effort Experiment (ADR-004#amend-4)` 헤딩과 한 줄 `- 상태: Round 11에서 측정 예정(P7-2 8번) — 조건 (a)~(d) 결과 표는 그때 채운다.`를 append한다(적용 surface 역참조가 Phase 7 검사 전에 실재하도록). P7-4가 이 절을 채운다.
+- 파일 끝에 `## Builder Effort Experiment (ADR-004#amend-4)` 헤딩과 한 줄 `- 상태: Round 11 dogfood에서 측정 예정 — 조건 (a)~(d) 결과 표는 그때 채운다(실험 설계는 ADR-004#amend-4 결정 3).`를 append한다(적용 surface 역참조가 Phase 7 검사 전에 실재하도록). P7-4가 이 절을 채운다.
 
 ### P3-5. 커밋
 ```

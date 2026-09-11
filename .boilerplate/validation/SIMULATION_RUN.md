@@ -928,3 +928,6 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 - **D4가 자동 신선도 검사 3후보를 전부 기각한 판단이 6b로 뒷받침됐다** — 정상 all-Reject 라운드가 만드는 `## 8` 배치(exec-evidence 뒤에 repair 결정 이력)는 (iii) 줄-순서 검사였다면 정확히 오탐이 났을 형태인데, 검사를 두지 않았으므로 finding 0건이었다.
 - **남은 최우선 미검증은 D1의 차단 경로다** — `Needs Execution Evidence` 정지와 `--waiver` 해제는 이번 3 시나리오가 건드리지 않았고, D7이 "실질 차단은 여기 하나뿐"이라고 배치한 지점이라 **차기 라운드 1순위**다(증거 확보 불가 환경 fixture 1개면 잰다).
 - **차기 라운드 후보**: (a) `Needs Execution Evidence` + `--waiver` 실측 · (b) 시나리오 6(코드를 고친 repair의 exec-evidence 재기록) · (c) D4가 명시한 구멍(repair가 갱신을 조용히 건너뛰는 사례) 누적 관측 — ADR-064가 "2회 이상이면 라운드 식별자 기반 구조화 스키마로 승격"이라 규정한 카운터의 현재 값은 **0** · (d) 나머지 반증 시나리오 1·4·5·7.
+
+## Builder Effort Experiment (ADR-004#amend-4)
+- 상태: Round 11 dogfood에서 측정 예정 — 조건 (a)~(d) 결과 표는 그때 채운다(실험 설계는 ADR-004#amend-4 결정 3).
