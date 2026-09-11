@@ -3,7 +3,6 @@ name: builder
 description: Use proactively for scoped implementation work. Best for task-level coding, tests, and localized refactors that should stay within a documented workitem.
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
-effort: medium
 maxTurns: 45
 color: cyan
 ---

@@ -957,7 +957,7 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 | 16 | 축 5(UI Design inventory)가 «UI 프로젝트» 신호만으로 매번 spawn — `.tsx`를 하나도 안 건드린 T-003에서도 validator 한 명이 «해당없음»만 반환 | P2 | **기록만** — spawn 신호를 «diff에 UI surface 파일이 있음»으로 좁히는 안. 발견 5와 함께 Round 12 실측 뒤 재보정 |
 | 17 | 비용 압력이 실제 규칙 이탈을 만들었다 — T-003 validate에서 foreman이 «1축=1 validator»를 어기고 축 3·8을 한 validator에 합쳤다(리포트 `## Orchestration`에 이탈로 기록) | 관측 | **기록만** — 발견 5의 임계 문제가 «규칙을 어기게 만드는» 형태로 드러난 실측. 실측 비용: T-001 6 dispatch/약 16.3만 토큰, T-003 5 dispatch/약 14.6만 토큰, 최장 축은 둘 다 diff-trace(176초/99초) |
 
-| 18 | **계획이 승인 UI 계약상 배선 불가능한 계측 이벤트를 요구했다** — T-002 `## 3` step 5와 F-001 `## 8-1`이 `todo_add_rejected`(공백 거부) 이벤트를 지정했으나, 승인된 `TodoAdd` 프로토타입은 공백 제출을 **내부에서 삼키고 콜백을 부르지 않는다**. 배선 계층에서는 그 시도를 관측할 수단이 없다 | P1 | **기록만(봉인 후 발견)** — 억지 분기를 넣으면 도달 불가 dead code가 되어 ADR-006 self-check 위반이다. 해소하려면 `TodoAdd`에 `onReject` 콜백이 필요하고 그건 **승인 UI 시그니처 변경**이라 `/design-milestone` 재진입 또는 다음 M 사안이다(ADR-060 D6). 원인: `/plan-workitem` 3-I가 계측 line item을 authoring할 때 **그 이벤트가 승인 프로토타입의 콜백 표면에서 실제로 발화 가능한지 대조하지 않는다** — 3-P(승인 UI 재사용)와 3-I(계측)가 서로를 보지 않는다. **builder effort 실험의 4조건 중 2조건(b·c)이 서로 독립적으로 같은 충돌을 발견하고 억지 구현 대신 보고를 택했다** — 우연이 아니라 계획의 구조적 결함이다 |
+| 18 | **계획이 승인 UI 계약상 배선 불가능한 계측 이벤트를 요구했다** — T-002 `## 3` step 5와 F-001 `## 8-1`이 `todo_add_rejected`(공백 거부) 이벤트를 지정했으나, 승인된 `TodoAdd` 프로토타입은 공백 제출을 **내부에서 삼키고 콜백을 부르지 않는다**. 배선 계층에서는 그 시도를 관측할 수단이 없다 | P1 | **기록만(봉인 후 발견)** — 억지 분기를 넣으면 도달 불가 dead code가 되어 ADR-006 self-check 위반이다. 해소하려면 `TodoAdd`에 `onReject` 콜백이 필요하고 그건 **승인 UI 시그니처 변경**이라 `/design-milestone` 재진입 또는 다음 M 사안이다(ADR-060 D6). **수정** — `/plan-workitem` 3-I에 «승인 UI로 배선 가능한 계측만 authoring한다» 한 줄 추가: 매니페스트 `source[]` 의 컴포넌트 시그니처로 발화 가능성을 대조하고, 불가능하면 line item 대신 «남은 미결정 사항» 에 `- 계측 배선 불가: <이벤트> — 승인 UI `<screen>` 에 콜백 없음` 으로 surface. 원인은 3-P(승인 UI 재사용)와 3-I(계측)가 서로를 보지 않는 것이었다. **4조건 중 2조건(b·c)이 독립적으로 같은 충돌을 발견했고, 나머지 2조건(a·d)은 도달 불가 dead code를 넣었다** — 구조적 결함의 실측이다 |
 
 ### 수정분 커밋
 `fix(harness): correct design gate adapter, protected-path timing and Red definition from dogfood round 11`
@@ -987,6 +987,5 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 
 결정 4는 두 갈래만 규정한다: «(d)가 (a) 대비 저하 없이 **시간이 줄면** 확장 / **저하가 있으면** effort 제거». 관측된 결과는 **저하는 없는데 시간이 늘었다**는 제3의 경우이며 어느 갈래에도 해당하지 않는다. Mutation delta의 falsifier(«(d)에서 완료율·검증 실패가 (a)보다 나쁨») 도 문자 그대로는 발화하지 않았다.
 
-- **본 라운드는 `builder.md`를 바꾸지 않고 채택값(`maxTurns: 45` + `effort: medium`)으로 되돌려 두었다.** 수치는 `effort` 제거를 가리키지만, 그것은 accepted ADR 결정을 뒤집는 일이고 결정 4가 그 경우를 규정하지 않았으므로 **사용자 판단 대상**이다.
-- 권고: `effort: medium` 제거 + `maxTurns: 45` 유지. 근거는 위 두 번째·세 번째 불릿이다. 채택 시 ADR-004 `## Amendment 5`로 박고 결정 4의 세 번째 갈래(«저하는 없으나 시간이 늘면»)를 함께 규정한다.
-- Round 12에서 같은 task 유형(Flutter 배선)으로 1회 더 재면 n=2가 된다.
+- **조정 결과 (ADR-017 결정 5 / P7-4 «실패한 falsifier는 재검토 트리거에 따라 조정하고 그 조정도 기록한다»)**: 사용자 확인 후 **ADR-004 `## Amendment 5`** 로 박았다 — ① `builder` 의 `effort: medium` 제거, `maxTurns: 45` 유지 ② 결정 4에 **세 번째 갈래**(«완료율·검증 실패에 저하가 없어도 소요·토큰이 유의하게 늘면 그 `effort` 지정을 제거한다») 규정 ③ `effort` 를 validator·qa 로 확장하지 않음.
+- **Round 12 재측정 (P7-3에 추가)**: 같은 실험을 Flutter 배선 task 로 1회 더 돌려 **n=2** 로 만든다. 그때는 `.claude/agents/builder.md` 를 반복 수정하지 않고 **`builder-a`~`builder-d` 변형 파일**로 돌린다(조건마다 canonical 파일을 고치면 매번 self-modification 승인이 필요하고 hot-reload 지연 때문에 «어느 정의가 실제로 쓰였는가»가 불확실해진다). 변형 파일은 **측정 전용이며 측정 후 삭제한다** — 상시 두면 `docs/00-meta/STRUCTURE.md` 의 sub-agent 로스터 13종과 어긋난다. 조건마다 **적용 확인 로그**(그 조건의 `maxTurns` 가 실제로 걸렸는지 보이는 관측)를 남긴다.

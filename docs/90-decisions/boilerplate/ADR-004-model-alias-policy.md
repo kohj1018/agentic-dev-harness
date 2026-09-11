@@ -131,3 +131,38 @@ agent 이름은 **역할 중심**(`architect` / `builder` / `validator` / `plann
 
 ### Mutation delta (ADR-047 D3)
 - failure = builder가 slice 중간에 턴 소진으로 멈추거나 과도한 추론으로 지연 / falsifier = (d)에서 완료율·검증 실패가 (a)보다 나쁨 → 그때는 결정 4대로 `effort`만 제거하고 `maxTurns: 45`는 유지한다 / rollback = **본 amend superseded** 시 frontmatter 두 줄 원복(`effort` 삭제 + `maxTurns: 20`).
+
+<a id="adr-004-amend-5"></a>
+## Amendment 5 (2026-09-11) — builder `effort` 제거(실측 결과) + 결정 4의 세 번째 갈래 규정
+
+### 배경
+- [관측됨] #amend-4 결정 3의 대조군 실험을 dogfood Round 11에서 실제로 돌렸다(기록: `.boilerplate/validation/SIMULATION_RUN.md ## Builder Effort Experiment`). 같은 task(T-002 — 승인 UI 2개 배선 + 도메인 연결 + 계측 + 테스트 3건)를 격리 사본 4개에서 **바이트 동일한 slice 프롬프트**로 돌렸다. **각 셀 n=1이다 — 통계가 아니라 경향 신호다.**
+
+  | 조건 | maxTurns | effort | 소요(ms) | tool_uses | 토큰 | 완료 AC | validate | 회수 턴 |
+  |---|---:|---|---:|---:|---:|---|---|---:|
+  | (a) | 20 | — (세션 `xhigh` 상속) | 132,522 | 17 | 42,761 | 3/3 | OK | 0 |
+  | (b) | 20 | medium | 338,873 | 23 (1차 20에서 상한 중단) | 62,019 | 3/3 | OK | 1 |
+  | (c) | 45 | — (세션 `xhigh` 상속) | 161,769 | 18 | 49,451 | 3/3 | OK | 0 |
+  | (d) | 45 | medium | 309,489 | 22 | 76,199 | 3/3 | OK | 0 |
+
+- **완료율·검증 실패는 4조건 동일**(AC 3/3, `validate` 전 단계 통과, 승인 UI 바이트 무변경)인데 **`medium` 두 조건의 소요가 상속 두 조건의 약 2배**이고 토큰도 높다. #amend-4 결정 2의 채택 근거(«깊이보다 완주»)와 반대 방향이다.
+- [관측됨] `maxTurns` frontmatter 는 실제로 적용된다 — (b) 1차가 `tool_uses` 정확히 20에서 잘렸다. 단 **편집 직후 dispatch 하면 이전 정의가 쓰인다**(같은 라운드 preflight 에서 `maxTurns: 1` 이 3 step 완주). 조건 전환 사이 대기가 필요하다.
+- [관측됨] 품질 편차는 조건 축과 정렬되지 않았다 — 도달 불가능한 계측 분기를 (a)·(d)는 코드에 넣고 (b)·(c)는 거부해 2:2로 갈렸다.
+
+### 결정
+1. **`builder` frontmatter 에서 `effort: medium` 을 제거한다. `maxTurns: 45` 는 유지한다.** 근거: 완료율·검증 실패에 이득이 없는데 소요·토큰이 약 2배다. `maxTurns: 45` 는 필요 없을 때 비용이 0이고 필요할 때 foreman 왕복 1회를 없앤다((b) 1차가 그 왕복을 실제로 치렀다).
+2. **#amend-4 결정 4에 세 번째 갈래를 규정한다.** 기존 두 갈래는 «저하 없이 시간이 줄면 확장 / 저하가 있으면 제거»뿐이라, 관측된 «**저하는 없으나 시간·토큰이 늘었다**»가 어느 쪽에도 걸리지 않았다. 세 번째 갈래: **완료율·검증 실패에 저하가 없어도 소요·토큰이 유의하게 늘면 그 `effort` 지정을 제거한다** — 채택 근거가 속도였으므로 속도가 반증되면 근거가 남지 않는다.
+3. **`effort` 를 다른 agent 로 확장하지 않는다.** #amend-4 결정 4의 확장 후보(validator·qa)는 근거가 사라졌으므로 올리지 않는다.
+4. **Round 12 재측정 트리거**: 같은 실험을 Flutter 배선 task 로 1회 더 돌려 n=2 로 만든다. **그때는 `.claude/agents/builder.md` 를 반복 수정하지 않고 `builder-a`~`builder-d` 변형 파일로 돌린다** — 조건마다 canonical 파일을 고치면 (i) 매번 self-modification 승인이 필요하고 (ii) hot-reload 지연 때문에 «어느 정의가 실제로 쓰였는가»가 불확실해진다. 변형 파일은 **측정 전용이며 측정 후 삭제한다**(상시 두면 `docs/00-meta/STRUCTURE.md` 의 sub-agent 로스터 13종과 어긋난다). 각 조건마다 **적용 확인 로그**(그 조건의 `maxTurns` 가 실제로 걸렸는지 보이는 관측)를 남긴다.
+   - 재측정 결과가 본 결정 1을 뒤집으면(= `medium` 이 더 빠르거나 동등) 그때 다시 amend 한다.
+
+### 강도 (ADR-022)
+- **제약 완화(약)** — 지정을 *제거*하는 방향이라 새 제약을 만들지 않는다. 근거는 [관측됨] n=1 이며 그 한계를 결정 4가 명시한다.
+
+### Mutation delta (ADR-047 D3)
+- failure = builder 가 slice 중간에 턴 소진으로 멈춘다 / falsifier = `maxTurns: 45` 에서도 상한 중단이 반복되면(회수 턴 ≥1 이 2회 이상) 45 가 부족한 것이므로 값을 다시 본다. 반대로 Round 12 재측정에서 `medium` 이 상속보다 빠르면 결정 1을 뒤집는다 / rollback = 본 amend superseded → `effort: medium` 복원.
+
+### 적용 surface
+- .claude/agents/builder.md                      — frontmatter (`effort` 제거)
+- docs/00-meta/DELEGATION_STRATEGY.md            — `## 모델 표기 정책` 의 effort 문구
+- .boilerplate/validation/SIMULATION_RUN.md      — 실험 기록·Round 12 재측정
