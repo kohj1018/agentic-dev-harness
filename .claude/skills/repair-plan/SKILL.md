@@ -74,7 +74,9 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 
 **feature/milestone scope 영속 형식** (IMPROVEMENT_GUIDE 스키마 정합 — `docs/40-validation/IMPROVEMENT_GUIDE.md` 본문 `## 항목 스키마` SSOT):
 ```
-- **F-001-repair-1** | P0 | [관측됨] | linked: F-001 | status: applied | decision: Adopt
+- **F-001-repair-1** | P0 | [관측됨] | linked: F-001 | status: closed | decision: Adopt
+
+> `status` 는 항상 `closed` 다 — 「이 건은 끝났다」는 뜻이고 **적용 여부는 `decision` 이 말한다**. `applied` 를 쓰지 않는다(발견 36: Reject-FP 를 `applied` 로 적게 만드는 자기모순).
   - 발견 (cross-LLM review <reviewer-tag>): <한 줄 설명>.
   - 결정: <Adopt|Adopt-modified|Reject-FP|Reject-conflict 사유 한 줄>.
 ```

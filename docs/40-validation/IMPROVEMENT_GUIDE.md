@@ -69,11 +69,11 @@
 - 형식은 본 파일 `## 항목 스키마` SSOT 따름.
 - **round 줄 (ADR-070 D5)**: `/repair-milestone`는 실행 시작 시 그 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K는 기존 최대값 + 1. `/stabilize-milestone` 단계 8이 최대 K를 읽어 예산(3)과 대조한다.
 - **원인·반경·재감사 줄 (ADR-070 D4)**: Adopt 항목 하위에 `- 원인:` · `- 영향 반경:` · `- 재감사: <대상 N파일> / 새 finding K건` · 라운드 끝에 `- 자기 점검: …` 한 줄.
-- **확인 미완 항목은 본 절에 적지 않는다**: 라운드가 판정을 못 내린 항목(`decision: needs-confirmation` 유지)의 영속 자리는 원본 원장 항목(`status: open` + 막힌 이유)이다(ADR-070 D3). 본 절은 closed records이므로 `status: applied` + 수리 판정값을 가진 항목만 담는다.
+- **확인 미완 항목은 본 절에 적지 않는다**: 라운드가 판정을 못 내린 항목(`decision: needs-confirmation` 유지)의 영속 자리는 원본 원장 항목(`status: open` + 막힌 이유)이다(ADR-070 D3). 본 절은 closed records이므로 **`status: closed`** + 수리 판정값을 가진 항목만 담는다. **`applied` 를 쓰지 않는다** — `status` 는 «그 건이 끝났는가»만 말하고 **적용 여부는 `decision` 이 말한다**(`Adopt`·`Adopt-modified` = 고쳤다 / `Reject-FP`·`Reject-context` = 고치지 않았고 그 판단으로 닫았다). 두 축을 한 칸에 섞으면 기각 항목을 적을 자리가 없어진다 — dogfood Round 11 실측: Reject-FP 2건을 `status: applied` 로 적어 형식은 지켰으나 `applied` 가 사실이 아니었다(발견 36).
 
 형식:
 ```
-- **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: src/auth/session.ts, tests/auth/session.spec.ts | scope: in-AC | status: applied | decision: Adopt
+- **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: src/auth/session.ts, tests/auth/session.spec.ts | scope: in-AC | status: closed | decision: Adopt
   - 발견 (stabilize qa): 세션 만료 후 재요청이 500을 낸다.
   - 결정: Adopt — AC-2가 401을 약속했다 / 회귀 테스트: tests/auth/session.spec.ts::expired_session_returns_401 (Red→Green 관측, validate에 묶임).
   - exec-evidence 2026-09-02 (a): 등급1 재실행 가능 — 테스트 전용 DB / 결과: 만료 세션 row 정리 확인.

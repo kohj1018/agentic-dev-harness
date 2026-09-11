@@ -80,7 +80,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Skill
 6. **한 라운드에 P0/P1/P2를 모두 판정으로 완결한다**(defer 금지). 작업량을 줄이려면 사용자가 인자로 부분 범위를 지정한다.
 7. **결정 이력 영속화 (ADR-047 D7)** — 본 라운드의 P0/P1 항목 전부를 `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` 안 `### M-N` 그룹(없으면 신설)에 append한다. P2는 영속화하지 않는다.
    ```
-   - **M1-uat-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: <경로 목록 또는 docs-only> | scope: out-of-AC | status: applied | decision: Adopt
+   - **M1-uat-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: <경로 목록 또는 docs-only> | scope: out-of-AC | status: closed | decision: Adopt
      - 발견 (수용 라운드 r1): <사용자가 관측한 것 한 줄>.
      - 결정: <Adopt 사유 한 줄> / 회귀 테스트: <추가한 테스트 또는 면제 사유>.
      - pattern-scan: 범위 내 N건 수정 / 범위 밖 M건 <경로>.   ← 검색을 수행한 항목만

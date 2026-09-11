@@ -42,7 +42,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 - **Reject-false-positive** — stabilize 단계가 잘못 봄 (예: 이미 충족됨 / deterministic preflight 휴리스틱 오탐 / placeholder 오인 / 이미 존재하는 link를 누락이라고 본 경우).
 - **Reject-context** — stabilize가 milestone 범위·상위 제약을 놓침 (예: charter `## 5. 비목표`상 의도된 미구현 / ARCH 결정상 정당한 동작).
 > 자기 판단을 신뢰하되, 애매하면 Adopt 쪽으로 보수적으로. Reject는 *근거가 코드/문서로 확인될 때만*.
-> **`Adopt` 인데 본 skill 이 못 고치는 것 (ADR-070#amend-1 결정 1)**: 승인 UI 시그니처·화면 셸 변경, 봉인된 계약 본문 정정, 사용자 설계 결정처럼 **책임 경계 밖**이라 이번 라운드에 손댈 수 없는 항목은 원본에 하위 줄 `- 판정: Adopt — blocked: <경로>` 를 달고 `status: open` 을 **유지한다**. `<경로>` 는 그것을 실제로 닫을 수 있는 경로다(`재승인` / `봉인 계약 정정` / `설계 결정`). `needs-confirmation` 과 같은 «판정된 open» 이며 졸업 item 5 를 계속 막는다. **`Reject-context` 로 적지 마라** — 그러면 `resolved` 가 되어 고쳐야 할 P0 가 졸업을 통과한다. 이 항목은 `## 5` 에 적지 않는다(`status: applied` 가 아니다).
+> **`Adopt` 인데 본 skill 이 못 고치는 것 (ADR-070#amend-1 결정 1)**: 승인 UI 시그니처·화면 셸 변경, 봉인된 계약 본문 정정, 사용자 설계 결정처럼 **책임 경계 밖**이라 이번 라운드에 손댈 수 없는 항목은 원본에 하위 줄 `- 판정: Adopt — blocked: <경로>` 를 달고 `status: open` 을 **유지한다**. `<경로>` 는 그것을 실제로 닫을 수 있는 경로다(`재승인` / `봉인 계약 정정` / `설계 결정`). `needs-confirmation` 과 같은 «판정된 open» 이며 졸업 item 5 를 계속 막는다. **`Reject-context` 로 적지 마라** — 그러면 `resolved` 가 되어 고쳐야 할 P0 가 졸업을 통과한다. 이 항목은 `## 5` 에 적지 않는다(`status: closed` 가 아니다).
 > **severity는 ADR-070 D1 표로 판정한다.** Adopt-modified에서 severity를 낮출 수 있으나(예: 재현되나 우회 가능 → P1) 사유를 한 줄 적는다. **`decision: needs-confirmation` 항목은 먼저 확인을 시도한다** — 확인되면 `confirmed`로 바꾸고 Adopt 경로, 반증되면 Reject-*, 여전히 불가면 `needs-confirmation` 유지 + 막힌 이유 갱신(그 P0는 졸업을 계속 막는다).
 
 수행:
@@ -84,7 +84,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent Skill
 
    **영속 형식** (IMPROVEMENT_GUIDE `## 항목 스키마` SSOT 정합):
    ```
-   - **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: <경로 목록 또는 docs-only> | scope: <in-AC|out-of-AC> | status: applied | decision: Adopt
+   - **M1-repair-1** | P0 | [관측됨] | linked: M1 | affected: T-004 | files: <경로 목록 또는 docs-only> | scope: <in-AC|out-of-AC> | status: closed | decision: Adopt
      - 발견 (stabilize <surface>): <한 줄 설명>.
      - 결정: <Adopt|Adopt-modified|Reject-FP|Reject-context 사유 한 줄> / 회귀 테스트: <추가한 테스트 또는 면제 사유>.
      - pattern-scan: 범위 내 N건 수정 / 범위 밖 M건 <경로>.   ← 검색을 수행한 항목만
