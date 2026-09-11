@@ -330,6 +330,6 @@ dogfood Round 11(웹)에서 `/stabilize-milestone` §3-V 경험 게이트**만�
 - rollback = 본 amend superseded → 데코레이터 제약 해제 + (a) 안(`decorator_provides[]`)으로 전환.
 
 ### 적용 surface
-- docs/90-decisions/boilerplate/ADR-072-…md               — D3 `source[]`·D4 스냅샷에 부기 (본 amend 로 부기)
+  (본 ADR 자신의 D3 `source[]`·D4 스냅샷에도 부기했다 — 자기 파일이라 surface 행으로 세지 않는다)
 - .claude/skills/design-milestone/SKILL.md                — 결정 3 R6-5 체크리스트 항목
 - .claude/agents/builder.md                               — 결정 1·2 ui-authoring 모드 산출물 규칙
