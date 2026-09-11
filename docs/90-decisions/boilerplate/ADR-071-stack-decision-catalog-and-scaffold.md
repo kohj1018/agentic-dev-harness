@@ -98,7 +98,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 - .claude/skills/bootstrap-stack/stack-catalog.md         — D1
 - .claude/skills/bootstrap-stack/stack-brief-template.md  — D1 행 참조
 - .claude/skills/bootstrap-stack/output-checklist.md      — D8
-- .claude/skills/stack-guard/SKILL.md                     — D5·D6
+- .claude/skills/stack-guard/SKILL.md                     — D5·D6 · 수행 0 2-0 scope 하위 harness 파일 탐지(**2026-09-11 추가** — 발견 38)
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md    — D2·D5 절
 - .claude/skills/plan-workitem/SKILL.md                   — D6 설치 line item 경계
 - docs/00-meta/PROJECT_START_CHECKLIST.md                 — 2·3절 문구
