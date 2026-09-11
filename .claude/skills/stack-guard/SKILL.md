@@ -9,6 +9,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 너의 역할은 스택이 확정된 직후 통합 검증 명령(`validate`)과 검증 스크립트를 생성하는 것이다.
 
 이 skill의 1단계 범위:
+- green-field 스캐폴드(공식 생성기 1종, harness 파일 미덮어쓰기) + 카탈로그 `설치: baseline` 행의 기초 라이브러리 설치 — 그 뒤에 probe·boot smoke·design gate·CI를 실제 코드 위에서 실측한다(ADR-071 D5·D6).
 - 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2) — **이때 `package.json` 이 없으면**(순수 Dart/Flutter 프로젝트엔 기본적으로 없다) **최소 형태로 생성하고 `scripts` 에 진입점을 박는다.** 생성하지 않으면 `npm run validate` 자체가 성립하지 않는다. **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 가장 자연스러운 런타임 1종.
 - UI 판정 시 canonical asset byte-copy + project-native `validate:design` entry + fixed browser conformance + `STACK_SETUP_PLAN.md ## Design Gate Adapter` registry 기록(ADR-058#amend-2). 비-UI는 asset을 읽거나 복사하지 않는다.
@@ -27,6 +28,8 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - `docs/00-meta/STACK_SETUP_PLAN.md` (있으면)
 - `docs/20-system/ARCHITECTURE_OVERVIEW.md`
 - UI 판정 시에만 `docs/90-decisions/boilerplate/ADR-058-design-workflow.md#adr-058-amend-2`와 `.claude/skills/stack-guard/assets/design-gate*.mjs`
+- `docs/00-meta/STACK_SETUP_PLAN.md ## Stack Decision Registry`(수행 0·6-2-b 입력)
+- `.claude/skills/bootstrap-stack/stack-catalog.md`(`설치: baseline` 판별 — registry에는 `설치` 열이 없어 id로 조인한다, ADR-071 D6)
 
 R0 — 운영 환경 가정 확인:
 - 단일 OS/셸인가, mixed env인가?
@@ -39,6 +42,15 @@ R0 — 운영 환경 가정 확인:
 - 두 OS 모두 매뉴얼 hook 예시 본문은 `${CLAUDE_PROJECT_DIR}` + `args` 배열로 박는다 (Anthropic open issue #50960 다중 reproducer 대응).
 
 수행:
+0. **스캐폴드 (green-field scope 한정 — ADR-071 D5)**: scope(registry `cat-common-repo-layout`)마다 «등록 소스 루트 0 **그리고** 프레임워크 manifest 부재»면 아래를 수행하고, 아니면 `## Scaffold`에 `skipped (<사유>)`를 적고 다음 scope로. 전 scope 처리 후 수행 1로 간다.
+   1. 생성기 = 그 scope 유형의 `cat-<유형>-framework` 확정 행(registry에서 `scope`가 그 scope이거나 `*`인 행 — ADR-071 D2 `(scope, id)` 키)의 공식 생성기 1종(없으면 최소 골격 — 소스 루트 1 + 테스트 루트 1 + manifest, `generator: minimal`). 옵션은 registry `확정` 행에서 도출(언어·PM·스타일링·라우팅·src 디렉터리·테스트 도구). 도출 불가 옵션은 생성기 기본값 + 출력에 명시.
+   2. **임시 디렉터리에 생성**한 뒤 scope 디렉터리로 복사한다. 아래는 **절대 덮어쓰지 않는다**: `README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs/**` `.claude/**` `.codex/**` `.agents/**` `.boilerplate/**` `.github/**`. `.gitignore`는 줄 단위 합집합(저장소 기존 줄 우선, 중복 제거). 그 외 충돌 파일은 덮어쓰지 않고 `Scaffold conflict: <경로>` 출력 + 사용자 결정.
+   2-1. **보호 경로 검사(내용 대조)**: 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`) 아래 **«파일 경로 + 내용 해시» 목록**을 복사 **직전**과 **직후**에 각각 만들어 **완전히 같아야** 한다(해시가 바뀐 파일 · 새로 생긴 파일 · 사라진 파일 = 위반). 예: `find <보호 경로> -type f -print0 | sort -z | xargs -0 shasum`. 달라진 경로가 있으면 `Scaffold protected-path violation: <경로>` 출력 + 종료(되돌리기는 사용자 결정 — 자동 checkout 금지).
+   3. 생성기가 만든 `README`류·예제 페이지는 그대로 둔다(정리는 M1 계획 소관). 생성기가 만든 `.git`은 버린다.
+   4. `## Scaffold`에 scope별 1행(scope·status·생성기·버전·옵션·생성 파일 수·제외·충돌·실행일)을 적는다. 생성 파일 전량은 `git status --porcelain`으로 보여 준다(문서 복사 금지).
+   5. **커밋하지 않는다.** 출력에 `권장 커밋: chore(scaffold): initialize <framework> project skeleton` 한 줄.
+   6. Dart/Flutter면 수행 0 직후 `## Dart Source Roots`를 실측 갱신한다(생성기가 `lib/`·`test/`를 만들었으므로).
+   7. 이 뒤 수행 1은 생성기 manifest의 `scripts`에 `validate*` 키를 **추가**한다(기존 키·의존 보존 — 덮어쓰기 금지). 도입부의 «Flutter는 `package.json`이 없으면 최소 형태로 생성» 규칙은 그 scope에 `pubspec.yaml`만 있고 `package.json`이 없을 때만 적용된다.
 1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.
 2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
 2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
@@ -73,7 +85,7 @@ R0 — 운영 환경 가정 확인:
    > ⚠️ **닷 디렉터리(`.stack-guard-probe/` 등)나 `.gitignore` 등재 경로에 만들면 안 된다.** (i) 다수 formatter/linter 가 `.gitignore` 를 기본 존중해 대상에서 제외하고, (ii) TypeScript `include` 의 `**/*` 는 `.` 로 시작하는 세그먼트를 매칭하지 않으며, (iii) 테스트 러너의 glob 은 dot 파일을 기본 제외한다. 그러면 위반 probe 가 실패하지 않아 **판정력이 정상인 검사도 FAIL 로 오분류**된다.
 
    - **위치**: 등록된 소스 루트 / 테스트 루트 **안**. 파일명은 그 스택의 include·test glob 에 걸리는 형태 + 명백한 표식. 예: `src/__stackguard_probe__.ts` · `src/__stackguard_probe__.test.ts` · `lib/__stackguard_probe__.dart` · `test/__stackguard_probe___test.dart` · `tests/test___stackguard_probe__.py`
-   - **등록된 소스/테스트 루트가 아직 없으면**(프레임워크 스캐폴드 전 — 정상 lifecycle 에서 본 skill 이 도는 시점의 기본 상태다) probe 를 둘 자리가 없으므로 `SKIPPED (probe unavailable — 등록된 소스 루트 부재)` 로 보고한다. **디렉터리를 새로 만들지 않는다** — 소스 트리 구조는 스캐폴드·계획의 소관이고 본 skill 은 `## 재실행 계약` 대로 *변경이 필요한 것만* 건드린다. 이 SKIPPED 는 5-f 로 기록되고 스캐폴드 후 재실행 때 해소된다(`[Guard-drift]` 가 그 재실행을 권고한다).
+   - **등록된 소스/테스트 루트가 아직 없으면**(수행 0 스캐폴드가 `skipped`인 brownfield·부분 초기화 상태 — green-field는 수행 0이 먼저 만들므로 정상 경로에서는 발생하지 않는다, ADR-071 D5) probe 를 둘 자리가 없으므로 `SKIPPED (probe unavailable — 등록된 소스 루트 부재)` 로 보고한다. **디렉터리를 새로 만들지 않는다** — 소스 트리 구조는 스캐폴드·계획의 소관이고 본 skill 은 `## 재실행 계약` 대로 *변경이 필요한 것만* 건드린다. 이 SKIPPED 는 5-f 로 기록되고 스캐폴드 후 재실행 때 해소된다(`[Guard-drift]` 가 그 재실행을 권고한다).
    - **`.gitignore` 에 등재하지 않는다.** 잔여물은 5-d 삭제로만 통제하고, 남았을 때 `git status` 에 보이는 것이 정상이다(조용히 무시되는 것보다 안전하다).
    - 같은 이름의 파일이 이미 있으면 **덮어쓰지 않고** 그 항목만 건너뛰고 사유를 보고한다.
 
@@ -143,6 +155,10 @@ R0 — 운영 환경 가정 확인:
    - **6-2-0. Dependency Tools 교차 확인 (ADR-051#amend-4)**: `docs/00-meta/STACK_SETUP_PLAN.md` `## Dependency Tools` 표(있으면)와 저장소의 실제 *tool-specific* 신호(`package-lock.json`·`pnpm-lock.yaml`·`yarn.lock`·`bun.lockb`·`poetry.lock`·`uv.lock`·`Cargo.lock`·`go.mod`·`pubspec.yaml`+`pubspec.lock` 등)를 **scope별로 대조**한다. **표·행 부재 → 관측 신호로 보완 기록**(green-field면 이번 6-2 설치로 생성될 도구를 적는다). **표↔저장소 불일치 → 자동 수정하지 않고** 출력에 `Dependency Tool 불일치: <scope> 표=<A> 저장소=<B>`로 보고 + 사용자 결정 요청(아래 "도구 감지 우선 순서" 4와 동일 정책). **검증 도구 자체를 설치하는 PM 의 신호는 이 대조에서 제외한다** — 이 표는 *builder 가 프로젝트·기능 의존성을 설치할 때 쓰는 PM* 만 적는다(ADR-059 D2). 그래서 Flutter scope 의 `package-lock.json`(design gate·통합 명령용 npm)은 `pubspec.lock` 과의 *동일 scope 신호 충돌* 로 보지 않고, 표에는 `pub` 1행만 둔다. 웹 프로젝트의 `@playwright/test` 를 이 표에 적지 않는 것과 같은 경계다. 아래 6-2 설치는 이 확인을 통과한 scope 도구로 실행한다.
    - **6-2. Toolchain 설치 (전 스택 공통, 기계적 — 기본은 진행)**: 감지된 패키지 매니저로 authored devDeps 를 설치한다 — `pnpm install` / `npm install` / `pip install -e .` (또는 `uv sync`) / `go mod download` / `cargo fetch` / `flutter pub get` 중 스택에 자연스러운 1종. lockfile 존재 시 frozen 설치(`pnpm install --frozen-lockfile` / `npm ci`) 우선. 설치 후 lock 파일 변경은 그대로 둔다(finalize 자동 화이트리스트, ADR-007#amend-1). **주의 — *validate 가 부르는 도구 자체*가 깔리는지 확인**: 패키지 deps 만 받는 명령은 lint/type/test 도구를 빠뜨릴 수 있다(예: `pip install -e .` 는 dev 도구 미설치 → `pip install -e '.[dev]'` 또는 `uv sync --all-extras`; Go `golangci-lint`·Rust `clippy` 는 별도 설치). step 5 smoke 가 command-not-found 면 도구 설치 명령을 보강한다.
    - **6-2-1. 테스트 격리 권장 (ADR-051#amend-1)**: 생성하는 e2e/통합 설정에 *가능한 범위에서* 격리를 권장한다 — playwright `webServer`는 동적 포트, 통합 테스트는 트랜잭션 롤백/임시 스키마/testcontainers. stack-guard가 unit-test 격리를 직접 authoring하긴 어려우므로, 미보장 시 `STACK_SETUP_PLAN.md`에 "테스트 격리 미설정 — 병렬 builder 시 foreman 순차 권장" 1줄 부기(implement partition이 실제 보호).
+   - **6-2-b. 기초 라이브러리 baseline 설치 (ADR-071 D6)**: registry에서 `disposition: 확정` **그리고** 카탈로그 `설치: baseline`인 행의 패키지를 **scope별로**(그 scope의 행을 그 scope의 PM으로 — ADR-071 D2 `(scope, id)` 키) 설치한다(UI 킷·스타일링·아이콘·UI 미리보기 도구·계측 SDK 등 — 폰트 제외). 버전은 registry `확인일`의 researcher 고정값. `설치: task` 행은 설치하지 않는다(plan-workitem → implement). 설치 실패는 6-5 `Needs Install` fallback.
+     - **Storybook (웹 UI + registry `cat-web-ui-preview` = Storybook)**: 프레임워크 공식 통합으로 설치하고 애드온은 `a11y`·`viewport`만 둔다. `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. 정적 빌드 출력 `design-gate-storybook/`이 `.gitignore`에 없으면 추가한다. Flutter는 미리보기 도구를 설치하지 않는다.
+     - **폰트 패키지·파일은 설치하지 않는다** — DESIGN `## 3` 확정 뒤 `/bootstrap-design` R6가 추가한다(ADR-071 D6 예외).
+     - 설치 결과를 출력에 `baseline libs: <패키지 목록> (installed | Needs Install)`로 낸다.
    - **6-3. e2e 실행 환경 준비 (runtime target 기준)**:
      - **target 에 `web` 포함**: `npx playwright install` (CI/Linux 환경이면 `npx playwright install --with-deps` 제안만 부기, 자동 실행 X — OS 패키지 sudo 필요). **웹 경로는 개선 전과 동일하다.**
      - **target 에 `native/*` 포함**: **앱 e2e 목적의** 브라우저는 설치하지 않는다. 대신 **`flutter devices --machine` 으로 연결된 device 를 조회**해 선언된 target 별 후보(android / ios)와 각 device id 를 회수한다 — `flutter doctor` 는 toolchain 점검이 본업이고 device 는 개수만 요약해 *어느 것이 android/ios 인지* 와 *후보가 몇 개인지* 를 알 수 없다(ADR-059 D4). 어떤 target 의 후보가 0개면 그 target 에 대해 `Needs Device: <에뮬레이터/시뮬레이터 기동 명령>` 을 출력한다. iOS 는 host 가 `macos` 일 때만 확인한다.
@@ -178,9 +194,11 @@ R0 — 운영 환경 가정 확인:
        - **판정 기록 (필수 — ADR-058#amend-3 결정 5)**: 위 결과를 `docs/00-meta/STACK_SETUP_PLAN.md` 의 `## 통합 명령 사용법` 절에 `visual-qa: <READY|PENDING> (<사유 — PENDING일 때만>) (<YYYY-MM-DD>)` 1줄로 기록한다(이미 있으면 갱신). **UI/web 대상일 때만 쓰고 비-UI에서는 줄을 만들지 않는다.** 이 줄이 `/stabilize-milestone` `[Guard-drift]` (e)의 유일한 입력이며, 없으면 전제 미준비가 조용히 잊힌다. **조기 종료 경로에서도 기록한다**(5-f `probe smoke:` 기록 규율과 동형).
      - 기존 `e2e/visual-qa.spec.*`는 덮어쓰지 않되 capability가 약하면 별도 adapter/helper로 보완한다. **스크린샷 vision 비평은 hot-loop 제외**(탐색/사람 검토는 stabilize §3-P). 졸업 e2e 게이트는 ADR-052 D3 / ADR-068 D3 item 3가 SSOT.
    - **6-5. Graceful fallback (날조·우회 금지)**: 6-2/6-3 의 설치 명령이 sandbox/네트워크/승인 차단으로 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고, 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다. 이후 step 5 smoke 는 해당 항목을 SKIPPED 로 처리한다. (implement-workitem 의 ADR-040#amend-1 `Needs Install` 패턴과 동일.)
-   - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존*(biome/tsc/vitest/@playwright/test + browser)뿐이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 ADR-052(install-ownership 3분할)에 기록 — 본 step 은 toolchain+e2e 소유만 집행한다.
+   - **설치-소유 경계 주의(SSOT)**: 본 step 이 까는 것은 *toolchain + e2e 의존* + **카탈로그 `설치: baseline` 확정 행**(6-2-b)이다. *task 단위 런타임/기능 패키지*(결제 SDK 등)는 plan-workitem 이 authoring → implement-workitem 이 설치한다(ADR-040#amend-1). 경계 결정은 ADR-052(3분할) + ADR-071(baseline 라이브러리·스캐폴드 4번째 class).
 
 마지막 출력:
+- 스캐폴드 결과 (`done <생성기>` / `skipped <사유>`) + 권장 커밋 메시지
+- baseline libs 설치 결과
 - 생성/갱신한 파일 목록
 - 운영 환경 가정 (R0 결과)
 - 통합 명령 호출 방법 (예: `pnpm validate`; UI/web 이면 `pnpm validate:e2e` 도)
@@ -242,6 +260,8 @@ R0 — 운영 환경 가정 확인:
 
 | 산출물 | 재실행 동작 |
 |---|---|
+| `## Scaffold` (수행 0) | `status: done`이면 **재실행하지 않는다**. `skipped`인데 이후 소스 루트가 생겼으면 그대로 `skipped` 유지(brownfield 승격) |
+| 6-2-b baseline 라이브러리 | registry 확정 행 중 **미설치분만** 설치. registry가 바뀌어 새 확정 행이 생기면 그것만 |
 | `validate` / `validate:e2e` / `validate:design` 진입점 | 존재하면 **교체하지 않는다** |
 | 도구 선택 (Biome / ESLint / Vitest / Jest 등) | 존재하면 **교체하지 않는다** (도구 감지 우선 순서 2) |
 | toolchain 설치 | 이미 설치돼 있으면 재설치하지 않고 `deps already present` 출력 |
@@ -300,7 +320,7 @@ R0 — 운영 환경 가정 확인:
 
 - `/stack-guard` 는 *authored toolchain 을 기본 설치* 한다(수행-6). 산출은 `package.json` 의 `scripts.validate`(+ UI/web 이면 `scripts.validate:e2e`) 진입점 + verify 스크립트 본문 + 실제 설치된 devDeps(예: `biome / typescript / vitest / @playwright/test`) + (UI/web) playwright browser.
 - 패키지 매니저 설치는 lockfile 존재 시 frozen(`pnpm install --frozen-lockfile` / `npm ci`) 우선, 부재 시 일반 install. 설치된 devDeps 목록을 출력에 박는다.
-- **설치 범위 경계(SSOT)**: stack-guard 가 까는 것은 *toolchain + e2e 의존* 뿐이다. *task 단위 기능 패키지*는 plan-workitem authoring → implement-workitem 설치(ADR-040#amend-1). 경계 결정 기록은 ADR-052(install-ownership 3분할).
+- **설치 범위 경계(SSOT)**: stack-guard 가 까는 것은 *toolchain + e2e 의존* + **카탈로그 `설치: baseline` 확정 행**(6-2-b)이다. *task 단위 기능 패키지*는 plan-workitem authoring → implement-workitem 설치(ADR-040#amend-1). 경계 결정 기록은 ADR-052(3분할) + ADR-071(baseline 라이브러리·스캐폴드).
 - **Graceful fallback (날조·우회 금지)**: 네트워크 / 사용자 승인 / lockfile 충돌 / monorepo workspace 라우팅 / sandbox 정책으로 설치가 *실제 실패* 하면 fabricate 하지 않고 `Needs Install: <명령> — 메인 세션/사용자 실행 필요` 를 출력하고 가능한 산출(진입점·config·verify 스크립트)은 계속 생성한다(implement-workitem ADR-040#amend-1 패턴 동일). 이후 smoke 는 SKIPPED.
 - 이미 설치돼 있으면(노드 모듈/lock 정합) 재설치하지 않고 verify 스크립트만 박되, 설치 상태를 `deps already present` 로 출력한다.
 

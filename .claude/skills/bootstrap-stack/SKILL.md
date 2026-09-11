@@ -6,7 +6,7 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Agent
 ---
 
-너의 역할은 프로젝트 스택을 *결정하거나 문서화*하고, 이 보일러플레이트에 맞게 stack-specific 초기 세팅 문서를 정리하는 것이다. 스택이 이미 정해졌으면 문서화만, 미정이면 리서치+라운드로 결정까지 운전한다. 정책 SSOT는 ADR-055(입력 적응형 흐름·taxonomy) + ADR-041 D2(--migrate contract).
+너의 역할은 프로젝트 스택을 *결정하거나 문서화*하고, 이 보일러플레이트에 맞게 stack-specific 초기 세팅 문서를 정리하는 것이다. 스택이 이미 정해졌으면 문서화만, 미정이면 리서치+라운드로 결정까지 운전한다. 정책 SSOT는 ADR-055(입력 적응형 흐름·taxonomy) + ADR-071(카탈로그·disposition·HYBRID 라우팅) + ADR-041 D2(--migrate contract).
 
 이 skill은 **메인 세션에서 직접 실행**된다(discover-product/plan-milestone 패턴 — `context: fork` 미지정). 무거운 추론은 `Agent` 도구로 architect/researcher 단발 sub-call에 위임하고 결론만 문서에 반영한다. `disable-model-invocation: true` 유지 — 후속 `/stack-guard`는 텍스트 제안이며 자동 호출하지 않는다(ADR-050 D2).
 
@@ -14,11 +14,12 @@ allowed-tools: Read Glob Grep Write Edit Agent
 1. **상태 회수(최소)**: `docs/90-decisions/project/ADR-101-stack-selection.md` 존재 여부 + 프로젝트 manifest(`package.json`/`pyproject.toml`/`go.mod`/`Cargo.toml` 등) 존재 여부.
 2. **분기**:
    - **`--migrate`** → 아래 `## --migrate (T2) 흐름`.
-   - **구체적 스택 감지** — $ARGUMENTS에 아래 "스택별 디폴트 디렉터리 구조" 표나 ARCH §7 sub-section으로 해석되는 프레임워크/언어/런타임 토큰이 1+ 있음, **또는** manifest가 이미 있어 스택이 물질화됨(brownfield) → **BASE 문서화 흐름**. brownfield는 스택을 새로 *결정하지 않고* manifest에서 감지해 문서화·정합한다.
-   - **비어 있음/모호/불확실** — $ARGUMENTS가 비었거나, 앱 범주·목표만 있고 해석 가능한 프레임워크 토큰이 없거나("SaaS 하나", "웹앱", "백엔드"), 불확실 마커("추천", "뭐가 좋을까", "골라줘")가 있음 → **DEEP 결정 흐름**.
+   - **BASE** — 프레임워크/언어/런타임 토큰이 있고 **`stack-catalog.md`의 해당 유형 T1 행이 모두 입력에서 결정됨**(또는 brownfield manifest에서 감지됨) → `## BASE 문서화 흐름` + `## R-C 카탈로그 라운드`(T2/T3 미결정 행만).
+   - **HYBRID** — 프레임워크 토큰은 있으나 T1 행에 미결정이 남음(예: "Next.js"만 주고 백엔드·DB 미정) → `## DEEP 결정 흐름`의 R1~R2를 **미결정 T1 행에 한정**해 실행 → R-C → R4 저장. (ADR-071 D4)
+   - **DEEP** — 해석 가능한 프레임워크 토큰이 없거나 불확실 마커("추천"·"골라줘") → `## DEEP 결정 흐름` 전체.
 3. **가드**:
    - **charter/ARCH 얕음** — DEEP인데 `PROJECT_CHARTER §4/5/6/7`·`ARCH §8`이 비었으면 persona·제품 맥락을 *만들지 말고* "먼저 `/discover-product` 또는 `/bootstrap-project`" 안내 후 종료(DISCOVERY=SSOT, ADR-035).
-   - **오라우팅 방지** — 프레임워크 토큰이 하나라도 있으면 BASE로 가되, 산출이 §7에 미달(예: API 필요 제품인데 백엔드 미정)이면 "추천을 원하면 스택 없이 재실행" 1줄만 echo — 몰래 라운드로 승격하지 않는다.
+   - **오라우팅 방지** — 토큰이 있는데 T1 미결정이 남으면 HYBRID다. 사용자가 명시적으로 "나머지는 나중에"라고 하면 그 행들을 registry `이관`(사유 + 회수 시점)으로 적고 BASE로 간다. 조용히 건너뛰지 않는다.
 
 반드시 먼저 읽을 파일:
 - `docs/00-meta/GUARDRAILS_STRATEGY.md`
@@ -29,6 +30,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 - `docs/90-decisions/project/README.md` (project ADR 인덱스 — ADR-101 추가 후 한 줄 갱신 대상)
 - `stack-brief-template.md`
 - `output-checklist.md`
+- `stack-catalog.md`
 
 ## DEEP 결정 흐름 (R1~R4 — 무입력/모호 시)
 discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 포맷으로 출력하고 자연어 응답(`skip`/`good`/`refine: …`)만 받는다:
@@ -70,9 +72,19 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
      해당 스택이 아닌 sub-section은 아래 3번대로 삭제하므로 결정 대상이 아니다.
    - `docs/90-decisions/project/README.md` 인덱스 표에 ADR-101 한 줄 추가.
 3. **비해당 `## 7-1`~`## 7-5` 처리 — 단일 스택은 통째 삭제, 다중 스택(monorepo)은 KEEP-list**: 프로젝트가 스택 1종이면 비해당 sub-section을 통째 삭제한다(예: API 미포함 → `## 7-1` 삭제). **FE+API+CLI 등 다중 스택이면 해당하는 sub-section을 *모두 보존*하고 각 스택의 디렉터리 트리를 `## 3-1`에 함께 박는다(삭제 금지).** **모바일 앱 스택이면 `## 7-5`를 채우고 `## 7-4`를 삭제한다**(웹 화면이 함께 있는 경우에만 둘 다 보존 — ADR-027#amend-8).
-4. 필요하면 `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md` 생성(이미 있으면 갱신 제안). **복사 시 비해당 절을 통째 삭제한다**(ARCH `## 7-1`~`## 7-5` 비해당 삭제 규칙과 동형). **두 절의 조건은 다르다** — `## Dart Source Roots`는 `dart format` 대상이 있는 **모든 Dart/Flutter 스택**에서 남기고(순수 Dart CLI·패키지 포함, ADR-059 D2), `## Golden 초기 절차`는 **화면이 있는 native 스택에서만** 남긴다(runtime target에 `native/*` 포함 ∧ design surface 있음 — ADR-059 D3). golden 은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는 `flutter test --update-goldens` 자체가 성립하지 않으므로, 그 프로젝트에 남기면 쓸모없는 안내가 영구히 붙는다. `## E2E Smoke Registry`는 스택 무관이라 남기고 비대상이면 `status: n/a`만 적는다. **Optional MCP Connectors 백필(ADR-048#d1)**: `.codex/config.toml`에 `[mcp_servers.*]`가 있으면 STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 backfill 권장(자동 연결 X — 사용자 직접).
+4. `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 **항상** 생성·갱신한다(ADR-071 D8 — 선택 산출물 아님). **복사 시 비해당 절을 통째 삭제한다**(ARCH `## 7-1`~`## 7-5` 비해당 삭제 규칙과 동형). **두 절의 조건은 다르다** — `## Dart Source Roots`는 `dart format` 대상이 있는 **모든 Dart/Flutter 스택**에서 남기고(순수 Dart CLI·패키지 포함, ADR-059 D2), `## Golden 초기 절차`는 **화면이 있는 native 스택에서만** 남긴다(runtime target에 `native/*` 포함 ∧ design surface 있음 — ADR-059 D3). golden 은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는 `flutter test --update-goldens` 자체가 성립하지 않으므로, 그 프로젝트에 남기면 쓸모없는 안내가 영구히 붙는다. `## E2E Smoke Registry`는 스택 무관이라 남기고 비대상이면 `status: n/a`만 적는다. **Optional MCP Connectors 백필(ADR-048#d1)**: `.codex/config.toml`에 `[mcp_servers.*]`가 있으면 STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 backfill 권장(자동 연결 X — 사용자 직접).
    - **Dependency Tools 기록 (ADR-051#amend-4)**: 확정한 **scope별 의존성 도구**(npm/pnpm/yarn/bun · pip/poetry/uv · cargo · go · **pub(Flutter/Dart)** 등)를 STACK_SETUP_PLAN `## Dependency Tools` 표에 기록한다 — 단일 패키지는 `.` 1행, 모노레포·polyglot은 scope별 1행(경로 prefix), 비-JS 스택도 같은 표. **적는 대상은 *builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM*뿐이다** — 검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록하므로 이 표에 넣지 않는다(ADR-059 D2). 예: Flutter 루트는 `pubspec.lock`·`package-lock.json`이 함께 있어도 **`pub` 1행**이고(npm은 design gate·통합 명령용), 웹 프로젝트의 `@playwright/test`도 별도 행으로 적지 않는다. 근거 컬럼엔 그 판정을 뒷받침한 *tool-specific* 신호(lockfile·tool-manifest)를 적고, lockfile이 아직 없는 green-field는 `(신규 — lockfile 미생성)`으로 표기한다. **이 표가 downstream scope→tool SSOT**다(stack-guard 교차확인 → plan-workitem 설치 line item → implement 3-DT → builder). 도구 *선택 근거*는 ARCHITECTURE `## 7`에, 설치 소유 경계는 ADR-052.
+   - **Stack Decision Registry 기록 (ADR-071 D2)**: `stack-catalog.md`의 해당 유형 행 전부를 `## Stack Decision Registry`에 적고 `scope`·disposition(`확정 | 해당 없음 | 이관 | 미결정`)·authority·정본 앵커·확인일을 채운다. **행 키는 `(scope, id)`** — 단일 패키지는 전 행 `.`, monorepo는 scope마다 갈릴 수 있는 행을 scope별로 두고 저장소 단위 행만 `*`로 둔다. **빈 행이 남으면 성공 종료하지 않는다.** 결정 본문은 앵커(ARCH `## 7-N`·ADR-101)에만 적는다 — registry는 색인이다.
 5. 화면이 있는 스택(웹 프론트 또는 모바일 앱) 감지 시 마지막 출력에 "UI 스택 감지됨. `/bootstrap-design` 권장" 1줄.
+
+## R-C — 카탈로그 라운드 (BASE·HYBRID·DEEP R4 공통, ADR-071)
+1. `stack-catalog.md`에서 프로젝트 유형(들)의 행을 회수한다 — 유형은 ADR-071 D4 판별 규칙(활성 ARCH sub-section·workspace·Supabase 신호, 애매하면 사용자 확인 1회)으로 정하고 monorepo·풀스택은 해당 유형 전부. monorepo는 scope마다 값이 갈릴 수 있는 행을 scope별로 나눈다(ADR-071 D2 `(scope, id)` 키).
+2. 이미 결정된 행(입력·brownfield 감지·DEEP R2 결론)은 `확정`으로 registry에 적는다.
+3. 나머지 행을 authority로 나눈다 — `user-approval` 행은 Decision Brief 6블록으로 **라운드당 3~5개씩** 제시(ADR-060 D3, `skip` 불허 — 선택/설명/리서치/`이관` 중 택1). `agent-delegated` 행은 architect 단발 sub-call이 기본 후보와 근거를 정하고 **라운드 끝 일괄 확인 1회**로 제시한다. 사용자가 뒤집은 행은 `user-approval`로 원장에 등재한다.
+4. 새로 정하거나 불확실한 행만 researcher 단발 sub-call로 현재 메이저·호환·발행일을 확인해 `확인일`에 적는다(ADR-071 D7). 기존 실측 스택은 재조사하지 않는다.
+5. 사용자가 지금 정하지 않겠다는 행은 `이관`(사유 + 회수 시점 — 보통 `M1 plan-milestone R1`)으로 적고 **DECISION_REGISTER에 `deferred`**(무영향 근거·이관 앵커 = registry 행·회수 시점)로 등재한다(ADR-060 D4 3필드 — plan-milestone R1이 회수). 정해야 하는데 못 정한 행은 `미결정` + DECISION_REGISTER `open`(`영향: (미할당)`)으로 적는다.
+6. 결정 본문은 정본 앵커에 쓴다: 7-x 소항목 → ARCH `## 7-N`, 스택·주요 라이브러리 → ADR-101 `## 결정` 표, 운영 사실 → ARCH `## 7` 하위, 설치 시점·PM → STACK_SETUP_PLAN.
+7. 종료 조건: registry에 빈 행 0.
 
 ## --migrate (T2) 흐름 — 입력 적응형
 스택 *변경*. R0에서 `--migrate`로 진입. contract 규약 소유는 ADR-041 D2, 적응형 진입은 ADR-055. **입력 적응형**:
@@ -100,6 +112,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 - **원장 요약**: `closed N건 / deferred M건 / open K건` (open이 있으면 `authority`·필요 시점 1줄씩). *결정*은 대화에만 두지 않고 전부 `docs/10-charter/DECISION_REGISTER.md`에 등재한다
 - **연결/연결 권장 MCP가 있으면**: STACK_SETUP_PLAN `## Optional MCP Connectors`에 lifecycle usage + agent access 기록 안내 1줄(ADR-048).
 - 다음 권장 단계로 `/stack-guard` 안내(자동 호출 아님 — 사용자 발화). 프론트면 `/bootstrap-design`도.
+- **registry 요약**: 확정 N / 해당 없음 M / 이관 K(회수 시점 목록) / 미결정 J(0이어야 정상 종료)
 
 ## 외부 의존 부트업 권장 (감지 시 출력, ADR-025)
 스택 감지 시(강제 X, 권장만):
@@ -117,6 +130,8 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 > monorepo는 위 `## BASE 문서화 흐름` 3의 다중 스택 KEEP-list를 적용한다(§7-1~7-5 삭제 금지, 패키지별 디렉터리 트리 모두 §3-1에 박음).
 
 ## 스택별 디폴트 디렉터리 구조 (권장 출력)
+
+스캐폴드 생성은 `/stack-guard` 수행 0이 수행한다(ADR-071 D5). 본 표는 생성기 옵션·`## 3-1` 기록의 기준이다.
 
 | 스택 | 디폴트 트리 |
 |------|-----------|

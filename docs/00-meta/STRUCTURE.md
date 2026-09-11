@@ -57,6 +57,9 @@
 | ADR (project) | `docs/90-decisions/project/ADR-1NN-*.md` (인덱스: `docs/90-decisions/project/README.md`) | `/bootstrap-project`(ADR-100) · `/bootstrap-stack`(ADR-101·--migrate ADR-1NN) · `/plan-milestone` R0([ADR-candidate] 회수) · architect(초안 sub-call) — 트리거 표: ADR-000#amend-2 | Record | generated |
 | stack setup plan template | `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md` | 수동 (boilerplate 제공) | Reference | baseline |
 | stack setup plan | `docs/00-meta/STACK_SETUP_PLAN.md` | `/bootstrap-stack`, `/stack-guard` | Reference | generated |
+| 스택 결정 카탈로그 | `.claude/skills/bootstrap-stack/stack-catalog.md` | 수동 (boilerplate 제공 — ADR-071 D1) | Reference | baseline |
+| 스택 결정 registry | `STACK_SETUP_PLAN.md ## Stack Decision Registry` | `/bootstrap-stack` (R-C, 빈 행 0) | Reference | generated |
+| 스캐폴드 기록 | `STACK_SETUP_PLAN.md ## Scaffold` | `/stack-guard` 수행 0 (ADR-071 D5) | Record | generated |
 | verify scripts | `scripts/verify.{sh,ps1,mjs,py}` | `/stack-guard` | Reference | generated |
 | design gate canonical assets | `.claude/skills/stack-guard/assets/design-gate*.mjs` | 수동 (harness 제공, UI 판정 때만 JIT read/copy/run) | Reference | baseline |
 | design gate adapter (UI) | `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 기록된 project-native 경로 | `/stack-guard` (UI 판정 뒤 생성·self-test) | Reference | conditional |
@@ -136,6 +139,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | task 층 증거 계약 (외부 경계 실행 증거·검증 판정력·`[미실측]` 외부 사실·receipt) | [ADR-064](../90-decisions/boilerplate/ADR-064-task-layer-evidence-contract.md) (정책 SSOT). → ADR-064 `## Surfaces` 참조. |
 | 원장 5종 배타 범위 + 비중복 불변식 | [ADR-005](../90-decisions/boilerplate/ADR-005-ssot.md)#amend-1 (정책 SSOT). 실행 표는 본 문서 `## Canonical Owner 매핑`의 «원장 5종 배타 범위». |
 | 죽은 ADR 인용 처리 5종 분류 (`[Ref-dead]` 판정 기준) | [ADR-045](../90-decisions/boilerplate/ADR-045-doc-reference-contract.md)#amend-2 (정책 SSOT). → ADR-045 `## Surfaces` 참조. |
+| 스택 결정 색인(disposition·앵커) | `STACK_SETUP_PLAN.md ## Stack Decision Registry` — 결정 본문은 ARCH `## 7-N`·ADR-101에만(색인은 제2 SSOT 아님, ADR-071 D1) |
 
 ### 원장 5종 배타 범위 (ADR-005#amend-1)
 

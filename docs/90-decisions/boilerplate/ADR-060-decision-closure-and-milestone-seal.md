@@ -160,6 +160,7 @@ M/F 상태를 `draft → contract-ready → ready`로 확장한다.
 | `## 7-5` 모바일 | **대상 플랫폼·최소 OS · 화면 이동 · 권한 요청 흐름 · 로컬 저장·오프라인 · 서명·배포** | 상태관리 · 네이티브 연동 · 빌드 flavor · 백그라운드 · WebView · Don'ts |
 
 배정 기준: 되돌린 뒤 **이미 쓴 코드·데이터·사용자 계정에 파급**이 있으면 `user-approval`, 코드 안에서 끝나면 `agent-delegated`. (`## 7-5` 화면 이동은 `## 7-4` 라우팅과 같은 성격이라 대칭으로 `user-approval`이다 — 라우팅 라이브러리 교체는 전 화면을 건드린다.)
+> 참조 갱신 (2026-09): 패키지·provider 수준 항목과 슬롯 없는 항목의 authority 기본값은 [ADR-071](ADR-071-stack-decision-catalog-and-scaffold.md) D3(카탈로그 열)이 배정한다. 본 표의 7-x 정책 수준 배정은 불변이다.
 
 ### D10. ADR-053 종결자 이동
 ADR-053 결정 2의 `④ ARCHITECTURE §7 결정 블록 기록`을 `④ 사용자 선택(Decision Brief) → ⑤ 기록`으로 정정한다(ADR-053#amend-2). 리서치·다각도·적대 검토는 **선택지를 만드는 과정**이지 결정 자체가 아니다.

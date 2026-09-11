@@ -80,6 +80,7 @@
 스택이 확정된 후 사용자가 `/stack-guard`를 발화하면 다음을 생성한다.
 
 **1단계 산출물 (자동 생성)**:
+- (green-field) 공식 생성기 스캐폴드 + 카탈로그 `설치: baseline` 확정 행의 기초 라이브러리 설치. harness 파일은 덮어쓰지 않는다 (ADR-071 D5·D6).
 - 통합 진입점 — 이름은 `validate`로 고정 (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 1종). **단 design gate(`validate:design`)를 쓰는 프로젝트는 그 진입점을 npm 계열로 둔다** — `task`·`make`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단/실행불가 구분을 없앤다 (ADR-059 D2).
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 자연스러운 런타임 1종.
 - UI 판정 시에만 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고 fixed conformance를 실행한 뒤 `STACK_SETUP_PLAN.md ## Design Gate Adapter`에 실제 명령·경로·capability version·source digest를 기록한다(ADR-058#amend-2). 비-UI에서는 asset을 읽거나 복사하거나 design toolchain을 설치하지 않는다.
@@ -96,7 +97,7 @@
 
 | 시점 | 무엇이 도나 | 누가 |
 |---|---|---|
-| 스택 확정 직후 1회 | `validate` 생성 + probe 실측 검증 | `/stack-guard` |
+| 스택 확정 직후 1회 | (green-field) 스캐폴드·기초 라이브러리 설치 → `validate` 생성 + probe 실측 검증 + design gate 자가 검사 | `/stack-guard` |
 | 매 task 검증 | `validate` **전체 실행** (코드 상태가 매 phase 변하므로 직전 결과를 재사용하지 않는다) | `/validate-workitem` |
 | task 마감 직전 | `validate --changed` 허용 (빠른 회전 — ADR-020) | `/finalize-workitem` |
 | 매 마일스톤 | `validate` 전체 + `validate:e2e` + 장치 노후 점검 | `/stabilize-milestone` |

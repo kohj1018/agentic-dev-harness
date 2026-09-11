@@ -139,7 +139,7 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 | charter 전면 재정의 (문제 정의 자체가 바뀜) | `/discover-product --update` 재실행(또는 산출물만 갱신) → `/bootstrap-project --apply`로 charter 재생성 |
 | 페르소나 교체·pain 재발굴 | `/discover-product --update` |
 | architecture 스택 변경 (T2 — 언어/런타임/프레임워크/DB/인증 등 토대 변경, ADR-055) | `/bootstrap-stack --migrate` (타깃 미정이면 DEEP 라운드로 수렴) 후 `/stack-guard` 이어 실행 |
-| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1). 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 |
+| 라이브러리 몇 개 추가 (T3 — 토대 미변경) | 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리 (ADR-040#amend-1). 누적이 T2 임계를 넘으면 stabilize `[Stack-drift]`가 ADR-101 갱신을 감지 — registry `설치: baseline` 확정분은 `/stack-guard`가 이미 설치(ADR-071 D6) |
 | 시각 방향 전환 (concept 시안 재탐색 필요) | `/bootstrap-design --update` |
 
 > 판별 기준은 «위험한가»가 아니라 **«답을 아직 모르고 그것을 찾는 라운드가 필요한가»** 다(ADR-069 D4). 위험 관리는 `/amend-ssot`의 authority 확인·전파 검사·봉인 충돌 검사가 담당한다.

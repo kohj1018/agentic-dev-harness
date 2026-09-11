@@ -10,6 +10,7 @@ accepted
 - e2e 판정은 **종료코드가 아니라 구조화된 러너 출력**으로 하며 상태는 `NOT_APPLICABLE`/`EMPTY`/`PASS`/`FAIL`/`BLOCKED_ENV` 5종이다(Amendment 1). `EMPTY`는 프로비저닝 단계에서 허용, 졸업 시점에는 차단.
 - D1(install provision)·D2(provision/smoke)·D4(repair-milestone) 결정은 그대로 유효하다.
 > **부분 supersede (2026-08-17)**: D4의 *"단일 task로 격리되는 결함은 `/repair-workitem T-NNN`으로 라우팅"* 은 [ADR-068](ADR-068-milestone-closure-and-graduation-v3.md) D1이 부분 supersede한다 — **마일스톤 층(산하 전 task done) 이후에는 라우팅 없이 `/repair-milestone`이 직접 고친다.** D4의 나머지(코드 수정 허용 · 자동 커밋·status 변경 금지 · `## 5` 결정 이력)는 유효하다. 본 표기는 개정(amend)이 아니라 참조 갱신이다.
+> 참조 갱신 (2026-09): D1의 install-ownership 3분할에 [ADR-071](ADR-071-stack-decision-catalog-and-scaffold.md) D5·D6이 네 번째 class(스캐폴드 + 카탈로그 baseline 라이브러리)를 더한다. 본 표기는 개정이 아니라 참조 갱신이다.
 
 ## 배경
 - [관측됨] stack-guard는 검증 wiring(`validate`/`validate:e2e`)만 생성하고 *baseline toolchain·e2e 브라우저를 직접 설치하지 않는다* → 검증 실행 시 미설치 라이브러리(biome/tsc/vitest/@playwright/test)·Playwright 브라우저로 에러가 반복 발생한다(**사용자 보고 root cause**). per-task 패키지 설치(implement, ADR-040#amend-1)는 있으나 *스택 baseline provision* 게이트가 부재.

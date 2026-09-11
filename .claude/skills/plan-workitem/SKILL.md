@@ -249,6 +249,7 @@ YAGNI 정합 — Phase 6의 graduation contract *시작 시점 budget*과 동등
 - **T2** — dep/변경이 ADR-053 S1~S4에 해당(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존을 건드림, 또는 ARCH §7 결정·charter §7 제약을 뒤엎음): `T2: /bootstrap-stack --migrate 권장 (ADR-101 supersede)` 출력. task로 즉흥 도입하지 않는다.
 - **물질적이나 비-foundational** (S1~S4 미해당이지만 근거 기록이 필요한 새 의존): 해당 task `## 0-1. Type`을 `technical-enabler`로 두고 근거를 `## 2`에 기록(ADR-039).
 - **사소(T3)**: 평범한 `## 3` install line-item으로 처리(ADR-040#amend-1). ADR-101/charter §7 제약 미변경.
+- **baseline 설치분 제외 (ADR-071 D6)**: `STACK_SETUP_PLAN.md ## Stack Decision Registry`에서 `확정` + 카탈로그 `설치: baseline`인 패키지는 `/stack-guard`가 이미 설치했으므로 task `## 3` install line item으로 다시 만들지 않는다(registry를 먼저 읽는다).
 
 ## Cross-review hook (ADR-038)
 본 skill 호출 후 plan 품질에 확신이 부족하거나 다중 모델 관점을 원하면:

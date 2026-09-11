@@ -593,7 +593,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 - (f) `## --migrate (T2) 흐름` 앞에 새 절 삽입:
   ```
   ## R-C — 카탈로그 라운드 (BASE·HYBRID·DEEP R4 공통, ADR-071)
-  1. `stack-catalog.md`에서 프로젝트 유형(들)의 행을 회수한다 — 유형은 ADR-071 D4 판별 규칙(활성 ARCH sub-section·workspace·Supabase 신호, 애매하면 사용자 확인 1회)으로 정하고 monorepo·풀스택은 해당 유형 전부.
+  1. `stack-catalog.md`에서 프로젝트 유형(들)의 행을 회수한다 — 유형은 ADR-071 D4 판별 규칙(활성 ARCH sub-section·workspace·Supabase 신호, 애매하면 사용자 확인 1회)으로 정하고 monorepo·풀스택은 해당 유형 전부. monorepo는 scope마다 값이 갈릴 수 있는 행을 scope별로 나눈다(ADR-071 D2 `(scope, id)` 키).
   2. 이미 결정된 행(입력·brownfield 감지·DEEP R2 결론)은 `확정`으로 registry에 적는다.
   3. 나머지 행을 authority로 나눈다 — `user-approval` 행은 Decision Brief 6블록으로 **라운드당 3~5개씩** 제시(ADR-060 D3, `skip` 불허 — 선택/설명/리서치/`이관` 중 택1). `agent-delegated` 행은 architect 단발 sub-call이 기본 후보와 근거를 정하고 **라운드 끝 일괄 확인 1회**로 제시한다. 사용자가 뒤집은 행은 `user-approval`로 원장에 등재한다.
   4. 새로 정하거나 불확실한 행만 researcher 단발 sub-call로 현재 메이저·호환·발행일을 확인해 `확인일`에 적는다(ADR-071 D7). 기존 실측 스택은 재조사하지 않는다.

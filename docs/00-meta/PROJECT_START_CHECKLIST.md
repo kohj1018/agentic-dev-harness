@@ -26,6 +26,7 @@
 - [ ] 패키지 매니저를 정했다
 - [ ] 테스트 도구를 정했다
 - [ ] lint/typecheck 도구를 정했다
+- [ ] (선택) `stack-catalog.md`의 id로 이미 정한 항목을 적어 두었다 — 나머지는 `/bootstrap-stack`의 R-C 라운드가 묻는다 (ADR-071)
 
 ## 3. guardrail 추가
 - [ ] `docs/00-meta/GUARDRAILS_STRATEGY.md`를 읽었다
@@ -35,10 +36,10 @@
   /bootstrap-stack Next.js 16 + TypeScript + pnpm + Supabase + Playwright + Vercel
   ```
   모바일 앱이면 예: `/bootstrap-stack Flutter + Android/iOS + Firebase`
-- [ ] `STACK_SETUP_PLAN.md`를 검토한 뒤 `/stack-guard`를 실행해 통합 `validate` 진입점·verify 스크립트를 생성했다. UI 판정이면 `## Design Gate Adapter`가 current `ADR-058#amend-2/v2` + source digest(direct-support Node UI는 canonical)의 `ready`이고 fixed conformance를 통과했는지 확인했다
+- [ ] `STACK_SETUP_PLAN.md`(`## Stack Decision Registry` 빈 행 0)를 검토한 뒤 `/stack-guard`를 실행했다 — green-field면 스캐폴드·기초 라이브러리가 설치되고(`## Scaffold`), 통합 `validate`·verify 스크립트가 생성되며, UI 판정이면 `## Design Gate Adapter`가 `ready (self-test PASS <날짜>)`다 (ADR-071·ADR-072). 권장 커밋 메시지로 스캐폴드를 커밋했다
 - [ ] (프론트엔드 스택이면) `/bootstrap-design`을 실행해 레퍼런스 조사(`DESIGN_RESEARCH.md`) + concept 시안 방향 선택을 거쳐 `docs/20-system/DESIGN.md`를 채웠다 (ADR-058)
 - [ ] (해당 시) 아래 조건 중 하나라도 걸리면 `/consult-expert legal <관할>`을 선행했다 — **결제·PG 연동 / 개인정보 수집 / 규제 산업(의료·금융·교육·운송) / 미성년자 대상**. 규제 판단이 늦으면 되돌리기가 비싸다 (ADR-062)
-- [ ] (선택) 프레임워크 스캐폴드를 이미 돌렸다면 `/stack-guard`의 probe 검증이 실제 프로젝트 설정으로 판정한다. **스캐폴드 전이면 소스 루트나 도구 config 가 없어 `SKIPPED (probe unavailable …)` 또는 `SKIPPED (probe out of tool scope …)` 로 나오는 것이 정상**이다. 그 판정은 `STACK_SETUP_PLAN.md` 의 `probe smoke:` 줄에 남고, 다음 마일스톤 `[Guard-drift]` 가 `/stack-guard` 재실행을 권고한다 — **졸업을 차단하지는 않으므로 스캐폴드 후 한 번 다시 돌리는 것이 실질 해소 경로다** (ADR-063 D3·D4)
+- [ ] (brownfield) 이미 소스가 있는 저장소면 `/stack-guard`가 스캐폴드를 건너뛰고(`## Scaffold` `skipped`) 기존 코드 위에서 probe를 실측한다. 소스 루트가 없는데 `skipped`면 `## Stack Decision Registry`의 프레임워크 행을 확인한다 (ADR-071 D5)
 - [ ] 필요하면 `.claude/settings.local.json`에 개인 자동화를 추가했다
 - [ ] shared 설정에 환경 종속적인 hook를 바로 넣지 않았다
 

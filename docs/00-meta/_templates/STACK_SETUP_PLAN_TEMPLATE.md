@@ -4,6 +4,30 @@
 
 > 모드: Reference (스택 설정 절차 + 자동화 권장)
 
+## Stack Decision Registry
+<!-- 스택 결정 카탈로그(.claude/skills/bootstrap-stack/stack-catalog.md)의 해당 유형 행 전부를 적는다(ADR-071 D2).
+     이 표는 색인이다 — 결정 본문은 정본 앵커(ARCH ## 7-N / ADR-101 / 본 파일 다른 절)에만 있다.
+     행 키는 (scope, id)다 — 단일 패키지는 전 행 scope: . 이고, monorepo는 scope마다 갈릴 수 있는 행(패키지 매니저·lint·test·e2e·유형별 행)을
+     scope별로 나누고, 저장소 전체에 한 번만 성립하는 행(레이아웃·라이선스·CI·비밀 취급)만 scope: * 한 행으로 둔다.
+     disposition: 확정(앵커 필수) / 해당 없음(사유) / 이관(사유 + 회수 시점) / 미결정(원장 open 등재).
+     빈 행이 남으면 /bootstrap-stack은 성공 종료하지 않는다. /stack-guard 6-2-b는 그 scope의 `설치: baseline` 확정 행만 그 scope의 PM으로 설치한다. -->
+| scope | id | 항목 | disposition | authority | 정본 앵커 | 확인일 |
+|---|---|---|---|---|---|---|
+| . | (예: cat-web-framework) | 프레임워크 | 확정 | user-approval | ADR-101 ## 결정 | 2026-09-11 |
+| . | (예: cat-web-ui-preview) | UI 미리보기 도구 | 확정 (Storybook) | agent-delegated | ARCH ## 7-4 | 2026-09-11 |
+| apps/mobile | (예: cat-common-package-manager) | 패키지 매니저 | 확정 (pub) | agent-delegated | 본 파일 ## Dependency Tools | 2026-09-11 |
+| * | (예: cat-common-license-policy) | 배포 라이선스 | 확정 (MIT) | user-choice | Charter ## 7 · LICENSE | |
+| . | (예: cat-common-error-reporting) | 에러 리포팅 | 이관 — 사유: 배포 전 불요 / 회수: M2 plan-milestone R1 | agent-delegated | — | |
+
+## Scaffold
+<!-- /stack-guard 수행 0이 green-field scope마다 공식 생성기로 뼈대를 만든 뒤 기록한다(ADR-071 D5). 검증 진입점(수행 1)보다 먼저다.
+     brownfield·부분 초기화 scope는 `skipped (<사유>)`. harness 파일은 절대 덮어쓰지 않는다(복사 직전·직후 보호 경로 내용 해시 대조). -->
+| scope | status | 생성기·버전 | 옵션 | 생성 파일 수 | 제외·충돌 | 실행일 |
+|---|---|---|---|---|---|---|
+| (예: `.`) | done | (예: `create-next-app@15.x`) | (예: `--ts --tailwind --app --src-dir`) | | (예: `.gitignore` 줄 병합 12줄 / 충돌 0) | |
+| (예: `apps/mobile`) | done | `flutter create` | (예: `--platforms android,ios --org com.example`) | | | |
+| (예: `apps/api`) | skipped (brownfield — 소스 루트 존재) | | | | | |
+
 ## Dependency Tools
 <!-- scope → 의존성 도구 SSOT (ADR-051#amend-4). 정보 흐름: `/bootstrap-stack`이 확정 도구를 기록 →
      `/stack-guard`가 실제 lockfile과 교차 확인·보완 → `/plan-workitem`이 설치 line item의 도구를 이 표에 맞춤 →

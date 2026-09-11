@@ -21,3 +21,6 @@
 
 ## 추가 요구사항
 [예: CI 필요, e2e 포함, monorepo 여부]
+
+## 카탈로그 행 (선택 — 아는 것만)
+[`stack-catalog.md`의 id로 이미 정한 항목을 적는다(ADR-071 D1). 예: `cat-web-ui-kit: shadcn/ui`, `cat-web-ui-preview: Storybook`, `cat-common-error-reporting: 이관(M1 이후)`. 적지 않은 행은 R-C 라운드에서 묻는다.]
