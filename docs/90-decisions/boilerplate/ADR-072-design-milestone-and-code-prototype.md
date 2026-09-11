@@ -261,6 +261,7 @@ dogfood Round 11(웹)에서 D6 어댑터를 실제로 돌려 얻은 실측 3건�
 - .claude/skills/stack-guard/assets/design-gate.mjs       — 결정 1·3 (canonical sha 변경 — 재실행 계약대로 `copied-from` 갱신)
 - .claude/skills/stack-guard/SKILL.md                     — 결정 1·2 문구
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md    — `## Design Gate Adapter` command template·self-test 일자 칸
+- .claude/skills/stabilize-milestone/SKILL.md             — 결정 3 (§1.0 5-2 웹 계열 raw-hex 정규식 — **2026-09-11 추가**. amend-1 작성 시 «같은 정규식을 쓰는 다른 surface» 를 찾지 않아 누락됐고 Round 11 이 오탐 5건으로 잡았다 — dogfood 발견 26)
 
 <a id="adr-072-amend-2"></a>
 ## Amendment 2 (2026-09-11) — plan 이 승인 표면을 대조하지 않는다 (계획 self-check 3축)

@@ -72,7 +72,11 @@ LLM 호출 전 다음을 순서대로 점검 (모두 deterministic, fail-fast X 
    5-1. **UI 프로젝트 판정** — **ADR-073 D9 "UI 판정 다중신호 절차"** 적용(부재→비-UI: 5-1~5-3 skip+사유 echo / status≠draft→UI: 5-1~5-3 활성 / status=draft+추가신호≥1→UI 의심: IMPROVEMENT_GUIDE에 `P1 [Design-draft] DESIGN.md status=draft + UI 신호 감지 — /bootstrap-design 권장` 기록 + 5-1~5-3 활성 / 신호 0→silent skip).
 
    5-2. **UI 프로젝트 — raw color grep** (정규식 deterministic, **기록 등급 — 진행 차단 안 함**): 5-0 에서 회수한 변경 파일 중 아래 두 갈래로 검사한다.
-   - **웹 계열** — 확장자 `.tsx`/`.jsx`/`.ts`/`.js`/`.vue`/`.svelte`/`.astro`/`.css`/`.scss`/`.html`: `#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})\b` 패턴 grep(ERE — 3·4·6·8자리 hex 전부; `\b`로 더 긴 hex 런의 부분매치 방지). 일치 시 `P1 [Design-rawhex] <file:line> — DESIGN.md ## 2 token 으로 교체 권장`.
+   - **웹 계열** — 확장자 `.tsx`/`.jsx`/`.ts`/`.js`/`.vue`/`.svelte`/`.astro`/`.css`/`.scss`/`.html`. **단축 hex 는 스타일시트에서만 잡는다**(ADR-072#amend-1 결정 3 — design gate 어댑터와 같은 규칙):
+     - `.css`/`.scss`/`.sass`/`.less`: `#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{3})\b`(3~8자리 전부)
+     - 그 밖의 코드 파일(`.tsx`·`.ts`·`.vue`·`.svelte`·`.astro`·`.html` 등): `#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6})\b`(**6·8자리만**)
+     `\b`로 더 긴 hex 런의 부분매치를 막는다. 일치 시 `P1 [Design-rawhex] <file:line> — DESIGN.md ## 2 token 으로 교체 권장`.
+     **왜 갈랐는가**: 3~5자리 단축 hex 는 `#412` 같은 이슈·번호 표기와 구별되지 않아 카피 문자열·테스트 fixture 를 통째로 오탐한다(dogfood Round 11 실측 5/5 오탐 — 전부 「PR #412」). 대가는 «코드에 직접 쓴 `#abc` 단축 색을 놓친다»이며, 토큰 규율상 코드에 색 리터럴 자체를 두지 않으므로 수용한다.
    - **Dart 계열** — 확장자 `.dart`: ① `Color\(0x[0-9A-Fa-f]{6,8}\)` 및 `Color\.from(ARGB|RGBO)\(` → `P1 [Design-rawhex] <file:line>` ② `\b(Colors|CupertinoColors)\.[a-zA-Z]+` (프레임워크 기본 팔레트 사용 — 값을 박은 것은 아니나 프로젝트 토큰을 우회함) → `P1 [Design-token-grep] <file:line> — 테마에서 가져오도록 교체 권장`. 두 라벨은 원인과 수정 방법이 달라 분리한다. **`[Design-token]`(접미 없음)은 reviewer 의 LLM 판정 차원이 이미 쓰는 라벨이므로 grep 결정분에는 `-grep` 접미를 붙인다** — `[Design-voice-grep]`/`[Design-voice]` 분리와 같은 규칙이며, 회귀 신호 집계가 라벨 정확 일치로 동작하므로 겹치면 오집계된다.
    - **Dart 정의 라인 예외**: `static +const +Color +[A-Za-z_]+ *=` 형태의 줄은 토큰 *정의*이므로 제외한다(웹의 CSS custom property 정의 라인 예외와 동형).
    - **한계(사실 기록)**: 본 검사는 문자열 검색이라 문법을 이해하지 못한다. **주석 안·문자열 리터럴 안의 색값도 함께 잡는다**(실측 확인). 그래서 본 항목은 기록 등급이며 진행을 차단하지 않는다. 문법을 이해하는 검사가 필요하면 Dart 의 공식 analyzer plugin 방식과 별도 패키지인 `custom_lint` 중 하나를 고른다(둘은 같은 것이 아니다 — ADR-059 D6).
