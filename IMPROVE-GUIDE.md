@@ -1252,7 +1252,7 @@ accepted
 ### D6. design gate v3 (매니페스트 모드 + 설치 시 자가 검사)
 - **실행물**: canonical `.claude/skills/stack-guard/assets/design-gate.mjs` v3를 `/stack-guard`가 project-native 경로(기본 `scripts/design-gate.mjs`)에 복사하고 `validate:design`(npm 계열)에 배선한다. **`design-gate-conformance.mjs`(고정 적합성 oracle)·capability version 핸드셰이크는 폐지**한다. 복사 시점의 canonical sha256은 registry `copied-from`에 남긴다 — caller는 대조하지 않으며, stack-guard 재실행의 local-modification 판별과 stabilize의 canonical 갱신 감지에만 쓴다.
 - **모드**: `--html <files|glob>`(concept HTML — bootstrap-design R2-G) / `--manifest <path> [--only <screen id,...>] [--snapshot <dir>] [--no-build]`(화면·쇼케이스 — R6·design-milestone·stabilize·validate-workitem) / `--self-test`(설치 시) / `--tokens-only <glob>`(토큰 외 리터럴 스캔 — 기록 등급, 렌더 출력을 건드리지 않는다). 렌더 모드(`--html`·`--manifest`·`--self-test`)만 `design-gate-shots/`를 초기화한다. 출력 `design-gate-shots/report.json` + 스크린샷. exit `0`(pass) / `1`(blocker) / `2`(실행 불가 — Needs Install·미정의 플래그·모르는 매니페스트 `version`). 자식 프로세스 기동 실패(EPERM·EACCES·ENOENT)는 exit 2, 기동 후 시간 초과·출력 초과는 exit 1(ADR-063 D1 spawn 3분기 승계).
-- **실행 scope(monorepo)**: 각 화면의 `scope`(기본 `.`)를 어댑터 명령의 **작업 디렉터리**로 쓴다 — `build-storybook`은 Storybook이 설치된 scope(예 `apps/web`), `flutter test`는 `pubspec.yaml`이 있는 scope(예 `apps/mobile`)에서 돈다. 매니페스트·`source[]`·`snapshots[]`·출력 디렉터리 경로는 **저장소 루트 기준**으로 유지한다(한 매니페스트가 웹·Flutter 화면을 함께 담기 때문 — 부록 예시 참조).
+- **실행 scope(monorepo)**: 각 화면의 `scope`(기본 `.`)를 어댑터 명령의 **작업 디렉터리**로 쓴다 — `build-storybook`은 Storybook이 설치된 scope(예 `apps/web`), `flutter test`는 `pubspec.yaml`이 있는 scope(예 `apps/mobile`)에서 돈다. `source[]`·`preview` 파일 경로·출력 디렉터리는 **저장소 루트 기준**, `brief`·`snapshots[]`는 **매니페스트 디렉터리 상대**로 해석한다(`## 매니페스트 schema (v1)` 참조 — 한 매니페스트가 서로 다른 scope의 화면을 함께 담는다).
 - **웹 어댑터**: `preview: "story:<id>"` → Storybook 정적 빌드(`build-storybook -o design-gate-storybook/` — **매 실행 재빌드**; 같은 세션 반복에서만 `--no-build`로 재사용, mtime 캐시 없음) + 내장 정적 서버(임시 포트) → 화면의 `states[]` 각 `preview`(없으면 화면 `preview` 1개)를 `iframe.html?id=<id>&viewMode=story`로 프로필 뷰포트마다 fresh render → populated axe(serious/critical 차단, moderate/minor 보고) + 좁은 폭 geometry(page overflow·viewport escape·clipped text — 기존 v2 로직·오탐 제외 유지). `--html`은 `file://` 렌더로 같은 검사.
 - **Flutter 어댑터**: `preview: "flutter:<test file>"` → `flutter test <file> --reporter json`(위젯 테스트가 프로필 논리 크기 렌더 + `meetsGuideline` 4종 + `FlutterError`(RenderFlex overflow) 0 + PNG 저장 — 캡처 이름 `<screen>-<state>-<w>x<h>.png`) → 결과를 같은 report schema로 정규화. 차단 = guideline 실패·overflow·예외. **컴파일 오류·러너 기동 실패는 exit 2**(blocker가 아니라 실행 불가)로 구분한다.
 - **자가 검사(4케이스)**: `--self-test`는 (a) 내장 known-bad HTML — **규칙별 기대**: `page-overflow`(320) ≥1 · `color-contrast` ≥1 · `button-name` ≥1이 각각 blocker로 잡혀야 한다(합계가 아니라 규칙별 — 한 규칙의 다중 검출이 다른 규칙의 결함을 가리지 않게) (b) 내장 known-good HTML — blocker 0 (c) 내장 정적 HTML 2개를 임시 매니페스트(`preview: "url:<path>"`)로 서빙해 매니페스트 경로·report·`--snapshot` 저장까지 exit 0 (d) Flutter 프로젝트면 `test/design_gate/self_bad_test.dart`(known-bad: 탭 타겟 20px + 대비 2:1) 실패 + `test/design_gate/self_ok_test.dart`(known-good) 통과 — 컴파일 오류는 exit 2로 구분. 넷 다 기대와 같아야 `self-test: PASS`. 불일치 → `status: wiring-fail`. 통과하면 registry `status: ready (self-test PASS <YYYY-MM-DD>)`.
@@ -1354,7 +1354,7 @@ R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 
 }
 ```
 - `preview`는 `story:<storybook id>`·`flutter:<test file>[#<group>]`·(게이트 자가 검사 전용) `url:<path>` 중 하나. `entry`는 사람이 여는 진입점(선택). `states[].preview`가 상태별 렌더 대상이고, 화면 `preview`는 default 상태 fallback이다.
-- `scope`는 **어댑터 명령을 돌릴 작업 디렉터리**다(단일 패키지는 `.` — 생략 시 기본값). `build-storybook`은 Storybook이 설치된 scope, `flutter test`는 `pubspec.yaml`이 있는 scope에서 돈다. 매니페스트·`source[]`·`snapshots[]`·`brief`·출력 디렉터리 경로는 **저장소 루트 기준**이다 — 한 매니페스트가 웹·Flutter 화면을 함께 담기 때문이다(위 예시가 그 경우다).
+- `scope`는 **어댑터 명령을 돌릴 작업 디렉터리**다(단일 패키지는 `.` — 생략 시 기본값). `build-storybook`은 Storybook이 설치된 scope, `flutter test`는 `pubspec.yaml`이 있는 scope에서 돈다. 경로 기준은 둘로 갈린다 — **`source[]`·`preview`의 파일 경로·출력 디렉터리는 저장소 루트 기준**(한 매니페스트가 서로 다른 scope의 웹·Flutter 화면을 함께 담기 때문 — 위 예시가 그 경우다), **`brief`·`snapshots[]`는 매니페스트 디렉터리 상대**(`briefs/<screen>.md`·`snapshots/<screen>-<state>-<w>x<h>.png` — 위 예시와 D4 저장 규칙 그대로).
 - `snapshots[]` 파일명은 `<screen>-<state>-<w>x<h>.png`. 기준선 집합 = 각 뷰포트 `default` + 1차 뷰포트 `empty`·`error` + `baseline: true` 상태.
 - `product_entry`는 제품 라우트·딥링크. design-milestone R7이 `## 9`·ARCH 라우팅에서 채우고, 미정이면 `null` → 배선 task line item이 확정해 implement가 이 필드만 갱신한다. stabilize §3-V ②(제품 렌더)의 입력.
 - `supersedes[]`는 이전 M 화면 참조 `M<K>/<screen>` — 공용 컴포넌트·토큰 변경으로 이 M이 그 화면의 기준선을 새로 잡을 때. 이전 M 파일은 불변. 소비자는 «가장 최근 M의 등록·supersedes»를 현재 기준선으로 해석한다.
@@ -1455,7 +1455,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 
 ## 입력·모드
 - `$ARGUMENTS` = `M<N>`(`M[0-9]+`만 허용). `--fast`: R2 갤러리 생략 + 브리프 요소 근거를 «핵심 요소만»으로 축약. 다른 라운드는 생략하지 않는다.
-- **입력 분기**: (a) `draft` M + 대상 화면 미완 → 미완 라운드부터 재개(완료 화면 skip — 매니페스트 `approved.date` 유무로 판정). (b) `draft`·`contract-ready` M의 재진입 대상은 셋 — (i) `프로토타입:`·`프로토타입 면제:` 둘 다 없는 UI feature의 화면(최초·추가) (ii) `- 계약 수정:` 마커가 남은 UI feature의 승인 화면(브리프 delta → 재승인; 마커 자체는 plan-workitem 재검증 규칙대로 남긴다) (iii) `--screens <id,...>`로 지정된 승인 화면(`/repair-plan` 4-M·사용자 요청). (ii)(iii)는 R3부터 돌고 같은 M 스냅샷을 대체한다. `contract-ready`는 유지(강등 없음). (c) `ready` + `- 봉인일:` 채움 → 거부 + «변경은 M<N+1>». (d) 비-UI M(산하 feature `## 11` `Design:` 줄 0) → «비-UI 마일스톤 — /plan-workitem M<N>» 안내 후 종료.
+- **입력 분기**: (a) `draft` M + 대상 화면 미완 → 미완 라운드부터 재개(완료 화면 skip — 매니페스트 `approved.date` 유무로 판정). (b) `draft`·`contract-ready` M의 재진입 대상은 셋 — (i) `프로토타입:`·`프로토타입 면제:` 둘 다 없는 UI feature의 화면(최초·추가) (ii) `- 계약 수정:` 마커가 남은 UI feature의 승인 화면(브리프 delta → 재승인; 마커 자체는 plan-workitem 재검증 규칙대로 남긴다) (iii) `--screens <id,...>`로 지정된 승인 화면(`/repair-plan` 4-M·사용자 요청). (ii)(iii)는 R3부터 돌고 같은 M 스냅샷을 대체한다. **(iii)로 화면·PX·카피 의미를 바꾸면 그 화면을 쓰는 feature에 `- 계약 수정: <날짜> — 이 feature의 task 재검증 필요` 마커를 남긴다**(ADR-060 D6 — 이미 만들어진 task가 재검증 없이 통과하는 것을 막는다; 마커 회수는 plan-workitem 규칙 그대로). **매니페스트에 등록됐는데 `approved`가 비어 있는 화면은 (i)(ii)(iii)와 무관하게 항상 재개 대상이다**(재승인 중 중단 복구 — feature `## 7`에 이전 참조가 남아 있어도 누락되지 않는다). `contract-ready`는 유지(강등 없음). (c) `ready` + `- 봉인일:` 채움 → 거부 + «변경은 M<N+1>». (d) 비-UI M(산하 feature `## 11` `Design:` 줄 0) → «비-UI 마일스톤 — /plan-workitem M<N>» 안내 후 종료.
 
 ## 반드시 먼저 읽을 파일
 - 마일스톤 문서 `## 1~4`·`## 9`, 산하 feature `## 2`·`## 3`·`## 7`·`## 8-1`·`## 11`
@@ -1474,8 +1474,9 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 
 ## R1 — 화면 목록 · 전환표 · 프로필 배정
 - feature `## 3` 시나리오에서 화면을 도출한다(feature당 대표 1화면 기본, 다화면은 협의, 총 6~8화면 초과 시 우선순위 협상 + 세션 분할 안내).
+- **이전 M 승인 화면 재사용 판정**: 도출한 화면이 이전 M 매니페스트에 이미 승인돼 있고 이번 M에서 **구성·카피·PX가 바뀌지 않으면** 새로 제작하지 않는다 — 제작 대상에서 빼고 R7에서 그 feature `## 7`에 `프로토타입: M<K>/<screen>`을 기입한다(ADR-072 D9 재사용 형식). 공용 컴포넌트·토큰이 바뀌었으면 재사용이 아니라 R0 4의 `supersedes` 재등록 대상이다.
 - 각 화면에 프로필(DESIGN `## 0` 매핑표)을 배정한다 — 기준 뷰포트가 여기서 정해진다.
-- 마일스톤 `## 9. 화면 전환` 표를 채운다(ADR-056#amend-3 승계 — 트리거는 비가역·분기·복구 상태 존재; 아니면 «(해당 없음)»).
+- **화면이 2개 이상이거나(다화면), 단일 화면이라도 비가역·파괴 동작(삭제·결제·전송)·분기·다단계 오류→복구·modal이 있으면** 마일스톤 `## 9. 화면 전환` 표를 채운다(ADR-056#amend-3 승계 — 그 amendment의 적용 범위가 «다화면·복구 흐름»이다; 순수 정적 단일 화면이면 «(해당 없음)»).
 - 화면 id는 kebab-case(`<screen>`) — 매니페스트·PX·브리프·코드 디렉터리가 같은 id를 쓴다. **숫자로 끝나지 않는다**(PX 문법 `\d{2,}$` 파싱 보호).
 - 출력 압축 포맷(`이번 결정 / 확인 필요 / 답변`)으로 사용자 확인 1회.
 
@@ -1493,7 +1494,7 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 - 화면마다 builder 단발 sub-call(dispatch에 `mode: ui-authoring` 명시 — 입력: 승인 브리프 + DESIGN 토큰·`_theme` 배선 경로 + 재사용 컴포넌트 목록 + ADR-072 D3 규칙 + 추적 헤더 형식 + PX 마커 문법). **presentational만** — props-in/callbacks-out, fetch·store·router 금지.
 - 웹: `screens/<screen>/<Screen>.<ext>` + `<Screen>.stories.<ext>`(확장자는 스택 관례 — `.tsx`/`.vue`/`.svelte`; 상태별 스토리: happy + 못생긴 상태 5종 + category state, `구성 불확실`이면 `A`/`B`) + `fixtures.<ext>`(출처 표기). Flutter: `lib/screens/<screen>/` + `lib/prototype/main.dart` 갤러리 등록 + `test/screens/<screen>_prototype_test.dart`(프로필 크기 렌더 + guideline 4종 + overflow 0 + PNG — ADR-059#amend-1 결정 2·3).
 - 각 코드에 PX 마커 주석을 단다(브리프 PX 후보 → 확정 id). 토큰 외 리터럴 금지.
-- 매니페스트 `docs/20-system/prototypes/M<N>/manifest.json`에 화면을 등록한다(`states[]`는 `{id, preview}`로 상태별 스토리 id·테스트 group까지, 브리프의 «승인 필요 상태»는 `baseline: true`; `approved`·`product_entry`는 비움).
+- 매니페스트 `docs/20-system/prototypes/M<N>/manifest.json`에 화면을 등록한다(**`scope`는 그 화면 코드가 있는 패키지 디렉터리 — 단일 패키지는 `.`, monorepo는 `apps/web`·`apps/mobile` 등. 게이트가 어댑터 명령을 돌릴 작업 디렉터리다**; `states[]`는 `{id, preview}`로 상태별 스토리 id·테스트 group까지, 브리프의 «승인 필요 상태»는 `baseline: true`; `approved`·`product_entry`는 비움).
 - builder 반환은 경로·PX 목록·남은 리스크만(코드 전문 금지).
 
 ## R5 — 선택·수정 루프 (사용자)
@@ -1503,14 +1504,14 @@ allowed-tools: Read Glob Grep Write Edit Agent Bash(node .claude/skills/bootstra
 
 ## R6 — 게이트 + 픽셀 판정 + 승인 + 스냅샷
 1. `STACK_SETUP_PLAN.md ## Design Gate Adapter` `status: ready`가 아니면 `Needs Design Gate: /stack-guard` + 승격 보류(silent skip 금지).
-2. `validate:design -- --manifest docs/20-system/prototypes/M<N>/manifest.json --only <이번 대상 화면>` 실행(같은 세션 반복은 `--no-build`). exit 1 blocker는 builder에 selector·요약을 되먹여 재생성(≤2회), 초과 시 승인 보류 + 브리프 재검토. exit 2면 사유 echo + 보류.
+2. `validate:design -- --manifest docs/20-system/prototypes/M<N>/manifest.json --only <이번 대상 화면>` 실행(같은 세션에서 **코드 변경 없이** 반복할 때만 `--no-build` — builder 재생성 뒤에는 반드시 재빌드한다, ADR-072 D6). exit 1 blocker는 builder에 selector·요약을 되먹여 재생성(≤2회), 초과 시 승인 보류 + 브리프 재검토. exit 2면 사유 echo + 보류.
 3. `--tokens-only <screens 경로>` 결과가 0건이 아니면 고치거나 브리프에 사유를 적는다(승인 체크리스트 항목 — 이 모드는 렌더 출력을 지우지 않는다).
 4. reviewer(design surface) 단발 sub-call이 `design-gate-shots/`를 Read로 열람해 위계·밀도·slop·overlap·도메인 fit을 판정(차단은 재생성).
 5. 사용자 최종 승인(화면 단위). **승인 체크리스트**: happy + 못생긴 상태 5종 + category state 렌더됨 / 실카피(§10) / 인터랙션 계약 테스트(키보드·포커스·취소·콜백) 존재·통과 / PX 마커 ≥1 / 토큰 외 리터럴 0 또는 사유 / 접근성 blocker 0.
 6. 승인 직후 `validate:design -- --manifest <경로> --only <화면> --snapshot docs/20-system/prototypes/M<N>/snapshots/`로 기준선 스냅샷(각 뷰포트 default + 1차 뷰포트 empty·error + `baseline: true` 상태)을 `snapshots/<screen>-<state>-<w>x<h>.png`로 저장한다(500KB 초과 경고). 매니페스트 `approved{date, by: user}`·`snapshots[]`·`product_entry`(`## 9`·ARCH 라우팅에서 도출, 미정이면 `null`)·`handoff{run, remaining_wiring[]}` 채움. 이전 M 승인 화면에 영향(공용 컴포넌트·토큰 변경)이 있으면 그 화면을 **이 M 매니페스트에 `supersedes: ["M<K>/<screen>"]`로 재등록**해 함께 렌더·승인·스냅샷(이전 M 파일은 불변 — ADR-072 D5-5).
 
 ## R7 — feature 기입 · 정합 재대조 · contract-ready
-1. 각 구현 feature `## 7`에 `프로토타입: <screen id> (manifest: docs/20-system/prototypes/M<N>/manifest.json, 진입: <story id | entry>)` + `승인 스냅샷: <경로들>` + `경험 결정(PX):` 인벤토리(코드 주석에서 **그대로 복사** — 재추출 금지; 화면이 여러 feature에 걸치면 PX별 구현 feature에 분산). 완전성 확인: 그 화면 코드의 PX 마커 집합 = 관련 feature 인벤토리 부분집합.
+1. 각 구현 feature `## 7`에 `프로토타입: <screen id> (manifest: docs/20-system/prototypes/M<N>/manifest.json, 진입: <story id | entry>)` — **R1이 재사용으로 판정한 화면은 `프로토타입: M<K>/<screen> (manifest: docs/20-system/prototypes/M<K>/manifest.json, 진입: …)`로 이전 M을 가리킨다**(이 M에 화면을 새로 등록하지 않는다) + `승인 스냅샷: <경로들>` + `경험 결정(PX):` 인벤토리(코드 주석에서 **그대로 복사** — 재추출 금지; 화면이 여러 feature에 걸치면 PX별 구현 feature에 분산). 완전성 확인: 그 화면 코드의 PX 마커 집합 = 관련 feature 인벤토리 부분집합.
 2. 확정 재대조: M `## 3` ↔ F `## 3` ↔ F `## 7` FAC ↔ 매니페스트 화면·PX ↔ M `## 9` 전환표. 불일치면 해당 라운드로.
 3. `DECISION_REGISTER.md`에서 이 M `영향:` + `(미할당)`의 `open` 0건일 때만 **feature 먼저, M 마지막** `contract-ready`. open이 남으면 어느 D-NNN이 막았는지 보고.
 4. 커밋하지 않는다. 출력에 `권장 커밋: feat(ui): approve M<N> screen prototypes` 한 줄.
@@ -1654,7 +1655,7 @@ policy:
 
 ### P5-9. `.claude/skills/plan-milestone/SKILL.md` — R5 제거 + Exit 분기
 - (a) frontmatter `allowed-tools:` 전체 → `allowed-tools: Read Glob Grep Write Edit Agent`.
-- (b) 첫 문단 `메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해` → `메인 세션이 R0~R4를 직접 운전해`. 이어지는 입력 분기 (a)에 추가: `**UI 마일스톤(ADR-073 D9)의 draft M이 R0~R4를 모두 마쳤으면 라운드를 재실행하지 않고 «다음: `/design-milestone M<N>`»만 안내한다**(화면 층은 그 skill 소관 — ADR-072 D8).` (b)의 `계약 수정 요청이면 해당 라운드부터 재개하고` 뒤에 `(텍스트 계약 — 화면·PX·스냅샷 층은 `/design-milestone M<N>` 재진입)`.
+- (b) 첫 문단 `메인 세션이 R0~R4(+UI 마일스톤은 R5 프로토타입 라운드)를 직접 운전해` → `메인 세션이 R0~R4를 직접 운전해`. 이어지는 입력 분기 (a)에 추가: `**UI 마일스톤(ADR-073 D9)의 draft M이 R0~R4를 모두 마쳤으면 라운드를 재실행하지 않고 «다음: `/design-milestone M<N>`»만 안내한다**(화면 층은 그 skill 소관 — ADR-072 D8). **단 사용자가 텍스트 계약(scope·FAC·시나리오) 수정을 명시 요청했거나 `/repair-plan`이 그 층의 finding을 회수해 온 경우에는 해당 라운드부터 재개한다** — `/repair-plan`은 `draft` M을 본 skill로 돌려보내므로(그 skill 2-M), 이 예외가 없으면 draft UI M의 계획 결함을 고칠 경로가 사라진다.` (b)의 `계약 수정 요청이면 해당 라운드부터 재개하고` 뒤에 `(텍스트 계약 — 화면·PX·스냅샷 층은 `/design-milestone M<N>` 재진입)`.
 - (c) `각 라운드(R0~R5) 산출물은` → `각 라운드(R0~R4) 산출물은`. Codex 문단 `R2의 architect·R5-2의 designer 단발 sub-call은` → `R2의 architect 단발 sub-call은`.
 - (d) `반드시 먼저 읽을 파일`에서 `- UI R5를 수행할 때 docs/00-meta/STACK_SETUP_PLAN.md ## Design Gate Adapter …` 줄 삭제.
 - (e) R3 불릿 `**R2 분할이 식별한 *후속* 마일스톤은 지금 Mx 문서를 만들지 않는다 — 그 마일스톤의 feature 문서·R5 프로토타입도 만들지 않는다** (로드맵 Next/Later에 얇은 행(미번호 (M?))으로만; R4 컴포넌트·R5 프로토타입은 지금 착수하는 Now 마일스톤의 화면에만 적용). 후속 마일스톤의 feature·프로토타입은 그 마일스톤이 *Now가 되는 회차*에 생성한다.` → `**R2 분할이 식별한 *후속* 마일스톤은 지금 Mx 문서를 만들지 않는다 — 그 마일스톤의 feature 문서·화면 프로토타입(`/design-milestone`)도 만들지 않는다** (로드맵 Next/Later에 얇은 행으로만). 후속 마일스톤의 feature·프로토타입은 그 마일스톤이 *Now가 되는 회차*에 생성한다.`
@@ -1682,7 +1683,7 @@ policy:
   ```
 - (c) 프로토타입 line item 문단(`입력 feature가 UI 확정·비면제이면, feature ## 7의 프로토타입: 참조 줄에서 화면 파일 경로를 회수해 읽고 … - 구현 시 승인 프로토타입 참조 — <경로>의 <상태/섹션>과 동일 상태·문구로 구현 (AC-N)`) 교체:
   ```
-  입력 feature가 UI 확정·비면제이면 매니페스트에서 그 화면의 `source[]`·`preview`·`handoff.remaining_wiring[]`를 회수해(코드 전문은 읽지 않는다 — 경로·PX·남은 배선만), 그 화면을 구현하는 *모든* UI task `## 3`에 **재사용 line item**을 authoring한다(builder는 기계 실행 — ADR-072 D5-3). 형식: `- 승인 UI 재사용: <컴포넌트 경로> (manifest: <screen id>) — 배선만: <데이터/권한/저장/라우팅 연결 항목> (AC-N)`. 표현(마크업·스타일·카피)을 다시 쓰는 line item은 만들지 않는다. 배선 항목은 `handoff.remaining_wiring[]`에서 가져온다. 매니페스트 `product_entry`가 `null`이면 라우팅을 확정하는 배선 task에 `- product_entry 확정: <route> → docs/20-system/prototypes/M<N>/manifest.json 의 그 화면 product_entry 갱신` line item을 둔다(implement가 실행 — 매니페스트의 다른 필드는 건드리지 않는다).
+  입력 feature가 UI 확정·비면제이면 **그 feature `프로토타입:` id가 가리키는 M의 매니페스트**(`M<K>/<screen>`이면 이전 M 파일)에서 그 화면의 `source[]`·`preview`·`handoff.remaining_wiring[]`를 회수해(코드 전문은 읽지 않는다 — 경로·PX·남은 배선만), 그 화면을 구현하는 *모든* UI task `## 3`에 **재사용 line item**을 authoring한다(builder는 기계 실행 — ADR-072 D5-3). 형식: `- 승인 UI 재사용: <컴포넌트 경로> (manifest: <screen id>) — 배선만: <데이터/권한/저장/라우팅 연결 항목> (AC-N)`. 표현(마크업·스타일·카피)을 다시 쓰는 line item은 만들지 않는다. 배선 항목은 `handoff.remaining_wiring[]`에서 가져온다. 매니페스트 `product_entry`가 `null`이면 라우팅을 확정하는 배선 task에 `- product_entry 확정: <route> → docs/20-system/prototypes/M<N>/manifest.json 의 그 화면 product_entry 갱신` line item을 둔다(implement가 실행 — 매니페스트의 다른 필드는 건드리지 않는다).
   ```
   PX↔AC 매핑 문단의 `feature ## 7의 경험 결정(PX): 인벤토리 각 PX를` 유지, `(해당 AC 본문에 (PX-…) 태그 가능)` 유지, `[Plan-FAC-coverage]가 재점검` 유지. 문단 끝에 `PX 원천은 매니페스트 `px[]`와 코드 주석이다(HTML 아님).`
 - (d) self-check 9-1 «경험 좁힘 질문 규칙»(ADR-056 결정 4)이 있으면 인용을 `ADR-072 D5`로. 문서 내 `ADR-056` → 부록 B, `ADR-027#…` → 부록 A.
@@ -1729,7 +1730,7 @@ policy:
 - (a) §3-V 전체((a)~(d) + Codex)를 교체:
   ```
   3-V. **경험 게이트 — 구현 화면 vs 승인 스냅샷 대조 (ADR-072 D7, UI 확정 마일스톤 한정)**: MCP 불요 체계 감사. **실행 자체는 의무 — silent skip 금지**(미실행 사유 echo; 판정은 report-only).
-     - (a) `docs/20-system/prototypes/M<N>/manifest.json`을 읽는다(부재 = `blocked-on-env` 아님 — 계약 결함 `P0 [Experience-contract] 매니페스트 부재`). 화면마다 두 렌더를 만든다(**매니페스트에 없는 UI 화면 — `프로토타입 면제:` feature·이전 M 승인본 재사용 — 은 ②만 만들어 (b)의 ② 경로로 대조한다, ADR-072 D7**): **① 스토리/위젯 렌더** — `validate:design -- --manifest <경로> --snapshot docs/40-validation/visual/M-N/proto/`; **② 제품 렌더** — 웹은 dev server 기동(명령은 STACK_SETUP_PLAN·`package.json` `dev`/`start`에서 회수, readiness 대기, 종료 시 kill — 재사용 규칙 기존대로) 후 매니페스트 `product_entry`(`null`이면 «제품 진입점 미기록» 사유 echo + ① 대조만)의 라우트를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/app/`, Flutter는 통합 테스트 스크린샷이 가능하면 그것, 아니면 `blocked-on-env` 명시(ADR-059#amend-1 결정 4). blocker가 있어 `--snapshot` 복사에서 빠진 화면은 `design-gate-shots/`의 캡처를 ①로 쓴다.
+     - (a) `docs/20-system/prototypes/M<N>/manifest.json`을 읽는다(**이 M이 등록한 화면이 있어야 하는데** 부재면 `blocked-on-env`가 아니라 계약 결함 `P0 [Experience-contract] 매니페스트 부재`. 전 화면이 `프로토타입 면제:`이거나 이전 M 재사용이면 이 M 파일 부재가 정상이며, 그때는 feature `## 7`의 `프로토타입:` id가 가리키는 M의 매니페스트·스냅샷을 읽는다). 화면마다 두 렌더를 만든다(**매니페스트에 없는 UI 화면 — `프로토타입 면제:` feature·이전 M 승인본 재사용 — 은 ②만 만들어 (b)의 ② 경로로 대조한다, ADR-072 D7**): **① 스토리/위젯 렌더** — `validate:design -- --manifest <경로> --snapshot docs/40-validation/visual/M-N/proto/`; **② 제품 렌더** — 웹은 dev server 기동(명령은 STACK_SETUP_PLAN·`package.json` `dev`/`start`에서 회수, readiness 대기, 종료 시 kill — 재사용 규칙 기존대로) 후 매니페스트 `product_entry`(`null`이면 «제품 진입점 미기록» 사유 echo + ① 대조만)의 라우트를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/app/`, Flutter는 통합 테스트 스크린샷이 가능하면 그것, 아니면 `blocked-on-env` 명시(ADR-059#amend-1 결정 4). blocker가 있어 `--snapshot` 복사에서 빠진 화면은 `design-gate-shots/`의 캡처를 ①로 쓴다.
      - (b) 각 화면에 대해 **승인 스냅샷(`snapshots/`) ↔ ① ↔ ②**를 Read(멀티모달)로 나란히 대조한다. 앵커 위계: ① 승인 스냅샷(존재 시) ② DESIGN.md §2/§7/§9/§10 파생 체크리스트(면제·부재 화면). 관점: 레이아웃·상태·카피·토큰 준수 — 픽셀 일치가 아니라 경험 계약 준수. ① vs 승인 스냅샷 불일치는 «승인 후 UI 코드 변경»이므로 같은 M 재승인 또는 다음 M `supersedes` 등재 여부를 함께 본다. 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(ADR-072 D5-5).
      - (c) 불일치는 QA_FINDINGS에 `P1 [Experience-drift] <screen> — <1줄> (앵커: 스냅샷|DESIGN 파생 / 렌더: proto|app)` report-only. 판독 불확실은 «판독 불확실» 명시. 시각 불일치가 봉인 AC·PX↔AC 위반을 동반하고 재현되면 그것은 별도 P0 결함(재현 줄 포함)으로 등재한다(ADR-070 D1).
      - (d) 단계 8 출력에 갤러리 경로 + «사용자 육안 확인은 `/accept-milestone <M>`이 수행한다» 1줄. 관측 modality AC가 1건이라도 있으면 사실상 필수 경로(ADR-068 D3).
@@ -1741,7 +1742,7 @@ policy:
 - (e) 단계 8 `(UI) 경험 게이트 결과: [Experience-drift] N건 + 스크린샷 갤러리 경로` 유지. 문서 내 `ADR-056` → 부록 B, `ADR-058#amend-2` → `ADR-072 D6`, `ADR-027#…` → 부록 A.
 
 ### P5-16. 나머지 스킬 한 줄씩
-- `seal-milestone` 조건 4(`4. **커버리지** — …`) 끝에: `**UI M은 추가로** `docs/20-system/prototypes/M<N>/manifest.json` 존재 + 각 화면 `approved.date`·`snapshots[]` 파일 실재 + 각 UI feature `프로토타입:` id가 그 id가 가리키는 M(`<screen>`=이 M / `M<K>/<screen>`=이전 M 재사용)의 매니페스트에 존재(ADR-072 D9). 부재면 봉인 거부 + «`/design-milestone M<N>`».` 봉인 receipt 형식은 불변.
+- `seal-milestone` 조건 4(`4. **커버리지** — …`) 끝에: `**UI M은 추가로** — **이 M이 등록한 화면이 있으면** `docs/20-system/prototypes/M<N>/manifest.json` 존재 + 각 화면 `approved.date`·`snapshots[]` 파일 실재. **`프로토타입 면제:` feature는 대상이 아니고**, `프로토타입:`을 가진 UI feature는 그 id가 가리키는 M(`<screen>`=이 M / `M<K>/<screen>`=이전 M 재사용)의 매니페스트·스냅샷으로 검사한다 — 전 화면이 이전 M 재사용이면 이 M 매니페스트 부재가 정상이다(ADR-072 D9). 부재면 봉인 거부 + «`/design-milestone M<N>`».` 봉인 receipt 형식은 불변.
 - `implement-workitem` 3-R (b) `UI면 승인 프로토타입 경로가 **실제로 바뀌었거나 사라졌는지**` → `UI면 매니페스트의 그 화면 entry + `source[]` 파일이 **실재하고 approved 상태인지**(ADR-072 D9)`. 3-R 뒤 문장 `(참조 프로토타입 경로 삭제·상위 ## 7/INV 변경 등 계획 전제 붕괴)` → `(매니페스트 entry·source 삭제·상위 `## 7`/INV 변경 등)`. `일반 오류(테스트·타입·구현 누락·프로토타입 세부 불일치)` 유지.
 - `accept-milestone` R0 2 `## 7의 프로토타입: 참조 줄` → `## 7의 프로토타입: 참조 줄 + 매니페스트(`snapshots[]`·`handoff.run`)`; R2 5 `승인 프로토타입 경로(docs/20-system/prototypes/M<N>/<screen>.html)를 함께 제시해` → `승인 스냅샷 경로(`docs/20-system/prototypes/M<N>/snapshots/`)와 미리보기 실행 명령(`handoff.run`)을 함께 제시해`. R4/근거의 `프로토타입 경로` → `스냅샷 경로`. R0 2 줄 끝에 `(ADR-072 D9)`를 붙인다(역참조).
 - `repair-plan` 4-M `프로토타입 재승인이 필요한 수정(화면 구성·PX 변경)은 직접 고치지 말고 /plan-milestone M<N> 재개를 안내한다(R5 승인 루프가 소유)` → `… `/design-milestone M<N> --screens <id,...>` 재진입을 안내한다(R3~R6 승인 루프가 소유 — ADR-072 D1 (iii))`.
