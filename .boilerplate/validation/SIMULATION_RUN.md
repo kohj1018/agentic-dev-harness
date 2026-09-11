@@ -1015,6 +1015,23 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 ### 수정분 커밋
 `fix(harness): correct design gate adapter, protected-path timing and Red definition from dogfood round 11`
 
+## 참조 무결성 (P7-1 — 2026-09-11 재실행)
+
+본 라운드의 harness 변경(ADR-070#amend-1 · ADR-004#amend-6 · ADR-071 D6 확장 · ADR-072 D5-3-1·#amend-3 · skill 8종 · agent 12종) **뒤에** 부록 E 스크립트를 다시 돌렸다.
+
+| 검사 | 기준 | 결과 |
+|---|---|---|
+| 1. ADR 번호·링크 목적지 존재 | count 0 | **0** |
+| 2. amend 앵커 존재 | count 0 | **0** |
+| 3. Surfaces 역참조 (이번 라운드 ADR) | count 0 | **0** |
+| 4. 죽은 ADR 인용 (ADR-027·056) | count 0 | **0** |
+| 5. 로스터 집합 (skills ↔ STRUCTURE ↔ README ×2 ↔ wrappers) | ok 4줄 | **ok 4줄** (skill 27종) |
+| 6. 인덱스 amend 수 ↔ 본문 `## Amendment N` 수 | count 0 | **0** |
+| 3. `--all-surfaces` (전 ADR) | Phase 0 기준선 9 **이하** | **9** — 늘지 않음 |
+| 4. `--all-dead` (전체) | Phase 0 기준선 11 **이하** | **11** — 늘지 않음 |
+
+라운드 중 검사 3 이 한 번 발화했다 — ADR-072#amend-3 의 `### 적용 surface` 에 자기 파일 경로를 `ADR-072-…md`(말줄임표)로 적어 «실재하지 않는 파일» 로 읽혔다. 그 줄을 surface 행이 아니라 괄호 주석으로 내려 해소했다. **자기 파일은 surface 행이 아니다** 는 규칙이 문서화돼 있지 않아 생긴 일이며, 검사가 그것을 잡아냈다는 점에서 장치는 의도대로 작동했다.
+
 ## Round 12 (2026-09-11~, 습관 메모 앱 + 관리자 웹 / Flutter + Next.js — 프로필·target별 e2e 검증)
 
 > **진행 중** — 본 절은 `/stack-guard`·`/plan-milestone`·`/bootstrap-design`(R1·R3~R6)까지 수행한 시점의 기록이다. `/design-milestone` 이후는 완주 후 채운다.
