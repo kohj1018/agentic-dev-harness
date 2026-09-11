@@ -66,10 +66,10 @@ visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. 
 | field | value |
 |-------|-------|
 | status | `n/a` (`ready (self-test PASS <YYYY-MM-DD>)` / `needs-install` / `wiring-fail`) |
-| command template | (예: `npm run validate:design -- <args>` — args: `--html <files>` / `--manifest <path> [--only <id>] [--snapshot <dir>] [--no-build]` / `--self-test` / `--tokens-only <glob>`) |
+| command template | (예: `npm run validate:design -- <args>` / pnpm 은 `pnpm validate:design -- <args>` — `--` 취급이 PM 마다 다르지만 어댑터가 bare `--` 를 무시한다. args: `--html <files>` / `--manifest <path> [--only <id>] [--snapshot <dir>] [--no-build]` / `--self-test` / `--tokens-only <glob>`) |
 | adapter path | (예: `scripts/design-gate.mjs` — stabilize §1.0 (a) 실재 검사 대상) |
 | manifest 규약 | `docs/20-system/prototypes/<M<N> 또는 _theme>/manifest.json` (ADR-072 D3 schema v1) |
-| self-test 일자 | (마지막 자가 검사 PASS 일자) |
+| self-test 일자 | (마지막 자가 검사 PASS 일자 — 실행된 케이스 수를 함께 적는다. Dart 없는 웹 전용은 3케이스가 정상) |
 | copied-from | (복사 시점 canonical `design-gate.mjs` SHA-256 — caller는 대조하지 않는다; stack-guard 재실행·stabilize §1.0 (b)만 사용) |
 
 ## CI (ADR-025#amend-1)

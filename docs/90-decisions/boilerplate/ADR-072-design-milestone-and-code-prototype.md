@@ -230,3 +230,32 @@ Low~Medium — 코드 재사용·브리프·갤러리 효과는 [가설]. 게이
 
 ## 참고
 - ADR-056(superseded — 승계 원천), ADR-058(#amend-4), ADR-073, ADR-059(#amend-1), ADR-060 D6·D7, ADR-009, ADR-064 D5, ADR-069(#amend-1), ADR-063 D6·D7, ADR-057#amend-3 결정 4, ADR-007#amend-5, ADR-047 D3, ADR-022.
+
+<a id="adr-072-amend-1"></a>
+## Amendment 1 (2026-09-11) — design gate 어댑터 3건 정정 (PM `--` / 자가 검사 케이스 수 / 단축 hex 오탐)
+
+### 배경
+dogfood Round 11(웹)에서 D6 어댑터를 실제로 돌려 얻은 실측 3건이다.
+- [관측됨] **command template이 pnpm에서 깨진다.** D6과 템플릿은 `<pm> validate:design -- <args>`를 규정하는데, npm은 `--`를 제거해 스크립트에 넘기고 **pnpm은 리터럴로 그대로 넘긴다**. 어댑터의 `parseArgs`가 그 `--`를 «미정의 플래그»로 보고 `exit 2` 하므로, pnpm 프로젝트에서는 registry에 적힌 그대로의 명령이 실행되지 않는다.
+- [관측됨] **«자가 검사 4케이스»가 웹 전용 프로젝트에서 도달 불가.** 케이스 (d)는 `pubspec.yaml`이 있는 scope의 Flutter fixture라 Dart가 없는 프로젝트에서는 실행되지 않는다. 정상 결과는 (a)(b)(c) 3케이스 PASS인데, 문구가 4를 요구해 «정상 통과»가 미달로 읽힌다.
+- [관측됨] **`--tokens-only`의 단축 hex가 산문을 오탐한다.** 실측 18건 중 6건이 카피 문구 「PR #412 리뷰 반영」의 `#412`였다(fixture·테스트·컴포넌트). 3~5자리 단축 hex는 «#숫자» 형태의 이슈·번호 표기와 구별되지 않는다.
+
+### 결정
+1. **어댑터가 bare `--`를 무시한다.** 같은 command template이 npm·pnpm 양쪽에서 성립한다. registry에 기록할 때는 그 프로젝트 PM으로 **실제 1회 실행해 본 형태**를 적는다.
+2. **자가 검사 통과 판정은 «케이스 수»가 아니라 «실행된 케이스가 전부 기대와 같은가»다.** (d)는 `pubspec.yaml`이 있는 scope에서만 실행되며, Dart가 없는 프로젝트의 정상 결과는 3케이스 PASS다. registry `self-test 일자` 칸에 실행 케이스 수를 함께 적는다.
+3. **`--tokens-only`의 단축 hex 탐지를 스타일시트로 한정한다.** `.css`/`.scss`/`.sass`/`.less`에서는 3~8자리를 그대로 잡고, 코드 파일에서는 **6·8자리만** 잡는다. 대가는 «코드에 직접 쓴 `#abc` 단축 색을 놓친다»이며, 토큰 규율상 코드에 색 리터럴 자체를 두지 않으므로 수용한다.
+
+### 근거
+- 결정 1의 대안: 템플릿 문구를 PM별로 갈라 적는다 — 규정은 늘고 어댑터는 여전히 깨지기 쉬우며, caller가 `--`를 넣을지 판단하게 만든다. 기각.
+- 결정 3의 대안: 문맥(색 속성 인접 여부)으로 판정한다 — 파서가 필요해 어댑터가 커지고, 프레임워크마다 스타일 표기가 달라 일반화가 어렵다. 기각. **오탐을 줄이되 미탐 방향으로 기운다** — `--tokens-only`는 보고 등급이고 차단하지 않으므로 이쪽이 안전하다.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]) — 전부 기존 결정의 집행 정정이다. 새 차단·새 산출물이 없다.
+
+### Mutation delta (ADR-047 D3)
+- failure = registry의 command template이 그 프로젝트에서 실제로 안 돌거나, 정상 자가 검사가 미달로 읽히거나, tokens-only 보고가 오탐으로 채워져 신호가 죽는다 / falsifier = Round 12(Flutter monorepo)에서 (a) `npm run validate:design -- --self-test`가 4케이스로 돌지 않거나 (b) tokens-only가 Dart·TS 양쪽에서 실제 색 리터럴을 놓치면 결정 2·3 실패 / rollback = 본 amend superseded → `parseArgs`의 `--` 분기 제거, `LITERAL` 정규식 단일화, 문구 원복.
+
+### 적용 surface
+- .claude/skills/stack-guard/assets/design-gate.mjs       — 결정 1·3 (canonical sha 변경 — 재실행 계약대로 `copied-from` 갱신)
+- .claude/skills/stack-guard/SKILL.md                     — 결정 1·2 문구
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md    — `## Design Gate Adapter` command template·self-test 일자 칸

@@ -77,6 +77,9 @@ function parseArgs(argv) {
       opts.scopes = (argv[++i] || '').split(',').filter(Boolean);
     } else if (a === '--no-build') {
       opts.noBuild = true;
+    } else if (a === '--') {
+      // pnpm 은 `pnpm <script> -- <args>` 의 `--` 를 스크립트 인자로 그대로 넘긴다(npm 은 제거한다).
+      // 같은 command template 이 두 PM 에서 모두 돌도록 bare `--` 를 무시한다 (ADR-072#amend-1).
     } else if (a === '--self-test') {
       // 모드 플래그 자체 — 별도 값 없음
     } else if (a === '--report') {
@@ -492,7 +495,12 @@ async function runSelfTest(opts) {
 function runTokensOnly(opts) {
   const DEFINE_LINE = /^\s*(--[\w-]+\s*:\s*#[0-9a-f]{3,8}|static\s+const\s+Color\b)/i;
   const TOKEN_PATH = /(^|\/)(tokens?|theme)[\w./-]*\.(css|scss|dart|ts|js)$/i;
-  const LITERAL = /#[0-9a-f]{3,8}\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.\w+\b|\b\d+px\b/g;
+  // 3~5자리 단축 hex 는 «PR #412» 같은 산문 속 번호와 구별되지 않는다 — dogfood Round 11 실측에서
+  // 18건 중 6건이 카피 문구 오탐이었다. 스타일시트에서만 단축 hex 를 잡고, 코드 파일에서는 6·8자리만 잡는다.
+  // 대가: 코드에 직접 쓴 `#abc` 형태의 단축 색은 놓친다(토큰 규율상 코드에는 색 리터럴 자체를 두지 않는다). (ADR-072#amend-1)
+  const STYLE_FILE = /\.(css|scss|sass|less)$/i;
+  const LITERAL_STYLE = /#[0-9a-f]{3,8}\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.\w+\b|\b\d+px\b/g;
+  const LITERAL_CODE = /#[0-9a-f]{6}(?:[0-9a-f]{2})?\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.\w+\b|\b\d+px\b/g;
   const tokens = [];
   const unreadable = [];
   for (const item of expandInputs(opts.files)) {
@@ -501,9 +509,10 @@ function runTokensOnly(opts) {
     if (TOKEN_PATH.test(file)) continue;
     let text;
     try { text = readFileSync(file, 'utf8'); } catch (e) { unreadable.push(file + ' — ' + (e.code || e.message)); continue; }
+    const literal = STYLE_FILE.test(file) ? LITERAL_STYLE : LITERAL_CODE;
     text.split('\n').forEach((line, i) => {
       if (DEFINE_LINE.test(line)) return;
-      const matches = line.match(LITERAL);
+      const matches = line.match(literal);
       if (matches) for (const m of matches) tokens.push({ file, line: i + 1, literal: m });
     });
   }

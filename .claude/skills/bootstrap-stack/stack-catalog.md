@@ -36,7 +36,7 @@
 | cat-web-ui-kit | UI 킷·컴포넌트 라이브러리 | T2 | user-approval | baseline | ARCH ## 7-4 (컴포넌트 규칙은 DESIGN ## 7 — bootstrap-design) | shadcn/ui |
 | cat-web-icons | 아이콘 패키지 | T3 | agent-delegated | baseline | ARCH ## 7-4 (아이콘 스타일 방향은 DESIGN ## 1) | lucide |
 | cat-web-fonts-delivery | 폰트 전달 방식(self-host/CDN) | T3 | agent-delegated | n/a | ARCH ## 7-4 (폰트 선택·패키지 추가는 DESIGN ## 3 — bootstrap-design R6) | self-host |
-| cat-web-ui-preview | UI 미리보기 도구 | T3 | agent-delegated | baseline | STACK_SETUP_PLAN ## Design Gate Adapter · ARCH ## 7-4 | Storybook (a11y·viewport 애드온만) |
+| cat-web-ui-preview | UI 미리보기 도구 | T3 | agent-delegated | baseline | STACK_SETUP_PLAN ## Design Gate Adapter · ARCH ## 7-4 | Storybook (a11y 애드온만 — viewport는 SB 8+ 코어 global) |
 | cat-web-state | 클라이언트 상태관리 | T3 | agent-delegated | task | ARCH ## 7-4 | |
 | cat-web-data-fetching | 데이터 fetching·캐시 | T3 | agent-delegated | task | ARCH ## 7-4 | |
 | cat-web-forms | 폼·validation | T3 | agent-delegated | task | ARCH ## 7-4 | |

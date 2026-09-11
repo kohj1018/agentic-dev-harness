@@ -69,6 +69,7 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
 - task의 `## 6. Acceptance Criteria` 항목을 1개 골라 그것을 위반하는 실패 테스트를 작성한다.
 - 테스트 이름에 `AC_N` 식별자를 포함하는 것을 권장(예: `test_AC_1_user_can_login`). 강제 아님.
 - 테스트 실행 → "원하는 이유로" 실패하는지 확인 후 phase 종료.
+- **모듈 부재·컴파일 오류로 테스트가 0건 실행된 상태는 Red 가 아니다** — 어설션이 한 번도 돌지 않았으므로 그 테스트의 판정력에 대해 아무것도 말해 주지 않는다(ADR-072 D5 «가짜 Red 금지»의 가장 흔한 형태). 새 모듈을 만드는 slice 는 **의도적으로 틀린 최소 구현**(예: 항상 빈 값을 반환)을 먼저 두고 *어설션이 실패하는 것*을 관측한 뒤 올바른 구현으로 바꾼다. 반환의 Red 관측에는 그 어설션 실패 메시지를 적는다.
 
 **2. Green**
 - 그 테스트를 통과시키는 **최소 코드**만 작성한다.
@@ -118,7 +119,10 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
   - `--changed` 미지원이거나 통합 명령이 없으면 이 step 을 skip 한다 (별도 hardstop 만들지 않음 — validate-workitem 이 받는다).
   - sanity 가 깨지면 어느 slice/파일이 깼는지 출력에 명시하고 다음 추천 단계를 `/repair-workitem <task-id>` 로 둔다.
 
+**6-R 누락 방지 (ADR-064 D4 — dogfood Round 11 발견)**: 6-R 은 slice dispatch(4~5)와 출력 사이에 있어 foreman 이 건너뛰기 쉽다. 실제로 건너뛰면 `/validate-workitem` 축 7이 `P1 [Verify-power-missing]` 로 뒤늦게 잡는다. **아래 마지막 출력의 `receipt 기록` 줄은 생략할 수 없다** — 쓸 것이 없으면 `해당없음`이라고 적고, 적을 수 없으면 아직 6-R 을 수행하지 않은 것이다.
+
 마지막 출력 (메인 foreman 이 builder 결과를 병합해 signal-first 로):
+- **receipt 기록 (6-R)**: `exec-evidence <N>줄 / verify-power <N>줄 / ac-pending <N>줄 / fact-resolved <N>줄` (각각 없으면 `해당없음`) — 이 줄이 없으면 6-R 미수행이다
 - 수정 파일 목록 (전 slice 합산, 중복 제거)
 - AC별 진행 상태 (완료/미완료, 예: `AC-1 ✅, AC-2 ✅, AC-3 ❌(다음 호출)` — slice→builder 매핑이 비자명하면 1줄 부기)
 - 핵심 변경 사항

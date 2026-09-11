@@ -108,3 +108,28 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 
 ## 참고
 - ADR-052(install-ownership 3분할 → 4분할), ADR-055(T1/T2/T3·입력 적응형), ADR-063(probe·재실행 계약), ADR-060 D9(authority 배정 기준), ADR-051#amend-4(Dependency Tools), ADR-040#amend-1, ADR-047 D3, ADR-022.
+
+<a id="adr-071-amend-1"></a>
+## Amendment 1 (2026-09-11) — harness 경로 무결성을 실행 시작·종료로 확장 + Storybook 애드온 기본값 정정
+
+### 배경
+- [관측됨] dogfood Round 11 — `/stack-guard` 수행 0의 보호 경로 «경로+내용 해시» 대조는 **스캐폴드 복사 전후만** 본다. 그 뒤 6-2-b 설치와 수행 5·6-3의 e2e 실행이 계속되는데, **그 구간에서 harness 파일이 실제로 바뀌었다** — Next.js 16의 `next dev`가 실행할 때마다 `AGENTS.md`(없으면 `CLAUDE.md`)에 자기 규칙 블록 10줄을 append하고 지워도 되살린다(`node_modules/next/dist/server/lib/generate-agent-files.js`). 실측 57 → 67줄. 본 저장소의 `AGENTS.md`는 **100줄 hard cap**(ADR-011)이 걸린 에이전트 지시 파일이라 방치하면 상한을 잠식하고, 출처 불명 지시가 최상위 지시 파일에 섞인다(ADR-047 harness 무결성).
+- [관측됨] 같은 라운드 — `storybook init`(v10)이 registry 결정 집합(`cat-web-ui-preview`) 밖 애드온 4종(`@chromatic-com/storybook`·`addon-vitest`·`addon-docs`·`addon-mcp`)과 `vitest.config.ts`를 함께 설치했다. 또 **viewport는 Storybook 8부터 코어 global**이라 «viewport 애드온»은 존재하지 않는다 — 카탈로그 기본 후보 문구가 SB 7 시절 전제였다.
+
+### 결정
+1. **harness 경로 무결성 검사를 `/stack-guard` 실행 시작·종료로 확장한다**(수행 0-H). 수행 0 2-1의 복사 전후 대조는 그대로 두고, 그것과 **같은 방법**으로 실행 맨 앞·맨 끝의 보호 경로 목록을 대조한다. 달라진 경로는 `Harness-path drift: <경로> — <추정 원인>`으로 **보고만** 하고 **자동으로 되돌리지 않는다** — 본 skill 자신이 쓰는 파일(`docs/00-meta/STACK_SETUP_PLAN.md`·`.gitignore`·`.gitattributes`)과 직전 skill의 미커밋 문서는 대조에서 뺀다. `AGENTS.md`가 커졌으면 줄 수를 함께 출력해 ADR-011 상한을 사용자가 판단하게 한다.
+2. **Storybook 기본 후보를 «a11y 애드온만»으로 정정**하고, `init`이 추가로 깐 결정 집합 밖 애드온·생성 파일을 설치 직후 제거하도록 명시한다. 기준 뷰포트는 `.storybook/preview`의 `parameters.viewport.options`로 둔다.
+
+### 근거
+- 결정 1은 **새 차단을 만들지 않는다** — 보고 등급이다. 자동 되돌림을 두지 않는 이유는 그 변경이 의도된 것일 수 있고(본 skill이 문서를 갱신하는 것이 정상 경로다) 되돌리기는 사용자 결정이기 때문이다(ADR-059 D9의 «키 취급은 직접 옮기지 않는다»와 같은 형태).
+- 대안: (a) 보호 경로를 read-only로 만든다 — 본 skill 자신이 써야 하는 파일이 그 안에 있어 성립하지 않는다. (b) `next dev`를 쓰지 않는다 — e2e webServer가 그것을 쓰므로 스택 결정을 침범한다. 둘 다 기각.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]) — 보고 등급 확장 + 문구 정정. 졸업·봉인 차단을 새로 만들지 않는다.
+
+### Mutation delta (ADR-047 D3)
+- failure = 생성기·설치기·개발 서버가 harness 파일을 조용히 고치고 아무도 모른다 / falsifier = Round 12에서 `Harness-path drift:` 줄이 실제 변형(Next.js 블록 등)을 못 잡거나, 정상 갱신(STACK_SETUP_PLAN)을 drift로 오보고하면 결정 1 실패 / rollback = 본 amend superseded → 수행 0-H와 출력 항목 제거(수행 0 2-1은 유지).
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md                     — 수행 0-H 신설·마지막 출력 항목·6-2-b Storybook 문구
+- .claude/skills/bootstrap-stack/stack-catalog.md         — `cat-web-ui-preview` 기본 후보

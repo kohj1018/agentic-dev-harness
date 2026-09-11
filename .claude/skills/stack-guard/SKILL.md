@@ -12,7 +12,7 @@ allowed-tools: Read Glob Grep Write Edit Bash
 - green-field 스캐폴드(공식 생성기 1종, harness 파일 미덮어쓰기) + 카탈로그 `설치: baseline` 행의 기초 라이브러리 설치 — 그 뒤에 probe·boot smoke·design gate·CI를 실제 코드 위에서 실측한다(ADR-071 D5·D6).
 - 통합 진입점 — 이름은 **`validate`로 고정** (`pnpm validate` / `npm run validate` / `make validate` / `task validate` 중 스택에 자연스러운 단일 명령). **단 `validate:design` 진입점만은 npm 계열로 둔다** — `make`·`task`는 하위 명령의 종료코드를 자기 코드로 대체해 adapter의 차단(`exit 1`)/실행불가(`exit 2`) 구분을 없앤다. Flutter 스택은 `validate` 자체도 npm으로 둔다(ADR-059 D2) — **이때 `package.json` 이 없으면**(순수 Dart/Flutter 프로젝트엔 기본적으로 없다) **최소 형태로 생성하고 `scripts` 에 진입점을 박는다.** 생성하지 않으면 `npm run validate` 자체가 성립하지 않는다. **이미 생성된 진입점은 소급 교체하지 않는다**(도구 감지 우선순위 정합 — 기존 도구 미덮어씀); 기존 `validate:design`이 `make`·`task`로 물려 있으면 자동 변경 없이 출력에 1줄 보고 + 사용자 결정으로 넘긴다.
 - `scripts/verify.{sh,ps1,mjs,py}` 중 스택에 가장 자연스러운 런타임 1종.
-- UI 판정 시 canonical design gate v3 asset을 project-native `validate:design`에 배선하고 **자가 검사 1회**를 통과시켜 `STACK_SETUP_PLAN.md ## Design Gate Adapter`(6필드)에 기록(ADR-072 D6). 비-UI는 asset을 읽거나 복사하지 않는다.
+- UI 판정 시 canonical design gate v3 asset을 project-native `validate:design`에 배선하고 **자가 검사 1회**(해당 스택에서 실행되는 케이스 전부)를 통과시켜 `STACK_SETUP_PLAN.md ## Design Gate Adapter`(6필드)에 기록(ADR-072 D6). 비-UI는 asset을 읽거나 복사하지 않는다.
 - cross-platform 차이가 큰 팀이면 `.claude/settings.local.json` 예시 동봉 권장.
 - 생성된 `docs/00-meta/STACK_SETUP_PLAN.md`에 hook 절차 SSOT([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))를 link하는 1줄 안내. 절차 본문은 embed 금지 (SSOT 정합).
 
@@ -51,6 +51,7 @@ R0 — 운영 환경 가정 확인:
    5. **커밋하지 않는다.** 출력에 `권장 커밋: chore(scaffold): initialize <framework> project skeleton` 한 줄.
    6. Dart/Flutter면 수행 0 직후 `## Dart Source Roots`를 실측 갱신한다(생성기가 `lib/`·`test/`를 만들었으므로).
    7. 이 뒤 수행 1은 생성기 manifest의 `scripts`에 `validate*` 키를 **추가**한다(기존 키·의존 보존 — 덮어쓰기 금지). 도입부의 «Flutter는 `package.json`이 없으면 최소 형태로 생성» 규칙은 그 scope에 `pubspec.yaml`만 있고 `package.json`이 없을 때만 적용된다.
+0-H. **harness 경로 무결성 (실행 시작·종료 — ADR-071#amend-1)**: 수행 0의 2-1 보호 경로 검사는 *스캐폴드 복사 전후*만 본다. 그러나 본 skill 은 그 뒤로도 생성기·설치기·개발 서버를 돌리고, **그 도구들이 harness 파일을 고치는 사례가 실재한다** — 예: Next.js 16 의 `next dev` 는 실행할 때마다 `AGENTS.md`(없으면 `CLAUDE.md`)에 자기 규칙 블록을 append 하고 지워도 되살린다(`node_modules/next/dist/server/lib/generate-agent-files.js`). 그래서 **본 skill 실행 맨 앞과 맨 끝에** 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`)의 «파일 경로 + 내용 해시» 목록을 각각 만들어 대조한다(수행 0 2-1 과 같은 방법). 달라진 경로가 있으면 `Harness-path drift: <경로> — <추정 원인>` 을 출력에 남긴다. **자동으로 되돌리지 않는다** — 그 변경이 의도된 것일 수 있고(본 skill 이 `docs/00-meta/STACK_SETUP_PLAN.md` 를 갱신하는 것이 정상 경로다) 되돌리기는 사용자 결정이다. **본 skill 이 스스로 쓰는 파일**(`docs/00-meta/STACK_SETUP_PLAN.md`, `.gitignore`, `.gitattributes`)과 직전 skill 이 쓴 미커밋 문서는 대조 대상에서 뺀다. `AGENTS.md` 가 커졌으면 ADR-011 의 100줄 상한을 함께 확인해 출력에 줄 수를 적는다.
 1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.
 2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
 2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
@@ -156,7 +157,7 @@ R0 — 운영 환경 가정 확인:
    - **6-2. Toolchain 설치 (전 스택 공통, 기계적 — 기본은 진행)**: 감지된 패키지 매니저로 authored devDeps 를 설치한다 — `pnpm install` / `npm install` / `pip install -e .` (또는 `uv sync`) / `go mod download` / `cargo fetch` / `flutter pub get` 중 스택에 자연스러운 1종. lockfile 존재 시 frozen 설치(`pnpm install --frozen-lockfile` / `npm ci`) 우선. 설치 후 lock 파일 변경은 그대로 둔다(finalize 자동 화이트리스트, ADR-007#amend-1). **주의 — *validate 가 부르는 도구 자체*가 깔리는지 확인**: 패키지 deps 만 받는 명령은 lint/type/test 도구를 빠뜨릴 수 있다(예: `pip install -e .` 는 dev 도구 미설치 → `pip install -e '.[dev]'` 또는 `uv sync --all-extras`; Go `golangci-lint`·Rust `clippy` 는 별도 설치). step 5 smoke 가 command-not-found 면 도구 설치 명령을 보강한다.
    - **6-2-1. 테스트 격리 권장 (ADR-051#amend-1)**: 생성하는 e2e/통합 설정에 *가능한 범위에서* 격리를 권장한다 — playwright `webServer`는 동적 포트, 통합 테스트는 트랜잭션 롤백/임시 스키마/testcontainers. stack-guard가 unit-test 격리를 직접 authoring하긴 어려우므로, 미보장 시 `STACK_SETUP_PLAN.md`에 "테스트 격리 미설정 — 병렬 builder 시 foreman 순차 권장" 1줄 부기(implement partition이 실제 보호).
    - **6-2-b. 기초 라이브러리 baseline 설치 (ADR-071 D6)**: registry에서 `disposition: 확정` **그리고** 카탈로그 `설치: baseline`인 행의 패키지를 **scope별로**(그 scope의 행을 그 scope의 PM으로 — ADR-071 D2 `(scope, id)` 키) 설치한다(UI 킷·스타일링·아이콘·UI 미리보기 도구·계측 SDK 등 — 폰트 제외). 버전은 registry `확인일`의 researcher 고정값. `설치: task` 행은 설치하지 않는다(plan-workitem → implement). 설치 실패는 6-5 `Needs Install` fallback.
-     - **Storybook (웹 UI + registry `cat-web-ui-preview` = Storybook)**: 프레임워크 공식 통합으로 설치하고 애드온은 `a11y`·`viewport`만 둔다. `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. 정적 빌드 출력 `design-gate-storybook/`이 `.gitignore`에 없으면 추가한다. Flutter는 미리보기 도구를 설치하지 않는다.
+     - **Storybook (웹 UI + registry `cat-web-ui-preview` = Storybook)**: 프레임워크 공식 통합으로 설치하고 **애드온은 `a11y` 하나만 둔다** — *viewport 는 Storybook 8 부터 코어 global 이라 별도 애드온이 존재하지 않는다*(기준 뷰포트는 `.storybook/preview` 의 `parameters.viewport.options` 로 둔다). 최신 `storybook init` 은 Chromatic·vitest·docs·mcp 애드온을 함께 깔고 `vitest.config` 까지 생성하므로 **설치 직후 결정 집합 밖 애드온·생성 파일을 제거한다**(ADR-071#amend-1). `package.json`에 `storybook`·`build-storybook` 스크립트가 없으면 추가한다. 정적 빌드 출력 `design-gate-storybook/`이 `.gitignore`에 없으면 추가한다. Flutter는 미리보기 도구를 설치하지 않는다.
      - **폰트 패키지·파일은 설치하지 않는다** — DESIGN `## 3` 확정 뒤 `/bootstrap-design` R6가 추가한다(ADR-071 D6 예외).
      - 설치 결과를 출력에 `baseline libs: <패키지 목록> (installed | Needs Install)`로 낸다.
    - **6-3. e2e 실행 환경 준비 (runtime target 기준)**:
@@ -180,10 +181,10 @@ R0 — 운영 환경 가정 확인:
      - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
    - **6-4-1. design gate v3 어댑터 + Visual-QA scaffold (UI 한정 — ADR-072 D6 / ADR-058#amend-3)**:
      - **JIT read 경계**: 6-1이 UI 확정/의심일 때만 `.claude/skills/stack-guard/assets/design-gate.mjs`를 읽는다. 비-UI는 로드·복사·설치 없음(ADR-019).
-     - **물질화**: canonical v3를 project-native 경로(기본 `scripts/design-gate.mjs`)로 복사하고 `validate:design` 진입점을 **npm 계열**로 박는다(`make`·`task` 금지 — exit 1/2 구분 보존, ADR-059 D2). Flutter도 design gate 진입점만 npm이다. command template: `<pm> validate:design -- <args>`.
+     - **물질화**: canonical v3를 project-native 경로(기본 `scripts/design-gate.mjs`)로 복사하고 `validate:design` 진입점을 **npm 계열**로 박는다(`make`·`task` 금지 — exit 1/2 구분 보존, ADR-059 D2). Flutter도 design gate 진입점만 npm이다. command template: `<pm> validate:design -- <args>`. **`--` 는 npm 계열 PM 마다 취급이 다르다** — npm 은 제거해 스크립트에 넘기고 pnpm 은 리터럴로 그대로 넘긴다. 어댑터가 bare `--` 를 무시하므로(ADR-072#amend-1) 어느 PM 이든 같은 template 이 성립하지만, **기록할 때는 그 프로젝트 PM 으로 실제 1회 실행해 본 형태를 적는다.**
      - **Storybook 정적 빌드 출력**: `design-gate-storybook/`을 `.gitignore`에 추가(첫 실행 전).
      - **Flutter 자가 검사 fixture**: `pubspec.yaml`이 있으면 `test/design_gate/self_bad_test.dart`(known-bad 위젯 — 20px 탭 타겟 + 2:1 대비; 헤더 주석 «design gate self-test fixture — 실패가 정상»)와 `test/design_gate/self_ok_test.dart`(known-good)를 생성한다. **주의**: `flutter test`가 이 파일을 통합 `validate`에서 실행하지 않도록 `validate`의 test 단계에서 `test/design_gate/`를 제외한다(제외 방법은 도구 문서 확인 — SKILL에 키를 박지 않는다).
-     - **자가 검사(4케이스)**: `<pm> validate:design -- --self-test` 실행(Flutter scope가 루트가 아니면 `--scopes apps/mobile`처럼 fixture를 만든 scope를 함께 넘긴다 — 루트 `pubspec.yaml`만 보면 monorepo에서 (d)가 조용히 빠진다) → 위 판정 행. **capability 버전 핸드셰이크·고정 적합성 oracle은 없다**(ADR-072 D6이 ADR-058#amend-2를 대체). 복사 직후 canonical asset의 SHA-256을 registry `copied-from`에 적는다(caller 대조 없음).
+     - **자가 검사(최대 4케이스 — 웹 전용 프로젝트는 3)**: `<pm> validate:design -- --self-test` 실행(Flutter scope가 루트가 아니면 `--scopes apps/mobile`처럼 fixture를 만든 scope를 함께 넘긴다 — 루트 `pubspec.yaml`만 보면 monorepo에서 (d)가 조용히 빠진다) → 위 판정 행. **(d) Flutter fixture 케이스는 `pubspec.yaml` 이 있는 scope 에서만 돈다 — Dart 가 없는 웹 전용 프로젝트의 정상 결과는 (a)(b)(c) 3케이스 PASS 이며 그것이 «자가 검사 통과»다.** 케이스 수로 통과를 판정하지 않고 *실행된 케이스가 전부 기대와 같은가*로 판정한다(ADR-072#amend-1). **capability 버전 핸드셰이크·고정 적합성 oracle은 없다**(ADR-072 D6이 ADR-058#amend-2를 대체). 복사 직후 canonical asset의 SHA-256을 registry `copied-from`에 적는다(caller 대조 없음).
      - **registry 기록(6필드)**: `status | command template | adapter path | manifest 규약(docs/20-system/prototypes/<M|_theme>/manifest.json — ADR-072 D3) | self-test 일자 | copied-from`. 비-UI는 `status: n/a`만.
      - **single-origin**: `design-gate-shots/`는 렌더 실행마다 초기화, `design-gate-storybook/`는 빌드할 때만 재생성(`--no-build` 실행은 보존 — ADR-072 D6). 어느 쪽이든 같은 checkout에서 동시 2실행 금지(ADR-063 D7). 이 사실을 registry 하단에 1줄 부기.
      - **구현 앱 Visual-QA (별도 surface)**: e2e scaffold 시 `e2e/visual-qa.spec.*`도 생성해 렌더된 앱을 검사한다. breakpoint 320/375/768/1440 page overflow는 차단, 요소 겹침은 권고, populated axe serious/critical은 차단·moderate/minor는 권고. 가능한 runner에서는 generated geometry/axe helper를 두 surface가 재사용한다.
@@ -199,6 +200,7 @@ R0 — 운영 환경 가정 확인:
 
 마지막 출력:
 - 스캐폴드 결과 (`done <생성기>` / `skipped <사유>`) + 권장 커밋 메시지
+- **harness 경로 무결성 (수행 0-H)**: `변경 0건` 또는 `Harness-path drift: <경로> — <추정 원인>` (+ `AGENTS.md` 줄 수)
 - baseline libs 설치 결과
 - 생성/갱신한 파일 목록
 - 운영 환경 가정 (R0 결과)
