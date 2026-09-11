@@ -106,7 +106,9 @@
 
 **DESIGN.md 새 절·앵커**: `## 0` 프로필 매핑표(`design-0-profiles`), `## 3` 폰트 결정 블록(`design-3-typography`), `## 10` 언어별 하위 블록, `## 11. 기준 자료`(`design-11-sources`).
 
-**QA_FINDINGS·IMPROVEMENT_GUIDE `decision` 값**: `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`. repair 로그(`## 5`)의 `decision`은 기존 `Adopt | Adopt-modified | Reject-FP | Reject-context` 유지.
+**QA_FINDINGS·IMPROVEMENT_GUIDE `decision` 값**: `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`. repair 로그(`## 5`)의 `decision`은 기존 `Adopt | Adopt-modified | Reject-FP | Reject-context` 유지. **두 어휘의 경계는 스키마 본문에도 한 줄로 박는다**(P1-3 — 같은 파일 안에서 `## 항목 스키마`와 `## 5` 예시가 모순되지 않게).
+
+**finding 하위 줄 마커 신설**: `- 재현:` · `- 재현 재실행:` · `- 종결 근거:` · `- 출처:` (ADR-070 D1·D3·D7) / `- 수렴-보류: 회수 <시점> | 조건: …` (ADR-070 D5 B — 보류해도 `status`는 `open` 유지. finding 원장에 `deferred` 상태를 신설하지 않는다) / `## 5` 그룹 줄 `- round:` · `- convergence-decision:` (D5).
 
 **라벨 신설**: `[Design-element-rationale]`(브리프 요소 근거 부재), `[Design-reuse-drift]`(승인 UI 재사용 이탈), `[Finding-unreproduced]`(재현 줄 없는 P0 보고), `[Convergence]`(라운드 예산 도달), `[Experience-contract]`(UI M 매니페스트 부재).
 
@@ -182,7 +184,7 @@ accepted
   1. **종결 누락** — `/repair-milestone` 수행 5는 Adopt/Adopt-modified만 `status: resolved`로 토글한다. Reject-FP·Reject-context로 판정한 원본 finding은 `open`으로 남아 §1.5 item 5가 다음 라운드에 다시 센다.
   2. **P0 정의·재현 요구 부재** — `qa.md`·`reviewer.md`에 P0 기준이 없다. 정적 추론만으로 P0가 등재되고, 6-S는 보고자별로 원장을 나눌 뿐(qa→QA_FINDINGS, reviewer→IMPROVEMENT_GUIDE) 채택 전 검토가 없다.
   3. **수정 후 영향 반경 미검사** — `/repair-milestone` 2-V는 «방금 한 수정이 즉시 깨졌는가»만 본다. 수정이 다른 파일에 새로 여는 결함은 다음 stabilize 전수 감사에서야 드러나고, 그때 새 P0로 보인다.
-- [관측됨] ADR-067 D3은 미검증 축을 병기한 `YES`를 도입하지 않는다고 명시했고 ADR-068 D4가 그대로 승계한다. 따라서 수렴 실패의 출구는 판정값 신설이 아니라 **사용자 결정으로 진행 경로를 여는 것**이어야 한다(ROADMAP 병렬 Now 승인 경로가 이미 있다 — plan-milestone R0).
+- [관측됨] ADR-067 D3은 미검증 축을 병기한 `YES`를 도입하지 않는다고 명시했고 ADR-068 D4가 그대로 승계한다. 따라서 수렴 실패의 출구는 판정값 신설이 아니라 **사용자 결정으로 진행 경로를 여는 것**이어야 한다(ROADMAP 병렬 Now 승인 경로가 이미 있다 — plan-milestone R0). ADR-067은 superseded (현재 SSOT: ADR-068).
 - [외부실증] ADR-047 D8(Oracle Adequacy) — pass/fail 단일 신호는 과신을 만든다. finding도 «관측됨/재현됨/미확인»을 구분하지 않으면 P0 인플레이션이 생긴다.
 
 ## 결정
@@ -215,6 +217,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - **P0는 `confirmed`가 되기 전에 채택하지 않는다.** 재현이 명령 한 번인 경우(빌드 실패 등)도 그 명령을 돌린다.
 - **재현 재실행의 경계**: 코드·문서·상태를 바꾸지 않는 명령만 메인이 직접 돌린다. dev server·테스트 DB가 필요한 재현은 stabilize 단계 3이 이미 띄운 환경에서 qa 단발 sub-call로 돌리고, 그것도 불가하면 `needs-confirmation`(확인 방법 = `/repair-milestone`이 수행)으로 둔다. 6-S의 read-only 계약(코드·status 미변경)은 유지된다.
 - 이 검토는 사후 판정이다. verifier 입력에는 D1 표만 준다.
+- **어휘 경계**: 위 5값은 **원본 finding 항목**의 `decision`이다. `IMPROVEMENT_GUIDE.md ## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다 — 전자는 증거 상태, 후자는 수리 처분이라 축이 다르다. 두 어휘를 섞지 않는다.
 
 ### D3. 종결 규칙 (4-판정 전부가 원본을 닫는다)
 `/repair-milestone`의 4-판정은 원본 finding의 `status`를 **전부** 갱신한다.
@@ -236,10 +239,10 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 - `/stabilize-milestone` 단계 8은 그 K를 읽는다. **K ≥ 3이고 여전히 `### P0`에 `status: open`이 있으면** 판정은 그대로(`NO` 또는 `BLOCKED`) 두고 아래 **수렴 실패 브리프**를 출력한다(Decision Brief 6블록, `authority: user-choice`, DECISION_REGISTER 등재 `영향: M<N>`):
   - 남은 P0/P1 목록: 각각 `decision`·근거·영향·수리 범위 추정·**보류 가능 여부**(비차단이면 가능).
   - 선택지 A: 계속 수리(한 라운드 더).
-  - 선택지 B: 비차단 항목만 **회수 조건**(`회수: M<N+1> 착수 시 | 조건: …`)을 달아 `deferred` 처리하고 차단 항목만 수리.
-  - 선택지 C: `NO`를 유지한 채 **병렬 Now 승인**으로 다음 마일스톤을 연다(plan-milestone R0 «명시적 병렬 승인» 경로). 남은 P0는 `carry-over`로 매 라운드 표시되며, 다음 M에서 해소되면 이전 M의 `/stabilize-milestone` 재실행으로 정상 `YES`를 낸다.
+  - 선택지 B: 비차단 항목에 하위 줄 `- 수렴-보류: 회수 M<N+1> 착수 시 | 조건: …`를 달아 이번 라운드 수리 대상에서 빼고 차단 항목만 수리한다. **`status`는 `open`으로 유지한다** — severity는 영향이므로(D1) 미해소 P0는 졸업 item 5를 계속 막고, `/plan-milestone` R0의 기존 *open* 회수가 다음 M에서 그 항목을 surface한다. **finding 원장에 `deferred` 상태를 신설하지 않는다** — 읽는 소비자(R0 회수·아카이브 회전·item 5)가 전부 `open`/`resolved`만 보므로 항목이 새는 자리가 된다. 보류라는 *선택* 자체는 `[Convergence]` 원장 항목이 담는다(ADR-060 D1의 «결함을 감수한다는 선택» 예외). 다음 `/repair-milestone`는 `- 수렴-보류:` 줄이 달린 항목을 그 라운드 대상에서 제외한다.
+  - 선택지 C: `NO`를 유지한 채 **병렬 Now 승인**으로 다음 마일스톤을 연다(plan-milestone R0 «명시적 병렬 승인» 경로). 남은 P0는 `carry-over`로 매 라운드 표시되며(다음 M의 `/repair-milestone`는 책임 경계상 그 항목을 고치지 않고 flag만 한다), 결함이 해소된 뒤 **이전 M ID로 `/repair-milestone M<N>`을 돌려 D3 종결 규칙(재현 재실행 관측)으로 원본을 닫은 다음** 그 M의 `/stabilize-milestone` 재실행으로 정상 `YES`를 낸다.
   - 금지: 판정값 신설·`YES` 병기·P0의 P1 재분류(D1 위반).
-- 브리프 출력에는 `[Convergence]` 라벨을 붙인다. stabilize는 그 항목을 DECISION_REGISTER에 `open`으로 등재한다(정상 책임 4). **답변 기록**: 사용자가 같은 세션에서 답하면 stabilize가 *자기 등재 항목에 한해* `closed` + 앵커(ROADMAP `## Now` 행 또는 QA_FINDINGS 항목)를 쓴다(기존 항목 상태 변경 금지는 유지). 세션이 끝난 뒤 답하면 선택지 A·B는 `/repair-milestone` 1-R이, 선택지 C는 `/plan-milestone` R0(병렬 승인)가 그 항목을 `closed`로 쓰고 `IMPROVEMENT_GUIDE.md ## 5` `### M-N`에 `- convergence-decision: <A|B|C> (round K, <YYYY-MM-DD>)`를 append한다.
+- 브리프 출력에는 `[Convergence]` 라벨을 붙인다. stabilize는 그 항목을 DECISION_REGISTER에 `open`으로 등재한다(정상 책임 4). **답변 기록**: 사용자가 같은 세션에서 답하면 stabilize가 *자기 등재 항목에 한해* DECISION_REGISTER를 `closed` + 앵커(ROADMAP `## Now` 행 또는 QA_FINDINGS 항목)로 쓴다(기존 항목 상태 변경 금지는 유지). **`IMPROVEMENT_GUIDE.md ## 5` `### M-N`의 `- convergence-decision: <A|B|C> (round K, <YYYY-MM-DD>)` 줄은 답변 시점과 무관하게 후속 skill이 남긴다** — A·B는 다음 `/repair-milestone` 1-R, C는 `/plan-milestone` R0(병렬 승인). 세션이 끝난 뒤 답한 경우에는 그 skill이 DECISION_REGISTER `closed` 기록도 함께 쓴다(이미 닫혀 있으면 그대로 둔다). **stabilize는 `## 5`에 쓰지 않는다** — 그 절의 writer는 repair 3종 + 본 줄에 한한 `/plan-milestone`이다(IMPROVEMENT_GUIDE `## 5` writer 주석).
 - **재발화 억제**: `- convergence-decision:` 줄이 있으면 그 뒤로는 (i) 새 P0 ID가 등재됐거나 (ii) 현재 K − 결정 round ≥ 2일 때만 브리프를 다시 낸다.
 
 ### D6. 새 P0의 기록 사실 (원인 추정 대신 확인 가능한 사실)
@@ -258,7 +261,7 @@ severity는 **영향**이고, 채택 여부는 **증거 상태**다. 둘을 섞�
 stabilize 7-T에 다음 줄을 더한다: `- 수렴: round K / P0 신규 a · 해소 b · 재개 c / 재현 첨부율 <%> / needs-confirmation d`. 새 데이터 수집이 아니라 원장 계수다.
 
 ## 대안과 제약 (ADR-053)
-- A. 면제 판정값(`WAIVED`) 신설 — 편익: 마일스톤이 깔끔히 닫힘. 제약: 졸업·수용·ROADMAP·아카이브·다음 M 진입 규칙 전부 재정의, ADR-067 D3 명시 배제와 충돌. 기각(재검토 트리거 2 도달 시 별도 ADR).
+- A. 면제 판정값(`WAIVED`) 신설 — 편익: 마일스톤이 깔끔히 닫힘. 제약: 졸업·수용·ROADMAP·아카이브·다음 M 진입 규칙 전부 재정의, ADR-067 D3 명시 배제와 충돌. 기각(재검토 트리거 2 도달 시 별도 ADR). ADR-067은 superseded (현재 SSOT: ADR-068).
 - B. 미재현 P0를 P1로 자동 강등 — 편익: 구현 단순. 제약: severity(영향)와 증거 상태를 혼동해 기록이 거짓이 됨. 기각.
 - C. 채택(본 ADR) — 정의표·재현·검토·종결·반경 재감사·예산.
 
@@ -288,7 +291,7 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
 - .claude/agents/qa.md                              — D1 정의표·재현 줄
 - .claude/agents/reviewer.md                        — D1 참조·D7 결함 라우팅
 - docs/40-validation/QA_FINDINGS.md                 — D3 스키마(P0·P1 필수 2필드) · D2 decision 값
-- docs/40-validation/IMPROVEMENT_GUIDE.md           — D3 스키마 · D5 round 줄 형식
+- docs/40-validation/IMPROVEMENT_GUIDE.md           — D2 어휘 경계 · D3 스키마 · D5 round·convergence-decision 줄 형식과 writer 예외
 - .claude/skills/plan-milestone/SKILL.md            — D5 병렬 Now 승인(수렴 실패 이관 · convergence-decision C 기록)
 - .claude/skills/accept-milestone/SKILL.md          — D2 decision 등재 형식(사용자 관측 = 재현)
 - .claude/skills/repair-acceptance/SKILL.md         — D3 종결
@@ -296,7 +299,7 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
 - docs/00-meta/WORKFLOW.md                          — D5 NO 분기 주석
 
 ## 참고
-- ADR-068(졸업 계약 v3 — D3 item 5·D4·D6), ADR-067(D3 병기 YES 배제), ADR-050#amend-1(사전판정 금지), ADR-054(single-origin), ADR-066(수용 finding — decision·종결은 본 ADR), ADR-038·ADR-044·ADR-060 D8(plan·discovery 리뷰 severity — 본 ADR 범위 밖), ADR-022, ADR-047 D3·D8.
+- ADR-068(졸업 계약 v3 — D3 item 5·D4·D6), ADR-067(D3 병기 YES 배제 — superseded) (현재 SSOT: ADR-068), ADR-050#amend-1(사전판정 금지), ADR-054(single-origin), ADR-066(수용 finding — decision·종결은 본 ADR), ADR-060 D1(«결함을 감수한다는 선택» 원장 예외 — D5 B), ADR-038·ADR-044·ADR-060 D8(plan·discovery 리뷰 severity — 본 ADR 범위 밖), ADR-022, ADR-047 D3·D8.
 ```
 
 ### P1-2. `docs/40-validation/QA_FINDINGS.md`
@@ -314,15 +317,26 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
     - 출처: qa
   ```
 - `## 다운스트림 마이그레이션 가이드`에 (3) 추가: `기존 항목의 decision 값이 자유 텍스트면 위 5값 중 하나로 정규화한다(불명이면 needs-confirmation).`
+- evidence label 줄 다음에 `- 수렴-보류:` 마커 한 줄 추가(ADR-070 D5 B의 grep 신호 — `(수용)` 태그와 같은 이유로 스키마가 소유한다).
+  ```
+  - **선택 마커 `- 수렴-보류:`**: 수렴 실패 브리프에서 사용자가 선택지 B를 택한 항목에 붙는 하위 줄 — `- 수렴-보류: 회수 <시점> | 조건: <…>`. `status`는 `open`으로 유지한다(졸업 item 5 계수 불변). `/repair-milestone`이 그 라운드 수리 대상에서 제외하는 유일한 신호이며 문자열 정확 일치로 grep된다(ADR-070 D5).
+  ```
 
 ### P1-3. `docs/40-validation/IMPROVEMENT_GUIDE.md`
-- `## 항목 스키마`: P1-2와 동일하게 두 줄 교체(재현 줄 문장은 "결함이면 QA_FINDINGS가 제자리다(ADR-070 D7)"로 바꿈).
+- `## 항목 스키마`: P1-2와 동일하게 두 줄 교체(재현 줄 문장은 "결함이면 QA_FINDINGS가 제자리다(ADR-070 D7)"로 바꿈). **둘째 줄은 5값의 적용 범위를 «원본 finding 항목 한정»으로 못 박고 `## 5` 로그의 `decision`이 `Adopt | Adopt-modified | Reject-FP | Reject-context`임을 같은 줄에 병기한다** — 그러지 않으면 같은 문서의 `## 5` 예시(`decision: Adopt`)와 「형식은 `## 항목 스키마` SSOT 따름」이 서로 모순된다(§2 고정표 · ADR-070 D2 어휘 경계).
+  ```
+  - `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다** — 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
+  ```
 - `## 5. Repair decision log` 안내 단락 끝에 추가:
   ```
   - **round 줄 (ADR-070 D5)**: `/repair-milestone`는 실행 시작 시 그 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K는 기존 최대값 + 1. `/stabilize-milestone` 단계 8이 최대 K를 읽어 예산(3)과 대조한다.
   - **원인·반경·재감사 줄 (ADR-070 D4)**: Adopt 항목 하위에 `- 원인:` · `- 영향 반경:` · `- 재감사: <대상 N파일> / 새 finding K건` · 라운드 끝에 `- 자기 점검: …` 한 줄.
   ```
-- 형식 예시 블록에 위 하위 줄 예를 한 줄씩 추가한다.
+- 형식 예시 블록에 위 하위 줄 예를 한 줄씩 추가한다(`- round:`는 `### M-N` 그룹 줄이라 항목 예시에 넣지 않는다).
+- `## 5` 끝 HTML 주석의 writer 목록(`/repair-plan`·`/repair-milestone`·`/repair-acceptance`만 append)에 예외 한 줄 추가 — ADR-070 D5가 `/plan-milestone` R0에 `- convergence-decision: C` 기록을 맡기므로 목록과 충돌한다.
+  ```
+       예외 1종: /plan-milestone R0는 `- convergence-decision: C (round K, <날짜>)` 줄 하나만 해당 `### M-N`에 append한다 (ADR-070 D5 — 선택지 C 기록 writer).
+  ```
 
 ### P1-4. `.claude/agents/qa.md`
 - 현재: `- 결과는 P0, P1, P2로 나눈다.`
@@ -360,7 +374,7 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
   출력 형식 예시 블록에 `- 수렴: round 2 / P0 신규 1 · 해소 3 · 재개 0 / 재현 첨부율 100% / needs-confirmation 0` 한 줄 추가.
 - (d) 단계 8 `**졸업 가능 = NO 또는 P0 후속 있음**` 분기 첫머리에 추가:
   ```
-  - **수렴 실패 브리프 (ADR-070 D5)**: 7-T의 `round K`가 **3 이상**이고 `### P0`에 `status: open`이 남아 있으면, 판정은 그대로 두고 `[Convergence]` 라벨로 Decision Brief 6블록(`authority: user-choice`, `영향: M<N>`, DECISION_REGISTER 등재)을 출력한다 — 남은 P0/P1 각각의 `decision`·근거·영향·수리 범위·보류 가능 여부 + 선택지 A(계속 수리) / B(비차단 항목만 회수 조건을 달아 `deferred`, 차단 항목만 수리) / C(`NO` 유지 + 병렬 Now 승인으로 다음 마일스톤 진행 — carry-over 표시 지속, 다음 M에서 해소 후 본 skill 재실행으로 `YES`). **판정값 신설·`YES` 병기·P0의 P1 재분류는 하지 않는다.** 항목을 DECISION_REGISTER에 `open`으로 등재하고(정상 책임 4), 사용자가 같은 세션에서 답하면 *그 항목에 한해* `closed` + 앵커를 쓴다(세션 뒤 답변은 A·B → `/repair-milestone` 1-R, C → `/plan-milestone` R0가 기록 — ADR-070 D5). `## 5` `### M-N`에 `- convergence-decision:` 줄이 이미 있으면 새 P0 ID가 생겼거나 K − 결정 round ≥ 2일 때만 다시 낸다. **`BLOCKED` 분기에서도 같은 조건(round ≥ 3 + open P0)이면 동일 브리프를 낸다** — 감사 미완·환경 불가와 별개로 남은 P0의 진행 경로를 사용자가 정해야 한다.
+  - **수렴 실패 브리프 (ADR-070 D5)**: 7-T의 `round K`가 **3 이상**이고 `### P0`에 `status: open`이 남아 있으면, 판정은 그대로 두고 `[Convergence]` 라벨로 Decision Brief 6블록(`authority: user-choice`, `영향: M<N>`, DECISION_REGISTER 등재)을 출력한다 — 남은 P0/P1 각각의 `decision`·근거·영향·수리 범위·보류 가능 여부 + 선택지 A(계속 수리) / B(비차단 항목에 `- 수렴-보류: 회수 <시점> | 조건: …` 하위 줄을 달아 이번 라운드 대상에서 빼고 차단 항목만 수리 — `status`는 `open` 유지, finding 원장에 `deferred` 상태를 만들지 않는다) / C(`NO` 유지 + 병렬 Now 승인으로 다음 마일스톤 진행 — carry-over 표시 지속, 해소 후 `/repair-milestone M<N>`이 원본을 닫고 본 skill 재실행으로 `YES`). **판정값 신설·`YES` 병기·P0의 P1 재분류는 하지 않는다.** 항목을 DECISION_REGISTER에 `open`으로 등재하고(정상 책임 4), 사용자가 같은 세션에서 답하면 *그 항목에 한해* `closed` + 앵커를 쓴다. **`## 5`의 `- convergence-decision:` 줄은 답변 시점과 무관하게 후속 skill이 남긴다**(A·B → `/repair-milestone` 1-R, C → `/plan-milestone` R0 — 본 skill은 `## 5`에 쓰지 않는다, ADR-070 D5). `## 5` `### M-N`에 `- convergence-decision:` 줄이 이미 있으면 새 P0 ID가 생겼거나 K − 결정 round ≥ 2일 때만 다시 낸다. **`BLOCKED` 분기에서도 같은 조건(round ≥ 3 + open P0)이면 동일 브리프를 낸다** — 감사 미완·환경 불가와 별개로 남은 P0의 진행 경로를 사용자가 정해야 한다.
   ```
 - (e) 책임 경계 단락의 `- P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 반영한다(qa 팬아웃分 — reviewer는 report-only로 미반영).` → `- P0 기준은 `QA_FINDINGS.md`의 미해소 P0만 반영한다(성격 기준으로 등재된 결함 — 보고자 무관, ADR-070 D7).`
 - (f) 도입부 정상 책임 1 문장 `(qa 위임 결과)` → `(결함 — 보고자 무관, ADR-070 D7)`, 2 `(reviewer 위임 결과 + deterministic preflight 결과)` → `(개선 — 보고자 무관 + deterministic preflight 결과)`.
@@ -370,7 +384,7 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
 ### P1-7. `.claude/skills/repair-milestone/SKILL.md`
 - (a) 반드시 먼저 할 일 1 다음에 추가:
   ```
-  1-R. **round 카운터 (ADR-070 D5)**: `IMPROVEMENT_GUIDE.md ## 5`의 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K = 그 그룹의 기존 `- round:` 최대값 + 1(첫 실행 1). 이 줄이 `/stabilize-milestone` 단계 8 수렴 판정의 유일한 입력이다. 사용자가 수렴 실패 브리프(ADR-070 D5)에 A·B로 답한 뒤의 첫 실행이면 같은 그룹에 `- convergence-decision: <A|B> (round K, <날짜>)`를 append하고 DECISION_REGISTER의 그 `[Convergence]` 항목을 `closed`로 쓴다.
+  1-R. **round 카운터 (ADR-070 D5)**: `IMPROVEMENT_GUIDE.md ## 5`의 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K = 그 그룹의 기존 `- round:` 최대값 + 1(첫 실행 1). 이 줄이 `/stabilize-milestone` 단계 8 수렴 판정의 유일한 입력이다. 사용자가 수렴 실패 브리프(ADR-070 D5)에 A·B로 답한 뒤의 첫 실행이면(답변이 같은 세션이었는지와 무관) 같은 그룹에 `- convergence-decision: <A|B> (round K, <날짜>)`를 append하고 DECISION_REGISTER의 그 `[Convergence]` 항목을 `closed`로 쓴다(이미 닫혀 있으면 그대로 둔다). **선택지 B로 답했으면 `- 수렴-보류:` 줄이 달린 finding을 이 라운드의 4-판정·수정 대상에서 제외한다**(ADR-070 D5 B — 원본은 `open`으로 남아 다음 M `/plan-milestone` R0가 회수한다).
   ```
 - (b) 비판적 재점검 단락 끝 `> 자기 판단을 신뢰하되, 애매하면 Adopt 쪽으로 보수적으로. Reject는 *근거가 코드/문서로 확인될 때만*.` 다음에 추가:
   ```

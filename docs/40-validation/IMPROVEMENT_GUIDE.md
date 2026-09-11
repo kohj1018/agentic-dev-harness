@@ -8,7 +8,8 @@
 각 발견 항목은 다음 형식으로 박는다.
 
 - 필수 4필드: `ID | severity | evidence label | linked workitem`
-- 권장 2필드: `status | decision`
+- 처리 후 필수 2필드(P0·P1): `status | decision` — 6-S 검토(ADR-070 D2)나 `/repair-milestone` 4-판정(ADR-070 D3)을 거친 P0·P1은 두 필드가 비어 있을 수 없다. P2와 미처리 항목은 권장.
+- `decision` 값(**원본 finding 항목** 한정): `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). **`## 5. Repair decision log`의 `decision`은 수리 판정값 `Adopt | Adopt-modified | Reject-FP | Reject-context`를 그대로 쓴다** — 증거 상태와 수리 처분은 축이 다르므로 두 어휘를 섞지 않는다(ADR-070 D2 어휘 경계). 결함이면 QA_FINDINGS가 제자리다(ADR-070 D7).
 - evidence label은 [boilerplate/ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md)의 `[관측됨]` / `[외부실증]` / `[가설]` (+ 합성 표기) 중 1개.
 - **선택 태그 `(수용)`**: `/accept-milestone`이 사용자 수용 라운드에서 등재한 항목에 붙인다. **위치는 굵은 ID 바로 뒤·첫 `|` 앞으로 고정한다** — `- **M1-003** (수용) | P2 | ...`. 이 태그가 `/repair-acceptance`의 유일한 회수 신호이며 문자열 `(수용)` 정확 일치로 grep된다(ADR-066 D5). `/repair-milestone`은 이 태그가 붙은 항목을 4-판정하지 않는다.
 
@@ -63,6 +64,8 @@
   - `scope: in-AC | out-of-AC` — 그 변경 줄을 기존 계약(task `## 6` AC · task `## 3` line item · feature `## 7` FAC · feature `## 7-2` INV · 승인 프로토타입 · DESIGN 계약)으로 거꾸로 추적할 수 있는가. **애매하면 `out-of-AC`.** `out-of-AC`면 `## 4. 보류 항목`에 계약 부채를 별도 등재한다.
 - evidence label은 기본 `[관측됨]` (finding 자체는 리뷰어/stabilize의 *로컬 문서·코드 관측*에서 나옴 — cross-review 방식의 외부실증은 ADR-038 본문이 owning).
 - 형식은 본 파일 `## 항목 스키마` SSOT 따름.
+- **round 줄 (ADR-070 D5)**: `/repair-milestone`는 실행 시작 시 그 `### M-N` 그룹(없으면 신설)에 `- round: <K> (<YYYY-MM-DD>)`를 append한다. K는 기존 최대값 + 1. `/stabilize-milestone` 단계 8이 최대 K를 읽어 예산(3)과 대조한다.
+- **원인·반경·재감사 줄 (ADR-070 D4)**: Adopt 항목 하위에 `- 원인:` · `- 영향 반경:` · `- 재감사: <대상 N파일> / 새 finding K건` · 라운드 끝에 `- 자기 점검: …` 한 줄.
 
 형식:
 ```
@@ -71,6 +74,12 @@
   - 결정: Adopt — AC-2가 401을 약속했다 / 회귀 테스트: tests/auth/session.spec.ts::expired_session_returns_401 (Red→Green 관측, validate에 묶임).
   - exec-evidence 2026-09-02 (a): 등급1 재실행 가능 — 테스트 전용 DB / 결과: 만료 세션 row 정리 확인.
   - pattern-scan 2026-09-02 만료 세션 401 처리: 범위 내 1건 수정 / 범위 밖 0건.
+  - 원인: 세션 만료 분기가 401 대신 미처리 예외를 던짐.
+  - 영향 반경: src/auth/session.ts + 이를 import하는 src/auth/middleware.ts, src/api/routes/*.
+  - 재감사: 대상 3파일 / 새 finding 0건.
+  - 자기 점검: 이 수정으로 새로 열릴 수 있는 P0 후보 — 없음.
 ```
 
-<!-- 마일스톤별 그룹핑(`### M1`, `### M2`)은 `/repair-plan`·`/repair-milestone`·`/repair-acceptance`가 *첫 호출 시* 해당 마일스톤 헤더를 자동 신설하고 그 아래에 append. /stabilize-milestone은 본 sub-section을 *추가하거나 수정하지 않음* — /repair-plan·/repair-milestone·/repair-acceptance만 직접 append. 본 ## 5 sub-section은 *신설 시 헤더 + 본 안내 주석만* 두고 `### M-N` 그룹은 비워둔다. -->
+<!-- 마일스톤별 그룹핑(`### M1`, `### M2`)은 `/repair-plan`·`/repair-milestone`·`/repair-acceptance`가 *첫 호출 시* 해당 마일스톤 헤더를 자동 신설하고 그 아래에 append. /stabilize-milestone은 본 sub-section을 *추가하거나 수정하지 않음* — /repair-plan·/repair-milestone·/repair-acceptance만 직접 append.
+     예외 1종: /plan-milestone R0는 `- convergence-decision: C (round K, <날짜>)` 줄 하나만 해당 `### M-N`에 append한다 (ADR-070 D5 — 선택지 C 기록 writer).
+     본 ## 5 sub-section은 *신설 시 헤더 + 본 안내 주석만* 두고 `### M-N` 그룹은 비워둔다. -->
