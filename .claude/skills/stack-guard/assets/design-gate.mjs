@@ -193,9 +193,19 @@ async function runAxe(page, AxeBuilder) {
 }
 
 // 화면 1개(파일 URL 또는 이미 goto된 페이지)를 주어진 뷰포트 목록으로 렌더 — html/manifest/self-test 공용.
+// 상태의 렌더 조건(ADR-072 D4 `states[].render`) → 그 상태를 돌 뷰포트 목록.
+// `render.viewports` 가 있으면 그것만(프로필 밖 폭도 허용 — geometryOnly 가 아니라 기준선 대상이다).
+function stateRenderViewports(state, profileViewports) {
+  const r = state && state.render;
+  if (!r || !Array.isArray(r.viewports) || !r.viewports.length) return profileViewports;
+  return r.viewports.map((v) => ({ w: v.w, h: v.h, geometryOnly: false }));
+}
+
 // viewports 원소: { w, h, geometryOnly? } — geometryOnly면 axe 생략(매니페스트 profile 밖에서 주입한 320x720 등).
-async function renderScreen({ browser, AxeBuilder, url, name, viewports }) {
+async function renderScreen({ browser, AxeBuilder, url, name, viewports, textScale }) {
   const entries = [];
+  // 글자 확대 조건(ADR-072 D4 `states[].render.textScale`)은 브라우저 컨텍스트에 건다 —
+  // CSS zoom 은 리플로우를 일으켜 실제 확대와 같고, transform:scale 은 리플로우가 없어 부적합하다.
   const context = await browser.newContext();
   try {
     const page = await context.newPage();
@@ -205,6 +215,8 @@ async function renderScreen({ browser, AxeBuilder, url, name, viewports }) {
         await page.setViewportSize({ width: vp.w, height: vp.h });
         await page.goto(url, { waitUntil: 'networkidle' });
         await page.evaluate(() => (document.fonts && document.fonts.ready) ? document.fonts.ready : null).catch(() => {});
+        // goto 뒤에 건다 — 네비게이션이 앞서 주입한 스타일을 버린다.
+        if (textScale && textScale !== 1) { await page.addStyleTag({ content: `:root{zoom:${textScale}}` }).catch(() => {}); await page.waitForTimeout(50); }
         const populated = await page.evaluate(() => !!document.body && (document.body.innerText.trim().length > 0 || document.body.querySelectorAll('img,svg,canvas,input,button,select,textarea').length > 0));
         if (!populated) entry.blockers.push({ rule: 'empty-render', selector: 'body', detail: 'populated 전제 위반 — 빈 화면(ADR-058 D3)' });
         const geo = await page.evaluate(evalGeometry, vp.w > 375);
@@ -373,7 +385,11 @@ async function runManifestMode(opts, ctx) {
           console.error('알 수 없는 preview 스킴: ' + preview);
           process.exit(2);
         }
-        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports });
+        // 상태가 렌더 조건을 선언하면 그 조건으로만 돈다(ADR-072 D4 — schema v1 minor `states[].render`).
+        // 선언이 없으면 프로필 뷰포트 전체. 조건을 무시하면 「320에서 밀리는가」의 기준선이
+        // 1280 스크린샷이 되어 이름과 내용이 어긋난다(dogfood Round 12 실측).
+        const stateViewports = stateRenderViewports(state, viewports);
+        const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale });
         for (const e of entries) result.screens.push({ id: screen.id, profile: screen.profile, viewport: e.viewport, preview, blockers: e.blockers, reports: e.reports, screenshot: e.screenshot });
       }
       // 승인 스냅샷은 «통과한 화면»만 동결한다(ADR-072 D4) — 차단된 화면이 기존 승인본을 덮어쓰면 기준선이 오염된다.
@@ -385,7 +401,11 @@ async function runManifestMode(opts, ctx) {
           const isBaseline = st.id === 'default' || st.baseline === true
             || ((st.id === 'empty' || st.id === 'error') && primary); // empty·error는 1차 뷰포트만
           if (!isBaseline) continue;
-          const vps = (st.id === 'empty' || st.id === 'error') && !st.baseline ? [primary] : shotViewports;
+          // 렌더 조건을 선언한 상태는 그 조건에서만 기준선을 뜬다 — 그러지 않으면
+          // `<screen>-narrow-320-1280x900.png` 처럼 파일명과 내용이 어긋난다.
+          const declared = stateRenderViewports(st, null);
+          const vps = declared ? declared
+            : (st.id === 'empty' || st.id === 'error') && !st.baseline ? [primary] : shotViewports;
           for (const vp of vps) {
             if (!vp) continue;
             const src = join(SHOTS, `${screen.id}-${st.id}-${vp.w}x${vp.h}.png`); // 웹·Flutter 공통 명명
