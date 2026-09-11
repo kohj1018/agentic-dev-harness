@@ -280,7 +280,9 @@ async function buildStorybook(scope, noBuild) {
 function runFlutterTest(scope, testFile) {
   // 출력 경로는 저장소 루트 기준으로 고정한다 — cwd가 scope라 상대 경로면 apps/<scope>/design-gate-shots/에 쌓인다.
   const outAbs = resolve(SHOTS);
-  const r = spawnSync('flutter', ['test', testFile, '--reporter', 'json', `--dart-define=DESIGN_GATE_OUT=${outAbs}`], { cwd: scope, timeout: 180000, maxBuffer: 64 * 1024 * 1024, encoding: 'utf8', shell: WIN });
+  // 출력 경로를 **두 경로로** 넘긴다. `--dart-define` 만 주면 `const String.fromEnvironment` 로만 읽히고,
+  // 위젯 테스트가 더 흔한 `Platform.environment` 로 읽으면 조용히 null 이 되어 PNG 가 한 장도 안 나온다(실측).
+  const r = spawnSync('flutter', ['test', testFile, '--reporter', 'json', `--dart-define=DESIGN_GATE_OUT=${outAbs}`], { cwd: scope, timeout: 180000, maxBuffer: 64 * 1024 * 1024, encoding: 'utf8', shell: WIN, env: { ...process.env, DESIGN_GATE_OUT: outAbs } });
   if (r.error && SPAWN_ERROR_CODES.has(r.error.code)) return { unavailable: true };
   if (r.error || r.signal === 'SIGTERM') return { timedOut: true };
   const lines = (r.stdout || '').split('\n').filter(Boolean);
