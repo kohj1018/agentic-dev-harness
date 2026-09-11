@@ -83,3 +83,39 @@ Canonical Owner 매핑 표는 `docs/00-meta/STRUCTURE.md`의 "Canonical Owner �
 - docs/30-workitems/ROADMAP.md (`## Backlog`)
 - .claude/skills/accept-milestone/SKILL.md · repair-acceptance/SKILL.md (라우팅 목적지)
 - .claude/skills/plan-milestone/SKILL.md (R0 Backlog 회수 · R1 재분류)
+
+## Amendment 2 (2026-09-12) — 산출물 인벤토리가 «보일러플레이트 갱신»의 판정 기준이다
+
+### 배경
+결정 3 은 `docs/00-meta/STRUCTURE.md` 를 **산출물 인벤토리 SSOT** 로 두고 `presence`(baseline / generated / conditional / reserved / boilerplate-only)까지 행마다 기록한다. 그런데 **그 표를 쓰는 절차가 한 군데도 없다** — 「보일러플레이트의 새 버전을 기존 프로젝트에 반영한다」는 fork 사용자에게 1급 작업인데 문서에 경로가 0건이다.
+
+- [관측됨] dogfood Round 12 에서 하네스 동기화가 `docs/00-meta/` 를 통째로 맞추면서 **`STACK_SETUP_PLAN.md`(168줄 — 스택 결정 registry 40행 + `## Design Gate Adapter` 계약)를 삭제했다.** 그 파일은 인벤토리에 **`presence: generated`** 로 정확히 등록돼 있었다.
+- [관측됨] **삭제 뒤 아무 검사도 울지 않았다.** 그 파일을 읽는 것은 `/design-milestone` R0·R6-1 의 `Design Gate Adapter status: ready` 확인뿐이라, 그 단계를 이미 지난 라운드에서는 다음 라운드까지 조용했다.
+- 원인: `docs/00-meta/` 가 **혼합 디렉터리**다 — baseline 문서 6종 + `_templates/` 와 generated 인 `STACK_SETUP_PLAN.md` 가 한 자리에 있다. `docs/90-decisions/` 도 같다(`boilerplate/` = baseline, `project/` = generated). **디렉터리 단위로 판단하면 반드시 틀린다.**
+
+### 결정
+1. **보일러플레이트 갱신 시 `presence: generated` 행은 덮어쓰지도 지우지도 않는다.** 판정 SSOT 는 STRUCTURE.md 인벤토리이며 **경로가 아니라 행 단위**로 본다.
+2. **디렉터리 통째 동기화(`rsync --delete`·`cp -R` 등)를 갱신 수단으로 쓰지 않는다.** 혼합 디렉터리에서 그것은 결정 1 을 구조적으로 어긴다.
+3. **혼합 디렉터리를 인벤토리에 명시한다** — 현재 `docs/00-meta/` · `docs/90-decisions/`. 새로 생기면 그때 추가한다.
+4. **갱신 절차 자체(어느 경로를 어떤 순서로 옮기는가)는 본 amend 가 규정하지 않는다.** 규칙이 아니라 **새 경로**이며 후속 라운드 과제다. 그때까지 갱신은 결정 1~3 을 지키며 수동으로 한다.
+
+### 근거
+- 판정에 필요한 **데이터는 이미 있었다**(행별 `presence`). 없던 것은 그것을 쓰라는 문장이다 — 그래서 새 표를 만들지 않고 **기존 표를 판정 기준으로 승격**하는 쪽을 택했다.
+- 결정 2 를 규칙으로 올린 이유: 결정 1 만 두면 「generated 를 조심한다」는 의도로 읽히고, **실제 사고는 의도가 아니라 도구에서 났다.** 도구를 금지해야 막힌다.
+- 결정 4 에서 절차를 만들지 않은 것은 범위 판단이다 — 절차는 skill 한 개 분량이고, 그것을 규칙과 같은 라운드에 끼워 넣으면 검증 없이 들어간다.
+
+### 강도 (ADR-022)
+- 제약(강, [관측됨]): 결정 1·2.
+- enabling(약, [관측됨]): 결정 3.
+
+### Mutation Contract (ADR-047 D3 — 7 필드)
+1. Target — `docs/00-meta/STRUCTURE.md` `presence` 정의 절(판정 기준 승격) + 본 ADR 결정.
+2. Failure mode — 보일러플레이트 갱신이 프로젝트 생성물을 지우고 아무 검사도 울지 않는다(관측 1건, `STACK_SETUP_PLAN.md`).
+3. Predicted improvement — 다음 갱신에서 `generated` 행 손실 0건. 갱신을 수행한 세션이 어떤 행을 제외했는지 말할 수 있다.
+4. Preserved invariants — 인벤토리 표의 열 구성·`presence` 값 집합 불변 / baseline 문서의 갱신 경로 불변 / 자동 차단 없음.
+5. Falsifying evaluation — (a) 결정 1~3 뒤에도 `generated` 손실이 1건이라도 나면 **규칙으로는 안 되는 것**이므로 결정 4 를 앞당겨 절차·도구를 만든다 (b) 혼합 디렉터리가 3곳을 넘어가면 디렉터리 배치 자체가 잘못된 것이므로 `generated` 산출물의 위치를 재배치한다.
+6. Rollback path — 본 amend superseded → STRUCTURE.md 정의 절의 갱신 문단 제거, 인벤토리는 기술 문서로만 남는다.
+7. 예산 영향 — **없음.** 위임 단위의 작업량을 바꾸지 않는다(갱신은 메인 세션·사람이 수행한다).
+
+### 적용 surface
+- docs/00-meta/STRUCTURE.md — 결정 1·2·3 (`presence` 정의 절)

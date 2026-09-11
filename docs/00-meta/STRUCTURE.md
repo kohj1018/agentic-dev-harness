@@ -22,7 +22,10 @@
 - **reserved**: 번호 placeholder. 미생성. fork 사용자가 채우거나 dropped 처리.
 - **boilerplate-only**: 보일러플레이트 자체 검증·메타 자료. fork 후 read-only. 프로젝트 산출물 아님.
 
-**보일러플레이트를 갱신할 때 (기존 프로젝트에 새 버전을 덮어쓸 때)**: `presence: generated` 행은 **덮어쓰지도 지우지도 않는다.** 위 표가 그 판정의 SSOT다 — 경로가 아니라 **행 단위**로 본다. **디렉터리 통째 동기화(`rsync --delete`·`cp -R` 등)가 위험한 이유**가 여기 있다: `docs/00-meta/` 는 baseline 문서 6종 + `_templates/` 와 **generated 인 `STACK_SETUP_PLAN.md` 가 한 디렉터리에 섞여 있다.** dogfood Round 12 실측 — 그 디렉터리를 통째로 동기화해 `STACK_SETUP_PLAN.md` 가 삭제됐고, 다음 `/design-milestone` R0 가 `## Design Gate Adapter` 를 못 찾을 때까지 아무도 몰랐을 상태였다(발견 73). 같은 이유로 `docs/90-decisions/` 도 혼합이다 — `boilerplate/` 는 baseline, `project/` 는 generated.
+**보일러플레이트를 갱신할 때 (기존 프로젝트에 새 버전을 반영할 때)** — 정책 SSOT: [ADR-005#amend-2](../90-decisions/boilerplate/ADR-005-ssot.md).
+- `presence: generated` 행은 **덮어쓰지도 지우지도 않는다.** 판정은 **위 표의 행 단위**로 한다 — 경로·디렉터리 단위로 판단하면 틀린다.
+- **디렉터리 통째 동기화(`rsync --delete`·`cp -R`)를 갱신 수단으로 쓰지 않는다.**
+- **혼합 디렉터리**: `docs/00-meta/`(baseline 문서 + `_templates/` + generated `STACK_SETUP_PLAN.md`) · `docs/90-decisions/`(`boilerplate/` baseline + `project/` generated).
 
 | 산출물 | 위치 | 생성 주체 | 라이프사이클 | presence |
 |--------|------|-----------|--------------|----------|
