@@ -128,3 +128,39 @@ Medium — 원인 셋은 문서·사용자 보고로 관측됐으나, 예산 3�
 
 ## 참고
 - ADR-068(졸업 계약 v3 — D3 item 5·D4·D6), ADR-067(D3 병기 YES 배제 — superseded) (현재 SSOT: ADR-068), ADR-050#amend-1(사전판정 금지), ADR-054(single-origin), ADR-066(수용 finding — decision·종결은 본 ADR), ADR-060 D1(«결함을 감수한다는 선택» 원장 예외 — D5 B), ADR-038·ADR-044·ADR-060 D8(plan·discovery 리뷰 severity — 본 ADR 범위 밖), ADR-022, ADR-047 D3·D8.
+
+<a id="adr-070-amend-1"></a>
+## Amendment 1 (2026-09-11) — 수리 경계 밖 항목의 상태 · Reject 재등재 금지 · 빈 수렴 선택지
+
+### 배경
+dogfood Round 11 의 수리·수렴 루프(repair 3라운드 + stabilize 3회차)를 완주하며 나온 실측 3건이다. 세 건이 **한 뿌리**를 공유한다 — 「`/repair-milestone` 이 고칠 수 없는 항목」이 본 ADR 의 어휘에 없다.
+
+- [관측됨] **`Adopt` 인데 이번 라운드에 못 고치는 상태가 없다.** `M1-002`(승인 `TodoAdd` 시그니처 변경 필요)·`M1-004`(화면 셸 신설 = 승인 UI 재구성)·`M1-003` 세 건이 그 자리였다. D3 은 Adopt → 수정 → 재현 재실행 → `resolved` 만 규정하고, 「판정 없이 원본을 `open` 인 채 두지 않는다」고 한다. `needs-confirmation` 은 «판정된 open» 으로 명문화돼 있는데 이쪽은 대칭 자리가 없어, 라운드가 원본에 비규격 하위 줄을 만들어야 했다.
+- [관측됨] **Reject 된 finding 의 재등재를 막는 규칙이 `[Pattern-spread]`(§1.0 3-1)에만 있다.** stabilize 2·3회차의 preflight 5-2 raw-hex 5건·5-2b voice 10건이 1회차와 **똑같이** 재발화했다. 둘 다 이미 `rejected-fp / resolved` 다. 재등재를 막은 것은 메인 세션의 판단뿐이며 D2 어디에도 dedup 이 없다. falsifier (a)가 «발화하지 않음» 으로 끝난 것은 규칙 덕이 아니다.
+- [관측됨] **수렴 실패 브리프의 선택지 A·B 가 빈 선택지가 됐다.** 수렴이 일어난 원인이 곧 「남은 P0 가 전부 repair 의 수단 밖」이었으므로 A(한 라운드 더)의 기대 효과는 0 이고 B(차단 항목만 수리)의 대상도 없다. 브리프를 쓰면서 두 선택지를 «기대 효과 0» 이라고 적어야 했다.
+
+### 결정
+1. **`Adopt` 의 하위 상태로 `blocked` 를 둔다 (D3 확장).** 4-판정은 그대로 넷이고, `Adopt`·`Adopt-modified` 중 **본 skill 의 책임 경계 밖이라 이번 라운드에 고칠 수 없는** 항목은 원본에 하위 줄 `- 판정: Adopt — blocked: <경로>` 를 달고 `status: open` 을 유지한다. `<경로>` 는 그 항목을 닫을 수 있는 실제 경로다(`재승인` — `/design-milestone` 재진입 또는 다음 M / `봉인 계약 정정` — 다음 M 의 plan / `설계 결정` — 사용자 결정). **`needs-confirmation` 과 같은 «판정된 open» 이며 졸업 item 5 를 계속 막는다.** `deferred` 상태를 신설하지 않는다는 D5 B 의 규율은 그대로다 — 이것은 새 `status` 값이 아니라 `decision` 쪽 하위 줄이다.
+2. **6-S 등재 전 dedup 을 필수로 한다 (D2 확장).** 등재하려는 각 P0·P1 에 대해 **같은 사실이 본 마일스톤 원장에 이미 있으면 새 ID 를 만들지 않는다** — `status` 가 `open` 이든 `resolved` 든 같다. 동일성 판정 기준은 §1.0 3-1 과 같은 «`<라벨> <file:line> <증상>`» 이며, preflight 정규식 발화처럼 file:line 이 여럿인 항목은 **경로 집합**으로 본다. 이미 `resolved` 인 항목과 같으면 등재 대신 그 항목에 `- 재발화: <날짜> (<라운드>) — 판정 유지` 한 줄만 붙인다. **경로 집합이 달라졌으면 새 항목이다**(3-1 의 예외 규칙과 동형).
+3. **남은 P0 가 전부 `blocked` 면 브리프가 A·B 를 제시하지 않는다 (D5 확장).** 그때 선택지는 **C(병렬 Now 승인)** 와 **«재승인·계약 정정 경로 착수»** 둘이다. 결정 1 의 `- 판정: Adopt — blocked:` 줄이 그 분기의 기계적 입력이다 — 남은 `### P0` open 항목이 전부 그 줄을 가지면 A·B 를 내지 않는다. 하나라도 `blocked` 가 아니면 기존대로 셋을 낸다.
+
+### 근거
+- 결정 1 의 대안 「`Adopt` 대신 `Reject-context` 로 적는다」는 기각했다 — Reject-context 는 `resolved` 라서 졸업을 막지 못하고, 그러면 **고쳐야 할 P0 가 통과한다**. 실측 두 건이 데이터 손실(M1-002)과 DESIGN 계약 위반(M1-004)이었다.
+- 결정 2 를 D2(채택 전 검토)에 둔 이유: 재등재는 *등재 시점*에만 막을 수 있다. D3(종결)에 두면 이미 만들어진 ID 를 사후에 지워야 하고, 그것은 원장의 append-only 성격과 어긋난다.
+- 결정 3 의 대가: 브리프가 상황에 따라 선택지 수를 바꾸므로 사용자가 보는 형식이 일정하지 않다. 그래도 **기대 효과 0 인 선택지를 제시하는 쪽이 더 나쁘다** — 사용자가 A 를 고르면 한 라운드를 통째로 버린다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 2 — 등재 전 dedup 은 의무다.
+- enabling(약, [관측됨]): 결정 1·3.
+
+### Mutation delta (ADR-047 D3)
+- failure = 고칠 수 없는 P0 가 어휘에 없어 라운드마다 비규격 기록이 생기고, Reject 가 매 라운드 재등재되며, 빈 선택지가 사용자 라운드를 낭비한다(관측 3건).
+- predicted = Round 13 에서 (i) 수리 경계 밖 항목이 `- 판정: Adopt — blocked:` 로 일관 기록되고 (ii) preflight 재발화가 새 ID 를 만들지 않으며 (iii) 전부 blocked 인 수렴에서 A·B 가 제시되지 않는다.
+- falsifier = (a) `blocked` 가 «고치기 싫은 것» 의 대피소로 쓰여 한 마일스톤에 3건을 넘으면 결정 1 을 좁힌다(경로 열거를 닫힌 목록으로) (b) dedup 이 *다른* 결함을 같은 것으로 뭉개 새 P0 를 놓치면 결정 2 의 동일성 기준을 좁힌다 (c) A·B 를 숨겼는데 사용자가 「그래도 한 라운드 더」를 원하면 결정 3 을 되돌린다.
+- rollback = 본 amend superseded → `blocked` 하위 줄·dedup 의무·선택지 분기 제거.
+
+### 적용 surface
+- .claude/skills/repair-milestone/SKILL.md         — 결정 1 (4-판정 서술 · 수행 5 종결 규칙)
+- .claude/skills/stabilize-milestone/SKILL.md      — 결정 2 (6-S 등재 전 dedup) · 결정 3 (단계 8 브리프 분기)
+- docs/40-validation/QA_FINDINGS.md                — 결정 1·2 스키마 주석
+- docs/40-validation/IMPROVEMENT_GUIDE.md          — 결정 1·2 스키마 주석

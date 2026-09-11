@@ -12,6 +12,8 @@
 - `decision` 값: `confirmed | rejected-fp | rejected-context | needs-confirmation | unsubstantiated`(ADR-070 D2). P0 항목은 하위 줄 `- 재현: <명령/단계> → <관측 출력>`이 필수이며, 미시도면 `- 재현: 미시도 — <사유>` + evidence `[가설]`(ADR-070 D1).
 - evidence label은 [boilerplate/ADR-022](../90-decisions/boilerplate/ADR-022-ratchet-principle.md)의 `[관측됨]` / `[외부실증]` / `[가설]` (+ 합성 표기) 중 1개.
 - **선택 마커 `- 수렴-보류:`**: 수렴 실패 브리프에서 사용자가 선택지 B를 택한 항목에 붙는 하위 줄 — `- 수렴-보류: 회수 <시점> | 조건: <…>`. `status`는 `open`으로 유지한다(졸업 item 5 계수 불변). `/repair-milestone`이 그 라운드 수리 대상에서 제외하는 유일한 신호이며 문자열 정확 일치로 grep된다(ADR-070 D5).
+- **선택 하위 줄 `- 판정: Adopt — blocked: <경로>`** (ADR-070#amend-1 결정 1): `/repair-milestone` 이 진짜 결함으로 판정했으나 **책임 경계 밖이라 그 라운드에 못 고치는** 항목에 붙인다. `status: open` 을 유지하며 `needs-confirmation` 과 같은 «판정된 open» 이다 — 졸업 item 5 를 계속 막는다. `<경로>` 는 그것을 닫을 수 있는 실제 경로(`재승인` / `봉인 계약 정정` / `설계 결정`).
+- **선택 하위 줄 `- 재발화: <날짜> (stabilize <N>회차) — 판정 유지`** (ADR-070#amend-1 결정 2): 같은 사실이 preflight 등에서 다시 발화했을 때 **새 ID 를 만드는 대신** 기존 항목에 붙인다.
 - **선택 태그 `(수용)`**: `/accept-milestone`이 사용자 수용 라운드에서 등재한 항목에 붙인다. **위치는 굵은 ID 바로 뒤·첫 `|` 앞으로 고정한다** — `- **M1-003** (수용) | P0 | ...`. 이 태그가 `/repair-acceptance`의 유일한 회수 신호이며 문자열 `(수용)` 정확 일치로 grep된다(ADR-066 D5). `/repair-milestone`은 이 태그가 붙은 항목을 4-판정하지 않는다.
 
 예시:
