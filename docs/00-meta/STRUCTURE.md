@@ -136,7 +136,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | Workitem Type 분류 (feature/technical-enabler/bugfix/refactor/migration/research-spike) | [ADR-039](../90-decisions/boilerplate/ADR-039-workitem-type.md) (정책 SSOT). → ADR-039 `## Surfaces` 참조 (fan-out SSOT). |
 | 출력 스타일 (signal-first 대화/반환 계약) | [ADR-046](../90-decisions/boilerplate/ADR-046-signal-first-output.md) (정책 SSOT). → ADR-046 `## Surfaces` 참조 (fan-out SSOT). |
 | Code-as-Agent-Harness 패러다임 + Harness Mutation Contract | [ADR-047](../90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) (정책 SSOT). → ADR-047 `## Surfaces` 참조 (fan-out SSOT). |
-| 메인 세션 오케스트레이션(foreman·fan-out)·wave 제거 | [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) (정책 SSOT). → ADR-051 `## Surfaces` 참조 (fan-out SSOT). |
+| 메인 세션 오케스트레이션(foreman·fan-out)·wave 제거 | [ADR-075](../90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md) (정책 SSOT). → ADR-075 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack provisioning(install) + E2E readiness | [ADR-052](../90-decisions/boilerplate/ADR-052-stack-provisioning-and-e2e-readiness.md) (정책 SSOT). → ADR-052 `## Surfaces` 참조 (fan-out SSOT). |
 | Stack 결정 taxonomy (T1 기초 / T2 마이그레이션 / T3 라이브러리 추가) + 입력 적응형 bootstrap-stack 흐름 | [ADR-055](../90-decisions/boilerplate/ADR-055-input-adaptive-stack-flow.md) (정책 SSOT). → ADR-055 `## Surfaces` 참조 (fan-out SSOT). |
 | 마일스톤 경험 계약 (design-milestone 라운드·입구 계약·매니페스트+스냅샷 게이트) | [ADR-072](../90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md) (정책 SSOT). → ADR-072 `## Surfaces` 참조 (fan-out SSOT). Voice 규칙서는 [ADR-073](../90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) D6. |

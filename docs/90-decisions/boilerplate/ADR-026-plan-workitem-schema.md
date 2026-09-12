@@ -67,7 +67,7 @@ plan-workitem 마지막 출력에 `Milestone | Feature | Task | AC 수 | 의존�
 - ADR-009 (TDD default)
 - ADR-007 (workitem lifecycle)
 - ADR-022 (Ratchet Principle)
-- ADR-051 (`## 9` 5필드 스키마 제거 — wave 완전 제거 정합)
+- ADR-051 (`## 9` 5필드 스키마 제거 — wave 완전 제거 정합) (현재 SSOT: ADR-075)
 
 <a id="adr-026-amend-1"></a>
 ## Amendment 1 (2026-05-15) — planner self-check + architect 신호 + sizing SSOT

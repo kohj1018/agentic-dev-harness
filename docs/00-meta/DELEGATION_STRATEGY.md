@@ -11,7 +11,7 @@
 - 관련 workitem과 상위 문서를 확인한다
 - 적절한 서브에이전트에 작업을 위임한다
 - 돌아온 결과를 통합하고 다음 결정을 내린다
-- 위임한 서브에이전트가 구조화 최종 반환 없이 멈추면 1회 재개한다. 그래도 미반환이면: **파일 생성 에이전트(builder)** 는 그 slice가 건드린 파일을 직접 확인해 회수; **report-only 감사자(validator/qa/reviewer — 산출 파일 없음)** 는 재실행 → 안 되면 다른 감사자에 재위임하거나 메인이 그 축을 직접 감사 → 그래도 불가하면 `감사 미완(unavailable): <축>`을 명시 기록한다("결과 없음"을 조용히 통과 금지 — ADR-051#amend-4)
+- 위임한 서브에이전트가 구조화 최종 반환 없이 멈추면 1회 재개하되, **「이미 쓴 파일 목록」은 하청에게 받지 않고 호출자가 워킹트리를 직접 읽어 만들어 실어 보낸다**(상한 중단은 마무리 턴 없이 잘려 하청이 목록을 낼 기회가 없다 — ADR-074 D10). 그래도 미반환이면: **파일 생성 에이전트(builder)** 는 그 slice가 건드린 파일을 직접 확인해 회수; **report-only 감사자(validator/qa/reviewer — 산출 파일 없음)** 는 재실행 → 안 되면 다른 감사자에 재위임하거나 메인이 그 축을 직접 감사 → 그래도 불가하면 `감사 미완(unavailable): <축>`을 명시 기록한다("결과 없음"을 조용히 통과 금지 — ADR-075 D13)
 - 긴 로그, 장문의 탐색 결과, 세부 구현 과정을 메인 컨텍스트에 오래 보존하지 않는다
 
 ## 서브에이전트 우선 원칙
@@ -161,10 +161,10 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 
 shared 도구 설정 파일(`.claude/settings.json` · `.codex/config.toml`)에는 모델·추론 강도 키를 두지 않는다 — 사용자 계층과 계정·CLI 기본값이 승계한다 (ADR-074 D1).
 별칭(`sonnet`, `opus`, `haiku`)은 역할별 고정이 필요한 `.claude/agents/<name>.md` frontmatter `model:`에서만 쓴다. 전체 버전 ID 금지는 불변 (ADR-074 D2).
-추론 강도 `effort:`도 같은 자리에서만 허용되는 축이나 **현재 어느 agent에도 지정하지 않는다** — builder의 `medium`은 완료율 이득 없이 소요·토큰이 약 2배로 늘어 제거했다 (ADR-074 D5). 메인 세션은 사용자 계층에서 `high` 이상을 권장하며, `CLAUDE_CODE_EFFORT_LEVEL` 환경변수를 전역에 두면 agent `effort`가 무력화되므로 두지 않는다.
+추론 강도 `effort:`도 같은 자리에서만 허용되는 축이나 **현재 어느 agent에도 지정하지 않는다** — builder의 `medium`은 완료율 이득 없이 소요·토큰이 약 2배로 늘어 제거했다 (ADR-074 D5). Round 13 Flutter 재측정은 반대 방향이라 결론 보류다(ADR-074 D5). 메인 세션은 사용자 계층에서 `high` 이상을 권장하며, `CLAUDE_CODE_EFFORT_LEVEL` 환경변수를 전역에 두면 agent `effort`가 무력화되므로 두지 않는다.
 턴 예산 `maxTurns:`는 «쓰기 도구 보유» 축으로 잡는다 — `max(8, 회수 문서 수) + 3 × 산출물 수`, builder 60. 값의 SSOT는 각 agent frontmatter이고 표는 ADR-074 D8에 있다.
 **에이전트 정의는 세션 시작 시점에 고정된다.** `.claude/agents/*.md`를 고친 뒤 그 효과의 관측·검증은 새 세션에서 한다 — 같은 세션의 dispatch는 편집 전 정의로 돈다 (ADR-074 D12).
 특정 버전·강도를 강제해야 하면 ADR로 남기고 그 자리에서만 고정한다.
 정책 근거는 [ADR-074-model-effort-and-turn-budget-policy.md](../90-decisions/boilerplate/ADR-074-model-effort-and-turn-budget-policy.md)를 참조한다.
 
-메인 세션 오케스트레이션(foreman·fan-out·wave 제거) 정책은 [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) 참조.
+메인 세션 오케스트레이션(foreman·fan-out·wave 제거) 정책은 [ADR-075](../90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md) 참조.

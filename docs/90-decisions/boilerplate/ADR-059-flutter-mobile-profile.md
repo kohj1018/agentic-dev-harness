@@ -36,7 +36,7 @@ accepted
 
 ### D2. 통합 검증 명령
 - 실행 껍데기는 **npm**으로 고정한다. 근거 둘: ① design gate가 exit 0/1/2를 구분해야 하는데 task·make는 이를 각각 201·2로 뭉갠다(Windows·macOS 동일 관측) ② design gate 때문에 Node가 이미 필수 의존이므로, 여기에 다른 러너를 하나 더 얹는 것보다 하나로 두는 편이 단순하다(ADR-006). `validate:design`만 npm으로 하고 나머지를 다른 러너로 두는 혼합안도 가능하나, 도구 두 개를 관리하는 비용을 지불할 이득이 없다.
-- **이 npm은 `## Dependency Tools` 표의 대상이 아니다.** 그 표(ADR-051 결정 3)는 *"builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM"* 을 scope별 1행으로 적는 자리이고, **검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록한다**(design gate → `## Design Gate Adapter`, 통합 명령 → `## 통합 명령 사용법`). 그래서 Flutter 루트는 `pubspec.lock`·`package-lock.json` 두 신호가 함께 있어도 표에는 **`pub` 1행**이고, `package-lock.json`은 ADR-051의 *"동일 scope 신호 충돌"* 로 취급하지 않는다.
+- **이 npm은 `## Dependency Tools` 표의 대상이 아니다.** 그 표(ADR-051 결정 3, 현재 SSOT: ADR-075 D14)는 *"builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM"* 을 scope별 1행으로 적는 자리이고, **검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록한다**(design gate → `## Design Gate Adapter`, 통합 명령 → `## 통합 명령 사용법`). 그래서 Flutter 루트는 `pubspec.lock`·`package-lock.json` 두 신호가 함께 있어도 표에는 **`pub` 1행**이고, `package-lock.json`은 ADR-051(현재 SSOT: ADR-075)의 *"동일 scope 신호 충돌"* 로 취급하지 않는다.
   - 이것은 Flutter 예외가 아니라 **원래부터 적용돼 온 경계를 명문화한 것**이다 — 웹 프로젝트의 `@playwright/test`도 이 표에 별도 행으로 적지 않는다. Flutter가 두 PM이 한 scope에 공존하는 첫 스택이라 처음 문제가 됐을 뿐이다.
   - **경계가 성립하는 근거**: Flutter 루트에서 `pub`은 builder가 task마다 반복 실행하는 도구이고, npm은 stack-guard 6-3이 스택 확정 시 1회 설치하는 검증 의존이다. 성격이 달라 같은 칸에 들어갈 수 없다.
   - **B안(scope당 복수 도구 허용)을 지금 택하지 않은 이유**: 값을 둘 허용하는 것만으로는 *"Dart 패키지에 npm을 골라도 표를 위반하지 않는"* 새 모호성이 생긴다. 정확해지려면 "도구 → 그 도구가 소유하는 패키지 집합"까지 스키마에 넣어야 하는데, 그것을 요구하는 실사용 관측이 아직 없다(전환 조건은 재검토 트리거 9).

@@ -64,7 +64,7 @@ MILESTONE `## 5. 완료 기준`은 다음 5개 필수 + 1개 선택이다. **항
   - reviewer 팬아웃은 졸업 predicate 입력이 아니므로(report-only) 그 축의 감사 미완은 **기록·echo만 하고 판정을 바꾸지 않는다.**
   - **`YES (… 미검증: <축>)` 같은 병기 통과를 본 ADR은 도입하지 않는다.** `YES`는 D1의 전 항목 충족을 뜻하므로 미검증 축을 병기한 `YES`는 정의와 모순된다. host 제약 e2e target(예: Windows 호스트의 iOS)의 처리는 **본 ADR이 바꾸지 않으며 [ADR-052](ADR-052-stack-provisioning-and-e2e-readiness.md)#amend-1과 [ADR-059](ADR-059-flutter-mobile-profile.md) D4가 그대로 소유한다** — 같은 커밋의 registry PASS 증거가 있으면 그 target을 `PASS`로 보고, 없으면 `BLOCKED_ENV`로 졸업을 차단한다. (그 교착을 완화하는 별도 방향이 dogfood에 기록돼 있으나 아직 채택되지 않았다 — 본 ADR은 그 결정을 대신 내리지 않는다.)
   - 따라서 D3의 `BLOCKED`가 덮는 것은 둘뿐이다: **(a) e2e blocked-on-env**(ADR-052#amend-1 판정 그대로), **(b) 감사 미완**. 계약상 애초에 대상이 아닌 것은 `NOT_APPLICABLE`이다.
-  - **validate 층도 같은 규칙을 받는다** — `/validate-workitem`의 감사 축이 회수 규율을 전부 소진해도 미완이면 그 report는 `Pass`를 낼 수 없다(위 D1 item 4 (c)의 입력). 이것은 새 게이트가 아니라 본 D3의 평가 규칙을 task 층에 적용한 것이며, 기록 규율의 근거는 ADR-051#amend-4 결정 2다.
+  - **validate 층도 같은 규칙을 받는다** — `/validate-workitem`의 감사 축이 회수 규율을 전부 소진해도 미완이면 그 report는 `Pass`를 낼 수 없다(위 D1 item 4 (c)의 입력). 이것은 새 게이트가 아니라 본 D3의 평가 규칙을 task 층에 적용한 것이며, 기록 규율의 근거는 ADR-051#amend-4 결정 2다(현재 SSOT: ADR-075 D13).
 - **우선순위 (둘 이상 성립할 때)**: `BLOCKED` > `NO` > `PENDING_ACCEPTANCE` > `YES`. 「못 재봤다」가 어떤 긍정 판정보다 강하고, 「결함이 있다」가 「확인만 남았다」보다 앞선다.
 - **`PENDING_ACCEPTANCE`가 별도 값인 이유**: 이 상태를 `NO`로 뭉뚱그리면 사용자가 `/repair-milestone`을 호출하는데 고칠 코드가 없어 헛돈다. 판정값마다 다음 액션이 다르다는 것이 이 enum의 존재 이유이며, task 층의 `/validate-workitem` 판정 3종(ADR-065 D6)과 같은 원리다.
 - **`ROADMAP.md`의 Done 전환은 `YES`일 때만이다.** `PENDING_ACCEPTANCE`는 Now를 유지한다.

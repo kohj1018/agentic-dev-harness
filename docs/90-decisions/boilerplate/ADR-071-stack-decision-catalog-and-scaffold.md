@@ -12,7 +12,7 @@ accepted
 - [관측됨] `/bootstrap-stack` 입력 서식(`stack-brief-template.md`)은 7칸이고, R0는 프레임워크 토큰이 1개라도 있으면 BASE로 보내 나머지를 «추천을 원하면 스택 없이 재실행» 한 줄로 끝낸다. UI 킷·스타일링·폼·상태관리·계측·에러 리포팅·호스팅 등은 물어볼 자리가 없어 마일스톤 중간에 즉흥 결정되고, 그때마다 ARCH·ADR-101을 다시 고친다(사용자 fork 보고).
 - [관측됨] ADR-060 D9 표는 ARCH `## 7-1`~`## 7-5` 소항목(라우팅·인증·SSR 등 정책 수준)에만 authority를 배정한다. 패키지·provider 수준(어떤 UI 킷, 어떤 에러 리포팅 provider)과 슬롯이 없는 항목은 배정 대상이 아니다.
 - [관측됨] 정상 lifecycle에서 `/stack-guard` 실행 시점의 소스 파일 수는 0이다(ADR-063 배경). probe는 `SKIPPED (등록된 소스 루트 부재)`, e2e는 `EMPTY`, design gate는 자가 검사만 통과한다. 첫 마일스톤의 첫 task가 사실상 «초기 세팅»이 되어 계획 층이 인프라 결정을 떠안는다(SIMULATION_RUN probe 실측 1순위 미실측 항목).
-- [관측됨] `output-checklist.md`는 STACK_SETUP_PLAN을 «선택 생성 문서»로 두고 «자동 작성 X» 문구가 남아 있으나, 실제로는 stack-guard·plan-workitem·implement가 그 파일을 SSOT로 읽는다(ADR-051#amend-4 Dependency Tools).
+- [관측됨] `output-checklist.md`는 STACK_SETUP_PLAN을 «선택 생성 문서»로 두고 «자동 작성 X» 문구가 남아 있으나, 실제로는 stack-guard·plan-workitem·implement가 그 파일을 SSOT로 읽는다(ADR-051#amend-4 Dependency Tools) (현재 SSOT: ADR-075 D14).
 
 ## 결정
 
@@ -91,7 +91,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 1. Target — `.claude/skills/bootstrap-stack/SKILL.md`(R0 3분기, R-C 카탈로그 라운드, BASE 4 registry, 마지막 출력) / `stack-catalog.md` 신설 / `stack-brief-template.md` / `output-checklist.md` / `.claude/skills/stack-guard/SKILL.md`(수행 0 스캐폴드, 6-2-b baseline 설치, 5-a 문구, 재실행 계약 행) / `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`(`## Stack Decision Registry`·`## Scaffold`) / `.claude/skills/plan-workitem/SKILL.md`(설치 line item에서 baseline 설치분 제외) / `docs/00-meta/{PROJECT_START_CHECKLIST,GUARDRAILS_STRATEGY,STRUCTURE,DELEGATION_STRATEGY}.md`.
 2. Failure mode — 카탈로그에 없는 항목의 즉흥 결정 / 프레임워크 한 토큰이 라운드를 건너뜀 / 소스 0개 위에서 검증 장치가 SKIPPED로 굳음 / 첫 task가 인프라 세팅이 됨 (전부 관측됨).
 3. Predicted improvement — registry 빈 행 0 / probe smoke가 M1 전에 `PASS`·`PARTIAL` 실측 / e2e boot smoke `PASS` / 마일스톤 중 ARCH §7·ADR-101 재편집 횟수 감소.
-4. Preserved invariants — `disable-model-invocation` / bootstrap-stack에 Bash 없음(스캐폴드는 stack-guard) / probe가 소스 루트를 만들지 않음(ADR-063 D1) / 기존 도구 미덮어씀·재실행 계약(ADR-063 D3) / T1/T2/T3 taxonomy(ADR-055) / Dependency Tools 표 의미(ADR-051#amend-4) / Needs Install graceful fallback.
+4. Preserved invariants — `disable-model-invocation` / bootstrap-stack에 Bash 없음(스캐폴드는 stack-guard) / probe가 소스 루트를 만들지 않음(ADR-063 D1) / 기존 도구 미덮어씀·재실행 계약(ADR-063 D3) / T1/T2/T3 taxonomy(ADR-055) / Dependency Tools 표 의미(ADR-051#amend-4) (현재 SSOT: ADR-075 D14) / Needs Install graceful fallback.
 5. Falsifying evaluation — Round 11(web)·12(Flutter)에서 (a) registry에 빈 행이 남은 채 bootstrap-stack이 성공 종료하면 D2 실패 (b) 수행 0 복사 직전·직후의 보호 경로 «경로+내용 해시» 목록이 달라지면 D5 실패(내용 대조이므로 이미 미커밋 상태인 파일의 덮어쓰기도 잡힌다. 수행 3의 `STACK_SETUP_PLAN` 갱신은 복사 뒤라 대상이 아니다) (c) 스캐폴드 뒤 probe smoke가 `SKIPPED (등록된 소스 루트 부재)`면 D5 배선 실패 (d) HYBRID 입력(프론트만 지정)에서 백엔드 결정 라운드가 열리지 않으면 D4 실패.
 6. Rollback path — 본 ADR superseded → 수행 0·6-2-b·R-C·registry 제거, R0 2분기 복원, ADR-052/055/063 참조 갱신 줄 삭제. 생성된 프로젝트 스캐폴드는 프로젝트 소유라 되돌리지 않는다.
 
@@ -110,7 +110,7 @@ Medium — 누락·즉흥 결정은 관측됐고, 카탈로그 행의 완결성�
 - docs/00-meta/DELEGATION_STRATEGY.md                     — Mid-project T3 행 갱신
 
 ## 참고
-- ADR-052(install-ownership 3분할 → 4분할), ADR-055(T1/T2/T3·입력 적응형), ADR-063(probe·재실행 계약), ADR-060 D9(authority 배정 기준), ADR-051#amend-4(Dependency Tools), ADR-040#amend-1, ADR-047 D3, ADR-022.
+- ADR-052(install-ownership 3분할 → 4분할), ADR-055(T1/T2/T3·입력 적응형), ADR-063(probe·재실행 계약), ADR-060 D9(authority 배정 기준), ADR-051#amend-4(Dependency Tools) (현재 SSOT: ADR-075 D14), ADR-040#amend-1, ADR-047 D3, ADR-022.
 
 <a id="adr-071-amend-1"></a>
 ## Amendment 1 (2026-09-11) — harness 경로 무결성을 실행 시작·종료로 확장 + Storybook 애드온 기본값 정정

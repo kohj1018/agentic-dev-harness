@@ -16,13 +16,13 @@ accepted
 - 상세는 아래 `## 결정 — A/B` + Amendment 1·2·3·4.
 
 ## 배경
-- [관측됨] 사용자 실사용: plan-workitem이 feature 단위 입력으로 refocus(ADR-051 D4)된 뒤, feature마다 계획 세션(문서 로드·협상·cross-check·/clear)을 반복해 시간 비효율이 크다. 또 per-feature 분해는 구조적으로 그 feature만 보므로 cross-feature seam을 볼 수 없다.
+- [관측됨] 사용자 실사용: plan-workitem이 feature 단위 입력으로 refocus(ADR-051 D4) (현재 SSOT: ADR-075 D4)된 뒤, feature마다 계획 세션(문서 로드·협상·cross-check·/clear)을 반복해 시간 비효율이 크다. 또 per-feature 분해는 구조적으로 그 feature만 보므로 cross-feature seam을 볼 수 없다.
 - [관측됨] M1/F-001은 bootstrap-project가 seed하고 M2+는 plan-milestone이 만들어 마일스톤 생성 경로가 2원화 — 첫 마일스톤만 라운드 협상(R0~R5) 없이 태어난다.
 - [사실] task `## 3`은 실제 파일의 현재 상태 기반 before/after 가이드(ADR-026#amend-2)라, 뒤 feature task를 미리 full 분해하면 앞 feature 구현으로 스냅샷이 무효화된다 — 낡은 before/after는 "자신 있게 틀린" 지시가 되어 기계 실행 builder에 위험하다. 병목은 AI 능력이 아니라 정보의 시점.
 - [관측됨] lifecycle 어디에도 cross-task invariant/seam 계약(상태 전이·2차-write 경계 재검증·멱등·task 간 입출력 계약)을 열거·대조하는 단계가 없다 — plan-workitem self-check는 비목표/ARCH 7-x/DESIGN 충돌 점검뿐, validate-plan Plan Quality 10차원에도 seam 차원 부재, ARCHITECTURE placeholder에 상태 모델 자리 자체가 없다("상태 모델" grep 0건). FAC↔AC(ADR-037)는 *커버리지*만 강제하고 invariant *도출*은 강제하지 않는다.
 
 ## 결정 — A. 플래닝 흐름 (1~7)
-1. **마일스톤 생성 단일화**: 모든 마일스톤·feature 문서(M1 포함)는 `/plan-milestone`이 생성한다. `/bootstrap-project`는 charter/ARCHITECTURE/ADR-100까지만 담당하고 M1/F-001을 seed하지 않는다(ADR-051 D4의 "M2+" 한정과 ADR-007 lifecycle 표 2행의 M1/F-001 산출을 부분 supersede — 각 ADR에 표기). plan-milestone의 additive 원칙(기존 마일스톤 비파괴)은 불변 — "첫 호출 = M1 생성"이 정상 경로가 될 뿐.
+1. **마일스톤 생성 단일화**: 모든 마일스톤·feature 문서(M1 포함)는 `/plan-milestone`이 생성한다. `/bootstrap-project`는 charter/ARCHITECTURE/ADR-100까지만 담당하고 M1/F-001을 seed하지 않는다(ADR-051 D4(현재 SSOT: ADR-075 D4)의 "M2+" 한정과 ADR-007 lifecycle 표 2행의 M1/F-001 산출을 부분 supersede — 각 ADR에 표기). plan-milestone의 additive 원칙(기존 마일스톤 비파괴)은 불변 — "첫 호출 = M1 생성"이 정상 경로가 될 뿐.
 2. **`/plan-workitem M<N>` 배치 분해 모드 (2-tier)**: 마일스톤 전체 feature를 한 세션에서 task로 분해한다.
    - *안정 tier(전 feature 완성)*: task 범위/비범위, `## 6` AC, `## 9` 의존성, feature `## 7-1` FAC↔AC 매핑, seam self-check(결정 9 — 마일스톤 전체 대상 1회). 코드가 변해도 낡지 않는 정보.
    - *가이드 tier*: `## 3. 구현 항목`의 현재상태-기반 단계 가이드는 **첫 구현 대상 feature만 full JIT** 작성. 나머지 feature의 task는 의도 수준 초안 + `## 3` 본문 첫 줄에 **HTML 주석 마커** `<!-- ## 3 상태: draft — 구현 직전 /plan-workitem F-NNN --refresh 필요 -->` (heading이 아닌 주석 — 문서 스키마 보존, grep 문자열 `## 3 상태: draft`는 동일).
@@ -51,7 +51,7 @@ accepted
 - 2-pass planning 전면 도입 — ADR-026 비결정 유지(seam self-check는 신호 발화 시의 좁은 축 단발이지 전체 재계획이 아님).
 
 ## Mutation Contract (ADR-047 D3)
-1. Target — bootstrap-project(M1 seed 제거)/plan-milestone(모든 마일스톤 + R2 seam 1줄)/plan-workitem(배치·refresh·echo·seam self-check)/implement(하드스탑)/finalize(체크포인트)/stabilize(--feature)/FEATURE·TASK 템플릿(§7-2·draft 마커·INV 태그)/ARCH §4-1/reviewer·validate-plan 11차원/validator·validate-workitem seam 축/repair-plan + ADR-007 표·ADR-026#amend-3·ADR-051#amend-3 + WORKFLOW/DELEGATION/CHECKLIST/STRUCTURE/README.
+1. Target — bootstrap-project(M1 seed 제거)/plan-milestone(모든 마일스톤 + R2 seam 1줄)/plan-workitem(배치·refresh·echo·seam self-check)/implement(하드스탑)/finalize(체크포인트)/stabilize(--feature)/FEATURE·TASK 템플릿(§7-2·draft 마커·INV 태그)/ARCH §4-1/reviewer·validate-plan 11차원/validator·validate-workitem seam 축/repair-plan + ADR-007 표·ADR-026#amend-3·ADR-051#amend-3(현재 SSOT: ADR-075 D4) + WORKFLOW/DELEGATION/CHECKLIST/STRUCTURE/README.
 2. Failure mode — feature마다 계획 세션 반복(시간 비효율, 관측됨) + cross-feature seam 사각 + 마일스톤 생성 2원화 + invariant 도출 단계 부재 + (배치 도입 시) stale 가이드 위험.
 3. Predicted improvement — 계획 고정 오버헤드 1회화 + seam 전체 조망(마일스톤 1회 표) + M1도 라운드 협상으로 생성 + draft/refresh/하드스탑 3중으로 stale 사고 0건화.
 4. Preserved invariants — ADR-026#amend-2의 "## 3은 실제 현재 상태 근거" 원칙(보장 시점을 구현 직전으로 이동) / plan-workitem·plan-milestone disable-model-invocation / additive(기존 마일스톤 비파괴) / 1 task = 1 RGR sizing / 자동 차단 X(결정 4 하드스탑 제외) / builder EXECUTE 전용(INV는 plan이 authoring) / 12 main section 구조(§7-2는 §7의 subsection — §7-1 선례).
@@ -81,7 +81,7 @@ accepted
 - docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md
 - docs/90-decisions/boilerplate/ADR-026-plan-workitem-schema.md
 - docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md
-- docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md
+- docs/90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md
 - .claude/skills/repair-workitem/SKILL.md
 - .claude/skills/repair-milestone/SKILL.md
 - .claude/skills/review-doc/SKILL.md
@@ -95,7 +95,7 @@ accepted
 - docs/00-meta/STRUCTURE.md
 
 ## 참고
-- ADR-051(D4 부분 supersede — #amend-3 표기), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점) (현재 SSOT: ADR-072), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-068(graduation은 milestone 전용), ADR-006/ADR-022.
+- ADR-051(D4 부분 supersede — #amend-3 표기, 현재 SSOT: ADR-075), ADR-026(#amend-2 원칙 유지 + #amend-3 draft 예외), ADR-007(표 갱신 + 텍스트 제안 규약 불변), ADR-050(model-invocable 범위 불변), ADR-056(R5·--prototype·§3-V와의 접점) (현재 SSOT: ADR-072), ADR-037(FAC 커버리지 — seam은 invariant 도출로 보완), ADR-038(Plan Quality 차원 additive 확장), ADR-053(architect sub-call 패턴), ADR-068(graduation은 milestone 전용), ADR-006/ADR-022.
 
 <a id="adr-057-amend-1"></a>
 ## Amendment 1 (2026-07-26) — 마일스톤 로드맵 SSOT (얇은 forward 지도)
@@ -172,7 +172,7 @@ D5상 `## 현재 유효 결정`의 plan-workitem 진입 줄도 이 M 단위 전�
 - docs/00-meta/PROJECT_START_CHECKLIST.md (F-NNN 단일 제거 — §4.12c)
 - docs/00-meta/STRUCTURE.md (프로토타입 producer의 `--prototype` 재진입 표기 제거 — §4.12c)
 - docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md (lifecycle 표 정정 — §4.12c f)
-- docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md (amend-3 단일 feature 문구 정정 — §4.12c j)
+- docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md (amend-3 단일 feature 문구 정정 — §4.12c j) (현재 SSOT: ADR-075)
 - .claude/skills/repair-milestone/SKILL.md (다음 액션 `M<N>` 전체 + per-task 결함은 status를 직접 쓰지 않고 repair-workitem 위임 — §4.12c h·§4.12d h) (부분 supersede: ADR-068 D1)
 - .claude/skills/repair-plan/SKILL.md (첫 구현 전 ready 문서 제자리 수정·self-check, 미완 시 review 파일 보존, 구현 시작 후 변경 거부 — 결정 5d, §4.12d)
 - .claude/skills/repair-workitem/SKILL.md (검증된 결함 시 `done → in-progress` 재개방 — §4.12d h) (부분 supersede: ADR-068 D1)
@@ -186,7 +186,7 @@ D5상 `## 현재 유효 결정`의 plan-workitem 진입 줄도 이 M 단위 전�
 
 ### 강도 (ADR-022)
 - enabling(약)이나 base 메커니즘 supersede라 실질 변경. 자동 차단은 늘리지 않는다(preflight는 안내·중단이지 자동 재계획 아님).
-- **D6 override (ADR-045)**: 본 amend는 surface 15+개(2-tier/draft/refresh 폐기 + `draft→ready→in-progress→done` 잠금 상태기계·`[Plan-dep]`가 plan-milestone·plan-workitem·implement·finalize·stabilize·repair-milestone·repair-plan·repair-workitem·validate-plan·validate-workitem·validator·reviewer·WORKFLOW·DELEGATION·CHECKLIST·MILESTONE/FEATURE/TASK_TEMPLATE·ADR-007·ADR-037·ADR-051 전반; `## 3` SSOT는 ADR-026#amend-4, unmapped FAC 실행 후 라우팅은 ADR-037#amend-3)라 D6상 통합 재발행 대상이나, 이번 라운드는 minimal-churn으로 amend 처리한다 — 근거: 이번 개선 라운드 결정, 다음 변경 시 ADR-057 통합 재발행. (ADR-057은 grandfather 아님 — 2026-07-16 생성.)
+- **D6 override (ADR-045)**: 본 amend는 surface 15+개(2-tier/draft/refresh 폐기 + `draft→ready→in-progress→done` 잠금 상태기계·`[Plan-dep]`가 plan-milestone·plan-workitem·implement·finalize·stabilize·repair-milestone·repair-plan·repair-workitem·validate-plan·validate-workitem·validator·reviewer·WORKFLOW·DELEGATION·CHECKLIST·MILESTONE/FEATURE/TASK_TEMPLATE·ADR-007·ADR-037·ADR-051(현재 SSOT: ADR-075) 전반; `## 3` SSOT는 ADR-026#amend-4, unmapped FAC 실행 후 라우팅은 ADR-037#amend-3)라 D6상 통합 재발행 대상이나, 이번 라운드는 minimal-churn으로 amend 처리한다 — 근거: 이번 개선 라운드 결정, 다음 변경 시 ADR-057 통합 재발행. (ADR-057은 grandfather 아님 — 2026-07-16 생성.)
 - **Mutation delta (ADR-047 D3)**: failure=사용자가 여전히 `F-NNN`/`--refresh` 재호출 강제 · `## 3 상태: draft` task가 stale인 채 구현됨 · preflight 전 task를 `in-progress`로 기록 · `blocked`/`done` task가 있는데 계획 수정 허용 · repair-milestone이 task status를 직접 변경 · 구현 뒤 finding을 generic plan-workitem이 현재 M 새 task로 생성 · 에이전트가 근본 충돌을 사용자 보고 없이 임의 재계획 / falsifier=runtime surface에 `draft`/`F-NNN`/`--refresh`/`Needs Plan Refresh`/generic 후속 plan-workitem 잔존, 정상 경로에 `ready→draft` 자동 역전이 존재, 또는 plan-workitem/repair-plan 잠금이 `draft|ready` 밖 상태를 놓침 / rollback=2-tier/draft/refresh·draft 하드스탑 복원.
 
 <a id="adr-057-amend-4"></a>

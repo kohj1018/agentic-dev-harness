@@ -3,7 +3,7 @@
 > scope: boilerplate
 
 ## Status
-accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman 오케스트레이션으로 supersede. de-fork 나머지·D2 model-invocable·D3는 유효 유지.)
+accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman 오케스트레이션으로 supersede. de-fork 나머지·D2 model-invocable·D3는 유효 유지.) (현재 SSOT: ADR-075)
 
 ## 배경
 - [관측됨] bootstrap/validate/repair류 skill이 `context: fork` 서브에이전트로 돌면, (1) 사용자 실시간 권한 응답이 불가해 리뷰·report 파일 `rm`이 막히고, (2) repair가 풀 프로젝트 컨텍스트로 "검증이 맞는지"를 판단하기 어렵다.
@@ -12,11 +12,11 @@ accepted (부분 superseded — D1의 implement-workitem 부분은 [ADR-051](ADR
 
 ## 결정
 
-### D1. 일부 lifecycle skill을 메인 세션 실행으로 전환 — implement-workitem 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1 (fork builder → foreman 병렬/단일 builder 위임: file-disjoint면 병렬, 작거나 겹치면 단일)
+### D1. 일부 lifecycle skill을 메인 세션 실행으로 전환 — implement-workitem 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1 (fork builder → foreman 병렬/단일 builder 위임: file-disjoint면 병렬, 작거나 겹치면 단일) (현재 SSOT: ADR-075 D1)
 다음 7종에서 `context: fork`(및 죽은 `agent:`)를 제거해 메인 세션 인라인 실행한다: bootstrap-project, bootstrap-stack, stack-guard, validate-plan, repair-plan, validate-workitem, repair-workitem.
 - bootstrap-project/bootstrap-stack은 무거운 아키텍처 추론을 `Agent`로 architect sub-call 위임(discover-product·bootstrap-design 패턴). 나머지는 메인 세션이 직접 수행.
 - `context-pack: minimal`은 유지(메인 세션 skill도 사용 — discover-product 선례). [정정 2026-07: context-pack은 no-op으로 확인돼 전 skill/agent에서 제거됨(ADR-019 정정) — 본 '유지'는 실효 없음, 로딩은 본문 JIT 지침.]
-- finalize-workitem은 fork 유지(git 조작 격리 이득). *implement-workitem은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman(메인 세션 오케스트레이터)으로 supersede — 위 D1 헤딩 참조.*
+- finalize-workitem은 fork 유지(git 조작 격리 이득). *implement-workitem은 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) D1이 foreman(메인 세션 오케스트레이터)으로 supersede — 위 D1 헤딩 참조.* (현재 SSOT: ADR-075 D1)
 
 ### D2. task 실행 inner-loop 4종 model-invocable
 implement-workitem, validate-workitem, repair-workitem, finalize-workitem에서 `disable-model-invocation: true`를 제거해 **모델이 Skill 도구로 직접 호출**할 수 있게 한다.

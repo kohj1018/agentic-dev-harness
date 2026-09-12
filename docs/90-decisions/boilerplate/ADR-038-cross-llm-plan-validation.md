@@ -3,15 +3,15 @@
 > scope: boilerplate
 
 ## Status
-accepted (부분 superseded — #d3 parallel waves echo + #d6 worktree 병렬 implement + #amend-3 write_set wave 분리는 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md)이 supersede. cross-LLM plan validation 정책은 유효 유지.)
+accepted (부분 superseded — #d3 parallel waves echo + #d6 worktree 병렬 implement + #amend-3 write_set wave 분리는 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md)이 supersede. cross-LLM plan validation 정책은 유효 유지.) (현재 SSOT: ADR-075)
 
 ## 현재 유효 결정
 - `/validate-plan`(타 세션·타 LLM 비판 리뷰, 문서 수정 X) + `/repair-plan`(회수·수용·기각 후 문서 수정) opt-in 추가.
 - 리뷰 파일은 `docs/40-validation/plan-reviews/<workitem-id>.<reviewer-tag>.md`(ephemeral). 같은 tag 재실행은 #amend-2로 *덮어쓰기 대신 `<tag>-N` 자동 suffix*.
-- ~~`/plan-workitem`이 `## 9. 의존성` 위상정렬 wave 그룹을 echo. 병렬 implement는 `claude --worktree` 권장~~ → **[ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 supersede** — wave echo·worktree 병렬 implement 권장 제거. 병렬성은 validate/stabilize report-only fan-out(ADR-051 #d2)으로 이전. `## 9. 의존성` 5필드 구조는 ADR-051 #d5가 *삭제*(wave 전용 스키마) — foreman은 `## 3` step 경로로 분할.
+- ~~`/plan-workitem`이 `## 9. 의존성` 위상정렬 wave 그룹을 echo. 병렬 implement는 `claude --worktree` 권장~~ → **[ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 supersede** — wave echo·worktree 병렬 implement 권장 제거. 병렬성은 validate/stabilize report-only fan-out(ADR-051 #d2)으로 이전. `## 9. 의존성` 5필드 구조는 ADR-051 #d5가 *삭제*(wave 전용 스키마) — foreman은 `## 3` step 경로로 분할. (현재 SSOT: ADR-075)
 - Plan Quality 차원은 #amend-1로 8→10(ADR-027#amend-1 양립) (현재 SSOT: ADR-073 D8).
 - validate-plan은 입력에 task 0건(plan-milestone 직후)이면 milestone-plan mode — FAC 빈 shell 정상 처리 + milestone 4차원(#amend-4).
-- file overlap 점검은 plan-workitem 제외(#d3, 유효 유지) — #amend-3의 *명시적 `write_set:` 결정적 wave 분리*는 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 폐지(write_set 5필드 삭제). `## 4-1` 기반 free-form overlap을 외부 peer review에 위임하는 부분만 유효 잔존.
+- file overlap 점검은 plan-workitem 제외(#d3, 유효 유지) — #amend-3의 *명시적 `write_set:` 결정적 wave 분리*는 [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5가 폐지(write_set 5필드 삭제). `## 4-1` 기반 free-form overlap을 외부 peer review에 위임하는 부분만 유효 잔존. (현재 SSOT: ADR-075)
 
 ## 배경
 - [외부실증] Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 (Diverse Interaction Modes Grounded in Shared Program State) — critique-and-repair, adversarial validation, reasoning debate 패턴을 survey로 정리. 본 ADR의 cross-LLM peer review 패턴이 *survey-level 외부실증* 자격.
@@ -45,7 +45,7 @@ ADR-026 "비결정 (No) — 2-pass planning: 토큰 2배 + stabilize reviewer �
 - **삭제 주체**: `/repair-plan` (수용·기각 결정 후 일괄 삭제).
 - **reviewer-tag**: 다중 리뷰어 동시 작성 시 충돌 회피. 미지정 시 `default`. 같은 tag로 재실행 시 덮어쓰기 허용. *(→ #amend-2 로 "기존 파일 보존 + `<tag>-N` 자동 suffix" 로 정정됨)*
 
-### D3. /plan-workitem에 parallel waves 출력 추가 — superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (wave echo 제거; `write_set` 5필드 스키마는 ADR-051 #d5가 폐지 — foreman은 `## 3` 경로 분할)
+### D3. /plan-workitem에 parallel waves 출력 추가 — superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (wave echo 제거; `write_set` 5필드 스키마는 ADR-051 #d5가 폐지 — foreman은 `## 3` 경로 분할) (현재 SSOT: ADR-075)
 plan-workitem 마지막 출력에 task `## 9. 의존성`을 위상 정렬한 wave 그룹 echo (Kahn's algorithm 등 결정적 알고리즘 — 같은 입력에 같은 wave). **새 영속 저장 자리 신설 X** — derived view라 drift 위험 ([ADR-005](ADR-005-ssot.md) SSOT 정합). **file overlap 점검은 plan-workitem에서 제외** — `## 4-1. 변경 예정 파일/경로`가 implement 시점에 채워진다는 현행 정책(WORKFLOW.md `## 4`(task `## 4-1` 채움 시점 정책) + TASK_TEMPLATE `## 4-1` 주석 SSOT)상 plan 시점 정확도 부족 → 외부 LLM peer review(`/validate-plan`)에 *전적 위임*. 새 dependency 추가 의도(manifest/lock 파일명 *어느 하나라도* 명시 — 예: `package.json` 또는 `pnpm-lock.yaml`)가 보이는 task는 *단독 wave* 라벨로 echo (자동 차단 X / 영속 저장 X).
 
 ### D4. agent 분담
@@ -55,7 +55,7 @@ plan-workitem 마지막 출력에 task `## 9. 의존성`을 위상 정렬한 wav
 ### D5. Codex 호환
 ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents/skills/repair-plan` 2개 wrapper 신설.
 
-### D6. Wave 그룹 병렬 implement 시 worktree 권장 — superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (병렬 implement 권장 철회; 면책 단락은 환경 책임으로 잔존)
+### D6. Wave 그룹 병렬 implement 시 worktree 권장 — superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (병렬 implement 권장 철회; 면책 단락은 환경 책임으로 잔존) (현재 SSOT: ADR-075)
 - wave 그룹 echo 시점에 다음을 *권장*으로 명시 (강제 X):
   - "**병렬 실행은 `claude --worktree` 사용 권장** (Claude Code 공식 worktree 지원). 이름을 `--worktree` 인자로 명시: `claude --worktree T-NNN -p "/implement-workitem T-NNN"`. 미명시 시 자동 이름이 붙어 task-id와 매칭 안 됨. 단일 working tree 동시 implement는 file 충돌 + git index race + 빌드 캐시 충돌 위험."
 - `.gitignore`에 `.claude/worktrees/` 패턴 추가 — main checkout에서 worktree 폴더 untracked 노출 방지.
@@ -134,13 +134,13 @@ D2 의 "같은 tag 재실행 시 덮어쓰기 허용" 을 **기존 파일 보존
 - Ning et al. 2026, *Code as Agent Harness* (arXiv:2605.18747v1) §4.1.2 — cross-review 패턴 survey-level evidence.
 
 <a id="adr-038-amend-3"></a>
-## Amendment 3 — file overlap 정책 정정 (free-form 제외, 명시적 write_set 허용) — *write_set wave 분리 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (5필드 삭제); free-form 외부위임만 유효*
+## Amendment 3 — file overlap 정책 정정 (free-form 제외, 명시적 write_set 허용) — *write_set wave 분리 부분 superseded by [ADR-051](ADR-051-main-session-orchestration-and-wave-removal.md) #d5 (5필드 삭제); free-form 외부위임만 유효* (현재 SSOT: ADR-075)
 
 D3 의 *"file overlap 점검은 plan-workitem에서 제외 — 외부 LLM peer review에 전적 위임"* 정책은 **TASK_TEMPLATE `## 4-1. 변경 예정 파일/경로`(implement 시점 채움 — plan 시점에는 빈 상태)에 기반한 free-form file overlap** 한정으로 정정한다. **명시적 `write_set:` 구조화 필드**(TASK_TEMPLATE `## 9. 의존성` 안 — ADR-026 schema 확장으로 plan 시점 deterministic input)는 본 면제 범위 밖이며, plan-workitem은 `write_set` 교집합을 *결정적으로 검출해 wave 분리*한다 (ADR-047 D1 inspectability 정합). 본 amend는 *deterministic 부분만 회수* — 자연어 dep / `## 4-1` 기반 추측은 여전히 외부 peer review 책임.
 
 <a id="adr-038-amend-4"></a>
 ## Amendment 4 (2026-06-30) — milestone-plan mode (plan-milestone 산출 검토)
-> **amend 근거(ADR-045#d6 정합)**: validate-plan mode 확장 = *충돌 없는 확장*이라 amend로 충분. ADR-038은 ADR-051 정리 라운드에서 통합 재발행 후보이나, 단발 mode 추가는 supersede 불요.
+> **amend 근거(ADR-045#d6 정합)**: validate-plan mode 확장 = *충돌 없는 확장*이라 amend로 충분. ADR-038은 ADR-051(현재 SSOT: ADR-075) 정리 라운드에서 통합 재발행 후보이나, 단발 mode 추가는 supersede 불요.
 ### 결정
 1. validate-plan은 하위 task 0건이면 milestone-plan mode: task형 차원([Plan-sizing]/[Plan-AC-form]/[Plan-dep]) 비활성, [Plan-FAC-coverage]를 "빈 `## 7-1` shell 정상, 형식 깨짐만 flag"로 반전, milestone 4차원([MP-FAC-quality]/[MP-feature-scope]/[MP-graduation]/[MP-feature-dep]) 활성. 혼합은 feature 단위.
 2. 리뷰 파일·repair-plan 회수·삭제 계약 불변(plan-reviews/ 재사용).

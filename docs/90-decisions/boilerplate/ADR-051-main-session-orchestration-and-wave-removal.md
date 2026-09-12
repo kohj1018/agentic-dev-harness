@@ -3,7 +3,9 @@
 > scope: boilerplate
 
 ## Status
-accepted
+superseded
+
+> 대체: [ADR-075](ADR-075-main-session-orchestration-v2.md) — 통합 재발행(2026-09-13, #amend-4 거버넌스 주 이행). 본 문서는 history 잔존. (현재 SSOT: ADR-075)
 
 ## 현재 유효 결정
 - implement는 foreman(메인 세션)이 운전 — `## 3` step 파일 경로로 file-disjoint slice를 나눠 병렬 builder, 작거나 겹치면 단일/순차(D1·#d6).

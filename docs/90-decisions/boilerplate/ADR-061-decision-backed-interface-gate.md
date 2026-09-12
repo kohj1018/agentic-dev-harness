@@ -84,4 +84,4 @@ accepted
 - task `## 6-1. 테스트 시나리오`가 구현 후에도 빈 채로 남는 별개 결함(모델에 따라 보고 여부가 갈림)은 본 ADR 범위 밖 — 별도 처방.
 
 ## 참고
-- ADR-006#amend-1 (diff trace audit — D2가 해석 고정), ADR-017 (dogfood 트리거), ADR-022 (Ratchet — 정책 강도), ADR-027 (인터페이스 결정 할당) (현재 SSOT: ADR-073), ADR-037 (spec coverage), ADR-038 (cross-LLM plan validation — opt-in 한계), ADR-045 (참조 계약), ADR-047 D3/D8 (mutation contract / oracle adequacy), ADR-051 (validate fan-out), ADR-059 D7 (모바일 Don'ts P0 — 본 결정의 선례), ADR-060 D1/D2/D7 (원장·authority·봉인)
+- ADR-006#amend-1 (diff trace audit — D2가 해석 고정), ADR-017 (dogfood 트리거), ADR-022 (Ratchet — 정책 강도), ADR-027 (인터페이스 결정 할당) (현재 SSOT: ADR-073), ADR-037 (spec coverage), ADR-038 (cross-LLM plan validation — opt-in 한계), ADR-045 (참조 계약), ADR-047 D3/D8 (mutation contract / oracle adequacy), ADR-051 (validate fan-out, 현재 SSOT: ADR-075), ADR-059 D7 (모바일 Don'ts P0 — 본 결정의 선례), ADR-060 D1/D2/D7 (원장·authority·봉인)

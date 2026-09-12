@@ -65,7 +65,7 @@ milestone graduation hard-block(D3) 미통과 + cross-stabilize 회귀 신호를
 - docs/90-decisions/boilerplate/ADR-040-external-research-capability.md — install-ownership 3분할 boundary 참조 note
 
 ## 참고
-- ADR-014(graduation — item 3 hard-block amend), ADR-025(외부 의존 + CI 권장 — install/e2e provision 확장), ADR-040(install authoring/실행 — stack-guard 검증 추가로 3분할), ADR-047(harness mutation + D1 Executability), ADR-050(de-fork — repair-milestone 메인 세션 정합), ADR-051(foreman/fan-out — stabilize fan-out과 정합). (현재 SSOT: ADR-068)
+- ADR-014(graduation — item 3 hard-block amend), ADR-025(외부 의존 + CI 권장 — install/e2e provision 확장), ADR-040(install authoring/실행 — stack-guard 검증 추가로 3분할), ADR-047(harness mutation + D1 Executability), ADR-050(de-fork — repair-milestone 메인 세션 정합), ADR-051(foreman/fan-out — stabilize fan-out과 정합, 현재 SSOT: ADR-075). (현재 SSOT: ADR-068)
 
 <a id="adr-052-amend-1"></a>
 ## Amendment 1 (2026-07-28) — 0-spec 판정 정합화 (D2 우선, 문자열 매칭 폐기)

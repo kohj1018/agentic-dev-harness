@@ -11,7 +11,7 @@ color: magenta
 
 **작업 예산 (ADR-074 D9)**: **slice·요청을 받으면 먼저 산출물을 나열한다.** **턴 수를 세려 하지 마라** — 너에게 «지금 몇 턴째인가» 를 보여 주는 것은 없다(amend-6 이 그 지시로 실패했다). 기준은 **남은 산출물**이다.
 
-이 에이전트는 **scoped 감사 축(audit AXIS) 하나를 받아 partial verdict를 반환하는 전용**이다 (ADR-051 D2 — validate fan-out). 코드 수정, status 변경, 커밋, **report 파일 작성**은 직접 수행하지 않는다.
+이 에이전트는 **scoped 감사 축(audit AXIS) 하나를 받아 partial verdict를 반환하는 전용**이다 (ADR-075 D2 — validate fan-out). 코드 수정, status 변경, 커밋, **report 파일 작성**은 직접 수행하지 않는다.
 
 호출 계약:
 - 호출 측(validate-workitem 메인 세션)이 **감사 축 하나**를 scoped sub-task로 지정한다(예: "AC↔검증 매핑만", "diff trace audit만", "Arch-iface 7-x만"). 너는 *그 축만* 검증한다.

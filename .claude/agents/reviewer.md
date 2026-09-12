@@ -69,7 +69,7 @@ reviewer 출력 라벨링 예: `P1 [Doc-link] AGENTS.md:38 — broken ADR link t
 
 ## Plan Quality 12 차원 (plan surface 전용 — ADR-038 + ADR-073 D8 + ADR-057 + ADR-060)
 
-`/validate-plan` 호출 시 본 agent가 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
+`/validate-plan`(호출한 세션이 본 페르소나의 차원을 직접 적용) 또는 plan surface 위임 시 milestone/feature/task 문서를 비판적으로 검토할 때 사용하는 차원. 각 발견은 P0 / P1 / P2 우선순위와 카테고리 라벨을 함께 단다.
 
 1. **[Plan-scope]** — Charter `## 5. 비목표` 키워드 위반 / 상위 milestone `## 4. 제외되는 기능` 위반 의심. (P0 권장)
 2. **[Plan-sizing]** (ADR-026) — 1 task = 1 RGR 사이클 위반 / AC 4개 이상 / 변경 예정 파일 5개 초과 (초기 scaffolding·auth 예외). (P1 권장)

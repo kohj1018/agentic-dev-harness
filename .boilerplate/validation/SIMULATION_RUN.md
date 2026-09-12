@@ -942,7 +942,7 @@ ADR-063 Mutation Contract 5의 *Falsifying evaluation*이 요구한 실측을 �
 | 2 | `next dev`가 실행마다 `AGENTS.md`에 자기 규칙 블록 10줄을 append(57→67줄). stack-guard 보호 경로 대조가 수행 0 전후만 돌아 못 잡음 | P1 | **수정** — `/stack-guard` 수행 0-H 신설(실행 시작·종료 harness 경로 해시 대조, 보고 등급·자동 되돌림 없음) + 마지막 출력 항목(ADR-071#amend-1 결정 1) |
 | 3 | «자가 검사 4케이스»가 웹 전용 프로젝트에서 도달 불가 — (d)는 `pubspec.yaml` scope 전용이라 정상 결과가 3케이스 | P2 | **수정** — 판정 기준을 «케이스 수»에서 «실행된 케이스가 전부 기대와 같은가»로 정정(ADR-072#amend-1 결정 2). registry `self-test 일자`에 케이스 수 병기 |
 | 4 | `storybook init`(v10)이 결정 집합 밖 애드온 4종 + `vitest.config.ts`를 함께 설치. 「viewport 애드온」은 SB 8부터 존재하지 않음(코어 global) | P2 | **수정** — 카탈로그 기본 후보를 «a11y 애드온만»으로 정정 + 설치 직후 결정 밖 애드온 제거 명시(ADR-071#amend-1 결정 2) |
-| 5 | `/validate-workitem` inline 임계(`L≤50`)가 TDD task에 낮다 — T-001(순수 함수 4개 + 테스트) 실측 **F=6·L=91**로 초과해 6축 fan-out 강제(재량 0). 축 2 단독 176초 / 6축 subagent 토큰 약 16만 | P2 | **기록만** — ADR-051#amend-4가 «실측 전 추정치, 재보정 창구»라 명시한 값의 첫 실측이다. Round 12 실측을 더한 뒤 재보정한다(단일 표본으로 임계를 옮기지 않는다) |
+| 5 | `/validate-workitem` inline 임계(`L≤50`)가 TDD task에 낮다 — T-001(순수 함수 4개 + 테스트) 실측 **F=6·L=91**로 초과해 6축 fan-out 강제(재량 0). 축 2 단독 176초 / 6축 subagent 토큰 약 16만 | P2 | **기록만** — ADR-051#amend-4가 «실측 전 추정치, 재보정 창구»라 명시한 값의 첫 실측이다. Round 12 실측을 더한 뒤 재보정한다(단일 표본으로 임계를 옮기지 않는다)(현재 SSOT: ADR-075 D11) |
 | 6 | foreman이 `/implement-workitem` 6-R(receipt 기록)을 건너뛰고 validate로 진행 — 축 7 validator가 `P1 [Verify-power-missing] AC-1..3`으로 사후 검출 | P1 | **수정** — 6-R 앞에 누락 방지 문단 + 마지막 출력에 `receipt 기록 (6-R)` 필수 항목 신설(없으면 «6-R 미수행») |
 | 7 | builder의 «Red»가 모듈 부재 import 실패로 끝남 — 어설션이 0건 실행돼 판정력 근거가 아님(가짜 Red의 가장 흔한 형태) | P1 | **수정** — implement Red phase 정의와 `builder.md`에 «모듈 부재·컴파일 오류로 0건 실행은 Red가 아니다 — 의도적 오구현을 먼저 두고 어설션 실패를 관측» 명시. **완화 확인됨**: 같은 문구를 넣은 T-003 dispatch에서 builder가 실제로 오구현 → 어설션 실패 3종 관측 후 구현 |
 | 8 | `/bootstrap-design` R6-1 테마 배선이 DESIGN `## 9` 포커스 링 규정을 배선하지 않아, 승인 화면에 브라우저 기본 파란 포커스 링(팔레트 밖 색)이 렌더됨. 인라인 스타일로는 의사 클래스 표현 불가 | P2 | **수정** — R6-1에 «의사 클래스가 필요한 상태 규정은 전역 CSS로 함께 배선» 명시 |
@@ -1393,6 +1393,19 @@ IMPROVE-GUIDE P7-5 는 `docs(validation): record dogfood rounds 11 and 12 and th
 「첫 쓰기 이전에 연 입력 수」를 네 조건 모두 실행 로그의 도구 호출 순서로 셌다: **(a) 15 · (b) 11 · (c) 11 · (d) 8**. Phase 1의 planner(10)를 더하면 **5/5에서 「입력을 먼저 다 열고 그 뒤에 첫 산출물을 쓴다」**이며, 0건으로 시작한 dispatch는 하나도 없다. 에이전트 2종(planner · builder) · 스택 2종(Next.js · Flutter) · effort 2조건에 걸쳐 예외가 없다. 첫 쓰기 앞의 호출은 전부 `cat`·`grep`·`find`·`Read` 같은 **입력 열람**이었고 TDD Red 실행 같은 사이클 단계가 아니었다(환경 확인 `flutter --version` 1건 제외).
 
 **확인된 것과 확인되지 않은 것을 구분한다.** Phase 1 probe 프롬프트에는 「읽어야 할 문서」 목록이 앞에 있었고 Phase 2 slice 프롬프트에는 없었는데 순서가 같았으므로, **「그 목록이 원인」이라는 가설은 기각된다**. 그러나 **「호출자 프롬프트가 첫 산출물 파일 생성을 직접 지시하면 달라지는가」는 이번에 시험하지 않았다** — 네 프롬프트 중 그렇게 지시한 것이 없다. 따라서 확인된 사실은 **「에이전트 본문 지시만으로는 순서가 바뀌지 않는다(n=5)」**까지이고, 프롬프트층 처방의 유효성은 열린 채로 둔다(Round 14 후보).
+
+### fan-out 크기 판정 재보정 실측 — 테스트·문서를 뺀 구현 줄
+
+dogfood-web의 두 finalize 커밋을 «테스트 파일 집합»·«문서 집합»을 분리해 다시 쟀다(`git show --numstat`).
+
+| task | F | L_impl | L_test | L_docs | 판정 |
+|---|---:|---:|---:|---:|---|
+| T-001 (순수 함수 4개 + 테스트) | 6 | **38** | 51 | 15 | `L_impl ≤ 50` — inline 후보 |
+| T-003 (저장 어댑터, 외부 경계) | 5 | **74** | 62 | 16 | `L_impl > 50` · `F > 2` — fan-out 필수 |
+
+가설(「T-001은 테스트·문서를 빼면 구현 줄이 50 안팎이라 inline 후보이고, T-003은 구현 줄만으로도 50을 넘어 fan-out이 맞다」)이 **두 사례 모두 성립**해 임계(50/200)를 옮기지 않는다. **다만 과거 판정의 원인이 바뀌는 것은 아니다** — Round 11 당시 기준은 총 `L=91`·`F=6`이라 크기 조건만으로도 fan-out이 필수였다(발견 5). 새 기준에서 T-001이 크기 관문을 통과한다는 뜻일 뿐이고, 실제 inline 여부는 UI·Arch-iface 등 나머지 조건이 함께 정한다. **한계**: 위 값은 finalize 커밋 diff 기준이고 규칙의 측정 시점은 validate 실행 시점의 워킹트리(`git diff HEAD` + untracked)라 서로 다를 수 있다.
+
+**발견 22 종결**: `[FAC-semantic-hollow]`의 재발 기록이 Round 12 절에 **0건**이므로(누적 6건은 Round 11 기록이다) 의미 정합 관찰 항목을 `/validate-workitem`에 신설하지 않고 **계획 시점 3-S (c)로 종결**한다. 같은 자리에 계측 속성 도메인 관찰(발견 31)만 기록 등급으로 넣었다.
 
 ## Builder Effort Experiment (ADR-004#amend-4) — 측정일 2026-09-11 (현재 SSOT: ADR-074)
 

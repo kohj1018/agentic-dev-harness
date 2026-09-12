@@ -29,7 +29,7 @@ accepted
 | 2 | bootstrap | `/bootstrap-project` | architect | DISCOVERY.md → charter/architecture/ADR-100 (M1/F-001 seed는 ADR-057로 제거 — plan 단계로 이동) |
 | 3 | plan | `/plan-milestone`(모든 milestone+feature — M1 포함, ADR-057) · `/design-milestone M<N>`(UI M 화면 경험 계약 — plan-milestone 뒤·plan-workitem 앞, ADR-072) · `/plan-workitem M<N>`(마일스톤 전체 계획 스냅샷 — ADR-057#amend-3) | 메인 세션 (architect 위임) | milestone/feature 생성(plan-milestone — M1 포함) + task 분해(plan-workitem — `M<N>` 1회 전체) |
 | — | seal | `/seal-milestone` | (메인 세션) | 계획 최종 검사 + 사용자 승인 + task→feature→milestone 일괄 `ready` 승격. 내용 수정·커밋 없음 (ADR-060 D7) |
-| 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) |
+| 4 | implement | `/implement-workitem` | 메인 세션 foreman (builder 위임) | task 를 file-disjoint slice 로 나눠 builder 에 위임, 각 builder Red→Green→Refactor (ADR-009 / ADR-051 D1) (현재 SSOT: ADR-075 D1) |
 | 5 | validate | `/validate-workitem` | validator | 판정 + report 기록. **status 변경·코드 수정·커밋 금지.** |
 | 6 | repair (Needs Fix일 때만) | `/repair-workitem` | builder | report의 실패 항목만 수정. **자동 커밋 금지, 새 기능 금지, 범위 밖 변경 금지.** |
 | 7 | finalize (`Pass` 또는 `Pending Acceptance`일 때 — ADR-065 D6) | `/finalize-workitem` | builder | status `done` 갱신 + 명시적 파일 add + Conventional Commits 커밋. `Pending Acceptance`면 관측 AC를 통과시키고 task `## 8`에 `- ac-pending`을 남긴다 |
