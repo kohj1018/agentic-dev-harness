@@ -1312,6 +1312,38 @@ IMPROVE-GUIDE P7-5 는 `docs(validation): record dogfood rounds 11 and 12 and th
 - **amend-9 결정 2** — `reviewer` `maxTurns: 24`: 적용 후 `/validate-plan M<N>` 이 회수 없이 완주하는가.
 - 검증 순서는 ①의 재발행 **전**이 낫다 — 재발행본이 담을 결론이 이 검증에 달려 있다.
 
+## Round 13 (2026-09-12~, 검증 부채 정리 — 세션 고정 규칙·재측정·재발행)
+
+### 새 세션 검증 (첫 과제 ③)
+
+| 항목 | 방법 | 관측 | 판정 |
+|---|---|---|---|
+| 0-tool probe (planner/reviewer/builder) | P1-1 프롬프트 — 저장소 루트, 새 세션에서 세 subagent_type에 Agent 도구로 병렬 전달 | `probe=planner 1=YES 2=YES 3=YES` / `probe=reviewer 1=NO 2=YES 3=YES` / `probe=builder 1=YES 2=YES 3=YES`(builder 반환문이 자신을 "implement-agent"로 칭했다 — 저장소 파일에는 그 문자열이 0건이고 `builder.md`는 자신을 「구현 전담 에이전트」로 적는다. 런타임 반환에만 나타난 관측이라 원인 미상, 기록만) | **live — 2026-09-12 기대치와 완전 일치.** reviewer만 1번(부분 보고 형식 문구) 누락, Phase 3 P3-3에서 통일 예정 |
+| amend-9 결정 2 reviewer 24 | `/validate-plan M1` (dogfood-web, 새 세션, 사용자 직접 타이핑 — `disable-model-invocation: true`라 세션 내 위임으로는 실행 불가) | **reviewer subagent dispatch 0회** — skill이 메인 세션에서 직접 수행(tool_uses 19: Bash 18 + Write 1 + Agent 0). 회수 문서는 charter·원장·ARCHITECTURE·M1·feature 2·task 4·manifest.json·DESIGN·PX grep 등 15개 이상으로 ADR-004#amend-9 결정 4(통합 재발행본 D11 (b)로 이관 예정)의 「회수 문서 10개 초과 시 축·범위 분할」 임계를 넘었는데도 dispatch하지 않았다(sed·grep -o \| sort \| uniq -c 로 부분 읽기 처리 — 실측 상한 근접 없이 완주). 산출 판정은 12차원 전수 + 발견 14건(P0 2·P1 9·P2 3), 리뷰 파일 `docs/40-validation/plan-reviews/M1.default.md` 생성 확인 후 삭제함 | **미측정(대상 무효)** — reviewer `maxTurns: 24` 예산 자체는 이번에 시험되지 않았다. 대신 **새 discrepancy**: `/validate-plan`이 자기 문서화된 10건 dispatch 임계를 실행에서 지키지 않았다(아래 절 참조) |
+| amend-8 결정 3 부분 보고 형식 | planner 7파일 probe (프롬프트상 프로젝트 루트는 dogfood-flutter 지정, 실제 세션 cwd는 보일러플레이트 루트였음 — 두 저장소의 `planner.md`가 byte 동일해 판정 자체는 유효) | tool_uses 17 · 소요 266,794ms · 토큰 90,393 — 상한(20) 미도달, 7/7 파일 완주 후 서술형(결론·매핑·근거·가정·다음 액션) 완결 보고 반환 | **미도달** — 형식 검증 불가(가이드가 이미 예상한 정상 결과값. `_probe/` 정리 확인 완료, 두 저장소 모두 git status clean) |
+| amend-9 결정 1 write-first | 같은 dispatch — subagent 실행 로그(`agent-*.jsonl`)의 도구 호출 순서로 판정 | **입력 10건(Read 6 · Glob 4)을 모두 연 뒤 11번째 호출에서 첫 `Write`**, 이후 7파일을 연속 `Write`(중간 입력 열람 0). 파일당 `Write` **1회 = 완성본**(3.2~3.7K자, 템플릿 관행 섹션 `## 4·4-1·5·6-1·7·8·9`까지 채움)이고 `미검토:` 줄 **0건** — 골격 선행·후속 갱신 흔적이 없다. 프롬프트가 「읽어야 할 문서」 5건을 지시문 앞에 세운 것이 순서에 영향을 줬을 가능성은 배제하지 못한다(n=1) | **미준수** — 지시는 적재돼 있는데(probe 2=YES) 실행 순서가 정반대다. 상한 압력이 없는 조건의 관측이라 falsifier (a)(상한 중단 + 산출물 0건)와는 별개다 |
+
+### falsifier 판정 (P1-1·P1-3)
+- amend-8 (a) 「쓰기 에이전트 보고 0건 상한 도달 1회라도」 → **미발화**
+- amend-9 (a) 「상한 중단 + 산출물 파일 0건」 → **미발화**
+- amend-9 (b) 「골격만 쓰고 미검토 절반 초과」 → **미발화** — `미검토:` 0건이나 그것이 골격 선행의 결과가 아니라 **입력을 전부 읽고 한 번에 완성본을 쓴 결과**다(위 표 4행). (b)는 write-first를 지킨 뒤의 품질 저하를 재는 falsifier라 이번 실행은 애초에 적용 대상이 아니었다
+
+발화한 falsifier는 없다. 다만 **D9-2(write-first)는 지시가 적재된 채로 지켜지지 않았다** — 상한 압력이 없는 조건의 n=1이므로 항목을 빼지 않고, 통합 재발행본에 **신뢰도 하향 + 재검토 트리거**를 달아 승계한다. falsifier는 「상한 중단 + 산출물 0건」·「상한 도달 dispatch가 부분 보고 형식을 내지 않음」 같은 **결과 기준**으로 좁힌다 — 지시 문구의 순서 준수 자체를 falsifier로 두면 이번 관측만으로 규칙이 빠지는데, 산출은 7/7 완결이었다.
+
+**방법 교훈**: 「반환 시점에 산출물 파일이 실재하는가」는 write-first를 시험하지 못한다 — 일괄 후작성과 구분되지 않는다. 유효한 신호는 **첫 쓰기 이전에 연 입력 수**이며, 다음 측정부터 이 값을 남긴다.
+
+### 새로 확인된 것 — `/validate-plan`의 dispatch 임계 미준수
+회수 문서 15개(>10)에도 reviewer subagent dispatch 없이 in-session으로 완주했다. 판정 결과 자체(P0 2·P1 9·P2 3, 발견 14건)의 신뢰도 저하는 관측되지 않았으나, ADR-004#amend-9 결정 4(통합 재발행본 D11 (b)로 이관 예정)에 명시된 임계와 실행이 어긋난다. 「회수 방식이 grep·부분 읽기 위주면 단일 세션도 허용」으로 완화할지, dispatch를 실제로 강제할지 — 그 정책 판단은 이번 라운드 범위 밖이라 결정하지 않고 사실만 기록한다.
+보충(2026-09-12 검토): skill frontmatter(`disable-model-invocation: true`, `allowed-tools`에 Agent 없음)·ADR-050 D1(validate-plan 메인 세션 인라인)·DELEGATION_STRATEGY 37행(다른 세션이 reviewer 페르소나로 호출)상 본 skill은 세션 인라인 실행이 정본이며, 43행의 dispatch 문장은 Round 12의 ad hoc reviewer 위임 실행을 전제로 쓰였다 — 임계 위반이라기보다 문장과 실행 모델의 불일치다. 정정은 Phase 4(통합 재발행본 D11 (b) + validate-plan 43행·reviewer.md 72행). reviewer `maxTurns: 24`의 실측 자리는 P8-3 (c)의 stabilize 단계 5 dispatch다.
+
+### 복제본 harness 동기화 실측 — `/stack-guard` 재실행 계약의 세 번째 경우
+
+두 dogfood 복제본의 design gate 어댑터를 현재 canonical(`faeaadf0`)로 맞추며 관측했다. 실행 후 두 복제본 모두 canonical = 사본 = registry `copied-from` = `faeaadf0`로 수렴했다.
+
+- **dogfood-web** (사본 `e0cb8fc1` = registry `copied-from` `e0cb8fc1` ≠ canonical): 재실행 계약대로 «무수정 사본»으로 판정해 사용자 질문 없이 교체 + `copied-from` 갱신. **계약 일치.**
+- **dogfood-flutter** (사본 `faeaadf0` = canonical ≠ `copied-from` `700eea38`): 계약 조건식이 «사본 sha == `copied-from`일 때만 교체»라 이 경우를 «local modification → diff 보고 + 사용자 결정» 분기로 보낸다. 실행 주체는 diff가 비어 있음을 근거로 스스로 «코드는 동일하고 낡은 것은 기록값뿐»으로 재분류한 뒤 **사용자 확인 없이** `copied-from`만 갱신했다. 결과값은 옳으나 계약 문장과는 어긋난다 — 조건식에 «또는 사본 sha == canonical sha»가 없어 이 경우가 두 분기 어디에도 정확히 맞지 않기 때문이다. 사전 예측이었던 「계약이 이 경우를 «수정됨(빈 diff)»으로 보고한다」는 **실행에서 재현되지 않았다**: 계약을 문자 그대로 따르면 오분류되고, 옳게 처리하려면 실행 주체가 계약을 벗어나 자율 판단해야 한다. 조건식을 «사본 == `copied-from` **또는** 사본 == canonical»로 넓히면 이 경우가 자동 갱신 분기로 정상 편입된다.
+- **부수 관측**: dogfood-web의 boot smoke가 돌린 `next dev`가 `AGENTS.md` 끝에 `<!-- BEGIN:nextjs-agent-rules -->` 블록 10줄을 append했다(생성처 `node_modules/next/dist/server/lib/generate-agent-files.js` — 지워도 다음 실행에 재생성된다). 외부 도구가 `presence: baseline` 문서(ADR-005)를 변조하는 경로다. ADR-011 100줄 상한에는 아직 여유가 있다(57 → 67줄). 이번 라운드는 원복만 하고 정책은 정하지 않는다.
+
 ## Builder Effort Experiment (ADR-004#amend-4) — 측정일 2026-09-11
 
 - task: **T-002-todo-screen-wiring** (승인 UI 2개 배선 + 도메인 연결 + 계측 이벤트 + 테스트 3건)
