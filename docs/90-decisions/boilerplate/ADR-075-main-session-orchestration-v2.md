@@ -99,7 +99,7 @@ Medium — D1~D10은 여러 라운드에 걸쳐 관측·재확인됐다. D11·D1
 
 ## Mutation Contract (ADR-047 D3)
 1. Target — `.claude/skills/{implement-workitem,plan-workitem,validate-workitem,stabilize-milestone,validate-plan}/SKILL.md`(fan-out 판정·인용 재지정) / `docs/00-meta/DELEGATION_STRATEGY.md`(오케스트레이션 단락) / `docs/90-decisions/boilerplate/{ADR-038,ADR-047,ADR-050,ADR-019,ADR-026}.md`(참조 갱신) / `docs/90-decisions/boilerplate/README.md` 인덱스.
-2. Failure mode — net 규칙을 base + amendment 4개에서 조립해야 함 / fan-out 크기 판정이 테스트 파일 포함 총 줄 수로 왜곡돼 큰 변경이 inline으로 새는 위험 / 축 5가 UI 파일 0건에도 spawn돼 낭비되는 fan-out (전부 관측됨).
+2. Failure mode — net 규칙을 base + amendment 4개에서 조립해야 함 / fan-out 크기 판정이 테스트 파일을 포함한 총 줄 수를 써서 **테스트가 붙은 작은 구현 변경까지 fan-out으로 밀어 올리는 왜곡**(Round 11·13 실측) — 반대 방향의 위험(#amend-2 시절 재량 문구로 큰 변경이 inline으로 샌 Round 4 사례)은 D11 결정 1의 «재량 0»이 이미 막는다 / 축 5가 UI 파일 0건에도 spawn돼 낭비되는 fan-out (전부 관측됨).
 3. Predicted improvement — Round 14에서 L_impl 기준 판정이 테스트 비대 task에서도 정확히 서고, 축 5가 UI surface 파일 diff 없는 task에서 spawn되지 않아 팬아웃 낭비가 줄어든다.
 4. Preserved invariants — lifecycle 8단계 책임 경계·validate report 양식·signal-first cap·ADR-050 D2 model-invocable 범위·`## 9. 의존성`의 자연어 선언·1축=1 validator.
 5. Falsifying evaluation — (a) Round 14에서 **inline으로 판정된** task(`L_impl ≤ 50` 또는 `F ≤ 2` 이고 `L_impl ≤ 200`)의 validate가 놓친 P0가 뒤늦게 드러나면 L_impl 임계를 하향한다(재검토 트리거 1과 같은 조건이다) (b) 축 5가 UI surface 파일 diff 1개 이상인데도 매번 「해당없음」으로 끝나면(UI 판정이 실질적으로 불필요) 조건을 더 좁힌다 (c) foreman 운전이 사용자 확인 전 자동 연쇄를 일으키면 D1 범위를 재검토한다.

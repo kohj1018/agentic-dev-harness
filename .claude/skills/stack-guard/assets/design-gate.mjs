@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// design gate v3 (ADR-072 D6 / Flutter 어댑터: ADR-059#amend-1). 모드: --html | --manifest | --self-test | --tokens-only. 품질 계약: ADR-058 D3.
+// design gate v3 (ADR-072 D6 / Flutter 어댑터: ADR-059#amend-1 / 뷰포트 축·자가 검사(e)·주입 관찰·토큰 확장: ADR-072#amend-5). 모드: --html | --manifest | --self-test | --tokens-only. 품질 계약: ADR-058 D3.
 import { resolve, dirname, basename, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { mkdirSync, rmSync, readdirSync, readFileSync, writeFileSync, copyFileSync, mkdtempSync, existsSync, statSync } from 'node:fs';
@@ -336,6 +336,46 @@ function runFlutterTest(scope, testFile) {
   return { ok: blockers.length === 0, blockers };
 }
 
+// 하네스 주입 정적 관찰(기록 등급) — ADR-072#amend-5 결정 4. 차단 아님 — R6-5 «하네스 요소 0» 사람 확인이 여전히 관문이다.
+function checkHarnessInjection(screen, scope) {
+  const reports = [];
+  const SUSPECT_TAG = /<(h[1-6]|header|nav|main|footer|aside|p|span|button|a)\b/gi;
+  const isFlutter = (screen.preview || '').startsWith('flutter:');
+  if (!isFlutter) {
+    for (const src of screen.source || []) {
+      if (!/\.stories\.[^./]+$/.test(src)) continue;
+      const p = join(scope, src);
+      if (!existsSync(p)) continue;
+      let txt; try { txt = readFileSync(p, 'utf8'); } catch { continue; }
+      // 대괄호 균형으로 배열 끝을 찾는다 — 한 줄 배열과 파일 안 두 번째 이후 decorators 도 대상이다
+      // (줄바꿈을 요구하고 첫 배열만 보던 정규식은 둘 다 놓쳤다).
+      const hits = [];
+      for (const m0 of txt.matchAll(/decorators\s*:\s*\[/g)) {
+        let depth = 0, end = -1;
+        for (let i = m0.index + m0[0].length - 1; i < txt.length; i++) {
+          const ch = txt[i];
+          if (ch === '[') depth++;
+          else if (ch === ']') { depth--; if (depth === 0) { end = i; break; } }
+        }
+        if (end < 0) continue;
+        const seg = txt.slice(m0.index + m0[0].length, end).match(SUSPECT_TAG);
+        if (seg) hits.push(...seg);
+      }
+      if (hits.length) reports.push({ rule: 'harness-injection-suspect', file: src, detail: `decorators 안 허용 목록(ThemeProvider|MemoryRouter|div(style만)|Fragment) 밖 태그: ${[...new Set(hits)].join(', ')}` });
+    }
+  } else {
+    const testFile = screen.preview.slice('flutter:'.length).split('#')[0];
+    const p = join(scope, testFile);
+    if (existsSync(p)) {
+      let txt = ''; try { txt = readFileSync(p, 'utf8'); } catch { /* 읽기 실패 — 관찰 skip */ }
+      const m = txt.match(/pumpWidget\(([\s\S]*?)\)\s*;/);
+      const hit = m && m[1].match(/\b(Scaffold|AppBar|Text|Icon)\(/);
+      if (hit) reports.push({ rule: 'harness-injection-suspect', file: testFile, detail: `pumpWidget( 인자 안 화면 위젯 밖 태그: ${hit[1]}(` });
+    }
+  }
+  return reports;
+}
+
 // ---------- manifest 모드 ----------
 // 결정 글꼴의 «선언»이 실재하는가 (ADR-073#amend-1 결정 5 — 1차, 차단 등급).
 // 패밀리 이름을 CSS 변수에 쓴 것은 배선이 아니다 — @font-face / next/font/local / pubspec fonts: 중 하나가 있어야 한다.
@@ -415,8 +455,36 @@ async function runManifestMode(opts, ctx) {
           const r = runFlutterTest(scope, testFile);
           if (r.unavailable) { console.error('flutter 미설치 또는 러너 기동 실패: ' + screen.id); process.exit(2); }
           if (r.compileError) { console.error('flutter test 컴파일 오류: ' + screen.id + ' — ' + (r.stderr || '').slice(0, 300)); process.exit(2); }
-          if (r.timedOut) { result.screens.push({ id: screen.id, profile: screen.profile, viewport: null, preview, blockers: [{ rule: 'timeout', widget: null, detail: null }], reports: [], screenshot: null }); continue; }
-          result.screens.push({ id: screen.id, profile: screen.profile, viewport: null, preview, blockers: r.blockers, reports: [], screenshot: null });
+          if (r.timedOut) { result.screens.push({ id: screen.id, profile: screen.profile, viewport: null, state: state.id, preview, blockers: [{ rule: 'timeout', widget: null, detail: null }], reports: [], screenshot: null }); continue; }
+          // Flutter report 뷰포트 축(ADR-072#amend-5 결정 2) — PNG 파일명 `<screen>-<state>-<w>x<h>.png`에서
+          // 실제로 렌더된 (상태 × 뷰포트)를 읽어 (화면 × 뷰포트)마다 항목을 만든다. --snapshot 없이 돈 0건은
+          // 뷰포트 커버리지 증거가 없으므로 기존 viewport:null 항목 하나(하위 호환)만 낸다.
+          const shotPrefix = `${screen.id}-${state.id}-`;
+          let rendered = [];
+          try {
+            rendered = readdirSync(SHOTS).filter((f) => f.startsWith(shotPrefix) && f.endsWith('.png'))
+              .map((f) => { const m = f.slice(shotPrefix.length, -4).match(/^(\d+)x(\d+)$/); return m ? { w: Number(m[1]), h: Number(m[2]) } : null; })
+              .filter(Boolean);
+          } catch { rendered = []; }
+          if (!rendered.length) {
+            // PNG 0건은 «커버리지 0» 이 아니라 «측정 불가» 다 — 둘을 구분해 기록한다(ADR-073#amend-2 결정 3과 같은 원칙).
+            // 침묵하면 R4 group/PNG 규약 미적용이 통과로 읽힌다(ADR-072#amend-5 falsifier (a)의 관측 지점).
+            const expected = stateRenderViewports(state, viewports).filter((v) => !v.geometryOnly);
+            result.screens.push({ id: screen.id, profile: screen.profile, viewport: null, state: state.id, preview, blockers: r.blockers,
+              reports: [{ rule: 'viewport-coverage-unavailable', state: state.id, detail: `PNG 0건 — R4 group/PNG 규약 미적용이라 뷰포트 커버리지를 측정할 수 없다(기대 ${expected.map((v) => `${v.w}x${v.h}`).join(',') || '없음'})` }],
+              screenshot: null });
+            continue;
+          }
+          const expectedViewports = stateRenderViewports(state, viewports).filter((v) => !v.geometryOnly);
+          let firstEntry = true;
+          for (const vp of expectedViewports) {
+            const hit = rendered.find((rv) => rv.w === vp.w && rv.h === vp.h);
+            const reports = hit ? [] : [{ rule: 'viewport-coverage', state: state.id, detail: `expected ${vp.w}x${vp.h}, rendered ${rendered.map((rv) => `${rv.w}x${rv.h}`).join(',') || '없음'}` }];
+            // blockers는 flutter test 실행 1회(화면 전체)의 결과라 뷰포트별로 갈라지지 않는다 —
+            // 이중 집계를 막기 위해 그 상태의 첫 뷰포트 항목에만 붙인다.
+            result.screens.push({ id: screen.id, profile: screen.profile, viewport: { w: vp.w, h: vp.h }, state: state.id, preview, blockers: firstEntry ? r.blockers : [], reports, screenshot: hit ? join(SHOTS, `${screen.id}-${state.id}-${vp.w}x${vp.h}.png`) : null });
+            firstEntry = false;
+          }
           continue;
         }
         let url;
@@ -445,6 +513,12 @@ async function runManifestMode(opts, ctx) {
         const stateViewports = stateRenderViewports(state, viewports);
         const entries = await renderScreen({ browser, AxeBuilder, url, name, viewports: stateViewports, textScale: state.render && state.render.textScale, fonts: (profile.fonts || []) });
         for (const e of entries) result.screens.push({ id: screen.id, profile: screen.profile, viewport: e.viewport, preview, blockers: e.blockers, reports: e.reports, screenshot: e.screenshot });
+      }
+      // 하네스 주입 정적 관찰(기록 등급) — ADR-072#amend-5 결정 4. 화면당 1회, 첫 항목에 붙인다.
+      const injectionReports = checkHarnessInjection(screen, scope);
+      if (injectionReports.length) {
+        const firstIdx = result.screens.findIndex((s) => s.id === screen.id);
+        if (firstIdx >= 0) result.screens[firstIdx].reports = [...(result.screens[firstIdx].reports || []), ...injectionReports];
       }
       // 승인 스냅샷은 «통과한 화면»만 동결한다(ADR-072 D4) — 차단된 화면이 기존 승인본을 덮어쓰면 기준선이 오염된다.
       const screenBlocked = result.screens.some((s) => s.id === screen.id && (s.blockers || []).length);
@@ -537,10 +611,16 @@ async function runSelfTest(opts) {
     const dir = mkdtempSync(join(tmpdir(), 'design-gate-self-manifest-'));
     const goodFile = join(dir, 'good.html');
     writeFileSync(goodFile, knownGoodHtml());
+    // 렌더 조건 자가 검사(e)용 두 번째 known-good — narrow 상태가 320x720 조건에서만 렌더되는지 본다(ADR-072#amend-5 결정 3).
+    const good2File = join(dir, 'good2.html');
+    writeFileSync(good2File, knownGoodHtml());
     const tmpManifest = {
       version: 1, milestone: 'self-test',
       profiles: { default: { viewports: [{ w: 1280, h: 900 }] } },
-      screens: [{ id: 'self-good', feature: 'self-test', profile: 'default', scope: (opts.scopes && opts.scopes[0]) || '.', preview: 'url:' + goodFile, states: [{ id: 'default', preview: 'url:' + goodFile, baseline: true }] }],
+      screens: [{ id: 'self-good', feature: 'self-test', profile: 'default', scope: (opts.scopes && opts.scopes[0]) || '.', preview: 'url:' + goodFile, states: [
+        { id: 'default', preview: 'url:' + goodFile, baseline: true },
+        { id: 'narrow', preview: 'url:' + good2File, baseline: true, render: { viewports: [{ w: 320, h: 720 }] } },
+      ] }],
     };
     const manifestPath = join(dir, 'manifest.json');
     writeFileSync(manifestPath, JSON.stringify(tmpManifest, null, 2));
@@ -550,6 +630,9 @@ async function runSelfTest(opts) {
     const cBlockers = c.result.screens.flatMap((s) => s.blockers);
     const cPass = cBlockers.length === 0 && existsSync(join(snapDir, 'self-good-default-1280x900.png'));
     cases.push({ case: 'c-manifest-url', pass: cPass });
+    const narrowEntry = c.result.screens.find((s) => s.preview === 'url:' + good2File);
+    const ePass = existsSync(join(snapDir, 'self-good-narrow-320x720.png')) && !!narrowEntry && !!narrowEntry.viewport && narrowEntry.viewport.w === 320;
+    cases.push({ case: 'e-render-condition', pass: ePass });
     rmSync(dir, { recursive: true, force: true });
 
     for (const scope of flutterSelfTestScopes(opts.scopes)) {
@@ -575,8 +658,12 @@ function runTokensOnly(opts) {
   // 18건 중 6건이 카피 문구 오탐이었다. 스타일시트에서만 단축 hex 를 잡고, 코드 파일에서는 6·8자리만 잡는다.
   // 대가: 코드에 직접 쓴 `#abc` 형태의 단축 색은 놓친다(토큰 규율상 코드에는 색 리터럴 자체를 두지 않는다). (ADR-072#amend-1)
   const STYLE_FILE = /\.(css|scss|sass|less)$/i;
-  const LITERAL_STYLE = /#[0-9a-f]{3,8}\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.\w+\b|\b\d+px\b/g;
-  const LITERAL_CODE = /#[0-9a-f]{6}(?:[0-9a-f]{2})?\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.\w+\b|\b\d+px\b/g;
+  // `Colors.transparent`는 «색을 칠하지 않는다»는 뜻이라 토큰화 대상이 아니다 — stabilize 5-2와 정합(ADR-072#amend-5 결정 1).
+  const LITERAL_STYLE = /#[0-9a-f]{3,8}\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.(?!transparent\b)\w+\b|\b\d+px\b/g;
+  const LITERAL_CODE = /#[0-9a-f]{6}(?:[0-9a-f]{2})?\b|\[#[0-9a-f]{3,8}\]|Color\(0x[0-9a-fA-F]{6,8}\)|\bColors\.(?!transparent\b)\w+\b|\b\d+px\b/g;
+  // JS 스타일 객체(`style={{ … }}`/`style: { … }`)의 단위 없는 리터럴 — 0·1은 토큰 대상이 아니고 `lineHeight`는 배수라 제외(ADR-072#amend-5 결정 1).
+  const STYLE_OBJECT_LINE = /style\s*(=\s*\{\{|:\s*\{)/;
+  const STYLE_PROP_LITERAL = /\b(width|height|maxWidth|minWidth|maxHeight|minHeight|margin\w*|padding\w*|top|left|right|bottom|gap|fontSize|borderRadius)\s*:\s*(?:[2-9]|[1-9]\d+)\b/g;
   const tokens = [];
   const unreadable = [];
   for (const item of expandInputs(opts.files)) {
@@ -590,6 +677,10 @@ function runTokensOnly(opts) {
       if (DEFINE_LINE.test(line)) return;
       const matches = line.match(literal);
       if (matches) for (const m of matches) tokens.push({ file, line: i + 1, literal: m });
+      if (!STYLE_FILE.test(file) && STYLE_OBJECT_LINE.test(line)) {
+        const styleMatches = line.match(STYLE_PROP_LITERAL);
+        if (styleMatches) for (const m of styleMatches) tokens.push({ file, line: i + 1, literal: m });
+      }
     });
   }
   const result = { version: 3, mode: 'tokens-only', tokens, unreadable, summary: { blockers: 0, reports: tokens.length, unavailable: unreadable.length } };

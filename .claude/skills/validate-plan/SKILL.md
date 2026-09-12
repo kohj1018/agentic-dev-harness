@@ -40,7 +40,7 @@ allowed-tools: Read Glob Grep Write
   세 단계 모두 결과 0건이면 *"하위 문서 회수 0건"* 한 줄 echo 후 본 workitem만 회수하고 진행 (자동 차단 X).
 - `docs/30-workitems/_templates/MILESTONE_TEMPLATE.md`, `FEATURE_TEMPLATE.md`, `TASK_TEMPLATE.md` (양식 정합 점검용)
 
-**회수 예산 (ADR-075 D11 (b))**: 본 skill은 세션 인라인 실행이다 — 회수 문서가 10개를 넘으면 아래 «큰 milestone budget 가이드»대로 JIT 회수한다(한 번에 전부 읽지 않는다). Round 12의 실측(reviewer subagent에 위임해 15+ 문서를 한 dispatch로 → 상한 중단)은 위임 실행의 기록이며, 위임해 돌릴 때는 D11 (b)대로 축·범위를 나눈다.
+**회수 예산 (ADR-075 D11 (b))**: 본 skill은 세션 인라인 실행이다 — 회수 문서가 10개 이상이면 아래 «큰 milestone budget 가이드»대로 JIT 회수한다(한 번에 전부 읽지 않는다). Round 12의 실측(reviewer subagent에 위임해 15+ 문서를 한 dispatch로 → 상한 중단)은 위임 실행의 기록이며, 위임해 돌릴 때는 D11 (b)대로 축·범위를 나눈다.
 
 **큰 milestone budget 가이드 (ADR-019 minimal/JIT 정합)**: 산하 task 합산 ≥10개면 다음 순서로 budget — (a) feature 문서 전체 + 각 task `## 6 AC` 섹션만 1차 회수, (b) 그 결과로 P0 의심 task 후보를 좁힌 뒤 (c) 후보 task 본문 전체를 깊게 읽는다. 모든 task 본문을 사전 fork-load 금지.
 

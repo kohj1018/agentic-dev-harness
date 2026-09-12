@@ -108,7 +108,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 
 **Exit — 확정 재대조 (ADR-060 D6 / ADR-072 D8)**: 종료 전 마일스톤 `## 3` ↔ feature `## 3` ↔ feature `## 7` FAC 정합을 재대조한다(`## 7-1`은 shell). 불일치면 해당 라운드로.
 - **비-UI 마일스톤**: 재대조 통과 + `DECISION_REGISTER.md`의 이 M `영향:` 및 `(미할당)` `status: open` 0건일 때만 **feature 먼저, M 마지막** `contract-ready`. open이 남으면 보류 + D-NNN 보고. 원장 부재는 echo 후 skip.
-- **UI 마일스톤(산하 feature `Design:` 줄 ≥1)**: 재대조만 통과시키고 **`draft` 유지**. `contract-ready` 전환은 `/design-milestone M<N>`이 화면 층 정합(프로토타입↔`## 3`↔PX↔`## 9`)까지 본 뒤 수행한다. 출력에 «다음: `/design-milestone M<N>`».
+- **UI 마일스톤(산하 feature `Design:` 줄 ≥1)**: 재대조만 통과시키고 **상태는 그대로 둔다**(최초 작성이면 `draft`, `contract-ready` 재진입이면 `contract-ready` — 강등 전이 없음, ADR-072#amend-5 결정 8). `contract-ready` 전환은 `/design-milestone M<N>`이 화면 층 정합(프로토타입↔`## 3`↔PX↔`## 9`)까지 본 뒤 수행한다. 출력에 «다음: `/design-milestone M<N>`».
 **`contract-ready`는 잠금이 아니다** — task 분해 진입 자격일 뿐이며, 분해 중 상위 계약 결함이 드러나면 `/repair-plan`이 그 자리에서 고친다. 잠금은 `/seal-milestone`이 `ready`를 부여할 때 발생한다.
 
 **계획 잠금 (ADR-060 D6/D7)**: M/F/task 계획은 `/seal-milestone`이 `ready`를 부여한 시점부터 잠긴다. 그 전(`draft`·`contract-ready`)에는 feature 추가·FAC 수정·프로토타입 갱신·task 수정이 모두 정상 경로다. `ready` 이후의 변경은 다음 마일스톤(M<N+1>)이 기본이고, 구현이 시작되면 task 계획도 변경하지 않는다(근본 충돌은 사용자 중단·보고).
@@ -120,7 +120,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 - 사용자가 `/clear` 권장 — R0~R4 인터랙션이 다음 task 컨텍스트에 잡음.
 
 마지막 출력 ([WORKFLOW.md "스킬 종료 시 다음 단계 출력 contract"](../../../docs/00-meta/WORKFLOW.md) 양식 정합):
-- 생성·갱신한 문서 목록(상대 경로 — 마일스톤·feature) — (UI 마일스톤) `draft` 유지·화면 층은 `/design-milestone M<N>`
+- 생성·갱신한 문서 목록(상대 경로 — 마일스톤·feature) — (UI 마일스톤) 상태 유지·화면 층은 `/design-milestone M<N>`
 - **로드맵 갱신됨: `docs/30-workitems/ROADMAP.md` (Done/Now/Next/Later 반영 — ADR-057#amend-1)**
 - 마일스톤 ↔ feature 구조 한 줄 요약
 - 핵심 가정

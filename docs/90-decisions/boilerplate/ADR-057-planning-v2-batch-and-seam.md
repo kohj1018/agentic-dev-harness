@@ -172,7 +172,7 @@ D5상 `## 현재 유효 결정`의 plan-workitem 진입 줄도 이 M 단위 전�
 - docs/00-meta/PROJECT_START_CHECKLIST.md (F-NNN 단일 제거 — §4.12c)
 - docs/00-meta/STRUCTURE.md (프로토타입 producer의 `--prototype` 재진입 표기 제거 — §4.12c)
 - docs/90-decisions/boilerplate/ADR-007-workitem-lifecycle.md (lifecycle 표 정정 — §4.12c f)
-- docs/90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md (amend-3 단일 feature 문구 정정 — §4.12c j) (현재 SSOT: ADR-075)
+- docs/90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md (D4 단일 feature 문구 — §4.12c j)
 - .claude/skills/repair-milestone/SKILL.md (다음 액션 `M<N>` 전체 + per-task 결함은 status를 직접 쓰지 않고 repair-workitem 위임 — §4.12c h·§4.12d h) (부분 supersede: ADR-068 D1)
 - .claude/skills/repair-plan/SKILL.md (첫 구현 전 ready 문서 제자리 수정·self-check, 미완 시 review 파일 보존, 구현 시작 후 변경 거부 — 결정 5d, §4.12d)
 - .claude/skills/repair-workitem/SKILL.md (검증된 결함 시 `done → in-progress` 재개방 — §4.12d h) (부분 supersede: ADR-068 D1)
