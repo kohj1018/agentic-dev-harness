@@ -9,6 +9,12 @@ accepted
 > 대체: [ADR-056](ADR-056-milestone-experience-contract.md)을 supersede한다(비결정 «프로토타입 코드의 구현 재사용 — 스펙이지 코드가 아니다»를 뒤집고, R5 라운드를 `/plan-milestone`에서 분리한다). ADR-056은 `superseded`로 history 잔존. 경험 계약의 목적(사용자 승인 artifact가 오라클, 구현 전 시각 확인, PX 커버리지, §10 voice 집행, 전환표)은 전부 승계한다. 디자인 워크플로우(R0~R6)는 [ADR-058](ADR-058-design-workflow.md), DESIGN.md 내용은 [ADR-073](ADR-073-interface-and-design-content-v2.md).
 > 부분 supersede: ADR-058#amend-1 결정 5·6, #amend-2 전부(게이트 실행물 계약) → 본 ADR D6. [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7 «봉인 전 구현 없음» → 본 ADR D5의 UI 제작 계약이 명시 예외. [ADR-009](ADR-009-tdd-default.md) TDD 기본 → D5가 시각 탐색 코드에 한해 Red-first를 면제. [ADR-059](ADR-059-flutter-mobile-profile.md) D12 native degrade → #amend-1이 갱신. 각 ADR에는 참조 갱신 줄만 둔다.
 
+## 현재 유효 결정
+- `/design-milestone M<N>`이 UI M의 화면 층(브리프 → 코드 프로토타입 → 게이트·스냅샷 → contract-ready)을 소유한다(D1~D4·D8). 재진입 3경로, 봉인 뒤 변경은 다음 M.
+- UI 제작 계약(D5): presentational만·가짜 Red 금지·재사용 추적·행동 변경은 인터랙션 계약 기준(D5-3-1)·공용 컴포넌트 변경은 supersedes.
+- 게이트 v3(D6): 매니페스트 모드·자가 검사·copied-from. PM `--`·케이스 수·단축 hex(#amend-1), Flutter 뷰포트별 report + viewport-coverage(#amend-5).
+- 계획은 승인 표면과 대조한다(#amend-2 3-S). 미리보기 하네스는 provider만(#amend-3). A/B는 상태로 모델링 + 원장 행(#amend-4). 승인본 충실도 묶음(#amend-5).
+
 ## 배경
 - [관측됨] 프로토타입이 HTML이라 같은 화면을 구현 때 React/Flutter로 다시 만든다. Flutter는 HTML과 간극이 커 §3-V 대조가 native에서 서지 않는다(ADR-059 D12). ADR-056은 «스펙이지 코드가 아니다»를 비결정으로 못 박았으나 이중 제작 비용이 사용자 fork에서 반복 보고됐다.
 - [관측됨] plan-milestone R0~R4 뒤 R5 HTML 왕복이 컨텍스트를 소진해 skill 스스로 «feature 3+면 /clear 후 재실행»을 안내한다.

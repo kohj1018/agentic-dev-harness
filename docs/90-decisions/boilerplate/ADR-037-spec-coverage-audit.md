@@ -9,6 +9,7 @@ accepted
 - feature `## 7` FAC와 `## 7-1` FAC↔AC 매핑이 coverage SSOT다(#amend-1); 대화 출력은 요약만 둔다(#amend-2).
 - `/plan-workitem M<N>`은 FAC↔AC 100%와 unmapped 0건을 task ready 승격 조건으로 삼는다. 첫 구현 전 validate/reviewer는 누락을 P0로 보고하고 repair-plan이 task·AC·매핑을 수정한다(#amend-3).
 - 구현 시작 뒤 unmapped FAC는 `P0 [Spec-gap]`+`Needs Fix`, stabilize graduation `NO`로 사용자에게 보고한다. 현재 M task 자동 추가·FAC 자동 취소·plan-workitem 재호출은 없다(#amend-3, ADR-057#amend-3 결정 6, 기록 위치는 QA_FINDINGS — ADR-073#amend-2 결정 4).
+- `## 7-1`(·`## 7-3`) 우변에 «승인 스냅샷 <경로> (manifest: <screen id>) — 증명: …» 형식을 허용한다 — 승인 산출물이 경로로 실재하고 이번 M의 어느 task도 그 화면 `source[]`를 안 건드릴 때만. 그 행은 unmapped가 아니며 seal이 조건을 재확인한다(#amend-4). 증명 문장 규율은 ADR-072#amend-2 결정 4.
 
 > **부분 supersede (2026-07-29)**: #amend-3의 "FAC↔AC 100%가 task `ready` 승격의 필수 조건"에서 **승격 주체는 [ADR-060](ADR-060-decision-closure-and-milestone-seal.md) D7의 `/seal-milestone`**이다(봉인 조건 4). plan-workitem은 unmapped 발견 시 성공 종료를 막고 task를 `draft`에 둔다. 커버리지 요구 자체는 불변.
 

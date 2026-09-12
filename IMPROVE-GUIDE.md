@@ -926,7 +926,7 @@ STRUCTURE.md `presence` 절(17~26행) 아래에 결정 1의 (i)~(vii)를 명령 
   ```
   ## 현재 유효 결정
   - `/design-milestone M<N>`이 UI M의 화면 층(브리프 → 코드 프로토타입 → 게이트·스냅샷 → contract-ready)을 소유한다(D1~D4·D8). 재진입 3경로, 봉인 뒤 변경은 다음 M.
-  - UI 제작 계약(D5): presentational만·가짜 Red 금지·재사용 추적·행동 변경은 인터랙션 계약 기준(#amend-3-1)·공용 컴포넌트 변경은 supersedes.
+  - UI 제작 계약(D5): presentational만·가짜 Red 금지·재사용 추적·행동 변경은 인터랙션 계약 기준(D5-3-1)·공용 컴포넌트 변경은 supersedes.
   - 게이트 v3(D6): 매니페스트 모드·자가 검사·copied-from. PM `--`·케이스 수·단축 hex(#amend-1), Flutter 뷰포트별 report + viewport-coverage(#amend-5).
   - 계획은 승인 표면과 대조한다(#amend-2 3-S). 미리보기 하네스는 provider만(#amend-3). A/B는 상태로 모델링 + 원장 행(#amend-4). 승인본 충실도 묶음(#amend-5).
   ```
