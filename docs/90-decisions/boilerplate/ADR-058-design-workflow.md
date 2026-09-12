@@ -16,7 +16,7 @@ accepted
 ## 현재 유효 결정
 - `/bootstrap-design` 라운드 구조 SSOT는 본 ADR: R0(리서치 + `DESIGN_RESEARCH.md`) → R1(원칙 + voice 기본값) → R2(다중 concept 시안 — DESIGN.md 작성 *전* 시각 방향 선택) → R3(토큰) → R4(컴포넌트) → R5(DESIGN.md 저장) → R6(파생 preview 확인 + 정리).
 - **R0 = evidence-on-demand**(D2): AI 자율 리서치가 디폴트, 사용자 입력은 옵션 힌트. Layer A(방향)/B(값 grounding — 핀 URL)/C(포맷 — R5 fixture만). role 3종, counter-reference 조건부, 고정 쿼터 없음(coverage 정지, 최종 3~5개), 최소 기록 schema.
-- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). UI 판정 뒤 `/stack-guard`가 JIT canonical asset을 project-native `validate:design` adapter로 물질화하고, 고정 fixture conformance와 source digest를 통과한 v2만 사용한다(#amend-1·#amend-2). *진짜 품질 지렛대*.
+- **R2/R6 수용 게이트**(D3): full 모드는 concept마다 1280+375 렌더 + 독립 reviewer 픽셀 판정, 320 reflow·populated axe 상시, block/report 등급, repair loop(retry ≤2). UI 판정 뒤 `/stack-guard`가 게이트 v3 asset을 물질화하고 자가 검사를 통과시킨다(실행물 계약: ADR-072 D6). *진짜 품질 지렛대*.
 - **R2 시안 카드 = REFINE / EXPLORE**(D4): 안전/과감 아님. signature는 primary task 이해를 도울 때만.
 - 취향 오라클=사용자, 생성(designer)/감사(reviewer[design]) 분리 유지(D5).
 - **R0 레퍼런스 갤러리 절차(4층 소스 + 큐레이션 라운드)·R6 네이티브 테마 쇼케이스 — #amend-4.**
@@ -237,3 +237,23 @@ accepted
 - docs/20-system/DESIGN.md (§0 R0~R6 주석)
 - docs/00-meta/STRUCTURE.md
 - .gitignore
+
+<a id="adr-058-amend-5"></a>
+## Amendment 5 (2026-09-13) — visual-qa spec은 seed가 화면에 반영됐는지 먼저 단언한다
+
+### 배경
+- [관측됨] #amend-3 결정 2 «spec이 전제를 소유한다»는 spec이 seed를 넣는 것까지만 보장했다. Round 11에서 앱이 그 seed(`localStorage` 키)를 소비하지 않게 바뀌자 spec은 빈 화면을 검사하고 «통과»했다 — vacuous pass가 skip 대신 통과로 나타났다(발견 19).
+
+### 결정
+1. 생성되는 `visual-qa.spec`은 seed 주입 뒤 **대표 항목 1건이 화면에 실재함을 첫 단언**으로 둔다(`expect(page.getByText(seed.title)).toBeVisible()` 동형). 실패하면 spec 전체를 실패로 끝낸다 — 전제가 깨졌음을 알리는 것이 목적이다. Flutter integration_test의 seed도 같다.
+2. `## 현재 유효 결정` 셋째 불릿의 «고정 fixture conformance와 source digest를 통과한 v2만 사용한다(#amend-1·#amend-2)» 문구는 #amend-4 결정 4로 ADR-072 D6에 이관된 낡은 서술이므로 «UI 판정 뒤 `/stack-guard`가 게이트 v3 asset을 물질화하고 자가 검사를 통과시킨다(실행물 계약: ADR-072 D6)»로 정정한다.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = seed 미반영 상태를 통과로 판정 (관측됨). predicted = 전제 파손 시 spec이 첫 단언에서 실패. falsifier = 첫 단언이 정상 앱에서 timing 오탐을 내면 readiness 대기를 단언 앞에 둔다. rollback = 결정 1 삭제.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md — 6-4-1 «구현 앱 Visual-QA» 전제 처리 ①

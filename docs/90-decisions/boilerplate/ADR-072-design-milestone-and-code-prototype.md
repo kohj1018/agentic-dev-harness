@@ -60,7 +60,7 @@ accepted
 - **모드**: `--html <files|glob>`(concept HTML — bootstrap-design R2-G) / `--manifest <path> [--only <screen id,...>] [--snapshot <dir>] [--no-build]`(화면·쇼케이스 — R6·design-milestone·stabilize·validate-workitem) / `--self-test`(설치 시) / `--tokens-only <glob>`(토큰 외 리터럴 스캔 — 기록 등급, 렌더 출력을 건드리지 않는다). 렌더 모드(`--html`·`--manifest`·`--self-test`)만 `design-gate-shots/`를 초기화한다. 출력 `design-gate-shots/report.json` + 스크린샷. exit `0`(pass) / `1`(blocker) / `2`(실행 불가 — Needs Install·미정의 플래그·모르는 매니페스트 `version`). 자식 프로세스 기동 실패(EPERM·EACCES·ENOENT)는 exit 2, 기동 후 시간 초과·출력 초과는 exit 1(ADR-063 D1 spawn 3분기 승계).
 - **실행 scope(monorepo)**: 각 화면의 `scope`(기본 `.`)를 어댑터 명령의 **작업 디렉터리**로 쓴다 — `build-storybook`은 Storybook이 설치된 scope(예 `apps/web`), `flutter test`는 `pubspec.yaml`이 있는 scope(예 `apps/mobile`)에서 돈다. `source[]`·`preview` 파일 경로는 **그 화면의 `scope` 기준 상대**, `brief`·`snapshots[]`는 **매니페스트 디렉터리 상대**, 게이트 출력은 **저장소 루트 기준**으로 해석한다(`## 매니페스트 schema (v1)` 참조 — Flutter 러너에 넘기는 `DESIGN_GATE_OUT`도 루트 절대 경로다).
 - **웹 어댑터**: `preview: "story:<id>"` → Storybook 정적 빌드(`build-storybook -o design-gate-storybook/` — **매 실행 재빌드**; 같은 세션 반복에서만 `--no-build`로 재사용, mtime 캐시 없음) + 내장 정적 서버(임시 포트) → 화면의 `states[]` 각 `preview`(없으면 화면 `preview` 1개)를 `iframe.html?id=<id>&viewMode=story`로 프로필 뷰포트마다 fresh render → populated axe(serious/critical 차단, moderate/minor 보고) + 좁은 폭 geometry(page overflow·viewport escape·clipped text — 기존 v2 로직·오탐 제외 유지). `--html`은 `file://` 렌더로 같은 검사.
-- **Flutter 어댑터**: `preview: "flutter:<test file>"` → `flutter test <file> --reporter json`(위젯 테스트가 프로필 논리 크기 렌더 + `meetsGuideline` 4종 + `FlutterError`(RenderFlex overflow) 0 + PNG 저장 — 캡처 이름 `<screen>-<state>-<w>x<h>.png`). **`DESIGN_GATE_OUT` 은 프로세스 환경변수와 `--dart-define` 두 경로로 전달한다** — 한쪽만 주면 테스트가 반대쪽 API 로 읽었을 때 조용히 PNG 0장이 되고, 게이트는 `blockers: 0` 을 내므로 아무도 모른다(dogfood Round 12 실측) → 결과를 같은 report schema로 정규화. 차단 = guideline 실패·overflow·예외. **report 의 뷰포트 축은 Flutter 갈래에서 비어 있다 (2026-09-12)**: 웹은 화면×상태×뷰포트마다 `screens[]` 항목을 만들지만 Flutter 는 `flutter test` **실행 하나당 항목 1개**에 `viewport: null`·`screenshot: null` 이다. 따라서 **`--snapshot` 없이 돈 Flutter 항목의 `blockers: 0` 을 「뷰포트 커버리지 증거」로 읽지 마라** — 뷰포트 루프를 통째로 빠뜨린 테스트도 같은 항목을 만든다(발견 53). **승인 경로는 보호된다**: R6 은 `--snapshot` 을 요구하고 PNG 파일명 `<screen>-<state>-<w>x<h>.png` 이 뷰포트별 증거다. 테스트 이름을 파싱해 뷰포트별 항목으로 쪼개는 것은 탐지기이며 후속 라운드 후보다. **컴파일 오류·러너 기동 실패는 exit 2**(blocker가 아니라 실행 불가)로 구분한다.
+- **Flutter 어댑터**: `preview: "flutter:<test file>"` → `flutter test <file> --reporter json`(위젯 테스트가 프로필 논리 크기 렌더 + `meetsGuideline` 4종 + `FlutterError`(RenderFlex overflow) 0 + PNG 저장 — 캡처 이름 `<screen>-<state>-<w>x<h>.png`). **`DESIGN_GATE_OUT` 은 프로세스 환경변수와 `--dart-define` 두 경로로 전달한다** — 한쪽만 주면 테스트가 반대쪽 API 로 읽었을 때 조용히 PNG 0장이 되고, 게이트는 `blockers: 0` 을 내므로 아무도 모른다(dogfood Round 12 실측) → 결과를 같은 report schema로 정규화. 차단 = guideline 실패·overflow·예외. **report 의 뷰포트 축은 Flutter 갈래에서 비어 있다 (2026-09-12)**: 웹은 화면×상태×뷰포트마다 `screens[]` 항목을 만들지만 Flutter 는 `flutter test` **실행 하나당 항목 1개**에 `viewport: null`·`screenshot: null` 이다. 따라서 **`--snapshot` 없이 돈 Flutter 항목의 `blockers: 0` 을 「뷰포트 커버리지 증거」로 읽지 마라** — 뷰포트 루프를 통째로 빠뜨린 테스트도 같은 항목을 만든다(발견 53). **승인 경로는 보호된다**: R6 은 `--snapshot` 을 요구하고 PNG 파일명 `<screen>-<state>-<w>x<h>.png` 이 뷰포트별 증거다. 테스트 이름을 파싱해 뷰포트별 항목으로 쪼개는 것은 탐지기이며 후속 라운드 후보다(#amend-5 결정 2가 대체 — 현재 SSOT: 본 ADR #amend-5). **컴파일 오류·러너 기동 실패는 exit 2**(blocker가 아니라 실행 불가)로 구분한다.
 - **자가 검사(4케이스)**: `--self-test`는 (a) 내장 known-bad HTML — **규칙별 기대**: `page-overflow`(320) ≥1 · `color-contrast` ≥1 · `button-name` ≥1이 각각 blocker로 잡혀야 한다(합계가 아니라 규칙별 — 한 규칙의 다중 검출이 다른 규칙의 결함을 가리지 않게) (b) 내장 known-good HTML — blocker 0 (c) 내장 정적 HTML 2개를 임시 매니페스트(`preview: "url:<path>"`)로 서빙해 매니페스트 경로·report·`--snapshot` 저장까지 exit 0 (d) Flutter 프로젝트면 `test/design_gate/self_bad_test.dart`(known-bad: 탭 타겟 20px + 대비 2:1) 실패 + `test/design_gate/self_ok_test.dart`(known-good) 통과 — 컴파일 오류는 exit 2로 구분. 넷 다 기대와 같아야 `self-test: PASS`. 불일치 → `status: wiring-fail`. 통과하면 registry `status: ready (self-test PASS <YYYY-MM-DD>)`.
 - **registry 6필드**: `status | command template | adapter path | manifest 규약 | self-test 일자 | copied-from(복사 시 canonical sha256)`. caller는 `status: ready`만 확인한다(missing/n/a/needs-install/wiring-fail면 `Needs Design Gate: /stack-guard` + 승인 보류 — fail-closed 유지). `adapter path`는 stabilize §1.0 (a) 실재 검사용, `copied-from`은 stack-guard 재실행(사본 sha == copied-from이면 무수정 → 새 canonical로 교체 + copied-from 갱신, 다르면 diff 보고 + 사용자 결정)과 stabilize §1.0 (b)(canonical 현재 sha ≠ copied-from → `/stack-guard` 재실행 권장)에만 쓴다.
 - **품질 계약 불변**: ADR-058 D3(serious/critical axe·좁은 폭 geometry 차단, reviewer 픽셀 판정, repair ≤2, populated 전제). 토큰 외 리터럴 스캔은 문자열 검사라 기록 등급(ADR-063 D6) — design-milestone 승인 체크리스트가 «0건 또는 사유 기입»을 요구한다.
@@ -70,7 +70,7 @@ accepted
 - 웹: 매니페스트 `screens[]`마다 (a) 스토리 렌더(게이트 `--manifest`)와 (b) 제품 라우트 렌더(dev server + 매니페스트 `product_entry` — `null`이면 «제품 진입점 미기록» 사유 echo + (a) 대조만)를 프로필 뷰포트로 캡처해 `docs/40-validation/visual/M-N/`에 두고, **승인 스냅샷과 나란히** Read로 대조한다. Flutter: (a) 위젯 테스트 스냅샷 재생성 + (b) 통합 테스트 스크린샷(가능 시, 아니면 `blocked-on-env` 명시). 화면의 현재 기준선은 «가장 최근 M의 등록·supersedes»다(D5-5). **매니페스트에 없는 UI 화면**(`프로토타입 면제:` feature · 이전 M 승인본을 변경 없이 재사용하는 화면)도 제품 렌더 (b)는 만들어 ② 경로로 대조한다 — 순회 대상을 매니페스트로만 좁히면 ADR-056 결정 5의 면제·부재 화면 fallback이 사라진다. 앵커 위계: ① 승인 스냅샷(그 화면을 등록한 M의 것) ② DESIGN 파생 체크리스트. 불일치 `P1 [Experience-drift]` report-only(승계) — 봉인 AC·PX↔AC 위반을 동반해 재현되면 별도 P0 결함(ADR-070 D1). 실행 의무·silent skip 금지 승계.
 
 ### D8. `/plan-milestone` 분리
-R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 3` ↔ F `## 3` ↔ F `## 7` FAC)까지 하고 **`draft` 유지** + 출력 «다음: `/design-milestone M<N>`». 비-UI는 기존대로 `contract-ready`. draft UI M 재실행 시 R0~R4 완료면 재실행 없이 같은 안내를 낸다. `contract-ready` UI M의 텍스트 계약 수정은 plan-milestone, 화면 층 수정은 design-milestone 재진입.
+R5 라운드 제거. UI 마일스톤은 R4 뒤 텍스트 정합 재대조(M `## 3` ↔ F `## 3` ↔ F `## 7` FAC)까지 하고 **`draft` 유지**(최초 작성 한정 — #amend-5 결정 8) + 출력 «다음: `/design-milestone M<N>`». 비-UI는 기존대로 `contract-ready`. draft UI M 재실행 시 R0~R4 완료면 재실행 없이 같은 안내를 낸다. `contract-ready` UI M의 텍스트 계약 수정은 plan-milestone, 화면 층 수정은 design-milestone 재진입.
 
 ### D9. 하류 소비자 배선
 - `/plan-workitem` 입구 계약: `contract-ready` + feature `## 7` `프로토타입:`(매니페스트 screen id) 또는 `프로토타입 면제:`. 부재 시 `Needs Experience Contract` + «`/design-milestone M<N>`» 안내(ADR-007#amend-5 문구 갱신). task `## 3`에 `승인 UI 재사용` line item authoring, PX↔AC는 매니페스트 `px[]`에서.
@@ -354,7 +354,7 @@ dogfood Round 12 `today-list` 은 브리프 `## 13` 에 「E6 「습관 추가�
 ### 결정
 1. **A/B 를 상태로 모델링한다** — `구성 불확실` 화면은 선택이 렌더에 보이는 상태마다 `<state>-a`·`<state>-b` 두 상태를 매니페스트에 등록한다. 새 스키마 필드를 두지 않는다(`## 매니페스트 schema (v1)` 주석 참조). Flutter 위젯 테스트는 그 상태 id 로 group·PNG 이름을 낸다.
 2. **R4 가 원장 행을 만든다** — `구성 불확실` 화면마다 `DECISION_REGISTER.md` 에 `authority: user-choice` · `status: open` 행을 만들고 브리프 `## 13` 이 그 `D-NNN` 을 인용한다. 새 탐지기를 만들지 않는다 — **R7-3 의 기존 `open` 검사가 그대로 그물이 된다.**
-3. **R6-5 승인 체크리스트에 두 줄** — (i) 대상 화면 브리프 `## 13` 이 「없음」이거나 그 `D-NNN` 이 원장에서 `closed` 인가 (ii) A/B 화면은 **두 안의 렌더가 모두** `design-gate-shots/` 에 있는가.
+3. **R6-5 승인 체크리스트에 두 줄** — (i) 대상 화면 브리프 `## 13` 이 「없음」이거나 그 `D-NNN` 이 원장에서 `closed` 인가 (ii) A/B 화면은 **두 안의 렌더가 모두** `design-gate-shots/` 에 있는가(선택 전 시점 — #amend-5 결정 7 (iv)).
 4. **R5 는 선택 확정 후 재촬영한다** — 탈락 상태·코드·테스트를 지우고 남은 상태의 스냅샷을 다시 찍는다. 선택에 딸린 수치(하단 패딩 등)가 그때 확정되기 때문이다.
 
 ### 근거
@@ -374,3 +374,39 @@ dogfood Round 12 `today-list` 은 브리프 `## 13` 에 「E6 「습관 추가�
 
 ### 적용 surface
 - .claude/skills/design-milestone/SKILL.md — 결정 1·2·3·4 (R4·R5·R6-5)
+
+<a id="adr-072-amend-5"></a>
+## Amendment 5 (2026-09-13) — 게이트 보류 탐지기 4건 + 승인본 충실도 묶음 + R1 화면 정의
+
+### 배경
+- [관측됨] `--tokens-only`가 JS 스타일 객체의 단위 없는 숫자(`style={{ maxWidth: 640 }}`)를 잡지 못한다(발견 20). 반대로 stabilize 5-2는 `Colors.transparent`를 예외로 뒀는데 게이트는 아직 잡는다(불일치).
+- [관측됨] Flutter 어댑터는 `flutter test` 실행당 항목 1개에 `viewport: null`이라 뷰포트 루프를 빠뜨린 테스트도 `blocker 0`이다(발견 53). 규칙(«--snapshot 없는 0건을 커버리지 증거로 읽지 마라»)만 있고 report는 정직하지 않다. 테스트 이름에는 이미 `<w>x<h>`가 들어 있다.
+- [관측됨] 승인본이 결정을 담지 않은 세 사례(23 데코레이터 주입·58 렌더 조건 무시·69 글꼴 미적재)가 한 라운드에 나왔다. R6-5 체크리스트에 항목은 있으나 흩어져 있고, 자가 검사는 렌더 조건 적용을 검사하지 않는다.
+- [관측됨] 승인 컴포넌트의 행동 변경 규칙(D5-3-1)은 있으나 고지 누락을 아무도 보지 않는다(발견 40). 단일 라우트 앱에서 «화면»이 흔들렸다(발견 9).
+
+### 결정
+1. **`--tokens-only` 확장**: 코드 파일에서 같은 줄에 `style={{` 또는 `style: {`가 있으면 그 줄의 `\b(width|height|maxWidth|minWidth|maxHeight|minHeight|margin\w*|padding\w*|top|left|right|bottom|gap|fontSize|borderRadius)\s*:\s*(?:[2-9]|[1-9]\d+)\b`를 리터럴로 잡는다(0·1은 토큰 대상이 아니고 `lineHeight`는 배수라 제외). `Colors.transparent`는 제외한다(stabilize 5-2와 정합).
+2. **Flutter report 뷰포트 축(기록 등급)**: 어댑터는 `flutter test`가 `DESIGN_GATE_OUT`에 남긴 PNG 파일명 `<screen>-<state>-<w>x<h>.png`(ADR-072 D6의 기존 계약)에서 **실제로 렌더된 (상태 × 뷰포트)**를 읽어 (화면 × 뷰포트)마다 `screens[]` 항목을 만든다(`viewport: {w,h}`, `state` 필드 추가). 각 상태의 기대 뷰포트는 `states[].render.viewports`가 있으면 그것, 없으면 프로필 뷰포트다. 기대에 없는 (상태 × 뷰포트)는 `reports: [{ rule: 'viewport-coverage', state, detail: 'expected …, rendered …' }]`로 **보고**한다 — 차단이 아니다. **PNG가 하나도 없으면 `viewport: null` 항목 하나로 하위 호환하되 `reports`를 비우지 않고 `viewport-coverage-unavailable`(«측정 불가»)를 남긴다** — 「대상 0건」과 「위반 0건」을 구분하는 것은 ADR-073#amend-2 결정 3과 같은 원칙이고, 침묵하면 R4 규약 미적용이 통과로 읽혀 아래 falsifier (a)를 관측할 수 없다. 이유: 위젯 테스트의 group 이름에 `<w>x<h>`를 넣는 규약은 아직 어디에도 적혀 있지 않고(기존 복제본은 관행일 뿐), 문자열 검사만으로 차단 등급을 주지 않는다(ADR-063 D6). R4 생성 규칙과 builder ui-authoring 모드에 «상태·뷰포트마다 `group('<state> <w>x<h>')` + PNG 저장» 규약을 이번에 박고, 차단 승격은 그 규약이 실제 생성물에 들어간 다음 라운드 후보다. D6의 «--snapshot 없는 0건을 증거로 읽지 마라» 문장은 «report의 `viewport-coverage`와 PNG 파일명이 증거다»로 대체한다.
+3. **자가 검사 (e) 렌더 조건**: 임시 매니페스트에 두 번째 known-good HTML(`good2`)을 가리키는 상태 `{ id: 'narrow', preview: 'url:<good2>', baseline: true, render: { viewports: [{w:320,h:720}] } }`를 두고, `--snapshot` 결과에 `self-good-narrow-320x720.png`가 있고 report의 `preview`가 `good2`인 항목의 `viewport.w`가 320인지 본다(`baseline: true`가 없으면 스냅샷 분기가 그 상태를 건너뛴다 — 코드 455행 `isBaseline`).
+4. **하네스 주입 정적 관찰(기록 등급)**: `--manifest` 실행 시 웹은 화면 `source[]`의 `*.stories.*`에서 `decorators` 배열 안 JSX 태그 중 provider·wrapper 허용 목록(`ThemeProvider|MemoryRouter|div(style만)|Fragment`) 밖의 태그(`h1~h6|header|nav|main|footer|aside|p|span|button|a`)가 있으면, Flutter는 `test/screens/*_prototype_test.dart`의 `pumpWidget(` 인자 안에서 화면 위젯 밖에 `Scaffold(|AppBar(|Text(|Icon(`이 있으면 `reports: [{ rule: 'harness-injection-suspect', … }]`를 낸다. 차단 아님 — R6-5 «하네스 요소 0» 사람 확인이 여전히 관문이다.
+5. **행동 변경 고지 관찰(기록 등급)**: validator는 `승인 UI 재사용` task의 `source[]` diff에 행동 토큰(`on[A-Z]\w+\s*[:=]`, `setState(`, `useState(`, `useEffect(`, `useReducer(`, `useCallback(`, `Timer(`, `debounce|throttle`, `.then(`, `await `)이 있는데 task `## 8`(또는 repair `## 5`)에 `승인 컴포넌트 행동 변경:` 고지 줄이 없으면 `P2 [Design-behavior-drift] <file> — 고지 누락`을 낸다.
+6. **R1 화면 정의**: 화면은 라우트가 아니라 «사용자가 한 번에 보는 상태 묶음»이다. 단일 라우트 앱은 상태 묶음 단위로 화면을 도출하고, 브리프 첫 줄에 `- 화면 도출 메모: <라우트/상태 묶음 근거>`를 남긴다(D1 R1 부기).
+7. **R6-5 «승인본 충실도» 묶음**: 승인 체크리스트의 흩어진 항목을 한 묶음으로 둔다 — (i) 하네스 요소 0(#amend-3) (ii) 결정 글꼴 실재(ADR-073#amend-1) (iii) 렌더 조건 적용(스냅샷 파일명 `-<w>x<h>`·report viewport·`viewport-coverage` 0) (iv) A/B 화면은 **R5 선택 전**에 두 안의 렌더가 있었고, **선택 후**에는 선택본 렌더 + 원장 `D-NNN` `closed`(#amend-4 결정 3(ii)의 «두 안 모두 실재»는 선택 전 시점을 뜻한다 — 이 문장으로 정정) (v) 렌더 카피 = 브리프 카피. 하나라도 아니면 승인하지 않는다.
+8. **D8 재진입 상태 문구 정정**: «UI 마일스톤은 `draft` 유지»는 **최초 작성**의 규칙이다. `contract-ready` UI M을 텍스트 계약 수정으로 재실행하면 상태를 바꾸지 않는다(강등 전이 없음 — ADR-060 D6). plan-milestone Exit 문장을 «UI 마일스톤: 재대조만 통과시키고 **상태는 그대로 둔다**(최초 작성이면 `draft`, 재진입이면 `contract-ready`)»로 고친다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 7.
+- enabling(약): 결정 1·2·3·4·5·6·8.
+
+### Mutation delta (ADR-047 D3)
+- failure = 단위 없는 숫자 미검출 / Flutter 뷰포트 누락 침묵 / 렌더 조건 자가 검사 부재 / 주입·행동 변경 미관찰 / 재진입 상태 문구 충돌 (관측됨). predicted = Round 14 R6에서 `viewport-coverage` 0·자가 검사 (e) PASS, 주입 의심 report가 사람 확인과 일치, contract-ready 재진입이 상태를 바꾸지 않음. falsifier = (a) PNG 파일명 파싱이 정상 테스트에서 «rendered 없음»을 내면(테스트가 PNG를 안 남김) R4 규약 위반으로 분류하고 그 규약을 먼저 박는다 (b) harness-injection-suspect 오탐이 report의 절반을 넘으면 허용 목록을 넓힌다 (c) 결정 1이 카운트·인덱스 값을 잡으면 속성 목록을 좁힌다. rollback = 각 결정 개별 삭제.
+- 예산 영향 = validator(축 5)에 관찰 항목 1개 추가 — `maxTurns 16` 유지, slice 기준 무변경. 그 외 없음.
+
+### 적용 surface
+- .claude/skills/stack-guard/assets/design-gate.mjs — 결정 1·2·3·4
+- .claude/skills/design-milestone/SKILL.md — 결정 2(R4 group·PNG 규약·R6-2 문장)·6(R1)·7(R6-5)
+- .claude/skills/plan-milestone/SKILL.md — 결정 8 (Exit 문장)
+- .claude/agents/builder.md — 결정 2 (ui-authoring 모드의 위젯 테스트 group·PNG 규약)
+- .claude/agents/validator.md — 결정 5
+- .claude/skills/validate-workitem/SKILL.md — 결정 5 (UI 항목 한 줄)
+- .claude/skills/stack-guard/SKILL.md — 자가 검사 케이스 수 (e) 반영
