@@ -760,6 +760,7 @@ feat(design-gate): add style-object literals, per-viewport Flutter report from c
 ### P6-2. `repair-plan` — M 입력 시 산하 F·T 리뷰 파일도 회수
 현재: seal-milestone 80행은 `plan-reviews/`에서 `M<N>.*.md` **및 산하** `F-NNN.*.md`·`T-NNN.*.md`를 회수하고 차단 시 `/repair-plan M<N>`을 안내하는데, repair-plan 18행은 `docs/40-validation/plan-reviews/<workitem-id>.*.md` glob 하나만 본다. F-001 리뷰만 있으면 «리뷰 없음»으로 끝난다.
 변경: repair-plan 18행 `1. 임시 리뷰 파일 회수: `docs/40-validation/plan-reviews/<workitem-id>.*.md` glob.` → `1. 임시 리뷰 파일 회수: `docs/40-validation/plan-reviews/<workitem-id>.*.md` glob. **입력이 `M<N>`이면 산하 feature·task id도 회수 대상이다** — 마일스톤 문서 `## 3`의 feature 링크와 각 feature 문서의 task 링크에서 id를 모아 `F-NNN.*.md`·`T-NNN.*.md`도 glob한다(seal-milestone 조건 8과 같은 집합).` 5-D 영속 위치는 파일이 가리키는 workitem 타입으로 정한다(기존 규칙 그대로).
+**회수만 넓히면 삭제가 막힌다** — 수행 6의 마지막 점검(`<workitem-id>.` 접두 정합)과 책임 경계(«본 workitem ID의 plan-review 파일만 삭제»)가 산하 `F-NNN.*.md`를 거부한다. 둘 다 **«삭제 허용 집합 = step 1에서 회수한 경로 목록»**으로 바꾼다(접두 검사는 «회수 대상 id 집합» 기준).
 커밋: `fix(repair-plan): collect child feature and task review files for a milestone id`
 
 ### P6-3. `repair-plan` — 마일스톤 층(전 task done) 분기
@@ -769,6 +770,7 @@ feat(design-gate): add style-object literals, per-viewport Flutter report from c
    - **`ready` + `- 봉인일:` 채워짐 + 산하 task 전부 `done`** (= 마일스톤 층, ADR-068 D1): 계획을 수정하지 않고 task 문서에도 쓰지 않는다. finding은 **후속 수리 스킬이 읽는 원장**에 open으로 등재한다 — 결함(계약 위반)은 `QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2`에 `- 출처: peer(plan-review)` + `status: open` + `decision: needs-confirmation`(3필드)으로, 개선은 `IMPROVEMENT_GUIDE.md ## 2. 열린 항목`의 `### M<N>` 그룹에 `status: open`으로. `## 5`에는 «판정 이력 + 등재 ID 링크» 한 줄만 남긴다. 라우팅은 결함이면 `/repair-milestone M<N>`, 수용 라운드 finding이면 `/repair-acceptance M<N>`, 새 범위면 M<N+1> 후보다. review 파일은 (iii)대로 삭제한다.
 ```
 5-D `**영속 위치 — workitem 타입별로 다름**` 표의 task 행 끝에 `(산하 task 전부 `done`이면 task `## 8` 대신 위 분기의 원장 — ADR-068 D1)` 부기.
+**책임 경계도 함께 연다** — 현재 «QA_FINDINGS 수정 금지» + 예외 2가지(5-D의 `## 5`, 4-D의 원장)뿐이라 새 분기가 쓰라는 `QA_FINDINGS`·`IMPROVEMENT_GUIDE ## 2`가 둘 다 금지에 걸린다. 예외를 **3가지**로 늘려 «마일스톤 층 분기에 한해» 그 둘의 append를 허용한다(다른 분기에서는 금지 유지).
 커밋: `fix(repair-plan): register milestone-layer findings in the ledgers repair skills actually read`
 
 ### P6-4. `accept-milestone`·`repair-acceptance` — 재확인 전용 라운드 (ADR-066 `## Amendment 2`)
@@ -801,7 +803,8 @@ ADR-066 끝에 append:
 - docs/30-workitems/_templates/MILESTONE_TEMPLATE.md — `## 11` `- 모드:` 줄
 - docs/00-meta/WORKFLOW.md — §5-1 미완 규칙 옆에 재확인 모드 한 줄
 ```
-스킬·템플릿 수정: accept-milestone 21행(`라운드 번호는 … +1이다.`) 뒤에 결정 1·2 문장(`ADR-066#amend-2`); 100행 `판정 + 라운드 번호(상한 3 중 N회차)` → `… + 모드(탐색 N회차 | 재확인 — 카운터 미소모)`; 109행 `미완` 문단 뒤에 «재확인 모드도 카운터를 올리지 않는다» 한 줄. repair-acceptance «수행 후» 3번 `- invalidated`가 1건 이상이면 … `/accept-milestone <M>`을 먼저 재실행한다` 끝에 `(재확인 모드 — 카운터 미소모, ADR-066#amend-2)`. MILESTONE_TEMPLATE 68행 `- 판정: <승인 | 보류(백로그 N건) | 미완(<사유> — 확인 K/M건)>` 앞에 `- 모드: <탐색 | 재확인 (카운터 미소모)>` 줄. WORKFLOW 76행 `미완` 규칙 문장 뒤에 `재확인 모드(마지막 이벤트가 `- invalidated`인 관측 AC만 확인)도 카운터를 소모하지 않는다(ADR-066#amend-2).`
+스킬·템플릿 수정: accept-milestone 21행(`라운드 번호는 … +1이다.`) 뒤에 결정 1·2 문장(`ADR-066#amend-2`); 100행 `판정 + 라운드 번호(상한 3 중 N회차)` → `… + 모드(탐색 N회차 | 재확인 — 카운터 미소모)`; 109행 `미완` 문단 뒤에 «재확인 모드도 카운터를 올리지 않는다» 한 줄. repair-acceptance «수행 후» 3번 `- invalidated`가 1건 이상이면 … `/accept-milestone <M>`을 먼저 재실행한다` 끝에 `(재확인 모드 — 카운터 미소모, ADR-066#amend-2)`. MILESTONE_TEMPLATE 68행 `- 판정: <승인 | 보류(백로그 N건) | 미완(<사유> — 확인 K/M건)>` 앞에 `- 모드: <탐색 | 재확인 (카운터 미소모)>` 줄.
+**모드를 실행 단계에도 건다** — 21행의 «+1»에 `(탐색 모드 기준)` 단서, **R2 1번의 «보완» 묶음은 재확인 모드에서 뽑지 않고 «필수»를 재확인 대상 AC로 좁힌다**, **R3(자유 탐색)은 재확인 모드에서 건너뛰고 그 사실을 `## 11`에 한 줄 남긴다**. 게이팅이 없으면 결정 2의 «탐색은 하지 않는다»가 본문 절차와 충돌한다. WORKFLOW 76행 `미완` 규칙 문장 뒤에 `재확인 모드(마지막 이벤트가 `- invalidated`인 관측 AC만 확인)도 카운터를 소모하지 않는다(ADR-066#amend-2).`
 커밋: `docs(adr): amend ADR-066 so re-confirmation rounds do not consume the acceptance round cap`
 
 ### P6-5. `repair-workitem` ↔ `validate-workitem` — exec-evidence 미확보 기록
@@ -825,7 +828,7 @@ ADR-066 끝에 append:
 현재: 수행 2~4가 architect가 Adopt를 확정해 DISCOVERY에 반영한다. 원장·승인·authority 언급이 없다. architect.md 41행은 «ADR-053 게이트가 발동한 결정은 네가 확정하지 않는다», ADR-060 D2는 제품 의도·범위·페르소나를 `user-choice`로 둔다. 이 스킬은 `context: fork, agent: architect`라 **사용자에게 실시간으로 물을 수 없다**(finalize-workitem이 같은 제약을 명문화).
 변경: 수행 2 뒤에 삽입:
 ```
-2-A. **authority 분기 (ADR-060 D2·D11 / ADR-053#amend-2)**: Adopt·Adopt-modified 후보 중 **페르소나·문제 정의·MVP 범위·비범위·핵심 가정처럼 Charter가 소비하는 절을 바꾸는 항목**은 architect가 확정하지 않는다. 본 skill은 fork 실행이라 사용자에게 묻지 못하므로 그 항목은 (i) `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `authority: user-choice` + `- 발견: discovery 리뷰 (<reviewer-tag>)`로 등재하고 (ii) DISCOVERY에는 반영하지 않으며 (iii) 마지막 출력에 그 항목의 Decision Brief 6블록을 실어 **사용자가 답한 뒤 원장을 닫고 DISCOVERY를 직접 고치거나 `/repair-discovery`를 재실행**하도록 안내한다. 4-D 이력에는 «원장 대기 D-NNN»으로 적는다. 리뷰 파일 삭제(수행 5)는 그대로다 — finding은 원장에 영속됐다.
+2-A. **authority 분기 (ADR-060 D2·D11 / ADR-053#amend-2)**: Adopt·Adopt-modified 후보 중 **페르소나·문제 정의·MVP 범위·비범위·핵심 가정처럼 Charter가 소비하는 절을 바꾸는 항목**은 architect가 확정하지 않는다. 본 skill은 fork 실행이라 사용자에게 묻지 못하므로 그 항목은 (i) `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `authority: user-choice` + `- 발견: discovery 리뷰 (<reviewer-tag>)`로 등재하고 (ii) DISCOVERY에는 반영하지 않으며 (iii) 마지막 출력에 그 항목의 Decision Brief 6블록을 실어 **사용자가 답한 뒤 원장을 닫고 DISCOVERY를 직접 고치도록** 안내한다 — 본 skill은 리뷰 파일이 0건이면 즉시 종료하므로(반드시 먼저 할 일 1) 수행 5에서 리뷰를 지운 뒤에는 재실행해도 진입하지 못한다. skill 경로로 반영하려면 `/validate-discovery`를 먼저 돌려 리뷰를 새로 만든다. 4-D 이력에는 «원장 대기 D-NNN»으로 적는다. 리뷰 파일 삭제(수행 5)는 그대로다 — finding은 원장에 영속됐다.
 ```
 책임 경계 줄 `charter·workitem·코드·다른 산출물 수정 금지.` 뒤에 `원장 append는 허용(ADR-060 D11 writer).`
 커밋: `fix(repair-discovery): route charter-shaping findings to the decision ledger instead of architect adoption`
@@ -905,7 +908,7 @@ ADR-059 끝에 append:
 ### 적용 surface
 - docs/00-meta/STRUCTURE.md — `### 보일러플레이트 갱신 절차` 소절
 ```
-STRUCTURE.md `presence` 절(17~26행) 아래에 결정 1의 (i)~(vii)를 명령 예시와 함께 `### 보일러플레이트 갱신 절차 (ADR-005#amend-3)` 소절로 적는다(P0-2b의 명령을 정리해 옮긴다).
+STRUCTURE.md `presence` 절(17~26행) 아래에 결정 1의 (i)~(vii)를 명령 예시와 함께 `### 보일러플레이트 갱신 절차 (ADR-005#amend-3)` 소절로 적는다(P0-2b의 명령을 정리해 옮긴다). **명령은 실행 가능해야 한다** — `git archive HEAD -- <경로> | tar -x`만 적으면 **현재 디렉터리에 풀린다**. 원본(`git -C <보일러플레이트>`)과 대상(`tar -x -C <fork>`)을 모두 넣는다.
 커밋: `docs(adr): amend ADR-005 with the boilerplate upgrade procedure`
 
 ### P6-13. 잔존 문구 정리

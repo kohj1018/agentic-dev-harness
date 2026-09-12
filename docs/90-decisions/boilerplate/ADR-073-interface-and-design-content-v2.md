@@ -98,7 +98,7 @@ DESIGN_SYSTEM 광의 SSOT / 영역별 3파일 분리 / UI의 ARCHITECTURE 흡수
 
 ## 대안과 제약 (ADR-053)
 - 플랫폼별 DESIGN 파일 분리 — 읽기 쉽지만 공통 규칙이 두 파일에서 어긋난다. 기각.
-- §10을 별도 VOICE.md로 — 파일 분리 기각(ADR-056 비결정 승계).
+- §10을 별도 VOICE.md로 — 파일 분리 기각(ADR-056(현재 SSOT: ADR-072) 비결정 승계).
 - 채택: 단일 파일 + 프로필 delta + 언어별 §10.
 
 ## 신뢰도
@@ -143,7 +143,7 @@ Medium — 내용 계약 확장의 효과는 design-eval 방법으로 재측정 
 - docs/00-meta/STRUCTURE.md                           — 산출물·Canonical Owner
 
 ## 참고
-- ADR-027(superseded — 본 ADR이 승계), ADR-031(직접 지원 범위 — 새 스택 진입 시 D1에 `## 7-N` 자리 신설), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
+- ADR-027(superseded — 본 ADR이 승계), ADR-031(직접 지원 범위 — 새 스택 진입 시 D1에 `## 7-N` 자리 신설), ADR-058(워크플로우), ADR-072(프로토타입·UI 제작 계약), ADR-056(superseded → ADR-072)(현재 SSOT: ADR-072), ADR-060 D9, ADR-071 D3, ADR-042#amend-1, ADR-059 D7, ADR-045, ADR-022.
 
 ## Amendment 1 (2026-09-12) — 폰트 «전달 방식» 결정에 대응하는 배선 단계가 없다
 

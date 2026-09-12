@@ -17,12 +17,13 @@ agent: architect
 수행:
 1. 모든 리뷰 파일의 발견을 한 표로(severity / category / 대상 섹션 / 설명 / 제안 / 리뷰어 태그).
 2. 각 항목 4결정 중 하나 + 한 줄 근거: **Adopt** / **Adopt-modified** / **Reject-false-positive** / **Reject-conflict**. P0>P1>P2 — **한 라운드에 모두 판정**(defer-drop 금지, ADR-038 정합).
+2-A. **authority 분기 (ADR-060 D2·D11 / ADR-053#amend-2)**: Adopt·Adopt-modified 후보 중 **페르소나·문제 정의·MVP 범위·비범위·핵심 가정처럼 Charter가 소비하는 절을 바꾸는 항목**은 architect가 확정하지 않는다. 본 skill은 fork 실행이라 사용자에게 묻지 못하므로 그 항목은 (i) `docs/10-charter/DECISION_REGISTER.md`에 `status: open` + `authority: user-choice` + `- 발견: discovery 리뷰 (<reviewer-tag>)`로 등재하고 (ii) DISCOVERY에는 반영하지 않으며 (iii) 마지막 출력에 그 항목의 Decision Brief 6블록을 실어 **사용자가 답한 뒤 원장을 닫고 DISCOVERY를 직접 고치도록** 안내한다 — 본 skill은 리뷰 파일이 0건이면 즉시 종료하므로(반드시 먼저 할 일 1) 수행 5에서 리뷰를 지운 뒤에는 재실행해도 진입하지 못한다. skill 경로로 반영하려면 `/validate-discovery`를 먼저 돌려 리뷰를 새로 만든다. 4-D 이력에는 «원장 대기 D-NNN»으로 적는다. 리뷰 파일 삭제(수행 5)는 그대로다 — finding은 원장에 영속됐다.
 3. 다중 리뷰어 충돌은 architect가 *제품 전략* 기준으로 어느 쪽이 더 정합한지 판단 + 근거 1줄(자동 다수결 X).
 4. Adopt/Adopt-modified 항목을 DISCOVERY.md에 반영 — 섹션 구조 유지, §12 Assumption Tracker / §14 Evidence / §15 Insight 정합 유지. **charter는 건드리지 않는다**(DISCOVERY=SSOT; charter sync는 `/bootstrap-project --apply`).
 4-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 + D1 정합): 본 라운드의 P0+P1 결정을 DISCOVERY.md `## 12. Assumption Tracker` *표 끝 아래의 보조 단락* `### Repair history`(없으면 신설)에 한 줄씩 append. 형식: `- repair-discovery <YYYY-MM-DD> [<reviewer-tag>] <severity> <category>: <결정> — <근거 ≤80자>`. P2는 영속 X.
 5. **삭제 전 echo 강제**: 삭제 대상 경로 목록 전체를 출력에 echo → *step 1에서 회수한 경로*를 한 개씩 `rm`(glob 재실행 X). 모든 경로가 `docs/40-validation/discovery-reviews/DISCOVERY.` 접두 + `.md` 접미인지 마지막 점검.
 
-책임 경계: charter·workitem·코드·다른 산출물 수정 금지. 자동 커밋 금지.
+책임 경계: charter·workitem·코드·다른 산출물 수정 금지. 원장 append는 허용(ADR-060 D11 writer). 자동 커밋 금지.
 
 마지막 출력: 처리 리뷰 수 + reviewer-tag 명단 / 결정별 카운트(Adopt·Adopt-modified·Reject-fp·Reject-conflict) / 수정된 DISCOVERY 섹션 / 결정 이력 영속화 (§12 Repair history append 줄 수) / 다중 리뷰어 충돌 결정 근거(있으면) / 삭제된 리뷰 파일 목록 / 다음 권장(`/bootstrap-project --apply`로 charter sync, 또는 M/F 미생성 시 `/plan-milestone`(ADR-057); 이미 draft M이 있으면 그 안에서 재검토, `ready` 잠금 M이면 다음 `/plan-milestone`(M+1) 범위로 반영).
 - **변경한 tracked 파일 목록**: <경로 나열>

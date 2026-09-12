@@ -6,7 +6,7 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash
 ---
 
-너의 역할은 스택이 확정된 직후 통합 검증 명령(`validate`)과 검증 스크립트를 생성하는 것이다.
+너의 역할은 스택이 확정된 직후 통합 검증 명령(`validate`)과 검증 스크립트를 생성하는 것이다. 본 skill은 메인 세션에서 직접 실행된다(ADR-050 D1).
 
 이 skill의 1단계 범위:
 - green-field 스캐폴드(공식 생성기 1종, harness 파일 미덮어쓰기) + 카탈로그 `설치: baseline` 행의 기초 라이브러리 설치 — 그 뒤에 probe·boot smoke·design gate·CI를 실제 코드 위에서 실측한다(ADR-071 D5·D6).
@@ -53,7 +53,7 @@ R0 — 운영 환경 가정 확인:
    6. Dart/Flutter면 수행 0 직후 `## Dart Source Roots`를 실측 갱신한다(생성기가 `lib/`·`test/`를 만들었으므로).
    7. 이 뒤 수행 1은 생성기 manifest의 `scripts`에 `validate*` 키를 **추가**한다(기존 키·의존 보존 — 덮어쓰기 금지). 도입부의 «Flutter는 `package.json`이 없으면 최소 형태로 생성» 규칙은 그 scope에 `pubspec.yaml`만 있고 `package.json`이 없을 때만 적용된다.
 0-H. **harness 경로 무결성 (실행 시작·종료 — ADR-071#amend-1)**: 수행 0의 2-1 보호 경로 검사는 *스캐폴드 복사 전후*만 본다. 그러나 본 skill 은 그 뒤로도 생성기·설치기·개발 서버를 돌리고, **그 도구들이 harness 파일을 고치는 사례가 실재한다** — 예: Next.js 16 의 `next dev` 는 실행할 때마다 `AGENTS.md`(없으면 `CLAUDE.md`)에 자기 규칙 블록을 append 하고 지워도 되살린다(`node_modules/next/dist/server/lib/generate-agent-files.js`). 그래서 **본 skill 실행 맨 앞과 맨 끝에** 보호 경로(`README.md` `README_ko.md` `LICENSE` `AGENTS.md` `CLAUDE.md` `docs` `.claude` `.codex` `.agents` `.boilerplate` `.github`)의 «파일 경로 + 내용 해시» 목록을 각각 만들어 대조한다(수행 0 2-1 과 같은 방법). 달라진 경로가 있으면 `Harness-path drift: <경로> — <추정 원인>` 을 출력에 남긴다. **자동으로 되돌리지 않는다** — 그 변경이 의도된 것일 수 있고(본 skill 이 `docs/00-meta/STACK_SETUP_PLAN.md` 를 갱신하는 것이 정상 경로다) 되돌리기는 사용자 결정이다. **본 skill 이 스스로 쓰는 파일**(`docs/00-meta/STACK_SETUP_PLAN.md`, `.gitignore`, `.gitattributes`)과 직전 skill 이 쓴 미커밋 문서는 대조 대상에서 뺀다. **이 대조도 루트 기준이다** — scope 하위에 새로 생긴 harness 이름 파일은 수행 0 2-0 이 담당한다. `AGENTS.md` 가 커졌으면 ADR-011 의 100줄 상한을 함께 확인해 출력에 줄 수를 적는다.
-1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다.
+1. `package.json`/`pyproject.toml`/`Makefile`/`Taskfile.yaml` 중 스택에 자연스러운 곳에 `validate` 진입점을 만든다. Flutter 포함 프로젝트는 `validate:ci`도 만든다 — test 단계만 `--exclude-tags golden`(`test/design_gate/` 제외 유지)이고 나머지 단계는 `validate`와 같다(ADR-059#amend-2).
 2. `scripts/verify.{sh,ps1,mjs,py}` 중 자연스러운 런타임 1종을 생성. 내용은 스택의 `format + lint + typecheck + test` 통합(아래 `## 스택별 verify 풀세트` 의 4단계와 같다 — 이 줄이 3단계로 남으면 수행-5 1회차의 format probe 가 갈 곳이 없고 `missing: format` 이 매 실행 발화한다). **이미 존재하면 덮어쓰지 않고 4단계 커버리지 부족만 출력에 보고한다**(아래 `## 재실행 계약` 표 정합).
 2-1. **harness 경로 배제 (ADR-063 D2)**: 생성하는 도구 config 중 **formatter / linter / 타입 검사 include / 테스트 커버리지 집계 / 의존성 그래프**의 검사 범위에서 아래를 제외한다 — 이들은 프로젝트 소스가 아니라 agent harness다.
    - `.claude/`, `.codex/`, `.agents/`, `.boilerplate/`
@@ -181,7 +181,7 @@ R0 — 운영 환경 가정 확인:
        - **새 프로젝트이고 앱 진입점이 결정적이면**: 프레임워크 수준 boot smoke 를 1개 생성한다. 내용은 *"앱이 기동하고 첫 프레임이 예외 없이 렌더된다"* 까지이며 **어떤 화면을 볼지 고르지 않는다**(화면 선택은 제품 결정이라 계획 단계 소관).
        - **기존 코드가 있거나 로그인·외부 의존이 필요해 부팅만으로 성립하지 않으면**: 생성하지 않고 `Needs E2E Smoke — /plan-workitem 이 작성 line item 을 authoring 해야 함` 을 출력한다.
        - 생성했든 아니든 결과를 `STACK_SETUP_PLAN.md ## E2E Smoke Registry` 에 **runtime target 별로 한 행씩** 기록한다. **`native/*` 는 클래스 표기이므로 행으로 쓰지 않는다** — `native/android` 와 `native/ios` 를 함께 선언했으면 **두 행**이고 `web` 까지 선언했으면 세 행이다(ADR-059 D8). 판정도 각 행마다 따로 난다 — 한쪽 target 의 통과를 다른 쪽 근거로 쓰지 않는다.
-     - **6-4-b. golden 초기 절차 안내 (runtime target 에 `native/*` 가 포함되고 화면이 있을 때)**: golden(픽셀 비교) 정답 사진은 **커밋하지 않으며 머신마다 로컬 생성**한다(ADR-059 D3). `.gitignore` 에 `**/test/**/goldens/` 와 `**/test/**/failures/` 가 있는지 확인하고 없으면 추가한다 — **`**/test/goldens/` 처럼 한 단계만 쓰면 안 된다**: golden key 는 그 테스트 파일이 있는 디렉터리 기준 상대경로라(`LocalFileComparator.basedir`) `test/widgets/foo_test.dart` 의 `goldens/foo.png` 는 `test/widgets/goldens/` 에 생성되고 한 단계 패턴에는 걸리지 않는다. 그리고 `STACK_SETUP_PLAN.md` 에 아래 절차를 1회성 안내로 기록한다 — *"새 체크아웃 직후 첫 `validate` 는 정답 사진 부재로 실패한다. `flutter test --update-goldens` 를 1회 실행하고 생성된 이미지를 육안 확인한 뒤 진행한다."* golden 테스트 위젯에는 `debugShowCheckedModeBanner: false` 를 준다. **재생성 규율도 함께 적는다** — *"`--update-goldens` 는 (a) 정답 사진이 아직 없을 때, (b) UI 를 의도적으로 바꾸고 새 모습을 육안 확인했을 때만 쓴다. golden 실패를 통과시키려고 덮어쓰지 않는다 — 그러면 회귀가 정답으로 굳는다."*
+     - **6-4-b. golden 초기 절차 안내 (runtime target 에 `native/*` 가 포함되고 화면이 있을 때)**: golden(픽셀 비교) 정답 사진은 **커밋하지 않으며 머신마다 로컬 생성**한다(ADR-059 D3). `.gitignore` 에 `**/test/**/goldens/` 와 `**/test/**/failures/` 가 있는지 확인하고 없으면 추가한다 — **`**/test/goldens/` 처럼 한 단계만 쓰면 안 된다**: golden key 는 그 테스트 파일이 있는 디렉터리 기준 상대경로라(`LocalFileComparator.basedir`) `test/widgets/foo_test.dart` 의 `goldens/foo.png` 는 `test/widgets/goldens/` 에 생성되고 한 단계 패턴에는 걸리지 않는다. 그리고 `STACK_SETUP_PLAN.md` 에 아래 절차를 1회성 안내로 기록한다 — *"새 체크아웃 직후 첫 `validate` 는 정답 사진 부재로 실패한다. `flutter test --update-goldens` 를 1회 실행하고 생성된 이미지를 육안 확인한 뒤 진행한다."* golden 테스트 위젯에는 `debugShowCheckedModeBanner: false` 를 준다. **재생성 규율도 함께 적는다** — *"`--update-goldens` 는 (a) 정답 사진이 아직 없을 때, (b) UI 를 의도적으로 바꾸고 새 모습을 육안 확인했을 때만 쓴다. golden 실패를 통과시키려고 덮어쓰지 않는다 — 그러면 회귀가 정답으로 굳는다."* golden 테스트 파일은 `@Tags(['golden'])`을 달고 `dart_test.yaml`에 `tags: golden:` 을 선언한다(ADR-059#amend-2).
      - e2e 대상이 아니면 6-3·6-4 를 skip 하되 6-2 toolchain 설치는 수행한다.
    - **6-4-1. design gate v3 어댑터 + Visual-QA scaffold (UI 한정 — ADR-072 D6 / ADR-058#amend-3)**:
      - **JIT read 경계**: 6-1이 UI 확정/의심일 때만 `.claude/skills/stack-guard/assets/design-gate.mjs`를 읽는다. 비-UI는 로드·복사·설치 없음(ADR-019).
@@ -365,11 +365,11 @@ git ls-files | grep -Ei '\.(jks|keystore|p12|mobileprovision|p8)$|key\.propertie
 - 비-Node 스택·비-UI 프로젝트는 본 항목 skip. *GUARDRAILS_STRATEGY "OS·런타임 종속 자동화 강제 X" 정합 — npm 의존이라 shared 기본값에는 넣지 않는다.*
 
 ## CI 생성 (ADR-025#amend-1)
-**아래 두 조건이 모두 참이면 `.github/workflows/validate.yml`을 기본 생성한다** — (i) git remote가 GitHub이고(`git remote -v`로 확인), (ii) 스택 판정이 끝나 통합 `validate` 명령이 존재한다. 생성 사실과 파일 경로를 출력에 명시하고, `docs/00-meta/STACK_SETUP_PLAN.md`에 `CI: generated (.github/workflows/validate.yml)` 한 줄을 기록한다.
+**아래 두 조건이 모두 참이면 `.github/workflows/validate.yml`을 기본 생성한다** — (i) git remote가 GitHub이고(`git remote -v`로 확인), (ii) 스택 판정이 끝나 통합 `validate` 명령이 존재한다. 생성 사실과 파일 경로를 출력에 명시하고, `docs/00-meta/STACK_SETUP_PLAN.md`에 `CI: generated (.github/workflows/validate.yml)` 한 줄을 기록한다(Flutter 포함이면 `CI: generated (.github/workflows/validate.yml, validate:ci — golden 제외, ADR-059#amend-2)`).
 - **`--no-ci` 플래그가 있으면 생성하지 않고** `CI: opt-out (사용자 지정)`을 기록한다.
 - 위 두 조건 중 하나라도 거짓이면(GitHub 아님·스택 미정) 생성하지 않고 **형식 권장 텍스트만** 출력하며 `CI: n/a (<사유>)`를 기록한다.
-- **이미 `.github/workflows/validate.yml`이 있으면 덮어쓰지 않는다** — `CI: existing (preserved)`를 기록하고 커버리지 부족만 출력에 보고한다(`## 재실행 계약` 정합). brownfield 첫 실행의 정상 결과이며 `generated`·`n/a` 어느 쪽으로도 적지 않는다.
-- **생성하는 YAML은 fresh runner에서 실제로 도는 것이어야 한다.** checkout 뒤 곧바로 `validate`만 부르면 런타임·의존성이 없어 실패한다. 감지한 스택에 맞춰 아래 3단계를 반드시 포함한다 — ① 런타임 setup(`actions/setup-node@v4` + `node-version` / `actions/setup-python@v5` / `actions/setup-go@v5` / `subosito/flutter-action@v2` 등 1종), ② 의존성 설치(수행-6-2와 같은 명령 — lockfile 있으면 frozen), ③ 통합 `validate` 실행. **e2e는 기본 워크플로에 넣지 않는다**(브라우저·device 프로비저닝이 필요해 실패 소음이 된다 — 별도 워크플로는 사용자 결정).
+- **이미 `.github/workflows/validate.yml`이 있으면 덮어쓰지 않는다** — `CI: existing (preserved)`를 기록하고 커버리지 부족만 출력에 보고한다(`## 재실행 계약` 정합). brownfield 첫 실행의 정상 결과이며 `generated`·`n/a` 어느 쪽으로도 적지 않는다. Flutter 포함이면 마지막 단계가 `validate`를 부르는지 확인하고, 그렇다면 golden 부재로 fresh runner에서 실패하므로 **`validate:ci`로 교체 권장** 한 줄을 출력에 남긴다(ADR-059#amend-2).
+- **생성하는 YAML은 fresh runner에서 실제로 도는 것이어야 한다.** checkout 뒤 곧바로 `validate`만 부르면 런타임·의존성이 없어 실패한다. 감지한 스택에 맞춰 아래 3단계를 반드시 포함한다 — ① 런타임 setup(`actions/setup-node@v4` + `node-version` / `actions/setup-python@v5` / `actions/setup-go@v5` / `subosito/flutter-action@v2` 등 1종), ② 의존성 설치(수행-6-2와 같은 명령 — lockfile 있으면 frozen), ③ 통합 `validate` 실행(Flutter 포함이면 `validate:ci`, 아니면 `validate` — ADR-059#amend-2). **e2e는 기본 워크플로에 넣지 않는다**(브라우저·device 프로비저닝이 필요해 실패 소음이 된다 — 별도 워크플로는 사용자 결정).
 로컬 PostToolUse hook 1-명령 설정 안내([GUARDRAILS_STRATEGY.md "## PostToolUse hook 매뉴얼 등록 절차"](../../../docs/00-meta/GUARDRAILS_STRATEGY.md))도 함께 출력:
 ```yaml
 name: validate

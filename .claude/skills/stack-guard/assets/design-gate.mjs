@@ -564,7 +564,7 @@ function knownBadHtml() {
 function knownGoodHtml() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>known-good fixture</title><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>body{margin:0;color:#17211b;background:#f4f6f3;font:16px/1.5 Arial,sans-serif} main{max-width:640px;margin:24px auto;padding:0 16px} button{min-height:44px;padding:0 18px;color:#fff;background:#1d5b3f;border:none;border-radius:6px}</style>
-</head><body><main><h1>정상 화면</h1><p>대비·오버플로우 없는 통제 화면.</p><button>확인</button></main></body></html>`;
+</head><body><main><h1>정상 화면</h1><p>대비·오버플로우 없는 통제 화면.</p><button>확인</button><div role="region" tabindex="0" aria-label="표 스크롤" style="overflow-x:auto;width:200px"><table style="width:400px"><tr><td><span>가로 스크롤 안 텍스트</span></td></tr></table></div></main></body></html>`;
 }
 
 async function selfTestCase(name, html, expectRules, { browser, AxeBuilder }) {

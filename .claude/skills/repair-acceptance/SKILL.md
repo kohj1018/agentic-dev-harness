@@ -96,7 +96,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Skill
 
 1. 고친 것의 즉시 검증은 5-V(자체 검증)가 담당한다.
 2. 전체 검증과 졸업 판정은 다음 `/stabilize-milestone <M>`이 담당한다.
-3. `- invalidated`가 1건 이상이면 그 관측 AC의 receipt 재발급을 위해 `/accept-milestone <M>`을 먼저 재실행한다.
+3. `- invalidated`가 1건 이상이면 그 관측 AC의 receipt 재발급을 위해 `/accept-milestone <M>`을 먼저 재실행한다(재확인 모드 — 카운터 미소모, ADR-066#amend-2).
 4. **커밋은 사용자가 한다.** 본 skill은 `git commit`을 실행하지 않으며(ADR-047 D7), 연쇄가 사라졌으므로 이 경로에서 `/finalize-workitem`이 커밋하는 일도 없다 — **commit owner는 사용자 하나다.**
 
 책임 경계:
@@ -120,7 +120,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Skill
 - 동일 패턴 전수 검색: 범위 내 N건 / 범위 밖 M건(경로)
 - `## 5. Repair decision log` append 줄 수 / status resolved 토글 수 / 삭제·보존한 세션 파일
 - 본 skill은 커밋하지 않는다 — 수정 파일과 원장 갱신을 **사용자가 직접 커밋한 뒤** 다음 단계로 진행한다. 재개방이 없으므로 이 경로에 `/finalize-workitem` 커밋분은 없다.
-- 후속 권장 (순서 고정): ① `- invalidated`가 1건 이상이면 `/accept-milestone <M>` 재실행(무효화된 관측 AC의 receipt 재발급) → ② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정. **사용자가 돌릴 `/validate-workitem`·`/finalize-workitem`은 없다.**
+- 후속 권장 (순서 고정): ① `- invalidated`가 1건 이상이면 `/accept-milestone <M>` 재실행(무효화된 관측 AC의 receipt 재발급, 재확인 모드 — 카운터 미소모, ADR-066#amend-2) → ② `/stabilize-milestone <M>` 재실행으로 졸업 판정 확정. **사용자가 돌릴 `/validate-workitem`·`/finalize-workitem`은 없다.**
 
 정책 근거: [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md) D2/D4/D5 (라우팅·판정·경계), [ADR-065](../../../docs/90-decisions/boilerplate/ADR-065-ac-verification-contract.md) D3 (receipt 형식·판독), [ADR-047](../../../docs/90-decisions/boilerplate/ADR-047-code-as-agent-harness.md) D7 (결정 이력 영속·commit owner), [ADR-005](../../../docs/90-decisions/boilerplate/ADR-005-ssot.md)#amend-1 (원장 배타 범위), [ADR-060](../../../docs/90-decisions/boilerplate/ADR-060-decision-closure-and-milestone-seal.md) D11. 재개방 폐지는 [ADR-068](../../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) D1 · [ADR-066](../../../docs/90-decisions/boilerplate/ADR-066-milestone-acceptance.md)#amend-1.
 

@@ -149,3 +149,28 @@ repair가 결함 하나를 고칠 때 **같은 패턴의 다른 출현을 저장
 - .claude/skills/repair-acceptance/SKILL.md
 - .claude/skills/repair-milestone/SKILL.md
 - .claude/skills/repair-workitem/SKILL.md
+
+<a id="adr-066-amend-2"></a>
+## Amendment 2 (2026-09-13) — 재확인 전용 라운드는 카운터를 소모하지 않는다
+
+### 배경
+- [관측됨] 보류 3회차 뒤 `/repair-acceptance`가 관측 AC를 `- invalidated`로 무효화하면 receipt를 다시 받을 라운드가 필요한데, 상한 3회가 이미 찼다. 상한의 목적은 «새 탐색을 무한히 반복하지 않는 것»이지 «수리한 것을 확인하지 못하게 하는 것»이 아니다.
+
+### 결정
+1. **모드 판정**: `/accept-milestone` R0는 산하 task `## 8`에서 modality가 `[사용자 관측]`·`[플랫폼 관측]`인 AC 중 **마지막 이벤트가 `- invalidated`인 AC**(= 재확인 대상)와, **receipt 이벤트가 한 번도 없는 AC**(= 미발급 대상)를 회수한다. 재확인 대상이 1개 이상이고 미발급 대상이 0개면 **재확인 모드**, 아니면 탐색 모드다. 판정 enum(`승인 | 보류 | 미완`)은 두 모드가 같다.
+2. **재확인 모드**: 재확인 대상 AC만 확인하고 `## 11`에 `- 모드: 재확인 (카운터 미소모)`를 적으며 `- 라운드:` 값을 올리지 않는다. 탐색(새 시나리오)은 하지 않는다. 단 **확인 중 발견한 계약 위반은 탐색 모드와 똑같이 `QA_FINDINGS.md`에 등재한다** — 미루지 않는다(그것이 P0면 판정은 `보류`).
+3. **탐색 모드**는 기존 규칙 그대로(상한 3회). 재확인 모드는 재확인 대상이 남아 있는 한 반복 가능하며 상한과 무관하다.
+4. 자동 검증 AC만 수리해 `- invalidated`가 0건이면 재확인 라운드는 필요 없다 — `/stabilize-milestone` 재실행이 경로다.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = 수리 뒤 재확인이 상한에 막힘 (관측됨). predicted = 보류 3회 뒤에도 수리 항목 재확인이 가능하고, 재확인 라운드가 새 탐색으로 변질되지 않음. falsifier = 재확인 모드에서 새 결함이 반복 등재되면 모드 판정(대상 AC 회수)이 새는 것 — 대상을 좁힌다. rollback = 결정 1~4 삭제.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/skills/accept-milestone/SKILL.md — R0 모드 판정 · `## 11` 기록 · 4 최종 출력
+- .claude/skills/repair-acceptance/SKILL.md — 수행 후 안내
+- docs/30-workitems/_templates/MILESTONE_TEMPLATE.md — `## 11` `- 모드:` 줄
+- docs/00-meta/WORKFLOW.md — §5-1 미완 규칙 옆에 재확인 모드 한 줄

@@ -103,7 +103,7 @@ ADR-010 Phase 1 wrapper 패턴 정합. `.agents/skills/validate-plan` + `.agents
 - docs/00-meta/STRUCTURE.md                        — 산출물 표(plan review) + Canonical Owner
 - docs/00-meta/WORKFLOW.md                         — §3 opt-in sub-loop
 - docs/00-meta/DELEGATION_STRATEGY.md              — 위임 트리거 echo
-- .gitignore                                       — plan-reviews/*.md + .claude/worktrees/
+- .gitignore                                       — plan-reviews ignore 항목(worktrees 디렉터리 항목 포함)
 - README.md / README_ko.md                         — flow 다이어그램
 
 ## 후속 작업

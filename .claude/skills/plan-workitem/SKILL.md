@@ -130,7 +130,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 2. 부재 → `## 7 FAC` 본문에서 *inline 매핑 표기*(예: `- FAC-1 → T-001:AC-1`) 휴리스틱 검출.
 3. 둘 다 부재 → `Spec Gap: <feature> 매핑표 부재 — legacy 문서 보강 권장` 라벨로 IMPROVEMENT_GUIDE에 P1 기록 + 다음 plan 라운드에서 `## 7-1` 보강.
 
-feature `## 11. 관련 문서`의 `Architecture-Iface:` / (UI 한정) `Design:` link 채움과 비해당 스택 줄 삭제, 그리고 Evidence/Insight 연결(`근거 insight: I-N` 기입 + Insight Backlog status 권장)은 feature 문서 *생성* 책임이므로 `/plan-milestone`가 담당한다 — 본 skill에서는 하지 않는다. 단, task 분해 중 입력 feature 문서에서 이 항목들이 *비어 있음*을 발견하면 plan 출력의 "남은 미결정 사항"에 `- feature <id> 링크/insight 미채움 — /plan-milestone 보강 권장` 한 줄로 surface한다(자동 수정 X).
+feature `## 11. 관련 문서`의 `Architecture-Iface:` / (UI 한정) `Design:` link 채움과 비해당 스택 줄 삭제, 그리고 Evidence/Insight 연결(`근거 insight: I-N` 기입 + Insight Backlog status 권장, ADR-035#amend-2)은 feature 문서 *생성* 책임이므로 `/plan-milestone`가 담당한다 — 본 skill에서는 하지 않는다. 단, task 분해 중 입력 feature 문서에서 이 항목들이 *비어 있음*을 발견하면 plan 출력의 "남은 미결정 사항"에 `- feature <id> 링크/insight 미채움 — /plan-milestone 보강 권장` 한 줄로 surface한다(자동 수정 X).
 
 ## --fast 모드
 prototype task 분해는 핵심 AC 1개만 가진 최소 task 로 OK (나머지 AC·NFR 점검은 "M2 이후 검토"). feature 의 `## 3 핵심 시나리오` / `## 7 FAC` / `## 8 NFR` *신설* 은 `/plan-milestone` 담당 — 본 skill 범위 아님.

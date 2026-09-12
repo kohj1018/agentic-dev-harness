@@ -73,7 +73,7 @@ AGENTS.md의 *"상위 문서 없이 하위 문서를 먼저 만들지 않는다"
   - **판정값 소유권**: `/validate-workitem`의 report 판정은 `Pass | Pending Acceptance | Needs Fix` 셋이다(ADR-065 D6). `/finalize-workitem`은 그 값을 읽어 분기할 뿐 관측 AC 전용 종료값을 따로 두지 않는다.
 - **receipt 발급만으로는 재validate가 필요 없다** — 졸업 item 4가 채점표가 아니라 task `## 8`을 직접 읽는다(ADR-068 D3). **코드가 바뀌어도 per-task 재validate를 하지 않는다** — 수용 라운드의 수리는 이미 마일스톤 층이므로, 검증은 `/repair-acceptance` 5-V의 넷(회귀 테스트 Green·교차 task `## 6-1` 매핑 실행·경계 smoke·`validate --changed`)과 다음 `/stabilize-milestone`의 통합 validate·e2e가 담당한다(ADR-068 D6).
 - 결함이 있으면 `/repair-acceptance <M>`이 3+1 판정으로 수리한다. 판별 질문은 «이 변경 줄을 기존 계약(AC·`## 3` line item·FAC·INV·승인 프로토타입·DESIGN)으로 거꾸로 추적할 수 있는가»이며, **그 답은 라우팅이 아니라 결정 이력의 `scope: in-AC | out-of-AC` 분류값**이다(ADR-066#amend-1). **어느 쪽이든 그 skill이 직접 고치고 task를 재개방하지 않는다** — `out-of-AC`면 계약 부채를 `IMPROVEMENT_GUIDE.md` `## 4. 보류 항목`에 `status: open`으로 등재한다. **사용자가 손으로 돌릴 `/validate-workitem`·`/finalize-workitem`은 없다.**
-- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**. 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
+- **판정이 `미완`이면**(환경 기동 실패·사용자 중단으로 필수 시나리오를 다 확인하지 못함) 환경 복구 또는 사용자 재개 후 `/accept-milestone <M>`을 재실행한다 — **라운드 카운터를 소모하지 않는다**. 재확인 모드(마지막 이벤트가 `- invalidated`인 관측 AC만 확인)도 카운터를 소모하지 않는다(ADR-066#amend-2). 판정 3종의 후속은 `/accept-milestone` 출력이 SSOT다.
 - 라운드 상한 3회. 초과분은 사용자 확인 후 다음 마일스톤으로 이관한다.
 
 ## 6. 의사결정 기록

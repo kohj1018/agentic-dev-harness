@@ -22,10 +22,22 @@
 - **reserved**: 번호 placeholder. 미생성. fork 사용자가 채우거나 dropped 처리.
 - **boilerplate-only**: 보일러플레이트 자체 검증·메타 자료. fork 후 read-only. 프로젝트 산출물 아님.
 
-**보일러플레이트를 갱신할 때 (기존 프로젝트에 새 버전을 반영할 때)** — 정책 SSOT: [ADR-005#amend-2](../90-decisions/boilerplate/ADR-005-ssot.md).
+**보일러플레이트를 갱신할 때 (기존 프로젝트에 새 버전을 반영할 때)** — 정책 SSOT: [ADR-005#amend-2·#amend-3](../90-decisions/boilerplate/ADR-005-ssot.md).
 - `presence: generated` 행은 **덮어쓰지도 지우지도 않는다.** 판정은 **위 표의 행 단위**로 한다 — 경로·디렉터리 단위로 판단하면 틀린다.
 - **디렉터리 통째 동기화(`rsync --delete`·`cp -R`)를 갱신 수단으로 쓰지 않는다.**
 - **혼합 디렉터리**: `docs/00-meta/`(baseline 문서 + `_templates/` + generated `STACK_SETUP_PLAN.md`) · `docs/90-decisions/`(`boilerplate/` baseline + `project/` generated).
+
+### 보일러플레이트 갱신 절차 (ADR-005#amend-3)
+갱신 단위는 위 `presence: baseline` 행이다. 순서:
+1. `.claude/agents/`·`.claude/skills/`·`.agents/`(+ tracked `.claude/settings.json`) — 전 행이 baseline인 경로만 옛 사본을 지우고 `git -C <보일러플레이트> archive HEAD -- <경로…> | tar -x -C <fork>`로 **tracked 파일만** 추출한다(`-C <fork>`가 없으면 현재 디렉터리에 풀린다 — 예: `rm -rf "$FORK/.claude/agents" "$FORK/.claude/skills" "$FORK/.agents" && git -C "$BP" archive HEAD -- .claude .agents | tar -x -C "$FORK"`)(통째 동기화 금지는 혼합 디렉터리가 대상이다 — 이 경로들은 전 행 baseline이라 예외 없이 적용 가능. 복제본의 `settings.local.json`·`worktrees/` 같은 로컬 파일은 남긴다).
+2. `docs/90-decisions/boilerplate/*.md` 파일 단위 복사(`project/`는 손대지 않음).
+3. `docs/00-meta/`의 baseline 문서 5종(STRUCTURE·WORKFLOW·DELEGATION_STRATEGY·GUARDRAILS_STRATEGY·PROJECT_START_CHECKLIST)과 `_templates/`, `docs/30-workitems/_templates/`를 파일 단위로 복사.
+4. `AGENTS.md`·`CLAUDE.md`·`.codex/`·`.gitignore`는 줄 단위 합집합(기존 줄 보존 + 신규 줄 추가).
+5. `git status --porcelain -- <generated 행 경로들>`이 비었는지 확인 — `presence: generated`·`conditional`·`ephemeral` 행이 이 갱신으로 바뀌면 안 된다.
+6. `/stack-guard` 재실행 — 생성물(진입점·registry 등) 갱신은 그 재실행 계약이 담당한다.
+7. `chore: sync harness to <sha>, preserving generated artifacts` 커밋.
+
+혼합 디렉터리(`docs/00-meta/`·`docs/90-decisions/`)는 위 절차에서 항상 파일 단위로만 다룬다 — 디렉터리 통째 동기화는 여기서도 금지다.
 
 | 산출물 | 위치 | 생성 주체 | 라이프사이클 | presence |
 |--------|------|-----------|--------------|----------|
@@ -123,7 +135,7 @@ fork 후 read-only로 취급한다 — 프로젝트 산출물이 아니다.
 | API/CLI 인터페이스 컨벤션 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-1`, `## 7-2` |
 | 백엔드 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-3` |
 | 프론트 핵심 결정 | `docs/20-system/ARCHITECTURE_OVERVIEW.md` `## 7-4` |
-| Milestone graduation checklist 5+1 + 마일스톤 층 폐쇄 경계 | [ADR-068](../90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (정책 SSOT — ADR-067 통합 재발행. 현재 SSOT: ADR-068). → ADR-068 `## Surfaces` 참조. |
+| Milestone graduation checklist 5+1 + 마일스톤 층 폐쇄 경계 | [ADR-068](../90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) (정책 SSOT — ADR-067 통합 재발행 (현재 SSOT: ADR-068)). → ADR-068 `## Surfaces` 참조. |
 | 정본의 절 단위 부분 개정 + 파생 전파 (전파표·에스컬레이션·봉인 충돌) | [ADR-069](../90-decisions/boilerplate/ADR-069-bounded-ssot-amendment.md) (정책 SSOT). → ADR-069 `## Surfaces` 참조. |
 | AC 검증 modality·authority·receipt (충족률/자동화율) | [ADR-065](../90-decisions/boilerplate/ADR-065-ac-verification-contract.md) (정책 SSOT). → ADR-065 `## Surfaces` 참조. |
 | 마일스톤 수용 단계 (accept/repair-acceptance·피드백 3갈래) | [ADR-066](../90-decisions/boilerplate/ADR-066-milestone-acceptance.md) (정책 SSOT). → ADR-066 `## Surfaces` 참조. |

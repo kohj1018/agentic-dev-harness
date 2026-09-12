@@ -19,7 +19,7 @@ agent: builder
 
 반드시 먼저 할 일:
 1. 관련 task 문서를 읽는다.
-1-G. **착수 상태 게이트 (ADR-057#amend-3 결정 5 — `in-progress → done` 입구)**: 읽은 task 문서의 `## 0. Status`를 확인한다 — **`in-progress`일 때만** 아래 단계로 진행한다. `draft`/`ready`(아직 구현 안 함)면 "`/implement-workitem` 먼저 실행" 안내 후 종료(**`ready → done` 건너뛰기 차단** — 구현 없이 validate·finalize만으로 done 방지), `done`이면 read-only no-op("이미 완료" 안내, 파일·git 무변경). **본 게이트에서 종료하는 경우 파일·git index·`## 0. Status`를 전혀 건드리지 않는다.**
+1-G. **착수 상태 게이트 (ADR-057#amend-3 결정 5 — `in-progress → done` 입구)**: 읽은 task 문서의 `## 0. Status`를 확인한다 — **`in-progress`일 때만** 아래 단계로 진행한다. `draft`/`ready`(아직 구현 안 함)면 "`/implement-workitem` 먼저 실행" 안내 후 종료(**`ready → done` 건너뛰기 차단** — 구현 없이 validate·finalize만으로 done 방지), `done`이면 read-only no-op("이미 완료" 안내, 파일·git 무변경). **단 `git diff --cached --name-only`에 그 task 문서가 있고 staged diff에 이번 `- closure` 줄이 포함돼 있으면 «커밋 실패 잔존»이다 — 수행 7·8만 다시 수행한다**(검사·편집은 반복하지 않는다. 워킹트리에만 dirty한 done 문서는 accept-milestone receipt 등 정상 상태이므로 건드리지 않는다). **본 게이트에서 종료하는 경우(위 재개 분기 제외) 파일·git index·`## 0. Status`를 전혀 건드리지 않는다.**
 2. 통합 검증 명령(`pnpm validate` / `npm run validate` / `make validate` / `task validate`)이 있으면 실행한다.
    - `--changed` 옵션 지원 시 `validate --changed`로 변경 파일만 빠르게 검증 권장 (ADR-020). full validate는 `/stabilize-milestone`에서 실행.
    - 실패 → `Needs Fix`로 종료. 커밋하지 않음. `/repair-workitem <task-id>`를 텍스트로 제안.
@@ -46,7 +46,7 @@ agent: builder
      - task 범위와 명백히 무관한 파일
    - **(3-lock) lock file 자동 화이트리스트** — TASK_TEMPLATE `## 4-1`에 명시되지 않아도 자동 add 허용 (ADR-007 amend):
      `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `Gemfile.lock`, `composer.lock`, `go.sum`, `Pipfile.lock`, `poetry.lock`, `uv.lock`, `pubspec.lock`
-   - **(4) 차이 처리** — 본 skill은 `context: fork` 환경에서 실행되므로 사용자에게 실시간 확인을 받을 수 없다. (1)과 (2)(둘 다 task 문서 제외 기준)가 어긋나면(또는 (1)이 비어 있고 (2)에 add 대상으로 의심되는 파일이 섞여 있으면) **차이를 출력에 명시하고 즉시 종료**한다(`Needs Review` 종료). **단, (3-lock) whitelist에 해당하는 파일은 (1)에 없어도 차이로 보지 않고 자동 add한다.** 사용자가 task 문서의 `## 4-1`을 갱신하거나 `--apply` force 모드로 재실행하도록 안내한다.
+   - **(4) 차이 처리** — 본 skill은 `context: fork` 환경에서 실행되므로(ADR-050 D1 — finalize-workitem은 fork 유지) 사용자에게 실시간 확인을 받을 수 없다. (1)과 (2)(둘 다 task 문서 제외 기준)가 어긋나면(또는 (1)이 비어 있고 (2)에 add 대상으로 의심되는 파일이 섞여 있으면) **차이를 출력에 명시하고 즉시 종료**한다(`Needs Review` 종료). **단, (3-lock) whitelist에 해당하는 파일은 (1)에 없어도 차이로 보지 않고 자동 add한다.** 사용자가 task 문서의 `## 4-1`을 갱신하거나 `--apply` force 모드로 재실행하도록 안내한다.
    민감 경로가 staged 영역에 들어오면 즉시 종료한다.
 6. staging·안전검사(수행 4-5)가 abort 없이 통과한 뒤에만 task 문서를 갱신한다(커밋 성공 직전 — 검사 중단 시 아무것도 쓰지 않아 "done인데 미커밋" 방지). **아래 둘을 *한 번의 편집*으로 함께 쓴다** — 별도 편집으로 나누면 뒤엣것이 staging 밖에 남을 수 있다.
    - (i) `## 0. Status`를 `done`으로 갱신.
@@ -69,6 +69,7 @@ agent: builder
    - footer에 `Refs: T-NNN (AC-X, AC-Y)` 형식 포함 (ADR-008#amend-2). 누락 시 *footer 추가 권장 텍스트* 출력 — 자동 차단은 하지 않음 (사용자 결정).
 8. `git commit -m "..."` 실행.
    - **금지**: `--no-verify`, `--amend`, `git push`.
+   - **실패 분기**: `git commit`이 0이 아니면 아무것도 되돌리지 않는다 — staging(수행 5의 파일 + 수행 6의 task 문서)을 그대로 두고 stderr 요약과 함께 `Needs Commit: <원인>`으로 종료한다. 이 상태의 서명은 «task 문서가 staged인데 커밋되지 않음»이며 1-G가 그것으로 재개한다.
 9. **feature-완료 감지 (ADR-057 결정 5)**: 직전 단계에서 status를 `done`으로 갱신한 본 task(⚠ 0C-6이 status=done을 커밋 안전검사 뒤로 옮겼으므로 옛 "step 4" 번호에 의존하지 말 것)의 `## 7. 관련 문서` Feature 링크로 같은 feature를 참조하는 sibling task 문서를 Glob/Grep 회수한다. 전원 `## 0. Status` 값이 `done`이면(값은 heading *다음 줄*에 있다 — TASK_TEMPLATE 형식, `Status: done` 인라인 표기가 아니다) 마지막 출력에 **Feature-완료 블록**을 추가한다(본 블록은 ADR-046 압축 대상 아님 — 전량 보존):
    - FAC closure 요약: feature `## 7-1` 매핑표의 각 `T-NNN:AC-N`이 `docs/40-validation/reports/<task-id>.md`에서 ✅인지 (report 부재 task는 "확인 불가 — report checkout-local" degrade).
    - 다음 단계 제안(텍스트만): 다음 의존성 task가 있으면 그 task를 `/implement-workitem`, 마일스톤 전 task가 done이면 `/stabilize-milestone M-N` (refresh·F-NNN 재계획 경로 없음 — ADR-057#amend-3).

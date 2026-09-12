@@ -212,3 +212,25 @@ accepted
 - .claude/skills/stack-guard/assets/design-gate.mjs (flutter 어댑터)
 - docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md (`## E2E Smoke Registry` 주석 — 진입점 표기. target별 실행 스크립트는 프로젝트 측 생성물이라 boilerplate surface가 아니다)
 - docs/00-meta/STRUCTURE.md (승인 스냅샷 행)
+
+<a id="adr-059-amend-2"></a>
+## Amendment 2 (2026-09-13) — golden 테스트 태그 분리 + CI 진입점 `validate:ci`
+
+### 배경
+- [관측됨] D3의 «자동 실행 서버 없음» 전제와 ADR-025#amend-1의 «GitHub 프로젝트는 fresh runner CI 기본 생성»이 충돌한다. golden은 로컬 전용이라 fresh runner에서는 정답 사진이 없어 `validate`가 실패한다. CI는 별도 test 단계가 아니라 통합 `validate` 하나를 부르므로 test 명령만 바꿔서는 풀리지 않는다.
+
+### 결정
+1. golden 테스트 파일은 `@Tags(['golden'])`을 달고, `dart_test.yaml`에 `tags: golden:` 을 선언한다(6-4-b 초기 절차가 생성 시 둘 다 만든다 — 선언 없는 태그는 경고·오류).
+2. `/stack-guard`는 Flutter를 포함하는 프로젝트에 **`validate:ci` 진입점**을 하나 더 만든다 — 통합 `validate`와 같은 단계(format·analyze·test)이되 test 단계만 `flutter test --exclude-tags golden`(기존 `test/design_gate/` 제외는 유지)이다. 생성 CI 워크플로의 마지막 단계는 `validate:ci`를 부른다. 로컬 `validate`는 golden을 포함한다(D3 불변).
+3. STACK_SETUP_PLAN `CI:` 기록에 `(validate:ci — golden 제외, ADR-059#amend-2)`를 병기한다. 이미 `.github/workflows/validate.yml`이 있는 프로젝트(`CI: existing (preserved)`)는 덮어쓰지 않고 «`validate:ci`로 교체 권장» 한 줄만 출력한다.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = Flutter 프로젝트 CI가 구조적으로 실패 (관측됨). predicted = fresh runner CI가 golden 없이 통과하고 format·analyze는 유지. falsifier = `validate:ci`와 `validate`의 단계가 어긋나 CI만 통과하는 회귀가 나면 두 진입점을 같은 스크립트의 플래그로 통합한다. rollback = 결정 삭제.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/skills/stack-guard/SKILL.md — 6-4-b · 수행 1(`validate:ci`) · `## CI 생성`
+- docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md — `## CI` 주석

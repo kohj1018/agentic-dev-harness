@@ -11,7 +11,7 @@ allowed-tools: Read Glob Grep Write Edit Agent
 이 skill은 **메인 세션에서 직접 실행**된다(discover-product/plan-milestone 패턴 — `context: fork` 미지정). 무거운 추론은 `Agent` 도구로 architect/researcher 단발 sub-call에 위임하고 결론만 문서에 반영한다. `disable-model-invocation: true` 유지 — 후속 `/stack-guard`는 텍스트 제안이며 자동 호출하지 않는다(ADR-050 D2).
 
 ## R0 — 입력·상태 감지 + 분기 (항상 먼저 수행)
-1. **상태 회수(최소)**: `docs/90-decisions/project/ADR-101-stack-selection.md` 존재 여부 + 프로젝트 manifest(`package.json`/`pyproject.toml`/`go.mod`/`Cargo.toml` 등) 존재 여부.
+1. **상태 회수(최소)**: **활성 스택 ADR** = `docs/90-decisions/project/ADR-1NN-*.md` 중 `## Status`가 `superseded`로 시작하지 않고 스택 선택을 소유하는 파일(최초는 `ADR-101-stack-selection.md`, `--migrate` 뒤에는 `대체:` 체인의 마지막 하나). 둘 이상이면 «활성 ADR 중복 — 사용자 확인» 후 종료. 없으면 «없음». + 프로젝트 manifest(`package.json`/`pyproject.toml`/`go.mod`/`Cargo.toml` 등) 존재 여부.
 2. **분기**:
    - **`--migrate`** → 아래 `## --migrate (T2) 흐름`.
    - **BASE** — 프레임워크/언어/런타임 토큰이 있고 **`stack-catalog.md`의 해당 유형 T1 행이 모두 입력에서 결정됨**(또는 brownfield manifest에서 감지됨) → `## BASE 문서화 흐름` + `## R-C 카탈로그 라운드`(T2/T3 미결정 행만).
@@ -47,16 +47,16 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 
 **R3 — 고-stakes 심화(해당 시).** 되돌리기 비싼 §7-3 백엔드 결정(인증·DB·트랜잭션)이 ADR-053 게이트(S1~S4 중 1+)에 걸리면 아래 `## 고-stakes 설계 게이트`의 full 패널을 실행하고, 그 결론을 **Decision Brief로 사용자에게 제시해 확정**한다(ADR-053#amend-2 ④). 저-stakes는 R2 단발 결론. 스택 선택 자체는 R2에서 다뤘으므로 여기선 *별개의* 미해결 reversible 결정에만 발동(중복 발동 회피 — ADR-053 falsifying-eval의 과발동 방지).
 
-**R4 — 저장/실행(절대 건너뛰지 않음).** 확정된 스택으로 아래 `## BASE 문서화 흐름`을 그대로 수행해 모든 산출물을 *한 세션에* 쓴다. R1~R3 근거는 ADR-101의 옵션≥2/신뢰도/재검토 칸에 적재한다.
+**R4 — 저장/실행(절대 건너뛰지 않음).** 확정된 스택으로 아래 `## BASE 문서화 흐름`을 그대로 수행해 모든 산출물을 *한 세션에* 쓴다. R1~R3 근거는 활성 스택 ADR의 옵션≥2/신뢰도/재검토 칸에 적재한다.
 
-**누적/단계별 출구:** R1~R3 동안 결론을 draft ADR-101(`## 0. Status: proposed`, **인덱스 미등재**)에 누적한다. 중간에 멈춰도 proposed ADR-101이 남아 재개·`/stack-guard` 입력으로 유효하다. R4 저장 때만 status를 accepted로 올리고 인덱스 행을 추가한다. proposed 상태·미등재를 유지해 stabilize의 §7 backstop 오탐을 막는다.
+**누적/단계별 출구:** R1~R3 동안 결론을 draft 활성 스택 ADR(`## 0. Status: proposed`, **인덱스 미등재**)에 누적한다. 중간에 멈춰도 proposed 활성 스택 ADR이 남아 재개·`/stack-guard` 입력으로 유효하다. R4 저장 때만 status를 accepted로 올리고 인덱스 행을 추가한다. proposed 상태·미등재를 유지해 stabilize의 §7 backstop 오탐을 막는다.
 
 ## BASE 문서화 흐름 (구체적 스택/brownfield, 또는 DEEP R4)
 1. 스택 정보를 구조화한다(`stack-brief-template.md` 참조). brownfield면 manifest에서 감지.
 2. 아래 문서를 갱신한다.
    - `docs/20-system/ARCHITECTURE_OVERVIEW.md` — **`## 7. 기술 선택`**(고-stakes는 §7 결정 블록: 옵션≥2/신뢰도/재검토) + 해당 **`## 7-1`~`## 7-5`** 컨벤션 + **`## 3-1` 레이어 경계·의존성 규칙에 스택별 디폴트 디렉터리 트리**(아래 표) + `## 7. 기술 선택` 하위 운영 사실(실행 명령/포트/환경변수 이름/핵심 디렉터리 역할/gotcha — `output-checklist.md`).
    - `docs/10-charter/PROJECT_CHARTER.md` **`## 7. 제약 조건`** — 허용 의존 정책 envelope(스택 핵심 라이브러리). T3 dep 판정의 기준선.
-   - `docs/90-decisions/project/ADR-101-stack-selection.md` — _ADR_GUIDE 권장 섹션 + 옵션·신뢰도·재검토 칸. API 감지 → 7-1+7-3, CLI → 7-2, 웹 프론트 → 7-4, 모바일 앱(Flutter) → 7-5.
+   - `docs/90-decisions/project/ADR-101-stack-selection.md`(최초 생성) 또는 활성 스택 ADR(갱신) — _ADR_GUIDE 권장 섹션 + 옵션·신뢰도·재검토 칸. API 감지 → 7-1+7-3, CLI → 7-2, 웹 프론트 → 7-4, 모바일 앱(Flutter) → 7-5.
    - **`## 7-1`~`## 7-5` 채움은 소항목별 `authority`를 따른다 (ADR-060 D9 — 구 "라운드 아님" 규정을 부분 supersede)**:
 
      | 섹션 | `user-approval` — Decision Brief로 제시하고 사용자가 승인 | `agent-delegated` — architect 단발 sub-call, 라운드 끝 일괄 확인 1회 |
@@ -70,11 +70,11 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
      배정 기준: 되돌린 뒤 **이미 쓴 코드·데이터·사용자 계정에 파급**이 있으면 `user-approval`, 코드 안에서 끝나면 `agent-delegated`.
      `user-approval` 항목만 원장에 등재하고 **라운드당 3~5개 상한**을 지켜 나눠 제시한다(ADR-060 D3). 승인 후 `status: closed` + 정본 앵커(`ARCHITECTURE_OVERVIEW.md#arch-7-N`)를 채운다. `agent-delegated`는 개별 등재 없이 일괄 확인 1회로만 처리한다.
      해당 스택이 아닌 sub-section은 아래 3번대로 삭제하므로 결정 대상이 아니다.
-   - `docs/90-decisions/project/README.md` 인덱스 표에 ADR-101 한 줄 추가.
+   - `docs/90-decisions/project/README.md` 인덱스 표에 활성 스택 ADR 한 줄 추가.
 3. **비해당 `## 7-1`~`## 7-5` 처리 — 단일 스택은 통째 삭제, 다중 스택(monorepo)은 KEEP-list**: 프로젝트가 스택 1종이면 비해당 sub-section을 통째 삭제한다(예: API 미포함 → `## 7-1` 삭제). **FE+API+CLI 등 다중 스택이면 해당하는 sub-section을 *모두 보존*하고 각 스택의 디렉터리 트리를 `## 3-1`에 함께 박는다(삭제 금지).** **모바일 앱 스택이면 `## 7-5`를 채우고 `## 7-4`를 삭제한다**(웹 화면이 함께 있는 경우에만 둘 다 보존 — ADR-073 D1).
 4. `docs/00-meta/_templates/STACK_SETUP_PLAN_TEMPLATE.md`를 복사해 `docs/00-meta/STACK_SETUP_PLAN.md`를 **항상** 생성·갱신한다(ADR-071 D8 — 선택 산출물 아님). **복사 시 비해당 절을 통째 삭제한다**(ARCH `## 7-1`~`## 7-5` 비해당 삭제 규칙과 동형). **두 절의 조건은 다르다** — `## Dart Source Roots`는 `dart format` 대상이 있는 **모든 Dart/Flutter 스택**에서 남기고(순수 Dart CLI·패키지 포함, ADR-059 D2), `## Golden 초기 절차`는 **화면이 있는 native 스택에서만** 남긴다(runtime target에 `native/*` 포함 ∧ design surface 있음 — ADR-059 D3). golden 은 위젯 렌더 픽셀 비교라 화면 없는 Dart CLI·패키지에는 `flutter test --update-goldens` 자체가 성립하지 않으므로, 그 프로젝트에 남기면 쓸모없는 안내가 영구히 붙는다. `## E2E Smoke Registry`는 스택 무관이라 남기고 비대상이면 `status: n/a`만 적는다. **Optional MCP Connectors 백필(ADR-048#d1)**: `.codex/config.toml`에 `[mcp_servers.*]`가 있으면 STACK_SETUP_PLAN `## Optional MCP Connectors` 표에 backfill 권장(자동 연결 X — 사용자 직접).
    - **Dependency Tools 기록 (ADR-075 D14)**: 확정한 **scope별 의존성 도구**(npm/pnpm/yarn/bun · pip/poetry/uv · cargo · go · **pub(Flutter/Dart)** 등)를 STACK_SETUP_PLAN `## Dependency Tools` 표에 기록한다 — 단일 패키지는 `.` 1행, 모노레포·polyglot은 scope별 1행(경로 prefix), 비-JS 스택도 같은 표. **적는 대상은 *builder가 프로젝트·기능 의존성을 설치할 때 쓰는 PM*뿐이다** — 검증 도구 자체를 설치하는 PM은 그 도구의 registry가 기록하므로 이 표에 넣지 않는다(ADR-059 D2). 예: Flutter 루트는 `pubspec.lock`·`package-lock.json`이 함께 있어도 **`pub` 1행**이고(npm은 design gate·통합 명령용), 웹 프로젝트의 `@playwright/test`도 별도 행으로 적지 않는다. 근거 컬럼엔 그 판정을 뒷받침한 *tool-specific* 신호(lockfile·tool-manifest)를 적고, lockfile이 아직 없는 green-field는 `(신규 — lockfile 미생성)`으로 표기한다. **이 표가 downstream scope→tool SSOT**다(stack-guard 교차확인 → plan-workitem 설치 line item → implement 3-DT → builder). 도구 *선택 근거*는 ARCHITECTURE `## 7`에, 설치 소유 경계는 ADR-052.
-   - **Stack Decision Registry 기록 (ADR-071 D2)**: `stack-catalog.md`의 해당 유형 행 전부를 `## Stack Decision Registry`에 적고 `scope`·disposition(`확정 | 해당 없음 | 이관 | 미결정`)·authority·정본 앵커·확인일을 채운다. **행 키는 `(scope, id)`** — 단일 패키지는 전 행 `.`, monorepo는 scope마다 갈릴 수 있는 행을 scope별로 두고 저장소 단위 행만 `*`로 둔다. **빈 행이 남으면 성공 종료하지 않는다.** 결정 본문은 앵커(ARCH `## 7-N`·ADR-101)에만 적는다 — registry는 색인이다.
+   - **Stack Decision Registry 기록 (ADR-071 D2)**: `stack-catalog.md`의 해당 유형 행 전부를 `## Stack Decision Registry`에 적고 `scope`·disposition(`확정 | 해당 없음 | 이관 | 미결정`)·authority·정본 앵커·확인일을 채운다. **행 키는 `(scope, id)`** — 단일 패키지는 전 행 `.`, monorepo는 scope마다 갈릴 수 있는 행을 scope별로 두고 저장소 단위 행만 `*`로 둔다. **빈 행이 남으면 성공 종료하지 않는다.** 결정 본문은 앵커(ARCH `## 7-N`·활성 스택 ADR)에만 적는다 — registry는 색인이다.
 5. 화면이 있는 스택(웹 프론트 또는 모바일 앱) 감지 시 마지막 출력에 "UI 스택 감지됨. `/bootstrap-design` 권장" 1줄.
 
 ## R-C — 카탈로그 라운드 (BASE·HYBRID·DEEP R4 공통, ADR-071)
@@ -83,7 +83,7 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 3. 나머지 행을 authority로 나눈다 — `user-approval` 행은 Decision Brief 6블록으로 **라운드당 3~5개씩** 제시(ADR-060 D3, `skip` 불허 — 선택/설명/리서치/`이관` 중 택1). `agent-delegated` 행은 architect 단발 sub-call이 기본 후보와 근거를 정하고 **라운드 끝 일괄 확인 1회**로 제시한다. 사용자가 뒤집은 행은 `user-approval`로 원장에 등재한다.
 4. 새로 정하거나 불확실한 행만 researcher 단발 sub-call로 현재 메이저·호환·발행일을 확인해 `확인일`에 적는다(ADR-071 D7). 기존 실측 스택은 재조사하지 않는다.
 5. 사용자가 지금 정하지 않겠다는 행은 `이관`(사유 + 회수 시점 — 보통 `M1 plan-milestone R1`)으로 적고 **DECISION_REGISTER에 `deferred`**(무영향 근거·이관 앵커 = registry 행·회수 시점)로 등재한다(ADR-060 D4 3필드 — plan-milestone R1이 회수). 정해야 하는데 못 정한 행은 `미결정` + DECISION_REGISTER `open`(`영향: (미할당)`)으로 적는다.
-6. 결정 본문은 정본 앵커에 쓴다: 7-x 소항목 → ARCH `## 7-N`, 스택·주요 라이브러리 → ADR-101 `## 결정` 표, 운영 사실 → ARCH `## 7` 하위, 설치 시점·PM → STACK_SETUP_PLAN.
+6. 결정 본문은 정본 앵커에 쓴다: 7-x 소항목 → ARCH `## 7-N`, 스택·주요 라이브러리 → 활성 스택 ADR `## 결정` 표, 운영 사실 → ARCH `## 7` 하위, 설치 시점·PM → STACK_SETUP_PLAN.
 7. 종료 조건: registry에 빈 행 0.
 
 ## --migrate (T2) 흐름 — 입력 적응형
@@ -91,14 +91,14 @@ discover-product 라운드 패턴을 재사용한다. 각 라운드는 압축 �
 - **타깃 명시**(`--migrate Nest.js`) 또는 이미 결정 → 옵션 라운드 건너뛰고 계약 authoring 직행.
 - **타깃 미정**(`--migrate` 단독 / "뭐로 갈지 모르겠다") → 위 DEEP R1~R2를 *마이그레이션 프레이밍*으로 실행(트레이드오프 축에 **기존 데이터·API 호환성**과 **이전 비용**을 1급 추가) → 타깃 수렴 후 계약.
 
-계약(항상, ADR-041 D2): 새 project ADR `docs/90-decisions/project/ADR-1NN-<migration>.md`에 old/new stack, 호환성(데이터·API·런타임), cutover 순서(expand-contract: 신규 추가 → dual-run → 구식 제거), rollback, validation(완료 판정), hook·verify 갱신 목록을 쓰고, 기존 ADR-101을 `superseded` + 상단 "대체: ADR-1NN". project README 인덱스에 한 줄 추가 + ADR-101 행 상태 superseded 갱신. ARCH §7 결정 블록·§3-1 디렉터리 트리 갱신, charter §7 제약 갱신.
+계약(항상, ADR-041 D2): 새 project ADR `docs/90-decisions/project/ADR-1NN-<migration>.md`에 old/new stack, 호환성(데이터·API·런타임), cutover 순서(expand-contract: 신규 추가 → dual-run → 구식 제거), rollback, validation(완료 판정), hook·verify 갱신 목록을 쓰고, 기존 **활성 스택 ADR**을 `superseded` + 상단 "대체: ADR-1NN". project README 인덱스에 한 줄 추가 + 옛 활성 ADR 행 상태 superseded 갱신. ARCH §7 결정 블록·§3-1 디렉터리 트리 갱신, charter §7 제약 갱신.
 **진행 중 task/worktree 주의**: 마이그레이션은 진행 중 task의 §7 매핑·AC를 무효화할 수 있다. supersede 전에 진행 중 task를 freeze·재검증할 것을 출력에 명시하고, cutover는 `Type:migration` task(ADR-039)로 분해한다 — 즉시 generic `/plan-workitem`을 호출하지 않고 **다음 `/plan-milestone`의 범위에 포함한 뒤 그 M 전체 스냅샷에서 task화**한다(아직 계획 전인 draft M이면 그 안에서 반영, ADR-057#amend-3 결정 6).
-작성 후 안내: `/bootstrap-stack <new stack>`(문서화) → `/stack-guard` 순 재실행.
+작성 후 안내: `/bootstrap-stack <new stack>`(문서화) → `/stack-guard` 순 재실행(재실행의 BASE는 새 ADR-1NN을 활성 스택 ADR로 읽는다).
 
 ## 스택 결정 tier (T1/T2/T3 — ADR-055) — 판정 기준
 - **T1 기초 스택**(프로젝트 birth): 본 skill의 BASE/DEEP 흐름 → ADR-101 + ARCH §7 + charter §7 제약.
 - **T2 물질적 변경/마이그레이션**: ADR-053 S1~S4 중 1+ 해당(언어/런타임/프레임워크/DB·영속성/인증/배포 토폴로지/핵심 외부 의존을 건드림 **또는** ARCH §7 결정·charter §7 제약을 뒤엎음; 개별로 사소해도 *cluster*로 이 선을 넘으면 포함) → 본 skill `--migrate`.
-- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리(ADR-040#amend-1) — 해당 마일스톤 계획 범위에 포함하며 즉시 generic 호출하지 않음(ADR-057#amend-3 결정 6). ADR-101 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
+- **T3 라이브러리 추가**(routine): 위 어느 것도 아님 → 해당 마일스톤의 `/plan-workitem M<N>`이 task `## 3` install line-item으로 처리(ADR-040#amend-1) — 해당 마일스톤 계획 범위에 포함하며 즉시 generic 호출하지 않음(ADR-057#amend-3 결정 6). 활성 스택 ADR 안 건드림. 누적이 T2 선을 넘으면 stabilize의 `[Stack-drift]`가 감지.
 
 반드시 지켜야 할 원칙:
 - shared 기본값에 OS/셸 종속 hook를 강제로 넣지 않는다. 대신 필요한 scripts/hooks/CI를 문서로 정리한다.

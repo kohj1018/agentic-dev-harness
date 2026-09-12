@@ -5,7 +5,7 @@ argument-hint: "[task identifier] [--fast] [--waiver \"<why>\"]"
 allowed-tools: Read Glob Grep Write Edit Bash Agent
 ---
 
-너의 역할은 지정된 workitem 구현을 지휘하는 *foreman*이다 — task를 file-disjoint slice로 쪼개고 각 slice를 builder 에게 위임한다. 각 builder 는 자기 slice 의 AC 에 대해 Red → Green → Refactor 3 phase 사이클을 돈다. 메인 세션(너)은 직접 구현하지 않고 분할·dispatch·병합·최종 sanity 검증만 한다.
+너의 역할은 지정된 workitem 구현을 지휘하는 *foreman*이다 — task를 file-disjoint slice로 쪼개고 각 slice를 builder 에게 위임한다. 각 builder 는 자기 slice 의 AC 에 대해 Red → Green → Refactor 3 phase 사이클을 돈다. 메인 세션(너)은 직접 구현하지 않고 분할·dispatch·병합·최종 sanity 검증만 한다(ADR-050 D1 — implement-workitem 부분은 ADR-075 D1이 foreman 오케스트레이션으로 supersede).
 
 > Codex: 서브에이전트는 GA이나 본 저장소가 Claude persona 위임을 Codex subagent로 아직 매핑하지 않아 순차 단일 실행으로 degrade — slice 들을 한 builder 가(또는 메인이 직접) 순서대로 처리한다. 분할 결과·병합·최종 step 은 동일하게 적용한다.
 

@@ -119,3 +119,24 @@ Canonical Owner 매핑 표는 `docs/00-meta/STRUCTURE.md`의 "Canonical Owner �
 
 ### 적용 surface
 - docs/00-meta/STRUCTURE.md — 결정 1·2·3 (`presence` 정의 절)
+
+<a id="adr-005-amend-3"></a>
+## Amendment 3 (2026-09-13) — 보일러플레이트 갱신 절차
+
+### 배경
+- [관측됨] #amend-2가 절차를 미룬 채로 다음 동기화가 다시 필요했다(Round 13 Phase 0). 절차 없이 «규칙만 지켜서 수동으로»는 실행자마다 달라진다.
+
+### 결정
+1. 갱신 단위는 **STRUCTURE.md 인벤토리의 `presence: baseline` 행**이다. 순서: (i) `.claude/agents/`·`.claude/skills/`·`.agents/`(+ tracked `.claude/settings.json`) — 전 행이 baseline인 경로만 옛 사본을 지우고 `git archive HEAD -- <경로> | tar -x`로 **tracked 파일만** 추출한다(#amend-2 결정 2가 금지하는 통째 동기화는 혼합 디렉터리가 대상이다 — 결정 3. 복제본의 `settings.local.json`·`worktrees/` 같은 로컬 파일은 남긴다) → (ii) `docs/90-decisions/boilerplate/*.md` 파일 단위 복사(`project/`는 손대지 않음) → (iii) `docs/00-meta/`의 baseline 문서 5종(STRUCTURE·WORKFLOW·DELEGATION_STRATEGY·GUARDRAILS_STRATEGY·PROJECT_START_CHECKLIST)과 `_templates/`, `docs/30-workitems/_templates/` → (iv) `AGENTS.md`·`CLAUDE.md`·`.codex/`·`.gitignore`(줄 단위 합집합) → (v) `git status --porcelain -- <generated 행 경로들>`이 비었는지 확인 → (vi) `/stack-guard` 재실행(생성물 갱신은 재실행 계약이 담당) → (vii) `chore: sync harness to <sha>, preserving generated artifacts` 커밋.
+2. `presence: generated`·`conditional`·`ephemeral` 행은 절차가 건드리지 않는다. 혼합 디렉터리(`docs/00-meta/`·`docs/90-decisions/`)는 항상 파일 단위다.
+3. 절차 본문은 `docs/00-meta/STRUCTURE.md` `presence` 절 아래 `### 보일러플레이트 갱신 절차` 소절이 소유한다(본 amendment는 규칙만).
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = 절차 부재로 동기화가 생성물을 삭제 (관측됨). predicted = 다음 동기화에서 generated 행 손실 0, 커밋 메시지가 표준형. falsifier = 절차대로 했는데 generated 행이 바뀌면 인벤토리 표가 낡은 것 — 표를 먼저 고친다. rollback = 소절 삭제.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- docs/00-meta/STRUCTURE.md — `### 보일러플레이트 갱신 절차` 소절

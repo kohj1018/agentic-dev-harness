@@ -75,7 +75,8 @@ visual-qa: <READY | PENDING (<사유>)> (<YYYY-MM-DD>)   <!-- UI/web 대상만. 
 ## CI (ADR-025#amend-1)
 - CI: <generated (.github/workflows/validate.yml) | existing (preserved) | opt-out (사용자 지정) | n/a (<사유>)>
 <!-- git remote가 GitHub이고 스택이 확정되면 /stack-guard 가 기본 생성한다. --no-ci 로 opt-out.
-     기존 파일은 덮어쓰지 않고 `existing (preserved)`로 기록한다. 생성 YAML은 런타임 setup → 의존성 설치 → 통합 validate 3단계를 포함한다. -->
+     기존 파일은 덮어쓰지 않고 `existing (preserved)`로 기록한다. 생성 YAML은 런타임 setup → 의존성 설치 → 통합 validate 3단계를 포함한다.
+     Flutter 포함 프로젝트는 마지막 단계가 `validate` 대신 `validate:ci`(golden 제외 — ADR-059#amend-2)를 부른다. -->
 
 `/stack-guard`가 위 조건 충족 시 아래 형식으로 생성한다(미충족 시 텍스트만 출력):
 

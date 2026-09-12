@@ -99,6 +99,7 @@ accepted
   - *validate 이전*인 이유: validate가 report를 쓴 뒤에 `## 8`을 append하면 task 문서 mtime이 갱신되어 `/finalize-workitem`이 report를 stale로 판정하고 `Needs Validation`으로 종료한다 → 재validate → 재append의 무한 후퇴가 된다. 같은 계열의 교착이 host 제약 e2e 증거에서 이미 관측됐다(증거를 기록하는 커밋이 판정 대상 커밋을 한 칸 밀어내는 구조).
 - **신선도는 자동 검사를 두지 않는다 — 고친 주체가 갱신하는 것이 유일한 유지 방식이다**(위 작성자 규정). 세 후보를 모두 기각했다: (i) **파일 digest 비교** — `/validate-workitem`이 계산할 도구를 갖지 않고, report-only 계약상 부여하지도 않는다. (ii) **커밋 동일성 비교** — 위 무한 후퇴의 직접 원인이다. (iii) **`## 8` 안의 줄 순서**(마지막 `repair-workitem` 줄이 마지막 `exec-evidence` 줄보다 뒤면 stale) — **정상 경로에서 오탐이 난다.** `/repair-workitem`은 증거를 갱신한 라운드에서도 그 뒤에 결정 이력 줄을 append하고, 코드를 안 고친 all-Reject 라운드나 외부 경계 밖 수정 라운드도 결정 이력 줄만 남긴다. 두 경우 모두 "갱신 누락"과 구분되지 않는다. 정상 상태에서 울리는 검사는 라벨 신뢰를 떨어뜨리므로(침묵 우선) 두지 않는다.
   - **한계(사실 기록)**: 그 결과 `/repair-workitem`이 외부 경계 코드를 고치고도 위 갱신 책임을 *조용히 건너뛰면* 아무 장치도 잡지 못한다 — `- exec-evidence` 줄은 implement가 남긴 것이 그대로 있어 `[Exec-evidence-missing]`이 발화하지 않는다. 현재 방어는 repair의 명시 책임과 그 마지막 출력의 `실행 증거 갱신` 줄(사용자 가시성)뿐이다. **이 구멍을 검사로 막으려면 receipt를 순서·날짜가 아니라 라운드 식별자를 갖는 구조화 스키마로 바꿔야 하며, 그 전에 위 세 후보를 다시 꺼내면 오탐이 그대로 돌아온다.**
+    > 참조 갱신 (2026-09): `/repair-workitem`이 재확보 실패를 `미확보` 줄로 append하고 `/validate-workitem`이 그 줄을 `[Exec-evidence-stale]`로 읽는다 — 자동 신선도 검사가 아니라 작성자 규정의 확장이다.
 - **형식** (해당하는 것만 1줄씩 append):
   ```
   - exec-evidence <날짜> <경계 종류 a|b|c>: <등급 1 재실행 가능 | 등급 2 1회성 — 형태> — <무엇에 대고 실행했는가> / 결과: <관측 1줄>

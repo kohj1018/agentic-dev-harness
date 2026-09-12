@@ -108,7 +108,7 @@ S1·S2·S4 중 1+ → full 경로(① 조사 → ② 선택지 2~3안 → ③ �
 
 ## 읽을 파일 / 읽지 않을 파일
 
-**반드시 읽는다**: `PROJECT_CHARTER.md` `## 3~5`(목표·비목표) / `DISCOVERY.md` `## 2·3`(페르소나·JTBD) + `## 12`(기존 가정과 그 검증 상태 — 중복 가정 신설 방지) / `docs/30-workitems/ROADMAP.md`(있으면 — `/plan-milestone` 실행 전에는 비어 있다)
+**반드시 읽는다**: `PROJECT_CHARTER.md` `## 3~5`(문제·목표·비목표) / `DISCOVERY.md` `## 2·5`(페르소나·JTBD) + `## 12`(기존 가정과 그 검증 상태 — 중복 가정 신설 방지) / `docs/30-workitems/ROADMAP.md`(있으면 — `/plan-milestone` 실행 전에는 비어 있다)
 
 > **ROADMAP 의 `Done`/`Now`/`Next`/`Later` 구간은 `/plan-milestone` 단독 writer다**(ADR-057#amend-1·#amend-4 — `## Backlog`만 append-only 다중 writer이며 그 역시 본 agent 의 write 대상은 아니다). 본 agent 는 읽고 **우선순위 제안만** 하며, 그 제안은 사용자를 거쳐 다음 `/plan-milestone` 라운드가 반영한다.
 >

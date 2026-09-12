@@ -6,7 +6,7 @@ disable-model-invocation: true
 allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews/*.md)
 ---
 
-이 skill은 `/validate-plan`이 생성한 임시 리뷰 파일을 모두 회수해 plan 문서를 수정하는 단계다. **코드 수정·커밋 금지**.
+이 skill은 `/validate-plan`이 생성한 임시 리뷰 파일을 모두 회수해 plan 문서를 수정하는 단계다. **코드 수정·커밋 금지**. 메인 세션에서 직접 실행된다(`context: fork` 미지정 — ADR-050 D1).
 
 너의 역할: 임시 리뷰 파일 N개의 발견 항목을 종합해 수용 / 기각 / 수정 결정을 내리고, workitem 문서(milestone/feature/task)를 수정한 뒤, 임시 리뷰 파일을 삭제한다.
 
@@ -15,7 +15,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 - **workitem-id sanitization 강제**: `M[0-9]+` / `F-[0-9]+` / `T-[0-9]+` 패턴만 허용. `/`, 공백, glob 메타문자(`*`, `?`, `[`) 포함 시 *즉시 종료* — 본 skill은 ID로 glob 삭제하므로 안전 전제.
 
 반드시 먼저 할 일:
-1. 임시 리뷰 파일 회수: `docs/40-validation/plan-reviews/<workitem-id>.*.md` glob.
+1. 임시 리뷰 파일 회수: `docs/40-validation/plan-reviews/<workitem-id>.*.md` glob. **입력이 `M<N>`이면 산하 feature·task id도 회수 대상이다** — 마일스톤 문서 `## 3`의 feature 링크와 각 feature 문서의 task 링크에서 id를 모아 `F-NNN.*.md`·`T-NNN.*.md`도 glob한다(seal-milestone 조건 8과 같은 집합).
    - **glob 결과 → 실제 파일 경로 목록을 메모리에 회수.** 이후 *수행 step 6*의 삭제는 이 목록의 각 파일을 한 개씩 정확히 삭제한다 (glob 재실행 금지 — race 차단).
    - 결과 0건: 사용자에게 *"리뷰 파일이 없음 — 다른 세션에서 `/validate-plan <workitem-id>`를 먼저 실행하세요."* 안내 후 종료. workitem 문서 수정 금지.
    - 결과 1건 이상: 모두 읽는다.
@@ -24,6 +24,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
    - **`contract-ready`(= 미봉인)**: 정상 진입. 아래 2-L 이후 절차를 그대로 수행하고, 4-M/4-D의 계약 수정·원장 쓰기 권한도 이 상태에서만 유효하다.
    - **`ready` + `- 봉인일:` 채워짐 + 구현 흔적 task 0건** (= 봉인은 됐으나 구현 미착수. **구현 흔적** = `in-progress`·`blocked`·`done`·`deprecated` — `blocked`/`deprecated`도 구현 시작 후 상태다, ADR-060 D12): **task·매핑·의존성 결함은 그 자리에서 수정한다.** 잠금의 실익은 *구현 중 계획이 흔들리지 않는 것*인데 구현이 0건이면 그 목적이 걸리지 않는다(ADR-057#amend-3도 "구현이 시작되면 task 계획도 변경하지 않는다"로 *구현 시작*을 기준선으로 삼는다). 수정 후 **`/seal-milestone M<N>` 재실행**을 안내해 receipt를 갱신한다. M/F 계약 층 결함은 여전히 고치지 않고 보고만 한다(다음 M).
      > 이 분기가 없으면 봉인 직후 발견된 계획 결함을 **어떤 skill도 고칠 수 없다** — `repair-workitem` 2-G가 `ready` task repair를 거부하기 때문이다. 그러면 "첫 구현 전 결함을 다음 M으로 보낸다"는, 이 개선이 없애려던 원래 역설이 한 칸 뒤로 옮겨 재현된다.
+   - **`ready` + `- 봉인일:` 채워짐 + 산하 task 전부 `done`** (= 마일스톤 층, ADR-068 D1): 계획을 수정하지 않고 task 문서에도 쓰지 않는다. finding은 **후속 수리 스킬이 읽는 원장**에 open으로 등재한다 — 결함(계약 위반)은 `QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2`에 `- 출처: peer(plan-review)` + `status: open` + `decision: needs-confirmation`(3필드)으로, 개선은 `IMPROVEMENT_GUIDE.md ## 2. 열린 항목`의 `### M<N>` 그룹에 `status: open`으로. `## 5`에는 «판정 이력 + 등재 ID 링크» 한 줄만 남긴다. 라우팅은 결함이면 `/repair-milestone M<N>`, 수용 라운드 finding이면 `/repair-acceptance M<N>`, 새 범위면 M<N+1> 후보다. review 파일은 (iii)대로 삭제한다.
    - **`ready` + `- 봉인일:` 채워짐 + 구현 흔적 task 1건 이상** (= 구현 시작됨): **계획을 수정하지 않는다.** 회수한 review 파일의 finding을 (i) 사용자에게 보고하고 (ii) **5-D 형식으로 영속**한 뒤(task scope → 해당 task `## 8`, feature/milestone scope → `IMPROVEMENT_GUIDE ## 5. Repair decision log`; 결정 성격이면 원장에 `status: open` + `- 발견: 봉인 후 (M<N>)`) (iii) **review 파일을 삭제**한다. 라우팅은 (a) 기존 task·AC 약속의 결함이면 `/repair-workitem`, (b) 새 범위면 다음 마일스톤(M<N+1>) 후보로 안내.
      > **파일을 반드시 삭제하는 이유**: `/implement-workitem` 착수 게이트 ⑤가 "미해결 review 파일 없음"을 요구한다. 보존하면 봉인 후 `/validate-plan`을 한 번 돌린 것만으로 그 마일스톤의 모든 task가 영구 차단되고, 수동 `rm` 외에 해제 수단이 없다. finding은 위 (ii)로 영속되므로 삭제해도 유실되지 않는다.
    - **`ready`인데 `## 10` 부재·미채움**: 마이그레이션 대상이다(ADR-060 D12). 계획을 수정하지 않고 `/seal-milestone M<N>` 실행을 안내한 뒤 종료한다. review 파일은 보존한다(seal이 조건 8에서 읽는다).
@@ -58,7 +59,7 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 5-D. **P0/P1 결정 이력 영속화** (ADR-047 D7 durable correction history + D1 inspectability 정합). 본 라운드의 *P0 + P1 항목 전부*에 대해 결정 요약을 영속한다. P2는 영속화 X (cap 보호).
 
 **영속 위치 — workitem 타입별로 다름** (open items와 closed decision의 의미 분리):
-- **task (T-NNN)**: 해당 task 문서 `## 8. 메모`에 1줄 append (`## 8`이 자유 메모란).
+- **task (T-NNN)**: 해당 task 문서 `## 8. 메모`에 1줄 append (`## 8`이 자유 메모란). (산하 task 전부 `done`이면 task `## 8` 대신 위 분기의 원장 — ADR-068 D1)
 - **feature (F-NNN)** 또는 **milestone (M-N)**: `docs/40-validation/IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` sub-section(없으면 신설)에 IMPROVEMENT_GUIDE 스키마(`ID | severity | evidence | linked workitem | status | decision`)로 append. **`## 2. 열린 항목`에는 박지 않는다** — 그 섹션은 *open items*(해야 할 일)이고 결정 이력은 *closed records*(지나간 판단)라 의미가 다르다. (feature `## 8`은 NFR, milestone `## 8`은 회고 — 결정 이력 위치 아님.)
 
 **task scope 영속 형식 (한 줄 = 한 결정)**:
@@ -84,13 +85,13 @@ allowed-tools: Read Glob Grep Write Edit Bash(rm docs/40-validation/plan-reviews
 ID 컨벤션: `<workitem-id>-repair-<N>` (예: `F-001-repair-1`, `M1-repair-2`) — workitem ID 그대로 prefix + `-repair-` + 본 라운드 시퀀스. `linked workitem` 필드로 원본 workitem 역참조. **evidence label은 기본 `[관측됨]`** — finding 자체가 리뷰어의 *로컬 문서 관측*에서 나왔으므로. cross-LLM peer review *방식* 자체의 외부실증은 ADR-038 본문에 박혀 있고, 본 finding의 label과는 별개.
 6. **삭제 전 사전 조건 점검 (ADR-057#amend-3)** — 처음 회수한 review 파일은 **(i) 모든 finding 4-판정·반영 완료, (ii) 부모 M 전체 self-check + `[Plan-dep]` 성공, (iii) `DECISION_REGISTER.md`에서 이 M/F를 `영향:`으로 갖는 `status: open` 0건(그 M을 가리키는 `- 발견: 봉인 후 (M<N>)` 항목 제외 — ADR-060 D1)**일 때만 삭제한다. 하나라도 실패하거나 실행이 중단되면 review 파일을 그대로 보존해 미해결 상태를 영속하며, `/implement-workitem`은 해당 M 또는 산하 F/T의 미해결 plan-review가 있으면 착수하지 않는다.
    **삭제 전 echo 강제**: 메인 세션 출력에 *삭제 대상 경로 목록 전체를 echo* (예: `삭제 예정: M1.claude-b.md, M1.codex.md`). 사용자가 *눈으로* 검증 가능하게 함 — frontmatter `allowed-tools`의 `Bash(rm ...*.md)`가 기술적으로는 모든 plan-review md 삭제를 허용하므로, 본 echo가 *prompt-level safety* 마지막 가드.
-   삭제는 *반드시 먼저 할 일 step 1*에서 회수한 파일 경로 목록을 *한 개씩 정확히* 수행 — `rm <path>` 반복 (glob 재실행 금지). 다른 workitem ID의 파일은 *건드리지 않는다*. 마지막 점검 — 회수한 모든 경로가 `docs/40-validation/plan-reviews/<workitem-id>.` 접두 + `.md` 접미 정합.
+   삭제는 *반드시 먼저 할 일 step 1*에서 회수한 파일 경로 목록을 *한 개씩 정확히* 수행 — `rm <path>` 반복 (glob 재실행 금지). **삭제 허용 집합은 step 1에서 회수한 경로 목록 그 자체다** — 입력이 `M<N>`이면 거기에 산하 `F-NNN.*.md`·`T-NNN.*.md`가 들어 있다. 그 목록 **밖**의 파일은 *건드리지 않는다*. 마지막 점검 — 회수한 모든 경로가 `docs/40-validation/plan-reviews/` 아래이고, 접두가 **회수 대상 id 집합**(입력 id + `M<N>` 입력이면 산하 feature·task id) 중 하나이며 `.md` 접미 정합.
 
 책임 경계:
 - 코드 일체 수정 금지.
 - 자동 커밋 금지 — 결과만 출력하고 commit은 사용자/메인 세션이 별도 발화.
-- workitem 문서 *외* 다른 산출물(QA_FINDINGS / report / ADR / **Charter·ARCHITECTURE·DESIGN** 등) 수정 금지. **예외 2가지**: (1) feature/milestone scope의 위 5-D 영속화 — `IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` sub-section append. (2) 위 4-D의 `docs/10-charter/DECISION_REGISTER.md` 쓰기 — **2-S가 `contract-ready`(또는 봉인 후 구현 0건)로 판정하면 등재·상태 갱신 전체**, **봉인 후 구현이 시작된 경우엔 `- 발견: 봉인 후 (M<N>)` append만**(ADR-060 D11 writer). 정본 3종은 저작 소유가 각 bootstrap skill이므로 본 skill이 고치지 않고 권장만 한다(ADR-005).
-- 본 workitem ID의 plan-review 파일만 삭제. 다른 ID의 plan-review 파일은 건드리지 않는다.
+- workitem 문서 *외* 다른 산출물(QA_FINDINGS / report / ADR / **Charter·ARCHITECTURE·DESIGN** 등) 수정 금지. **예외 3가지**: (1) feature/milestone scope의 위 5-D 영속화 — `IMPROVEMENT_GUIDE.md`의 `## 5. Repair decision log` sub-section append. (2) 위 4-D의 `docs/10-charter/DECISION_REGISTER.md` 쓰기 — **2-S가 `contract-ready`(또는 봉인 후 구현 0건)로 판정하면 등재·상태 갱신 전체**, **봉인 후 구현이 시작된 경우엔 `- 발견: 봉인 후 (M<N>)` append만**(ADR-060 D11 writer). **(3) 2-S의 «마일스톤 층(산하 task 전부 `done`)» 분기에 한해** `docs/40-validation/QA_FINDINGS.md` 본 마일스톤 `### P0/P1/P2` append와 `docs/40-validation/IMPROVEMENT_GUIDE.md` `## 2. 열린 항목`의 `### M<N>` 그룹 append — 그 분기는 task 문서가 동결돼(ADR-068 D1) finding을 둘 자리가 원장뿐이다. 다른 분기에서는 둘 다 금지가 그대로다. 정본 3종은 저작 소유가 각 bootstrap skill이므로 본 skill이 고치지 않고 권장만 한다(ADR-005).
+- step 1에서 회수한 plan-review 파일만 삭제한다(`M<N>` 입력이면 산하 feature·task 리뷰 포함 — step 1·6). 회수 목록 밖의 plan-review 파일은 건드리지 않는다.
 
 마지막 출력:
 - 처리한 리뷰 파일 수 + 각 reviewer-tag 명단
