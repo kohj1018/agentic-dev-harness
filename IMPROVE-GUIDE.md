@@ -126,10 +126,10 @@ cp "$OLD/exp-slice-prompt.txt" "$OLD/experiment-plan.md" ~/harness-dogfood/tools
 (cd ~/harness-dogfood/dogfood-web && git log --oneline -1 && git status --short | head -3)      # a28f90c, clean
 (cd ~/harness-dogfood/dogfood-flutter && git log --oneline -1 && git status --short | head -3)  # 0530a1e, clean
 ```
-`set-cond.py`·`check-cond.sh`가 없으면 부록 B로 다시 만든다. 두 복제본의 harness 사본은 dogfood-web이 `13f6485`, dogfood-flutter가 `f4d8b0d` 기준이다 — P0-2b에서 지금 한 번, P8-2에서 다시 한 번 동기화한다.
+`set-cond.py`·`check-cond.sh`는 옛 Round 12 버전(인자 3개·옛 scratchpad 경로)이므로 **부록 B 버전으로 덮어쓴다**(2026-09-12 덮어씀 — `diff`로 부록 B와 같은지 확인). 두 복제본의 harness 사본은 dogfood-web이 `13f6485`, dogfood-flutter가 `f4d8b0d` 기준이다 — P0-2b에서 지금 한 번, P8-2에서 다시 한 번 동기화한다.
 
 ### P0-2b. 복제본 harness를 현재 main으로 동기화 (Phase 1·2의 전제)
-두 복제본의 harness 사본은 amend-8·9 이전 시점이다(dogfood-web `13f6485`: reviewer `maxTurns: 12`, planner에 «쓴 파일 목록»·«골격만으로 먼저 쓴다» 0건). 이대로 Phase 1을 돌리면 옛 정의를 재는 것이라 결과가 무효다. ADR-005#amend-2 결정 1~3(`presence: generated` 행 보존, 디렉터리 통째 동기화 금지)을 지켜 **파일 단위**로 맞춘다.
+dogfood-web의 harness 사본은 amend-8·9 이전 시점이다(`13f6485`: reviewer `maxTurns: 12`, planner에 «쓴 파일 목록»·«골격만으로 먼저 쓴다» 0건). dogfood-flutter(`f4d8b0d`)는 harness 파일이 이미 현재와 byte 동일해 커밋이 생기지 않는 것이 정상이다(2026-09-12 실측). 이대로 Phase 1을 돌리면 옛 정의를 재는 것이라 결과가 무효다. ADR-005#amend-2 결정 1~3(`presence: generated` 행 보존, 디렉터리 통째 동기화 금지)을 지켜 **파일 단위**로 맞춘다.
 ```bash
 SHA=$(git rev-parse --short HEAD)   # 보일러플레이트(현재 디렉터리 = 저장소 루트)의 sha — 복제본 커밋 메시지에 쓴다
 for f in dogfood-web dogfood-flutter; do
@@ -141,7 +141,7 @@ for f in dogfood-web dogfood-flutter; do
   (cd "$D" && git add -A -- .claude .agents docs/90-decisions/boilerplate docs/00-meta docs/30-workitems/_templates AGENTS.md && git commit -qm "chore: sync harness to $SHA, preserving generated artifacts")
 done
 ```
-`git add -A -- <경로>`는 열거한 경로 안에서만 동작한다(복제본 안에서의 동기화 커밋이라 허용). `CLAUDE.md`·`.codex/`·`.gitignore`는 Phase 1·2 결과에 영향이 없어 여기서는 건드리지 않고 P8-2(정식 절차)가 맞춘다. 동기화 뒤 **복제본 루트에서 연 세션**으로 두 복제본에서 `/stack-guard`를 한 번씩 돌려 `scripts/design-gate.mjs` 사본을 재실행 계약대로 갱신한다(무수정 사본은 새 canonical로 교체 + `copied-from` 갱신). dogfood-web은 사본이 registry와 같고 canonical과 다르므로 교체되고, dogfood-flutter는 사본이 이미 canonical과 같고 registry만 낡아 `copied-from`만 갱신된다(2026-09-12 실측 sha: web canonical `faeaadf0`·사본 `e0cb8fc1`·registry `e0cb8fc1` / flutter canonical `faeaadf0`·사본 `faeaadf0`·registry `700eea38`).
+`git add -A -- <경로>`는 열거한 경로 안에서만 동작한다(복제본 안에서의 동기화 커밋이라 허용). `CLAUDE.md`·`.codex/`·`.gitignore`는 Phase 1·2 결과에 영향이 없어 여기서는 건드리지 않고 P8-2(정식 절차)가 맞춘다. 동기화 뒤 **복제본 루트에서 연 세션**으로 두 복제본에서 `/stack-guard`를 한 번씩 돌려 `scripts/design-gate.mjs` 사본을 재실행 계약대로 갱신한다(무수정 사본은 새 canonical로 교체 + `copied-from` 갱신). dogfood-web은 사본이 registry와 같고 canonical과 다르므로 교체되고, dogfood-flutter는 사본이 이미 canonical과 같고 registry만 낡았는데, 현재 재실행 계약은 «사본 sha == copied-from일 때만 교체»라 이 경우를 «local modification(빈 diff) + 사용자 결정»으로 보고한다 — «registry 갱신»을 택한다(P5-2 결정 3이 이 경우를 자동 처리로 바꾼다)(2026-09-12 실측 sha: web canonical `faeaadf0`·사본 `e0cb8fc1`·registry `e0cb8fc1` / flutter canonical `faeaadf0`·사본 `faeaadf0`·registry `700eea38`).
 
 ### P0-2c. 실험 사본 위치
 Phase 2의 실험 사본은 저장소 밖이 아니라 **저장소 안** `.dogfood-exp/`에 둔다(세션 cwd 밖 쓰기의 권한 프롬프트·범위 규율 마찰 회피). 커밋 대상이 아니므로 `.gitignore`가 아니라 로컬 전용 제외에 적는다:
@@ -184,7 +184,7 @@ grep -E "^count:" /tmp/improve-baseline.txt
 ```bash
 cd ~/harness-dogfood/dogfood-web
 ```
-새 세션을 **복제본 루트**에서 연다(P0-2b 동기화 뒤라 복제본의 `.claude/agents/reviewer.md`가 `maxTurns: 24`인지 먼저 `grep -n maxTurns .claude/agents/reviewer.md`로 확인). `/validate-plan M1`을 실행한다 — 메인 세션 스킬이며 reviewer는 그 안에서 dispatch된다. M1은 봉인돼 있지만 validate-plan은 읽기 전용 리뷰라 실행 가능하다. 관측할 것: (i) reviewer dispatch가 **회수(재개) dispatch 없이 완전한 보고**를 냈는가 — `tool_uses`는 턴 수가 아니므로 판정 근거로 쓰지 않는다(Round 12 실측: 12턴 상한에서 tool_uses 29), (ii) `docs/40-validation/plan-reviews/M1.*.md`가 생겼는가. 끝나면 그 리뷰 파일은 `/repair-plan M1`을 돌리지 않고 삭제한다(`rm docs/40-validation/plan-reviews/M1.*.md` — 봉인된 M의 리뷰를 남기면 implement 착수 게이트가 막힌다). P8-3 (f)(ii)에서 repair-plan의 산하 파일 회수를 시험하려면 그때 다시 만든다.
+새 세션을 **복제본 루트**에서 연다(P0-2b 동기화 뒤라 복제본의 `.claude/agents/reviewer.md`가 `maxTurns: 24`인지 먼저 `grep -n maxTurns .claude/agents/reviewer.md`로 확인). `/validate-plan M1`을 실행한다 — 메인 세션 인라인 스킬이다(ADR-050 D1·DELEGATION 37행: 호출한 세션이 reviewer 페르소나의 12차원을 직접 적용한다. Round 12의 reviewer 위임 실행은 ad hoc이었다). **2026-09-12 실측: dispatch 0회로 완주(tool_uses 19)** — 따라서 reviewer `maxTurns: 24`는 여기서 시험되지 않는다. 그 실측 자리는 P8-3 (c)의 stabilize 단계 5 reviewer dispatch다. M1은 봉인돼 있지만 validate-plan은 읽기 전용 리뷰라 실행 가능하다. 관측할 것: (i) reviewer dispatch가 **회수(재개) dispatch 없이 완전한 보고**를 냈는가 — `tool_uses`는 턴 수가 아니므로 판정 근거로 쓰지 않는다(Round 12 실측: 12턴 상한에서 tool_uses 29), (ii) `docs/40-validation/plan-reviews/M1.*.md`가 생겼는가. 끝나면 그 리뷰 파일은 `/repair-plan M1`을 돌리지 않고 삭제한다(`rm docs/40-validation/plan-reviews/M1.*.md` — 봉인된 M의 리뷰를 남기면 implement 착수 게이트가 막힌다). P8-3 (f)(ii)에서 repair-plan의 산하 파일 회수를 시험하려면 그때 다시 만든다.
 
 ### P1-3. amend-8 결정 3 + amend-9 결정 1 — 상한 도달 시 부분 보고 형식과 write-first
 planner를 **일부러 상한에 걸리게** 띄운다. 복제본 루트(dogfood-flutter)에서 연 **새 세션**에서 `Agent`(subagent_type = planner)로:
@@ -316,7 +316,7 @@ Codex는 `.claude/agents/*.md`를 읽지 않으므로(persona 매핑 없음 — 
 builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작업이 거의 끝난 자리)이 관측돼 60으로 올렸다. <Phase 2 (c)(d) 결과 — 20에서 잘렸는가>. 60에서도 보고 0건 상한 도달이 1회라도 나면 값이 아니라 slice 크기 문제다(ADR-075 D11).
 
 ### D7. 예산 축 = 쓰기 도구 보유 (#amend-8 결정 1 + #amend-9 결정 2 승계)
-`Write`·`Edit`를 가진 agent(builder·planner·architect·designer·reviewer)는 «쓰는 쪽»이고 산출물 규모로 예산을 잡는다. report-only(qa·validator·researcher·analyst·security·marketer·counsel·strategist)는 보고 1건이 산출물이다. reviewer는 쓰기 도구가 있고 리뷰 파일을 쓰므로 쓰는 쪽이다(amend-8의 예외를 amend-9가 철회).
+`Write`·`Edit`를 가진 agent(builder·planner·architect·designer·reviewer)는 «쓰는 쪽»이고 산출물 규모로 예산을 잡는다. report-only(qa·validator·researcher·analyst·security·marketer·counsel·strategist)는 보고 1건이 산출물이다. reviewer는 쓰기 도구가 있고(review-doc 리뷰 파일) 회수 문서가 많은 dispatch(stabilize 단계 5 code·design surface, design-milestone R6-4 렌더 증거)를 받으므로 쓰는 쪽 산식을 적용한다(amend-8의 예외를 amend-9가 철회). `/validate-plan`은 세션 인라인 실행이라 이 예산의 대상이 아니다(Round 13 Phase 1 실측 — amend-9 배경의 «validate-plan 15+ 문서»는 Round 12의 ad hoc 위임 실행 기록이다).
 
 ### D8. 산식과 현재 값 (#amend-9 결정 3 승계)
 `maxTurns = 읽기 예산 + 3 × 산출물 수`, 읽기 예산 = `max(8, 회수 문서 수)`. builder는 60 예외(slice 단위 구현 + 검증). 현재 값:
@@ -324,7 +324,7 @@ builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작
 | agent | maxTurns | 근거 |
 |---|---:|---|
 | builder | 60 | D6 |
-| reviewer | 24 | 읽기 max(8, ~12) + 3×4 = 24 |
+| reviewer | 24 | 읽기 max(8, ~12: stabilize 단계 5 code/design surface·R6-4 렌더 증거) + 3×4 = 24 — 실측은 P8-3 (c) |
 | planner · designer · architect | 20 | 읽기 8 + 3×4 |
 | counsel · strategist | 20 | 자문 문서 회수량 |
 | qa · validator · analyst · security · marketer | 16 | 보고 1건 |
@@ -469,7 +469,7 @@ ADR-051 본문(D1~D8)과 amend-1~4를 읽고 **net 규칙을 클린 본문으로
 - **D11. fan-out 크기 판정 v2 (#amend-4 결정 1 재보정)**:
   ```
   dispatch 전에 크기를 결정적으로 계산한다. F = 변경 파일 수(전부), L_impl = «테스트 파일 집합»(test/**, tests/**, __tests__/**, e2e/**, integration_test/**, **/*.test.*, **/*.spec.*, **/*_test.dart)과 «문서 집합»(docs/**)을 제외한 변경 줄 합, L_test·L_docs = 각각의 변경 줄 합. inline 허용은 **(L_impl ≤ 50) 또는 (F ≤ 2 이고 L_impl ≤ 200)**, 그리고 UI/Arch-iface/MCP/spec-coverage 중 둘 이상 명백히 해당없음 — 셋 다 충족일 때만. 하나라도 미충족이면 fan-out 필수(재량 0). `## Orchestration`에 F·L_impl·L_test·L_docs와 판정 근거를 기록한다. 임계 초과인데 inline이면 규칙 위반이다. **1축 = 1 validator는 불변이다** — 비용 압력은 임계를 재보정해 풀지, 축을 합쳐 풀지 않는다(Round 11 발견 17). 측정 시점은 validate-workitem 실행 시점의 워킹트리(`git diff HEAD` + untracked)다 — finalize 커밋 diff가 아니다.
-  **(b) report-only·계획 리뷰 dispatch의 분할**: 회수 문서가 10개 이상이면 축·범위를 나눈다(원천: ADR-004#amend-9 결정 4 (현재 SSOT: 본 ADR D11) — validate-plan·stabilize reviewer에 적용. ADR-074는 이 규칙을 담지 않는다).
+  **(b) report-only·계획 리뷰 dispatch의 분할**: 회수 문서가 10개 이상이면 축·범위를 나눈다(원천: ADR-004#amend-9 결정 4 (현재 SSOT: 본 ADR D11) — reviewer·qa dispatch(stabilize 단계 4·5, design-milestone R6-4, review-doc)에 적용. ADR-074는 이 규칙을 담지 않는다). `/validate-plan`은 세션 인라인 스킬이라 dispatch 분할의 대상이 아니다 — 그 자리는 자체 «큰 milestone budget 가이드»(JIT 회수)가 맡는다(Round 13 Phase 1 실측: 15개 문서를 부분 읽기로 dispatch 없이 완주).
   ```
   근거 문장은 P4-3의 실측값으로 채운다. 가설: «Round 11 T-001은 테스트·문서를 빼면 구현 줄이 50 안팎이라 inline 후보이고, T-003(저장 어댑터, 외부 경계)은 구현 줄만으로도 50을 넘어 fan-out이 맞다». 실측이 가설과 다르면(T-001 L_impl > 50) 임계를 올리지 말고 그대로 fan-out으로 두고 그 사실을 적는다 — 단일 표본으로 값을 옮기지 않는다.
 - **D12. 축 spawn 신호 (validate-workitem #cost guard 확장 승계 + 재보정)**: 축 3·4·6·8 신호는 기존대로. **축 5(UI Design inventory)는 «UI 프로젝트» 신호가 아니라 «diff에 UI surface 파일 집합의 파일이 1개 이상»일 때만 spawn**한다(Round 11 T-003: `.tsx` 0개인데 spawn — 발견 16). UI surface 파일 집합의 정의는 ADR-073#amend-2 결정 1이 소유하며 여기서는 인용만 한다.
@@ -494,6 +494,7 @@ for t in T-001 T-003; do c=$(git log --format=%H --grep="Refs: $t" | tail -1); e
 - 66행 `- **두 수치 (ADR-065 D4)**: …` 문단 끝에: `자동화율의 분모는 **AC 수**이지 `## 6-1` 행 수가 아니다 — 한 AC가 두 modality 행으로 존재하면 계획 오류이며(ADR-065 D1 «정확히 하나»), `P2 [Modality-split-needed] AC-N`으로 기록하고 분모는 AC 수로 센다(Round 12 발견 30).`
 - 축 3(FAC spec) 판정 문단(79행 `P0 [Spec-gap] …` 근처)에 기록 등급 관찰 둘을 더한다: `- **의미 정합 관찰(기록 등급)**: 매핑 행의 증명 문장(ADR-072#amend-2 결정 4)이 AC 본문과 어긋나면 `P2 [FAC-semantic-hollow] FAC-N → T-NNN:AC-M`. 차단 아님 — 계획 시점 3-S (c)가 1차 관문이다.` / `- **계측 속성 도메인 관찰(기록 등급)**: task `## 3`의 계측 이벤트 속성이 승인 UI·도메인에서 산출 가능한 값인지 diff로 본다. 불가하면 `P2 [Instrumentation-domain] <이벤트.속성>`(Round 12 발견 31 — 계획 시점 3-S (b)는 콜백 유무까지만 본다).` **조건**: SIMULATION_RUN Round 12 절에 `[FAC-semantic-hollow]` 재발 기록이 없으면 첫 관찰 항목은 넣지 않고 발견 22를 «3-S (c)로 종결»로 적는다.
 - 파일 안 `ADR-051#amend-4`·`ADR-051` 인용은 `ADR-075 D11`·`ADR-075`로.
+- `.claude/skills/validate-plan/SKILL.md` 43행 현재 `**slice 기준 (ADR-004#amend-9 결정 4)**: 회수 문서가 **10개를 넘으면 축·범위를 나눠 dispatch 한다.** 실측(Round 12 `M1`): …` → `**회수 예산 (ADR-075 D11 (b))**: 본 skill은 세션 인라인 실행이다 — 회수 문서가 10개를 넘으면 아래 «큰 milestone budget 가이드»대로 JIT 회수한다(한 번에 전부 읽지 않는다). Round 12의 실측(reviewer subagent에 위임해 15+ 문서를 한 dispatch로 → 상한 중단)은 위임 실행의 기록이며, 위임해 돌릴 때는 D11 (b)대로 축·범위를 나눈다.` `.claude/agents/reviewer.md` 72행 `` `/validate-plan` 호출 시 본 agent가 `` → `` `/validate-plan`(호출한 세션이 본 페르소나의 차원을 직접 적용) 또는 plan surface 위임 시 ``.
 
 ### P4-5. plan-workitem·템플릿·DELEGATION
 - `.claude/skills/plan-workitem/SKILL.md` 3-S에 (e) 추가(현재 순서는 (a)74행·(b)75행·(d)76행·(c)77행이다 — (c) 뒤에 둔다): `- **(e) AC당 modality 하나 (ADR-065 D1)**: 한 AC에 «텍스트는 자동 테스트, 여백·위계는 사용자 관측»처럼 두 modality가 필요하면 **AC를 둘로 쪼갠다**(AC-1a/AC-1b). `## 6-1`에 같은 AC의 행이 둘이면 위반이다.`
@@ -566,6 +567,7 @@ feat(validate): count only implementation lines for the inline threshold and spa
 ### 결정
 1. **D4 (b)를 다음으로 교체한다**: `status: ready`일 때 세 값을 읽는다 — canonical sha C(`.claude/skills/stack-guard/assets/design-gate.mjs`), registry `copied-from` R, 사본 sha P(`adapter path`). 판정은 네 경우다: (i) P = R, C ≠ R → `P2 [Guard-drift] canonical 갱신됨 — /stack-guard 재실행 권장(무수정 사본이라 교체된다)` (ii) P ≠ R, C = R → `P2 [Guard-drift] 사본 로컬 수정됨 — 재실행해도 덮어쓰지 않음(diff 보고). 수정분을 canonical로 역류할지 검토: IMPROVEMENT_GUIDE [ADR-candidate]` (iii) P = C ≠ R → `P2 [Guard-drift] registry만 낡음(코드 동일) — copied-from 갱신 권장(/stack-guard 재실행이 갱신)` (iv) P ≠ R, C ≠ R, P ≠ C → 둘 다 + `사용자 결정 필요`. 전부 읽기 전용·기록 등급. sha256 도구 부재 시 skip + 사유 echo.
 2. 본문 배경·D6 예시의 «design gate digest» 표기는 «design gate copied-from 대조»로 읽는다(참조 갱신 — 본 amendment가 재지정).
+3. **`/stack-guard` 재실행 계약의 (iii) 처리**: 사본 sha == canonical sha(코드 동일)이면 local modification이 아니다 — diff 보고·사용자 결정 없이 `copied-from`만 갱신한다(2026-09-12 dogfood-flutter 실측: 현재 계약은 이 경우를 «수정됨(빈 diff)»으로 보고한다).
 
 ### 강도 (ADR-022)
 - enabling(약, [관측됨]).
@@ -576,8 +578,9 @@ feat(validate): count only implementation lines for the inline threshold and spa
 
 ### 적용 surface
 - .claude/skills/stabilize-milestone/SKILL.md — §1.0 항목 8 (b)
+- .claude/skills/stack-guard/SKILL.md — `## 재실행 계약` Design Gate Adapter 행 (결정 3)
 ```
-스킬 수정: `.claude/skills/stabilize-milestone/SKILL.md` 120행 현재 `- (b) **design gate canonical 갱신** — `status: ready`인 경우 canonical … SHA-256 ≠ registry `copied-from`이면 `P2 [Guard-drift] design gate canonical 갱신됨 — /stack-guard 재실행 권장`(읽기 전용 — mtime·날짜 비교 없음; sha256 도구 부재 시 skip + 사유 echo).` → 결정 1의 4경우 문구로 교체(`ADR-063#amend-1` 인용). ADR-063 본문 13행·70행·88행·122행의 `design gate digest`는 그대로 두되 70행(D4 (b)) 줄 끝에 `(#amend-1이 copied-from 4방향 판정으로 대체 — 현재 SSOT: 본 ADR #amend-1)`을 병기한다.
+스킬 수정: `.claude/skills/stabilize-milestone/SKILL.md` 120행 현재 `- (b) **design gate canonical 갱신** — `status: ready`인 경우 canonical … SHA-256 ≠ registry `copied-from`이면 `P2 [Guard-drift] design gate canonical 갱신됨 — /stack-guard 재실행 권장`(읽기 전용 — mtime·날짜 비교 없음; sha256 도구 부재 시 skip + 사유 echo).` → 결정 1의 4경우 문구로 교체(`ADR-063#amend-1` 인용). ADR-063 본문 13행·70행·88행·122행의 `design gate digest`는 그대로 두되 70행(D4 (b)) 줄 끝에 `(#amend-1이 copied-from 4방향 판정으로 대체 — 현재 SSOT: 본 ADR #amend-1)`을 병기한다. `.claude/skills/stack-guard/SKILL.md` 279행 `## 재실행 계약` Design Gate Adapter 행의 `다르면(local modification) 덮어쓰지 않고 diff 보고 + 사용자 결정` 앞에 `사본 sha == canonical sha면 코드 동일 — `copied-from`만 갱신(ADR-063#amend-1 결정 3);`를 넣는다.
 
 ### P5-3. ADR-035 `## Amendment 4` — §6.5 시그널 1 (발견 29)
 `docs/90-decisions/boilerplate/ADR-035-continuous-discovery.md` 끝에 append.
@@ -947,7 +950,7 @@ P0-2b 뒤 Phase 3~7이 harness를 또 바꿨으므로 두 복제본을 현재 ma
   ```
   신규 파일(`src/lib/todo.ts`·`tests/todo.test.ts`)은 untracked로 들어온다 — 실제 validate 시점과 같은 상태이며 규칙의 `-uall` 합산 대상이다(tracked numstat만 보면 F=4·12줄이고, untracked 2파일을 더해야 아래 값이 된다). `docs/30-workitems/tasks/T-001-*.md`의 `## 0. Status`를 `in-progress`로, 마지막 `- closure` 줄을 지운 뒤 사본 루트에서 연 세션으로 `/validate-workitem T-001`을 돌린다. `## Orchestration`에 `F·L_impl·L_test·L_docs`가 찍히고 판정이 L_impl 기준인지 본다(2026-09-12 커밋 실측: F=6 · L_impl=38 · L_test=51 · L_docs=15 → inline 후보. inline이 되든 fan-out이 되든 값과 판정의 정합만 본다). T-003도 같은 절차(사본 `reg-web-t003`)로 1회.
 - (b) **축 5 신호**: (a)의 T-003 실행(UI surface 파일 diff 0)에서 축 5가 spawn되지 않고 «해당없음» 인라인인지.
-- (c) **preflight 오탐**: dogfood-web `/stabilize-milestone M1` 재실행 — 5-2b `[Design-voice-grep]` 0건, 5-0 `회수 파일 N개 (… (d) w)` echo에 (d) 폐쇄 후 수리 파일이 포함되는지, 6.5 시그널 1 침묵. §1.0 8(b)는 P8-2 뒤라 세 sha가 같아 침묵이 정상이다 — 네 문구 검증은 dogfood-flutter registry의 `copied-from`을 임시로 한 글자 바꿔 (iii) «registry만 낡음»이 나오는지 1회 보고 `git checkout -- docs/00-meta/STACK_SETUP_PLAN.md`로 원복한다.
+- (c) **preflight 오탐**: dogfood-web `/stabilize-milestone M1` 재실행 — 5-2b `[Design-voice-grep]` 0건, 5-0 `회수 파일 N개 (… (d) w)` echo에 (d) 폐쇄 후 수리 파일이 포함되는지, 6.5 시그널 1 침묵, 단계 5 reviewer dispatch(code·design surface)가 회수 없이 완주하는지(amend-9 결정 2 reviewer 24의 실측 자리 — Phase 1의 `/validate-plan`은 인라인이라 미측정). §1.0 8(b)는 P8-2 뒤라 세 sha가 같아 침묵이 정상이다 — 네 문구 검증은 dogfood-flutter registry의 `copied-from`을 임시로 한 글자 바꿔 (iii) «registry만 낡음»이 나오는지 1회 보고 `git checkout -- docs/00-meta/STACK_SETUP_PLAN.md`로 원복한다.
 - (d) **게이트**: P8-2로 어댑터 사본이 새 canonical인 상태에서 — dogfood-web `validate:design -- --tokens-only src/**`로 `style={{ … : 640 }}` 류가 잡히고 `#412`·`Colors.transparent`·`padding: 0`은 안 잡히는지; `--self-test`에 케이스 (e)·(b) 가로 스크롤 포함 PASS; dogfood-flutter `validate:design -- --manifest docs/20-system/prototypes/M1/manifest.json`의 report가 (상태 × 뷰포트) 항목을 내고 `viewport-coverage` report 0인지(위젯 테스트에서 뷰포트 하나의 PNG 저장을 일부러 빼고 다시 돌려 report가 나는지도 1회).
 - (e) **verifier 쓰기 금지**: dogfood-web stabilize의 qa dispatch 입력에 scratch 경로 줄이 들어갔는지(출력에서 확인), 실행 뒤 `git status --porcelain`에 qa가 만든 파일 0.
 - (f) **repair-plan·finalize·accept 분기**: (i) (a)의 `reg-web` 사본에서 T-001을 `in-progress`로 되돌린 상태 그대로 `/validate-workitem T-001`(채점표 생성) → `.git/hooks/pre-commit`에 `exit 1`을 두고 `/finalize-workitem T-001` → `Needs Commit`으로 끝나고 task 문서가 staged인지 → 훅 제거 후 `/finalize-workitem T-001` 재호출이 수행 7·8만 수행해 커밋되는지. (ii) `/validate-plan M1`을 다시 돌려 리뷰 파일을 만든 뒤 `/repair-plan M1`이 F·T 리뷰 파일을 회수하고 마일스톤 층 분기로 QA_FINDINGS/`## 2`에 등재하는지(끝나면 리뷰 파일 삭제 확인). (iii) dogfood-web M1은 `## 11` 실측이 receipt 0건·`(수용)` 0건이라 그대로는 재확인 모드에 들어갈 수 없다(미발급 AC가 있으면 탐색 모드이고, `/repair-acceptance`는 고칠 항목이 없다). 관측 AC는 `T-004:AC-1` 하나이므로 dogfood-web의 T-004 `## 8`에 `- ac-acceptance 2026-09-11 AC-1: …`(형식은 TASK_TEMPLATE `## 8` 주석) 한 줄과 그 아래 `- invalidated 2026-09-XX AC-1: repair-acceptance 수정으로 재확인 필요` 한 줄을 **임시로** append해 «마지막 이벤트 = invalidated, 미발급 0»을 만든 뒤 `/accept-milestone M1`을 R0까지 돌려 재확인 모드(`- 모드: 재확인 (카운터 미소모)`)로 들어가고 `- 라운드:`가 1로 남는지 본다. 끝나면 `git checkout -- docs/30-workitems`와 새로 생긴 `acceptance-reviews/M1.r*.md` 삭제로 원복한다.
@@ -957,7 +960,7 @@ P0-2b 뒤 Phase 3~7이 harness를 또 바꿨으므로 두 복제본을 현재 ma
 ### P8-4. 기록
 `.boilerplate/validation/SIMULATION_RUN.md`
 - `## Round 13` 절에 P1·P2·P8-3 결과와 «발견 → 조치» 표(이번 라운드에 닫은 항목 번호 5·9·16·17·19·20·22·23·25·27·28·29·30·31·32·40·53·58·74 + 기존 결함 1~11)를 남긴다.
-- `## Falsifying evaluation 항목별 결과` 표의 미측정 행(ADR-004#amend-5·7·8, ADR-072#amend-4, ADR-071 (d), ADR-072 (e))을 이번 결과로 갱신하고, 새 amendment 9종 + ADR-074·075의 falsifier 행을 추가한다.
+- `## Falsifying evaluation 항목별 결과` 표의 미측정 행(ADR-004#amend-5·7·8, amend-9 결정 2(P8-3 (c)), ADR-072#amend-4, ADR-071 (d), ADR-072 (e))을 이번 결과로 갱신하고, 새 amendment 9종 + ADR-074·075의 falsifier 행을 추가한다.
 - `## Phase 7 개정 목록` 아래에 `## 라운드 2 개정 목록 (기준 <시작 sha>..HEAD)`를 같은 형식으로 추가한다(ADR별 개정 수·발화·실행 검증 여부·임계 도달).
 - 상단 시점 주석에 `ADR-004 → ADR-074, ADR-051 → ADR-075 (2026-09-XX)` 한 줄.
 
