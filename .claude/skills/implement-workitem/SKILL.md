@@ -27,7 +27,7 @@ allowed-tools: Read Glob Grep Write Edit Bash Agent
    - 실측이 막히면(네트워크·자격증명·승인 차단) 추측으로 진행하지 않고 `Needs Fact Resolution: <무엇> — <막힌 사유>`를 출력하고 **그 사실이 필요한 부분을 미완으로 둔다**(그 사실이 필요 없는 다른 AC 구현은 계속).
 4. **분할 (partition) — 싸게 한다, 과추론 금지** (ADR-047 D9 + ADR-051 #d6 — foreman `## 3` step-path partition; *partition 직전 `docs/00-meta/STACK_SETUP_PLAN.md`(있으면)의 "테스트 격리 미설정" 표식을 회수* — 공유 런타임 리소스 순차화 입력):
    - `## 3. 구현 항목` step 을 *건드리는 파일/경로* 기준으로 묶는다. step 의 파일 경로는 `## 3` 본문(또는 `## 4-1. 변경 예정 파일/경로` 힌트)에서 읽는다.
-   - **slice 크기 상한 (ADR-004#amend-7 결정 3)**: 한 slice 의 **산출물이 4개를 넘으면 쪼갠다**(파일 disjoint 여부와 별개 축이다). 실측(Round 12 R4): «화면 1개 + fixtures + 스토리/테스트 + 갤러리 등록 + 검증» 을 한 dispatch 에 넣었더니 **두 builder 가 다 턴 상한에서 보고 없이 멈췄다** — 작업은 거의 끝난 상태였고 죽은 자리는 최종 검증이었다. 산출물이 많으면 «코드+fixtures» / «테스트·등록» 으로 가른다.
+   - **slice 크기 상한 (ADR-074 D9-2)**: 한 slice 의 **산출물이 4개를 넘으면 쪼갠다**(파일 disjoint 여부와 별개 축이다). 실측(Round 12 R4): «화면 1개 + fixtures + 스토리/테스트 + 갤러리 등록 + 검증» 을 한 dispatch 에 넣었더니 **두 builder 가 다 턴 상한에서 보고 없이 멈췄다** — 작업은 거의 끝난 상태였고 죽은 자리는 최종 검증이었다. 산출물이 많으면 «코드+fixtures» / «테스트·등록» 으로 가른다.
    - 파일 집합이 **서로 겹치지 않는(disjoint)** step 그룹 → 각각 한 slice → *병렬 builder*.
    - 파일이 **겹치거나** step A 산출물을 step B 가 import/호출하는 *명백한* 선후 의존이 있으면 → 같은 slice(한 builder) 또는 *순차* dispatch. 의존은 `## 3` step 경로만 보고 rough 하게 판단 — 깊은 그래프 분석 금지.
    - **공유 변이 지점·테스트 의존 주의(조용한 clobber 방지)**: manifest/lockfile·barrel(`index.*`)·DI 컨테이너·route registry 처럼 *여러 slice 가 동시에 append 할 수 있는 공유 파일*은 `## 3` 에 명시 안 돼도 *겹치는 파일*로 간주 → 순차/단일. slice B 의 테스트가 slice A 코드를 import 하면 disjoint 아님 → 순차. *의심되면 단일 builder*.
@@ -86,7 +86,7 @@ AC 해석은 위 "AC 해석 모호성 경로"에서 dispatch 전에 메인 forem
 `--fast`면 단일 builder 가 첫 AC만 완료하고 종료, 나머지 AC는 후속 호출 권장.
 
 각 builder 는 *자기 slice 가 건드린 파일* 을 메인 foreman 에 반환한다.
-**builder가 구조화 최종 반환 없이 멈추면** foreman은 1회 재개를 시도(SendMessage 등)하고, 그래도 미반환이면 그 slice가 건드렸을 파일을 직접 열어 결과를 회수한다(always-verify — "결과 없음"을 조용히 통과 금지, ADR-051#amend-4).
+**builder가 구조화 최종 반환 없이 멈추면**(상한 중단은 마무리 턴 없이 잘리므로 부분 보고가 오지 않는 것이 정상이다 — ADR-074 D9) foreman은 **먼저 그 slice가 건드렸을 파일을 워킹트리에서 직접 읽어 「이미 쓴 파일 목록」을 만들고, 그 목록을 실어 1회 재개**한다(SendMessage 등 — ADR-074 D10). 재개해도 미반환이면 그 파일들에서 결과를 직접 회수한다(always-verify — "결과 없음"을 조용히 통과 금지, ADR-051#amend-4).
 6-V. **검증 판정력 확인 (ADR-064 D2 — 메인 foreman이 1회. `## 4-1` 갱신보다 *먼저* 수행한다 — 여기서 테스트가 추가되기 때문)**: 각 AC에 대해 그 테스트가 실제로 무언가를 보고 있는지 확인하고 기록한다. **코드를 변형하지 않는 3수단이 기본**이며 이 순서로 적용한다 — ① builder가 보고한 **Red 관측**(어떤 테스트가 구현 전에 어떤 이유로 실패했는지). 구현 전에 통과했다면 그 테스트는 판정력이 없으므로 테스트를 먼저 고친다. ② **반례 테스트** — 거부·차단돼야 할 입력을 넣고 실제로 거부되는지 단정(**이것은 대개 AC 본연의 행동이므로 `AC-N`으로 매핑한다** — VC로 빼지 않는다). ③ **positive control** — 검사 헬퍼·수집기 자체가 살아 있는지 확인(예: "로그가 없어야 한다"를 단정하기 전에 일부러 로그를 하나 심어 헬퍼가 잡는지). **부재를 단정하는 AC는 ①만으로 판정력이 증명되지 않으므로 ③이 필수다.**
    - **modality 분기 (ADR-065 D1)**: `## 6-1`의 `[modality]`를 먼저 읽는다. **`[자동 테스트]`·`[산출물 검사]` AC만 RGR·판정력 확인(6-V) 대상**이다. `[사용자 관측]`·`[플랫폼 관측]` AC는 Red를 만들 수 없으므로 **6-V·6-R의 `verify-power` 대상에서 제외한다** — 그 AC에는 `- verify-power` 줄을 쓰지 않고, 대신 **6-R에서 task `## 8`에** `- ac-pending <날짜> <AC-N>: modality=<...> — 마일스톤 수용 라운드에서 확인 예정` 한 줄을 append한다(형식 SSOT는 ADR-065 D3 / TASK_TEMPLATE `## 8`). 그 AC의 충족은 사용자 발급 `- ac-acceptance`가 담당하며 **foreman이 그 receipt를 쓰지 않는다.** `- ac-pending`은 receipt가 아니라 «아직 증거가 없다»는 표시이므로 이 금지에 걸리지 않는다.
    - **`red=opt-out(...)`을 modality 사유로 쓰지 않는다** — ADR-064 D2의 `opt-out`은 *task `## 6-2`가 정당하게 채워졌거나 `Type: research-spike`* 인 경우로 정의돼 있다. modality를 그 값에 태우면 그 상태의 의미가 조용히 넓어진다. 상태 집합을 늘리지도, 기존 값을 전용하지도 않고 **대상에서 빼는** 것이 두 ADR을 모두 지키는 유일한 방법이다.

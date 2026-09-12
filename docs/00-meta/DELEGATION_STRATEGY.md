@@ -157,12 +157,14 @@ charter/architecture는 Living Doc로 분류돼 진행 중 재진입이 필요�
 | stabilize ADR 후보 (validator는 P1-finding 경로 — ADR-000 결정 2) | IMPROVEMENT_GUIDE `[ADR-candidate]` → 다음 /plan-milestone R0 회수·작성 | 다음 plan 라운드 |
 | 수동 결정 (MCP 등) | 사용자 | — |
 
-## 모델 표기 정책
+## 모델·추론 강도·턴 예산 표기 정책
 
-shared 도구 설정 파일(`.claude/settings.json` · `.codex/config.toml`)에는 모델·추론 강도 키를 두지 않는다 — 사용자 계층과 계정·CLI 기본값이 승계한다 (ADR-004#amend-2·#amend-3).
-별칭(`sonnet`, `opus`, `haiku`)은 역할별 고정이 필요한 `.claude/agents/<name>.md` frontmatter `model:`에서만 쓴다. 전체 버전 ID 금지는 불변.
-추론 강도 `effort:`도 같은 자리(agent frontmatter)에서만 역할별로 고정한다 — **현재 어느 agent 에도 지정하지 않는다**(builder 의 `medium` 은 대조군 실험에서 완료율 이득 없이 소요·토큰이 약 2배로 늘어 제거했다 — ADR-004#amend-5). 지정이 없으면 세션 effort 를 물려받는다. 메인 세션은 사용자 계층에서 `high` 이상을 권장하며, `CLAUDE_CODE_EFFORT_LEVEL` 환경변수를 전역에 두면 agent `effort`가 무력화되므로 두지 않는다.
+shared 도구 설정 파일(`.claude/settings.json` · `.codex/config.toml`)에는 모델·추론 강도 키를 두지 않는다 — 사용자 계층과 계정·CLI 기본값이 승계한다 (ADR-074 D1).
+별칭(`sonnet`, `opus`, `haiku`)은 역할별 고정이 필요한 `.claude/agents/<name>.md` frontmatter `model:`에서만 쓴다. 전체 버전 ID 금지는 불변 (ADR-074 D2).
+추론 강도 `effort:`도 같은 자리에서만 허용되는 축이나 **현재 어느 agent에도 지정하지 않는다** — builder의 `medium`은 완료율 이득 없이 소요·토큰이 약 2배로 늘어 제거했다 (ADR-074 D5). 메인 세션은 사용자 계층에서 `high` 이상을 권장하며, `CLAUDE_CODE_EFFORT_LEVEL` 환경변수를 전역에 두면 agent `effort`가 무력화되므로 두지 않는다.
+턴 예산 `maxTurns:`는 «쓰기 도구 보유» 축으로 잡는다 — `max(8, 회수 문서 수) + 3 × 산출물 수`, builder 60. 값의 SSOT는 각 agent frontmatter이고 표는 ADR-074 D8에 있다.
+**에이전트 정의는 세션 시작 시점에 고정된다.** `.claude/agents/*.md`를 고친 뒤 그 효과의 관측·검증은 새 세션에서 한다 — 같은 세션의 dispatch는 편집 전 정의로 돈다 (ADR-074 D12).
 특정 버전·강도를 강제해야 하면 ADR로 남기고 그 자리에서만 고정한다.
-정책 근거는 [ADR-004-model-alias-policy.md](../90-decisions/boilerplate/ADR-004-model-alias-policy.md)를 참조한다.
+정책 근거는 [ADR-074-model-effort-and-turn-budget-policy.md](../90-decisions/boilerplate/ADR-074-model-effort-and-turn-budget-policy.md)를 참조한다.
 
 메인 세션 오케스트레이션(foreman·fan-out·wave 제거) 정책은 [ADR-051](../90-decisions/boilerplate/ADR-051-main-session-orchestration-and-wave-removal.md) 참조.

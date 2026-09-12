@@ -249,7 +249,7 @@ MILESTONE 문서의 `## 5. 완료 기준` 각 항목을 아래 deterministic 평
   - **합계 = N + M + K**. 형식: `Open 전체: QA_FINDINGS N + IMPROVEMENT_GUIDE M + carry-over(P0/P1) K = (N+M+K)건` — **carry-over에 `(P0/P1)`을 붙여 출력한다**. N·M은 전 severity인데 K는 P0/P1만 세므로(다른 마일스톤 항목은 색인 스캔 대상 — `/repair-milestone` 회수 규율과 동형), 표기하지 않으면 `## 8. 회고`에 영속되는 수치를 읽는 사람이 기준을 오독한다.
   - **두 원장을 각각 읽어야만 알 수 있는 수이므로 한 줄로 합산해 남긴다**(한쪽만 읽고 남은 항목 수를 오독한 사례가 관측됨). 같은 값을 milestone `## 8. 회고`의 `open 항목 스냅샷:` 줄에도 기록한다(ADR-068 D5).
 - Cross-stabilize 회귀 신호: *이전 모든 milestone들*(`## M-1` ~ `## M-(N-1)`)의 P1 라벨 finding이 본 milestone의 **QA_FINDINGS(`## M-N`)** 또는 **IMPROVEMENT_GUIDE 의 `## 2. 열린 항목` 안 `### M-N`** 두 sub-section에 *재등장*한 항목 수 (라벨 grep, 휴리스틱 한계 echo — 동의어/오타 false-negative 가능. 본 grep은 *정확한 라벨 매칭*만 잡음. `## 5. Repair decision log`는 *closed records*라 회귀 신호 대상 아님).
-- **위임 예산 (ADR-004#amend-8 결정 5)**: `턴 소진 0건 보고: N회` — 산하 task 의 report·repair 로그에서 «sub-agent 가 턴 상한에 닿았는데 보고가 0건이었다»고 적힌 건수를 센다(기록이 없으면 `0회 (미기록)`). 이 실패는 지금까지 사람이 알아채야만 보였다. **1회 이상이면 ADR-004#amend-8 falsifier (a)가 발화한다** — 단계 8 출력에 그 사실을 한 줄로 적는다.
+- **위임 예산 (ADR-074 D11)**: `턴 소진 0건 보고: N회` — 산하 task 의 report·repair 로그에서 «sub-agent 가 턴 상한에 닿았는데 보고가 0건이었다»고 적힌 건수를 센다(기록이 없으면 `0회 (미기록)`). 이 실패는 지금까지 사람이 알아채야만 보였다. **1회 이상이면 ADR-074 D14의 slice 강제 조건이 발화한다** — 단계 8 출력에 그 사실을 한 줄로 적는다.
 - **수렴 (ADR-070 D8)**: `round K`(IMPROVEMENT_GUIDE `## 5` `### M-N`의 `- round:` 최대값, 없으면 0) / P0 신규 a · 해소 b · 재개 c / P0 재현 첨부율 <%> / needs-confirmation d건
 
 본 단계는 *수치 echo만* — IMPROVEMENT_GUIDE / QA_FINDINGS에 새 항목 박지 않음. Cross-stabilize 회귀 신호가 1+ 건이면 단계 8 출력의 "P1 / P2 후속 작업"에 *patterned drift 의심* 한 줄 추가.

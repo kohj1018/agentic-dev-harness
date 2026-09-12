@@ -37,7 +37,7 @@
 **비고정(built-in default 승계) 정당화**:
 - 본 보일러플레이트의 lifecycle(plan→implement→validate→repair→finalize→stabilize)이 모든 변경을 *후속 validate에서 검증*한다 (deterministic sensor — ADR-047 D1 Executability 정합). 즉 mid-stream confirm을 빼도 끝단 validator가 catch.
 - `auto` 에서도 **작업 디렉터리 내 Write/Edit 는 분류기를 거치지 않고 자동 수락**되므로 builder 의 RGR 사이클은 그대로 성립한다. 셸·MCP 호출은 confirm 대신 분류기 검토를 받아 *비대화 sub-agent 도 멈추지 않는다* — sub-agent 의 모든 행동은 부모 세션과 같은 규칙으로 검토되고, sub-agent frontmatter 의 `permissionMode` 는 무시된다.
-- 도구 기본값을 따라가면 CLI 업데이트에 맞춰 모드 정책이 자동 갱신된다 (모델·추론 강도 비고정과 같은 형태 — ADR-004#amend-2).
+- 도구 기본값을 따라가면 CLI 업데이트에 맞춰 모드 정책이 자동 갱신된다 (모델·추론 강도 비고정과 같은 형태 — ADR-074 D1).
 
 **잔여 위험**:
 - builder 가 *task 범위 밖* Write/Edit 를 자동 수락 — validator 의 diff trace audit(ADR-006#amend-1)으로 후행 catch. 삭제·파괴 명령은 `auto` 에서 분류기 검토를 받지만(critical path 삭제는 어떤 모드에서도 자동 수락 X) 검토를 통과한 삭제는 실행되므로, *비가역 파괴* 위험이 0 이 되는 것은 아니다.
