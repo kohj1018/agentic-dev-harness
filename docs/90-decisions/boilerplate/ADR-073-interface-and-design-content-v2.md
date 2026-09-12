@@ -188,3 +188,28 @@ D4 는 `## 3` 폰트 결정 블록에 **전달 방식(self-host / CDN / 앱 번�
 - .claude/skills/design-milestone/SKILL.md — 결정 3
 - .claude/skills/plan-workitem/SKILL.md — 결정 4
 - .claude/skills/stack-guard/assets/design-gate.mjs — 결정 5
+
+<a id="adr-073-amend-2"></a>
+## Amendment 2 (2026-09-13) — preflight voice grep 범위 축소 + 회수 파일 수 echo
+
+### 배경
+- [관측됨] 5-2b voice grep이 DESIGN `## 10` «내부 키 노출» 규칙을 변경 파일 전체에 적용해 저장 어댑터의 식별자(`localStorage`·`todos.v1`·`QuotaExceededError`)를 카피로 오탐했다 — Round 11 stabilize 3회차 전부 10건(발견 27). 규칙은 사용자 카피 대상이다.
+- [관측됨] preflight grep이 «검사 대상 파일 0건»과 «위반 0건»을 구분하지 않아 회수 파일 목록이 비었는데 전부 «0건»으로 통과한 적이 있다(발견 32).
+
+### 결정
+1. **«UI surface 파일 집합»의 정의(canonical)**: 웹 `*.tsx *.jsx *.vue *.svelte *.astro *.html *.css *.scss *.sass *.less` + Flutter `lib/**/*.dart` 중 경로에 `screens/`·`widgets/`·`features/`·`theme/`·`prototype/` 포함. 다른 ADR·스킬(ADR-075 D12 축 5 신호, 5-2b)은 이 정의를 인용만 한다.
+2. **5-2b의 대상은 결정 1의 집합이고, 정규식은 «사용자에게 렌더되는 텍스트 구간»에만 적용한다.** 두 구간이다 — (a) 따옴표 안 문자열(`"…"`·`'…'`·`` `…` ``), (b) **JSX·HTML 텍스트 노드**(`>`와 다음 `<` 사이의 내용). (b)가 없으면 `<h1>TODO copy</h1>`·`<p>sample text</p>` 같은 **가장 전형적인 카피 위반을 놓친다**. 식별자·키 이름은 두 구간 어디에도 들어가지 않으므로 발견 27의 오탐(`localStorage`·`todos.v1`)은 그대로 배제된다. 등급은 5-2와 같은 **기록 등급**(`P1 [Design-voice-grep]` 유지, 차단 아님).
+3. **5-0은 회수 결과를 `회수 파일 N개 ((a) x · (b) y · (c) z · (d) w)` 한 줄로 echo한다.** 회수 출처에 **(d) 폐쇄 후 수리 기록**(기존 (d) «모두 실패 시»는 (e)로 민다) — `IMPROVEMENT_GUIDE.md ## 5`의 본 마일스톤 항목 `files:` 목록(마일스톤 층 수리가 바꾼 파일은 task `## 4-1`·커밋 Refs 어디에도 없다) — 을 더한다. N = 0이면 5-2·5-2b·5-3은 실행하지 않고 `P2 [Stabilize-scope-empty] 회수 파일 0건 — 5-x 미실행`을 기록한다(기존 `[Stabilize-recovery]`와 다른 라벨 — 회귀 신호 집계가 라벨 정확 일치로 돈다). 각 5-x 출력은 `대상 K파일 / 위반 M건`으로 둘을 함께 적는다.
+4. **`P0 [Spec-gap]`은 QA_FINDINGS로 간다.** 구현 시작 뒤 unmapped FAC는 계약 결함이므로 ADR-070 D7(성격 기준 라우팅)대로 `QA_FINDINGS.md` 본 마일스톤 `### P0`에 등재한다 — 그래야 졸업 item 5가 센다. IMPROVEMENT_GUIDE에는 적지 않는다(ADR-037#amend-3의 «IMPROVEMENT_GUIDE에 기록» 문구는 ADR-070 D7 이전 서술 — 참조 갱신).
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = 카피 규칙이 코드 식별자에 발화 / 빈 회수가 «위반 0건»으로 통과 / 폐쇄 후 수리 파일이 회수에서 빠짐 / Spec-gap P0가 졸업 계수 밖 (관측됨). predicted = 저장 어댑터 프로젝트에서 5-2b 오탐 0 / 회수 0건이 출력에 드러남 / Spec-gap이 item 5에 들어감. falsifier = (a) 따옴표 구간 한정으로 실제 카피 위반을 놓친 사례가 1건이라도 나오면 대상 집합을 넓힌다 (b) UI surface 밖 파일에 사용자 카피가 있는 스택(예: i18n json)이 나오면 집합에 확장자를 더한다. rollback = 네 결정 삭제.
+- 예산 영향 = 없음(메인 세션 preflight — 위임 단위 없음).
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md — 5-0 echo·(f) 출처 · 5-2b 대상·등급 · Spec-gap 라우팅
+- .claude/skills/validate-workitem/SKILL.md — 결정 1 인용(축 5 신호)
+- docs/90-decisions/boilerplate/ADR-037-spec-coverage-audit.md — 결정 4 참조 갱신 줄

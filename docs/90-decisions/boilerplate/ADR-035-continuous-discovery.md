@@ -122,3 +122,23 @@ mid-project pivot 시 DISCOVERY만 갱신하고 Charter는 그대로일 경우 S
 ### 강도 (ADR-022)
 - constraint(강) — 1·4행은 봉인 차단.
 - **Mutation delta (ADR-047 D3)**: failure=핵심 가설이 검증·수용 없이 구현으로 흘러감 / falsifier=3필드 없는 가정이 봉인을 통과 / rollback=4단계 표 제거 후 P1 보고로 원복.
+
+<a id="adr-035-amend-4"></a>
+## Amendment 4 (2026-09-13) — staleness 시그널 1을 mtime에서 변경 hunk 판정으로
+
+### 배경
+- [관측됨] 시그널 1(«DISCOVERY.md mtime > PROJECT_CHARTER.md mtime»)이 harness 자신의 쓰기에 발화한다 — 봉인 라운드가 `## 12` 가정 표에 원장 상호참조 3줄을 쓴 것만으로 매 마일스톤 P1 «drift 의심»이 뜬다(Round 11 발견 29). Charter가 소비하는 절(페르소나·핵심 pain·JTBD·시나리오)은 바뀌지 않았다.
+
+### 결정
+1. 시그널 1은 **«Charter 마지막 커밋 이후 DISCOVERY에 Charter 공급 절의 실질 변경이 있는가»**로 판정한다. 방법: `C=$(git log -1 --format=%H -- docs/10-charter/PROJECT_CHARTER.md)`; `git diff -U0 $C -- docs/10-charter/DISCOVERY.md`(워킹트리 변경 포함)의 각 hunk를 **새 파일의 줄 범위(`@@ -a,b +c,d @@`의 c..c+d)**로 현재 DISCOVERY의 `## N.` 헤딩 줄 범위에 대응시켜 절을 정한다(hunk 헤더의 함수명 칸은 markdown에서 절 제목을 보장하지 않으므로 쓰지 않는다). **제외**: `## 14`·`## 15`·`### Repair history` 절의 hunk 전부, 그리고 `## 12` 절의 hunk 중 변경 줄이 전부 원장 상호참조 패턴(`원장 D-[0-9]{3}`·`risk-accepted`)만 담은 것. `## 12`의 그 밖의 변경(가정 추가·결과 변경)은 Charter `## 9`의 공급원이므로(ADR-069 D3 전파표) 발화한다. 제외 뒤 남는 hunk가 1개 이상이면 발화. git 이력이 없으면(fresh fork) mtime 규칙으로 degrade + 사유 echo.
+2. 시그널 2~4는 불변.
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = 정기 오탐 (관측됨). predicted = 원장 상호참조만으로는 발화 0, 가정 내용 변경은 발화. falsifier = Charter 공급 절이 바뀌었는데 판정이 놓치면(절 매핑 오류) 헤딩 매핑을 넓힌다. rollback = mtime 규칙 복귀.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md — §6.5 시그널 1

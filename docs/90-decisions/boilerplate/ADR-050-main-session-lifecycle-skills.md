@@ -74,3 +74,26 @@ repair-workitem은 validator report를 기계적으로 수정하지 않고, repa
 
 ### 강도 (ADR-022)
 - enabling(약) — 한 줄 규율.
+
+<a id="adr-050-amend-2"></a>
+## Amendment 2 (2026-09-13) — Bash 보유 report-only 에이전트는 프로젝트 트리에 쓰지 않는다
+
+### 배경
+- [관측됨] qa·validator는 `tools: Read, Glob, Grep, Bash`다(브라우저 구동·`validate` 실행에 필요). «report-only»는 산문 규율뿐이라, Round 11 stabilize에서 qa 단위가 «검증 스크립트를 프로젝트 안으로 복사해 실행»을 다음 행동으로 잡은 채 턴 한도에 걸렸다 — 한도가 아니었으면 프로젝트에 파일을 썼을 것이다(발견 25, near-miss).
+
+### 결정
+1. **Bash를 가진 report-only 에이전트(qa·validator)는 프로젝트 트리(저장소 안)에 소스·테스트·검사 스크립트·설정 파일을 만들거나 고치지 않는다.** 도구가 정한 출력 경로에 생기는 실행 산출물(테스트 캐시·`design-gate-shots/`·리포트 파일·`coverage/`)은 이 금지의 대상이 아니다. 임시 스크립트가 필요하면 (a) `node -e`·`dart run --eval`류 인라인 실행 또는 (b) 호출자가 지정한 scratch 경로(저장소 밖)만 쓴다. 둘 다 불가하면 `Needs Script: <목적> — <필요한 실행 방식>`으로 보고하고 멈춘다.
+2. **호출자(stabilize 단계 4·5, validate-workitem dispatch)는 위임 프롬프트에 «작업 파일을 프로젝트에 만들지 않는다 — scratch 경로: <경로>» 한 줄과 scratch 경로를 넘긴다.** §3-V·3-P처럼 스크립트 실행이 예정된 단계는 실행 방식을 프롬프트에 미리 지정한다.
+
+### 강도 (ADR-022)
+- 제약(중, [관측됨]): 결정 1.
+
+### Mutation delta (ADR-047 D3)
+- failure = report-only가 프로젝트에 쓰기 직전 (near-miss 관측). predicted = Round 14에서 qa/validator의 소스·스크립트 쓰기 0건, `Needs Script` 보고가 대신 나옴. falsifier = `Needs Script`가 마일스톤당 3회 이상이면 scratch 경로를 stack-guard가 미리 만들어 둔다. rollback = 두 결정 삭제.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/agents/qa.md — 결정 1
+- .claude/agents/validator.md — 결정 1
+- .claude/skills/stabilize-milestone/SKILL.md — 결정 2 (단계 4·5 dispatch)
+- .claude/skills/validate-workitem/SKILL.md — 결정 2 (dispatch)

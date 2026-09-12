@@ -67,7 +67,7 @@ accepted
 
 - 점검 대상 4항목:
   - **(a) registry 경로 실재** — `STACK_SETUP_PLAN`에 기록된 **영속 산출물 경로**가 실제로 존재하는가. registry 절마다 스키마가 다르므로(절-수준 status / 행-수준 status / status 열 없음) **대상 절·검사할 경로 열·status 조건을 SKILL 본문의 표가 고정한다** — 그것이 없으면 본 항목은 deterministic 이 아니다. `status: n/a`·미대상 행은 대상이 아니다(e2e 비대상·비-UI 프로젝트에서 경로가 없는 것은 정상이다). **ephemeral 산출물 경로는 검사하지 않는다** — design gate 의 `output path`(`design-gate-shots/`)는 `.gitignore` 대상이고 매 실행 생성·초기화되므로 fresh clone 에서 부재가 정상이며, 검사하면 매 마일스톤 오탐이 되어 침묵 우선 원칙과 충돌한다.
-  - **(b) design gate digest** — `## Design Gate Adapter`의 `status`가 `ready`인 경우에만, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치.
+  - **(b) design gate digest** — `## Design Gate Adapter`의 `status`가 `ready`인 경우에만, 기록된 source digest ↔ 실제 adapter 파일의 SHA-256 일치. (#amend-1이 copied-from 4방향 판정으로 대체 — 현재 SSOT: 본 ADR #amend-1)
   - **(c) 등록 밖 소스 디렉터리** — **소스 루트 registry를 갖는 스택에서만** 수행한다. 현재 그 registry를 갖는 것은 `## Dart Source Roots`(Dart/Flutter)뿐이며 비-Dart 스택에서는 `/bootstrap-stack`이 그 절을 삭제하므로 **판정 기준이 없다 → 이 항목을 건너뛴다.** 기준 없이 "등록 밖"을 판정하면 TS/Python/Go의 `src/`·`tests/`가 매 마일스톤 오탐으로 찍혀 침묵 우선 원칙과 정면 충돌한다.
   - **(d) probe 판정 기록** — `## 통합 명령 사용법`의 `probe smoke:` 값이 `PROBE FAIL`·`PARTIAL`·`SKIPPED` 이거나 **줄 자체가 없으면** `P2 [Guard-drift] validate 판정력 미검증 — /stack-guard 재실행 권장`. **`PASS (…)`와 `PROBE OK, PROJECT FAIL`은 정상이다** — 후자는 probe 전 회차가 기대대로였고 프로젝트 코드만 실패한 상태라 검증 장치의 노후가 아니고(그 실패는 졸업 item 2·stabilize 단계 3이 이미 잡는다) 재실행 처방도 무의미하다. 판정력이 검증된 상태를 재실행 권고로 채우면 D4의 침묵 우선이 무너진다. **여기서 probe를 다시 돌리지 않는다** — 기록된 문자열만 읽는다(stabilize read-only 계약). 이것이 D1의 미검증 상태가 조용히 잊히지 않는 유일한 경로다.
 - **`STACK_SETUP_PLAN.md`가 부재하면**(`/bootstrap-stack` 미실행 또는 산출 누락) 본 항목 전체를 skip 하고 `Guard-drift check skipped: STACK_SETUP_PLAN.md 부재` 1줄만 남긴다(§1.0의 `markdown-link-check` 미설치·원장 부재 선례와 동형).
@@ -131,3 +131,26 @@ adapter 코드는 본 ADR에서 수정하지 않는다 — digest 변경은 capa
 
 ## 참고
 - ADR-068(졸업 게이트 — **본 ADR은 여기에 새 항목을 넣지 않는다**; probe 미검증은 D4 (d)의 기록·권고 경로로 처리), ADR-021(정적 분석·secret scanner 권장), ADR-022(Ratchet), ADR-047 D1·D8(Executability·Oracle Adequacy), ADR-052#amend-1(e2e 5상태 — 프로비저닝/졸업 2단 판정의 원형), ADR-054(실행 single-origin 원형), ADR-058#amend-2(design gate capability·digest), ADR-059 D2(Flutter 겸업 단계·source root drift 경고의 원형).
+
+<a id="adr-063-amend-1"></a>
+## Amendment 1 (2026-09-13) — D4 (b)를 copied-from 4방향 판정으로
+
+### 배경
+- [관측됨] D4 (b)는 ADR-058#amend-2 시절의 «source digest 일치» 문구 그대로였고, ADR-072 D6이 registry를 `copied-from`(복사 시 canonical sha) 6필드로 바꾼 뒤 재지정되지 않았다.
+- [관측됨] stabilize (b)는 «canonical sha ≠ copied-from»만 보고 «/stack-guard 재실행 권장»을 냈는데, Round 11 fork는 **사본이 canonical보다 새로웠다**(라운드 중 버그 3건을 사본에서 고쳤다). 그 처방대로 재실행하면 stack-guard 재실행 계약이 local modification을 덮어쓰지는 않지만, 처방 문구는 «사본이 앞선다»는 사실을 말하지 않아 사용자를 반대 방향으로 이끈다(발견 28).
+
+### 결정
+1. **D4 (b)를 다음으로 교체한다**: `status: ready`일 때 세 값을 읽는다 — canonical sha C(`.claude/skills/stack-guard/assets/design-gate.mjs`), registry `copied-from` R, 사본 sha P(`adapter path`). 판정은 네 경우다: (i) P = R, C ≠ R → `P2 [Guard-drift] canonical 갱신됨 — /stack-guard 재실행 권장(무수정 사본이라 교체된다)` (ii) P ≠ R, C = R → `P2 [Guard-drift] 사본 로컬 수정됨 — 재실행해도 덮어쓰지 않음(diff 보고). 수정분을 canonical로 역류할지 검토: IMPROVEMENT_GUIDE [ADR-candidate]` (iii) P = C ≠ R → `P2 [Guard-drift] registry만 낡음(코드 동일) — copied-from 갱신 권장(/stack-guard 재실행이 갱신)` (iv) P ≠ R, C ≠ R, P ≠ C → 둘 다 + `사용자 결정 필요`. 전부 읽기 전용·기록 등급. sha256 도구 부재 시 skip + 사유 echo.
+2. 본문 배경·D6 예시의 «design gate digest» 표기는 «design gate copied-from 대조»로 읽는다(참조 갱신 — 본 amendment가 재지정).
+3. **`/stack-guard` 재실행 계약의 (iii) 처리**: 사본 sha == canonical sha(코드 동일)이면 local modification이 아니다 — diff 보고·사용자 결정 없이 `copied-from`만 갱신한다(2026-09-12 dogfood-flutter 실측: 현재 계약은 이 경우를 «수정됨(빈 diff)»으로 보고한다).
+
+### 강도 (ADR-022)
+- enabling(약, [관측됨]).
+
+### Mutation delta (ADR-047 D3)
+- failure = 사본이 앞선 상황에 «재실행 권장»만 나옴 (관측됨). predicted = 네 경우가 각각 다른 문구로 나옴(2026-09-12 복제본 실측: dogfood-web은 (i), dogfood-flutter는 (iii)). falsifier = (ii)가 실제로는 canonical 회귀였던 사례가 나오면 mtime 보조 신호를 더한다. rollback = (b)를 amend 전 문구로.
+- 예산 영향 = 없음.
+
+### 적용 surface
+- .claude/skills/stabilize-milestone/SKILL.md — §1.0 항목 8 (b)
+- .claude/skills/stack-guard/SKILL.md — `## 재실행 계약` Design Gate Adapter 행 (결정 3)
