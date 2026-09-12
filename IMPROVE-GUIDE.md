@@ -283,7 +283,7 @@ accepted
 
 ## 현재 유효 결정
 - shared 설정 파일에는 모델·추론 강도 키를 두지 않는다(D1). 별칭은 agent frontmatter `model:`에서만(D2). `effort`는 허용 축이나 현재 어느 agent에도 지정하지 않는다(D5).
-- 턴 예산은 «쓰기 도구 보유» 축으로 잡고 산식 `maxTurns = max(8, 회수 문서 수) + 3 × 산출물 수`, builder 60 예외(D8). 본문 예산 절은 산출물 나열·절반 점검·부분 보고 형식·write-first(D9).
+- 턴 예산은 «쓰기 도구 보유» 축으로 잡고 산식 `maxTurns = max(8, 회수 문서 수) + 3 × 산출물 수`, builder 60 예외(D8). 본문 예산 절에는 «산출물을 먼저 나열한다 + 턴 수를 적지 않는다»만 남긴다 — 행동 지시 3종(중간 보고·write-first·부분 보고 형식)은 실측에서 각각 미준수·미준수·성립 불가로 판명돼 제거했고, 상한 중단 회수는 호출자 몫이다(D9·D10).
 - 에이전트 정의는 세션 시작 시점에 고정된다 — 파일 수정 후 검증은 새 세션에서(D12). 재측정은 조건당 새 세션(D13).
 
 ## 배경
@@ -313,7 +313,7 @@ Codex는 `.claude/agents/*.md`를 읽지 않으므로(persona 매핑 없음 — 
 - «frontmatter effort가 세션 effort를 덮는다»는 문서상 사양이며 본 저장소에서 직접 실측되지 않았다(effort를 지정한 조건은 세션 시작 뒤 편집이라 D12에 걸렸다). 실측은 D13 프로토콜로만 유효하다.
 
 ### D6. builder `maxTurns` (#amend-4 결정 2 → #amend-5 → #amend-7 결정 2 승계)
-builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작업이 거의 끝난 자리)이 관측돼 60으로 올렸다. <Phase 2 (c)(d) 결과 — 20에서 잘렸는가>. 60에서도 보고 0건 상한 도달이 1회라도 나면 값이 아니라 slice 크기 문제다(ADR-075 D11).
+builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작업이 거의 끝난 자리)이 관측돼 60으로 올렸다. <Phase 2 (c)(d) 결과 — 20에서 잘렸는가>. 60에서도 보고 0건 상한 도달이 1회라도 나면 값이 아니라 slice 크기 문제다(D9-2 — foreman 집행은 ADR-075 D1).
 
 ### D7. 예산 축 = 쓰기 도구 보유 (#amend-8 결정 1 + #amend-9 결정 2 승계)
 `Write`·`Edit`를 가진 agent(builder·planner·architect·designer·reviewer)는 «쓰는 쪽»이고 산출물 규모로 예산을 잡는다. report-only(qa·validator·researcher·analyst·security·marketer·counsel·strategist)는 보고 1건이 산출물이다. reviewer는 쓰기 도구가 있고(review-doc 리뷰 파일) 회수 문서가 많은 dispatch(stabilize 단계 5 code·design surface, design-milestone R6-4 렌더 증거)를 받으므로 쓰는 쪽 산식을 적용한다(amend-8의 예외를 amend-9가 철회). `/validate-plan`은 세션 인라인 실행이라 이 예산의 대상이 아니다(Round 13 Phase 1 실측 — amend-9 배경의 «validate-plan 15+ 문서»는 Round 12의 ad hoc 위임 실행 기록이다).
@@ -332,16 +332,20 @@ builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작
 값을 바꾸면 이 표와 frontmatter를 같은 커밋에서 고친다(손 동기화 — 어긋나면 표가 아니라 frontmatter가 SSOT다).
 #amend-9 결정 4(«회수 문서 10개 이상이면 축·범위를 나눈다»)는 dispatch 분할 규칙이라 본 ADR이 아니라 ADR-075 D11 (b)가 승계한다.
 
-### D9. 에이전트 본문의 예산 절 (#amend-6 결정 2 + #amend-7 결정 1 + #amend-8 결정 3 + #amend-9 결정 1 승계)
-쓰는 쪽 agent 본문에 «작업 예산» 절 하나를 둔다. 내용은 넷이다.
-1. **산출물을 먼저 나열**하고, 목록의 **절반을 끝낸 시점**에 남은 것을 점검한다. 남은 일이 이미 한 것보다 많아 보이면 그때 중간 보고를 내고 계속한다. **턴 수는 어디에도 적지 않는다** — 에이전트는 자기 턴을 셀 수 없다.
-2. **write-first**: 주 산출물 파일이 있는 작업이면 골격만으로 먼저 쓴다 — 새 입력을 더 열기 전에 그 파일이 디스크에 있어야 한다. 못 본 것은 파일 안에 `미검토: <무엇> — <이유>`로 남긴다.
-3. **부분 보고 형식**: 상한에 닿아 끝내지 못했으면 «쓴 파일 목록 + 남은 것 1줄». 미완 보고는 정상 산출이다 — 침묵하다 잘리는 것보다 항상 낫다.
-4. builder는 «slice가 산출물 4개를 넘으면 착수 전에 그렇게 보고한다 — 쪼개는 것은 foreman의 일이다».
-<Phase 1 결과 한 줄. **2026-09-12 실측**: planner는 1·3의 문구를 갖고 있으나(0-tool probe 2=YES) **2(write-first)는 무압력 dispatch에서 지켜지지 않았다** — 입력 10건을 모두 연 뒤 7파일을 1회 `Write` 완성본으로 썼고 `미검토:` 0건. 산출 자체는 7/7 완결이었다. 단일 표본이므로 항목을 빼지 않고 「지시 유지 + 신뢰도 하향 + 재검토 트리거 4」로 처리한다(아래 `## 신뢰도`·`## 재검토 트리거`). amend-9 falsifier (a)가 발화했으면 «지시로 풀리지 않으므로 예산·지시를 더 만지지 않고 ADR-075 D11의 slice 강제만 남긴다»를 여기 적는다.>
+### D9. 에이전트 본문의 예산 절 — 행동 지시를 걷어낸다 (#amend-6 결정 2·#amend-8 결정 3·#amend-9 결정 1을 **실측으로 폐기**; #amend-7 결정 1은 «산출물 나열·턴 수 금지»만, 결정 3은 slice 크기 기준으로 승계)
+쓰는 쪽 agent 본문에 «작업 예산» 절 하나를 둔다. **남는 내용은 둘뿐이다.**
+1. **산출물을 먼저 나열**한다. **턴 수는 어디에도 적지 않는다** — 에이전트는 자기 턴을 셀 수 없다(amend-6이 그 지시로 실패했다).
+2. **slice 크기 기준 = 산출물 4개**(#amend-7 결정 3 승계 — 값의 정의는 여기 한 곳): foreman(`/implement-workitem`·`/design-milestone` R4)은 넘으면 쪼개고, builder는 «slice가 산출물 4개를 넘으면 착수 전에 그렇게 보고한다 — 쪼개는 것은 foreman의 일이다»(builder 쪽은 미측정 — 유지). ADR-075 D1은 이 값을 인용한다.
 
-### D10. 회수 dispatch (#amend-8 결정 4 승계)
-하청이 상한에 닿아 미완이면 호출자는 1회 재개하되 **이미 쓴 파일 목록**을 넘긴다(다시 읽고 다시 쓰는 낭비 방지). 재개 규율 자체(1회 재개 → 실패 시 직접 회수)는 ADR-075 D13이 소유한다.
+**제거한 셋과 사유(Round 13 실측)**:
+- «절반 시점 중간 보고» — 관측 6회(Round 12의 4 + Round 13 (c)·(d)) 전부 미발생. 지시로 행동이 바뀌지 않았다.
+- «write-first(골격만으로 먼저 쓴다)» — 「첫 쓰기 이전에 연 입력 수」가 5/5에서 0이 아니었다(planner 10 · builder 15·11·11·8). 에이전트 2종·스택 2종·effort 2조건에 예외 없음.
+- «상한 도달 시 부분 보고 형식» — **성립 불가**다. 상한은 마무리 턴 없이 작업 중간에서 잘리고(두 관측 모두 마지막 텍스트가 절단 지점보다 2호출 앞), 로그 전체에 상한 접근 경고가 0건이며, 위 1번이 스스로 「턴 수를 셀 수 없다」고 못박는다. **알 수 없는 사건을 조건으로 삼는 지시는 어떤 에이전트도 만족시킬 수 없다.** 그 자리는 D10의 호출자 규칙이 받는다.
+
+세 문장을 지우는 것은 지시를 더 다듬는 대신 **slice 크기(D9-2 기준 — foreman 분할은 ADR-075 D1)를 유일한 방어선으로 삼겠다**는 뜻이다 — 사전 등록된 falsifier 대응을 그대로 집행한 결과다.
+
+### D10. 회수 dispatch — 「쓴 파일 목록」은 호출자가 만든다 (#amend-8 결정 4 승계 + 삭제된 «부분 보고 형식»의 이관처)
+하청이 상한에 닿아 미완이면 호출자는 1회 재개하되 **이미 쓴 파일 목록**을 넘긴다(다시 읽고 다시 쓰는 낭비 방지). **그 목록은 하청에게 받는 것이 아니라 호출자가 워킹트리를 직접 읽어 만든다** — 상한 중단은 마무리 턴 없이 잘리므로 하청이 목록을 낼 기회가 없다(D9 제거 사유 3). Round 13 (c)에서 foreman이 실제로 그렇게 복구했고 재개 1회로 완주했다. 재개 규율 자체(1회 재개 → 실패 시 직접 회수)는 ADR-075 D13이 소유한다.
 
 ### D11. stabilize 7-T 계수 (#amend-8 결정 5 승계)
 `턴 소진 0건 보고: N회`. 1회 이상이면 D14의 조건이 발화한다.
@@ -353,10 +357,10 @@ builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작
 - **반영 확인 수단**: 본문에 임시 마커 한 줄(«반환문 첫 줄에 `조건=… turns=… effort=…`를 적어라»)을 두고, 도구 0개 probe dispatch로 마커가 오는지 본다(1.9초, 결정적). 마커는 측정 뒤 제거한다.
 
 ### D13. 역할별 예산 실험 프로토콜 (#amend-4 결정 3 + #amend-5 결정 4 대체)
-조건별 측정은 **조건마다 세션을 새로 시작**한다: (i) 에이전트 파일을 그 조건으로 편집(커밋하지 않음) → (ii) 새 세션 → (iii) 0-tool probe로 반영 확인 → (iv) 격리 사본에 바이트 동일 slice dispatch → (v) 반환·사후 검증 기록 → (vi) 원복. 변형 파일 방식은 세션 분리와 함께 쓸 때만 성립한다. 측정 항목: 소요·tool_uses·토큰·완료 AC·validate·회수 턴·Red 보고 완전성·첫 쓰기 이전에 연 입력 수(D9-2 준수 신호 — 실행 로그의 도구 호출 순서에서 읽는다). 조건 표는 SIMULATION_RUN이 소유한다.
+조건별 측정은 **조건마다 세션을 새로 시작**한다: (i) 에이전트 파일을 그 조건으로 편집(커밋하지 않음) → (ii) 새 세션 → (iii) 0-tool probe로 반영 확인 → (iv) 격리 사본에 바이트 동일 slice dispatch → (v) 반환·사후 검증 기록 → (vi) 원복. 변형 파일 방식은 세션 분리와 함께 쓸 때만 성립한다. **프롬프트는 파일에서 그대로 읽어 보내고, dispatch 뒤 실행 로그에서 조건 간 바이트 동일을 실제로 대조한다** — Round 13에서 「바이트 동일하게 쓴다」는 지시만으로는 지켜지지 않아 두 조건에 호출자용 문장이 섞여 들어갔다. 측정 항목: 소요·tool_uses·**누적 `output_tokens`**·완료 AC·validate·회수 턴·Red 보고 완전성·첫 쓰기 이전에 연 입력 수(실행 로그의 도구 호출 순서에서 읽는다). **task-notification의 「subagent 토큰」은 마지막 요청 1건의 컨텍스트 규모이지 누적 사용량이 아니다** — 조건 비교에는 로그에서 요청 ID로 중복 제거한 누적값을 쓴다. 조건 표는 SIMULATION_RUN이 소유한다.
 
 ### D14. ADR-047 D3 «예산 영향» 필드 — 이미 채택됨 (#amend-8 근거의 조건은 소멸)
-#amend-8은 «D9 적용 뒤에도 보고 0건 상한 도달이 나면 ADR-047 D3에 «예산 영향» 항목을 넣는다»를 조건부로 남겼다. 그 항목은 ADR-047#amend-3(2026-09-12)으로 **이미 채택됐다**(D3 7번째 필드, 소급 적용 없음). 본 ADR은 그 필드를 채워 쓴다. 남는 규칙은 하나다 — D11 계수가 1회 이상이면 예산 상향이 아니라 ADR-075 D11의 slice 강제로 간다.
+#amend-8은 «D9 적용 뒤에도 보고 0건 상한 도달이 나면 ADR-047 D3에 «예산 영향» 항목을 넣는다»를 조건부로 남겼다. 그 항목은 ADR-047#amend-3(2026-09-12)으로 **이미 채택됐다**(D3 7번째 필드, 소급 적용 없음). 본 ADR은 그 필드를 채워 쓴다. 남는 규칙은 하나다 — D11 계수가 1회 이상이면 예산 상향이 아니라 D9-2 slice 기준의 하향 검토로 간다(집행은 ADR-075 D1).
 
 ## 대안과 제약 (ADR-053)
 - A. amend-10을 더한다 — ADR-045 D6 위반. 기각.
@@ -364,25 +368,26 @@ builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작
 - C. 채택 — net 규칙 재발행 + 세션 고정 관측 + 프로토콜.
 
 ## 신뢰도
-Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 재검토 트리거를 둔다. **D9-2(write-first)만 Low** — 유일한 무압력 관측(Round 13)에서 지시가 적재된 채 순서가 지켜지지 않았다. 지시는 유지하되 준수 근거는 아직 없다.
+Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 재검토 트리거를 둔다. **D9는 제거 근거가 High** — 중간 보고 0/6, write-first 0/5, 부분 보고는 구조적 성립 불가(상한 경고 부재 + 마무리 턴 부재)로 셋 다 실측에 기반한다.
 
 ## 재검토 트리거
 1. Claude Code 문서·실측에서 세션 중 에이전트 파일 반영이 확인되면 D12를 완화한다.
-2. D11 계수가 마일스톤당 1회 이상이면 D14 채택 + ADR-075 D11 slice 강제.
+2. D11 계수가 마일스톤당 1회 이상이면 예산 상향이 아니라 D9-2 slice 기준의 하향을 검토한다(D14).
 3. 다른 스택 dogfood에서 medium이 빠르게 나오면 D5 재측정(D13 프로토콜).
-4. D9-2 준수: 쓰기 에이전트 dispatch에서 «첫 쓰기 이전에 연 입력 수»가 0이 아닌 경우가 2회 이상 더 나오면 D9-2는 에이전트 본문이 아니라 **호출자 프롬프트 규약**으로 옮긴다 — 「읽어야 할 문서」 목록을 쓰기 지시 **뒤로** 내리거나 「첫 산출물 파일을 만든 뒤 나머지를 연다」를 dispatch 프롬프트가 직접 지시한다(Round 13 실측의 교란 요인이 그 목록이었다).
+4. **write-first의 프롬프트층 처방(미시험)**: Round 13은 「에이전트 본문 지시만으로는 순서가 바뀌지 않는다」(n=5)까지만 확인했고, **dispatch 프롬프트가 「첫 산출물 파일을 만든 뒤 나머지 입력을 연다」를 직접 지시하는 조건은 시험하지 않았다**. 그 조건을 한 번이라도 재면 결과를 기록하고, 효과가 있으면 write-first를 **호출자 프롬프트 규약**으로 되살린다(에이전트 본문으로는 되돌리지 않는다).
+5. **상한 신호가 생기면 «부분 보고 형식» 재도입 검토**: 하네스가 「상한 N턴 남음」류 신호를 에이전트에게 주기 시작하면 부분 보고 형식의 성립 불가 사유가 사라진다 — 그때 D10의 호출자 규칙과 함께 재검토한다.
 
 ## 정책 강도 (ADR-022)
 - 제약(강, [관측됨]): D1·D2·D12.
-- 제약(중, [관측됨]): D9 «턴 수를 적지 않는다», D13 «조건당 새 세션».
-- enabling(약): D5·D6·D8 값, **D9-2(준수 근거 없음 — 신뢰도 Low)**, D10·D11·D14.
+- 제약(중, [관측됨]): D9 «턴 수를 적지 않는다», D13 «조건당 새 세션», D10 «쓴 파일 목록은 호출자가 만든다».
+- enabling(약): D5·D6·D8 값, D9-2(builder slice 4개 초과 사전 보고 — 미측정), D11·D14.
 
 ## Mutation Contract (ADR-047 D3)
 1. Target — `.claude/agents/*.md`(frontmatter 값·예산 절 인용 재지정) / `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델·예산 표기 정책` / `.claude/skills/{implement-workitem,design-milestone,plan-workitem,validate-plan,stabilize-milestone}/SKILL.md`(인용 재지정) / `.codex/config.toml` 주석 / `docs/00-meta/GUARDRAILS_STRATEGY.md` / `docs/90-decisions/boilerplate/README.md` 인덱스 / ADR-010·ADR-047 인용.
-2. Failure mode — net 규칙을 개정 9개에서 조립해야 함 / 세션 중 편집을 반영된 것으로 오인해 실험이 무효가 됨 / 예산 축 오분류로 팬아웃 단위가 보고 0건으로 잘림 (전부 관측됨).
-3. Predicted improvement — Round 14에서 «보고 0건 상한 도달» 0회, 에이전트 파일 변경 뒤 새 세션 검증이 기록에 일관 등장, 예산 값이 표 하나로 읽힘.
+2. Failure mode — net 규칙을 개정 9개에서 조립해야 함 / 세션 중 편집을 반영된 것으로 오인해 실험이 무효가 됨 / 예산 축 오분류로 팬아웃 단위가 보고 0건으로 잘림 / **에이전트가 알 수 없는 사건(상한 도달)을 조건으로 삼은 지시가 본문에 남아 「규칙을 두었다」는 거짓 안심을 만듦** (전부 관측됨).
+3. Predicted improvement — Round 14에서 상한 중단이 **slice 크기 판정으로 예방**되고(지시로 완화되는 것이 아니라), 중단이 나더라도 호출자가 워킹트리에서 목록을 만들어 1회 재개로 복구되며, 에이전트 파일 변경 뒤 새 세션 검증이 기록에 일관 등장하고, 예산 값이 표 하나로 읽힘.
 4. Preserved invariants — shared 비고정 / 별칭 자리 / Codex 비지정 / graduation·오케스트레이션 계약(ADR-075) 불변.
-5. Falsifying evaluation — (a) D9 적용 뒤에도 «상한 중단 + 산출물 파일 0건» 또는 «상한에 닿은 dispatch가 D9-3 형식을 내지 않음»이 1회라도 나면 D9를 되돌리고 slice 강제(ADR-075 D11)만 남긴다 — **지시 문구의 순서 준수 여부 자체는 falsifier가 아니라 재검토 트리거 4가 맡는다**(Round 13 실측: D9-2 미준수에도 산출은 7/7 완결이었다. 결과가 멀쩡한데 규칙을 빼면 근거가 뒤집힌다) (b) D12의 반영 확인 수단이 반영된 정의에서도 마커를 못 받으면 수단 재설계 (c) D8 값의 dispatch가 매번 상한의 절반 아래로 끝나면 산식 하향.
+5. Falsifying evaluation — **(선행 이력) ADR-004#amend-8·9가 건 falsifier는 Round 13에서 발화했고 본 ADR의 D9는 그 사전 등록 대응(「지시를 더 만지지 말고 slice 강제만 남긴다」)을 집행한 결과다.** 이제 남는 것은 제거 자체의 falsifier다 — (a) 행동 지시 3종을 걷어낸 뒤 **산출물 손실이 동반된 상한 중단**(재개로도 복구되지 않는 미완)이 마일스톤당 1회 이상 나오면 slice 강제만으로는 부족한 것이므로 D9-2의 산출물 임계(4)를 내리고(report-only dispatch는 ADR-075 D11 (b)의 회수 문서 10개) — 지시를 되살리지 않는다 — 그 사실을 적는다 (b) D12의 반영 확인 수단이 반영된 정의에서도 마커를 못 받으면 수단 재설계 (c) D8 값의 dispatch가 매번 상한의 절반 아래로 끝나면 산식 하향.
 6. Rollback path — 본 ADR superseded → ADR-004 net 규칙으로 회귀(에이전트 파일 값 원복), D12는 관측 기록으로만 잔존.
 7. 예산 영향 — 없음(값을 바꾸지 않는다. D8 표는 현재 frontmatter와 동일).
 
@@ -404,8 +409,8 @@ Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 
 - docs/00-meta/GUARDRAILS_STRATEGY.md        — D1 인용
 - .codex/config.toml                         — D1 주석
 - docs/90-decisions/boilerplate/ADR-010-multi-agent-compatibility.md — D1 인용(#amend-6 Codex 비지정)
-- .claude/skills/implement-workitem/SKILL.md — D9-4·D10
-- .claude/skills/design-milestone/SKILL.md   — D9-4
+- .claude/skills/implement-workitem/SKILL.md — D9-2·D10
+- .claude/skills/design-milestone/SKILL.md   — D9-2
 - .claude/skills/plan-workitem/SKILL.md      — D10
 - .claude/skills/stabilize-milestone/SKILL.md — D11
 - .boilerplate/validation/SIMULATION_RUN.md  — D13 조건 표·실측
@@ -418,17 +423,20 @@ Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 
 - `## Status` 본문 `accepted` → `superseded`. 그 아래 첫 줄에 `> 대체: [ADR-074](ADR-074-model-effort-and-turn-budget-policy.md) — 통합 재발행(2026-09-XX). 본 문서는 history 잔존. (현재 SSOT: ADR-074)`.
 - `## 현재 유효 결정`·본문·amendment는 원문 유지. amend-8·9 헤딩 위에 앵커가 없는데(`<a id="adr-004-amend-8">`·`-9`) 재발행 뒤 그 anchor를 인용하는 파일이 0이 되므로 추가하지 않는다.
 
-### P3-3. 에이전트 파일 13개
+### P3-3. 에이전트 파일 13개 — D9 행동 지시 3종 삭제
 - frontmatter 값은 D8 표와 같아야 한다(2026-09-12 실측이 이미 표와 동일 — 값 변경 없음). `effort:` 키는 어디에도 없어야 한다.
-- 각 파일 12행 근처의 예산 절 헤딩 현재: `**작업 예산 (ADR-004#amend-7)**:` (architect만 `(ADR-004#amend-7·#amend-8)`) → 전부 `**작업 예산 (ADR-074 D9)**:`로. 본문 안 `(ADR-004#amend-8 결정 3)` → `(ADR-074 D9-3)`, `(ADR-004#amend-9 결정 1)` → `(ADR-074 D9-2)`.
-- reviewer.md·qa.md·validator.md의 예산 절에는 amend-8 결정 3 문장이 없다. reviewer(쓰는 쪽)에는 추가한다: `**상한에 닿아 끝내지 못했다면 보고 형식은 「쓴 파일 목록 + 남은 것 1줄」이다**(ADR-074 D9-3).` **report-only 12종(qa·validator·researcher·analyst·security·marketer·counsel·strategist — amend-9가 12개 파일 전부에 넣은 «산출물을 먼저 만든다(골격만으로 먼저 쓴다)» 문장)은 그 문장을 삭제한다** — 산출 파일이 없는 에이전트에게 write-first는 무의미하고 P5-4의 쓰기 금지와 충돌한다. 대신 «확정한 사실 + 미확인 항목» 두 묶음 형식만 남기고 인용을 `ADR-074 D9`로.
+- 각 파일 12행 근처 예산 절 헤딩: `**작업 예산 (ADR-004#amend-7)**:` (architect만 `(ADR-004#amend-7·#amend-8)`) → 전부 `**작업 예산 (ADR-074 D9)**:`.
+- **삭제 1 — 절반 점검·중간 보고 (13/13 전부)**: `, 그 목록의 **절반을 끝낸 시점에 남은 것을 점검한다.**` 부터 `…두 번째 기회가 없다.` 까지를 지우고 앞 문장을 `**slice·요청을 받으면 먼저 산출물을 나열한다.**` 로 닫는다. 근거: 관측 6회 전부 중간 보고 미발생.
+- **삭제 2 — write-first (13/13 전부)**: `**산출물을 먼저 만든다 (ADR-004#amend-9 결정 1)**:` 로 시작해 `**일의 순서는 바꿀 수 있다.**` 로 끝나는 문장 묶음 전체. 근거: 「첫 쓰기 이전에 연 입력 수」가 5/5에서 0이 아니었다.
+- **삭제 3 — 부분 보고 형식 (해당 4개: architect·builder·designer·planner)**: `**상한에 닿아 끝내지 못했다면 보고 형식은 …**(ADR-004#amend-8 결정 3)` 로 시작해 `…같은 파일을 다시 열 필요가 없다.` 까지. 근거: 상한은 마무리 턴 없이 잘리므로 성립 불가. **reviewer·qa·validator에 이 문장을 새로 넣지 않는다**(앞 라운드 계획을 철회한다 — 넣었다면 같이 지운다).
+- **유지 (13/13)**: `**턴 수를 세려 하지 마라** — … 기준은 **남은 산출물**이다.` (amend-6 재발 방지용 부정 지시). **유지 (builder만)**: `**slice 가 산출물 4개를 넘으면 착수 전에 그렇게 보고해라** — 쪼개는 것은 foreman 의 일이다.` → 인용을 `(ADR-074 D9-2)`로 단다.
+- 삭제 후 각 파일의 예산 절이 **두 문장**(산출물 나열 + 턴 수 금지, builder는 + slice 4개)인지 확인한다. 잔여 검사: `grep -l "절반을 끝낸 시점\|골격만으로 먼저 쓴다\|쓴 파일 목록 + 남은 것 1줄" .claude/agents/*.md` → 0줄.
 - `builder.md:41` 현재 `…멈추는 것이 깊이 고민하는 것보다 낫다(ADR-004#amend-4).` → `(ADR-074 D5)`.
 - Phase 2에서 심은 `측정 조건` 마커 줄이 남아 있지 않은지 확인한다(`grep -n "측정 조건" .claude/agents/*.md` → 0).
-
 ### P3-4. 인용 재지정(ADR-045 D10)
 `grep -rn --exclude-dir=.git "ADR-004" . | grep -v "ADR-004-model-alias-policy.md" | grep -v IMPROVE-GUIDE` 결과 전부를 처리한다(2026-09-12 실측 목록):
-- **A 살아있는 규칙 → 재지정**: `.claude/skills/implement-workitem/SKILL.md:30`(`ADR-004#amend-7 결정 3` → `ADR-074 D9-4`), `design-milestone/SKILL.md:57`(같음), `plan-workitem/SKILL.md:291`(`ADR-004#amend-8 결정 4 + amend-7 결정 3` → `ADR-074 D10·D9-4`), `validate-plan/SKILL.md:43`(`ADR-004#amend-9 결정 4` → `ADR-075 D11-b` — 회수 문서 분할 기준은 ADR-075가 소유. 그래서 ADR-074 Surfaces에는 validate-plan을 두지 않는다), `stabilize-milestone/SKILL.md:252`(한 줄에 2회 — 앞 `ADR-004#amend-8 결정 5` → `ADR-074 D11`, 뒤 «amend-8 falsifier (a)가 발화한다» → `ADR-074 D14`의 slice 강제 조건; 269행은 예시 출력이라 인용 없음), `.codex/config.toml:8`(`ADR-004#amend-2` → `ADR-074 D1`), `docs/00-meta/GUARDRAILS_STRATEGY.md:40`(→ `ADR-074 D1`), `docs/00-meta/DELEGATION_STRATEGY.md:162·164·166`(P3-5에서 절 전체 교체), ADR-010의 9건(`ADR-004`·`ADR-004#amend-2` → `ADR-074 D1`; 배경 서술이면 C 분류로 링크 제거).
-- **E 실행 기록 → 병기**: `.boilerplate/validation/SIMULATION_RUN.md`의 24건은 줄 끝에 `(현재 SSOT: ADR-074)`를 병기하고, 파일 상단 시점 주석에 `ADR-004 → ADR-074 (2026-09-XX)`를 한 줄 추가한다. `ADR-047:195`(#amend-3 배경의 «ADR-004#amend-8 의 falsifier (a)» 서술)는 **실행 기록(E)이므로 재지정하지 않고** 줄 끝에 `(현재 SSOT: ADR-074 D14)`만 병기한다. 전수 grep은 부록 A의 `EXC` 배열을 붙여 돌린다(`grep -rn "${EXC[@]}" "ADR-004" .`).
+- **A 살아있는 규칙 → 재지정**: `.claude/skills/implement-workitem/SKILL.md:30`(`ADR-004#amend-7 결정 3` → `ADR-074 D9-2`), `design-milestone/SKILL.md:57`(같음), `plan-workitem/SKILL.md:291`(`ADR-004#amend-8 결정 4 + amend-7 결정 3` → `ADR-074 D10·D9-2`), `validate-plan/SKILL.md:43`(`ADR-004#amend-9 결정 4` → `ADR-075 D11-b` — 회수 문서 분할 기준은 ADR-075가 소유. 그래서 ADR-074 Surfaces에는 validate-plan을 두지 않는다), `stabilize-milestone/SKILL.md:252`(한 줄에 2회 — 앞 `ADR-004#amend-8 결정 5` → `ADR-074 D11`, 뒤 «amend-8 falsifier (a)가 발화한다» → `ADR-074 D14`의 slice 강제 조건; 269행은 예시 출력이라 인용 없음), `.codex/config.toml:8`(`ADR-004#amend-2` → `ADR-074 D1`), `docs/00-meta/GUARDRAILS_STRATEGY.md:40`(→ `ADR-074 D1`), `docs/00-meta/DELEGATION_STRATEGY.md:162·164·166`(P3-5에서 절 전체 교체), ADR-010의 9건(`ADR-004`·`ADR-004#amend-2` → `ADR-074 D1`; 배경 서술이면 C 분류로 링크 제거).
+- **E 실행 기록 → 병기**: `.boilerplate/validation/SIMULATION_RUN.md`의 24건은 줄 끝에 `(현재 SSOT: ADR-074)`를 병기하고, 파일 상단 시점 주석에 `ADR-004 → ADR-074 (2026-09-XX)`를 한 줄 추가한다. `ADR-047:195`(#amend-3 배경의 «ADR-004#amend-8 의 falsifier (a)» 서술)는 **실행 기록(E)이므로 재지정하지 않고** 줄 끝에 `(현재 SSOT: ADR-074 D14)`만 병기한다. **예외**: SIMULATION_RUN `## Round 13` 절의 `ADR-004#amend-9 결정 4(통합 재발행본 D11 (b)로 이관 예정)` 2줄은 SSOT가 ADR-075라 `(현재 SSOT: ADR-075 D11 (b))`로 병기한다(Phase 4 뒤 실재). 전수 grep은 부록 A의 `EXC` 배열을 붙여 돌린다(`grep -rn "${EXC[@]}" "ADR-004" .`).
 - 확인: `grep -rn --exclude-dir=.git "ADR-004" . | grep -v "ADR-004-model-alias-policy.md" | grep -v "(현재 SSOT:" | grep -v "boilerplate/README.md" | grep -v IMPROVE-GUIDE` → 0줄.
 
 ### P3-5. `docs/00-meta/DELEGATION_STRATEGY.md` `## 모델 표기 정책`
@@ -466,7 +474,7 @@ feat(agents): re-point agent budget rules and docs to ADR-074
 
 ### P4-1. ADR-075 작성 — `docs/90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md`
 ADR-051 본문(D1~D8)과 amend-1~4를 읽고 **net 규칙을 클린 본문으로 옮긴다**. 결정 번호는 아래로 고정한다(부록 C에 절별 승계 원천을 표로 두었다).
-- D1 foreman 오케스트레이션(051 D1·#d6) / D2 report-only fan-out(051 D2) / D3 plan de-fork(051 D3) / D4 plan-milestone 범위 M1 포함(051 D4 + #amend-3) / D5 wave 제거(051 D5) / D6 ADR-047 D9 re-anchor(051 D6) / D7 NO-merge(051 D7) / D8 조건부 re-read(051 D8) / D9 공유 런타임 partition 가드(#amend-1) / D10 orchestration 관측 기록(#amend-2).
+- D1 foreman 오케스트레이션(051 D1·#d6 — slice 크기 기준 «산출물 4개»는 ADR-074 D9-2를 인용) / D2 report-only fan-out(051 D2) / D3 plan de-fork(051 D3) / D4 plan-milestone 범위 M1 포함(051 D4 + #amend-3) / D5 wave 제거(051 D5) / D6 ADR-047 D9 re-anchor(051 D6) / D7 NO-merge(051 D7) / D8 조건부 re-read(051 D8) / D9 공유 런타임 partition 가드(#amend-1) / D10 orchestration 관측 기록(#amend-2).
 - **D11. fan-out 크기 판정 v2 (#amend-4 결정 1 재보정)**:
   ```
   dispatch 전에 크기를 결정적으로 계산한다. F = 변경 파일 수(전부), L_impl = «테스트 파일 집합»(test/**, tests/**, __tests__/**, e2e/**, integration_test/**, **/*.test.*, **/*.spec.*, **/*_test.dart)과 «문서 집합»(docs/**)을 제외한 변경 줄 합, L_test·L_docs = 각각의 변경 줄 합. inline 허용은 **(L_impl ≤ 50) 또는 (F ≤ 2 이고 L_impl ≤ 200)**, 그리고 UI/Arch-iface/MCP/spec-coverage 중 둘 이상 명백히 해당없음 — 셋 다 충족일 때만. 하나라도 미충족이면 fan-out 필수(재량 0). `## Orchestration`에 F·L_impl·L_test·L_docs와 판정 근거를 기록한다. 임계 초과인데 inline이면 규칙 위반이다. **1축 = 1 validator는 불변이다** — 비용 압력은 임계를 재보정해 풀지, 축을 합쳐 풀지 않는다(Round 11 발견 17). 측정 시점은 validate-workitem 실행 시점의 워킹트리(`git diff HEAD` + untracked)다 — finalize 커밋 diff가 아니다.
@@ -961,8 +969,8 @@ P0-2b 뒤 Phase 3~7이 harness를 또 바꿨으므로 두 복제본을 현재 ma
 ### P8-4. 기록
 `.boilerplate/validation/SIMULATION_RUN.md`
 - `## Round 13` 절에 P1·P2·P8-3 결과와 «발견 → 조치» 표(이번 라운드에 닫은 항목 번호 5·9·16·17·19·20·22·23·25·27·28·29·30·31·32·40·53·58·74 + 기존 결함 1~11)를 남긴다.
-- `## Falsifying evaluation 항목별 결과` 표를 갱신한다: 미측정 행(ADR-004#amend-5·7, ADR-072#amend-4, ADR-071 (d), ADR-072 (e))은 이번 결과로, ADR-004#amend-8 행은 Phase 1 판정(미발화)으로. **ADR-004#amend-9 행은 표에 아직 없으므로 신설한다** — (a)·(b) 둘 다 미발화이되 「결정 1(write-first)은 무압력 dispatch에서 미준수」를 같은 칸에 병기한다(**falsifier 미발화와 규칙 미준수는 다른 사실이다**). 결정 2(reviewer 24)의 실측 자리는 P8-3 (c)다. 그 밖에 새 amendment 9종 + ADR-074·075의 falsifier 행을 추가한다.
-- 같은 절에 «이번 라운드가 새로 연 항목» 목록을 남긴다 — 닫지 않고 사실만 기록한 것들(D9-2 미준수, `/validate-plan`의 인라인 실행과 dispatch 임계 문장 불일치, `/stack-guard` 재실행 계약 조건식의 세 번째 경우, `next dev`의 `AGENTS.md` 변조)이 Round 14 입력이다.
+- `## Falsifying evaluation 항목별 결과` 표를 갱신한다: 미측정 행(ADR-004#amend-5·7, ADR-072#amend-4, ADR-071 (d), ADR-072 (e))은 이번 결과로, ADR-004#amend-8 행은 Phase 2 판정(**(a) 발화 2회** — (c)·(d) 상한 도달 시 보고 없음)으로. **ADR-004#amend-9 행은 표에 아직 없으므로 신설한다** — (a)·(b) 둘 다 미발화이되 「결정 1(write-first)은 5/5 미준수 — ADR-074 D9에서 제거」를 같은 칸에 병기한다(**falsifier 미발화와 규칙 미준수는 다른 사실이다**). 결정 2(reviewer 24)의 실측 자리는 P8-3 (c)다. 그 밖에 새 amendment 9종 + ADR-074·075의 falsifier 행을 추가한다.
+- 같은 절에 «이번 라운드가 새로 연 항목» 목록을 남긴다 — 닫지 않고 사실만 기록한 것들(write-first의 프롬프트층 처방 미시험, `/validate-plan`의 인라인 실행과 dispatch 임계 문장 불일치, `/stack-guard` 재실행 계약 조건식의 세 번째 경우, `next dev`의 `AGENTS.md` 변조, 실험 프롬프트 바이트 동일이 지시만으로 지켜지지 않음, dogfood-flutter (c) 사본의 공허한 AC-2 계측)이 Round 14 입력이다.
 - `## Phase 7 개정 목록` 아래에 `## 라운드 2 개정 목록 (기준 <시작 sha>..HEAD)`를 같은 형식으로 추가한다(ADR별 개정 수·발화·실행 검증 여부·임계 도달).
 - 상단 시점 주석에 `ADR-004 → ADR-074, ADR-051 → ADR-075 (2026-09-XX)` 한 줄.
 
@@ -985,7 +993,7 @@ docs(validation): record round 13 verification, re-measurement and the debt-clos
 #               검사 4(이번 라운드 supersede분 — ADR-004·051) = 0, 검사 5 = ok 4줄.
 # 민감 파일(.env·secrets/·키 파일)은 읽지 않는다(AGENTS.md).
 set -u
-EXC=(--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=secrets --exclude=IMPROVE-GUIDE.md
+EXC=(--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=secrets --exclude-dir=.dogfood-exp --exclude=IMPROVE-GUIDE.md
      --exclude='.env' --exclude='.env.*' --exclude='*.jks' --exclude='*.keystore' --exclude='key.properties'
      --exclude='*.p12' --exclude='*.mobileprovision' --exclude='*.p8' --exclude='*-firebase-adminsdk-*.json'
      --exclude='serviceAccount*.json' --exclude='service-account*.json')
@@ -1142,7 +1150,7 @@ slice: T-002-today-list-wiring 전체 (단일 builder)
 
 | ADR-075 | 원천 | 비고 |
 |---|---|---|
-| D1 foreman 오케스트레이션 | ADR-051 D1 + #d6 | file-disjoint slice·병렬/단일 판정 |
+| D1 foreman 오케스트레이션 | ADR-051 D1 + #d6 | file-disjoint slice·병렬/단일 판정 · slice 크기 4개는 ADR-074 D9-2 인용 |
 | D2 report-only fan-out | ADR-051 D2 | validate/stabilize |
 | D3 plan de-fork | ADR-051 D3 | |
 | D4 plan-milestone 범위 | ADR-051 D4 + #amend-3 | M1 포함 |
