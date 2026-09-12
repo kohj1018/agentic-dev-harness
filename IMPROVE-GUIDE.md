@@ -92,6 +92,7 @@ Phase 0 준비 (복제본 이전 · 복제본 harness를 현재 main으로 동�
 Phase 1 새 세션 검증 ③            ← 에이전트 파일은 세션 시작에 고정되므로 새 세션에서만 가능. Phase 3의 입력.
 Phase 2 builder 재측정 ② (a)~(d)  ← 조건당 새 세션. Phase 3 D5·D8의 입력.
 Phase 3 ADR-074 (ADR-004 재발행)   ← Phase 1·2 결과를 담는다. 에이전트 파일 인용 재지정.
+         └ ADR-074 본문이 미발행 ADR-075를 링크하므로 Phase 3 커밋 시점엔 검사 1이 `MISSING ADR-075` + `BAD-LINK-TARGET` 2건을 낸다(회귀가 아니다 — Phase 4 발행으로 닫히고 P8-1이 최종 관문).
 Phase 4 ADR-075 (ADR-051 재발행) + validate-workitem 재보정 ← 독립(Phase 3과 순서 무관하나 인덱스 행 충돌을 피하려 뒤에 둔다).
 Phase 5 stabilize·게이트 보류 발견 묶음 (ADR-035·050·058·063·072·073 개정) ← 독립(ADR-075 D12가 ADR-073#amend-2 결정 1을 앞서 인용하는 전방 참조는 P8-1 검사 2의 앵커 실재로 닫힌다). 인덱스 행 순서 때문에 Phase 4 뒤.
 Phase 6 기존 결함 11건               ← 독립. Phase 5의 게이트 자가 검사 변경 뒤(P6-11이 같은 함수를 만진다).
@@ -324,7 +325,7 @@ builder는 `maxTurns: 60`이다. 45에서 상한 중단 2건(Round 12 R4 — 작
 | agent | maxTurns | 근거 |
 |---|---:|---|
 | builder | 60 | D6 |
-| reviewer | 24 | 읽기 max(8, ~12: stabilize 단계 5 code/design surface·R6-4 렌더 증거) + 3×4 = 24 — 실측은 P8-3 (c) |
+| reviewer | 24 | 읽기 max(8, ~12: stabilize 단계 5 code/design surface·R6-4 렌더 증거) + 3×4 = 24 — **미실측**(실측 자리는 `/stabilize-milestone` 단계 5의 reviewer dispatch다. `/validate-plan`은 세션 인라인이라 대상이 아니다 — D7) |
 | planner · designer · architect | 20 | 읽기 8 + 3×4 |
 | counsel · strategist | 20 | 자문 문서 회수량 |
 | qa · validator · analyst · security · marketer | 16 | 보고 1건 |
@@ -387,7 +388,7 @@ Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 
 2. Failure mode — net 규칙을 개정 9개에서 조립해야 함 / 세션 중 편집을 반영된 것으로 오인해 실험이 무효가 됨 / 예산 축 오분류로 팬아웃 단위가 보고 0건으로 잘림 / **에이전트가 알 수 없는 사건(상한 도달)을 조건으로 삼은 지시가 본문에 남아 「규칙을 두었다」는 거짓 안심을 만듦** (전부 관측됨).
 3. Predicted improvement — Round 14에서 상한 중단이 **slice 크기 판정으로 예방**되고(지시로 완화되는 것이 아니라), 중단이 나더라도 호출자가 워킹트리에서 목록을 만들어 1회 재개로 복구되며, 에이전트 파일 변경 뒤 새 세션 검증이 기록에 일관 등장하고, 예산 값이 표 하나로 읽힘.
 4. Preserved invariants — shared 비고정 / 별칭 자리 / Codex 비지정 / graduation·오케스트레이션 계약(ADR-075) 불변.
-5. Falsifying evaluation — **(선행 이력) ADR-004#amend-8·9가 건 falsifier는 Round 13에서 발화했고 본 ADR의 D9는 그 사전 등록 대응(「지시를 더 만지지 말고 slice 강제만 남긴다」)을 집행한 결과다.** 이제 남는 것은 제거 자체의 falsifier다 — (a) 행동 지시 3종을 걷어낸 뒤 **산출물 손실이 동반된 상한 중단**(재개로도 복구되지 않는 미완)이 마일스톤당 1회 이상 나오면 slice 강제만으로는 부족한 것이므로 D9-2의 산출물 임계(4)를 내리고(report-only dispatch는 ADR-075 D11 (b)의 회수 문서 10개) — 지시를 되살리지 않는다 — 그 사실을 적는다 (b) D12의 반영 확인 수단이 반영된 정의에서도 마커를 못 받으면 수단 재설계 (c) D8 값의 dispatch가 매번 상한의 절반 아래로 끝나면 산식 하향.
+5. Falsifying evaluation — **(선행 이력) Round 13 판정은 amend별로 갈린다** — ADR-004#amend-8 (a)(「쓰기 도구 보유 에이전트의 보고 0건 상한 도달」)는 **2회 발화**했고 #amend-9의 (a)·(b)는 **미발화**다. 따라서 «부분 보고 형식» 제거는 amend-8 (a) 발화 + 구조적 성립 불가에 근거하고, «write-first»·«중간 보고» 제거는 falsifier 발화가 아니라 **직접 미준수 실측**(각각 5/5·0/6)에 근거한다. D9는 amend-8 (a)의 사전 등록 대응(「지시를 더 만지지 말고 slice 강제만 남긴다」)을 집행한 결과다. 이제 남는 것은 제거 자체의 falsifier다 — (a) 행동 지시 3종을 걷어낸 뒤 **산출물 손실이 동반된 상한 중단**(재개로도 복구되지 않는 미완)이 마일스톤당 1회 이상 나오면 slice 강제만으로는 부족한 것이므로 D9-2의 산출물 임계(4)를 내리고(report-only dispatch는 ADR-075 D11 (b)의 회수 문서 10개) — 지시를 되살리지 않는다 — 그 사실을 적는다 (b) D12의 반영 확인 수단이 반영된 정의에서도 마커를 못 받으면 수단 재설계 (c) D8 값의 dispatch가 매번 상한의 절반 아래로 끝나면 산식 하향.
 6. Rollback path — 본 ADR superseded → ADR-004 net 규칙으로 회귀(에이전트 파일 값 원복), D12는 관측 기록으로만 잔존.
 7. 예산 영향 — 없음(값을 바꾸지 않는다. D8 표는 현재 frontmatter와 동일).
 
@@ -433,8 +434,11 @@ Medium — D1~D4·D12는 관측됨. D5·D6·D8 값은 n=1~2 실측 기반이라 
 - 삭제 후 각 파일의 예산 절이 **두 문장**(산출물 나열 + 턴 수 금지, builder는 + slice 4개)인지 확인한다. 잔여 검사: `grep -l "절반을 끝낸 시점\|골격만으로 먼저 쓴다\|쓴 파일 목록 + 남은 것 1줄" .claude/agents/*.md` → 0줄.
 - `builder.md:41` 현재 `…멈추는 것이 깊이 고민하는 것보다 낫다(ADR-004#amend-4).` → `(ADR-074 D5)`.
 - Phase 2에서 심은 `측정 조건` 마커 줄이 남아 있지 않은지 확인한다(`grep -n "측정 조건" .claude/agents/*.md` → 0).
-### P3-4. 인용 재지정(ADR-045 D10)
-`grep -rn --exclude-dir=.git "ADR-004" . | grep -v "ADR-004-model-alias-policy.md" | grep -v IMPROVE-GUIDE` 결과 전부를 처리한다(2026-09-12 실측 목록):
+### P3-4. 인용 재지정(ADR-045 D10) + D10 실행 문장 갱신
+- **먼저 «인용 재지정이 아닌» 것 하나를 처리한다 — D10의 내용이 바뀌었으므로 그 surface 2개의 실행 문장도 바꾼다**(Surfaces 계약 «본 ADR 변경 시 동기 갱신»). 부분 보고가 성립 불가가 됐으니 두 곳 모두 «하청이 목록을 낸다»에서 «호출자가 워킹트리를 읽어 목록을 만든다»로 간다.
+  - `.claude/skills/plan-workitem/SKILL.md` 현재 `조각이 상한에 닿아 부분 보고(「쓴 파일 목록 + 남은 것 1줄」)를 내면, **회수 dispatch 에 그 파일 목록을 그대로 실어** 보낸다` → `조각이 상한에 닿으면 **부분 보고는 오지 않는다** — 상한은 마무리 턴 없이 작업 중간에서 자르고 에이전트에게는 상한 접근 신호가 없다(ADR-074 D9). 그러므로 **메인이 워킹트리를 직접 읽어 「이미 쓴 파일 목록」을 만들고 그 목록을 첫 회수 dispatch 에 실어** 보낸다(ADR-074 D10).`
+  - `.claude/skills/implement-workitem/SKILL.md` 현재 `**builder가 구조화 최종 반환 없이 멈추면** foreman은 1회 재개를 시도(SendMessage 등)하고, 그래도 미반환이면 …` → **순서를 뒤집는다**: 워킹트리에서 「이미 쓴 파일 목록」을 먼저 만들고 **그 목록을 실어 1회 재개**한 뒤, 재개해도 미반환이면 그 파일들에서 직접 회수한다(ADR-074 D9·D10 인용).
+- 나머지는 인용 재지정이다. `grep -rn --exclude-dir=.git "ADR-004" . | grep -v "ADR-004-model-alias-policy.md" | grep -v IMPROVE-GUIDE` 결과 전부를 처리한다(2026-09-12 실측 목록):
 - **A 살아있는 규칙 → 재지정**: `.claude/skills/implement-workitem/SKILL.md:30`(`ADR-004#amend-7 결정 3` → `ADR-074 D9-2`), `design-milestone/SKILL.md:57`(같음), `plan-workitem/SKILL.md:291`(`ADR-004#amend-8 결정 4 + amend-7 결정 3` → `ADR-074 D10·D9-2`), `validate-plan/SKILL.md:43`(`ADR-004#amend-9 결정 4` → `ADR-075 D11-b` — 회수 문서 분할 기준은 ADR-075가 소유. 그래서 ADR-074 Surfaces에는 validate-plan을 두지 않는다), `stabilize-milestone/SKILL.md:252`(한 줄에 2회 — 앞 `ADR-004#amend-8 결정 5` → `ADR-074 D11`, 뒤 «amend-8 falsifier (a)가 발화한다» → `ADR-074 D14`의 slice 강제 조건; 269행은 예시 출력이라 인용 없음), `.codex/config.toml:8`(`ADR-004#amend-2` → `ADR-074 D1`), `docs/00-meta/GUARDRAILS_STRATEGY.md:40`(→ `ADR-074 D1`), `docs/00-meta/DELEGATION_STRATEGY.md:162·164·166`(P3-5에서 절 전체 교체), ADR-010의 9건(`ADR-004`·`ADR-004#amend-2` → `ADR-074 D1`; 배경 서술이면 C 분류로 링크 제거).
 - **E 실행 기록 → 병기**: `.boilerplate/validation/SIMULATION_RUN.md`의 24건은 줄 끝에 `(현재 SSOT: ADR-074)`를 병기하고, 파일 상단 시점 주석에 `ADR-004 → ADR-074 (2026-09-XX)`를 한 줄 추가한다. `ADR-047:195`(#amend-3 배경의 «ADR-004#amend-8 의 falsifier (a)» 서술)는 **실행 기록(E)이므로 재지정하지 않고** 줄 끝에 `(현재 SSOT: ADR-074 D14)`만 병기한다. **예외**: SIMULATION_RUN `## Round 13` 절의 `ADR-004#amend-9 결정 4(통합 재발행본 D11 (b)로 이관 예정)` 2줄은 SSOT가 ADR-075라 `(현재 SSOT: ADR-075 D11 (b))`로 병기한다(Phase 4 뒤 실재). 전수 grep은 부록 A의 `EXC` 배열을 붙여 돌린다(`grep -rn "${EXC[@]}" "ADR-004" .`).
 - 확인: `grep -rn --exclude-dir=.git "ADR-004" . | grep -v "ADR-004-model-alias-policy.md" | grep -v "(현재 SSOT:" | grep -v "boilerplate/README.md" | grep -v IMPROVE-GUIDE` → 0줄.
