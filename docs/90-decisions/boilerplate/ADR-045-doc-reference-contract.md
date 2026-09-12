@@ -71,7 +71,7 @@ anchor id 규칙: `adr-<번호>-amend-<M>`. *외부 인용이 없는* amendment�
 |-----------|------|
 | 문구 정정·surface 1~2개 추가·충돌 없는 확장 | `## Amendment N` 추가 |
 | 정책 의미 변경·기존 결정 뒤집기·surface 5+ 추가 | 신규 ADR로 supersede(amend 흡수 금지) |
-| 개정(amend) 4개 이상 누적 | 통합 재발행(supersede)로 클린 ADR 재작성. 구 ADR은 `superseded`로 history 잔존 |
+| 개정(amend) 4개 이상 누적 | 통합 재발행(supersede)로 클린 ADR 재작성. 구 ADR은 `superseded`로 history 잔존 (#amend-1이 임계를 8로 상향 — 현재 SSOT: ADR-045#amend-1) |
 
 **적용 시점(중요)**: 본 기준은 ADR-045 이후의 *새 변경*에만 적용한다. 이미 amend가 누적된 기존 ADR(예: 개정(amend) 4개 + surface 다수였던 ADR-027 — 실제로 통합 재발행됐다) (현재 SSOT: ADR-073)은 **grandfather** — 즉시 재발행 의무 없음. 기존 ADR은 `## 현재 유효 결정` + `## Surfaces` 정리만 하고, *다음 변경이 발생할 때* amend 대신 통합 재발행을 우선 검토한다.
 

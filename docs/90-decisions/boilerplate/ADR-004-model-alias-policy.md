@@ -3,7 +3,9 @@
 > scope: boilerplate
 
 ## Status
-accepted
+superseded
+
+> 대체: [ADR-074](ADR-074-model-effort-and-turn-budget-policy.md) — 통합 재발행(2026-09-13). 본 문서는 history 잔존. (현재 SSOT: ADR-074)
 
 ## 현재 유효 결정
 - shared 기본값(`.claude/settings.json`, `.codex/config.toml`)에 **모델·추론 강도의 버전을 고정하지 않는다** (#amend-2).

@@ -192,7 +192,7 @@ agent별 *read-set / write-set / assumptions / verifier* 를 구조화하면 wav
 ## Amendment 3 (2026-09-12) — D3 에 7번째 필드: **예산 영향**
 
 ### 배경
-ADR-004#amend-8 의 falsifier (a)가 **규칙 신설 당일에 발화했다.** 그 falsifier 는 그 자체로 본 항목의 **사전 등록된 채택 조건**이었다(사용자 확정 2026-09-12: «(b)는 Round 13 후보로 기록, falsifier 「(a)(c) 뒤에도 쓰기 에이전트가 0건으로 상한 도달하면 채택」»).
+ADR-004#amend-8 의 falsifier (a)가 **규칙 신설 당일에 발화했다.** 그 falsifier 는 그 자체로 본 항목의 **사전 등록된 채택 조건**이었다(사용자 확정 2026-09-12: «(b)는 Round 13 후보로 기록, falsifier 「(a)(c) 뒤에도 쓰기 에이전트가 0건으로 상한 도달하면 채택」»). (현재 SSOT: ADR-074 D14)
 
 - [관측됨] `/validate-plan M1` dispatch 의 `reviewer` 가 `maxTurns: 12` 상한에서 **보고 0건**으로 멈췄다(29 tool_use / 176.0K 토큰 / 455초). 마지막 출력은 **「리뷰 파일 골격을 지금 쓰겠다」**였다 — 산출물을 만들기 **직전**에 죽었다.
 - [관측됨] 같은 실패의 5번째다: builder 2 (Round 12 R4) · planner 2 (`/plan-workitem`) · reviewer 1. **중간 보고는 5/5 에서 한 번도 나오지 않았다.**
