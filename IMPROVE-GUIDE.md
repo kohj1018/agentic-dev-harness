@@ -73,7 +73,7 @@
 | ADR-063 | #amend-1 | D4 (b) copied-from 4방향 판정(canonical 갱신 / 사본 수정 / registry만 낡음 / 둘 다) + 낡은 «digest» 문구 정정 |
 | ADR-066 | #amend-2 | 재확인 전용 라운드(`- invalidated` AC만)는 라운드 카운터를 소모하지 않음 |
 | ADR-072 | #amend-5 | `--tokens-only` 스타일 객체 숫자·`Colors.transparent` 정합 / Flutter report (상태 × 뷰포트) 항목 + `viewport-coverage` report(기록 등급) + R4 group·PNG 규약 / 자가 검사 (e) 렌더 조건 / 하네스 주입·행동 변경 정적 관찰(기록 등급) / R1 화면 정의 / R6-5 «승인본 충실도» 묶음 / D8 재진입 상태 문구 |
-| ADR-073 | #amend-2 | «UI surface 파일 집합» 정의(canonical) / 5-2b voice grep 대상·따옴표 문자열 한정·기록 등급 / 5-0 회수 출처 (d) `## 5` files + 파일 수 echo + `[Stabilize-scope-empty]` / `P0 [Spec-gap]` → QA_FINDINGS |
+| ADR-073 | #amend-2 | «UI surface 파일 집합» 정의(canonical) / 5-2b voice grep 대상·따옴표 문자열과 JSX/HTML 텍스트 노드 한정·기록 등급 / 5-0 회수 출처 (d) `## 5` files + 파일 수 echo + `[Stabilize-scope-empty]` / `P0 [Spec-gap]` → QA_FINDINGS |
 
 **참조 갱신 줄만 두는 ADR**: ADR-064 D4(exec-evidence 미확보 기록), ADR-045 D6(표 «4개» 행 끝에 #amend-1 임계 8 병기 — 원행은 Record 보존), ADR-037(Spec-gap 기록 위치 병기 + `## 현재 유효 결정` 불릿).
 
@@ -808,7 +808,7 @@ ADR-066 끝에 append:
 현재: repair-workitem 2-E는 재확보 실패 시 `Needs Execution Evidence: …`를 출력에만 남긴다. validate-workitem 87행은 경계 종류마다 `- exec-evidence` 줄 **존재**만 본다. ADR-064 D4는 자동 신선도 검사를 두지 않고 «고친 주체가 갱신»을 유일 방식으로 못 박았다(101행 «한계(사실 기록)»).
 변경(D4 원칙 안에서 — 고친 주체가 «못 갱신했다»도 기록한다):
 - repair-workitem 2-E 끝에: `확보하지 못하면 task `## 8`에 `- exec-evidence <날짜> <경계 종류>: 미확보 — <사유> (repair-workitem)`을 **append**한다(옛 줄은 지우지 않는다). 이 줄이 다음 validate의 판정 입력이다.`
-- validate-workitem 87행 «실행 증거 판정» 끝에: `경계 종류의 **마지막** `- exec-evidence` 줄이 `미확보`이면 `P1 [Exec-evidence-stale] <경계 종류> — repair가 재확보하지 못함`으로 기록한다(ADR-064 D4 «고친 주체가 갱신» 원칙 — 미확보도 갱신이다).` `.claude/agents/validator.md` 66행 Evidence 축 문단 끝에도 같은 판독 규칙 한 줄(팬아웃 경로 정합)과 `- verify-power`는 관측 modality AC를 대상에서 제외한다(ADR-065 D1 — validate-workitem 88행과 동형)`를 덧붙인다.
+- validate-workitem 87행 «실행 증거 판정» 끝에: `경계 종류의 **마지막** `- exec-evidence` 줄이 `미확보`이면 `P1 [Exec-evidence-stale] <경계 종류> — repair가 재확보하지 못함`으로 기록한다(ADR-064 D4 «고친 주체가 갱신» 원칙 — 미확보도 갱신이다).` `.claude/agents/validator.md` 67행(P5-4가 첫 줄에 쓰기 금지 한 줄을 넣어 66→67) Evidence 축 문단 끝에도 같은 판독 규칙 한 줄(팬아웃 경로 정합)과 `- verify-power`는 관측 modality AC를 대상에서 제외한다(ADR-065 D1 — validate-workitem 88행과 동형)`를 덧붙인다.
 - ADR-064 101행 «한계(사실 기록)» 문단 끝에 참조 갱신: `> 참조 갱신 (2026-09): `/repair-workitem`이 재확보 실패를 `미확보` 줄로 append하고 `/validate-workitem`이 그 줄을 `[Exec-evidence-stale]`로 읽는다 — 자동 신선도 검사가 아니라 작성자 규정의 확장이다.`
 커밋: `fix(evidence): record failed exec-evidence refresh so validation can flag stale boundaries`
 
@@ -910,7 +910,7 @@ STRUCTURE.md `presence` 절(17~26행) 아래에 결정 1의 (i)~(vii)를 명령 
 
 ### P6-13. 잔존 문구 정리
 - `docs/20-system/DESIGN.md` 98행 주석 `정밀 판정은 실화면 axe(stack-guard source-verified current-v2 `validate:design` …)` → `정밀 판정은 실화면 axe(`validate:design` v3 — ADR-072 D6)`. 파일 안 `current-v2`·`source-verified`·`conformance` 잔여 0건 확인.
-- `.claude/agents/validator.md` 66행 Evidence 축: P6-5의 두 문장(미확보 판독·관측 AC 제외)이 들어갔는지 확인.
+- `.claude/agents/validator.md` 67행(P5-4가 첫 줄에 쓰기 금지 한 줄을 넣어 66→67) Evidence 축: P6-5의 두 문장(미확보 판독·관측 AC 제외)이 들어갔는지 확인.
 커밋: `docs(design): drop the retired gate contract wording from the DESIGN template`
 
 
