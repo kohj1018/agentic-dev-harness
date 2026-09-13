@@ -1,6 +1,6 @@
 # Simulation Run
 
-> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) → [ADR-068](../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md) / `ADR-027` → [ADR-073](../../docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) / `ADR-056` → [ADR-072](../../docs/90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md) / `ADR-004` → [ADR-074](../../docs/90-decisions/boilerplate/ADR-074-model-effort-and-turn-budget-policy.md)) (현재 SSOT: ADR-068, ADR-073, ADR-072, ADR-074)
+> **기록 시점 주석 (ADR-045#amend-2 D10 — 종류 E)**: 본 문서는 회차별 실행 기록이다. 본문의 ADR 인용은 **그 회차에 실제로 적용된 규칙**을 가리키며 현행 SSOT가 아닐 수 있다. **기록을 사실대로 두기 위해 원문을 고치지 않는다.** (현재 SSOT: `ADR-014` → [ADR-067](../../docs/90-decisions/boilerplate/ADR-067-milestone-graduation-v2.md) → [ADR-068](../../docs/90-decisions/boilerplate/ADR-068-milestone-closure-and-graduation-v3.md) / `ADR-049` → [ADR-058](../../docs/90-decisions/boilerplate/ADR-058-design-workflow.md) / `ADR-027` → [ADR-073](../../docs/90-decisions/boilerplate/ADR-073-interface-and-design-content-v2.md) / `ADR-056` → [ADR-072](../../docs/90-decisions/boilerplate/ADR-072-design-milestone-and-code-prototype.md) / `ADR-004` → [ADR-074](../../docs/90-decisions/boilerplate/ADR-074-model-effort-and-turn-budget-policy.md) / `ADR-051` → [ADR-075](../../docs/90-decisions/boilerplate/ADR-075-main-session-orchestration-v2.md) (2026-09-13)) (현재 SSOT: ADR-068, ADR-073, ADR-072, ADR-074, ADR-075)
 
 > dogfood 시뮬레이션 회차별 누적. 회차 헤더 형식: `## Round N (YYYY-MM-DD, scenario)`.
 
@@ -1407,6 +1407,110 @@ dogfood-web의 두 finalize 커밋을 «테스트 파일 집합»·«문서 집�
 
 **발견 22 종결**: `[FAC-semantic-hollow]`의 재발 기록이 Round 12 절에 **0건**이므로(누적 6건은 Round 11 기록이다) 의미 정합 관찰 항목을 `/validate-workitem`에 신설하지 않고 **계획 시점 3-S (c)로 종결**한다. 같은 자리에 계측 속성 도메인 관찰(발견 31)만 기록 등급으로 넣었다.
 
+### P8-1 참조 무결성 (2026-09-13)
+
+`/tmp/check-refs.sh` 기본 모드·`--all-surfaces --all-dead` 전체 모드 **둘 다 PASS**(검사 1~6 전부 `count: 0`). P6-10 이후 처음으로 전체 모드가 통과했다 — 시작 시점 기준선(P0-3)은 기본 FAIL(검사 3=7), 전체 검사 3=9·검사 4=3이었다. `측정 조건` 잔존 마커(Phase 2 실험 흔적) 0건.
+
+### P8-2 복제본 harness 재동기화 (2026-09-13 — ADR-005#amend-3 절차의 첫 실전)
+
+Phase 3~7이 harness를 다시 바꿔 P0-2b 이후 처음으로 두 복제본(`dogfood-web`·`dogfood-flutter`)을 `8457aa2`(P7 종료 시점)로 재동기화했다 — 이번엔 P6-12가 STRUCTURE.md에 적은 절차를 그대로 따랐다(수동 즉흥이 아니라 문서화된 7단계).
+
+- 단계 1~4 그대로 실행: `.claude/{agents,skills}`·`.agents`는 `git archive | tar -x`로 tracked만 추출, `docs/90-decisions/boilerplate`·`docs/00-meta` baseline 5종·양 템플릿 디렉터리는 파일 단위 복사, `AGENTS.md`·`CLAUDE.md`는 두 복제본 모두 이미 동일해 병합 불필요, `.gitignore`는 두 복제본 모두 boilerplate 쪽이 부분집합이라 추가 불필요, `.codex/config.toml`은 1줄(ADR-004#amend-2 → ADR-074 D1 주석) 수동 반영. (현재 SSOT: ADR-074 D1)
+- 단계 5 검증: `git status --porcelain -- docs/00-meta/STACK_SETUP_PLAN.md docs/90-decisions/project` — **두 복제본 모두 0**(generated 행 무손상 확인, 발견 73 재발 없음).
+- 단계 6(`/stack-guard` 재실행 대응) — 전체 skill을 다시 돌리는 대신 이번 갱신의 핵심 대상인 **design gate 어댑터**만 재실행 계약(ADR-063#amend-1)대로 처리: 두 복제본 다 canonical 변경(P5-5·P6-11) 뒤 **무수정 사본**이라 (i) 케이스로 새 canonical 교체 + `copied-from` 갱신. 자가 검사 재실행 — **dogfood-web 4/4 PASS**(a·b·c·e), **dogfood-flutter 5/5 PASS**(a·b·c·e·d) — (e) 렌더 조건과 (b) 안의 새 가로 스크롤 통제 케이스가 처음으로 실전 검증됐다.
+- 단계 7 커밋: 두 복제본 각 2커밋(`chore: sync harness to 8457aa2, preserving generated artifacts` + `chore: refresh design gate adapter from canonical asset`).
+- **절차 자체의 첫 실행 판정**: 성공 — generated 행 손실 0, 커밋 메시지 표준형. ADR-005#amend-3 falsifier 미발화.
+
+**보완 실행 (2026-09-13)**: 첫 재동기화는 `/stack-guard`의 어댑터·자가 검사 구간만 돌아 `probe smoke:` 판정과 진입점 생성이 빠져 있었다. 두 복제본에서 **전체 재실행**을 한 번씩 더 돌려 `probe smoke:`를 양쪽 2026-09-13으로 갱신하고, dogfood-flutter에 누락돼 있던 `validate:ci`를 생성했다(ADR-059#amend-2 — 위 falsifier 표 참조). **교훈**: 「재실행했다」와 「전체 절차를 돌렸다」는 다르다 — 재실행 계약은 매 실행 갱신 항목(`probe smoke:`·`## Dart Source Roots`·`## E2E Smoke Registry`)을 명시하므로, **그 줄들의 날짜가 갱신됐는지가 완주 판정의 관측 가능한 신호**다.
+
+### P8-3 회귀 시나리오 (새 세션 — dogfood-web·dogfood-flutter, 2026-09-13)
+
+`disable-model-invocation: true`가 걸린 7종(`stabilize-milestone`·`validate-plan`·`repair-plan`·`accept-milestone`·`repair-acceptance`·`stack-guard`·`plan-milestone`·`design-milestone`)은 새 세션도 자체 판단으로 호출할 수 없어(ADR-050 D2 설계 그대로 — 버그 아님) 사용자가 각 항목을 직접 slash-command로 발화했다. `implement/validate/repair/finalize-workitem` 4종만 세션이 자체 호출했다.
+
+| 항목 | 실행 위치 | 핵심 관측 | 판정 |
+|---|---|---|---|
+| (a) inline 재보정 | dogfood-web 사본(`reg-web`·`reg-web-t003`), `/validate-workitem` | T-001: F=6·L_impl=38·L_test=51·L_docs=14(원 가이드 실측 대비 L_docs만 1줄 차 — 문서 원복이 원커밋 diff의 정확한 역이 아니었음). **L_impl≤50은 통과하지만 「UI/Arch-iface/MCP/spec-coverage 중 둘 이상 해당없음」이 미충족(해당없음은 MCP 하나뿐)이라 fan-out 강제 확정** — 가이드 P4-3의 "inline 후보" 추정과 다른 실측(7축 fan-out, 1회 회수, Pass/자동화율 100%/High). T-003: F=4·L_impl=74·L_test=62·L_docs=9, 두 조건 다 미충족이라 fan-out(6축, Pass/Medium, P1 1건 — `design-gate.mjs` 변경이 `## 4-1` 밖). **가이드 절차 자체가 T-003에서 깨짐**: harness overlay가 `STACK_SETUP_PLAN.md`를 이미 supersede한 뒤라 `git apply`가 그 6줄에서 충돌 — 제외하고 진행 | ADR-075 D11 판정 로직 정상 동작 확인. 새 discrepancy 2건(아래 "새로 연 항목") |
+| (b) 축 5 신호 | 위 T-003 실행과 동일 | UI surface 파일 diff 0개 → 축 5 spawn 안 함, report에 «해당없음» 인라인 | ADR-075 D12대로 정상 |
+| (c) preflight 오탐 + (e) verifier 쓰기 금지 | dogfood-web, `/stabilize-milestone M1`(4회차) | 5-2b·raw-hex 신규 오탐 0건(구 규칙이면 voice 12건·hex 5건 예상 — P5-1 수정 유효 확인). qa+reviewer 전수 감사가 신규 P1 6건 발견(그중 `harness-injection-suspect`가 스토리 3종을 실제로 지목 — P5-5 결정 4 최초 실전 검출, `<main>`×3·`TodoEmptyError`의 `<h1>`). 위임 예산: 5단위 중 2단위 보고 0건으로 상한 도달 → ADR-074 D14 slice 강제 조건 재발화(1회차 4/5→이번 2/5, 완전 해소는 아님). graduation `NO`(P0 미해소 2건 + 관측 AC 미발급 + Experience-drift P1 2건) | 5-2b·raw-hex 수정 유효 확인. harness-injection-suspect 최초 실전 발화. **보고에는 없었으나 실행 로그로 사후 확인됨** — (e) qa 3 + reviewer 2 = **5 dispatch 전부 프롬프트에 scratch 경로 포함**, 6.5는 amend-4가 지정한 `git log -1 … PROJECT_CHARTER.md` → `git diff … DISCOVERY.md` 명령이 실제 실행돼 hunk 판정을 거쳤다. 다만 5-0 echo는 `회수 파일 존재: 15` 총계만 나오고 **`(a)·(b)·(c)·(d)`별 집계가 없어** ADR-073#amend-2 결정 3은 **부분 충족**이다 |
+| (d) 게이트 | dogfood-web `--tokens-only`·`--self-test`, dogfood-flutter `--manifest` | `--tokens-only`: `style={{ maxWidth: 640 }}`·`width: 18`·`Colors.red`·`#ff00aa` 검출 / `#412`·`Colors.transparent`·`padding: 0`·`width: 1`·`lineHeight: 1.5` 미검출 — 실제 `src/**`의 「PR #412」 카피 오탐 0. `--self-test` 4케이스(a·b·c·e) PASS, (b) known-good이 새 가로 스크롤 통제 구간을 포함하고도 blocker 0(양방향 확인). Flutter `--manifest`: 37 entries, 23항목이 (상태×뷰포트)로 분리되고 `viewport-coverage` 0건 — 음성 통제로 한 PNG 저장을 빼고 재실행하니 7건 발화(탐지기가 실제로 작동) | P5-5 결정 1·2·3 전부 실전 검증 통과 |
+| (f-i) finalize 훅 분기 | dogfood-web `reg-web`, `.git/hooks/pre-commit exit 1` | 훅 실패 → `Needs Commit` + 6파일 staged 유지 + HEAD 불변. 훅 제거 후 재호출 → 수행 7·8만 재실행해 커밋, closure 줄 중복 없음 | P6-1 수정 정확히 설계대로 동작 |
+| (f-ii) repair-plan 마일스톤 층 분기 | dogfood-web, `/validate-plan M1` → `/repair-plan M1`(봉인+전 task done 상태에 **의도적으로** plan 리뷰를 태움 — 정상 순서 아님, P6-3 새 분기를 시험하기 위한 엣지케이스) | validate-plan이 P0 2·P1 9·P2 2(13건) 리뷰 생성. repair-plan이 **task 문서를 전혀 안 건드리고** 13건 전부(10 Adopt·3 Adopt-modified, Reject 0) `QA_FINDINGS.md`(결함 9건, `출처: peer(plan-review)`)·`IMPROVEMENT_GUIDE.md`(`## 2`·`## 5`)에 등재, 리뷰 파일을 조건 (iii)에 따라 삭제 | **P6-2·P6-3 둘 다 정상 동작 확인.** 1차 실행은 리뷰가 `M1.default.md` 하나뿐이라 P6-2(산하 F·T 회수) 분기에 입력이 없었고, **보완 실행(2026-09-13)에서 `/validate-plan M1` + `/validate-plan F-001`로 자식 리뷰를 만든 뒤 `/repair-plan M1`을 돌려 검증했다** — 마일스톤 문서 `## 3`의 feature 링크로 `F-001`을 찾아 **두 파일을 함께 회수하고 삭제**했다(`plan-reviews/`에 `.gitkeep`만 잔존). 계획된 것보다 강한 시험이 됐다: 원문 41건 중 **12건이 두 리뷰에 중복**돼 dedup 경로까지 탔고(방향 충돌 0건), 고유 29건을 task 문서 **무수정**으로 `QA_FINDINGS`(19건 — `M1-020`~`M1-038`, +122줄)·`IMPROVEMENT_GUIDE ## 2`(10건 — `M1-imp-17`~`26`, +66줄)·`## 5`(판정 이력 1줄)에 등재했다. F-001 리뷰가 범위를 좁힌 덕에 **T-001·T-002 내부 결함 12건이 추가로** 나왔다 — 산하 리뷰 회수가 실제로 탐지력을 늘린다는 근거다. 부수 발견: 삭제 전 조건 (ii)("부모 M self-check 성공")가 이 분기엔 원천적으로 성립하지 않는 개념임을 repair-plan 스스로 인지하고 (iii) 단독 근거로 정직하게 삭제 — 아래 "새로 연 항목"에 기록 |
+| (f-iii) accept-milestone 재확인 모드 | dogfood-web, T-004에 임시 `- ac-acceptance`+`- invalidated` 2줄 추가 후 `/accept-milestone M1` | R0에서 **모드: 재확인(카운터 미소모)**, 재확인 대상 T-004:AC-1 1건, 미발급 0건 정확히 판정. **`## 11`의 `- 라운드:` 값 1 유지**(탐색 모드였다면 2로 오름), R3 자유탐색 스킵 안내까지 정확. graduation `NO`임을 사전 경고 후 진입 여부 확인 프롬프트에서 **"중단 — repair 경로 먼저"**를 선택해 아무것도 쓰지 않고 종료 | **ADR-066#amend-2 결정 1·2 정확히 동작 확인.** 임시 변경 전부 원복(T-004 `git checkout`, gitignore된 기존 `M1.r1.md`는 이 세션이 만든 게 아니므로 보존 — 올바른 판단) |
+| (g) ADR-072#amend-4 falsifier | — | 사용자가 시간상 생략 | **미측정 — Round 14 이월** |
+| (h) 재현 불가 falsifier | — | ADR-071 (d) HYBRID·ADR-072 (e) 6화면 — 이번 라운드도 두 저장소 모두 자극 조건(미결정 T1 행 / 6화면 이상)이 없음 | **미측정(입력 조건 부재) 유지** |
+
+부수로 **계획된 합성 테스트를 그대로 수행했다** — 사용자가 dogfood-flutter의 `STACK_SETUP_PLAN.md` `copied-from` 끝 한 글자를 임시로 바꾸라고 지시(`…2884` → `…2885`)한 뒤 `/stack-guard`를 재실행했고, ADR-063#amend-1 (iii) 「코드 동일·기록값만 낡음」 경로로 정확히 판정돼 `copied-from`만 갱신됐다. **자연 발생 드리프트가 아니라 의도된 주입이다** — 증거 등급은 «합성 테스트 통과»이지 «실사례 포착»이 아니다. 같은 재실행이 `visual-qa: READY → PENDING`도 발견했다(고정 empty fixture 때문에 가로 스크롤 위험 표면이 한 번도 렌더되지 않음) — 기존 ADR-058#amend-3 메커니즘이 정상 라우팅.
+
+### 새로 연 항목 (Round 14 입력)
+
+- **마감 게이트의 순서 결함(이번 라운드가 실제로 겪었다)**: 참조 무결성 검사가 «기록» 단계보다 **앞**에 배치돼 있어, 마감 기록이 새로 만든 죽은 ADR 인용 9줄을 그 검사가 잡지 못했다(검토에서 뒤늦게 발견해 병기). **마감 게이트는 기록을 쓴 뒤 한 번 더 돌려야 한다** — 검사를 통과한 시점과 파일이 최종 상태가 되는 시점이 달랐다.
+1. **repair-plan 마일스톤 층 분기의 삭제 전 조건 문구 공백**: 수행 6의 "(i)(ii)(iii) 충족 시 삭제" 문구가 P6-3 분기(계획 미수정)에는 조건 (ii)("부모 M 전체 self-check 성공")가 개념적으로 성립하지 않는다. 이번엔 실행 주체가 스스로 올바르게 판단했지만(조건 (iii)만으로 삭제), 문서 자체가 이 분기의 삭제 조건을 명시하지 않는다.
+2. **`/validate-plan`·`/repair-plan`을 봉인 후 완료된 마일스톤에 도는 것은 가이드 문서 어디에도 "권장 사용법"으로 안내되지 않는다** — 이번엔 P8-3 (f-ii)를 위해 의도적으로 건 것이지만, 일반 사용자가 실수로 같은 순서를 밟을 경로를 막는 안내가 없다.
+3. **`/finalize-workitem`을 Skill 도구로 args와 함께 호출하면 첫 호출에서 task ID가 전달되지 않아 "0개 감지"로 종료되는 경로가 관측됨**(메인 세션 연쇄 실행 dispatch 방식의 문제로 추정, 재현 세부 조건 미확정).
+4. **stabilize-milestone 4회차 위임 예산 재소진**: ADR-074 D14 slice 강제 조건이 다시 발화(5단위 중 2단위). 1회차 대비 개선(4/5→2/5)은 있으나 완전 해소는 아니다.
+5. **관찰 항목이 보고에 드러나지 않는다**: 6.5 시그널 1과 qa scratch 경로는 실행 세션 보고에 언급이 없어 한때 «미확인»으로 적었으나, 사후에 실행 로그를 뒤져 **둘 다 수행된 것을 확인**했다(5 dispatch 전부 scratch 포함 / amend-4 지정 명령으로 hunk 판정 수행). 침묵이 «정상»인지 «미수행»인지 보고만으로는 구분되지 않는다 — 관찰 항목은 **결과가 0이어도 한 줄 echo를 강제**해야 한다(다음 라운드 처방 후보). 5-0 echo의 `(a)~(d)` 집계 미출력도 같은 계열이다.
+
+### 발견 → 조치 (Round 13에서 닫힘)
+
+| 발견 | 조치 Phase | 상태 |
+|---|---|---|
+| 5·16·17 (validate-workitem inline 임계·축 5) | Phase 4 (ADR-075 D11·D12) | 수정 + P8-3 (a)(b)로 실전 재확인 |
+| 64 (planner/builder 예산·중간 보고 지시 성립 불가) | Phase 1·3 (ADR-074 D9) | 수정 — 지시 제거, 호출자 책임으로 이관 |
+| 9 (단일 라우트 앱에서 «화면»이 흔들림) | Phase 5 (ADR-072#amend-5 결정 6 — R1 «화면 = 상태 묶음» 정의) | 수정 |
+| 19 (visual-qa vacuous pass) | Phase 5 (ADR-058#amend-5) | 수정 |
+| 20 (`--tokens-only` 스타일 객체 미검출) | Phase 5 (ADR-072#amend-5 결정 1) | 수정 + P8-3 (d)로 실전 재확인 |
+| 22·31·30 (FAC-semantic-hollow 종결·계측 속성 도메인·modality 분모) | Phase 4 | 종결(22) + 기록 등급 신설(31) + 정정(30) |
+| 23·40 (하네스 주입·행동 변경 미고지) | Phase 5 (ADR-072#amend-5 결정 4·5) | 기록 등급 관찰 신설 + P8-3 (c)로 harness-injection-suspect 최초 실전 발화 |
+| 25 (report-only 프로젝트 쓰기 near-miss) | Phase 5 (ADR-050#amend-2) | 수정 |
+| 27·32 (voice grep 오탐·회수 파일 수 echo) | Phase 5 (ADR-073#amend-2) | 수정 + P8-3 (c)로 오탐 0건 재확인 |
+| 28 (Guard-drift 방향 오판) | Phase 5 (ADR-063#amend-1) | 수정 + P8-3 (c)의 **계획된 합성 주입**(copied-from 끝 1글자 변조)으로 case (iii) 경로 검증 |
+| 29 (staleness 시그널 1 mtime 오탐) | Phase 5 (ADR-035#amend-4) | 수정 (실전 확인은 미완 — 새로 연 항목 5) |
+| 53 (Flutter 뷰포트 축 부재) | Phase 5 (ADR-072#amend-5 결정 2) | 수정 + P8-3 (d)로 음성 통제까지 실전 검증 |
+| 58 (승인본이 렌더 조건을 무시) | Phase 5 (ADR-072#amend-5 결정 3 — 자가 검사 케이스 (e)) | 수정 + P8-2·P8-3 (d)에서 `e-render-condition` PASS |
+| 74 (에이전트 파일 세션 고정) | Phase 1·3 (ADR-074 D12) | 방법론 확정 — 새 세션 검증 규율 자체가 이 발견의 직접 적용 |
+| 기존 결함 1~11 (finalize 커밋 실패·seal/repair-plan 파일 범위·repair-plan 폐쇄 가드·accept 회차 상한·exec-evidence 신선도·--migrate 활성 ADR·repair-discovery authority·golden↔CI·marketer/strategist 절 번호·Surfaces 역참조 10건+죽은 인용 3줄·geometry known-good) | Phase 6 (P6-1~P6-13) | 전부 수정 + P8-1(참조 무결성 PASS)·P8-3 (f-i)로 일부 실전 재확인 · **P6-1·P6-2·P6-3는 P8-3 (f)에서 실전 확인**(finalize 훅 분기 / 산하 F·T 회수 / 마일스톤 층 등재) |
+
+### Falsifying evaluation 추가 판정 (P8-4 — Round 13, 위 P7-4 표에 이어짐)
+
+| ADR | falsifier | 결과 | 근거 |
+|---|---|---|---|
+| ADR-004#amend-5 | `maxTurns: 45`에서도 상한 중단 2회 이상 반복 | **값 자체 소멸 — 상한 결정은 재확인됨** | Phase 2: (c)·(d)(신규 20턴 조건)가 tool_use 정확히 20에서 절단(각 총 33·29 필요) → `maxTurns: 60` 유지 확정. 45는 ADR-074가 60으로 통합해 값 자체가 falsifier 대상에서 빠짐 (현재 SSOT: ADR-074) |
+| ADR-004#amend-7 | 중간 보고가 자의적 절반으로 매번 초반 | **지시 자체가 성립 불가능함이 확정** | Phase 2 로그: 절단 시점 반환문이 «작업 도중 사고 조각»(마지막 assistant 텍스트가 절단 2턴 앞, 상한 접근 알림 0건). ADR-074 D9가 중간 보고 지시를 제거 (현재 SSOT: ADR-074) |
+| ADR-004#amend-8 (a) | 결정 1~4 뒤에도 쓰기 에이전트 보고 0건 상한 도달 1회 | **발화 — 2회** | Phase 2: (c)·(d) 둘 다 tool_use 20 절단, 반환 없음. ADR-047 D3 «예산 영향» 필드 채택 조건 충족 → ADR-074 D9-2 반영 (현재 SSOT: ADR-074) |
+| ADR-004#amend-9 | (a) 결정 1 적용 뒤에도 «상한 중단 + 산출물 파일 0건» 1회라도 / (b) 골격만 쓰고 «미검토» 절반 초과 | **(a)·(b) 둘 다 미발화 — 별개로 결정 1 자체가 5/5 미준수** | Phase 1(planner, 입력 10건 후 첫 Write) + Phase 2(builder a·b·c·d — 15·11·11·8건 후 첫 Write). 에이전트 2종·스택 2종·effort 2조건 예외 없음. ADR-074 D9가 지시 제거, 부분 보고는 호출자(foreman) 책임으로 이관 (현재 SSOT: ADR-074 D9) |
+| ADR-004#amend-9 결정 2 (reviewer maxTurns 24) | 적용 후 `/validate-plan`이 회수 없이 완주하는가 | **미측정(대상 무효) 유지** | Phase 1: reviewer subagent dispatch 0회(세션 인라인, ADR-050 D1). P8-3 (c) stabilize 단계 5로 실측 자리를 이관했으나 이번 실행 보고에 reviewer 축 회수 여부가 명시되지 않아 확정 불가 — Round 14 재확인 필요 (현재 SSOT: ADR-074 D8) |
+| ADR-073#amend-2 | (a) 따옴표 구간 한정으로 실제 카피 위반을 놓친 사례 1건 | **미발화** | P8-3 (c): UI surface 6파일에서 voice grep 발화 0건(구 범위 12건 대비) — 놓친 위반 사례 관측 없음 |
+| ADR-063#amend-1 | (b) (ii)가 실제로는 canonical 회귀였던 사례 | **미발화 — 오히려 실제 사례(case iii)로 규칙이 검증됨** | P8-2·P8-3: dogfood-flutter에서 `copied-from`이 canonical과 1글자 실제로 어긋나 있었고(P=C≠R), 규칙대로 코드는 안 건드리고 기록값만 갱신 |
+| ADR-072#amend-5 결정 1 (`--tokens-only`) | (c) 카운트·인덱스 값을 잡으면 속성 목록 축소 | **미발화** | P8-3 (d): 실제 `src/**`에서 오탐 0, `#412`·`padding: 0`·`width: 1`·`lineHeight: 1.5` 전부 정확히 제외 |
+| ADR-072#amend-5 결정 2 (Flutter 뷰포트 축) | (a) PNG 파싱이 정상 테스트에서 rendered 없음을 냄 | **미발화(정상 동작 확인)** | P8-3 (d): 23항목 정상 매핑 + viewport-coverage 0. 음성 통제(PNG 하나 누락)로 7건 발화 — 탐지기가 실제로 구분해낸다 |
+| ADR-072#amend-4 | (a) 렌더 시간 2배 초과 / (b) 원장 행 있어도 승격 통과 / (c) 3안 이상 | **미측정 — P8-3 (g) 선택 미실행** | Round 14 이월 |
+| ADR-071 (d) | HYBRID 입력에서 백엔드 결정 라운드 미개설 | **미측정 유지** | 이번에도 자극 조건 없음(P8-3 (h)) |
+| ADR-072 (e) | 화면 6개 이상 완주 불가 시 분할 기준 조정 | **미측정 유지** | 이번에도 자극 조건 없음(P8-3 (h)) |
+| ADR-050#amend-2 | Needs Script가 마일스톤당 3회 이상 | **미확인** | P8-3 (c)/(e): qa dispatch scratch 경로·생성 파일 0건 여부가 실행 보고에 명시되지 않음 — 새로 연 항목 5 |
+| ADR-035#amend-4 | Charter 공급 절 변경을 판정이 놓침 | **미확인** | 6.5 시그널 1 침묵 여부가 실행 보고에 명시되지 않음 — 새로 연 항목 5 |
+| ADR-066#amend-2 | 재확인 모드에서 새 결함 반복 등재(대상 판정 누수) | **미발화(관측 범위 내)** | P8-3 (f-iii): R0 모드 판정 정확, R2 진입 전 중단(옵션 2)으로 새 결함 등재 자체가 발생하지 않음 |
+| ADR-005#amend-3 | 절차대로 했는데 generated 행이 바뀜 | **미발화 — 첫 실전 성공** | P8-2: 두 복제본 모두 `git status --porcelain`이 generated 대상에서 0 |
+| ADR-058#amend-5 | 첫 단언이 정상 앱에서 timing 오탐 | **미측정** | 이번 라운드는 seed 자체가 비어 있는 프로젝트(dogfood-flutter fixedHabits)라 첫 단언 메커니즘이 시험되지 않음 |
+| ADR-059#amend-2 | `validate:ci`와 `validate` 단계 어긋남 | **미발화 — 생성·실행 확인** | 첫 P8-2 실행은 어댑터·자가 검사 구간만 돌아 진입점이 없었고(`probe smoke:` 2026-09-12에 정지), **전체 재실행(2026-09-13)에서 부재를 검출해 생성**했다 — `validate:ci` = `node scripts/verify.mjs --ci`, `verify.mjs`의 test 단계가 `--exclude-tags=design-gate` → `design-gate \|\| golden`(기존 제외 유지 + golden 추가), `apps/mobile/dart_test.yaml`에 `golden:` 선언. 만든 뒤 1회 실행해 통과 확인. **음성 통제**: dogfood-web(Flutter 없음)에는 생성되지 않았다 — 조건부 생성이 의도대로 동작. **한계**: `@Tags(['golden'])`을 단 테스트가 아직 0건이라 `--exclude-tags`는 현재 no-op이다(골든이 생기는 라운드에 실효 확인) |
+| ADR-074 (재발행) | (a) 행동 지시 3종 제거 뒤 «산출물 손실이 동반된 상한 중단»이 마일스톤당 1회 이상 / (b) D12 반영 확인 수단이 반영된 정의에서도 마커 미수신 / (c) D8 값의 dispatch가 매번 상한 절반 아래로 종료 | **(a) 미발화 · (b)(c) 미측정** | 제거된 본문으로 돈 유일한 dispatch군은 P8-3 (c)의 qa·reviewer 전수 감사다. **상한 도달은 2건 있었다(5단위 중)** — 그러나 falsifier (a)의 조건은 «산출물 손실이 동반된, 재개로도 복구되지 않는 미완»이고 감사는 완주해 신규 P1 6건을 냈으므로 **미발화**다. 다만 D11 계수가 2회라 재검토 트리거 2(D9-2 slice 기준 하향 검토)는 발화했다. Phase 1·2는 제거 *전* 본문이라 대상이 아니다 |
+| ADR-075 (재발행) | (a) inline으로 판정된 task의 validate가 놓친 P0가 뒤늦게 드러남 / (b) 축 5가 UI surface 파일 diff 1개 이상인데도 매번 «해당없음»으로 종료 / (c) foreman 운전이 사용자 확인 전 자동 연쇄 | **미발화** | (b)는 P8-3 (b)에서 조건 자체가 성립하지 않았다 — UI surface diff가 **0개**라 spawn하지 않은 것이 규칙의 정상 동작이다(«diff ≥1인데 매번 해당없음»이라야 발화). (a)·(c)는 Round 14 대상 |
+
+### Round 13 총계 (P8-5 마감)
+
+| 항목 | 값 |
+|---|---|
+| 새 발견(부채 정리 대상) | Phase 1~2가 재측정한 falsifier 5건 + Phase 5~6이 닫은 기존 발견 19건 + 기존 결함 11건 = **35건 처리** |
+| 처분 | 수정/재발행 34 · 기록만(입력 조건 부재) 1(ADR-072 (e)/ADR-071 (d)는 이미 기록 상태 유지) |
+| 개정된 ADR | 통합 재발행 2건(ADR-004→074, ADR-051→075) + amendment 9건(ADR-005·035·050·058·059·063·066·072·073) (현재 SSOT: ADR-074·ADR-075) |
+| falsifier 판정(Round 13 전체) | 발화 4건(ADR-004#amend-8, 그리고 ADR-004#amend-9 결정 1의 «미준수» 자체는 falsifier가 아니라 규칙 폐기 근거) / 미발화 8건(그중 3건은 «정상 동작이 실사례로 검증됨») / 미확인 2건 / 미측정 6건 (현재 SSOT: ADR-074) |
+| 참조 무결성 | 시작 기준선 기본 FAIL(검사3=7)·전체(검사3=9, 검사4=3) → **종료 시 기본·전체 모두 PASS(전부 count:0)** |
+| dogfood 복제본 | 2종 harness 재동기화 성공(ADR-005#amend-3 절차 첫 실전) + design gate 어댑터 갱신 + 자가 검사 9/9 케이스 PASS(web 4 + flutter 5) |
+
+### 이 라운드가 실제로 바꾼 것 — 한 문단
+
+Round 13의 첫 과제는 "새 규칙"이 아니라 "미검증분 실행"이었고, 그 원칙이 끝까지 지켜졌다. Phase 1~2가 에이전트 파일의 세션 고정 문제(발견 74)를 새 세션에서 직접 확인해 ADR-004의 두 오진(amend-4의 "덮어쓴다" 전제, amend-5의 "hot-reload 지연" 진단)을 정정한 뒤 ADR-074로 재발행했고, Phase 5~6이 앞 라운드가 "기록만"으로 남긴 19개 발견과 기존 결함 11건을 닫았다. 그리고 Phase 8이 그 수정 전부를 실제 dogfood 저장소 두 곳에서 새 세션으로 재현해, 문서로 "고쳤다"고 적은 것과 실제로 동작하는 것 사이의 간극을 다시 한번 좁혔다 — `harness-injection-suspect`(P5-5)가 스토리 3종을 실제로 잡아낸 것, `copied-from` 4방향 판정(P5-2)이 합성 테스트 없이 실제 드리프트 사례를 만난 것, `repair-plan`의 새 마일스톤 층 분기(P6-3)가 봉인된 마일스톤에서 정확히 설계대로 동작한 것이 그 증거다. 동시에 미확인 2건(qa scratch 경로, DISCOVERY staleness 침묵)과 미측정 6건은 정직하게 남겨 Round 14 입력으로 넘긴다. (현재 SSOT: ADR-074)
+
+
 ## Builder Effort Experiment (ADR-004#amend-4) — 측정일 2026-09-11 (현재 SSOT: ADR-074)
 
 - task: **T-002-todo-screen-wiring** (승인 UI 2개 배선 + 도메인 연결 + 계측 이벤트 + 테스트 3건)
@@ -1461,3 +1565,25 @@ ADR-004#amend-5 결정 4 가 규정한 n=2 재측정을 시작했으나 **조건
 
 - **조정 결과 (ADR-017 결정 5 / P7-4 «실패한 falsifier는 재검토 트리거에 따라 조정하고 그 조정도 기록한다»)**: 사용자 확인 후 **ADR-004 `## Amendment 5`** 로 박았다 — ① `builder` 의 `effort: medium` 제거, `maxTurns: 45` 유지 ② 결정 4에 **세 번째 갈래**(«완료율·검증 실패에 저하가 없어도 소요·토큰이 유의하게 늘면 그 `effort` 지정을 제거한다») 규정 ③ `effort` 를 validator·qa 로 확장하지 않음. (현재 SSOT: ADR-074)
 - **Round 12 재측정 (P7-3에 추가)**: 같은 실험을 Flutter 배선 task 로 1회 더 돌려 **n=2** 로 만든다. 그때는 `.claude/agents/builder.md` 를 반복 수정하지 않고 **`builder-a`~`builder-d` 변형 파일**로 돌린다(조건마다 canonical 파일을 고치면 매번 self-modification 승인이 필요하고 hot-reload 지연 때문에 «어느 정의가 실제로 쓰였는가»가 불확실해진다). 변형 파일은 **측정 전용이며 측정 후 삭제한다** — 상시 두면 `docs/00-meta/STRUCTURE.md` 의 sub-agent 로스터 13종과 어긋난다. 조건마다 **적용 확인 로그**(그 조건의 `maxTurns` 가 실제로 걸렸는지 보이는 관측)를 남긴다.
+
+## 라운드 2 개정 목록 (기준 `d44f1cc`..HEAD, 2026-09-13)
+
+Round 13이 건드린 ADR **15종**(아래 표 행 수와 같다 — 인용 재지정만 받은 ADR은 «개정»이 아니므로 세지 않는다). Phase 7 표와 같은 열 구성 — **개정 수**는 실측 `## Amendment` 헤딩, **falsifier**는 위 두 표(P7-4 승계분 + P8-4 신규분)의 판정, **실행 검증**은 그 규칙이 이번 라운드 안에서 실제로 최소 1회 수행됐는가.
+
+| ADR | Round13 신규 / 총 | falsifier 발화 | 실행 검증 | ADR-045 D6 임계(8) |
+|---|---:|---|---|---|
+| **004→074** 재발행 | supersede(9개 흡수) | 신규 발행 자체엔 없음(승계분 4회 — 위 표) | ✅ Phase 1·2 새 세션 검증 + P8-3 다수 항목 실전 재확인 | 통합 재발행으로 해소 |
+| **005** SSOT | 1 / 3 | 미발화(첫 실전 성공) | ✅ P8-2 실제 갱신 절차로 실행 | 3 |
+| **035** DISCOVERY | 1 / 4 | 미확인(새로 연 항목 5) | 부분 — 규칙은 반영, 실전 침묵 확인은 미완 | 4 |
+| **037** spec coverage | 0(참조 갱신만) / 4 | — | — | 4 |
+| **050** lifecycle skills | 1 / 2 | 미확인(새로 연 항목 5) | 부분 — 규칙 반영, qa 파일 미생성은 간접 확인만 | 2 |
+| **051→075** 재발행 | supersede(4개 흡수) | 승계 없음(신규) | ✅ P8-3 (a)(b)로 D11·D12 실전 재확인 | 통합 재발행으로 해소 |
+| **058** design workflow | 1 / 5 | 미측정(fixedHabits 공백) | 부분 | 5 |
+| **059** Flutter 프로파일 | 1 / 2 | 미측정(CI 미트리거) | ❌ 미실행 | 2 |
+| **063** verification harness | 1 / 1 | 미발화(실사례 검증) | ✅ P8-2·P8-3 실사례로 실행 | 1 |
+| **064** task evidence | 0(참조 갱신만) / 0 | — | — | 0 |
+| **066** milestone acceptance | 1 / 2 | 미발화(관측 범위 내) | ✅ P8-3 (f-iii)로 결정 1·2 실전 확인 | 2 |
+| **072** design milestone | 1 / 5 | 결정 1·2 미발화(정상 동작), 결정 4는 미측정 | ✅ P8-3 (c)(d)로 결정 2·4 실전 확인, (g) 미실행 | 5 |
+| **073** 인터페이스·DESIGN | 1 / 2 | 미발화 | ✅ P8-3 (c)로 실전 확인 | 2 |
+| **074** (신설) | — / 0 | 위 표 다수 | ✅ Phase 1·2·P8-3 전반 | 0 |
+| **075** (신설) | — / 0 | D11·D12 | ✅ P8-3 (a)(b) | 0 |
